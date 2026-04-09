@@ -60,13 +60,16 @@ function renderBikes(bikes) {
     }
 }
 
-// २. सर्च गर्ने जादुई फङ्सन (Search Function)
+// सर्च गर्ने फङ्सन
 window.searchBikes = function() {
-    const term = document.getElementById('search-input').value.toLowerCase();
+    const searchInput = document.getElementById('search-input');
+    if (!searchInput) return; // यदि इनपुट भेटिएन भने फिर्ता जाने
+
+    const term = searchInput.value.toLowerCase();
     const filtered = allBikes.filter(bike => 
         bike.name.toLowerCase().includes(term)
     );
-    renderBikes(filtered); // फिल्टर भएको डेटा मात्र देखाउने
+    renderBikes(filtered); // फिल्टर भएको लिस्ट मात्र देखाउने
 };
 
 // ३. नयाँ थप्ने वा अपडेट गर्ने
