@@ -15,9 +15,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const bikesCol = collection(db, "bikes");
 
-function updateApp() {
+function startApp() {
     onSnapshot(bikesCol, (snapshot) => {
         const bikes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
         let container = document.getElementById("bike-container");
         if (container) {
             container.innerHTML = bikes.map(bike => `
@@ -35,38 +36,47 @@ function updateApp() {
         if (adminList) {
             adminList.innerHTML = bikes.map(bike => `
                 <tr>
-                    <td><img src="${bike.img}" width="50"></td>
+                    <td><img src="${bike.img}" width="50" style="border-radius:5px;"></td>
                     <td>${bike.name}</td>
-                    <td>${bike.price}</td>
-                    <td>${bike.Insurance}</td>
-                    <td><button onclick="window.deleteBike('${bike.id}')" style="background:red; color:white; border:none; padding:5px; cursor:pointer; border-radius:4px;">Remove</button></td>
+                    <td>Rs. ${bike.price}</td>
+                    <td>Rs. ${bike.Insurance}</td>
+                    <td><button class="remove-btn" onclick="deleteBike('${bike.id}')">Remove</button></td>
                 </tr>
             `).join('');
         }
     });
 }
+
+
 window.handleForm = async function() {
-    let name = document.getElementById('newName').value;
-    let price = document.getElementById('newPrice').value;
-    let ins = document.getElementById('newIns').value || "0";
-    let img = document.getElementById('newImg').value || "https://cdn-icons-png.flaticon.com/512/8163/8163149.png";
+    const name = document.getElementById('newName').value;
+    const price = document.getElementById('newPrice').value;
+    const ins = document.getElementById('newIns').value || "0";
+    const img = document.getElementById('newImg').value || "https://cdn-icons-png.flaticon.com/512/8163/8163149.png";
 
     if (name && price) {
         try {
             await addDoc(bikesCol, { name, price, Insurance: ins, img });
-            alert("Bike added to Cloud!");
+            alert("Bike added successfully to Cloud!");
             document.getElementById('newName').value = "";
             document.getElementById('newPrice').value = "";
+            document.getElementById('newIns').value = "";
+            document.getElementById('newImg').value = "";
         } catch (e) {
-            alert("Error: " + e.message);
+            alert("Error adding bike: " + e.message);
         }
     } else {
-        alert("Please fill Name and Price!");
+        alert("Please enter Name and Price!");
     }
-}
+};
 window.deleteBike = async function(id) {
-    if (confirm("Are you sure?")) {
-        await deleteDoc(doc(db, "bikes", id));
+    if (confirm("Are you Sure?")) {
+        try {
+            await deleteDoc(doc(db, "bikes", id));
+        } catch (e) {
+            alert("Error deleting: " + e.message);
+        }
     }
-}
-updateApp();
+};
+
+startApp();
