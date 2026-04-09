@@ -275,36 +275,6 @@ button:active {
    color: #777;
    font-size: 14px;
 }
-.search-container {
-    position: relative;
-    max-width: 500px;
-    margin: 20px auto 40px auto;
-}
-
-#bikeSearch {
-    width: 100%;
-    padding: 15px 20px 15px 45px;
-    font-size: 16px;
-    border: 2px solid #ddd;
-    border-radius: 50px;
-    outline: none;
-    transition: 0.3s;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-#bikeSearch:focus {
-    border-color: #0054a6; /* बजाज ब्लु */
-    box-shadow: 0 4px 15px rgba(0, 84, 166, 0.2);
-}
-
-.search-icon {
-    position: absolute;
-    left: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #888;
-    font-size: 18px;
-}
 /* १. सर्च बारको नयाँ लुक */
 .search-container {
     margin: 20px 0;
@@ -389,6 +359,3 @@ button:active {
 .add-btn:hover {
     background-color: #218838;
 }
-
-
-
