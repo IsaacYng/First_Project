@@ -60,16 +60,20 @@ function renderBikes(bikes) {
     }
 }
 
-// सर्च गर्ने फङ्सन
+// सर्च फङ्सनलाई 'window' मा राख्ने ताकि HTML ले चिन्न सकोस्
 window.searchBikes = function() {
-    const searchInput = document.getElementById('search-input');
-    if (!searchInput) return; // यदि इनपुट भेटिएन भने फिर्ता जाने
+    const input = document.getElementById('search-input');
+    if (!input) return;
 
-    const term = searchInput.value.toLowerCase();
-    const filtered = allBikes.filter(bike => 
-        bike.name.toLowerCase().includes(term)
+    const filter = input.value.toLowerCase();
+    
+    // allBikes बाट फिल्टर गर्ने
+    const filteredBikes = allBikes.filter(bike => 
+        bike.name.toLowerCase().includes(filter)
     );
-    renderBikes(filtered); // फिल्टर भएको लिस्ट मात्र देखाउने
+
+    // फिल्टर भएको डेटा मात्र स्क्रिनमा देखाउने
+    renderBikes(filteredBikes);
 };
 
 // ३. नयाँ थप्ने वा अपडेट गर्ने
