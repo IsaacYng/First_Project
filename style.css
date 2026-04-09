@@ -275,87 +275,19 @@ button:active {
    color: #777;
    font-size: 14px;
 }
-/* १. सर्च बारको नयाँ लुक */
 .search-container {
-    margin: 20px 0;
-    text-align: center;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
 }
 
 #search-input {
-    width: 80%;
-    max-width: 400px;
-    padding: 12px 20px;
-    border: 2px solid #ddd;
-    border-radius: 25px; /* गोलो बनाउन */
-    font-size: 16px;
-    outline: none;
-    transition: 0.3s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-#search-input:focus {
-    border-color: #007bff; /* फोकस हुँदा निलो हुने */
-    box-shadow: 0 4px 10px rgba(0,123,255,0.2);
-    width: 85%;
-}
-
-/* २. एडमिन टेबलका बटनहरू */
-.edit-btn {
-    background-color: #ffc107;
-    color: #212529;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.2s;
-}
-
-.edit-btn:hover {
-    background-color: #e0a800;
-    transform: scale(1.05);
-}
-
-.remove-btn {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.2s;
-}
-
-.remove-btn:hover {
-    background-color: #c82333;
-    transform: scale(1.05);
-}
-
-/* ३. बाइक कार्डमा सानो एनिमेसन (Home Page) */
-.bike-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.bike-card:hover {
-    transform: translateY(-10px); /* माथि उफ्रिने जस्तो देखिने */
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-}
-
-/* ४. एडमिन फर्मको अपडेट बटन */
-.add-btn {
-    background-color: #28a745;
-    color: white;
-    padding: 12px 25px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
     width: 100%;
-    margin-top: 10px;
-}
-
-.add-btn:hover {
-    background-color: #218838;
+    max-width: 500px;
+    padding: 12px 25px;
+    font-size: 16px;
+    border: 2px solid #007bff; /* नीलो बोर्डर */
+    border-radius: 30px;
+    outline: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
