@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bajaj Admin Dashboard</title>
+<link rel="stylesheet" href="admin.css">
+
+</head>
+<body>
+    <div class="main-content">
+        <div class="header">
+            <h1>Inventory Management</h1>
+            <div class="user-info">Welcome, Admin 👤</div>
+        </div>
+
+        <!-- Add Bike Section -->
+        <div class="form-card">
+            <h3><i class="fas fa-plus-circle"></i> Add New Stock</h3>
+            <div class="grid-inputs">
+                <input type="text" id="newName" placeholder="Bike Name" required>
+                <input type="number" id="newPrice" placeholder="Price" required>
+                <input type="number" id="newIns" placeholder="Insurance" required>
+                <input type="text" id="newImg" placeholder="Image URL (Optional)">
+                <button onclick="handleForm()" class="add-btn">Update Inventory</button>
+            </div>
+        </div>
+        <!-- Table Section -->
+<div class="table-wrapper"> <!-- १. यहाँ सुरु गर्नुहोस् -->
+    <table class="inventory-table">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Model Name</th>
+                <th>Price</th>
+                <th>Insurance</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="admin-bike-list">
+            <!-- JS data will load here -->
+        </tbody>
+    </table>
+</div> <!-- २. यहाँ बन्द गर्नुहोस् -->
+
+
+    <script src="script.js"></script>
+</body>
+</html>

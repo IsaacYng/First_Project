@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Price view</title>
+   <link rel="stylesheet" href="style.css">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+   
+</head>
+<body>
+   <section>
+      <!-- nav bar area -->
+      <nav>
+         <div class="nav_head">
+               <div>
+                  <span style= "color:#FFD700;font-weight:bold;">
+                     Go!
+                  </span>
+                  <span style="color: white">
+                     YNG
+                  </span>
+               </div>
+               <div class="nav_a">
+                  <a href="#home">Home</a>
+                  <a href="#Price_list">Price</a>
+                  <a href="#about">About</a>
+                  <a href="#Contact">Connect</a>
+               </div>
+               <div class="nav_img">
+                  <img src="https://f4.bcbits.com/img/0031181823_25.jpg" alt="Logo">
+               </div>
+         </div>
+      </nav>
+   </section>
+   <!-- hero section -->
+   <section>
+    <div class="hero_section" id="home">
+   <div class="hero_content">
+      <h1 class="hero_title">Let's <span class="highlight">Race</span></h1>
+      <p class="hero_subtitle">The All-New Dominance. Thrill has a new address.</p>
+      
+      <div class="hero_buttons">
+         <button class="btn_primary">Get Start</button>
+         <button class="btn_secondary" id="Price_list">Explore Models</button>
+      </div>
+   </div>
+   <div class="hero_spacer"></div>
+</div>
+
+   </section>
+   <!-- price list-->
+      <div>
+<section id="Price_list" style="padding: 50px 10%;">
+   <h2 style="text-align: center; margin-bottom: 30px; font-size: 32px;">Price List</h2>
+   <div class="search-container">
+   <input type="text" id="bikeSearch" placeholder="Search your favorite Bajaj bike" onkeyup="filterBikes()">
+   <i class="fa-solid fa-magnifying-glass search-icon"></i>
+</div>
+
+   <div id="bike-container" class="bike-grid"></div>
+</section>
+<!-- Fotter -->
+   <section>
+      <footer class="main-footer">
+   <div class="footer-container" id="about">
+      <div class="footer-box">
+         <h3>My Idea 💡</h3>
+         <p>Connect With me.</p>
+         <div class="social-links">
+   <a href="#" class="fb"><i class="fa-brands fa-facebook-f"></i></a>
+   <a href="#" class="ig"><i class="fa-brands fa-instagram"></i></a>
+   <a href="#" class="yt"><i class="fa-brands fa-youtube"></i></a>
+</div>
+
+      </div>
+      <div class="footer-box">
+         <h4>Quick Links</h4>
+         <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#Price_list">Price List</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact Us</a></li>
+         </ul>
+      </div>
+      <div class="footer-box" id="Contact">
+         <h4>Contact Info</h4>
+         <p>📍 Phidim, Koshi Province, Nepal</p>
+         <p>📞 +977-9820907795</p>
+         <p>✉️ yonghangissac@gmail.com</p>
+      </div>
+   </div>
+
+   <div class="footer-bottom">
+      <p>&copy; 2026 My Idea | Designed for Bajaj Enthusiasts</p>
+   </div>
+</footer>
+
+   </section>
+   <script src="script.js"></script>
+</body>
+</html>
