@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Calculator | Go! YNG</title>
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="style.css"> <!-- Common Styles -->
+    <link rel="stylesheet" href="finance.css"> <!-- Calculator Specific Styles -->
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Navbar Placeholder (loader.js ले यहाँ navbar.html हाल्छ) -->
+    <div id="navbar-placeholder"></div>
+
+    <main class="main-content" style="margin-top: 100px; padding: 20px;">
+        <div class="finance-container">
+            <!-- Header: Total Downpayment Display -->
+            <div class="finance-header">
+                <h2>Finance Calculations</h2>
+                <p>Total Downpayment (Required Amount to take Bike Home)</p>
+                <div class="total-dp" id="displayTotalDP">RS. 0</div>
+            </div>
+
+            <div class="finance-grid">
+                <!-- Left Column: Selection & Inputs -->
+                <div class="calc-box">
+                    <h3 class="box-title"><i class="fa-solid fa-motorcycle"></i> Select Model</h3>
+                    <div class="input-group">
+                        <select id="modelSelect">
+                            <option>Loading Bikes...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="details-grid">
+                        <div><label>MRP</label><p id="mrp">RS. 0</p></div>
+                        <div><label>Discount</label><input type="number" id="discountInput" value="0"></div>
+                        <div><label>After Discount</label><p id="afterDiscount">RS. 0</p></div>
+                        <div><label>Advance EMI (Optional)</label><input type="number" id="advEmiInput" value="0"></div>
+                    </div>
+
+                    <div class="selection-row">
+                        <div style="flex:1;">
+                            <label>Downpayment %</label>
+                            <select id="dpPercent">
+                                <option value="30">30%</option>
+                                <option value="40">40%</option>
+                                <option value="50" selected>50%</option>
+                                <option value="60">60%</option>
+                                <option value="70">70%</option>
+                            </select>
+                        </div>
+                        <div style="flex:1;">
+                            <label>Tenure (Months)</label>
+                            <select id="tenure">
+                                <option value="12" selected>12 Months</option>
+                                <option value="18">18 Months</option>
+                                <option value="24">24 Months</option>
+                                <option value="36">36 Months</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h3 class="box-title"><i class="fa-solid fa-gears"></i> Additional Charges</h3>
+                    <div class="details-grid">
+                        <div><label>Insurance</label><p id="displayIns">RS. 0</p></div>
+                        <div><label>Namsari/Reg.</label><input type="number" id="namsariInput" value="3000"></div>
+                    </div>
+
+                    <h3 class="box-title"><i class="fa-solid fa-helmet-safety"></i> Accessories</h3>
+                    <div class="details-grid">
+                        <div><label>Helmet</label><input type="number" id="helmetInput" value="2500"></div>
+                        <div><label>Legguard</label><input type="number" id="legguardInput" value="1800"></div>
+                        <div><label>Seatcover</label><input type="number" id="seatcoverInput" value="650"></div>
+                        <div><label>Others</label><input type="number" id="othersInput" value="0" placeholder="Any other cost"></div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Final Results -->
+                <div class="results-box">
+                    <h3 class="box-title"><i class="fa-solid fa-calculator"></i> Calculation Summary</h3>
+                    
+                    <div class="res-row">
+                        <span>Interest Rate</span> 
+                        <span class="val" id="displayRate">11.99%</span>
+                    </div>
+                    <div class="res-row">
+                        <span>Downpayment Amount (${document.getElementById('dpPercent')?.value || 50}%)</span> 
+                        <span class="val" id="displayDpAmt">RS. 0</span>
+                    </div>
+                    <div class="res-row">
+                        <span>Loan Amount</span> 
+                        <span class="val" id="displayLoanAmt">RS. 0</span>
+                    </div>
+                    
+                    <hr>
+                    <div class="res-row emi-highlight">
+                        <span>Monthly EMI</span> 
+                        <span class="val" id="displayEMI">RS. 0</span>
+                    </div>
+                    <hr>
+
+                    <div class="res-row">
+                        <span>Auto Calculate Ad. EMI</span> 
+                        <span class="val" id="displayAutoAdEmi">RS. 0</span>
+                    </div>
+                    <div class="res-row">
+                        <span>Total Interest Pay</span> 
+                        <span class="val" id="displayTotalInterest">RS. 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="loader.js"></script> <!-- Navbar/Footer Loader -->
+    <script type="module" src="finance.js"></script> <!-- Finance Logic & Firebase -->
+</body>
+</html>

@@ -1,0 +1,149 @@
+:root {
+    --primary-green: #2d5a27;
+    --light-green: #f4f9f4;
+    --border-color: #c3dbc3;
+    --text-dark: #333;
+    --accent-yellow: #ffc107;
+}
+
+/* मोबाइल र पीसी दुवैको लागि फाउन्डेसन */
+body {
+    background-color: #e9ecef;
+    margin: 0;
+    padding: 0;
+}
+
+.finance-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+/* Header */
+.finance-header {
+    background: var(--primary-green);
+    color: white;
+    text-align: center;
+    padding: 25px 15px;
+}
+
+.total-dp {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--accent-yellow);
+    margin-top: 10px;
+}
+
+/* Grid Layout - Desktop first */
+.finance-grid {
+    display: flex;
+    flex-direction: row; /* पीसीमा दायाँ-बायाँ */
+}
+
+.calc-box {
+    flex: 1.2;
+    padding: 20px;
+    border-right: 1px solid #eee;
+}
+
+.results-box {
+    flex: 0.8;
+    padding: 20px;
+    background: var(--light-green);
+}
+
+/* Title bars */
+.box-title {
+    background: var(--primary-green);
+    color: white;
+    padding: 10px 15px;
+    font-size: 15px;
+    border-radius: 4px;
+    margin: 20px 0 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Input Grid */
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* पीसीमा दुई कोलम */
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+label {
+    font-size: 11px;
+    font-weight: bold;
+    color: #555;
+    display: block;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-sizing: border-box; /* Width बाहिर नजाओस् भनेर */
+}
+
+/* Result Rows */
+.res-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.emi-highlight {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    border-left: 5px solid #d32f2f;
+}
+
+.emi-highlight .val {
+    color: #d32f2f;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* ==========================================
+   MOBILE RESPONSIVE (Media Query)
+   ========================================== */
+
+@media (max-width: 768px) {
+    .finance-grid {
+        flex-direction: column; /* मोबाइलमा तल-माथि */
+    }
+
+    .calc-box {
+        border-right: none;
+        border-bottom: 2px solid #eee;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr; /* मोबाइलमा इनपुटहरु एक पछि अर्को तल आउने */
+    }
+
+    .finance-container {
+        margin: 10px;
+        border-radius: 8px;
+    }
+
+    .total-dp {
+        font-size: 26px;
+    }
+
+    .box-title {
+        font-size: 14px;
+    }
+}
