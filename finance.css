@@ -1,5 +1,3 @@
-/* finance.css - Updated for Full Layout */
-
 :root {
     --primary-green: #2d5a27;
     --light-green: #f4f9f4;
@@ -16,13 +14,10 @@ body {
     color: var(--text-dark);
 }
 
-/* 1. Navbar Styling (यदि HTML भित्रै स्टाइल छैन भने) */
 .main-nav a:hover {
     color: var(--accent-yellow) !important;
     transition: 0.3s;
 }
-
-/* 2. Container & Header */
 .finance-container {
     max-width: 1050px;
     margin: 0 auto;
@@ -46,10 +41,9 @@ body {
     margin-top: 10px;
 }
 
-/* 3. Grid Layout */
 .finance-grid {
     display: flex;
-    flex-wrap: wrap; /* मोबाइलको लागि */
+    flex-wrap: wrap;
 }
 
 .calc-box {
@@ -66,7 +60,6 @@ body {
     min-width: 300px;
 }
 
-/* 4. Section Titles */
 .box-title {
     background: var(--primary-green);
     color: white;
@@ -79,8 +72,6 @@ body {
     align-items: center;
     gap: 10px;
 }
-
-/* 5. Inputs & Labels */
 .details-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -112,7 +103,6 @@ input:focus, select:focus {
     box-shadow: 0 0 8px rgba(45, 90, 39, 0.2);
 }
 
-/* 6. Results Rows & Highlights */
 .res-row {
     display: flex;
     justify-content: space-between;
@@ -142,7 +132,6 @@ input:focus, select:focus {
     color: #d32f2f;
 }
 
-/* 7. Footer Styling */
 footer a {
     text-decoration: none;
     transition: 0.3s;
@@ -152,7 +141,6 @@ footer a:hover {
     color: var(--accent-yellow) !important;
 }
 
-/* 8. Mobile Responsiveness */
 @media (max-width: 768px) {
     .finance-grid {
         flex-direction: column;
@@ -164,7 +152,7 @@ footer a:hover {
     }
 
     .details-grid {
-        grid-template-columns: 1fr; /* मोबाइलमा एउटा मात्र कोलम */
+        grid-template-columns: 1fr;
     }
 
     .total-dp {
