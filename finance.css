@@ -1,67 +1,78 @@
+/* finance.css - Updated for Full Layout */
+
 :root {
     --primary-green: #2d5a27;
     --light-green: #f4f9f4;
     --border-color: #c3dbc3;
     --text-dark: #333;
     --accent-yellow: #ffc107;
+    --nav-blue: #215282;
 }
 
-/* मोबाइल र पीसी दुवैको लागि फाउन्डेसन */
 body {
-    background-color: #e9ecef;
+    background-color: #f0f2f5;
     margin: 0;
-    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-dark);
 }
 
+/* 1. Navbar Styling (यदि HTML भित्रै स्टाइल छैन भने) */
+.main-nav a:hover {
+    color: var(--accent-yellow) !important;
+    transition: 0.3s;
+}
+
+/* 2. Container & Header */
 .finance-container {
-    max-width: 1000px;
-    margin: 20px auto;
+    max-width: 1050px;
+    margin: 0 auto;
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     overflow: hidden;
-    font-family: sans-serif;
 }
 
-/* Header */
 .finance-header {
     background: var(--primary-green);
     color: white;
     text-align: center;
-    padding: 25px 15px;
+    padding: 30px 20px;
 }
 
 .total-dp {
-    font-size: 32px;
-    font-weight: bold;
+    font-size: 36px;
+    font-weight: 800;
     color: var(--accent-yellow);
     margin-top: 10px;
 }
 
-/* Grid Layout - Desktop first */
+/* 3. Grid Layout */
 .finance-grid {
     display: flex;
-    flex-direction: row; /* पीसीमा दायाँ-बायाँ */
+    flex-wrap: wrap; /* मोबाइलको लागि */
 }
 
 .calc-box {
     flex: 1.2;
-    padding: 20px;
+    padding: 25px;
     border-right: 1px solid #eee;
+    min-width: 320px;
 }
 
 .results-box {
     flex: 0.8;
-    padding: 20px;
+    padding: 25px;
     background: var(--light-green);
+    min-width: 300px;
 }
 
-/* Title bars */
+/* 4. Section Titles */
 .box-title {
     background: var(--primary-green);
     color: white;
     padding: 10px 15px;
-    font-size: 15px;
+    font-size: 14px;
+    font-weight: 600;
     border-radius: 4px;
     margin: 20px 0 15px 0;
     display: flex;
@@ -69,81 +80,95 @@ body {
     gap: 10px;
 }
 
-/* Input Grid */
+/* 5. Inputs & Labels */
 .details-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* पीसीमा दुई कोलम */
+    grid-template-columns: 1fr 1fr;
     gap: 15px;
-    margin-bottom: 15px;
 }
 
 label {
     font-size: 11px;
     font-weight: bold;
-    color: #555;
-    display: block;
-    margin-bottom: 5px;
+    color: #666;
     text-transform: uppercase;
+    margin-bottom: 5px;
+    display: block;
 }
 
-input, select {
+input[type="number"], select {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    box-sizing: border-box; /* Width बाहिर नजाओस् भनेर */
+    font-size: 14px;
+    background: #fff;
+    box-sizing: border-box;
 }
 
-/* Result Rows */
+input:focus, select:focus {
+    border-color: var(--primary-green);
+    outline: none;
+    box-shadow: 0 0 8px rgba(45, 90, 39, 0.2);
+}
+
+/* 6. Results Rows & Highlights */
 .res-row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 12px 0;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid #e0eadd;
+    font-size: 14px;
+}
+
+.val {
+    font-weight: bold;
+    color: var(--primary-green);
+    font-size: 16px;
 }
 
 .emi-highlight {
     background: #fff;
     padding: 15px;
     border-radius: 8px;
-    margin: 15px 0;
-    border-left: 5px solid #d32f2f;
+    border-left: 6px solid #d32f2f;
+    margin: 20px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .emi-highlight .val {
+    font-size: 24px;
     color: #d32f2f;
-    font-size: 20px;
-    font-weight: bold;
 }
 
-/* ==========================================
-   MOBILE RESPONSIVE (Media Query)
-   ========================================== */
+/* 7. Footer Styling */
+footer a {
+    text-decoration: none;
+    transition: 0.3s;
+}
 
+footer a:hover {
+    color: var(--accent-yellow) !important;
+}
+
+/* 8. Mobile Responsiveness */
 @media (max-width: 768px) {
     .finance-grid {
-        flex-direction: column; /* मोबाइलमा तल-माथि */
+        flex-direction: column;
     }
-
+    
     .calc-box {
         border-right: none;
-        border-bottom: 2px solid #eee;
+        border-bottom: 1px solid #eee;
     }
 
     .details-grid {
-        grid-template-columns: 1fr; /* मोबाइलमा इनपुटहरु एक पछि अर्को तल आउने */
-    }
-
-    .finance-container {
-        margin: 10px;
-        border-radius: 8px;
+        grid-template-columns: 1fr; /* मोबाइलमा एउटा मात्र कोलम */
     }
 
     .total-dp {
-        font-size: 26px;
+        font-size: 28px;
     }
-
-    .box-title {
-        font-size: 14px;
     }
-}
+    
