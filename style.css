@@ -1,4 +1,4 @@
-*{
+ki*{
    margin: 0;
    padding: 0;
    box-sizing: border-box;
@@ -9,7 +9,6 @@ body {
 nav{
    background: #215282;
    box-shadow: 0px 5px 10px #838383;
-   position: fixed;
    top: 0px;
    z-index: 1000;
    width: 100%;
