@@ -45,7 +45,7 @@ nav{
    object-fit: cover;
 }
 .hero_section {
-   margin-top: 70px;
+   margin-top: 10px;
    display: flex;
    align-items: center;
    background: linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.2)), 
