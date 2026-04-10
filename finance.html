@@ -4,55 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finance Calculator | Go! YNG</title>
-    <!-- CSS Files -->
-    <link rel="stylesheet" href="style.css"> <!-- Common Styles -->
-    <link rel="stylesheet" href="finance.css"> <!-- Calculator Specific Styles -->
-    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="finance.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <!-- Navbar Placeholder (loader.js ले यहाँ navbar.html हाल्छ) -->
-    <div id="navbar-placeholder"></div>
+    <!-- 1. Navbar Section -->
+    <nav class="main-nav" style="background: #215282; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <div class="nav-logo" style="font-size: 22px; font-weight: bold; color: white;">
+            <span style="color: #FFD700;">Go!</span> YNG
+        </div>
+        <div class="nav-links">
+            <a href="index.html" style="color: white; text-decoration: none; margin-left: 20px; font-size: 16px;">Home</a>
+            <a href="index.html" style="color: #FFD700; text-decoration: none; margin-left: 20px; font-size: 16px; font-weight: bold;">Price List</a>
+        </div>
+    </nav>
 
-    <main class="main-content" style="margin-top: 100px; padding: 20px;">
+    <!-- 2. Main Finance Section -->
+    <main style="padding: 20px 5%;">
         <div class="finance-container">
-            <!-- Header: Total Downpayment Display -->
+            <!-- Header -->
             <div class="finance-header">
                 <h2>Finance Calculations</h2>
-                <p>Total Downpayment (Required Amount to take Bike Home)</p>
+                <p>Total Downpayment (Total Amount to pay at Showroom)</p>
                 <div class="total-dp" id="displayTotalDP">RS. 0</div>
             </div>
 
             <div class="finance-grid">
-                <!-- Left Column: Selection & Inputs -->
+                <!-- Left: Inputs -->
                 <div class="calc-box">
                     <h3 class="box-title"><i class="fa-solid fa-motorcycle"></i> Select Model</h3>
-                    <div class="input-group">
-                        <select id="modelSelect">
-                            <option>Loading Bikes...</option>
-                        </select>
-                    </div>
+                    <select id="modelSelect" style="margin-bottom: 20px;">
+                        <option>Loading Bikes...</option>
+                    </select>
                     
                     <div class="details-grid">
                         <div><label>MRP</label><p id="mrp">RS. 0</p></div>
                         <div><label>Discount</label><input type="number" id="discountInput" value="0"></div>
                         <div><label>After Discount</label><p id="afterDiscount">RS. 0</p></div>
-                        <div><label>Advance EMI (Optional)</label><input type="number" id="advEmiInput" value="0"></div>
+                        <div><label>Customer Adv. EMI</label><input type="number" id="advEmiInput" value="0" placeholder="Extra Payment"></div>
                     </div>
 
-                    <div class="selection-row">
-                        <div style="flex:1;">
+                    <div class="details-grid" style="margin-top: 15px;">
+                        <div>
                             <label>Downpayment %</label>
                             <select id="dpPercent">
                                 <option value="30">30%</option>
                                 <option value="40">40%</option>
                                 <option value="50" selected>50%</option>
                                 <option value="60">60%</option>
-                                <option value="70">70%</option>
                             </select>
                         </div>
-                        <div style="flex:1;">
+                        <div>
                             <label>Tenure (Months)</label>
                             <select id="tenure">
                                 <option value="12" selected>12 Months</option>
@@ -74,52 +78,59 @@
                         <div><label>Helmet</label><input type="number" id="helmetInput" value="2500"></div>
                         <div><label>Legguard</label><input type="number" id="legguardInput" value="1800"></div>
                         <div><label>Seatcover</label><input type="number" id="seatcoverInput" value="650"></div>
-                        <div><label>Others</label><input type="number" id="othersInput" value="0" placeholder="Any other cost"></div>
+                        <div><label>Others</label><input type="number" id="othersInput" value="0"></div>
                     </div>
                 </div>
 
-                <!-- Right Column: Final Results -->
+                <!-- Right: Calculations Result -->
                 <div class="results-box">
-                    <h3 class="box-title"><i class="fa-solid fa-calculator"></i> Calculation Summary</h3>
+                    <h3 class="box-title"><i class="fa-solid fa-calculator"></i> Results Summary</h3>
                     
-                    <div class="res-row">
-                        <span>Interest Rate</span> 
-                        <span class="val" id="displayRate">11.99%</span>
-                    </div>
-                    <div class="res-row">
-                        <span>Downpayment Amount (${document.getElementById('dpPercent')?.value || 50}%)</span> 
-                        <span class="val" id="displayDpAmt">RS. 0</span>
-                    </div>
-                    <div class="res-row">
-                        <span>Loan Amount</span> 
-                        <span class="val" id="displayLoanAmt">RS. 0</span>
-                    </div>
+                    <div class="res-row"><span>Interest Rate</span><span class="val" id="displayRate">0%</span></div>
+                    <div class="res-row"><span>Downpayment Amt</span><span class="val" id="displayDpAmt">RS. 0</span></div>
+                    <div class="res-row"><span>Loan Amount</span><span class="val" id="displayLoanAmt">RS. 0</span></div>
                     
-                    <hr>
-                    <div class="res-row emi-highlight">
-                        <span>Monthly EMI</span> 
+                    <div class="emi-highlight">
+                        <label>Monthly EMI</label>
                         <span class="val" id="displayEMI">RS. 0</span>
                     </div>
-                    <hr>
 
-                    <div class="res-row">
-                        <span>Auto Calculate Ad. EMI</span> 
-                        <span class="val" id="displayAutoAdEmi">RS. 0</span>
+                    <div class="res-row"><span>Auto Rounding Adj.</span><span class="val" id="displayAutoAdEmi" style="color: blue;">RS. 0</span></div>
+                    <div class="res-row" style="background: #eef; padding: 10px; border-radius: 5px;">
+                        <span style="font-weight: bold;">Total Advance EMI</span>
+                        <span class="val" id="displayTotalAdvEmi">RS. 0</span>
                     </div>
-                    <div class="res-row">
-                        <span>Total Interest Pay</span> 
-                        <span class="val" id="displayTotalInterest">RS. 0</span>
-                    </div>
+                    
+                    <div class="res-row"><span>Due EMI (Remaining)</span><span class="val" id="displayDueEmi">RS. 0</span></div>
+                    <div class="res-row"><span>Total Interest Pay</span><span class="val" id="displayTotalInterest">RS. 0</span></div>
                 </div>
             </div>
         </div>
     </main>
-<a href="#home">Home</a>
-    <!-- Footer Placeholder -->
-    <div id="footer-placeholder"></div>
+
+    <!-- 3. Footer Section -->
+    <footer style="background: #1a1a1a; color: white; padding: 40px 5%; margin-top: 50px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
+            <div>
+                <h3 style="color: #0054a6;">Go! YNG Bajaj</h3>
+                <p>Something Is Pending...</p>
+                <p>📍 Phidim, Koshi Province, Nepal</p>
+            </div>
+            <div>
+                <h4>Quick Links</h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li><a href="index.html" style="color: #ccc; text-decoration: none;">Home</a></li>
+                    <li><a href="finance.html" style="color: #ccc; text-decoration: none;">Finance Calculator</a></li>
+                </ul>
+            </div>
+        </div>
+        <div style="text-align: center; border-top: 1px solid #333; margin-top: 30px; padding-top: 20px; font-size: 14px; color: #777;">
+            &copy; 2026 Go! YNG | Designed for Bajaj Enthusiasts
+        </div>
+    </footer>
 
     <!-- Scripts -->
-    <script src="loader.js"></script> <!-- Navbar/Footer Loader -->
-    <script type="module" src="finance.js"></script> <!-- Finance Logic & Firebase -->
+    <script type="module" src="finance.js"></script>
 </body>
-</html>
+    </html>
+    
