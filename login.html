@@ -3,28 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login | Go! YNG</title>
-    <link rel="stylesheet" href="login.css">
+    <title>Admin Login | Bajaj Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 320px; }
-        .btn-google { background: white; border: 1px solid #ddd; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; transition: 0.3s; margin-top: 20px; }
-        .btn-google:hover { background: #f8f9fa; transform: translateY(-2px); }
-        img { width: 24px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .login-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; margin: 20px; }
+        h2 { color: #215282; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-login { background: #215282; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .divider { margin: 20px 0; border-bottom: 1px solid #eee; position: relative; }
+        .divider span { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: white; padding: 0 10px; color: #888; font-size: 14px; }
+        .btn-google { background: white; border: 1px solid #ddd; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; transition: 0.3s; }
+        .btn-google:hover { background: #f8f9fa; }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <h2 style="color: #0054a6; margin-bottom: 10px;">Go! YNG Admin</h2>
-        <p style="color: #666; font-size: 14px;">सिस्टम चलाउन कृपया लगइन गर्नुहोस्।</p>
-        
-        <button class="btn-google" id="loginBtn">
-            <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google">
-            Login with Google
-        </button>
+<div class="login-container">
+    <h2>Go! YNG Admin</h2>
+    
+    <div class="input-group">
+        <input type="email" id="loginEmail" placeholder="Email Address">
     </div>
+    <div class="input-group">
+        <input type="password" id="loginPass" placeholder="Password">
+    </div>
+    <button onclick="emailLogin()" class="btn-login">Login with Email</button>
 
-    <script type="module" src="login.js"></script>
+    <div class="divider"><span>OR</span></div>
+
+    <button class="btn-google" id="googleBtn">
+        <img src="https://img.icons8.com/color/24/000000/google-logo.png"/>
+        Continue with Google
+    </button>
+</div>
+
+<script type="module" src="login.js"></script>
 </body>
 </html>
