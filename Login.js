@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
@@ -9,34 +9,61 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+const db = getFirestore(app);
+const bikesCol = collection(db, "bikes");
 
-// १. इमेलबाट लगइन
-document.getElementById('loginBtn').onclick = async () => {
-    const email = document.getElementById('email').value;
-    const pass = document.getElementById('password').value;
+// १. नयाँ बाइक सेभ गर्ने फङ्सन
+window.saveBike = async function() {
+    const name = document.getElementById('bikeName').value;
+    const price = document.getElementById('bikePrice').value;
+    const ins = document.getElementById('bikeIns').value;
+
+    if (!name || !price || !ins) {
+        alert("कृपया सबै खाली ठाउँ भर्नुहोस्!");
+        return;
+    }
+
     try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        window.location.href = "admin.html";
-    } catch (e) { alert("Login Failed: " + e.message); }
+        await addDoc(bikesCol, {
+            name: name,
+            price: parseFloat(price),
+            Insurance: parseFloat(ins),
+            createdAt: new Date()
+        });
+        alert("Bike added successfully!");
+        document.getElementById('bikeName').value = "";
+        document.getElementById('bikePrice').value = "";
+        document.getElementById('bikeIns').value = "";
+    } catch (e) {
+        alert("Error: " + e.message);
+    }
 };
 
-// २. गुगलबाट लगइन (Continue with Google)
-document.getElementById('googleBtn').onclick = async () => {
-    try {
-        await signInWithPopup(auth, provider);
-        window.location.href = "admin.html";
-    } catch (e) { alert("Google Login Failed"); }
+// २. बाइक डिलिट गर्ने फङ्सन
+window.deleteBike = async function(id) {
+    if (confirm("के तपाईं यो बाइक हटाउन चाहनुहुन्छ?")) {
+        await deleteDoc(doc(db, "bikes", id));
+    }
 };
 
-// ३. पासवर्ड बिर्सिएमा
-document.getElementById('forgotBtn').onclick = async () => {
-    const email = document.getElementById('email').value;
-    if(!email) return alert("Please enter email first");
-    try {
-        await sendPasswordResetEmail(auth, email);
-        alert("Password reset link sent to your email!");
-    } catch (e) { alert(e.message); }
-};
-
+// ३. रियल-टाइममा डाटा देखाउने (Real-time Sync)
+onSnapshot(bikesCol, (snapshot) => {
+    const tbody = document.getElementById('bikeTableBody');
+    tbody.innerHTML = "";
+    
+    snapshot.forEach((doc) => {
+        const bike = doc.data();
+        tbody.innerHTML += `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px;">${bike.name}</td>
+                <td style="padding: 12px;">RS. ${parseFloat(bike.price).toLocaleString()}</td>
+                <td style="padding: 12px;">RS. ${parseFloat(bike.Insurance).toLocaleString()}</td>
+                <td style="padding: 12px;">
+                    <button onclick="deleteBike('${doc.id}')" style="background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+});
