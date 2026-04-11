@@ -3,42 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login | Bajaj Dashboard</title>
+    <title>Bajaj Admin | All-in-One</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .login-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; margin: 20px; }
-        h2 { color: #215282; margin-bottom: 20px; }
-        .input-group { margin-bottom: 15px; text-align: left; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn-login { background: #215282; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .divider { margin: 20px 0; border-bottom: 1px solid #eee; position: relative; }
-        .divider span { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: white; padding: 0 10px; color: #888; font-size: 14px; }
-        .btn-google { background: white; border: 1px solid #ddd; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; transition: 0.3s; }
-        .btn-google:hover { background: #f8f9fa; }
+        :root { --primary: #215282; --success: #28a745; --danger: #dc3545; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 0; }
+        
+        /* १. लगइन सेक्सनको स्टाइल */
+        #login-section { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 90%; max-width: 350px; text-align: center; }
+        .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-google { background: white; border: 1px solid #ddd; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; margin-top: 10px; }
+
+        /* २. एडमिन सेक्सन (सुरुमा लुकेको हुन्छ) */
+        #admin-section { display: none; }
+        .header { background: var(--primary); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; }
+        .content { padding: 20px 5%; }
+        .form-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        
+        /* मोबाइल रेस्पोन्सिभ टेबल */
+        .table-container { overflow-x: auto; background: white; border-radius: 12px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        img.bike-img { width: 50px; height: 40px; object-fit: cover; border-radius: 4px; }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 16px; }
+            .content { padding: 10px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="login-container">
-    <h2>Go! YNG Admin</h2>
-    
-    <div class="input-group">
-        <input type="email" id="loginEmail" placeholder="Email Address">
+    <div id="login-section">
+        <div class="login-card">
+            <h2 style="color: var(--primary);">Bajaj Admin Login</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="pass" placeholder="Password">
+            <button onclick="loginWithEmail()" style="background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold;">Login</button>
+            <div style="margin: 15px 0; color: #888;">OR</div>
+            <button class="btn-google" id="googleBtn">
+                <img src="https://img.icons8.com/color/24/000000/google-logo.png"/> Continue with Google
+            </button>
+        </div>
     </div>
-    <div class="input-group">
-        <input type="password" id="loginPass" placeholder="Password">
+
+    <div id="admin-section">
+        <div class="header">
+            <h1><i class="fa fa-gauge"></i> Dashboard</h1>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span id="userName" style="font-size: 12px;"></span>
+                <button onclick="logout()" style="background:var(--danger); color:white; border:none; padding:8px 12px; border-radius:5px; cursor:pointer;">Logout</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="form-card">
+                <h3>Update Bike Stock</h3>
+                <div class="input-grid">
+                    <input type="text" id="newName" placeholder="Bike Name">
+                    <input type="number" id="newPrice" placeholder="Price">
+                    <input type="number" id="newIns" placeholder="Insurance">
+                    <input type="text" id="newImg" placeholder="Image URL">
+                </div>
+                <button onclick="handleForm()" id="submitBtn" style="background: var(--success); color:white; border:none; padding:12px; width:100%; margin-top:15px; border-radius:8px; cursor:pointer; font-weight:bold;">Update Inventory</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Model</th>
+                            <th>Price</th>
+                            <th>Insurance</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-bike-list"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <button onclick="emailLogin()" class="btn-login">Login with Email</button>
 
-    <div class="divider"><span>OR</span></div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-    <button class="btn-google" id="googleBtn">
-        <img src="https://img.icons8.com/color/24/000000/google-logo.png"/>
-        Continue with Google
-    </button>
-</div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
+            authDomain: "first-project-2082-12-26.firebaseapp.com",
+            projectId: "first-project-2082-12-26",
+            appId: "1:545170954251:web:0d2f7905834af3b0be8f0e"
+        };
 
-<script type="module" src="login.js"></script>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const bikesCol = collection(db, "bikes");
+        let editId = null;
+
+        // १. Authentication Check
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('admin-section').style.display = 'block';
+                document.getElementById('userName').innerText = user.email;
+            } else {
+                document.getElementById('login-section').style.display = 'flex';
+                document.getElementById('admin-section').style.display = 'none';
+            }
+        });
+
+        // २. Login Functions
+        window.loginWithEmail = () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
+        };
+
+        document.getElementById('googleBtn').onclick = () => {
+            signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.message));
+        };
+
+        window.logout = () => signOut(auth);
+
+        // ३. Inventory Functions
+        window.handleForm = async () => {
+            const name = document.getElementById('newName').value;
+            const price = document.getElementById('newPrice').value;
+            const ins = document.getElementById('newIns').value;
+            const img = document.getElementById('newImg').value || "https://cdn-icons-png.flaticon.com/512/8163/8163149.png";
+
+            if (!name || !price) return alert("नाम र मूल्य भर्नुहोस्!");
+
+            const data = { name, price, Insurance: ins, img };
+            try {
+                if (editId) {
+                    await updateDoc(doc(db, "bikes", editId), data);
+                    editId = null;
+                    document.getElementById('submitBtn').innerText = "Update Inventory";
+                } else {
+                    await addDoc(bikesCol, data);
+                }
+                clearForm();
+            } catch (e) { alert(e.message); }
+        };
+
+        window.deleteBike = (id) => confirm("हटाउन चाहनुहुन्छ?") && deleteDoc(doc(db, "bikes", id));
+
+        window.prepareEdit = (id, name, price, ins, img) => {
+            document.getElementById('newName').value = name;
+            document.getElementById('newPrice').value = price;
+            document.getElementById('newIns').value = ins;
+            document.getElementById('newImg').value = img;
+            editId = id;
+            document.getElementById('submitBtn').innerText = "Save Changes";
+            window.scrollTo(0, 0);
+        };
+
+        function clearForm() {
+            ['newName', 'newPrice', 'newIns', 'newImg'].forEach(id => document.getElementById(id).value = "");
+        }
+
+        // ४. Real-time List Update
+        onSnapshot(bikesCol, (snap) => {
+            document.getElementById('admin-bike-list').innerHTML = snap.docs.map(d => {
+                const b = d.data();
+                return `<tr>
+                    <td><img src="${b.img}" class="bike-img"></td>
+                    <td>${b.name}</td>
+                    <td>Rs. ${b.price}</td>
+                    <td>Rs. ${b.Insurance}</td>
+                    <td>
+                        <button onclick="prepareEdit('${d.id}', '${b.name}', '${b.price}', '${b.Insurance}', '${b.img}')" style="background:#ffc107; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;"><i class="fa fa-edit"></i></button>
+                        <button onclick="deleteBike('${d.id}')" style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;"><i class="fa fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        });
+    </script>
 </body>
 </html>
