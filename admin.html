@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <title>Admin Dashboard | Go! YNG</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | Go! YNG</title>
     <link rel="stylesheet" href="style.css">
+</head>
+<body>
     <script type="module">
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
-        // Firebase Config (Your same config)
         const firebaseConfig = {
             apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
             authDomain: "first-project-2082-12-26.firebaseapp.com",
@@ -19,37 +19,31 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // सुरक्षा जाँच: लगइन छैन भने लखेट्ने
         onAuthStateChanged(auth, (user) => {
             if (!user) {
-                window.location.href = "Login.html";
+                window.location.href = "login.html"; // लगइन छैन भने लखेट्ने
             } else {
-                document.getElementById('adminContent').style.display = 'block';
-                document.getElementById('userEmail').innerText = user.email;
+                document.body.style.display = "block";
+                document.getElementById('adminEmail').innerText = user.email;
             }
         });
 
-        // लगआउट फङ्सन
-        window.logout = () => {
-            signOut(auth).then(() => window.location.href = "Login.html");
-        };
+        window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
     </script>
-</head>
-<body style="background: #f4f7f6;">
-    <div id="adminContent" style="display:none;">
-        <nav style="background: #215282; padding: 15px; color: white; display: flex; justify-content: space-between;">
-            <h3>Go! YNG Admin</h3>
+
+    <div id="adminPanel" style="padding: 20px;">
+        <nav style="display: flex; justify-content: space-between; align-items: center; background: #215282; color: white; padding: 10px 20px; border-radius: 10px;">
+            <h3>Admin Dashboard</h3>
             <div>
-                <span id="userEmail"></span>
-                <button onclick="logout()" style="margin-left:15px; background:red; color:white; border:none; padding:5px 10px; cursor:pointer;">Logout</button>
+                <span id="adminEmail" style="margin-right: 15px; font-size: 14px;"></span>
+                <button onclick="logout()" style="background: #ff4d4d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Logout</button>
             </div>
         </nav>
 
-        <main style="padding: 20px;">
-            <h2>Dashboard</h2>
-            <p>Welcome to your bike management panel.</p>
-            </main>
+        <section style="margin-top: 30px;">
+            <h2>Manage Bikes</h2>
+            <p>यहाँ तपाईंले नयाँ बाइक थप्ने र मूल्य परिवर्तन गर्ने फर्म राख्न सक्नुहुन्छ।</p>
+            </section>
     </div>
 </body>
-                </html>
-    
+</html>
