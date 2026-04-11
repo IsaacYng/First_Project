@@ -39,8 +39,7 @@ function renderBikes(bikes) {
                 <img src="${bike.img || 'https://cdn-icons-png.flaticon.com/512/8163/8163149.png'}" alt="${bike.name}">
                 <div class="bike-info">
                     <h3>${bike.name}</h3>
-                    <p>Insurance 1: Rs. ${bike.Insurance1 || 0}</p>
-                    <p>Insurance 2: Rs. ${bike.Insurance2 || 0}</p>
+                    <p>Insurance: Rs. ${bike.Insurance}</p>
                     <div class="price">MRP: Rs. ${parseFloat(bike.price).toLocaleString()}</div>
                 </div>
             </div>
