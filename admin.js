@@ -14,9 +14,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const bikesCol = collection(db, "bikes");
 
-// १. सुरक्षा जाँच: लगइन छैन भने Login.html मा पठाउने
+// १. लगइन सुरक्षा जाँच (Check Login Status)
 onAuthStateChanged(auth, (user) => {
     if (!user) {
+        // यदि लगइन छैन भने Login.html मा पठाउने (L ठूलो भएको पक्का गर्नुहोस्)
         window.location.href = "Login.html"; 
     } else {
         document.body.style.display = "block";
@@ -25,11 +26,9 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // २. लगआउट फङ्सन
-window.logout = () => {
-    signOut(auth).then(() => window.location.href = "Login.html");
-};
+window.logout = () => signOut(auth).then(() => window.location.href = "Login.html");
 
-// ३. बाइक डेटा सेभ गर्ने
+// ३. नयाँ बाइक थप्ने फङ्सन
 window.saveBike = async function() {
     const name = document.getElementById('bikeName').value;
     const price = document.getElementById('bikePrice').value;
@@ -37,7 +36,7 @@ window.saveBike = async function() {
     const ins2 = document.getElementById('bikeIns2').value;
 
     if (!name || !price || !ins1 || !ins2) {
-        alert("कृपया सबै फिल्डहरू भर्नुहोस्!");
+        alert("कृपया सबै कोठा भर्नुहोस्!");
         return;
     }
 
@@ -49,38 +48,30 @@ window.saveBike = async function() {
             Insurance2: parseFloat(ins2),
             updatedAt: new Date()
         });
-        alert("Bike added successfully!");
-        // Clear inputs
+        alert("सफलतापूर्वक थपियो!");
         document.getElementById('bikeName').value = "";
         document.getElementById('bikePrice').value = "";
         document.getElementById('bikeIns1').value = "";
         document.getElementById('bikeIns2').value = "";
-    } catch (e) {
-        alert("Error: " + e.message);
-    }
+    } catch (e) { alert("Error: " + e.message); }
 };
 
-// ४. बाइक डिलिट गर्ने
+// ४. बाइक डिलिट गर्ने फङ्सन
 window.deleteBike = async function(id) {
-    if (confirm("के तपाईं यो बाइक हटाउन चाहनुहुन्छ?")) {
-        try {
-            await deleteDoc(doc(db, "bikes", id));
-        } catch (e) {
-            alert("Delete failed: " + e.message);
-        }
+    if (confirm("के तपाईं यो मोडल हटाउन चाहनुहुन्छ?")) {
+        await deleteDoc(doc(db, "bikes", id));
     }
 };
 
-// ५. रियल-टाइम डाटा टेबल अपडेट
+// ५. रियल-टाइम अपडेट (Display Data)
 onSnapshot(bikesCol, (snapshot) => {
     const tbody = document.getElementById('bikeTableBody');
     tbody.innerHTML = "";
-    
     snapshot.forEach((doc) => {
         const bike = doc.data();
         tbody.innerHTML += `
             <tr>
-                <td style="font-weight: bold;">${bike.name}</td>
+                <td><b>${bike.name}</b></td>
                 <td>RS. ${parseFloat(bike.price).toLocaleString()}</td>
                 <td>RS. ${parseFloat(bike.Insurance1).toLocaleString()}</td>
                 <td>RS. ${parseFloat(bike.Insurance2 || 0).toLocaleString()}</td>
