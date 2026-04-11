@@ -18,7 +18,7 @@ const bikesCol = collection(db, "bikes");
 onAuthStateChanged(auth, (user) => {
     if (!user) {
         // यदि लगइन छैन भने Login.html मा पठाउने (L ठूलो भएको पक्का गर्नुहोस्)
-        window.location.href = "Login.html"; 
+        window.location.href = "admin.html"; 
     } else {
         document.body.style.display = "block";
         document.getElementById('adminEmail').innerText = user.email;
@@ -26,7 +26,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // २. लगआउट फङ्सन
-window.logout = () => signOut(auth).then(() => window.location.href = "Login.html");
+window.logout = () => signOut(auth).then(() => window.location.href = "admin.html");
 
 // ३. नयाँ बाइक थप्ने फङ्सन
 window.saveBike = async function() {
