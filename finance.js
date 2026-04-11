@@ -12,8 +12,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const bikesCol = collection(db, "bikes");
 
-let selectedBike = null;
-
 // १. बाइकको लिस्ट लोड गर्ने (Dropdown को लागि)
 onSnapshot(bikesCol, (snapshot) => {
     const select = document.getElementById('bikeSelect');
@@ -25,9 +23,10 @@ onSnapshot(bikesCol, (snapshot) => {
         let option = document.createElement('option');
         option.value = doc.id;
         option.text = bike.name;
-        // पुरानो इन्स्योरेन्स (Insurance1) लाई डाटाको रूपमा राख्ने
-        option.dataset.price = bike.price;
-        option.dataset.ins = bike.Insurance1; 
+        
+        // डाटाबेसको नाम "Insurance1" र "price" सँग मिल्नुपर्छ
+        option.setAttribute('data-price', bike.price);
+        option.setAttribute('data-ins', bike.Insurance1 || 0); 
         select.appendChild(option);
     });
 });
@@ -37,26 +36,33 @@ window.updateBikeDetails = function() {
     const select = document.getElementById('bikeSelect');
     const option = select.options[select.selectedIndex];
     
-    if (option.value) {
-        const price = option.dataset.price;
-        const ins = option.dataset.ins; // यसले पुरानो (पहिलो) इन्स्योरेन्स मात्र लिन्छ
+    if (option && option.value !== "") {
+        const price = option.getAttribute('data-price');
+        const ins = option.getAttribute('data-ins'); 
         
         document.getElementById('mrpPrice').value = price;
         document.getElementById('insuranceFee').value = ins;
-        calculateFinance(); // आफै क्याल्कुलेट गर्ने
+        
+        // भ्यालु सेट भएपछि हिसाब गर्ने
+        calculateFinance();
+    } else {
+        document.getElementById('mrpPrice').value = "";
+        document.getElementById('insuranceFee').value = "";
     }
 };
 
 // ३. फाइनान्स क्याल्कुलेसन लजिक
 window.calculateFinance = function() {
     const mrp = parseFloat(document.getElementById('mrpPrice').value) || 0;
-    const downPaymentPercent = parseFloat(document.getElementById('dpPercent').value) || 40;
+    const dpPercent = parseFloat(document.getElementById('dpPercent').value) || 40;
     const insurance = parseFloat(document.getElementById('insuranceFee').value) || 0;
-    const interestRate = 14; // मानौँ १४% ब्याज दर
+    const interestRate = 14; 
     const tenure = parseInt(document.getElementById('tenure').value) || 12;
 
-    // डाउनपेमेन्ट हिसाब (MRP को ४०%)
-    const dpAmount = (mrp * downPaymentPercent) / 100;
+    if (mrp <= 0) return;
+
+    // डाउनपेमेन्ट हिसाब
+    const dpAmount = (mrp * dpPercent) / 100;
     const totalDownPayment = dpAmount + insurance;
 
     // ऋण (Loan) हिसाब
@@ -66,8 +72,14 @@ window.calculateFinance = function() {
     // EMI फर्मुला
     const emi = (loanAmount * monthlyInterest * Math.pow(1 + monthlyInterest, tenure)) / (Math.pow(1 + monthlyInterest, tenure) - 1);
 
-    // नतिजा देखाउने
-    document.getElementById('resDownPayment').innerText = "Rs. " + Math.round(totalDownPayment).toLocaleString();
-    document.getElementById('resEMI').innerText = "Rs. " + Math.round(emi).toLocaleString();
-    document.getElementById('resLoan').innerText = "Rs. " + Math.round(loanAmount).toLocaleString();
+    // नतिजा देखाउने (ID हरू तपाईंको HTML सँग मिल्नुपर्छ)
+    if(document.getElementById('resDownPayment')) {
+        document.getElementById('resDownPayment').innerText = "Rs. " + Math.round(totalDownPayment).toLocaleString();
+    }
+    if(document.getElementById('resEMI')) {
+        document.getElementById('resEMI').innerText = "Rs. " + Math.round(emi).toLocaleString();
+    }
+    if(document.getElementById('resLoan')) {
+        document.getElementById('resLoan').innerText = "Rs. " + Math.round(loanAmount).toLocaleString();
+    }
 };
