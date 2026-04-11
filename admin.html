@@ -1,49 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Dashboard | Go! YNG</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
-            authDomain: "first-project-2082-12-26.firebaseapp.com",
-            projectId: "first-project-2082-12-26",
-            appId: "1:545170954251:web:0d2f7905834af3b0be8f0e"
-        };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "login.html"; // लगइन छैन भने लखेट्ने
-            } else {
-                document.body.style.display = "block";
-                document.getElementById('adminEmail').innerText = user.email;
-            }
-        });
-
-        window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
-    </script>
-
-    <div id="adminPanel" style="padding: 20px;">
-        <nav style="display: flex; justify-content: space-between; align-items: center; background: #215282; color: white; padding: 10px 20px; border-radius: 10px;">
-            <h3>Admin Dashboard</h3>
-            <div>
-                <span id="adminEmail" style="margin-right: 15px; font-size: 14px;"></span>
-                <button onclick="logout()" style="background: #ff4d4d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Logout</button>
-            </div>
-        </nav>
-
-        <section style="margin-top: 30px;">
-            <h2>Manage Bikes</h2>
-            <p>यहाँ तपाईंले नयाँ बाइक थप्ने र मूल्य परिवर्तन गर्ने फर्म राख्न सक्नुहुन्छ।</p>
-            </section>
+<main style="padding: 20px; max-width: 1000px; margin: auto;">
+    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <h2 style="color: #215282; margin-top: 0;">Add New Bike</h2>
+        <div id="bikeForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <input type="text" id="bikeName" placeholder="Bike Name (e.g. Pulsar 150)" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            <input type="number" id="bikePrice" placeholder="MRP Price" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            <input type="number" id="bikeIns" placeholder="Insurance Amount" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            <button onclick="saveBike()" style="background: #28a745; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                <i class="fa fa-plus"></i> Add Bike
+            </button>
+        </div>
     </div>
-</body>
-</html>
+
+    <div style="margin-top: 40px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <h2 style="color: #215282;">Current Inventory</h2>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background: #f8fafc; text-align: left; border-bottom: 2px solid #eee;">
+                        <th style="padding: 12px;">Model Name</th>
+                        <th style="padding: 12px;">Price (MRP)</th>
+                        <th style="padding: 12px;">Insurance</th>
+                        <th style="padding: 12px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="bikeTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script type="module" src="admin.js"></script>
