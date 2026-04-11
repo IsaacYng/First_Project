@@ -8,21 +8,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #215282; --success: #28a745; --danger: #dc3545; --light: #f8fafc; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; display: none; } /* Security: Hide until login check */
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; display: none; } 
         .header { background: var(--primary); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--primary); }
-        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
         .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-add { background: var(--success); color: white; }
-        .btn-add:hover { background: #218838; }
+        .btn-add { background: var(--success); color: white; width: 100%; }
         .btn-logout { background: var(--danger); color: white; padding: 8px 15px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        th { background: var(--light); padding: 15px; text-align: left; color: #666; border-bottom: 2px solid #eee; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: var(--light); padding: 15px; text-align: left; border-bottom: 2px solid #eee; }
         td { padding: 15px; border-bottom: 1px solid #eee; }
-        .btn-del { background: #ffeded; color: var(--danger); border: 1px solid #ffcccc; padding: 5px 10px; border-radius: 5px; }
-        .btn-del:hover { background: var(--danger); color: white; }
+        .btn-del { color: var(--danger); border: none; background: none; cursor: pointer; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -41,25 +38,28 @@
             <div class="grid-form">
                 <input type="text" id="bikeName" placeholder="Model Name (e.g. Pulsar N250)">
                 <input type="number" id="bikePrice" placeholder="MRP Price (NPR)">
-                <input type="number" id="bikeIns" placeholder="Insurance (NPR)">
+                <input type="number" id="bikeIns1" placeholder="Insurance 1 (Standard)">
+                <input type="number" id="bikeIns2" placeholder="Insurance 2 (Extra)">
+            </div>
+            <div style="margin-top: 15px;">
                 <button class="btn btn-add" onclick="saveBike()">Add to Inventory</button>
             </div>
         </div>
 
         <div class="card">
-            <h2 style="margin-top: 0; color: var(--primary);"><i class="fa fa-list"></i> Live Inventory Management</h2>
+            <h2 style="margin-top: 0; color: var(--primary);"><i class="fa fa-list"></i> Live Inventory</h2>
             <div style="overflow-x: auto;">
                 <table>
                     <thead>
                         <tr>
                             <th>Model Name</th>
                             <th>MRP Price</th>
-                            <th>Insurance</th>
+                            <th>Insurance 1</th>
+                            <th>Insurance 2</th>
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="bikeTableBody">
-                        </tbody>
+                    <tbody id="bikeTableBody"></tbody>
                 </table>
             </div>
         </div>
