@@ -14,29 +14,30 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const bikesCol = collection(db, "bikes");
 
-// --- १. सुरक्षा र लगइन जाँच (Security Check) ---
+// १. सुरक्षा जाँच: लगइन छैन भने Login.html मा पठाउने
 onAuthStateChanged(auth, (user) => {
     if (!user) {
-        window.location.href = "login.html"; // लगइन छैन भने लखेट्ने
+        window.location.href = "Login.html"; 
     } else {
-        document.body.style.display = "block"; // लगइन भए मात्र स्क्रिन देखाउने
+        document.body.style.display = "block";
         document.getElementById('adminEmail').innerText = user.email;
     }
 });
 
-// --- २. लगआउट फङ्सन (Logout) ---
+// २. लगआउट फङ्सन
 window.logout = () => {
-    signOut(auth).then(() => window.location.href = "login.html");
+    signOut(auth).then(() => window.location.href = "Login.html");
 };
 
-// --- ३. बाइक सेभ गर्ने (Add Bike) ---
+// ३. बाइक डेटा सेभ गर्ने
 window.saveBike = async function() {
     const name = document.getElementById('bikeName').value;
     const price = document.getElementById('bikePrice').value;
-    const ins = document.getElementById('bikeIns').value;
+    const ins1 = document.getElementById('bikeIns1').value;
+    const ins2 = document.getElementById('bikeIns2').value;
 
-    if (!name || !price || !ins) {
-        alert("Please fill all fields!");
+    if (!name || !price || !ins1 || !ins2) {
+        alert("कृपया सबै फिल्डहरू भर्नुहोस्!");
         return;
     }
 
@@ -44,22 +45,24 @@ window.saveBike = async function() {
         await addDoc(bikesCol, {
             name: name,
             price: parseFloat(price),
-            Insurance: parseFloat(ins),
+            Insurance1: parseFloat(ins1),
+            Insurance2: parseFloat(ins2),
             updatedAt: new Date()
         });
-        // Input सफा गर्ने
+        alert("Bike added successfully!");
+        // Clear inputs
         document.getElementById('bikeName').value = "";
         document.getElementById('bikePrice').value = "";
-        document.getElementById('bikeIns').value = "";
-        alert("Bike added to database!");
+        document.getElementById('bikeIns1').value = "";
+        document.getElementById('bikeIns2').value = "";
     } catch (e) {
-        alert("Error adding bike: " + e.message);
+        alert("Error: " + e.message);
     }
 };
 
-// --- ४. बाइक डिलिट गर्ने (Delete Bike) ---
+// ४. बाइक डिलिट गर्ने
 window.deleteBike = async function(id) {
-    if (confirm("Are you sure you want to delete this model?")) {
+    if (confirm("के तपाईं यो बाइक हटाउन चाहनुहुन्छ?")) {
         try {
             await deleteDoc(doc(db, "bikes", id));
         } catch (e) {
@@ -68,7 +71,7 @@ window.deleteBike = async function(id) {
     }
 };
 
-// --- ५. रियल-टाइम डाटा देखाउने (Real-time Table Update) ---
+// ५. रियल-टाइम डाटा टेबल अपडेट
 onSnapshot(bikesCol, (snapshot) => {
     const tbody = document.getElementById('bikeTableBody');
     tbody.innerHTML = "";
@@ -77,12 +80,13 @@ onSnapshot(bikesCol, (snapshot) => {
         const bike = doc.data();
         tbody.innerHTML += `
             <tr>
-                <td style="font-weight: bold; color: #333;">${bike.name}</td>
+                <td style="font-weight: bold;">${bike.name}</td>
                 <td>RS. ${parseFloat(bike.price).toLocaleString()}</td>
-                <td>RS. ${parseFloat(bike.Insurance).toLocaleString()}</td>
+                <td>RS. ${parseFloat(bike.Insurance1).toLocaleString()}</td>
+                <td>RS. ${parseFloat(bike.Insurance2 || 0).toLocaleString()}</td>
                 <td>
                     <button class="btn-del" onclick="deleteBike('${doc.id}')">
-                        <i class="fa fa-trash"></i> Remove
+                        <i class="fa fa-trash-can"></i>
                     </button>
                 </td>
             </tr>
