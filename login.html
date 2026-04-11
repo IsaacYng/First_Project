@@ -10,20 +10,20 @@
         :root { --primary: #215282; --success: #28a745; --danger: #dc3545; }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 0; }
         
-        /* १. लगइन सेक्सनको स्टाइल */
+       
         #login-section { display: flex; justify-content: center; align-items: center; height: 100vh; }
         .login-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 90%; max-width: 350px; text-align: center; }
         .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .btn-google { background: white; border: 1px solid #ddd; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; margin-top: 10px; }
 
-        /* २. एडमिन सेक्सन (सुरुमा लुकेको हुन्छ) */
+       
         #admin-section { display: none; }
         .header { background: var(--primary); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; }
         .content { padding: 20px 5%; }
         .form-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
         
-        /* मोबाइल रेस्पोन्सिभ टेबल */
+        
         .table-container { overflow-x: auto; background: white; border-radius: 12px; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
@@ -138,7 +138,7 @@
             const ins = document.getElementById('newIns').value;
             const img = document.getElementById('newImg').value || "https://cdn-icons-png.flaticon.com/512/8163/8163149.png";
 
-            if (!name || !price) return alert("नाम र मूल्य भर्नुहोस्!");
+            if (!name || !price) return alert("Enter Full Data");
 
             const data = { name, price, Insurance: ins, img };
             try {
@@ -153,7 +153,7 @@
             } catch (e) { alert(e.message); }
         };
 
-        window.deleteBike = (id) => confirm("हटाउन चाहनुहुन्छ?") && deleteDoc(doc(db, "bikes", id));
+        window.deleteBike = (id) => confirm("Are You Sure?") && deleteDoc(doc(db, "bikes", id));
 
         window.prepareEdit = (id, name, price, ins, img) => {
             document.getElementById('newName').value = name;
