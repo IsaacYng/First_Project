@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login | Go! YNG</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-card { max-width: 400px; margin: 100px auto; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 15px; text-align: center; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; }
+        button { width: 95%; padding: 12px; background: #215282; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        .links { margin-top: 15px; font-size: 14px; color: #666; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2>Go! YNG Admin</h2>
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="password" placeholder="Password">
+        <button id="loginBtn">Login to Panel</button>
+        <div class="links" id="forgotBtn">Forgot Password?</div>
+    </div>
+    <script type="module" src="auth.js"></script>
+</body>
+  </html>
+  
