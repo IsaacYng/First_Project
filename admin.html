@@ -1,33 +1,70 @@
-<main style="padding: 20px; max-width: 1000px; margin: auto;">
-    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-        <h2 style="color: #215282; margin-top: 0;">Add New Bike</h2>
-        <div id="bikeForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            <input type="text" id="bikeName" placeholder="Bike Name (e.g. Pulsar 150)" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-            <input type="number" id="bikePrice" placeholder="MRP Price" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-            <input type="number" id="bikeIns" placeholder="Insurance Amount" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-            <button onclick="saveBike()" style="background: #28a745; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                <i class="fa fa-plus"></i> Add Bike
-            </button>
-        </div>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go! YNG Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #215282; --success: #28a745; --danger: #dc3545; --light: #f8fafc; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; display: none; } /* Security: Hide until login check */
+        .header { background: var(--primary); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-add { background: var(--success); color: white; }
+        .btn-add:hover { background: #218838; }
+        .btn-logout { background: var(--danger); color: white; padding: 8px 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th { background: var(--light); padding: 15px; text-align: left; color: #666; border-bottom: 2px solid #eee; }
+        td { padding: 15px; border-bottom: 1px solid #eee; }
+        .btn-del { background: #ffeded; color: var(--danger); border: 1px solid #ffcccc; padding: 5px 10px; border-radius: 5px; }
+        .btn-del:hover { background: var(--danger); color: white; }
+    </style>
+</head>
+<body>
 
-    <div style="margin-top: 40px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-        <h2 style="color: #215282;">Current Inventory</h2>
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                <thead>
-                    <tr style="background: #f8fafc; text-align: left; border-bottom: 2px solid #eee;">
-                        <th style="padding: 12px;">Model Name</th>
-                        <th style="padding: 12px;">Price (MRP)</th>
-                        <th style="padding: 12px;">Insurance</th>
-                        <th style="padding: 12px;">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="bikeTableBody">
-                    </tbody>
-            </table>
+    <header class="header">
+        <div style="font-size: 20px; font-weight: bold;"><i class="fa fa-gauge-high"></i> Go! YNG Admin</div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span id="adminEmail" style="font-size: 14px; opacity: 0.9;"></span>
+            <button class="btn btn-logout" onclick="logout()"><i class="fa fa-sign-out"></i> Logout</button>
         </div>
-    </div>
-</main>
+    </header>
 
-<script type="module" src="admin.js"></script>
+    <main style="padding: 40px 5%;">
+        <div class="card">
+            <h2 style="margin-top: 0; color: var(--primary);"><i class="fa fa-plus-circle"></i> Add New Bike Model</h2>
+            <div class="grid-form">
+                <input type="text" id="bikeName" placeholder="Model Name (e.g. Pulsar N250)">
+                <input type="number" id="bikePrice" placeholder="MRP Price (NPR)">
+                <input type="number" id="bikeIns" placeholder="Insurance (NPR)">
+                <button class="btn btn-add" onclick="saveBike()">Add to Inventory</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-top: 0; color: var(--primary);"><i class="fa fa-list"></i> Live Inventory Management</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model Name</th>
+                            <th>MRP Price</th>
+                            <th>Insurance</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bikeTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
