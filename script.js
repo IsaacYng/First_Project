@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
@@ -15,109 +15,52 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const bikesCol = collection(db, "bikes");
 
-let editId = null; 
-let allBikes = []; // सबै बाइकहरू यहाँ बस्छन्
+let allBikes = []; // डेटा स्टोर गर्न
 
 function startApp() {
+    // रियल-टाइम डाटा तान्ने
     onSnapshot(bikesCol, (snapshot) => {
         allBikes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderBikes(allBikes); // सुरुमा सबै बाइक देखाउने
+        renderBikes(allBikes); 
     });
 }
 
-// १. बाइकहरू स्क्रिनमा देखाउने फङ्सन
+// १. बाइकहरू मात्र देखाउने फङ्सन (Admin List हटाइयो)
 function renderBikes(bikes) {
-    // होम पेजको लागि
     let container = document.getElementById("bike-container");
     if (container) {
+        if (bikes.length === 0) {
+            container.innerHTML = "<p style='text-align:center;'>No bikes found.</p>";
+            return;
+        }
+        
         container.innerHTML = bikes.map(bike => `
             <div class="bike-card">
-                <img src="${bike.img}" alt="${bike.name}">
+                <img src="${bike.img || 'https://cdn-icons-png.flaticon.com/512/8163/8163149.png'}" alt="${bike.name}">
                 <div class="bike-info">
                     <h3>${bike.name}</h3>
-                    <p>Insurance: Rs. ${bike.Insurance}</p>
-                    <div class="price">Rs. ${bike.price}</div>
+                    <p>Insurance 1: Rs. ${bike.Insurance1 || 0}</p>
+                    <p>Insurance 2: Rs. ${bike.Insurance2 || 0}</p>
+                    <div class="price">MRP: Rs. ${parseFloat(bike.price).toLocaleString()}</div>
                 </div>
             </div>
         `).join('');
     }
-
-    // एडमिन प्यानलको लागि
-    let adminList = document.getElementById("admin-bike-list");
-    if (adminList) {
-        adminList.innerHTML = bikes.map(bike => `
-            <tr>
-                <td><img src="${bike.img}" width="50" style="border-radius:5px;"></td>
-                <td>${bike.name}</td>
-                <td>Rs. ${bike.price}</td>
-                <td>Rs. ${bike.Insurance}</td>
-                <td>
-                    <button onclick="prepareEdit('${bike.id}', '${bike.name}', '${bike.price}', '${bike.Insurance}', '${bike.img}')" style="background:#ffc107; border:none; padding:5px 10px; cursor:pointer; border-radius:4px; margin-right:5px;">Edit</button>
-                    <button onclick="deleteBike('${bike.id}')" style="background:#dc3545; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:4px;">Remove</button>
-                </td>
-            </tr>
-        `).join('');
-    }
 }
 
-// सर्च फङ्सनलाई 'window' मा राख्ने ताकि HTML ले चिन्न सकोस्
+// २. सर्च फङ्सन (यसलाई window मा राख्नुपर्छ)
 window.searchBikes = function() {
     const input = document.getElementById('search-input');
     if (!input) return;
 
     const filter = input.value.toLowerCase();
     
-    // allBikes बाट फिल्टर गर्ने
     const filteredBikes = allBikes.filter(bike => 
         bike.name.toLowerCase().includes(filter)
     );
 
-    // फिल्टर भएको डेटा मात्र स्क्रिनमा देखाउने
     renderBikes(filteredBikes);
 };
 
-// ३. नयाँ थप्ने वा अपडेट गर्ने
-window.handleForm = async function() {
-    const name = document.getElementById('newName').value;
-    const price = document.getElementById('newPrice').value;
-    const ins = document.getElementById('newIns').value || "0";
-    const img = document.getElementById('newImg').value || "https://cdn-icons-png.flaticon.com/512/8163/8163149.png";
-
-    if (name && price) {
-        try {
-            if (editId) {
-                await updateDoc(doc(db, "bikes", editId), { name, price, Insurance: ins, img });
-                alert("Updated!");
-                editId = null;
-                document.querySelector('.add-btn').innerText = "Update Inventory";
-            } else {
-                await addDoc(bikesCol, { name, price, Insurance: ins, img });
-                alert("Added!");
-            }
-            clearForm();
-        } catch (e) { alert("Error: " + e.message); }
-    } else { alert("Please fill details!"); }
-};
-
-window.prepareEdit = function(id, name, price, ins, img) {
-    document.getElementById('newName').value = name;
-    document.getElementById('newPrice').value = price;
-    document.getElementById('newIns').value = ins;
-    document.getElementById('newImg').value = img;
-    editId = id;
-    document.querySelector('.add-btn').innerText = "Save Changes";
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-window.deleteBike = async function(id) {
-    if (confirm("Are you sure?")) await deleteDoc(doc(db, "bikes", id));
-};
-
-function clearForm() {
-    document.getElementById('newName').value = "";
-    document.getElementById('newPrice').value = "";
-    document.getElementById('newIns').value = "";
-    document.getElementById('newImg').value = "";
-}
-
+// एप सुरु गर्ने
 startApp();
