@@ -1,164 +1,176 @@
-/* १. ग्लोबल सेटअप */
+/* १. ग्लोबल रिसेट र बेस */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 :root {
     --primary: #215282;
     --success: #2d5a27;
     --white: #ffffff;
-    --bg: #f0f2f5;
+    --bg: #f4f7f6;
 }
 
 body {
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
     background: var(--bg);
+    line-height: 1.6;
 }
 
-/* २. लगइन सेक्सन - PC र Mobile दुवैमा मिल्ने */
+/* २. लगइन पेज (Mobile Fix) */
 #login-section {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 15px;
+    padding: 20px;
 }
 
 .login-card {
     background: white;
-    padding: 30px;
+    padding: 25px;
     border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     width: 100%;
-    max-width: 380px;
-    box-sizing: border-box;
+    max-width: 400px; /* PC मा ठुलो नदेखियोस् भनेर */
+    text-align: center;
 }
 
-/* ३. GOOGLE BUTTON - ठ्याक्कै गुगलको जस्तै डिजाइन */
-.divider {
-    margin: 20px 0;
+/* लोगो मोबाइलमा धेरै ठुलो नहोस् */
+.logo-area img {
+    max-width: 150px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+.input-group .field {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 10px 15px;
     display: flex;
     align-items: center;
-    color: #888;
-}
-.divider::before, .divider::after {
-    content: ""; flex: 1; height: 1px; background: #eee; margin: 0 10px;
 }
 
+.input-group .field input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    padding: 5px 10px;
+    font-size: 16px; /* मोबाइलमा अटो-जुम रोक्न */
+    outline: none;
+}
+
+/* ३. Google Button - पूर्ण फिक्स */
 .btn-social {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 44px; /* Standard Google Height */
-    background: #ffffff;
+    height: 48px;
+    background: #fff;
     border: 1px solid #dadce0;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
-    font-family: 'Roboto', arial, sans-serif;
-    font-size: 14px;
     font-weight: 500;
     color: #3c4043;
     gap: 10px;
-    transition: 0.2s;
+    margin-top: 10px;
 }
 
-.btn-social:hover {
-    background-color: #f8f9fa;
-    border-color: #d2e3fc;
-}
+.btn-social img { width: 20px; }
 
-.btn-social img {
-    width: 18px;
-    height: 18px;
-}
-
-/* ४. एडमिन प्यानल - Mobile Responsive Fixes */
+/* ४. एडमिन लेआउट र नेभिगेसन (Mobile First) */
 .admin-header {
     background: white;
-    padding: 15px 5%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
 }
 
 .admin-nav {
     display: flex;
     gap: 10px;
-    margin: 15px 5%;
-    overflow-x: auto; /* मोबाइलमा बटनहरु तेर्सो स्क्रोल हुने */
-    padding-bottom: 5px;
+    padding: 10px;
+    overflow-x: auto; /* मेनु मोबाइलमा स्क्रोल हुन्छ */
+    background: #fff;
+    white-space: nowrap;
 }
 
 .nav-item {
-    padding: 10px 20px;
+    padding: 10px 15px;
     border: none;
-    border-radius: 5px;
-    background: white;
-    cursor: pointer;
+    border-radius: 8px;
+    background: #eee;
     font-weight: 600;
-    color: #555;
-    white-space: nowrap;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-size: 14px;
 }
 
-.nav-item.active {
-    background: var(--primary);
-    color: white;
+.nav-item.active { background: var(--primary); color: white; }
+
+/* ५. टेबल र ग्रिड फिक्स */
+.content { padding: 15px; }
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-/* ५. टेबल रेस्पोन्सिभ फिक्स (तपाईंको फोटोमा बिग्रिएको यही हो) */
+.grid-form {
+    display: grid;
+    grid-template-columns: 1fr; /* मोबाइलमा डिफल्ट १ कोलम */
+    gap: 15px;
+}
+
+/* टेबल मोबाइलमा नबिग्रियोस् */
 .table-responsive {
     width: 100%;
-    overflow-x: auto; /* यसले मोबाइलमा टेबललाई साइडमा स्क्रोल गर्न दिन्छ */
-    background: white;
-    border-radius: 8px;
+    overflow-x: auto;
 }
 
 table {
     width: 100%;
+    min-width: 600px;
     border-collapse: collapse;
-    min-width: 650px; /* कोलमहरु थिचिन दिँदैन */
 }
 
-th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-    font-size: 14px;
-}
+th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
 
-/* ६. ग्रिड फर्म - PC मा कोलम, मोबाइलमा एक मुनि अर्को */
-.grid-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.field-box input, .field-box select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-sizing: border-box;
-}
-
-/* ७. फेसबुक स्टाइल प्रोफाइल */
-.profile-card { padding: 0 !important; overflow: hidden; text-align: center; }
-.cover-photo { height: 110px; background: linear-gradient(45deg, #215282, #2d5a27); }
+/* ६. प्रोफाइल (Facebook Look) */
+.profile-card { padding: 0 !important; overflow: hidden; }
+.cover-photo { height: 120px; background: linear-gradient(to right, #215282, #2d5a27); }
 
 #profilePic {
-    width: 100px;
-    height: 100px;
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
     border: 4px solid white;
-    margin-top: -50px;
+    margin: -55px auto 10px auto;
+    display: block;
     background: white;
-    object-fit: cover;
 }
 
-/* ८. मोबाइलको लागि बाँकी मिलावट */
-@media (max-width: 600px) {
-    .admin-header { flex-direction: column; gap: 10px; text-align: center; }
-    .content { padding: 0 10px; }
-    .login-card { padding: 25px 20px; }
+/* ७. PC को लागि रेस्पोन्सिभ */
+@media (min-width: 768px) {
+    .grid-form {
+        grid-template-columns: repeat(2, 1fr); /* ट्याब्लेट/PC मा २ कोलम */
+    }
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 5%;
+    }
+}
+
+.btn-save {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    width: 100%;
+    font-weight: bold;
+    cursor: pointer;
     }
     
