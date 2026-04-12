@@ -29,10 +29,6 @@
                 </div>
             </div>
 
-            <div class="forgot-link">
-                <a href="#" id="forgotPassBtn">Forgot Password?</a>
-            </div>
-
             <button id="loginBtn" class="btn-primary">Sign In <i class="fa fa-arrow-right"></i></button>
 
             <div class="divider"><span>OR</span></div>
@@ -48,7 +44,7 @@
     <section id="admin-section" style="display: none;">
         <header class="admin-header">
             <div class="greeting">
-                <h3 id="greetingText">Good Morning, Admin!</h3>
+                <h3 id="greetingText">Welcome, Admin!</h3>
                 <p id="currentDate"></p>
             </div>
             <div class="header-right">
@@ -93,10 +89,6 @@
                             <input type="text" id="pBio" placeholder="Your status or bio">
                         </div>
                         <div class="info-row">
-                            <label><i class="fa fa-phone"></i> Contact Details</label>
-                            <input type="text" id="pContact" placeholder="Phone or Social Link">
-                        </div>
-                        <div class="info-row">
                             <label><i class="fa fa-briefcase"></i> Position</label>
                             <input type="text" id="pRole" placeholder="e.g. Sales Advisor">
                         </div>
@@ -108,8 +100,6 @@
             <div id="tab-price" class="tab-pane">
                 <div class="card">
                     <h3><i class="fa fa-edit"></i> Global Price & Insurance</h3>
-                    <p style="font-size: 13px; color: #777; margin-bottom: 20px;">यी डाटाहरू तपाईँको मुख्य वेबसाइट (INDEX PAGE) मा देखिनेछन्।</p>
-                    
                     <div class="grid-form">
                         <div class="field-box">
                             <label>Model Name</label>
@@ -134,24 +124,25 @@
                     </div>
                     <button id="saveModelBtn" class="btn-save" style="background: var(--primary);">Update Master Price List</button>
                 </div>
-            </div>
-            <div class="card table-card">
-                    <h3><i class="fa fa-list-ul"></i> Live Inventory Stock</h3>
+
+                <div class="card table-card" style="margin-top: 20px;">
+                    <h3><i class="fa fa-list-ul"></i> Master List</h3>
                     <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Model</th>
+                                    <th>Model Name</th>
                                     <th>Price</th>
                                     <th>Insurance</th>
-                                    <th>Finance Insurance</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="stockTableBody">
+                            <tbody id="masterTableBody">
                                 </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
 
             <div id="tab-stock" class="tab-pane">
                 <div class="card">
@@ -160,7 +151,7 @@
                         <div class="field-box">
                             <label>Select Master Model</label>
                             <select id="stockModelSelect">
-                                <option value="">-- Loading Models --</option>
+                                <option value="">-- Select Model --</option>
                             </select>
                         </div>
                         <div class="field-box">
@@ -179,8 +170,8 @@
                     <button id="saveStockBtn" class="btn-save" style="background: var(--success);">Confirm Stock Entry</button>
                 </div>
 
-                <div class="card table-card">
-                    <h3><i class="fa fa-list-ul"></i> Live Inventory Stock</h3>
+                <div class="card table-card" style="margin-top: 20px;">
+                    <h3><i class="fa fa-warehouse"></i> Current Live Stock</h3>
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -214,5 +205,5 @@
         }
     </script>
 </body>
-    </html>
-                        
+                </html>
+    
