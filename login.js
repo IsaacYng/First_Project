@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/fireba
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-// १. फायरबेस कन्फिगरेसन (तपाईँकै प्रोजेक्टको)
 const firebaseConfig = {
     apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
     authDomain: "first-project-2082-12-26.firebaseapp.com",
@@ -14,157 +13,124 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// २. लगइन अवस्था चेक गर्ने र डाटा लोड गर्ने
+// १. लगइन अवस्था
 onAuthStateChanged(auth, (user) => {
     if (user) {
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('admin-section').style.display = 'block';
         loadProfile(user.uid);
-        syncEverything(); // मोडेल र स्टक लोड गर्न
+        loadAllData(); // सबै डाटा लोड गर्ने
     } else {
         document.getElementById('login-section').style.display = 'flex';
         document.getElementById('admin-section').style.display = 'none';
     }
 });
 
-// ३. लगइन लजिक (ईमेल/गुगल र पासवर्ड रिसेट)
+// २. लगइन/आउट लजिक
 document.getElementById('loginBtn').onclick = () => {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('pass').value;
-    if(!email || !pass) return alert("Email र Password भर्नुहोस्।");
-    signInWithEmailAndPassword(auth, email, pass).catch(e => alert("Error: " + e.message));
+    signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
 };
-
-document.getElementById('googleBtn').onclick = () => {
-    signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.message));
-};
-
-document.getElementById('forgotPassBtn').onclick = (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    if(!email) return alert("Password रिसेट गर्न पहिले ईमेल लेख्नुहोस्।");
-    sendPasswordResetEmail(auth, email).then(() => alert("Password reset link ईमेलमा पठाइयो।")).catch(e => alert(e.message));
-};
-
 document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-// ४. प्रोफाइल र नाम व्यवस्थापन (Fix)
-async function loadProfile(uid) {
-    const docSnap = await getDoc(doc(db, "profiles", uid));
-    if (docSnap.exists()) {
-        const data = docSnap.data();
-        const userName = data.name || "Admin";
-        document.getElementById('dispName').innerText = userName;
-        document.getElementById('headerUserName').innerText = userName;
-        document.getElementById('pNameInput').value = userName;
-        document.getElementById('pBio').value = data.bio || "";
-        document.getElementById('pContact').value = data.contact || "";
-        document.getElementById('pRole').value = data.role || "";
-        updateGreeting(userName);
-    } else {
-        updateGreeting("Admin");
-    }
+// ३. सबै डाटा लोड गर्ने (यसले पुराना डाटाहरू टेबलमा देखाउँछ)
+function loadAllData() {
+    // मास्टर प्राइस लिस्ट (Bikes Collection)
+    onSnapshot(collection(db, "bikes"), (snap) => {
+        const tableBody = document.getElementById('stockTableBody');
+        // नोट: यदि तपाईँको HTML मा एउटै टेबल छ भने यहाँ 'bikes' को डाटा पनि थपिनेछ
+        let html = "";
+        snap.docs.forEach(d => {
+            const data = d.data();
+            const name = data.name || data.Name || "Unknown";
+            const price = data.price || data.Price || 0;
+            html += `
+                <tr>
+                    <td><img src="${data.img || data.Image || ''}" width="40" style="border-radius:5px;"></td>
+                    <td><strong>${name}</strong> (Master)</td>
+                    <td>Rs. ${price}</td>
+                    <td><span style="color:blue">Master List</span></td>
+                    <td>
+                        <button onclick="deleteData('bikes', '${d.id}')" style="color:red; border:none; background:none; cursor:pointer; font-size:18px;">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>`;
+        });
+        
+        // अब 'bike_stock' को डाटा पनि यसैमा मिसाउने (यदि छ भने)
+        onSnapshot(collection(db, "bike_stock"), (stockSnap) => {
+            let stockHtml = html; // पहिलेको मास्टर लिस्टमा स्टक थप्ने
+            stockSnap.docs.forEach(sd => {
+                const s = sd.data();
+                stockHtml += `
+                    <tr>
+                        <td><i class="fa fa-motorcycle" style="font-size:24px; color:#666;"></i></td>
+                        <td><strong>${s.model}</strong></td>
+                        <td>Chassis: ${s.chassis}</td>
+                        <td><span style="color:green">In Stock</span></td>
+                        <td>
+                            <button onclick="deleteData('bike_stock', '${sd.id}')" style="color:red; border:none; background:none; cursor:pointer; font-size:18px;">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+            tableBody.innerHTML = stockHtml;
+        });
+    });
+
+    // स्टक इन्ट्रीको लागि ड्रपडाउन अपडेट
+    onSnapshot(collection(db, "bikes"), (snap) => {
+        const select = document.getElementById('stockModelSelect');
+        select.innerHTML = '<option value="">-- Select Model --</option>';
+        snap.docs.forEach(d => {
+            const name = d.data().name || d.data().Name;
+            select.innerHTML += `<option value="${name}">${name}</option>`;
+        });
+    });
 }
 
-document.getElementById('updateProfileBtn').onclick = async () => {
-    const user = auth.currentUser;
-    const profileData = {
-        name: document.getElementById('pNameInput').value,
-        bio: document.getElementById('pBio').value,
-        contact: document.getElementById('pContact').value,
-        role: document.getElementById('pRole').value,
-        updatedAt: new Date()
-    };
-    await setDoc(doc(db, "profiles", user.uid), profileData);
-    alert("Profile Update भयो!");
-    loadProfile(user.uid);
+// ४. डिलिट फङ्सन (जुनसुकै कलेक्सनबाट हटाउन मिल्ने)
+window.deleteData = async (collectionName, id) => {
+    if(confirm("के तपाईँ यो डाटा सधैँका लागि हटाउन चाहनुहुन्छ?")) {
+        try {
+            await deleteDoc(doc(db, collectionName, id));
+            alert("डाटा हटाइयो!");
+        } catch(e) { alert("Error: " + e.message); }
+    }
 };
 
-// ५. मूल्य र इन्स्योरेन्स (Master Price List)
+// ५. नयाँ मोडेल थप्ने (Price Setup)
 document.getElementById('saveModelBtn').onclick = async () => {
     const data = {
         name: document.getElementById('mName').value,
         price: Number(document.getElementById('mPrice').value),
         normalIns: Number(document.getElementById('mNormalIns').value),
         financeIns: Number(document.getElementById('mFinanceIns').value),
-        img: document.getElementById('mImg').value || "https://cdn-icons-png.flaticon.com/512/8163/8163149.png",
-        // पुरानो सिस्टमसँग मिलाउन (Compatibility)
-        Price: Number(document.getElementById('mPrice').value),
-        Insurance: Number(document.getElementById('mNormalIns').value)
-    };
-    
-    if(!data.name || !data.price) return alert("Model Name र Price अनिवार्य छ।");
-    await addDoc(collection(db, "bikes"), data);
-    alert("नयाँ मूल्य सूचीमा थपियो!");
-};
-
-// ६. स्टक र मोडेल सिङ्क्रोनाइजेसन (पुरानो डाटा तान्ने मुख्य भाग)
-let allModels = [];
-function syncEverything() {
-    // पुरानो र नयाँ दुवै मोडेल तान्ने
-    onSnapshot(collection(db, "bikes"), (snap) => {
-        allModels = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        const select = document.getElementById('stockModelSelect');
-        select.innerHTML = '<option value="">-- Select Model --</option>';
-        
-        allModels.forEach(m => {
-            // यदि डाटाबेसमा 'Name' छ भने त्यो लिने, नत्र 'name' लिने
-            const mName = m.name || m.Name || "Unknown Model";
-            select.innerHTML += `<option value="${mName}">${mName}</option>`;
-        });
-    });
-
-    // स्टक लिस्ट टेबलमा देखाउने
-    onSnapshot(collection(db, "bike_stock"), (snap) => {
-        const tableBody = document.getElementById('stockTableBody');
-        tableBody.innerHTML = snap.docs.map(d => {
-            const s = d.data();
-            return `
-                <tr>
-                    <td><strong>${s.model}</strong></td>
-                    <td style="font-family:monospace">${s.chassis}</td>
-                    <td>${s.engine || '-'}</td>
-                    <td><span style="color:green">In Stock</span></td>
-                    <td>
-                        <button onclick="delStock('${d.id}')" style="color:red; border:none; background:none; cursor:pointer;"><i class="fa fa-trash"></i></button>
-                    </td>
-                </tr>`;
-        }).join('');
-    });
-}
-
-// ७. स्टक सेभ गर्ने
-document.getElementById('saveStockBtn').onclick = async () => {
-    const modelName = document.getElementById('stockModelSelect').value;
-    const modelInfo = allModels.find(m => (m.name || m.Name) === modelName);
-    
-    if(!modelName || !document.getElementById('sChassis').value) return alert("Model र Chassis No भर्नुहोस्।");
-
-    const stockObj = {
-        model: modelName,
-        price: modelInfo.price || modelInfo.Price,
-        financeIns: modelInfo.financeIns || 0,
-        chassis: document.getElementById('sChassis').value,
-        engine: document.getElementById('sEngine').value,
-        color: document.getElementById('sColor').value,
+        img: document.getElementById('mImg').value,
         addedAt: new Date()
     };
-    await addDoc(collection(db, "bike_stock"), stockObj);
-    alert("बाइक स्टकमा थपियो!");
+    await addDoc(collection(db, "bikes"), data);
+    alert("Master Price List Updated!");
 };
 
-// ग्लोबल डिलिट फङ्सन
-window.delStock = (id) => {
-    if(confirm("के तपाईँ यो बाइक स्टकबाट हटाउन चाहनुहुन्छ?")) {
-        deleteDoc(doc(db, "bike_stock", id));
+// ६. प्रोफाइल लोड गर्ने
+async function loadProfile(uid) {
+    const docSnap = await getDoc(doc(db, "profiles", uid));
+    if (docSnap.exists()) {
+        const data = docSnap.data();
+        document.getElementById('dispName').innerText = data.name || "Ishak";
+        document.getElementById('headerUserName').innerText = data.name || "Ishak";
+        document.getElementById('pNameInput').value = data.name || "";
+        updateGreeting(data.name || "Ishak");
     }
-};
+}
 
-// ८. ग्रिटिङ (Greeting Logic)
 function updateGreeting(name) {
     const hour = new Date().getHours();
     const greet = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
     document.getElementById('greetingText').innerText = `${greet}, ${name}!`;
     document.getElementById('currentDate').innerText = new Date().toDateString();
-    }
-            
+}
