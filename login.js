@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
+// १. फायरबेस कन्फिगरेसन
 const firebaseConfig = {
     apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
     authDomain: "first-project-2082-12-26.firebaseapp.com",
@@ -13,89 +14,146 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Auth Check
-onAuthStateChanged(auth, u => {
-    if(u) {
-        document.getElementById('login-section').style.display = 'none';
-        document.getElementById('admin-section').style.display = 'block';
-        loadProfile(u.uid);
+// २. लगइन अवस्था चेक गर्ने (Authentication State)
+onAuthStateChanged(auth, (user) => {
+    const loginSec = document.getElementById('login-section');
+    const adminSec = document.getElementById('admin-section');
+    
+    if (user) {
+        loginSec.style.display = 'none';
+        adminSec.style.display = 'block';
+        updateGreeting();
+        loadProfile(user.uid);
+        loadStockData();
     } else {
-        document.getElementById('login-section').style.display = 'flex';
-        document.getElementById('admin-section').style.display = 'none';
+        loginSec.style.display = 'flex';
+        adminSec.style.display = 'none';
     }
 });
 
-// Login/Logout
+// ३. लगइन र पासवर्ड रिसेट लजिक
 document.getElementById('loginBtn').onclick = () => {
-    signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message));
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('pass').value;
+    signInWithEmailAndPassword(auth, email, pass).catch(e => alert("Error: " + e.message));
 };
+
+document.getElementById('googleBtn').onclick = () => {
+    signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.message));
+};
+
+document.getElementById('forgotPassBtn').onclick = (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    if(!email) return alert("Please enter your email first!");
+    sendPasswordResetEmail(auth, email).then(() => alert("Password reset link sent to your email!")).catch(e => alert(e.message));
+};
+
 document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-// 1. Save Model
+// ४. प्रोफाइल व्यवस्थापन (Profile Management)
+async function loadProfile(uid) {
+    const docSnap = await getDoc(doc(db, "profiles", uid));
+    if (docSnap.exists()) {
+        const data = docSnap.data();
+        document.getElementById('dispName').innerText = data.bio ? data.bio.split(' ')[0] : "Admin";
+        document.getElementById('pBio').value = data.bio || "";
+        document.getElementById('pContact').value = data.contact || "";
+        document.getElementById('pRole').value = data.role || "";
+    }
+}
+
+document.getElementById('updateProfileBtn').onclick = async () => {
+    const user = auth.currentUser;
+    const profileData = {
+        bio: document.getElementById('pBio').value,
+        contact: document.getElementById('pContact').value,
+        role: document.getElementById('pRole').value,
+        updatedAt: new Date()
+    };
+    await setDoc(doc(db, "profiles", user.uid), profileData);
+    alert("Profile Updated!");
+    loadProfile(user.uid);
+};
+
+// ५. मूल्य र इन्स्योरेन्स सेटअप (Price Setup)
 document.getElementById('saveModelBtn').onclick = async () => {
     const data = {
         name: document.getElementById('mName').value,
         price: Number(document.getElementById('mPrice').value),
         normalIns: Number(document.getElementById('mNormalIns').value),
         financeIns: Number(document.getElementById('mFinanceIns').value),
-        img: document.getElementById('mImg').value
+        img: document.getElementById('mImg').value || "https://cdn-icons-png.flaticon.com/512/8163/8163149.png"
     };
+    if(!data.name || !data.price) return alert("Model Name and Price are required!");
     await addDoc(collection(db, "bikes"), data);
-    alert("Model Updated!");
+    alert("Model Price Added!");
+    ['mName', 'mPrice', 'mNormalIns', 'mFinanceIns', 'mImg'].forEach(id => document.getElementById(id).value = "");
 };
 
-// 2. Load Models for Stock
-let allModels = [];
-onSnapshot(collection(db, "bikes"), snap => {
-    allModels = snap.docs.map(d => d.data());
+// ६. स्टक इन्ट्री लजिक (Stock Entry)
+let availableModels = [];
+onSnapshot(collection(db, "bikes"), (snap) => {
+    availableModels = snap.docs.map(d => ({id: d.id, ...d.data()}));
     const select = document.getElementById('stockModelSelect');
     select.innerHTML = '<option value="">-- Select Model --</option>';
-    allModels.forEach(m => select.innerHTML += `<option value="${m.name}">${m.name}</option>`);
+    availableModels.forEach(m => {
+        select.innerHTML += `<option value="${m.name}">${m.name}</option>`;
+    });
 });
 
-// 3. Save Stock
 document.getElementById('saveStockBtn').onclick = async () => {
     const modelName = document.getElementById('stockModelSelect').value;
-    const model = allModels.find(m => m.name === modelName);
+    const modelInfo = availableModels.find(m => m.name === modelName);
+    
+    if(!modelName || !document.getElementById('sChassis').value) return alert("Fill Model and Chassis!");
+
     const stockData = {
         model: modelName,
-        price: model.price,
-        financeIns: model.financeIns,
+        price: modelInfo.price,
+        financeIns: modelInfo.financeIns,
         chassis: document.getElementById('sChassis').value,
         engine: document.getElementById('sEngine').value,
         reg: document.getElementById('sReg').value,
-        color: document.getElementById('sColor').value
+        color: document.getElementById('sColor').value,
+        status: "In Stock",
+        addedAt: new Date()
     };
     await addDoc(collection(db, "bike_stock"), stockData);
-    alert("Bike Added to Stock!");
+    alert("Bike added to Live Stock!");
+    ['sChassis', 'sEngine', 'sReg', 'sColor'].forEach(id => document.getElementById(id).value = "");
 };
 
-// 4. Load Stock Table
-onSnapshot(collection(db, "bike_stock"), snap => {
-    document.getElementById('stockTableBody').innerHTML = snap.docs.map(d => `
-        <tr>
-            <td>${d.data().model}</td>
-            <td>${d.data().chassis}</td>
-            <td><button onclick="deleteStock('${d.id}')" style="color:red; border:none; background:none; cursor:pointer;">Delete</button></td>
-        </tr>
-    `).join('');
-});
-
-// 5. Profile Logic
-async function loadProfile(uid) {
-    const d = await getDoc(doc(db, "profiles", uid));
-    if(d.exists()) {
-        document.getElementById('profileDisplay').innerHTML = `<h4>Bio: ${d.data().bio}</h4><p>Post: ${d.data().post}</p>`;
-    }
+// ७. स्टक टेबल लोड गर्ने
+function loadStockData() {
+    onSnapshot(collection(db, "bike_stock"), (snap) => {
+        const tableBody = document.getElementById('stockTableBody');
+        tableBody.innerHTML = snap.docs.map(d => {
+            const s = d.data();
+            return `
+                <tr>
+                    <td><strong>${s.model}</strong></td>
+                    <td style="font-family:monospace">${s.chassis}</td>
+                    <td>Rs. ${s.financeIns}</td>
+                    <td>
+                        <button onclick="deleteStockRecord('${d.id}')" style="color:red; border:none; background:none; cursor:pointer;"><i class="fa fa-trash"></i></button>
+                    </td>
+                </tr>`;
+        }).join('');
+    });
 }
 
-document.getElementById('updateProfileBtn').onclick = async () => {
-    const user = auth.currentUser;
-    await setDoc(doc(db, "profiles", user.uid), {
-        bio: document.getElementById('pBio').value,
-        post: document.getElementById('pPost').value
-    });
-    alert("Profile Updated!");
-    loadProfile(user.uid);
+// डिलिट फङ्सन (Global scope मा राख्न window प्रयोग गरिएको)
+window.deleteStockRecord = (id) => {
+    if(confirm("Are you sure you want to remove this bike from stock?")) {
+        deleteDoc(doc(db, "bike_stock", id));
+    }
 };
-            
+
+// ८. स्मार्ट ग्रिटिङ (Greeting Logic)
+function updateGreeting() {
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
+    document.getElementById('greetingText').innerText = `${greeting}, Ishak!`;
+    document.getElementById('currentDate').innerText = new Date().toDateString();
+}
