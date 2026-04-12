@@ -1,20 +1,22 @@
-/* १. ग्लोबल रिसेट र बेस */
+/* १. मूल डिजाइन सेटअप (Variables & Base) */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --primary: #215282;
-    --success: #2d5a27;
+    --primary: #215282;          /* Bajaj Blue */
+    --success: #2d5a27;         /* Showroom Green */
+    --danger: #d32f2f;
     --white: #ffffff;
-    --bg: #f4f7f6;
+    --bg: #f0f2f5;
+    --shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 body {
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background: var(--bg);
-    line-height: 1.6;
+    color: #333;
 }
 
-/* २. लगइन पेज (Mobile Fix) */
+/* २. लगइन सेक्सन (Mobile & PC Fix) */
 #login-section {
     display: flex;
     justify-content: center;
@@ -24,31 +26,33 @@ body {
 }
 
 .login-card {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    background: var(--white);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     width: 100%;
-    max-width: 400px; /* PC मा ठुलो नदेखियोस् भनेर */
+    max-width: 380px;
     text-align: center;
 }
 
-/* लोगो मोबाइलमा धेरै ठुलो नहोस् */
 .logo-area img {
-    max-width: 150px;
+    max-width: 130px;
     height: auto;
     margin-bottom: 15px;
 }
 
+/* ३. इनपुट फिल्डहरू (ठुलो र मोबाइल फ्रेन्ड्ली) */
 .input-group .field {
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    padding: 10px 15px;
     display: flex;
     align-items: center;
+    background: #f8f9fa;
+    padding: 12px 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
 }
+
+.input-group .field i { color: var(--primary); width: 20px; }
 
 .input-group .field input {
     border: none;
@@ -59,118 +63,134 @@ body {
     outline: none;
 }
 
-/* ३. Google Button - पूर्ण फिक्स */
+.btn-primary {
+    background: var(--primary);
+    color: white; border: none; width: 100%;
+    padding: 14px; border-radius: 12px;
+    font-weight: 600; cursor: pointer; transition: 0.3s;
+}
+
+/* ४. GOOGLE BUTTON (Official Standard Design) */
+.divider {
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    color: #999;
+    font-size: 13px;
+}
+.divider::before, .divider::after {
+    content: ""; flex: 1; height: 1px; background: #eee; margin: 0 10px;
+}
+
 .btn-social {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 48px;
-    background: #fff;
+    height: 46px;
+    background: white;
     border: 1px solid #dadce0;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
     color: #3c4043;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 12px;
 }
 
-.btn-social img { width: 20px; }
+.btn-social img { width: 18px; }
 
-/* ४. एडमिन लेआउट र नेभिगेसन (Mobile First) */
+/* ५. एडमिन प्यानल र नेभिगेसन */
 .admin-header {
-    background: white;
-    padding: 15px;
-    text-align: center;
-    border-bottom: 1px solid #eee;
+    background: var(--white);
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .admin-nav {
     display: flex;
     gap: 10px;
-    padding: 10px;
-    overflow-x: auto; /* मेनु मोबाइलमा स्क्रोल हुन्छ */
-    background: #fff;
-    white-space: nowrap;
+    margin: 15px 5%;
+    overflow-x: auto; /* मोबाइलमा मेनु साइड स्क्रोल हुन्छ */
+    padding-bottom: 5px;
 }
 
 .nav-item {
-    padding: 10px 15px;
+    padding: 10px 18px;
     border: none;
-    border-radius: 8px;
-    background: #eee;
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
     font-weight: 600;
-    font-size: 14px;
+    color: #666;
+    box-shadow: var(--shadow);
+    white-space: nowrap;
 }
 
 .nav-item.active { background: var(--primary); color: white; }
 
-/* ५. टेबल र ग्रिड फिक्स */
-.content { padding: 15px; }
+/* ६. टेबल र ग्रिड (तपाईँको फोटोमा बिग्रिएको फिक्स) */
+.content { padding: 0 5% 50px 5%; }
 
 .card {
-    background: white;
+    background: var(--white);
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
     margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .grid-form {
     display: grid;
-    grid-template-columns: 1fr; /* मोबाइलमा डिफल्ट १ कोलम */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 15px;
 }
 
-/* टेबल मोबाइलमा नबिग्रियोस् */
+.field-box label { font-size: 13px; font-weight: bold; margin-bottom: 5px; display: block; }
+.field-box input, .field-box select {
+    width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;
+}
+
+/* टेबल मोबाइल फिक्स */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 table {
     width: 100%;
-    min-width: 600px;
     border-collapse: collapse;
+    min-width: 700px;
 }
 
-th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+th { background: #f8f9fa; padding: 15px; text-align: left; font-size: 13px; }
+td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 14px; }
 
-/* ६. प्रोफाइल (Facebook Look) */
+/* ७. फेसबुक स्टाइल प्रोफाइल पिक */
 .profile-card { padding: 0 !important; overflow: hidden; }
-.cover-photo { height: 120px; background: linear-gradient(to right, #215282, #2d5a27); }
+.cover-photo { height: 120px; background: linear-gradient(45deg, #215282, #2d5a27); position: relative; }
 
 #profilePic {
     width: 110px;
     height: 110px;
     border-radius: 50%;
-    border: 4px solid white;
+    border: 5px solid white;
     margin: -55px auto 10px auto;
     display: block;
     background: white;
+    object-fit: cover;
 }
 
-/* ७. PC को लागि रेस्पोन्सिभ */
-@media (min-width: 768px) {
-    .grid-form {
-        grid-template-columns: repeat(2, 1fr); /* ट्याब्लेट/PC मा २ कोलम */
-    }
-    .admin-header {
-        display: flex;
-        justify-content: space-between;
-        padding: 15px 5%;
-    }
+/* ८. मोबाइलका लागि थप सफाइ (Media Query) */
+@media (max-width: 600px) {
+    .admin-header { flex-direction: column; text-align: center; gap: 10px; }
+    .content { padding: 0 10px; }
+    .nav-item { padding: 8px 14px; font-size: 13px; }
 }
 
-.btn-save {
-    background: var(--success);
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    width: 100%;
-    font-weight: bold;
-    cursor: pointer;
-    }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
     
