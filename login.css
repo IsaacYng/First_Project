@@ -1,15 +1,12 @@
-/* १. मूल रङ र फन्ट सेटअप */
+/* १. मूल रङ र फन्ट (Root Variables) */
 :root {
     --primary: #215282;          /* Royal Blue */
-    --primary-light: #e8f0fe;
-    --success: #2d5a27;         /* Bajaj Showroom Green */
+    --primary-hover: #1a4169;
+    --success: #2d5a27;         /* Deep Green */
     --danger: #d32f2f;
-    --warning: #ffa000;
-    --dark: #2c3e50;
-    --gray: #666;
     --white: #ffffff;
     --bg-light: #f0f2f5;
-    --shadow: 0 4px 15px rgba(0,0,0,0.1);
+    --shadow: 0 4px 12px rgba(0,0,0,0.1);
     --border-radius: 12px;
 }
 
@@ -17,36 +14,35 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: var(--bg-light);
     margin: 0;
-    color: var(--dark);
+    color: #333;
 }
 
-/* २. लगइन कार्ड (Login UI) */
+/* २. लगइन सेक्सन (Login Page) */
 #login-section {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 20px;
 }
 
 .login-card {
     background: var(--white);
     padding: 35px;
     border-radius: 20px;
-    box-shadow: var(--shadow);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     width: 100%;
     max-width: 380px;
     text-align: center;
 }
 
 .logo-area img { width: 70px; margin-bottom: 10px; }
-.logo-area h2 { color: var(--primary); margin: 0; font-size: 24px; }
-.logo-area p { color: var(--gray); font-size: 14px; margin-bottom: 25px; }
 
 .input-group .field {
     display: flex;
     align-items: center;
     background: #f0f2f5;
-    padding: 12px;
+    padding: 12px 15px;
     border-radius: 10px;
     margin-bottom: 15px;
     border: 1px solid transparent;
@@ -57,25 +53,53 @@ body {
     background: white;
 }
 
-.input-group .field i { color: var(--gray); margin-right: 10px; }
+.input-group .field i { color: #888; margin-right: 12px; }
 .input-group .field input {
-    border: none;
-    background: transparent;
-    outline: none;
-    width: 100%;
-    font-size: 15px;
+    border: none; background: transparent; outline: none; width: 100%; font-size: 15px;
 }
 
 .btn-primary {
     background: var(--primary);
     color: white; border: none; width: 100%;
-    padding: 12px; border-radius: 10px;
+    padding: 13px; border-radius: 10px;
     font-weight: 600; cursor: pointer; transition: 0.3s;
 }
 
-.btn-primary:hover { background: #1a4169; }
+.divider {
+    margin: 25px 0; display: flex; align-items: center; color: #999; font-size: 13px;
+}
 
-/* ३. एडमिनHeader र नेभिगेसन */
+.divider::before, .divider::after {
+    content: ""; flex: 1; height: 1px; background: #eee; margin: 0 10px;
+}
+
+/* ३. GOOGLE बटन - ठ्याक्कै गुगलको आधिकारिक स्टाइल */
+.btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 10px;
+    background: white;
+    border: 1px solid #dadce0; /* Google's standard border color */
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Roboto', arial, sans-serif;
+    font-weight: 500;
+    color: #3c4043;
+    gap: 12px;
+    transition: background-color .218s, border-color .218s, box-shadow .218s;
+}
+
+.btn-social:hover {
+    background-color: #f8f9fa;
+    border-color: #d2e3fc;
+    box-shadow: 0 1px 3px 0 rgba(60,64,67,0.30), 0 4px 8px 3px rgba(60,64,67,0.15);
+}
+
+.btn-social img { width: 20px; height: 20px; }
+
+/* ४. एडमिन Header र नेभिगेसन */
 .admin-header {
     background: var(--white);
     padding: 15px 5%;
@@ -89,7 +113,8 @@ body {
     display: flex;
     gap: 10px;
     margin: 20px 5%;
-    overflow-x: auto;
+    overflow-x: auto; /* मोबाइलमा मेनु स्क्रोल हुने */
+    padding-bottom: 5px;
 }
 
 .nav-item {
@@ -99,8 +124,8 @@ body {
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    color: var(--gray);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    color: #666;
+    box-shadow: var(--shadow);
     white-space: nowrap;
 }
 
@@ -109,7 +134,7 @@ body {
     color: white;
 }
 
-/* ४. कार्ड र फर्म डिजाइन */
+/* ५. कार्ड र रेस्पोन्सिभ ग्रिड */
 .content { padding: 0 5% 50px 5%; }
 
 .card {
@@ -122,87 +147,75 @@ body {
 
 .grid-form {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 20px;
 }
 
-.field-box { display: flex; flex-direction: column; }
-.field-box label { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: var(--gray); }
+.field-box label { font-size: 13px; font-weight: bold; margin-bottom: 6px; display: block; color: #555; }
 .field-box input, .field-box select {
-    padding: 11px;
-    border: 1px solid #ddd;
+    width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;
+}
+
+/* ६. मोबाइल रेस्पोन्सिभ टेबल */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     border-radius: 8px;
-    outline: none;
 }
 
-.field-box input:focus { border-color: var(--primary); }
-.full-width { grid-column: 1 / -1; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px; /* मोबाइलमा डाटा थिचिन दिँदैन */
+}
 
-/* ५. टेबल डिजाइन (Modern Look) */
-.table-responsive { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-th { background: #f8f9fa; padding: 15px; text-align: left; font-size: 13px; color: var(--gray); border-bottom: 2px solid #eee; }
+th { background: #f8f9fa; padding: 15px; text-align: left; font-size: 13px; color: #777; border-bottom: 2px solid #eee; }
 td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 14px; }
-tr:hover { background: #fdfdfd; }
 
-/* इमेज प्रिभ्यु (Table Photo) */
 .master-img-view {
-    width: 50px;
-    height: 35px;
-    object-fit: cover;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    background: #f0f0f0;
+    width: 50px; height: 35px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;
 }
 
-/* ६. फेसबुक स्टाइल प्रोफाइल */
-.profile-card { padding: 0 !important; overflow: hidden; }
-.cover-photo { height: 130px; background: linear-gradient(45deg, #215282, #2d5a27); position: relative; }
+/* ७. फेसबुक स्टाइल प्रोफाइल */
+.profile-card { padding: 0 !important; overflow: hidden; position: relative; }
+.cover-photo { height: 130px; background: linear-gradient(45deg, #215282, #2d5a27); }
 
 .three-dot-menu {
-    position: absolute; right: 15px; top: 15px; color: white; cursor: pointer; font-size: 20px; z-index: 10;
+    position: absolute; right: 15px; top: 15px; color: white; cursor: pointer; font-size: 18px; z-index: 10;
 }
 
 .dropdown-content {
-    display: none; position: absolute; right: 0; top: 25px; background: white;
-    min-width: 150px; border-radius: 8px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); z-index: 101;
+    display: none; position: absolute; right: 15px; top: 40px; background: white;
+    min-width: 160px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 100;
 }
 
-.dropdown-content a { color: #333; padding: 12px; text-decoration: none; display: block; font-size: 14px; border-bottom: 1px solid #eee; }
-.dropdown-content a:hover { background: #f1f1f1; }
+.dropdown-content a { color: #333; padding: 12px 15px; text-decoration: none; display: block; font-size: 14px; border-bottom: 1px solid #eee; }
 
 #profilePic {
-    width: 110px; height: 110px; border-radius: 50%;
-    border: 5px solid white; background: white;
-    margin-top: -55px; position: relative; object-fit: cover;
+    width: 100px; height: 100px; border-radius: 50%; border: 4px solid white;
+    margin-top: -50px; background: white; object-fit: cover;
 }
 
-/* ७. बटनहरू र ट्याब कन्ट्रोल */
+/* ८. मोबाइलको लागि स्पेसल एडजस्टमेन्ट */
+@media (max-width: 600px) {
+    .admin-header { flex-direction: column; text-align: center; gap: 10px; }
+    .header-right { margin-top: 5px; }
+    .content { padding: 0 10px; }
+    .login-card { padding: 25px; }
+    .grid-form { grid-template-columns: 1fr; } /* मोबाइलमा १ कोलम */
+}
+
 .btn-save {
-    background: var(--success);
-    color: white; border: none; padding: 12px 25px; border-radius: 8px;
-    font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s;
-}
-
-.btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
-
-.btn-danger-icon {
-    background: #f8d7da; color: var(--danger); border: none;
-    width: 35px; height: 35px; border-radius: 50%; cursor: pointer;
+    background: var(--success); color: white; border: none; padding: 12px 30px;
+    border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; width: 100%;
 }
 
 .tab-pane { display: none; }
-.tab-pane.active { display: block; animation: fadeIn 0.4s ease; }
+.tab-pane.active { display: block; animation: fadeIn 0.3s ease; }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-/* मोबाइलको लागि थप सपोर्ट */
-@media (max-width: 768px) {
-    .grid-form { grid-template-columns: 1fr; }
-    .content { padding: 0 15px; }
-    .admin-header { flex-direction: column; gap: 10px; text-align: center; }
     }
     
