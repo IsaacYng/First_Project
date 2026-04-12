@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-// १. फायरबेस कन्फिगरेसन
 const firebaseConfig = {
     apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
     authDomain: "first-project-2082-12-26.firebaseapp.com",
@@ -12,30 +11,31 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// २. लगइन सुरक्षा चेक
+// सुरक्षा चेक
 if (sessionStorage.getItem("isLoggedIn") !== "true") {
     window.location.href = "login.html";
 }
 
-// ३. 'Price List' बाट बाइकका नामहरू मात्र तान्ने
 const modelSelect = document.getElementById('modelSelect');
+
+// १. 'bikes' (Price List) बाट मोडलको नामहरू मात्र तान्ने
 onSnapshot(collection(db, "bikes"), (snap) => {
     modelSelect.innerHTML = '<option value="">-- Select Model --</option>';
     snap.forEach(d => {
-        const bike = d.data();
         const opt = document.createElement('option');
-        opt.value = bike.name;
-        opt.innerText = bike.name;
+        opt.value = d.data().name; 
+        opt.innerText = d.data().name;
         modelSelect.appendChild(opt);
     });
 });
 
-// ४. नयाँ बाइकको विवरण (Specs) स्टोर गर्ने
+// २. डाटा सेभ गर्ने (Chassis, Engine, Insurance)
 document.getElementById('saveBtn').addEventListener('click', async () => {
     const model = modelSelect.value;
     const chassis = document.getElementById('chassisNo').value;
     const engine = document.getElementById('engineNo').value;
     const color = document.getElementById('bikeColor').value;
+    const ins = document.getElementById('insuranceAmt').value;
 
     if (model && chassis && engine) {
         try {
@@ -44,43 +44,41 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
                 chassisNo: chassis,
                 engineNo: engine,
                 color: color,
+                insurance: Number(ins),
                 addedAt: new Date()
             });
-            alert("सफलतापूर्वक सेभ भयो!");
-            // फारम सफा गर्ने
+            alert("Stock Added Successfully!");
+            // सफा गर्ने
             document.getElementById('chassisNo').value = "";
             document.getElementById('engineNo').value = "";
-            document.getElementById('bikeColor').value = "";
-        } catch (error) {
-            alert("डाटा सेभ गर्न सकिएन: " + error.message);
+        } catch (e) {
+            alert("Error: " + e.message);
         }
     } else {
-        alert("कृपया सबै विवरणहरू भर्नुहोस्!");
+        alert("Please fill important fields!");
     }
 });
 
-// ५. इन्भेन्टरी लिस्ट देखाउने र Delete गर्ने व्यवस्था
-const inventoryList = document.getElementById('inventoryList');
+// ३. इन्भेन्टरी देखाउने र डिलिट गर्ने
 onSnapshot(collection(db, "bike_specs"), (snap) => {
-    inventoryList.innerHTML = "";
+    const list = document.getElementById('inventoryList');
+    list.innerHTML = "";
     snap.forEach(d => {
         const data = d.data();
         const tr = document.createElement('tr');
-        
         tr.innerHTML = `
             <td>${data.modelName}</td>
             <td>${data.chassisNo}</td>
-            <td><button class="delete-btn" data-id="${d.id}">Delete</button></td>
+            <td>${data.color}</td>
+            <td><button class="btn-del" data-id="${d.id}" style="background:red; color:white; border:none; padding:5px; cursor:pointer;">Delete</button></td>
         `;
-        inventoryList.appendChild(tr);
+        list.appendChild(tr);
     });
 
-    // डिलिट बटनमा इभेन्ट लिसनर थप्ने
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.onclick = async (e) => {
-            const id = e.target.getAttribute('data-id');
-            if (confirm("के तपाईँ यो डाटा हटाउन चाहनुहुन्छ?")) {
-                await deleteDoc(doc(db, "bike_specs", id));
+    document.querySelectorAll('.btn-del').forEach(btn => {
+        btn.onclick = async (e) => {
+            if(confirm("Delete this entry?")) {
+                await deleteDoc(doc(db, "bike_specs", e.target.dataset.id));
             }
         };
     });
