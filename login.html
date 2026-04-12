@@ -3,38 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Go! YNG - Unified Admin</title>
+    <title>Go! YNG - Admin Suite</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="login.css">
+    <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
 
     <section id="login-section">
         <div class="login-card">
             <div class="logo-area">
-                <img src="favicon.png" alt="Logo" style="width: 60px;">
-                <h2>Welcome Back</h2>
+                <img src="favicon.png" alt="Go YNG" onerror="this.src='https://cdn-icons-png.flaticon.com/512/8163/8163149.png'">
+                <h2>Admin Login</h2>
+                <p>Manage your inventory & finance</p>
             </div>
             
             <div class="input-group">
-                <input type="email" id="email" placeholder="Email Address">
-                <input type="password" id="pass" placeholder="Password">
+                <div class="field">
+                    <i class="fa fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Email Address">
+                </div>
+                <div class="field">
+                    <i class="fa fa-lock"></i>
+                    <input type="password" id="pass" placeholder="Password">
+                </div>
             </div>
 
             <div class="forgot-link">
                 <a href="#" id="forgotPassBtn">Forgot Password?</a>
             </div>
 
-            <button id="loginBtn" class="btn-primary">Sign In</button>
+            <button id="loginBtn" class="btn-primary">Sign In <i class="fa fa-arrow-right"></i></button>
 
-            <div class="divider"><span>OR CONTINUE WITH</span></div>
+            <div class="divider"><span>OR</span></div>
 
             <div class="social-login">
                 <button id="googleBtn" class="btn-social">
-                    <img src="https://img.icons8.com/color/24/000000/google-logo.png" alt="Google">
-                </button>
-                <button id="fbBtn" class="btn-social">
-                    <img src="https://img.icons8.com/color/24/000000/facebook-new.png" alt="FB">
+                    <img src="https://img.icons8.com/color/24/000000/google-logo.png" alt="Google"> Google
                 </button>
             </div>
         </div>
@@ -46,15 +51,24 @@
                 <h3 id="greetingText">Good Morning, Admin!</h3>
                 <p id="currentDate"></p>
             </div>
-            <div class="user-actions">
-                <button id="logoutBtn" class="btn-danger"><i class="fa fa-sign-out-alt"></i></button>
+            <div class="header-right">
+                <span id="headerUserName" style="font-weight: 600; margin-right: 15px;"></span>
+                <button id="logoutBtn" class="btn-danger-icon" title="Logout">
+                    <i class="fa fa-power-off"></i>
+                </button>
             </div>
         </header>
 
         <nav class="admin-nav">
-            <button onclick="switchTab('tab-profile')" class="nav-item active"><i class="fa fa-user-circle"></i> Profile</button>
-            <button onclick="switchTab('tab-price')" class="nav-item"><i class="fa fa-tag"></i> Price Setup</button>
-            <button onclick="switchTab('tab-stock')" class="nav-item"><i class="fa fa-boxes-stacked"></i> Stock Entry</button>
+            <button onclick="switchTab('tab-profile')" class="nav-item active" id="btn-profile">
+                <i class="fa fa-user-circle"></i> Profile
+            </button>
+            <button onclick="switchTab('tab-price')" class="nav-item" id="btn-price">
+                <i class="fa fa-tags"></i> Price Setup
+            </button>
+            <button onclick="switchTab('tab-stock')" class="nav-item" id="btn-stock">
+                <i class="fa fa-warehouse"></i> Live Stock
+            </button>
         </nav>
 
         <main class="content">
@@ -62,69 +76,107 @@
             <div id="tab-profile" class="tab-pane active">
                 <div class="card profile-card">
                     <div class="profile-header">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User" id="profilePic">
+                        <div class="avatar-wrapper">
+                            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User" id="profilePic">
+                        </div>
                         <h2 id="dispName">Ishak</h2>
+                        <p id="dispRole" style="color: var(--primary); font-weight: 500;"></p>
                     </div>
-                    <div class="profile-details">
+                    
+                    <div class="profile-form">
                         <div class="info-row">
-                            <label>Bio:</label>
-                            <input type="text" id="pBio" placeholder="Tell us about yourself...">
+                            <label><i class="fa fa-id-card"></i> Display Name</label>
+                            <input type="text" id="pNameInput" placeholder="Enter full name">
                         </div>
                         <div class="info-row">
-                            <label>Contact:</label>
-                            <input type="text" id="pContact" placeholder="Your Phone Number">
+                            <label><i class="fa fa-quote-left"></i> Bio / Quote</label>
+                            <input type="text" id="pBio" placeholder="Your status or bio">
                         </div>
                         <div class="info-row">
-                            <label>Showroom Role:</label>
+                            <label><i class="fa fa-phone"></i> Contact Details</label>
+                            <input type="text" id="pContact" placeholder="Phone or Social Link">
+                        </div>
+                        <div class="info-row">
+                            <label><i class="fa fa-briefcase"></i> Position</label>
                             <input type="text" id="pRole" placeholder="e.g. Sales Advisor">
                         </div>
-                        <button id="updateProfileBtn" class="btn-save">Save Profile Changes</button>
+                        <button id="updateProfileBtn" class="btn-save">Save Profile <i class="fa fa-check-circle"></i></button>
                     </div>
                 </div>
             </div>
 
             <div id="tab-price" class="tab-pane">
                 <div class="card">
-                    <h3>Model Price & Insurance Configuration</h3>
+                    <h3><i class="fa fa-edit"></i> Global Price & Insurance</h3>
+                    <p style="font-size: 13px; color: #777; margin-bottom: 20px;">यी डाटाहरू तपाईँको मुख्य वेबसाइट (Index Page) मा देखिनेछन्।</p>
+                    
                     <div class="grid-form">
-                        <input type="text" id="mName" placeholder="Bike Model Name">
-                        <input type="number" id="mPrice" placeholder="Cash Price">
-                        <input type="number" id="mNormalIns" placeholder="Normal Insurance">
-                        <input type="number" id="mFinanceIns" placeholder="Finance Insurance">
-                        <input type="text" id="mImg" placeholder="Image URL">
+                        <div class="field-box">
+                            <label>Model Name</label>
+                            <input type="text" id="mName" placeholder="e.g. Pulsar 150 SD">
+                        </div>
+                        <div class="field-box">
+                            <label>Cash Price (NPR)</label>
+                            <input type="number" id="mPrice" placeholder="0.00">
+                        </div>
+                        <div class="field-box">
+                            <label>Normal Insurance</label>
+                            <input type="number" id="mNormalIns" placeholder="For Cash/Personal">
+                        </div>
+                        <div class="field-box">
+                            <label>Finance Insurance</label>
+                            <input type="number" id="mFinanceIns" placeholder="For Finance Users">
+                        </div>
+                        <div class="field-box full-width">
+                            <label>Image Link (URL)</label>
+                            <input type="text" id="mImg" placeholder="https://...">
+                        </div>
                     </div>
-                    <button id="saveModelBtn" class="btn-save">Update Price List</button>
+                    <button id="saveModelBtn" class="btn-save" style="background: var(--primary);">Update Master Price List</button>
                 </div>
             </div>
 
             <div id="tab-stock" class="tab-pane">
                 <div class="card">
-                    <h3>Individual Bike Stock Entry</h3>
+                    <h3><i class="fa fa-plus-square"></i> Add New Bike to Stock</h3>
                     <div class="grid-form">
-                        <select id="stockModelSelect">
-                            <option value="">-- Select Model --</option>
-                        </select>
-                        <input type="text" id="sChassis" placeholder="Chassis Number">
-                        <input type="text" id="sEngine" placeholder="Engine Number">
-                        <input type="text" id="sReg" placeholder="Registration (Lot) No">
-                        <input type="text" id="sColor" placeholder="Bike Color">
+                        <div class="field-box">
+                            <label>Select Master Model</label>
+                            <select id="stockModelSelect">
+                                <option value="">-- Loading Models --</option>
+                            </select>
+                        </div>
+                        <div class="field-box">
+                            <label>Chassis Number</label>
+                            <input type="text" id="sChassis" placeholder="Unique Chassis No">
+                        </div>
+                        <div class="field-box">
+                            <label>Engine Number</label>
+                            <input type="text" id="sEngine" placeholder="Engine No">
+                        </div>
+                        <div class="field-box">
+                            <label>Color</label>
+                            <input type="text" id="sColor" placeholder="e.g. Sparkle Black">
+                        </div>
                     </div>
-                    <button id="saveStockBtn" class="btn-save">Add to Inventory</button>
+                    <button id="saveStockBtn" class="btn-save" style="background: var(--success);">Confirm Stock Entry</button>
                 </div>
 
                 <div class="card table-card">
-                    <h3>Live Stock List</h3>
+                    <h3><i class="fa fa-list-ul"></i> Live Inventory Stock</h3>
                     <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Model</th>
                                     <th>Chassis No</th>
-                                    <th>Finance Ins</th>
+                                    <th>Engine No</th>
+                                    <th>Status</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="stockTableBody"></tbody>
+                            <tbody id="stockTableBody">
+                                </tbody>
                         </table>
                     </div>
                 </div>
@@ -134,14 +186,16 @@
     </section>
 
     <script type="module" src="login.js"></script>
+    
     <script>
         function switchTab(id) {
             document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            event.currentTarget.classList.add('active');
+            const activeBtn = document.querySelector(`button[onclick="switchTab('${id}')"]`);
+            if(activeBtn) activeBtn.classList.add('active');
         }
     </script>
 </body>
     </html>
-                
+                        
