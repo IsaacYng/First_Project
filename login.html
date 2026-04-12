@@ -47,54 +47,8 @@
                 <button id="logoutBtn" class="btn-danger-icon"><i class="fa fa-power-off"></i></button>
             </div>
         </header>
-
-        <nav class="admin-nav">
-            <button onclick="switchTab('tab-profile')" class="nav-item active" id="btn-profile">
-                <i class="fa fa-user-circle"></i> Profile
-            </button>
-            <button onclick="switchTab('tab-price')" class="nav-item" id="btn-price">
-                <i class="fa fa-tags"></i> Price Setup
-            </button>
-            <button onclick="switchTab('tab-stock')" class="nav-item" id="btn-stock">
-                <i class="fa fa-warehouse"></i> Live Stock
-            </button>
-        </nav>
-
         <main class="content">
-            
-            <div id="tab-profile" class="tab-pane active">
-                <div class="card profile-card" style="padding:0; overflow:hidden;">
-                    <div class="cover-photo">
-                        <div class="three-dot-menu" id="profileMenuBtn">
-                            <i class="fa fa-ellipsis-v"></i>
-                            <div class="dropdown-content" id="profileMenu">
-                                <a href="#" id="menuLogout"><i class="fa fa-sign-out-alt"></i> Logout</a>
-                                <a href="#" onclick="alert('System Secure')"><i class="fa fa-lock"></i> Privacy</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="margin-top:-55px; text-align:center;">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" id="profilePic" style="width:110px; height:110px; border:5px solid white; border-radius:50%; background:#fff;">
-                        <h2 id="dispName" style="margin:10px 0 5px 0;">Admin</h2>
-                        <p id="dispRole" style="color: var(--primary); font-weight: 600;"></p>
-                    </div>
-                    <div class="profile-form" style="padding:20px 30px;">
-                        <div class="info-row">
-                            <label>Full Name</label>
-                            <input type="text" id="pNameInput" placeholder="Display Name">
-                        </div>
-                        <div class="info-row">
-                            <label>Bio / Quote</label>
-                            <input type="text" id="pBio" placeholder="Your Status">
-                        </div>
-                        <div class="info-row">
-                            <label>Position</label>
-                            <input type="text" id="pRole" placeholder="e.g. Sales Advisor">
-                        </div>
-                        <button id="updateProfileBtn" class="btn-save">Save Profile <i class="fa fa-check"></i></button>
-                    </div>
-                </div>
-            </div>
+        
 
             <div id="tab-price" class="tab-pane">
                 <div class="card">
