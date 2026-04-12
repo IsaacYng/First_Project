@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bike Inventory Admin</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+    <div class="container">
+        <h2>Manage Bike Inventory</h2>
+
+        <div class="card">
+            <h3>Add New Entry</h3>
+            <select id="modelSelect">
+                <option value="">-- Select Model --</option>
+            </select>
+            <input type="text" id="chassisNo" placeholder="Chassis Number">
+            <input type="text" id="engineNo" placeholder="Engine Number">
+            <input type="text" id="bikeColor" placeholder="Color">
+            <button id="saveBtn">Save to Inventory</button>
+        </div>
+
+        <div class="card">
+            <h3>Current Inventory</h3>
+            <table id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Chassis No.</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryList">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
