@@ -14,7 +14,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// २. Auth State Observer (Login/Logout Switch)
+// २. Auth State Observer
 onAuthStateChanged(auth, (user) => {
     const loginSec = document.getElementById('login-section');
     const adminSec = document.getElementById('admin-section');
@@ -22,16 +22,16 @@ onAuthStateChanged(auth, (user) => {
         if(loginSec) loginSec.style.display = 'none';
         if(adminSec) adminSec.style.display = 'block';
         loadProfile(user.uid);
-        loadMasterPriceList(); // Price Setup को टेबल भर्ने
-        loadLiveStock();       // Live Stock को टेबल भर्ने
-        loadModelDropdown();   // Dropdown भर्ने
+        loadMasterPriceList(); 
+        loadLiveStock();       
+        loadModelDropdown();   
     } else {
         if(loginSec) loginSec.style.display = 'flex';
         if(adminSec) adminSec.style.display = 'none';
     }
 });
 
-// ३. Profile Management (Fix)
+// ३. Profile Management (Facebook Style Menu Logic)
 async function loadProfile(uid) {
     const docSnap = await getDoc(doc(db, "profiles", uid));
     if (docSnap.exists()) {
@@ -48,101 +48,79 @@ async function loadProfile(uid) {
 document.getElementById('updateProfileBtn').onclick = async () => {
     const user = auth.currentUser;
     if(!user) return;
-    const data = {
+    await setDoc(doc(db, "profiles", user.uid), {
         name: document.getElementById('pNameInput').value,
         bio: document.getElementById('pBio').value,
-        role: document.getElementById('pRole').value,
-        updatedAt: new Date()
-    };
-    try {
-        await setDoc(doc(db, "profiles", user.uid), data);
-        alert("Profile updated successfully!");
-        loadProfile(user.uid);
-    } catch(e) { alert("Error: " + e.message); }
+        role: document.getElementById('pRole').value
+    });
+    alert("Profile Updated!");
+    loadProfile(user.uid);
 };
 
-// ४. Price Setup (Master Price Table)
+// ४. Master Price List (With Image Preview in Table)
 function loadMasterPriceList() {
-    const masterTable = document.getElementById('masterTableBody');
-    if(!masterTable) return;
-
     onSnapshot(collection(db, "bikes"), (snap) => {
-        let html = "";
+        const tableBody = document.getElementById('masterTableBody');
+        let rows = "";
         snap.docs.forEach(d => {
             const b = d.data();
-            // Checking all possible field names from your history (price, Price, name, Name)
-            const bName = b.name || b.Name || "Unknown";
-            const bPrice = b.price || b.Price || 0;
-            const bIns = b.Insurance || b.insurance || 0;
-            const bFins = b.financeInsurance || 0;
-
-            html += `
+            rows += `
                 <tr>
-                    <td><b>${bName}</b></td>
-                    <td>Rs. ${Number(bPrice).toLocaleString()}</td>
-                    <td>Rs. ${Number(bIns).toLocaleString()}</td>
-                    <td>Rs. ${Number(bFins).toLocaleString()}</td>
+                    <td><img src="${b.img || 'favicon.png'}" class="master-img-view" onerror="this.src='https://cdn-icons-png.flaticon.com/512/8163/8163149.png'"></td>
+                    <td><b>${b.name || 'Unknown'}</b></td>
+                    <td>Rs. ${Number(b.price || 0).toLocaleString()}</td>
+                    <td>Rs. ${Number(b.Insurance || 0).toLocaleString()}</td>
+                    <td>Rs. ${Number(b.financeInsurance || 0).toLocaleString()}</td>
                     <td>
                         <button onclick="deleteEntry('bikes', '${d.id}')" style="border:none; background:none; color:red; cursor:pointer;">
-                            <i class="fa fa-trash-alt"></i>
+                            <i class="fa fa-trash"></i>
                         </button>
                     </td>
                 </tr>`;
         });
-        masterTable.innerHTML = html;
+        tableBody.innerHTML = rows;
     });
 }
 
-// ५. Live Stock Management
+// ५. Live Stock (With Registration Number)
 function loadLiveStock() {
-    const stockTable = document.getElementById('stockTableBody');
-    if(!stockTable) return;
-
     onSnapshot(collection(db, "inventory"), (snap) => {
-        let html = "";
+        const tableBody = document.getElementById('stockTableBody');
+        let rows = "";
         snap.docs.forEach(d => {
             const s = d.data();
-            html += `
+            rows += `
                 <tr>
                     <td>${s.model}</td>
+                    <td>Rs. ${Number(s.price || 0).toLocaleString()}</td>
                     <td>${s.chassis}</td>
                     <td>${s.engine}</td>
+                    <td style="color:var(--primary); font-weight:bold;">${s.regNo || 'N/A'}</td>
                     <td>${s.color}</td>
                     <td>
                         <button onclick="deleteEntry('inventory', '${d.id}')" style="border:none; background:none; color:red; cursor:pointer;">
-                            <i class="fa fa-trash-alt"></i>
+                            <i class="fa fa-trash"></i>
                         </button>
                     </td>
                 </tr>`;
         });
-        stockTable.innerHTML = html;
+        tableBody.innerHTML = rows;
     });
 }
 
-// ६. Dropdown Models
+// ६. Dropdown Models for Stock
 function loadModelDropdown() {
-    const select = document.getElementById('stockModelSelect');
-    if(!select) return;
     onSnapshot(collection(db, "bikes"), (snap) => {
+        const select = document.getElementById('stockModelSelect');
         select.innerHTML = '<option value="">-- Select Model --</option>';
         snap.docs.forEach(d => {
-            const name = d.data().name || d.data().Name;
+            const name = d.data().name;
             select.innerHTML += `<option value="${name}">${name}</option>`;
         });
     });
 }
 
-// ७. Global Delete Function
-window.deleteEntry = async (col, id) => {
-    if(confirm("Are you sure you want to delete this record?")) {
-        try {
-            await deleteDoc(doc(db, col, id));
-            alert("Deleted successfully!");
-        } catch(e) { alert("Error: " + e.message); }
-    }
-};
-
-// ८. Form Submissions
+// ७. Save Data Functions
 document.getElementById('saveModelBtn').onclick = async () => {
     const name = document.getElementById('mName').value;
     const price = document.getElementById('mPrice').value;
@@ -156,38 +134,48 @@ document.getElementById('saveModelBtn').onclick = async () => {
         img: document.getElementById('mImg').value || "",
         addedAt: new Date()
     });
-    alert("Master price list updated!");
-    // Clear inputs
+    alert("Master Model Added!");
+    // Reset fields
     document.getElementById('mName').value = "";
     document.getElementById('mPrice').value = "";
+    document.getElementById('mImg').value = "";
 };
 
 document.getElementById('saveStockBtn').onclick = async () => {
     const model = document.getElementById('stockModelSelect').value;
+    const regNo = document.getElementById('sRegNo').value;
     const chassis = document.getElementById('sChassis').value;
-    if(!model || !chassis) return alert("Please select model and enter chassis!");
 
+    if(!model || !chassis) return alert("Select Model and Enter Chassis!");
+
+    // Master list बाट यो मोडलको मूल्य पत्ता लगाउने (ऐच्छिक तर राम्रो)
     await addDoc(collection(db, "inventory"), {
         model: model,
+        regNo: regNo,
         chassis: chassis,
         engine: document.getElementById('sEngine').value,
         color: document.getElementById('sColor').value,
         addedAt: new Date()
     });
-    alert("Stock entry confirmed!");
+    alert("Stock Entry Saved!");
 };
 
-// ९. Login/Logout Actions
+// ८. Global Delete & Auth Actions
+window.deleteEntry = async (col, id) => {
+    if(confirm("Are you sure?")) {
+        await deleteDoc(doc(db, col, id));
+    }
+};
+
 document.getElementById('loginBtn').onclick = () => {
-    const email = document.getElementById('email').value;
-    const pass = document.getElementById('pass').value;
-    signInWithEmailAndPassword(auth, email, pass).catch(e => alert("Login Error: " + e.message));
+    signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)
+    .catch(e => alert(e.message));
 };
 
 document.getElementById('googleBtn').onclick = () => {
     signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.message));
 };
 
-document.getElementById('logoutBtn').onclick = () => {
-    signOut(auth).then(() => alert("Logged out!"));
-};
+document.getElementById('logoutBtn').onclick = () => signOut(auth);
+document.getElementById('menuLogout').onclick = (e) => { e.preventDefault(); signOut(auth); };
+    
