@@ -1,4 +1,3 @@
-/* RESET */
 * {
     margin: 0;
     padding: 0;
@@ -11,7 +10,6 @@ body {
     color: #333;
 }
 
-/* VARIABLES */
 :root {
     --primary: #4f46e5;
     --secondary: #6366f1;
@@ -22,7 +20,6 @@ body {
     --radius: 12px;
 }
 
-/* LOGIN SECTION */
 #login-section {
     height: 100vh;
     display: flex;
@@ -54,7 +51,6 @@ body {
     margin-bottom: 20px;
 }
 
-/* INPUT */
 .field {
     display: flex;
     align-items: center;
@@ -76,7 +72,6 @@ body {
     width: 100%;
 }
 
-/* BUTTONS */
 button {
     cursor: pointer;
     border: none;
@@ -144,7 +139,6 @@ button {
     z-index: -1;
 }
 
-/* ADMIN PANEL */
 .admin-header {
     display: flex;
     justify-content: space-between;
@@ -199,7 +193,6 @@ button {
     grid-column: span 2;
 }
 
-/* TABLE */
 .table-card {
     overflow-x: auto;
 }
@@ -237,7 +230,6 @@ td img {
     border-radius: 5px;
 }
 
-/* TAB */
 .tab-pane {
     display: none;
 }
