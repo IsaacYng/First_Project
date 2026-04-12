@@ -4,173 +4,220 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Go! YNG - Admin Suite</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="login.css">
     <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
 
-    <section id="login-section">
-        <div class="login-card">
-            <div class="logo-area">
-                <img src="favicon.png" alt="Go YNG" onerror="this.src='https://cdn-icons-png.flaticon.com/512/8163/8163149.png'">
-                <h2>Admin Login</h2>
-                <p>Manage your inventory & finance</p>
+<!-- LOGIN SECTION -->
+<section id="login-section">
+    <div class="login-card">
+        <div class="logo-area">
+            <img src="favicon.png" alt="Go YNG"
+                 onerror="this.src='https://cdn-icons-png.flaticon.com/512/8163/8163149.png'">
+            <h2>Admin Login</h2>
+            <p>Manage your inventory & finance</p>
+        </div>
+
+        <div class="input-group">
+            <div class="field">
+                <i class="fa fa-envelope"></i>
+                <input type="email" id="email" placeholder="Email Address">
             </div>
-            <div class="input-group">
-                <div class="field">
-                    <i class="fa fa-envelope"></i>
-                    <input type="email" id="email" placeholder="Email Address">
-                </div>
-                <div class="field">
-                    <i class="fa fa-lock"></i>
-                    <input type="password" id="pass" placeholder="Password">
-                </div>
-            </div>
-            <button id="loginBtn" class="btn-primary">Sign In <i class="fa fa-arrow-right"></i></button>
-            <div class="divider"><span>OR</span></div><div class="social-login">
-                <button id="googleBtn" class="btn-social">
-                    <img src="https://img.icons8.com/color/24/000000/google-logo.png" alt="Google"> Google
-                </button>
+
+            <div class="field">
+                <i class="fa fa-lock"></i>
+                <input type="password" id="pass" placeholder="Password">
             </div>
         </div>
-    </section>
 
-    <section id="admin-section" style="display: none;">
-        <header class="admin-header">
-            <div class="greeting">
-                <h3 id="greetingText">Welcome Back!</h3>
-                <p id="currentDate"></p>
-            </div>
-            <div class="header-right">
-                <span id="headerUserName" style="font-weight: 600; margin-right: 15px;"></span>
-                <button id="logoutBtn" class="btn-danger-icon"><i class="fa fa-power-off"></i></button>
-            </div>
-        </header>
-        <main class="content">
-        
+        <button id="loginBtn" class="btn-primary">
+            Sign In <i class="fa fa-arrow-right"></i>
+        </button>
 
-            <div id="tab-price" class="tab-pane">
-                <div class="card">
-                    <h3><i class="fa fa-cog"></i> Master Price Setup</h3>
-                    <div class="grid-form">
-                        <div class="field-box">
-                            <label>Model Name</label>
-                            <input type="text" id="mName" placeholder="e.g. Pulsar 150">
-                        </div>
-                        <div class="field-box">
-                            <label>MRP Price (NPR)</label>
-                            <input type="number" id="mPrice" placeholder="0">
-                        </div>
-                        <div class="field-box">
-                            <label>Cash Insurance</label>
-                            <input type="number" id="mNormalIns" placeholder="0">
-                        </div>
-                        <div class="field-box">
-                            <label>Finance Insurance</label>
-                            <input type="number" id="mFinanceIns" placeholder="0">
-                        </div>
-                        <div class="field-box full-width">
-                            <label>Image URL</label>
-                            <input type="text" id="mImg" placeholder="Paste link here...">
-                        </div>
+        <div class="divider"><span>OR</span></div>
+
+        <div class="social-login">
+            <button id="googleBtn" class="btn-social">
+                <img src="https://img.icons8.com/color/24/000000/google-logo.png">
+                Google
+            </button>
+        </div>
+    </div>
+</section>
+
+
+<!-- ADMIN SECTION -->
+<section id="admin-section" style="display:none;">
+
+    <!-- HEADER -->
+    <header class="admin-header">
+        <div class="greeting">
+            <h3 id="greetingText">Welcome Back!</h3>
+            <p id="currentDate"></p>
+        </div>
+
+        <div class="header-right">
+            <span id="headerUserName"></span>
+            <button id="logoutBtn" class="btn-danger-icon">
+                <i class="fa fa-power-off"></i>
+            </button>
+        </div>
+    </header>
+
+
+    <!-- NAVIGATION -->
+    <div class="nav-bar" style="padding:10px 20px;">
+        <button class="nav-item active" onclick="switchTab('tab-price')">Price Setup</button>
+        <button class="nav-item" onclick="switchTab('tab-stock')">Stock</button>
+    </div>
+
+
+    <main class="content">
+
+        <!-- PRICE TAB -->
+        <div id="tab-price" class="tab-pane active">
+            <div class="card">
+                <h3><i class="fa fa-cog"></i> Master Price Setup</h3>
+
+                <div class="grid-form">
+                    <div class="field-box">
+                        <label>Model Name</label>
+                        <input type="text" id="mName">
                     </div>
-                    <button id="saveModelBtn" class="btn-save" style="background: var(--primary);">Save to Master List</button>
-                </div>
 
-                <div class="card table-card" style="margin-top: 20px;">
-                    <h3><i class="fa fa-list"></i> Master Price List</h3>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Image</th>
-                                    <th>Model </th>
-                                    <th>Price</th>
-                                    <th>Insurance</th>
-                                    <th>Finance Insurance</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="masterTableBody"></tbody>
-                        </table>
+                    <div class="field-box">
+                        <label>MRP Price</label>
+                        <input type="number" id="mPrice">
                     </div>
-                </div>
-            </div>
 
-            <div id="tab-stock" class="tab-pane">
-                <div class="card">
-                    <h3><i class="fa fa-plus-circle"></i> Add Bike to Live Stock</h3>
-                    <div class="grid-form">
-                        <div class="field-box">
-                            <label>Select Model</label>
-                            <select id="stockModelSelect"><option>Loading...</option></select>
-                        </div>
-                        <div class="field-box">
-                            <label>Registration Number</label>
-                            <input type="text" id="sRegNo" placeholder="e.g. ME 1 PA 1234">
-                        </div>
-                        <div class="field-box">
-                            <label>Chassis Number</label>
-                            <input type="text" id="sChassis" placeholder="Unique Chassis No">
-                        </div>
-                        <div class="field-box">
-                            <label>Engine Number</label>
-                            <input type="text" id="sEngine" placeholder="Engine No">
-                        </div>
-                        <div class="field-box">
-                            <label>Color</label>
-                            <input type="text" id="sColor" placeholder="e.g. Blue">
-                        </div>
+                    <div class="field-box">
+                        <label>Cash Insurance</label>
+                        <input type="number" id="mNormalIns">
                     </div>
-                    <button id="saveStockBtn" class="btn-save" style="background: var(--success);">Confirm Stock Entry</button>
-                </div>
 
-                <div class="card table-card" style="margin-top: 20px;">
-                    <h3><i class="fa fa-warehouse"></i> Current Live Stock Inventory</h3>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Model</th>
-                                    <th>Price</th>
-                                    <th>Chasiss</th>
-                                    <th>Engine</th>
-                                    <th>Registration No.</th>
-                                    <th>Colour</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="stockTableBody"></tbody>
-                        </table>
+                    <div class="field-box">
+                        <label>Finance Insurance</label>
+                        <input type="number" id="mFinanceIns">
+                    </div>
+
+                    <div class="field-box full-width">
+                        <label>Image URL</label>
+                        <input type="text" id="mImg">
                     </div>
                 </div>
+
+                <button id="saveModelBtn" class="btn-save" style="background:var(--primary)">
+                    Save to Master List
+                </button>
             </div>
 
-        </main>
-    </section>
 
-    <script type="module" src="login.js"></script>
-    
-    <script>
-        function switchTab(id) {
-            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            const btn = document.querySelector(`button[onclick="switchTab('${id}')"]`);
-            if(btn) btn.classList.add('active');
-        }
+            <div class="card table-card" style="margin-top:20px;">
+                <h3><i class="fa fa-list"></i> Master Price List</h3>
 
-        // Facebook Style Menu Toggle
-        document.getElementById('profileMenuBtn').onclick = function(e) {
-            e.stopPropagation();
-            const menu = document.getElementById('profileMenu');
-            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-        };
-        window.onclick = function() {
-            document.getElementById('profileMenu').style.display = 'none';
-        };
-    </script>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Model</th>
+                            <th>Price</th>
+                            <th>Insurance</th>
+                            <th>Finance Insurance</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="masterTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <!-- STOCK TAB -->
+        <div id="tab-stock" class="tab-pane">
+
+            <div class="card">
+                <h3><i class="fa fa-plus-circle"></i> Add Bike to Stock</h3>
+
+                <div class="grid-form">
+                    <div class="field-box">
+                        <label>Select Model</label>
+                        <select id="stockModelSelect"></select>
+                    </div>
+
+                    <div class="field-box">
+                        <label>Registration No</label>
+                        <input type="text" id="sRegNo">
+                    </div>
+
+                    <div class="field-box">
+                        <label>Chassis No</label>
+                        <input type="text" id="sChassis">
+                    </div>
+
+                    <div class="field-box">
+                        <label>Engine No</label>
+                        <input type="text" id="sEngine">
+                    </div>
+
+                    <div class="field-box">
+                        <label>Color</label>
+                        <input type="text" id="sColor">
+                    </div>
+                </div>
+
+                <button id="saveStockBtn" class="btn-save" style="background:var(--success)">
+                    Add Stock
+                </button>
+            </div>
+
+
+            <div class="card table-card" style="margin-top:20px;">
+                <h3><i class="fa fa-warehouse"></i> Live Stock</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Price</th>
+                            <th>Chassis</th>
+                            <th>Engine</th>
+                            <th>Registration</th>
+                            <th>Color</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="stockTableBody"></tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </main>
+</section>
+
+
+<script type="module" src="login.js"></script>
+
+<script>
+function switchTab(id) {
+    document.querySelectorAll('.tab-pane').forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    document.getElementById(id).classList.add('active');
+
+    event.target.classList.add('active');
+}
+</script>
+
 </body>
 </html>
-                            
