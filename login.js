@@ -14,28 +14,25 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// २. लगइन अवस्था चेक गर्ने (Authentication State)
+// २. लगइन अवस्था र डाटा लोड
 onAuthStateChanged(auth, (user) => {
-    const loginSec = document.getElementById('login-section');
-    const adminSec = document.getElementById('admin-section');
-    
     if (user) {
-        loginSec.style.display = 'none';
-        adminSec.style.display = 'block';
-        updateGreeting();
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('admin-section').style.display = 'block';
         loadProfile(user.uid);
-        loadStockData();
+        syncModelsAndStock(); // पुरानो र नयाँ डाटा सँगै लोड गर्न
     } else {
-        loginSec.style.display = 'flex';
-        adminSec.style.display = 'none';
+        document.getElementById('login-section').style.display = 'flex';
+        document.getElementById('admin-section').style.display = 'none';
     }
 });
 
-// ३. लगइन र पासवर्ड रिसेट लजिक
+// ३. लगइन लजिक
 document.getElementById('loginBtn').onclick = () => {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('pass').value;
-    signInWithEmailAndPassword(auth, email, pass).catch(e => alert("Error: " + e.message));
+    if(!email || !pass) return alert("Please enter email and password");
+    signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
 };
 
 document.getElementById('googleBtn').onclick = () => {
@@ -45,115 +42,133 @@ document.getElementById('googleBtn').onclick = () => {
 document.getElementById('forgotPassBtn').onclick = (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value;
-    if(!email) return alert("Please enter your email first!");
-    sendPasswordResetEmail(auth, email).then(() => alert("Password reset link sent to your email!")).catch(e => alert(e.message));
+    if(!email) return alert("Enter your email to reset password!");
+    sendPasswordResetEmail(auth, email).then(() => alert("Reset link sent to email!")).catch(e => alert(e.message));
 };
 
 document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-// ४. प्रोफाइल व्यवस्थापन (Profile Management)
+// ४. प्रोफाइल व्यवस्थापन (नाम र बायो फिक्स)
 async function loadProfile(uid) {
     const docSnap = await getDoc(doc(db, "profiles", uid));
+    const userEmail = auth.currentUser.email;
+    
     if (docSnap.exists()) {
         const data = docSnap.data();
-        document.getElementById('dispName').innerText = data.bio ? data.bio.split(' ')[0] : "Admin";
+        const userName = data.name || "Admin";
+        document.getElementById('dispName').innerText = userName;
+        document.getElementById('headerUserName').innerText = userName;
+        document.getElementById('pNameInput').value = userName;
         document.getElementById('pBio').value = data.bio || "";
         document.getElementById('pContact').value = data.contact || "";
         document.getElementById('pRole').value = data.role || "";
+        updateGreeting(userName);
+    } else {
+        document.getElementById('dispName').innerText = "Admin";
+        updateGreeting("Admin");
     }
 }
 
 document.getElementById('updateProfileBtn').onclick = async () => {
     const user = auth.currentUser;
+    const nameValue = document.getElementById('pNameInput').value || "Admin";
     const profileData = {
+        name: nameValue,
         bio: document.getElementById('pBio').value,
         contact: document.getElementById('pContact').value,
         role: document.getElementById('pRole').value,
         updatedAt: new Date()
     };
     await setDoc(doc(db, "profiles", user.uid), profileData);
-    alert("Profile Updated!");
-    loadProfile(user.uid);
+    alert("Profile Successfully Updated!");
+    loadProfile(user.uid); // पेज रिफ्रेस नगरी नाम अपडेट गर्न
 };
 
-// ५. मूल्य र इन्स्योरेन्स सेटअप (Price Setup)
+// ५. मूल्य र इन्स्योरेन्स (पुरानो Index सँग मिल्ने गरी)
 document.getElementById('saveModelBtn').onclick = async () => {
     const data = {
         name: document.getElementById('mName').value,
-        price: Number(document.getElementById('mPrice').value),
+        price: Number(document.getElementById('mPrice').value), // पुरानाे Index मा 'price' सानाे अक्षरमा थियाे भने
         normalIns: Number(document.getElementById('mNormalIns').value),
         financeIns: Number(document.getElementById('mFinanceIns').value),
         img: document.getElementById('mImg').value || "https://cdn-icons-png.flaticon.com/512/8163/8163149.png"
     };
-    if(!data.name || !data.price) return alert("Model Name and Price are required!");
+    if(!data.name || !data.price) return alert("Model Name and Price are mandatory!");
     await addDoc(collection(db, "bikes"), data);
-    alert("Model Price Added!");
-    ['mName', 'mPrice', 'mNormalIns', 'mFinanceIns', 'mImg'].forEach(id => document.getElementById(id).value = "");
+    alert("New Model Added to Price List!");
 };
 
-// ६. स्टक इन्ट्री लजिक (Stock Entry)
-let availableModels = [];
-onSnapshot(collection(db, "bikes"), (snap) => {
-    availableModels = snap.docs.map(d => ({id: d.id, ...d.data()}));
-    const select = document.getElementById('stockModelSelect');
-    select.innerHTML = '<option value="">-- Select Model --</option>';
-    availableModels.forEach(m => {
-        select.innerHTML += `<option value="${m.name}">${m.name}</option>`;
+// ६. स्टक र मोडेल सिङ्क्रोनाइजेसन
+let allModels = [];
+function syncModelsAndStock() {
+    // मोडेलहरू ड्रपडाउनमा लोड गर्ने
+    onSnapshot(collection(db, "bikes"), (snap) => {
+        allModels = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        const select = document.getElementById('stockModelSelect');
+        select.innerHTML = '<option value="">-- Select Master Model --</option>';
+        allModels.forEach(m => {
+            select.innerHTML += `<option value="${m.name}">${m.name}</option>`;
+        });
     });
-});
 
-document.getElementById('saveStockBtn').onclick = async () => {
-    const modelName = document.getElementById('stockModelSelect').value;
-    const modelInfo = availableModels.find(m => m.name === modelName);
-    
-    if(!modelName || !document.getElementById('sChassis').value) return alert("Fill Model and Chassis!");
-
-    const stockData = {
-        model: modelName,
-        price: modelInfo.price,
-        financeIns: modelInfo.financeIns,
-        chassis: document.getElementById('sChassis').value,
-        engine: document.getElementById('sEngine').value,
-        reg: document.getElementById('sReg').value,
-        color: document.getElementById('sColor').value,
-        status: "In Stock",
-        addedAt: new Date()
-    };
-    await addDoc(collection(db, "bike_stock"), stockData);
-    alert("Bike added to Live Stock!");
-    ['sChassis', 'sEngine', 'sReg', 'sColor'].forEach(id => document.getElementById(id).value = "");
-};
-
-// ७. स्टक टेबल लोड गर्ने
-function loadStockData() {
+    // स्टक लिस्ट लोड गर्ने
     onSnapshot(collection(db, "bike_stock"), (snap) => {
-        const tableBody = document.getElementById('stockTableBody');
-        tableBody.innerHTML = snap.docs.map(d => {
+        document.getElementById('stockTableBody').innerHTML = snap.docs.map(d => {
             const s = d.data();
             return `
                 <tr>
                     <td><strong>${s.model}</strong></td>
-                    <td style="font-family:monospace">${s.chassis}</td>
-                    <td>Rs. ${s.financeIns}</td>
+                    <td style="font-family:monospace; font-size:12px;">${s.chassis}</td>
+                    <td>${s.engine || '-'}</td>
+                    <td><span style="color:green; font-weight:bold;">${s.status || 'In Stock'}</span></td>
                     <td>
-                        <button onclick="deleteStockRecord('${d.id}')" style="color:red; border:none; background:none; cursor:pointer;"><i class="fa fa-trash"></i></button>
+                        <button onclick="delStock('${d.id}')" style="color:var(--danger); border:none; background:none; cursor:pointer;"><i class="fa fa-trash-can"></i></button>
                     </td>
                 </tr>`;
         }).join('');
     });
 }
 
-// डिलिट फङ्सन (Global scope मा राख्न window प्रयोग गरिएको)
-window.deleteStockRecord = (id) => {
-    if(confirm("Are you sure you want to remove this bike from stock?")) {
+// ७. नयाँ स्टक सेभ गर्ने
+document.getElementById('saveStockBtn').onclick = async () => {
+    const modelName = document.getElementById('stockModelSelect').value;
+    const chassis = document.getElementById('sChassis').value;
+    const modelInfo = allModels.find(m => m.name === modelName);
+    
+    if(!modelName || !chassis) return alert("Model and Chassis are required!");
+
+    const stockObj = {
+        model: modelName,
+        price: modelInfo.price,
+        financeIns: modelInfo.financeIns,
+        chassis: chassis,
+        engine: document.getElementById('sEngine').value,
+        color: document.getElementById('sColor').value,
+        status: "In Stock",
+        addedAt: new Date()
+    };
+    
+    try {
+        await addDoc(collection(db, "bike_stock"), stockObj);
+        alert("Bike added to Inventory!");
+        ['sChassis', 'sEngine', 'sColor'].forEach(id => document.getElementById(id).value = "");
+    } catch(e) { alert(e.message); }
+};
+
+// डिलिट फङ्सन
+window.delStock = (id) => {
+    if(confirm("Confirm deletion from live stock?")) {
         deleteDoc(doc(db, "bike_stock", id));
     }
 };
 
-// ८. स्मार्ट ग्रिटिङ (Greeting Logic)
-function updateGreeting() {
+// ८. स्मार्ट ग्रिटिङ र समय
+function updateGreeting(name) {
     const hour = new Date().getHours();
-    const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
-    document.getElementById('greetingText').innerText = `${greeting}, Ishak!`;
-    document.getElementById('currentDate').innerText = new Date().toDateString();
+    let greet = "Good Evening";
+    if(hour < 12) greet = "Good Morning";
+    else if(hour < 17) greet = "Good Afternoon";
+    
+    document.getElementById('greetingText').innerText = `${greet}, ${name}!`;
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
