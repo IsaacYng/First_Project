@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-// १. तपाईँको फायरबेस कन्फिगरेसन
+// १. फायरबेस सेटअप
 const firebaseConfig = {
     apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
     authDomain: "first-project-2082-12-26.firebaseapp.com",
@@ -11,42 +12,94 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+const db = getFirestore(app);
 
-// २. लगइन अवस्था चेक गर्ने (यदि पहिले नै लगइन छ भने एडमिनमा पठाउने)
+// २. लगइन अवस्था चेक गर्ने (एउटै पेजमा तल-माथि गर्ने)
 onAuthStateChanged(auth, (user) => {
+    const loginSec = document.getElementById('login-section');
+    const adminSec = document.getElementById('admin-section');
+
     if (user) {
-        window.location.href = "admin.html";
+        if(loginSec) loginSec.style.display = 'none';
+        if(adminSec) adminSec.style.display = 'block';
+        loadAllMyData(); // डाटाहरू लोड गर्ने
+    } else {
+        if(loginSec) loginSec.style.display = 'flex';
+        if(adminSec) adminSec.style.display = 'none';
     }
 });
 
-// ३. Google Login
-const googleBtn = document.getElementById('googleBtn');
-if (googleBtn) {
-    googleBtn.addEventListener('click', () => {
-        signInWithPopup(auth, provider)
-            .then(() => {
-                window.location.href = "admin.html";
-            })
-            .catch((err) => alert("Google Login Error: " + err.message));
+// ३. लगइन लजिक
+window.emailLogin = () => {
+    const email = document.getElementById('loginEmail')?.value || document.getElementById('email')?.value;
+    const pass = document.getElementById('loginPass')?.value || document.getElementById('pass')?.value;
+    if(!email || !pass) return alert("Email र Password भर्नुहोस्।");
+    signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
+};
+
+document.getElementById('googleBtn').onclick = () => {
+    signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.message));
+};
+
+window.logout = () => signOut(auth);
+// logoutBtn को लागि पनि
+const logoutBtn = document.getElementById('logoutBtn');
+if(logoutBtn) logoutBtn.onclick = () => signOut(auth);
+
+// ४. पुराना र नयाँ सबै डाटा टेबलमा देखाउने (Delete गर्नका लागि)
+function loadAllMyData() {
+    const tableBody = document.getElementById('stockTableBody') || document.getElementById('dataTableBody');
+    
+    if(!tableBody) return;
+
+    // 'bikes' कलेक्सन चेक गर्ने (जहाँ पुराना डाटाहरू लुकेका छन्)
+    onSnapshot(collection(db, "bikes"), (snap) => {
+        let rows = "";
+        snap.docs.forEach(d => {
+            const data = d.data();
+            // Price (P ठूलो) वा price (p सानो) दुवै चेक गर्ने
+            const price = data.price || data.Price || "0";
+            const name = data.name || data.Name || "Unknown";
+            
+            rows += `
+                <tr>
+                    <td style="color:red; font-weight:bold;">OLD DATA</td>
+                    <td>${name}</td>
+                    <td>Rs. ${price}</td>
+                    <td>
+                        <button onclick="finalDelete('bikes', '${d.id}')" style="border:none; background:none; color:red; cursor:pointer; font-size:20px;">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        tableBody.innerHTML = rows;
     });
 }
 
-// ४. Email Login (यसलाई window.emailLogin बनाइएको छ ताकि HTML को onclick ले काम गरोस्)
-window.emailLogin = () => {
-    const email = document.getElementById('loginEmail').value;
-    const pass = document.getElementById('loginPass').value;
-    
-    if(email && pass) {
-        signInWithEmailAndPassword(auth, email, pass)
-            .then(() => {
-                window.location.href = "admin.html";
-            })
-            .catch((err) => {
-                alert("Login Failed: " + err.message);
-            });
-    } else {
-        alert("कृपया इमेल र पासवर्ड भर्नुहोस्।");
+// ५. डिलिट फङ्सन
+window.finalDelete = async (col, id) => {
+    if(confirm("के तपाईँ यो डाटा सधैँका लागि हटाउन चाहनुहुन्छ?")) {
+        await deleteDoc(doc(db, col, id));
+        alert("हटाइयो!");
     }
 };
+
+// ६. नयाँ डाटा थप्ने
+const saveBtn = document.getElementById('saveModelBtn');
+if(saveBtn) {
+    saveBtn.onclick = async () => {
+        const name = document.getElementById('mName').value;
+        const price = document.getElementById('mPrice').value;
+        if(!name || !price) return alert("Data भर्नुहोस्");
         
+        await addDoc(collection(db, "bikes"), {
+            name: name,
+            price: Number(price),
+            addedAt: new Date()
+        });
+        alert("थपियो!");
+    };
+        }
+                          
