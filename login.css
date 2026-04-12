@@ -1,74 +1,58 @@
-/* १. मूल रङ र फन्ट (Modern Variables) */
+/* १. ग्लोबल सेटअप र रङहरू */
 :root {
-    --primary: #215282;          /* Royal Blue */
+    --primary: #215282;          /* Royal Blue (Navbar/Buttons) */
     --primary-light: #e8f0fe;
-    --success: #2d5a27;         /* Deep Green */
+    --success: #2d5a27;         /* Bajaj Green (Success/Confirm) */
     --danger: #d32f2f;
-    --warning: #ffa000;
-    --dark: #1a1a1a;
-    --gray: #666;
-    --light-bg: #f4f7f6;
+    --dark: #2c3e50;
+    --gray: #7f8c8d;
     --white: #ffffff;
-    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --shadow: 0 5px 25px rgba(0,0,0,0.1);
     --border-radius: 12px;
-    --transition: all 0.3s ease;
 }
 
 body {
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background: var(--light-bg);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
     margin: 0;
     color: var(--dark);
-    line-height: 1.6;
 }
 
-/* २. लगइन कार्ड डिजाइन (Login UI) */
+/* २. लगइन सेक्सन (Login Page) */
 #login-section {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #215282 0%, #2d5a27 100%);
 }
 
 .login-card {
     background: var(--white);
     padding: 40px;
     border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    box-shadow: var(--shadow);
     width: 100%;
     max-width: 400px;
     text-align: center;
 }
 
-.logo-area img { width: 80px; margin-bottom: 15px; }
-.logo-area h2 { margin: 0; color: var(--primary); font-size: 24px; }
-.logo-area p { color: var(--gray); font-size: 14px; margin-bottom: 30px; }
+.logo-area img { width: 70px; margin-bottom: 15px; }
 
 .input-group .field {
     display: flex;
     align-items: center;
     background: #f0f2f5;
-    padding: 12px 15px;
+    padding: 12px;
     border-radius: 10px;
     margin-bottom: 15px;
-    border: 1px solid transparent;
-    transition: var(--transition);
 }
 
-.input-group .field:focus-within {
-    border-color: var(--primary);
-    background: var(--white);
-    box-shadow: 0 0 0 4px rgba(33, 82, 130, 0.1);
-}
-
-.input-group .field i { color: var(--gray); margin-right: 10px; }
 .input-group .field input {
     border: none;
     background: transparent;
     outline: none;
     width: 100%;
-    font-size: 15px;
+    margin-left: 10px;
 }
 
 .btn-primary {
@@ -78,138 +62,185 @@ body {
     width: 100%;
     padding: 14px;
     border-radius: 10px;
-    font-weight: 600;
+    font-weight: bold;
     cursor: pointer;
-    transition: var(--transition);
 }
 
-.btn-primary:hover { background: #163d63; transform: translateY(-2px); }
-
-/* ३. एडमिनHeader र Navigation */
+/* ३. एडमिन हेडर र नेभिगेसन */
 .admin-header {
     background: var(--white);
     padding: 15px 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: var(--shadow);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .admin-nav {
     display: flex;
-    justify-content: center;
-    background: var(--white);
-    margin: 20px 5%;
-    border-radius: var(--border-radius);
-    padding: 10px;
     gap: 10px;
+    margin: 20px 5%;
 }
 
 .nav-item {
-    padding: 12px 20px;
+    padding: 10px 20px;
     border: none;
-    background: transparent;
+    background: white;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    border-radius: 8px;
     color: var(--gray);
-    transition: var(--transition);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .nav-item.active {
-    background: var(--primary-light);
-    color: var(--primary);
+    background: var(--primary);
+    color: white;
 }
 
-/* ४. कार्ड र फर्म डिजाइन (Dynamic Content) */
-.content { padding: 0 5%; padding-bottom: 50px; }
+/* ४. कार्ड र लेआउट (Main Content) */
+.content { padding: 0 5%; }
+
 .card {
     background: var(--white);
     padding: 25px;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
-    margin-bottom: 25px;
-    animation: fadeIn 0.5s ease;
+    margin-bottom: 30px;
 }
 
 .grid-form {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
 }
 
-.field-box { display: flex; flex-direction: column; }
-.field-box label { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--gray); }
-.field-box input, .field-box select {
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    outline: none;
-    transition: var(--transition);
+.field-box label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: var(--gray);
 }
 
-.field-box input:focus { border-color: var(--primary); }
+.field-box input, .field-box select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
 .full-width { grid-column: 1 / -1; }
 
-/* ५. टेबल डिजाइन (Modern & Responsive) */
-.table-responsive { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 600px; }
-th { background: #f8f9fa; padding: 15px; text-align: left; font-size: 13px; color: var(--gray); text-transform: uppercase; }
-td { padding: 15px; border-bottom: 1px solid #eee; font-size: 15px; }
-tr:hover { background-color: #fcfcfc; }
+/* ५. टेबल (Table Design) */
+.table-responsive { overflow-x: auto; margin-top: 15px; }
 
-/* ६. इमेज भ्यू (Preview in Table) */
-.master-img-view {
-    width: 60px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 6px;
-    border: 1px solid #eee;
-    background: #f9f9f9;
+table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-/* ७. प्रोफाइल डिजाइन (Facebook Inspired) */
-.profile-card { padding: 0 !important; overflow: hidden; }
-.cover-photo { height: 140px; background: linear-gradient(45deg, #215282, #2d5a27); position: relative; }
+th {
+    background: #f8f9fa;
+    padding: 15px;
+    text-align: left;
+    font-size: 13px;
+    color: var(--gray);
+    border-bottom: 2px solid #eee;
+}
+
+td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+/* सानो इमेज भ्यू */
+.master-img-view {
+    width: 50px;
+    height: 35px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+/* ६. प्रोफाइल (Facebook Style) */
+.profile-card { padding: 0 !important; overflow: hidden; position: relative; }
+
+.cover-photo {
+    height: 120px;
+    background: linear-gradient(45deg, var(--primary), var(--success));
+}
 
 .three-dot-menu {
-    position: absolute; right: 20px; top: 20px; color: white; cursor: pointer; font-size: 20px;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    color: white;
+    cursor: pointer;
+    font-size: 20px;
 }
 
 .dropdown-content {
-    display: none; position: absolute; right: 0; top: 30px; background: white;
-    min-width: 150px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000;
+    display: none;
+    position: absolute;
+    right: 15px;
+    top: 40px;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    z-index: 100;
 }
 
-.dropdown-content a { color: #333; padding: 12px; text-decoration: none; display: block; font-size: 14px; border-bottom: 1px solid #eee; }
+.dropdown-content a {
+    display: block;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: var(--dark);
+    font-size: 14px;
+}
+
 .dropdown-content a:hover { background: #f8f9fa; }
 
-/* ८. बटनहरू */
+#profilePic {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid white;
+    margin-top: -50px;
+    background: white;
+    object-fit: cover;
+}
+
+/* ७. बटन र युटिलिटी */
 .btn-save {
     background: var(--success);
-    color: white; border: none; padding: 12px 25px; border-radius: 8px;
-    font-weight: bold; cursor: pointer; transition: var(--transition);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
     margin-top: 20px;
 }
-.btn-save:hover { opacity: 0.9; transform: scale(1.02); }
 
 .btn-danger-icon {
-    background: #ffebee; color: var(--danger); border: none;
-    width: 40px; height: 40px; border-radius: 50%; cursor: pointer; transition: var(--transition);
-}
-.btn-danger-icon:hover { background: var(--danger); color: white; }
-
-/* ९. Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    background: #f8d7da;
+    color: #721c24;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
 }
 
-/* १०. Mobile Responsive */
-@media (max-width: 768px) {
-    .admin-nav { flex-wrap: wrap; }
-    .nav-item { flex: 1; text-align: center; font-size: 13px; padding: 10px; }
-    .content { padding: 0 15px; }
-    .grid-form { grid-template-columns: 1fr; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* मोबाइलको लागि */
+@media (max-width: 600px) {
+    .admin-nav { overflow-x: auto; padding-bottom: 5px; }
+    .nav-item { white-space: nowrap; }
     }
     
