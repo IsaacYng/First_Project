@@ -1,24 +1,306 @@
-:root { --primary: #215282; --success: #28a745; --danger: #dc3545; }
-body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; }
+/* १. General Setup & Variables */
+:root {
+    --primary: #215282;
+    --primary-dark: #1a4168;
+    --success: #28a745;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --bg-light: #f4f7f6;
+    --white: #ffffff;
+    --text-dark: #333;
+    --text-muted: #666;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
 
-#login-section { display: flex; justify-content: center; align-items: center; height: 100vh; }
-.login-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 320px; text-align: center; }
-.login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-light);
+    margin: 0;
+    color: var(--text-dark);
+}
 
-.header { background: var(--primary); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; }
-.admin-nav { background: #fff; padding: 10px 5%; border-bottom: 1px solid #ddd; display: flex; gap: 10px; }
-.admin-nav button { padding: 8px 15px; border: none; background: #eee; cursor: pointer; border-radius: 5px; }
+/* २. Login Section Styling */
+#login-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
 
-.content { padding: 20px 5%; }
-.card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
-input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; width: 100%; box-sizing: border-box; }
+.login-card {
+    background: var(--white);
+    padding: 40px 30px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
 
-.btn-main { background: var(--primary); color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; }
-.btn-success { background: var(--success); color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; }
-.btn-danger { background: var(--danger); color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; }
+.logo-area img {
+    margin-bottom: 15px;
+}
 
-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
-.profile-box { text-align: center; padding: 20px; }
-             
+.login-card h2 {
+    margin-bottom: 25px;
+    color: var(--primary);
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+.forgot-link {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.forgot-link a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    padding: 14px;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+.divider {
+    margin: 25px 0;
+    position: relative;
+    text-align: center;
+}
+
+.divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #ddd;
+}
+
+.divider span {
+    background: var(--white);
+    padding: 0 10px;
+    position: relative;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.social-login {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.btn-social {
+    background: var(--white);
+    border: 1px solid #ddd;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.btn-social:hover {
+    background: #f9f9f9;
+}
+
+/* ३. Admin Dashboard Styling */
+.admin-header {
+    background: var(--primary);
+    color: var(--white);
+    padding: 20px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.greeting h3 { margin: 0; font-size: 1.2rem; }
+.greeting p { margin: 5px 0 0; font-size: 0.8rem; opacity: 0.8; }
+
+.btn-danger {
+    background: var(--danger);
+    color: var(--white);
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}
+
+.admin-nav {
+    display: flex;
+    background: var(--white);
+    padding: 10px 5%;
+    overflow-x: auto;
+    gap: 10px;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    padding: 10px 15px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.nav-item.active {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.content {
+    padding: 20px 5%;
+}
+
+.card {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+}
+
+.card h3 {
+    margin-top: 0;
+    color: var(--primary);
+    border-left: 4px solid var(--primary);
+    padding-left: 10px;
+}
+
+/* ४. Grid Form & Inputs */
+.grid-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.grid-form input, .grid-form select {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.btn-save {
+    background: var(--success);
+    color: var(--white);
+    border: none;
+    padding: 15px;
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ५. Profile Styling */
+.profile-card {
+    text-align: center;
+}
+
+#profilePic {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--primary);
+    padding: 5px;
+    margin-bottom: 15px;
+}
+
+.info-row {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.info-row label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
+
+.info-row input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #eee;
+    background: #fdfdfd;
+    border-radius: 8px;
+}
+
+/* ६. Table Styling */
+.table-responsive {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+th {
+    background: #f8f9fa;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+/* ७. Tab Logic Display */
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* ८. Responsive Adjustments */
+@media (max-width: 600px) {
+    .content { padding: 15px 3%; }
+    .admin-header h3 { font-size: 1rem; }
+    .nav-item { padding: 8px 12px; font-size: 13px; }
+  }
