@@ -3,89 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | Go YNG</title>
+    <title>Go! YNG - Unified Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="login.css">
 </head>
 <body>
 
-    <div id="login-section">
+    <section id="login-section">
         <div class="login-card">
-            <h2>Admin Login</h2>
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="pass" placeholder="Password">
-            <button id="loginBtn" class="btn-main">Login</button>
-        </div>
-    </div>
+            <div class="logo-area">
+                <img src="favicon.png" alt="Logo" style="width: 60px;">
+                <h2>Welcome Back</h2>
+            </div>
+            
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Email Address">
+                <input type="password" id="pass" placeholder="Password">
+            </div>
 
-    <div id="admin-section" style="display: none;">
-        <div class="header">
-            <h2><i class="fa fa-gauge"></i> Control Panel</h2>
-            <button id="logoutBtn" class="btn-danger">Logout</button>
+            <div class="forgot-link">
+                <a href="#" id="forgotPassBtn">Forgot Password?</a>
+            </div>
+
+            <button id="loginBtn" class="btn-primary">Sign In</button>
+
+            <div class="divider"><span>OR CONTINUE WITH</span></div>
+
+            <div class="social-login">
+                <button id="googleBtn" class="btn-social">
+                    <img src="https://img.icons8.com/color/24/000000/google-logo.png" alt="Google">
+                </button>
+                <button id="fbBtn" class="btn-social">
+                    <img src="https://img.icons8.com/color/24/000000/facebook-new.png" alt="FB">
+                </button>
+            </div>
         </div>
+    </section>
+
+    <section id="admin-section" style="display: none;">
+        <header class="admin-header">
+            <div class="greeting">
+                <h3 id="greetingText">Good Morning, Admin!</h3>
+                <p id="currentDate"></p>
+            </div>
+            <div class="user-actions">
+                <button id="logoutBtn" class="btn-danger"><i class="fa fa-sign-out-alt"></i></button>
+            </div>
+        </header>
 
         <nav class="admin-nav">
-            <button onclick="showTab('tab-price')">Price Setup</button>
-            <button onclick="showTab('tab-stock')">Stock Entry</button>
-            <button onclick="showTab('tab-profile')">My Profile</button>
+            <button onclick="switchTab('tab-profile')" class="nav-item active"><i class="fa fa-user-circle"></i> Profile</button>
+            <button onclick="switchTab('tab-price')" class="nav-item"><i class="fa fa-tag"></i> Price Setup</button>
+            <button onclick="switchTab('tab-stock')" class="nav-item"><i class="fa fa-boxes-stacked"></i> Stock Entry</button>
         </nav>
 
-        <div class="content">
-            <div id="tab-price" class="tab-content card">
-                <h3>1. Price & Insurance Setup</h3>
-                <div class="grid">
-                    <input type="text" id="mName" placeholder="Model Name">
-                    <input type="number" id="mPrice" placeholder="Cash Price">
-                    <input type="number" id="mNormalIns" placeholder="Normal Insurance">
-                    <input type="number" id="mFinanceIns" placeholder="Finance Insurance">
-                    <input type="text" id="mImg" placeholder="Image URL">
-                </div>
-                <button id="saveModelBtn" class="btn-success">Update Price List</button>
-            </div>
-
-            <div id="tab-stock" class="tab-content card" style="display:none;">
-                <h3>2. Inventory Entry (Chassis/Engine)</h3>
-                <div class="grid">
-                    <select id="stockModelSelect">
-                        <option value="">-- Select Model --</option>
-                    </select>
-                    <input type="text" id="sChassis" placeholder="Chassis No">
-                    <input type="text" id="sEngine" placeholder="Engine No">
-                    <input type="text" id="sReg" placeholder="Registration No">
-                    <input type="text" id="sColor" placeholder="Color">
-                </div>
-                <button id="saveStockBtn" class="btn-main">Add to Live Stock</button>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr><th>Model</th><th>Chassis</th><th>Action</th></tr>
-                        </thead>
-                        <tbody id="stockTableBody"></tbody>
-                    </table>
+        <main class="content">
+            
+            <div id="tab-profile" class="tab-pane active">
+                <div class="card profile-card">
+                    <div class="profile-header">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User" id="profilePic">
+                        <h2 id="dispName">Ishak</h2>
+                    </div>
+                    <div class="profile-details">
+                        <div class="info-row">
+                            <label>Bio:</label>
+                            <input type="text" id="pBio" placeholder="Tell us about yourself...">
+                        </div>
+                        <div class="info-row">
+                            <label>Contact:</label>
+                            <input type="text" id="pContact" placeholder="Your Phone Number">
+                        </div>
+                        <div class="info-row">
+                            <label>Showroom Role:</label>
+                            <input type="text" id="pRole" placeholder="e.g. Sales Advisor">
+                        </div>
+                        <button id="updateProfileBtn" class="btn-save">Save Profile Changes</button>
+                    </div>
                 </div>
             </div>
 
-            <div id="tab-profile" class="tab-content card" style="display:none;">
-                <h3>User Profile</h3>
-                <div class="profile-box">
-                    <div id="profileDisplay"></div>
-                    <hr>
-                    <input type="text" id="pBio" placeholder="Your Bio">
-                    <input type="text" id="pPost" placeholder="Quick Post/Note">
-                    <button id="updateProfileBtn" class="btn-main">Update Profile</button>
+            <div id="tab-price" class="tab-pane">
+                <div class="card">
+                    <h3>Model Price & Insurance Configuration</h3>
+                    <div class="grid-form">
+                        <input type="text" id="mName" placeholder="Bike Model Name">
+                        <input type="number" id="mPrice" placeholder="Cash Price">
+                        <input type="number" id="mNormalIns" placeholder="Normal Insurance">
+                        <input type="number" id="mFinanceIns" placeholder="Finance Insurance">
+                        <input type="text" id="mImg" placeholder="Image URL">
+                    </div>
+                    <button id="saveModelBtn" class="btn-save">Update Price List</button>
                 </div>
             </div>
-        </div>
-    </div>
+
+            <div id="tab-stock" class="tab-pane">
+                <div class="card">
+                    <h3>Individual Bike Stock Entry</h3>
+                    <div class="grid-form">
+                        <select id="stockModelSelect">
+                            <option value="">-- Select Model --</option>
+                        </select>
+                        <input type="text" id="sChassis" placeholder="Chassis Number">
+                        <input type="text" id="sEngine" placeholder="Engine Number">
+                        <input type="text" id="sReg" placeholder="Registration (Lot) No">
+                        <input type="text" id="sColor" placeholder="Bike Color">
+                    </div>
+                    <button id="saveStockBtn" class="btn-save">Add to Inventory</button>
+                </div>
+
+                <div class="card table-card">
+                    <h3>Live Stock List</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Model</th>
+                                    <th>Chassis No</th>
+                                    <th>Finance Ins</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stockTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </section>
 
     <script type="module" src="login.js"></script>
     <script>
-        // Tab switching logic
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-            document.getElementById(tabId).style.display = 'block';
+        function switchTab(id) {
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
     </script>
 </body>
-                        </html>
-    
+    </html>
+                
