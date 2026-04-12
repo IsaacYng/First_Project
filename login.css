@@ -1,151 +1,270 @@
-/* १. मूल सेटअप (Variables) */
-:root {
-    --primary: #215282;          /* Bajaj Blue */
-    --success: #2d5a27;         /* Bajaj Green */
-    --white: #ffffff;
-    --bg: #f0f2f5;
-    --shadow: 0 4px 15px rgba(0,0,0,0.1);
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 body {
-    font-family: 'Segoe UI', sans-serif;
-    background: var(--bg);
-    margin: 0;
+  background: #0f0f0f;
+  color: #fff;
+  line-height: 1.6;
 }
 
-/* २. लगइन कार्ड डिजाइन */
-#login-section {
-    display: flex;
-    justify-content: center;
+/* NAVBAR */
+nav {
+  width: 100%;
+  background: #111;
+  padding: 10px 5%;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.nav_head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav_head div:first-child {
+  font-size: 24px;
+}
+
+.nav_a {
+  display: flex;
+  gap: 20px;
+}
+
+.nav_a a {
+  text-decoration: none;
+  color: #ccc;
+  transition: 0.3s;
+}
+
+.nav_a a:hover {
+  color: #FFD700;
+}
+
+.nav_img img {
+  width: 40px;
+}
+
+/* HERO SECTION */
+.hero_section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 10%;
+  min-height: 80vh;
+  background: linear-gradient(to right, #000, #1a1a1a);
+}
+
+.hero_content {
+  max-width: 500px;
+}
+
+.hero_title {
+  font-size: 40px;
+}
+
+.highlight {
+  color: #FFD700;
+}
+
+.hero_subtitle {
+  margin: 15px 0;
+  color: #aaa;
+}
+
+.hero_buttons {
+  margin-top: 20px;
+}
+
+.hero_buttons button {
+  padding: 10px 20px;
+  border: none;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn_primary {
+  background: #FFD700;
+  color: #000;
+}
+
+.btn_primary:hover {
+  background: #e6c200;
+}
+
+.btn_secondary {
+  background: transparent;
+  border: 1px solid #FFD700;
+  color: #FFD700;
+}
+
+.btn_secondary:hover {
+  background: #FFD700;
+  color: #000;
+}
+
+/* PRICE LIST */
+#Price_list {
+  background: #121212;
+}
+
+.search-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+}
+
+/* BIKE GRID */
+.bike-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.bike-card {
+  background: #1c1c1c;
+  padding: 15px;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+.bike-card:hover {
+  transform: translateY(-5px);
+}
+
+.bike-card img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.bike-card h3 {
+  margin: 10px 0;
+}
+
+.bike-card p {
+  color: #bbb;
+}
+
+/* FOOTER */
+.main-footer {
+  background: #000;
+  padding: 40px 10%;
+}
+
+.footer-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.footer-box h3,
+.footer-box h4 {
+  margin-bottom: 10px;
+}
+
+.footer-box p {
+  color: #aaa;
+}
+
+.footer-box ul {
+  list-style: none;
+}
+
+.footer-box ul li {
+  margin: 8px 0;
+}
+
+.footer-box ul li a {
+  text-decoration: none;
+  color: #ccc;
+}
+
+.footer-box ul li a:hover {
+  color: #FFD700;
+}
+
+/* SOCIAL ICONS */
+.social-links a {
+  display: inline-block;
+  margin-right: 10px;
+  color: #fff;
+  background: #222;
+  padding: 8px;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.social-links a:hover {
+  background: #FFD700;
+  color: #000;
+}
+
+/* FOOTER BOTTOM */
+.footer-bottom {
+  text-align: center;
+  margin-top: 30px;
+  color: #777;
+}
+
+/* TABLET */
+@media (min-width: 600px) {
+  .hero_title {
+    font-size: 50px;
+  }
+
+  .bike-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* PC / LARGE SCREEN */
+@media (min-width: 992px) {
+  .nav_head {
+    max-width: 1200px;
+    margin: auto;
+  }
+
+  .hero_section {
+    flex-direction: row;
     align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-}
+  }
 
-.login-card {
-    background: var(--white);
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 380px;
-    text-align: center;
-}
+  .hero_content {
+    flex: 1;
+  }
 
-/* ३. GOOGLE BUTTON (Exact Official Design) */
-.divider {
-    margin: 25px 0;
-    display: flex;
-    align-items: center;
-    color: #999;
-    font-size: 13px;
-}
-.divider::before, .divider::after {
-    content: ""; flex: 1; height: 1px; background: #eee; margin: 0 10px;
-}
+  .hero_spacer {
+    flex: 1;
+  }
 
-.btn-social {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 10px;
-    background: #ffffff;
-    border: 1px solid #dadce0; /* Google Standard Border */
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    color: #3c4043;
-    gap: 12px;
-    transition: background-color 0.2s, box-shadow 0.2s;
-}
+  .bike-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 
-.btn-social:hover {
-    background-color: #f8f9fa;
-    box-shadow: 0 1px 3px rgba(60,64,67,0.3);
-}
-
-.btn-social img {
-    width: 20px;
-    height: 20px;
-}
-
-/* ४. एडमिन प्यानल र मेनु (Mobile Responsive) */
-.admin-header {
-    background: var(--white);
-    padding: 15px 5%;
-    display: flex;
+  .footer-container {
+    flex-direction: row;
     justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
 }
 
-.admin-nav {
-    display: flex;
-    gap: 10px;
-    margin: 15px 5%;
-    overflow-x: auto; /* मोबाइलमा मेनु साइड स्क्रोल हुन्छ */
-    padding-bottom: 8px;
-}
-
-.nav-item {
-    padding: 10px 20px;
-    border: none;
-    background: white;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    color: #666;
-    box-shadow: var(--shadow);
-    white-space: nowrap; /* बटनहरू खुम्चिँदैनन् */
-}
-
-.nav-item.active {
-    background: var(--primary);
-    color: white;
-}
-
-/* ५. टेबल रेस्पोन्सिभ (Mobile Fix) */
-.table-responsive {
-    width: 100%;
-    overflow-x: auto; /* मोबाइलमा टेबल नथन्कियोस् भनेर */
-    background: white;
-    border-radius: 8px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 650px; /* मोबाइलमा टेबलको कोलम मिल्छ */
-}
-
-th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 13px; color: #777; }
-td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-
-/* ६. ग्रिड फर्म (PC मा २ कोलम, मोबाइलमा १) */
-.grid-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-}
-
-/* ७. फेसबुक स्टाइल प्रोफाइल पिक */
-.profile-card { padding: 0 !important; overflow: hidden; text-align: center; }
-.cover-photo { height: 120px; background: linear-gradient(45deg, #215282, #2d5a27); }
-
-#profilePic {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    border: 4px solid white;
-    margin-top: -50px; /* प्रोफाइल माथि तान्छ */
-    background: white;
-    object-fit: cover;
-}
-
-/* ८. मोबाइलका लागि थप सफाइ */
-@media (max-width: 600px) {
-    .admin-header { flex-direction: column; gap: 10px; text-align: center; }
-    .content { padding: 0 10px; }
-        }
-    
+/* EXTRA LARGE */
+@media (min-width: 1200px) {
+  .bike-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+    }
