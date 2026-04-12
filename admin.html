@@ -3,38 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bike Inventory Admin</title>
+    <title>Bike Inventory Admin | Go! YNG</title>
     <link rel="stylesheet" href="admin.css">
 </head>
 <body>
 
     <div class="container">
-        <h2>Manage Bike Inventory</h2>
+        <header style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #215282;">BAJAJ INVENTORY</h1>
+            <p>Phidim, Panchthar</p>
+        </header>
 
         <div class="card">
-            <h3>Add New Entry</h3>
+            <h3><i class="fa fa-plus"></i> Add New Bike to Stock</h3>
+            
+            <label>Select Model (from Price List)</label>
             <select id="modelSelect">
-                <option value="">-- Select Model --</option>
+                <option value="">-- Loading Models... --</option>
             </select>
-            <input type="text" id="chassisNo" placeholder="Chassis Number">
-            <input type="text" id="engineNo" placeholder="Engine Number">
-            <input type="text" id="bikeColor" placeholder="Color">
-            <button id="saveBtn">Save to Inventory</button>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>Chassis Number</label>
+                    <input type="text" id="chassisNo" placeholder="Enter Chassis No.">
+                </div>
+                <div>
+                    <label>Engine Number</label>
+                    <input type="text" id="engineNo" placeholder="Enter Engine No.">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>Color</label>
+                    <input type="text" id="bikeColor" placeholder="e.g. Ebony Black">
+                </div>
+                <div>
+                    <label>Insurance Amount</label>
+                    <input type="number" id="insuranceAmt" placeholder="Insurance for this bike">
+                </div>
+            </div>
+
+            <button id="saveBtn" style="margin-top: 15px;">Save to Inventory</button>
         </div>
 
         <div class="card">
-            <h3>Current Inventory</h3>
-            <table id="inventoryTable">
-                <thead>
-                    <tr>
-                        <th>Model</th>
-                        <th>Chassis No.</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="inventoryList">
-                    </tbody>
-            </table>
+            <h3><i class="fa fa-list"></i> Current Stock</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Chassis No.</th>
+                            <th>Color</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryList">
+                        </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
