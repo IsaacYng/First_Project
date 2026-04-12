@@ -1,28 +1,28 @@
-/* १. Root Variables & Reset */
+/* १. मूल रङ र फन्ट (Modern UI Variables) */
 :root {
-    --primary: #215282;
-    --primary-dark: #1a4169;
-    --success: #2d5a27;
+    --primary: #215282;          /* Bajaj Blue */
+    --success: #2d5a27;         /* Showroom Green */
     --danger: #d32f2f;
     --white: #ffffff;
-    --light-bg: #f0f2f5;
+    --bg: #f0f2f5;
     --shadow: 0 4px 15px rgba(0,0,0,0.1);
     --border-radius: 12px;
 }
 
 body {
-    font-family: 'Segoe UI', sans-serif;
-    background: var(--light-bg);
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
     margin: 0;
     color: #333;
 }
 
-/* २. लगइन सेक्सन र Google Button फिक्स */
+/* २. लगइन सेक्सन (Login Page) - मोबाइलमा पर्फेक्ट रेस्पोन्सिभ */
 #login-section {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 20px;
 }
 
 .login-card {
@@ -30,40 +30,45 @@ body {
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    width: 90%;
+    width: 100%;
     max-width: 380px;
     text-align: center;
 }
 
-.logo-area img { width: 70px; margin-bottom: 15px; }
+.logo-area img { width: 70px; margin-bottom: 10px; }
 
 .input-group .field {
     display: flex;
     align-items: center;
     background: #f0f2f5;
-    padding: 12px;
+    padding: 12px 15px;
     border-radius: 10px;
     margin-bottom: 15px;
     border: 1px solid transparent;
 }
 
-.input-group .field:focus-within { border-color: var(--primary); background: white; }
+.input-group .field:focus-within {
+    border-color: var(--primary);
+    background: white;
+}
 
 .btn-primary {
     background: var(--primary);
     color: white; border: none; width: 100%;
     padding: 13px; border-radius: 10px;
-    font-weight: 600; cursor: pointer;
+    font-weight: 600; cursor: pointer; transition: 0.3s;
 }
 
-/* Google Design Fix */
+/* ३. Google Button - पूर्ण फिक्स (Official Branding) */
 .divider {
     margin: 20px 0;
     display: flex;
     align-items: center;
     color: #999;
 }
-.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #eee; margin: 0 10px; }
+.divider::before, .divider::after {
+    content: ""; flex: 1; height: 1px; background: #eee; margin: 0 10px;
+}
 
 .btn-social {
     display: flex;
@@ -78,29 +83,31 @@ body {
     font-weight: 500;
     color: #3c4043;
     gap: 12px;
-    transition: 0.3s;
+    transition: 0.2s;
 }
+
 .btn-social:hover {
     background-color: #f8f9fa;
     box-shadow: 0 1px 3px rgba(60,64,67,0.3);
 }
-.btn-social img { width: 20px; }
 
-/* ३. एडमिन हेडर र मोबाइल मेनु */
+.btn-social img { width: 20px; height: 20px; }
+
+/* ४. एडमिन Header र नेभिगेसन */
 .admin-header {
     background: var(--white);
     padding: 15px 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .admin-nav {
     display: flex;
     gap: 10px;
     margin: 20px 5%;
-    overflow-x: auto; /* मोबाइलमा साइड स्क्रोल */
+    overflow-x: auto; /* मोबाइलमा मेनु स्क्रोल हुने */
     padding-bottom: 10px;
 }
 
@@ -115,14 +122,18 @@ body {
     box-shadow: var(--shadow);
     white-space: nowrap;
 }
-.nav-item.active { background: var(--primary); color: white; }
 
-/* ४. टेबल र रेस्पोन्सिभ ग्रिड */
+.nav-item.active {
+    background: var(--primary);
+    color: white;
+}
+
+/* ५. कार्ड र फर्म (PC & Mobile Grid) */
 .content { padding: 0 5% 50px 5%; }
 
 .card {
     background: var(--white);
-    padding: 20px;
+    padding: 25px;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
     margin-bottom: 25px;
@@ -130,43 +141,38 @@ body {
 
 .grid-form {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
 }
 
-.field-box label { font-size: 13px; font-weight: bold; margin-bottom: 5px; display: block; }
+.field-box label { font-size: 13px; font-weight: bold; margin-bottom: 6px; display: block; }
 .field-box input, .field-box select {
-    width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;
+    width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;
 }
 
-/* टेबल मोबाइल फिक्स */
+/* ६. मोबाइल रेस्पोन्सिभ टेबल (Horizontal Scroll) */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
-    border-radius: 8px;
-}
-table { width: 100%; border-collapse: collapse; min-width: 650px; }
-th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 13px; color: #777; }
-td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-
-.master-img-view {
-    width: 50px; height: 35px; object-fit: cover; border-radius: 4px;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* ५. फेसबुक प्रोफाइल स्टाइल */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px; /* मोबाइलमा डाटा कोलम खुम्चिन दिँदैन */
+}
+
+th { background: #f8f9fa; padding: 15px; text-align: left; font-size: 13px; color: #777; border-bottom: 2px solid #eee; }
+td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 14px; }
+
+/* ७. फेसबुक स्टाइल प्रोफाइल */
 .profile-card { padding: 0 !important; overflow: hidden; position: relative; }
 .cover-photo { height: 120px; background: linear-gradient(45deg, #215282, #2d5a27); }
 
 #profilePic {
-    width: 100px; height: 100px; border-radius: 50%;
-    border: 4px solid white; margin-top: -50px; background: white; object-fit: cover;
-}
-
-/* ६. मोबाइलको लागि रेस्पोन्सिभ (PC vs Mobile) */
-@media (max-width: 600px) {
-    .admin-header { flex-direction: column; text-align: center; gap: 10px; }
-    .grid-form { grid-template-columns: 1fr; }
-    .content { padding: 0 10px; }
+    width: 100px; height: 100px; border-radius: 50%; border: 4px solid white;
+    margin-top: -50px; background: white; object-fit: cover;
 }
 
 .btn-save {
@@ -174,7 +180,15 @@ td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
     border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%;
 }
 
+/* ८. मोबाइल एड्जस्टमेन्ट */
+@media (max-width: 600px) {
+    .admin-header { flex-direction: column; text-align: center; gap: 10px; }
+    .grid-form { grid-template-columns: 1fr; }
+    .content { padding: 0 10px; }
+}
+
 .tab-pane { display: none; }
-.tab-pane.active { display: block; animation: fadeIn 0.3s; }
+.tab-pane.active { display: block; animation: fadeIn 0.3s ease; }
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     
