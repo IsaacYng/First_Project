@@ -3,36 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin | Go YNG</title>
+    <title>Admin Dashboard | Go YNG</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="login.css">
     <link rel="icon" type="image/png" href="favicon.png">
     <style>
-        :root { --primary: #215282; --success: #28a745; --danger: #dc3545; }
+        :root { --primary: #215282; --success: #28a745; --danger: #dc3545; --warning: #ffc107; }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 0; }
         
-       
         #login-section { display: flex; justify-content: center; align-items: center; height: 100vh; }
         .login-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 90%; max-width: 350px; text-align: center; }
         .login-card input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .btn-google { background: white; border: 1px solid #ddd; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; margin-top: 10px; }
 
-       
         #admin-section { display: none; }
-        .header { background: var(--primary); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; }
+        .header { background: var(--primary); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .content { padding: 20px 5%; }
-        .form-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .form-card { background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         
+        /* Input Grid मिलाइएको */
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+        .input-grid input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
         
-        .table-container { overflow-x: auto; background: white; border-radius: 12px; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
-        img.bike-img { width: 50px; height: 40px; object-fit: cover; border-radius: 4px; }
-
+        .table-container { overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        th { background: #f8f9fa; color: #555; font-weight: 600; text-transform: uppercase; font-size: 12px; }
+        th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: left; }
+        img.bike-img { width: 60px; height: 45px; object-fit: cover; border-radius: 6px; background: #eee; }
+        
+        .action-btns button { border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s; margin-right: 5px; }
+        .btn-edit { background: var(--warning); color: #333; }
+        .btn-del { background: var(--danger); color: white; }
+        
         @media (max-width: 600px) {
-            .header h1 { font-size: 16px; }
-            .content { padding: 10px; }
+            .header h1 { font-size: 18px; }
+            .content { padding: 15px; }
         }
     </style>
 </head>
@@ -53,23 +58,26 @@
 
     <div id="admin-section">
         <div class="header">
-            <h1><i class="fa fa-gauge"></i>Admin Dashboard</h1>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span id="userName" style="font-size: 12px;"></span>
-                <button onclick="logout()" style="background:var(--danger); color:white; border:none; padding:8px 12px; border-radius:5px; cursor:pointer;">Logout</button>
+            <h1><i class="fa fa-motorcycle"></i> Go YNG Admin</h1>
+            <div style="display:flex; align-items:center; gap:15px;">
+                <span id="userName" style="font-size: 13px; font-weight: 500;"></span>
+                <button onclick="logout()" style="background:rgba(255,255,255,0.2); color:white; border:1px solid white; padding:6px 15px; border-radius:6px; cursor:pointer;">Logout</button>
             </div>
         </div>
 
         <div class="content">
             <div class="form-card">
-                <h3>Update Stock</h3>
+                <h3 style="margin-top:0; color: var(--primary); border-left: 4px solid var(--primary); padding-left: 10px;">Stock Management</h3>
                 <div class="input-grid">
-                    <input type="text" id="newName" placeholder="Bike Name">
-                    <input type="number" id="newPrice" placeholder="Price">
-                    <input type="number" id="newIns" placeholder="Insurance">
-                    <input type="text" id="newImg" placeholder="Image URL">
+                    <input type="text" id="newName" placeholder="Bike Model Name">
+                    <input type="number" id="newPrice" placeholder="Price (NPR)">
+                    <input type="number" id="newIns" placeholder="Insurance Amount">
+                    <input type="text" id="newChassis" placeholder="Chassis Number">
+                    <input type="text" id="newEngine" placeholder="Engine Number">
+                    <input type="text" id="newColor" placeholder="Color (e.g. Ebony Black)">
+                    <input type="text" id="newImg" placeholder="Image URL (Optional)">
                 </div>
-                <button onclick="handleForm()" id="submitBtn" style="background: var(--success); color:white; border:none; padding:12px; width:100%; margin-top:15px; border-radius:8px; cursor:pointer; font-weight:bold;">Update Inventory</button>
+                <button onclick="handleForm()" id="submitBtn" style="background: var(--success); color:white; border:none; padding:14px; width:100%; margin-top:20px; border-radius:8px; cursor:pointer; font-weight:bold; font-size: 16px;">Update Inventory</button>
             </div>
 
             <div class="table-container">
@@ -80,10 +88,14 @@
                             <th>Model</th>
                             <th>Price</th>
                             <th>Insurance</th>
+                            <th>Chassis No.</th>
+                            <th>Engine No.</th>
+                            <th>Color</th>
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="admin-bike-list"></tbody>
+                    <tbody id="admin-bike-list">
+                        </tbody>
                 </table>
             </div>
         </div>
@@ -107,7 +119,7 @@
         const bikesCol = collection(db, "bikes");
         let editId = null;
 
-        // १. Authentication Check
+        // 1. Auth Logic
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-section').style.display = 'none';
@@ -119,11 +131,10 @@
             }
         });
 
-        // २. Login Functions
         window.loginWithEmail = () => {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
-            signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
+            signInWithEmailAndPassword(auth, email, pass).catch(e => alert("Login Failed: " + e.message));
         };
 
         document.getElementById('googleBtn').onclick = () => {
@@ -132,60 +143,82 @@
 
         window.logout = () => signOut(auth);
 
-        // ३. Inventory Functions
+        // 2. Inventory Logic
         window.handleForm = async () => {
             const name = document.getElementById('newName').value;
             const price = document.getElementById('newPrice').value;
             const ins = document.getElementById('newIns').value;
+            const chassis = document.getElementById('newChassis').value;
+            const engine = document.getElementById('newEngine').value;
+            const color = document.getElementById('newColor').value;
             const img = document.getElementById('newImg').value || "https://cdn-icons-png.flaticon.com/512/8163/8163149.png";
 
-            if (!name || !price) return alert("Enter Full Data");
+            if (!name || !price || !chassis || !engine) return alert("Please fill at least Model, Price, Chassis and Engine!");
 
-            const data = { name, price, Insurance: ins, img };
+            const data = { 
+                name, 
+                price: Number(price), 
+                Insurance: Number(ins), 
+                chassis, 
+                engine, 
+                color, 
+                img,
+                updatedAt: new Date()
+            };
+
             try {
                 if (editId) {
                     await updateDoc(doc(db, "bikes", editId), data);
                     editId = null;
                     document.getElementById('submitBtn').innerText = "Update Inventory";
+                    alert("Stock Updated!");
                 } else {
                     await addDoc(bikesCol, data);
+                    alert("New Stock Added!");
                 }
                 clearForm();
-            } catch (e) { alert(e.message); }
+            } catch (e) { alert("Error: " + e.message); }
         };
 
-        window.deleteBike = (id) => confirm("Are You Sure?") && deleteDoc(doc(db, "bikes", id));
+        window.deleteBike = (id) => confirm("Delete this bike record permanently?") && deleteDoc(doc(db, "bikes", id));
 
-        window.prepareEdit = (id, name, price, ins, img) => {
+        window.prepareEdit = (id, name, price, ins, img, chassis, engine, color) => {
             document.getElementById('newName').value = name;
             document.getElementById('newPrice').value = price;
             document.getElementById('newIns').value = ins;
             document.getElementById('newImg').value = img;
+            document.getElementById('newChassis').value = (chassis === 'undefined') ? "" : chassis;
+            document.getElementById('newEngine').value = (engine === 'undefined') ? "" : engine;
+            document.getElementById('newColor').value = (color === 'undefined') ? "" : color;
             editId = id;
             document.getElementById('submitBtn').innerText = "Save Changes";
-            window.scrollTo(0, 0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         function clearForm() {
-            ['newName', 'newPrice', 'newIns', 'newImg'].forEach(id => document.getElementById(id).value = "");
+            ['newName', 'newPrice', 'newIns', 'newImg', 'newChassis', 'newEngine', 'newColor'].forEach(id => document.getElementById(id).value = "");
         }
 
-        // ४. Real-time List Update
+        // 3. Real-time List
         onSnapshot(bikesCol, (snap) => {
             document.getElementById('admin-bike-list').innerHTML = snap.docs.map(d => {
                 const b = d.data();
                 return `<tr>
                     <td><img src="${b.img}" class="bike-img"></td>
-                    <td>${b.name}</td>
-                    <td>Rs. ${b.price}</td>
-                    <td>Rs. ${b.Insurance}</td>
-                    <td>
-                        <button onclick="prepareEdit('${d.id}', '${b.name}', '${b.price}', '${b.Insurance}', '${b.img}')" style="background:#ffc107; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;"><i class="fa fa-edit"></i></button>
-                        <button onclick="deleteBike('${d.id}')" style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;"><i class="fa fa-trash"></i></button>
+                    <td><strong>${b.name}</strong></td>
+                    <td>Rs. ${b.price.toLocaleString()}</td>
+                    <td>Rs. ${b.Insurance ? b.Insurance.toLocaleString() : 0}</td>
+                    <td style="font-family: monospace; font-size: 13px;">${b.chassis || '-'}</td>
+                    <td style="font-family: monospace; font-size: 13px;">${b.engine || '-'}</td>
+                    <td><span style="background:#eee; padding:3px 8px; border-radius:4px; font-size:12px;">${b.color || '-'}</span></td>
+                    <td class="action-btns">
+                        <button class="btn-edit" onclick="prepareEdit('${d.id}', '${b.name}', '${b.price}', '${b.Insurance}', '${b.img}', '${b.chassis}', '${b.engine}', '${b.color}')"><i class="fa fa-edit"></i></button>
+                        <button class="btn-del" onclick="deleteBike('${d.id}')"><i class="fa fa-trash"></i></button>
                     </td>
                 </tr>`;
             }).join('');
         });
     </script>
 </body>
-</html>
+    </html>
+    
