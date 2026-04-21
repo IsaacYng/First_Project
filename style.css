@@ -306,3 +306,77 @@ button:active {
     background-position: 15px center;
     padding-left: 45px !important; 
 }
+/* Drawer Styling */
+.drawer {
+   position: fixed;
+   top: 0;
+   left: -280px; /* Hidden by default */
+   width: 280px;
+   height: 100%;
+   background: #1a1a1a;
+   z-index: 1001;
+   transition: 0.4s;
+   padding: 20px;
+   box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+}
+
+.drawer.active {
+   left: 0;
+}
+
+.drawer_header {
+   font-size: 24px;
+   font-weight: bold;
+   color: white;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   margin-bottom: 30px;
+}
+
+.close_icon {
+   cursor: pointer;
+   color: #FFD700;
+}
+
+.drawer_links a {
+   display: block;
+   color: white;
+   text-decoration: none;
+   font-size: 18px;
+   padding: 15px 0;
+   border-bottom: 1px solid #333;
+}
+
+/* Overlay Styling */
+.overlay {
+   position: fixed;
+   display: none;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background: rgba(0,0,0,0.7);
+   z-index: 1000;
+}
+
+.overlay.active {
+   display: block;
+}
+
+/* Hide desktop menu on small screens */
+@media (max-width: 768px) {
+   .desktop_menu {
+      display: none;
+   }
+   .mobile_toggle {
+      display: block;
+   }
+}
+
+@media (min-width: 769px) {
+   .mobile_toggle {
+      display: none;
+   }
+}
+
