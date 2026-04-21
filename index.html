@@ -3,28 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Go! YNG | Bajaj Premium</title>
+    <title>Go! YNG | Bajaj Showroom</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <nav>
         <div class="nav_head">
-            <div class="logo">
-                <span class="brand_go">Go!</span><span class="brand_yng">YNG</span>
-            </div>
-
-            <div class="nav_a desktop_menu">
-                <a href="#home">Home</a>
-                <a href="#Price_list">Price</a>
-                <a href="finance.html">Finance</a>
-                <a href="#Contact">Contact</a>
-            </div>
+            <div class="logo" id="home-link">Go! YNG</div>
 
             <div class="mobile_toggle" onclick="toggleDrawer()">
-                <i class="fa-solid fa-bars-staggered"></i>
+                <i class="fa-solid fa-bars"></i>
             </div>
 
             <div class="nav_img">
@@ -34,7 +25,7 @@
     </nav>
 
     <div id="drawerOverlay" class="overlay" onclick="toggleDrawer()"></div>
-    <div id="appDrawer" class="drawer">
+    <aside id="appDrawer" class="drawer">
         <div class="drawer_header">
             <span>MENU</span>
             <i class="fa-solid fa-xmark" onclick="toggleDrawer()"></i>
@@ -45,54 +36,50 @@
             <a href="finance.html">Finance</a>
             <a href="#Contact" onclick="toggleDrawer()">Contact</a>
         </div>
-    </div>
+    </aside>
 
     <section class="hero_section" id="home">
         <div class="hero_content">
-            <h1 class="hero_title">Let's <span class="highlight">Race</span></h1>
+            <h1 class="hero_title">LET'S <span class="highlight">RACE</span></h1>
             <p class="hero_subtitle">The All-New Dominance.</p>
             <div class="hero_buttons">
-                <button class="btn_primary">Get Started</button>
-                <button class="btn_secondary" onclick="scrollToPrice()">Explore Models</button>
+                <button class="btn_get_started">GET STARTED</button>
+                <button class="btn_explore" onclick="scrollToPrice()">EXPLORE MODELS</button>
             </div>
         </div>
     </section>
 
-    <section id="Price_list" class="price_container">
-        <h2 class="section_title">Official Price List</h2>
+    <section id="Price_list" class="price_section">
+        <h2 class="section_title">Price List</h2>
         
         <div class="search-box-wrapper">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="search-input" placeholder="Search your favorite bike...">
+            <input type="text" id="search-input" placeholder="Search bikes here...">
         </div>
 
         <div id="bike-container" class="bike-grid">
-            <p style="text-align: center; grid-column: 1/-1;">Connecting to Database...</p>
+            <p class="loading-text">Connecting to database...</p>
         </div>
     </section>
 
-    <footer class="main-footer" id="Contact">
-        <div class="footer-container">
-            <div class="footer-box">
-                <h3>Go! YNG</h3>
-                <p>Authorized Bajaj Partner, Phidim.</p>
-            </div>
-            <div class="footer-box">
-                <h4>Support</h4>
-                <p>📍 Phidim, Nepal</p>
-                <p>📞 +977-9802315425</p>
-            </div>
+    <footer id="Contact">
+        <div class="footer_content">
+            <h3>Go! YNG</h3>
+            <p>Authorized Bajaj Showroom, Phidim</p>
+            <p>Phone: +977-9802315425</p>
         </div>
     </footer>
 
     <script>
-        // Drawer Toggle Logic
+        // Drawer Toggle Function
         function toggleDrawer() {
-            document.getElementById('appDrawer').classList.toggle('active');
-            document.getElementById('drawerOverlay').classList.toggle('active');
+            const drawer = document.getElementById('appDrawer');
+            const overlay = document.getElementById('drawerOverlay');
+            drawer.classList.toggle('active');
+            overlay.classList.toggle('active');
         }
 
-        // Smooth Scroll
+        // Smooth Scroll to Price List
         function scrollToPrice() {
             document.getElementById('Price_list').scrollIntoView({ behavior: 'smooth' });
         }
