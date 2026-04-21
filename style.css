@@ -1,150 +1,273 @@
-/* --- 1. Basic Setup & Typography --- */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Poppins:wght@300;400;600&display=swap');
-
+/* RESET */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
 }
 
 body {
-    background-color: #f8f9fa;
-    color: #2d3436;
+    font-family: 'Poppins', sans-serif;
+    background: #0f1115;
+    color: #fff;
 }
 
-/* --- 2. Navbar Fix (Gap & Alignment) --- */
+/* NAVBAR */
 nav {
-    background-color: #1e3c72; /* Deep Navy Blue */
-    padding: 12px 20px;
-    position: sticky;
+    width: 100%;
+    background: rgba(15,17,21,0.9);
+    backdrop-filter: blur(10px);
+    position: fixed;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .nav_head {
     display: flex;
-    justify-content: space-between; /* Element haru lai side side ma rakcha */
+    justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 15px 30px;
 }
 
 .logo {
-    flex: 1; /* Logo lai left ma base gari space dincha */
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1.5rem;
-    color: #FFD700; /* Gold Logo */
-    letter-spacing: 1px;
+    font-size: 22px;
+    font-weight: 700;
 }
 
-/* Mobile Toggle (The 3-Dots) */
+.brand_go {
+    color: #ff3c00;
+}
+
+.brand_yng {
+    color: #fff;
+}
+
+.nav_a a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: #ccc;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.nav_a a:hover {
+    color: #ff3c00;
+}
+
 .mobile_toggle {
-    display: none; /* Desktop ma hide */
-    color: white;
-    font-size: 1.5rem;
+    display: none;
+    font-size: 22px;
     cursor: pointer;
-    margin-right: 25px; /* Logo ra Menu ko bich ma gap thapeko */
 }
 
 .nav_img img {
-    width: 45px;
-    height: 45px;
+    width: 35px;
     border-radius: 50%;
-    border: 2px solid #FFD700;
-    background: white;
 }
 
-/* --- 3. Hero Section (Actual Look) --- */
+/* DRAWER */
+.overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    top: 0;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s;
+}
+
+.overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.drawer {
+    position: fixed;
+    right: -260px;
+    top: 0;
+    width: 260px;
+    height: 100%;
+    background: #1a1d24;
+    transition: 0.3s;
+    padding: 20px;
+    z-index: 1001;
+}
+
+.drawer.active {
+    right: 0;
+}
+
+.drawer_header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.drawer_links a {
+    display: block;
+    margin: 15px 0;
+    color: #ccc;
+    text-decoration: none;
+}
+
+/* HERO */
 .hero_section {
-    height: 60vh;
-    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.4)), 
-                url('https://c.ndtvimg.com/2022-06/db4blp34_2022-bajaj-pulsar-n160_625x300_22_June_22.jpg');
-    background-size: cover;
-    background-position: center;
+    height: 100vh;
+    background: linear-gradient(to right, #0f1115, #1a1d24);
     display: flex;
     align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: white;
+    padding: 0 50px;
 }
 
-.hero_title { font-family: 'Montserrat', sans-serif; font-size: 3rem; text-transform: uppercase; }
-.highlight { color: #FFD700; font-style: italic; }
+.hero_title {
+    font-size: 55px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.highlight {
+    color: #ff3c00;
+}
+
+.hero_subtitle {
+    margin: 10px 0 20px;
+    color: #aaa;
+}
 
 .hero_buttons button {
     padding: 12px 25px;
-    margin: 10px;
+    margin-right: 10px;
     border: none;
-    font-weight: 600;
-    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%); /* Original parallelogram shape */
     cursor: pointer;
+    border-radius: 6px;
 }
 
-.btn_primary { background: #d3a372; color: white; }
-.btn_secondary { background: rgba(255,255,255,0.15); color: white; border: 1px solid white; }
+.btn_primary {
+    background: #ff3c00;
+    color: white;
+}
 
-/* --- 4. Search Box (Classic UI) --- */
+.btn_secondary {
+    background: transparent;
+    border: 1px solid #ff3c00;
+    color: #ff3c00;
+}
+
+/* PRICE SECTION */
+.price_container {
+    padding: 80px 40px;
+}
+
+.section_title {
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+
 .search-box-wrapper {
-    max-width: 500px;
-    margin: -30px auto 40px;
-    position: relative;
-    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    background: #1a1d24;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 30px;
 }
 
-#search-input {
-    width: 100%;
-    padding: 15px 15px 15px 45px;
-    border-radius: 50px;
-    border: 2px solid #1e3c72;
+.search-box-wrapper input {
+    background: none;
+    border: none;
     outline: none;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    color: white;
+    margin-left: 10px;
+    width: 100%;
 }
 
-/* --- 5. Bike Cards (Database Friendly) --- */
+/* GRID */
 .bike-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
 }
 
+/* 🔥 BIKE CARD (MAIN PART) */
 .bike-card {
-    background: white;
-    border-radius: 15px;
-    padding: 20px;
-    border-bottom: 4px solid #1e3c72; /* Original Card Border Style */
+    background: #1a1d24;
+    border-radius: 14px;
+    overflow: hidden;
     transition: 0.3s;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
-.bike-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
-
-.bike-card img { width: 100%; height: 200px; object-fit: contain; }
-
-.bike-card h3 { font-size: 1.1rem; color: #1e3c72; margin: 10px 0; }
-
-.bike-card p { font-size: 0.9rem; color: #666; }
-
-/* Price Styling for Firebase MRP */
-.bike-card .price {
-    font-weight: 800;
-    color: #e74c3c;
-    font-size: 1.2rem;
-    margin-top: 10px;
+.bike-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }
 
-/* --- 6. Mobile Logic (3-Dot Fix) --- */
-@media (max-width: 768px) {
-    .desktop_menu { display: none !important; }
-    
-    .mobile_toggle { 
-        display: block; /* Mobile ma matra 3-dot dekhincha */
-        margin-left: auto; /* Logo bhanda para dhakne */
+.bike-img {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+}
+
+.bike-content {
+    padding: 15px;
+}
+
+.bike-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.bike-price {
+    color: #ff3c00;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.bike-details {
+    font-size: 13px;
+    color: #aaa;
+}
+
+.bike-btn {
+    margin-top: 15px;
+    display: block;
+    text-align: center;
+    padding: 10px;
+    background: #ff3c00;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+/* FOOTER */
+.main-footer {
+    background: #111;
+    padding: 30px;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* RESPONSIVE */
+@media(max-width: 768px) {
+    .nav_a {
+        display: none;
     }
 
-    .hero_title { font-size: 2.2rem; }
+    .mobile_toggle {
+        display: block;
+    }
+
+    .hero_title {
+        font-size: 35px;
+    }
+
+    .footer-container {
+        flex-direction: column;
+        gap: 20px;
+    }
 }
