@@ -1,132 +1,82 @@
-/* PROJECT: Go! YNG - Classic Edition
-   THEME: Deep Navy, Metallic Gold, and Pure White
-   GOAL: Clean, Professional, and Fully Responsive
-*/
-
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,800;1,900&family=Poppins:wght@300;400;500;600&display=swap');
-
+/* --- 1. Variables & Global --- */
 :root {
-    /* Color Palette */
-    --primary: #1e3c72;        /* Deep Classic Navy */
-    --accent: #FFD700;         /* Premium Gold */
-    --dark: #121212;           /* Onyx Black */
-    --light-gray: #f8f9fa;     /* Soft Background */
+    --primary: #1e3c72;      /* Deep Navy Blue */
+    --accent: #FFD700;       /* Premium Gold */
+    --text-dark: #2d3436;
     --white: #ffffff;
-    
-    /* Functional Variables */
-    --nav-height: 70px;
-    --card-radius: 20px;
-    --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    --shadow: 0 10px 30px rgba(0,0,0,0.05);
+    --shadow: 0 8px 25px rgba(0,0,0,0.08);
 }
 
-/* --- 1. Reset & Foundations --- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+body { background: #f5f7fa; color: var(--text-dark); }
 
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--light-gray);
-    color: var(--dark);
-    line-height: 1.6;
-    overflow-x: hidden;
-}
-
-/* --- 2. Navigation (The Centering Fix) --- */
+/* --- 2. Navigation Fix (3-Dot to the Right) --- */
 nav {
     background: var(--primary);
-    height: var(--nav-height);
-    width: 100%;
+    padding: 12px 0;
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    display: flex;
-    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
 .nav_head {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Element haru lai side-by-side rakcha */
     align-items: center;
-    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
 }
 
-/* Balancing the Navbar into 3 equal zones */
-.logo, .mobile_toggle, .nav_img {
-    flex: 1;
-    display: flex;
-    align-items: center;
+.logo { 
+    flex: 1; /* Logo lai left ma dhakcha */
+    color: var(--accent);
+    font-weight: 800;
+    font-size: 1.4rem;
 }
 
-.logo {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1.6rem;
-    letter-spacing: 1px;
-}
-
-.brand_go { color: var(--accent); font-weight: 800; }
-.brand_yng { color: var(--white); font-weight: 300; }
-
+/* PC Menu Style */
 .desktop_menu {
     display: flex;
-    gap: 30px;
-    justify-content: center;
-    flex: 2; /* Takes more space in center for PC */
+    gap: 25px;
+    margin-right: 20px;
 }
 
 .desktop_menu a {
-    color: var(--white);
+    color: white;
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: var(--transition);
     opacity: 0.8;
+    transition: 0.3s;
 }
 
-.desktop_menu a:hover {
-    color: var(--accent);
-    opacity: 1;
-}
+.desktop_menu a:hover { opacity: 1; color: var(--accent); }
 
+/* Mobile Hamburger Fix - Center bata Right ma move gareko */
 .mobile_toggle {
-    display: none; /* Hidden on PC */
-    justify-content: center;
-    color: var(--white);
+    display: none; /* Desktop ma hide huncha */
+    order: 2; /* Content pachi bascha */
+    color: white;
     font-size: 1.6rem;
     cursor: pointer;
-}
-
-.nav_img {
-    justify-content: flex-end;
+    margin-right: 15px;
 }
 
 .nav_img img {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     border: 2px solid var(--accent);
-    background: var(--white);
-    object-fit: cover;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    background: white;
+    order: 3; /* Sabai bhanda right side ma bascha */
 }
 
-/* --- 3. Hero Section (Classic Split Design) --- */
+/* --- 3. Hero Section (Classic) --- */
 .hero_section {
-    height: 70vh;
-    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.3)), 
+    height: 65vh;
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.4)), 
                 url('https://c.ndtvimg.com/2022-06/db4blp34_2022-bajaj-pulsar-n160_625x300_22_June_22.jpg');
     background-size: cover;
     background-position: center;
@@ -134,213 +84,110 @@ nav {
     align-items: center;
     justify-content: center;
     text-align: center;
-    color: var(--white);
+    color: white;
 }
 
-.hero_title {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 4.5rem;
-    font-weight: 900;
-    font-style: italic;
-    text-transform: uppercase;
-    line-height: 1;
-}
+.hero_title { font-size: 3.5rem; font-weight: 800; }
+.highlight { color: var(--accent); font-style: italic; }
 
-.highlight {
-    color: var(--accent);
-    text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-}
-
-.hero_subtitle {
-    font-size: 1.2rem;
-    margin: 15px 0 35px;
-    letter-spacing: 4px;
-    font-weight: 300;
-    text-transform: uppercase;
-}
-
-.hero_buttons .btn {
-    padding: 16px 35px;
-    font-weight: 700;
+.hero_buttons button {
+    padding: 12px 30px;
     border: none;
+    font-weight: 600;
     cursor: pointer;
-    text-transform: uppercase;
-    transition: var(--transition);
+    margin: 10px;
     clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
-    font-size: 0.9rem;
+    transition: 0.3s;
 }
 
-.btn_primary { background: var(--accent); color: var(--primary); margin-right: 15px; }
-.btn_secondary { background: rgba(255,255,255,0.1); color: var(--white); border: 1px solid var(--white) !important; backdrop-filter: blur(5px); }
+.btn_primary { background: var(--accent); color: var(--primary); }
+.btn_secondary { background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(5px); }
 
-.btn:hover {
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 15px 25px rgba(0,0,0,0.3);
-}
-
-/* --- 4. Search Bar (Glassmorphism Light) --- */
-.search_container {
-    max-width: 600px;
-    margin: -40px auto 60px; /* Overlaps Hero slightly for style */
-    padding: 0 20px;
+/* --- 4. Search Box (Rounded & Clean) --- */
+.search-box-wrapper {
+    max-width: 500px;
+    margin: -30px auto 50px;
     position: relative;
-    z-index: 10;
+    padding: 0 20px;
 }
 
-#search-input {
+.search-box-wrapper input {
     width: 100%;
-    padding: 18px 25px 18px 60px;
+    padding: 16px 20px 16px 50px;
     border-radius: 50px;
     border: none;
-    background: var(--white);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    font-size: 1rem;
+    box-shadow: var(--shadow);
     outline: none;
-    transition: var(--transition);
 }
 
-#search-input:focus {
-    box-shadow: 0 15px 40px rgba(30, 60, 114, 0.2);
-    transform: scale(1.02);
-}
-
-.search_icon {
+.search-box-wrapper i {
     position: absolute;
-    left: 45px;
+    left: 40px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--primary);
-    font-size: 1.2rem;
 }
 
-/* --- 5. Bike Grid & Cards (Modern Premium) --- */
-.price_list_container {
-    max-width: 1200px;
-    margin: 0 auto 100px;
-    padding: 0 20px;
-}
-
-.section_title {
-    text-align: center;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 2.5rem;
-    margin-bottom: 50px;
-    color: var(--primary);
-}
-
+/* --- 5. Firebase Bike Card (Classic Look) --- */
 .bike-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 35px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 20px;
 }
 
 .bike-card {
-    background: var(--white);
-    border-radius: var(--card-radius);
-    padding: 20px;
-    border: 1px solid rgba(0,0,0,0.03);
-    transition: var(--transition);
+    background: white;
+    border-radius: 20px;
+    padding: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+    border: 1px solid #eee;
+    transition: 0.4s;
     display: flex;
     flex-direction: column;
-    position: relative;
 }
 
 .bike-card:hover {
-    transform: translateY(-15px);
-    box-shadow: 0 25px 50px rgba(0,0,0,0.1);
-    border-color: var(--accent);
+    transform: translateY(-10px);
+    box-shadow: var(--shadow);
+    border-color: var(--primary);
 }
 
 .bike-card img {
     width: 100%;
-    height: 220px;
+    height: 180px;
     object-fit: contain;
-    margin-bottom: 20px;
-    filter: drop-shadow(0 10px 10px rgba(0,0,0,0.05));
+    margin-bottom: 15px;
 }
 
-.bike-info h3 {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1.2rem;
-    margin-bottom: 12px;
-    color: var(--primary);
-}
+.bike-card h3 { color: var(--primary); font-size: 1.1rem; margin-bottom: 5px; }
+.bike-card p { font-size: 0.85rem; color: #666; }
 
-.bike-info p {
-    font-size: 0.9rem;
-    color: #777;
-    margin-bottom: 6px;
-}
-
-.bike-card .price_tag {
-    margin-top: auto;
-    padding-top: 20px;
-    font-size: 1.5rem;
+/* Purano Database Price Section */
+.bike-card .price {
+    font-size: 1.3rem;
     font-weight: 800;
-    color: var(--primary);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    color: #e74c3c;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px dashed #eee;
 }
 
-.price_tag::after {
-    content: "MRP";
-    font-size: 0.7rem;
-    background: var(--accent);
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-weight: 400;
-}
-
-/* --- 6. Footer (Classic Dark) --- */
-.main-footer {
-    background: var(--dark);
-    color: var(--white);
-    padding: 80px 20px 30px;
-}
-
-.footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 50px;
-}
-
-.footer-box h3 {
-    font-family: 'Montserrat', sans-serif;
-    color: var(--accent);
-    margin-bottom: 20px;
-}
-
-.footer-box ul { list-style: none; }
-.footer-box ul li { margin-bottom: 12px; }
-.footer-box ul li a { color: #bbb; text-decoration: none; transition: 0.3s; }
-.footer-box ul li a:hover { color: var(--accent); padding-left: 10px; }
-
-/* --- 7. Responsive Fix (The "Makkhan" Rule) --- */
+/* --- 6. Mobile Responsive Fix --- */
 @media (max-width: 768px) {
-    .desktop_menu { display: none !important; }
+    .desktop_menu { display: none !important; } /* PC Menu Hide */
     
     .mobile_toggle { 
-        display: flex; 
-        flex: 1;
-        justify-content: center;
+        display: block; /* 3-dot Right ma dekhincha */
     }
     
-    .logo, .nav_img { flex: 1; }
-
-    .hero_title { font-size: 2.5rem; }
-    .hero_subtitle { font-size: 0.9rem; letter-spacing: 2px; }
+    .logo { flex: 1; }
     
-    .hero_buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        padding: 0 40px;
-    }
-    
-    .btn_primary { margin-right: 0; }
-    
-    .search_container { margin-top: -30px; }
+    .hero_title { font-size: 2.2rem; }
 }
+
+/* Drawer & Overlay logic remains same as before */
+.drawer { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: white; z-index: 2000; transition: 0.4s; }
+.drawer.active { left: 0; }
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 1500; }
+.overlay.active { display: block; }
