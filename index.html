@@ -3,141 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Go! YNG | Classic Bajaj Showroom</title>
+    <title>Go! YNG | Bajaj Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header id="top">
-        <nav>
-            <table width="100%" cellpadding="10">
-                <tr>
-                    <td align="left">
-                        <strong style="font-size: 24px;">Go! YNG</strong>
-                    </td>
+    <nav>
+        <div class="nav_head">
+            <div class="logo">
+                <span class="brand_go">Go!</span><span class="brand_yng">YNG</span>
+            </div>
 
-                    <td align="center">
-                        <button type="button" onclick="openMenu()"> ☰ MENU </button>
-                    </td>
+            <div class="nav_a desktop_menu">
+                <a href="#home">Home</a>
+                <a href="#Price_list">Price</a>
+                <a href="finance.html">Finance</a>
+                <a href="#Contact">Contact</a>
+            </div>
 
-                    <td align="right">
-                        <img src="favicon.png" alt="Profile" width="40" height="40" style="border-radius: 50%;">
-                    </td>
-                </tr>
-            </table>
-            
-            <table width="100%" bgcolor="#f0f0f0">
-                <tr>
-                    <td align="center">
-                        <a href="#home">Home</a> &nbsp; | &nbsp;
-                        <a href="#prices">Price List</a> &nbsp; | &nbsp;
-                        <a href="#finance">Finance</a> &nbsp; | &nbsp;
-                        <a href="#contact">Contact</a>
-                    </td>
-                </tr>
-            </table>
-        </nav>
-    </header>
+            <div class="mobile_toggle" onclick="toggleDrawer()">
+                <i class="fa-solid fa-bars-staggered"></i>
+            </div>
 
-    <hr>
-
-    <aside id="drawer" style="display:none; border: 2px solid #000; padding: 20px; background: #fff; position: fixed; top: 0; left: 0; width: 250px; height: 100%; z-index: 9999;">
-        <button onclick="closeMenu()">Close [X]</button>
-        <h3>Go! YNG Menu</h3>
-        <ul>
-            <li><a href="#home" onclick="closeMenu()">Home</a></li>
-            <li><a href="#prices" onclick="closeMenu()">Price List</a></li>
-            <li><a href="#finance" onclick="closeMenu()">Finance</a></li>
-            <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
-        </ul>
-    </aside>
-
-    <main id="home">
-        <section style="background-color: #333; color: white; padding: 50px; text-align: center;">
-            <h1>LET'S <i style="color: gold;">RACE</i></h1>
-            <p>The All-New Dominance. Experience the power of Bajaj.</p>
-            <br>
-            <button onclick="window.location.href='#prices'">Explore Models</button>
-            <button>Get Started</button>
-        </section>
-    </main>
-
-    <br>
-
-    <section id="prices" style="padding: 20px;">
-        <h2 align="center">Official Price List</h2>
-        
-        <div align="center" style="margin-bottom: 30px;">
-            <label for="bikeSearch">Find Your Bike: </label>
-            <input type="text" id="bikeSearch" onkeyup="searchFunction()" placeholder="Type a bike name..." size="40">
+            <div class="nav_img">
+                <img src="favicon.png" alt="YNG Profile">
+            </div>
         </div>
+    </nav>
 
-        <div id="bikeList">
-            
-            <article class="bike-card" style="border: 1px solid #ccc; margin-bottom: 20px; padding: 15px;">
-                <img src="https://itv-production.s3.ap-south-1.amazonaws.com/bike_images/Pulsar_N160_Brooklyn_Black.png" alt="Pulsar N160" width="200">
-                <h3>Pulsar N160 BSVI</h3>
-                <p>Insurance: Rs. 8,500</p>
-                <p><strong>MRP: Rs. 3,95,900</strong></p>
-                <button>View Details</button>
-            </article>
+    <div id="drawerOverlay" class="overlay" onclick="toggleDrawer()"></div>
+    <div id="appDrawer" class="drawer">
+        <div class="drawer_header">
+            <span>MENU</span>
+            <i class="fa-solid fa-xmark" onclick="toggleDrawer()"></i>
+        </div>
+        <div class="drawer_links">
+            <a href="#home" onclick="toggleDrawer()">Home</a>
+            <a href="#Price_list" onclick="toggleDrawer()">Price List</a>
+            <a href="finance.html">Finance</a>
+            <a href="#Contact" onclick="toggleDrawer()">Contact</a>
+        </div>
+    </div>
 
-            <article class="bike-card" style="border: 1px solid #ccc; margin-bottom: 20px; padding: 15px;">
-                <img src="https://www.bajajauto.com/-/media/Assets/BajajAuto/Bikes/Pulsar/Pulsar-150/Pulsar-150-Neon/neon-red.ashx" alt="Pulsar 150" width="200">
-                <h3>Pulsar 150 SD BSVI</h3>
-                <p>Insurance: Rs. 7,900</p>
-                <p><strong>MRP: Rs. 3,10,900</strong></p>
-                <button>View Details</button>
-            </article>
-
-            <article class="bike-card" style="border: 1px solid #ccc; margin-bottom: 20px; padding: 15px;">
-                <img src="https://itv-production.s3.ap-south-1.amazonaws.com/bike_images/Avenger_Street_160_Ebony_Black.png" alt="Avenger" width="200">
-                <h3>Avenger 160 Street</h3>
-                <p>Insurance: Rs. 9,200</p>
-                <p><strong>MRP: Rs. 3,65,900</strong></p>
-                <button>View Details</button>
-            </article>
-
+    <section class="hero_section" id="home">
+        <div class="hero_content">
+            <h1 class="hero_title">Let's <span class="highlight">Race</span></h1>
+            <p class="hero_subtitle">The All-New Dominance.</p>
+            <div class="hero_buttons">
+                <button class="btn_primary">Get Started</button>
+                <button class="btn_secondary" onclick="scrollToPrice()">Explore Models</button>
+            </div>
         </div>
     </section>
 
-    <hr>
+    <section id="Price_list" class="price_container">
+        <h2 class="section_title">Official Price List</h2>
+        
+        <div class="search-box-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="Search your favorite bike...">
+        </div>
 
-    <footer id="contact" align="center" style="padding: 40px; background: #eee;">
-        <h3>Go! YNG Bajaj Phidim</h3>
-        <p>Location: Phidim, Koshi, Nepal</p>
-        <p>Phone: +977-9802315425</p>
-        <p>
-            <a href="#">Facebook</a> | <a href="#">Instagram</a> | <a href="#">WhatsApp</a>
-        </p>
-        <br>
-        <p><small>&copy; 2026 Go! YNG - All Rights Reserved</small></p>
-        <p><a href="#top">Back to Top ↑</a></p>
+        <div id="bike-container" class="bike-grid">
+            <p style="text-align: center; grid-column: 1/-1;">Connecting to Database...</p>
+        </div>
+    </section>
+
+    <footer class="main-footer" id="Contact">
+        <div class="footer-container">
+            <div class="footer-box">
+                <h3>Go! YNG</h3>
+                <p>Authorized Bajaj Partner, Phidim.</p>
+            </div>
+            <div class="footer-box">
+                <h4>Support</h4>
+                <p>📍 Phidim, Nepal</p>
+                <p>📞 +977-9802315425</p>
+            </div>
+        </div>
     </footer>
 
     <script>
-        // Drawer Controls
-        function openMenu() {
-            document.getElementById("drawer").style.display = "block";
-        }
-        function closeMenu() {
-            document.getElementById("drawer").style.display = "none";
+        // Drawer Toggle Logic
+        function toggleDrawer() {
+            document.getElementById('appDrawer').classList.toggle('active');
+            document.getElementById('drawerOverlay').classList.toggle('active');
         }
 
-        // Real-Time Search Logic
-        function searchFunction() {
-            let input = document.getElementById('bikeSearch').value.toLowerCase();
-            let cards = document.getElementsByClassName('bike-card');
-
-            for (let i = 0; i < cards.length; i++) {
-                let title = cards[i].getElementsByTagName('h3')[0].innerText.toLowerCase();
-                if (title.includes(input)) {
-                    cards[i].style.display = "";
-                } else {
-                    cards[i].style.display = "none";
-                }
-            }
+        // Smooth Scroll
+        function scrollToPrice() {
+            document.getElementById('Price_list').scrollIntoView({ behavior: 'smooth' });
         }
     </script>
-
+    
+    <script type="module" src="script.js"></script>
 </body>
 </html>
