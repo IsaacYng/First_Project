@@ -1,78 +1,321 @@
-/* Bike Grid Container */
-.bike-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
-    padding: 20px 0;
+/* --- 1. Global & Reset Styles --- */
+* {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+   font-family: 'Poppins', sans-serif; /* Professional look ko lagi */
 }
 
-/* Modern Card Redesign */
+body {
+   background: #f0f4f8; /* Soft background color */
+   color: #333;
+}
+
+/* --- 2. Navigation Bar (Alignment Fix) --- */
+nav {
+   background: #215282;
+   box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+   position: sticky;
+   top: 0;
+   width: 100%;
+   z-index: 1000;
+}
+
+.nav_head {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding: 12px 20px;
+   max-width: 1300px;
+   margin: 0 auto;
+}
+
+/* Three-column layout for perfect centering */
+.logo, .mobile_toggle, .nav_img {
+   flex: 1;
+   display: flex;
+   align-items: center;
+}
+
+.logo {
+   font-size: 1.4rem;
+   text-transform: uppercase;
+   letter-spacing: 1px;
+}
+
+.mobile_toggle {
+   justify-content: center; /* Hamburger Icon exactly in the center */
+   cursor: pointer;
+}
+
+.nav_img {
+   justify-content: flex-end;
+}
+
+.nav_img img {
+   height: 42px;
+   width: 42px;
+   border-radius: 50%;
+   border: 2px solid #FFD700;
+   background: white;
+   object-fit: cover;
+}
+
+/* Desktop Menu Links */
+.desktop_menu {
+   display: flex;
+   gap: 25px;
+}
+
+.desktop_menu a {
+   color: white;
+   text-decoration: none;
+   font-weight: 500;
+   font-size: 0.95rem;
+   transition: 0.3s;
+}
+
+.desktop_menu a:hover {
+   color: #FFD700;
+}
+
+/* --- 3. App Drawer (Mobile Side Menu) --- */
+.drawer {
+   position: fixed;
+   top: 0;
+   left: -280px;
+   width: 280px;
+   height: 100%;
+   background: #1a1a1a;
+   z-index: 2000;
+   transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+   padding: 30px 20px;
+}
+
+.drawer.active {
+   left: 0;
+}
+
+.drawer_header {
+   font-size: 22px;
+   font-weight: bold;
+   color: white;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   margin-bottom: 40px;
+   border-bottom: 1px solid #333;
+   padding-bottom: 10px;
+}
+
+.drawer_links a {
+   display: block;
+   color: #eee;
+   text-decoration: none;
+   font-size: 1.1rem;
+   padding: 15px 0;
+   border-bottom: 1px solid #222;
+   transition: 0.3s;
+}
+
+.drawer_links a:hover {
+   color: #FFD700;
+   padding-left: 10px;
+}
+
+.overlay {
+   position: fixed;
+   display: none;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background: rgba(0,0,0,0.7);
+   z-index: 1500;
+   backdrop-filter: blur(4px);
+}
+
+.overlay.active {
+   display: block;
+}
+
+/* --- 4. Hero Section --- */
+.hero_section {
+   display: flex;
+   align-items: center;
+   background: linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.4)), 
+               url('https://c.ndtvimg.com/2022-06/db4blp34_2022-bajaj-pulsar-n160_625x300_22_June_22.jpg');
+   background-position: center;
+   background-size: cover;
+   height: 50vh; 
+   padding: 0 10%;
+   color: white;
+}
+
+.hero_title {
+   font-size: 2.5rem;
+   font-weight: 800;
+   font-style: italic;
+   text-transform: uppercase;
+}
+
+.highlight { color: #215282; background: #FFD700; padding: 0 10px; }
+
+.hero_subtitle {
+   font-size: 1.2rem;
+   margin: 15px 0 30px 0;
+   color: #ccc;
+}
+
+.hero_buttons button {
+   padding: 14px 28px;
+   font-weight: bold;
+   cursor: pointer;
+   transition: 0.3s;
+   border: none;
+   clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+}
+
+.btn_primary { background: #d4a373; color: white; margin-right: 10px; }
+.btn_secondary { background: rgba(255,255,255,0.1); color: white; border: 1px solid white !important; }
+
+.btn_primary:hover, .btn_secondary:hover { transform: scale(1.05); }
+
+/* --- 5. Bike Cards Redesign --- */
+.bike-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 40px 0;
+}
+
 .bike-card {
-    background: #ffffff;
-    border-radius: 15px;
+    background: #fff;
+    border-radius: 16px;
     overflow: hidden;
-    transition: all 0.3s ease;
-    border: 1px solid #eee;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    transition: 0.4s ease;
+    border: 1px solid #eef2f6;
     display: flex;
     flex-direction: column;
-    position: relative;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
 .bike-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
     border-color: #215282;
 }
 
-/* Image Styling */
 .bike-card img {
     width: 100%;
-    height: 200px;
-    object-fit: contain; /* Product clear dekhinna contain garda */
-    padding: 15px;
-    background: #f9f9f9;
+    height: 220px;
+    object-fit: contain;
+    padding: 20px;
+    background: #fcfcfc;
 }
 
-/* Bike Info Content */
 .bike-info {
-    padding: 20px;
-    text-align: left; /* Alignment left garda modern dekhincha */
-    border-top: 1px solid #f0f0f0;
+    padding: 25px;
+    background: white;
 }
 
 .bike-info h3 {
-    font-size: 1.2rem;
-    color: #222;
-    margin-bottom: 8px;
+    font-size: 1.3rem;
+    color: #1a1a1a;
+    margin-bottom: 10px;
     font-weight: 700;
 }
 
 .bike-info p {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #666;
-    margin: 4px 0;
+    margin: 5px 0;
 }
 
-/* Price Highlight */
 .bike-info .price {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     color: #215282;
     font-weight: 800;
-    margin-top: 10px;
-    display: block;
-    border-bottom: 2px solid #FFD700;
-    width: fit-content;
+    margin-top: 15px;
+    display: inline-block;
+    border-bottom: 3px solid #FFD700;
 }
 
-/* Mobile Responsive Adjustments */
-@media (max-width: 480px) {
-    .bike-grid {
-        grid-template-columns: 1fr; /* Mobile ma single column */
-        padding: 10px;
-    }
-    
-    .bike-card img {
-        height: 180px;
-    }
+/* --- 6. Search Bar --- */
+.search-container {
+    display: flex;
+    justify-content: center; 
+    margin: 40px 0;
+}
+
+#search-input {
+    width: 85%; 
+    max-width: 550px; 
+    padding: 14px 25px 14px 50px;
+    border-radius: 40px;
+    border: 2px solid #215282;
+    background: white url('https://cdn-icons-png.flaticon.com/512/622/622669.png') no-repeat 18px center;
+    background-size: 18px;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.3s;
+}
+
+#search-input:focus {
+    box-shadow: 0 0 15px rgba(33, 82, 130, 0.2);
+    border-color: #FFD700;
+}
+
+/* --- 7. Footer --- */
+.main-footer {
+   background: #111;
+   color: white;
+   padding: 60px 0 30px;
+   margin-top: 80px;
+}
+
+.footer-container {
+   display: flex;
+   justify-content: space-around;
+   flex-wrap: wrap;
+   max-width: 1200px;
+   margin: 0 auto;
+   gap: 40px;
+}
+
+.footer-box h4 {
+   color: #FFD700;
+   margin-bottom: 20px;
+   font-size: 1.1rem;
+}
+
+.footer-box ul { list-style: none; }
+.footer-box ul li { margin-bottom: 12px; }
+.footer-box ul li a { color: #bbb; text-decoration: none; transition: 0.3s; }
+.footer-box ul li a:hover { color: white; padding-left: 8px; }
+
+.social-links { display: flex; gap: 15px; }
+.social-links a {
+   width: 42px; height: 42px; background: #222; color: white;
+   display: flex; align-items: center; justify-content: center;
+   border-radius: 50%; transition: 0.3s;
+}
+.social-links a:hover { background: #FFD700; color: #111; transform: translateY(-5px); }
+
+/* --- 8. Responsive Design --- */
+@media (max-width: 768px) {
+   .desktop_menu { display: none; }
+   .mobile_toggle { display: flex; }
+   
+   .hero_title { font-size: 1.8rem; }
+   .hero_section { height: 40vh; text-align: center; justify-content: center; }
+   .hero_buttons { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+   .btn_primary { margin-right: 0; }
+   
+   .bike-grid { grid-template-columns: 1fr; padding: 20px; }
+}
+
+@media (min-width: 769px) {
+   .mobile_toggle { display: none; }
+   .desktop_menu { flex: 2; justify-content: center; }
 }
