@@ -31,6 +31,12 @@
             border-color: #3b82f6;
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
+
+        /* Highlight invalid fields when user tries to submit */
+        input:invalid:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+        }
     </style>
 </head>
 <body class="h-full text-slate-800 antialiased">
@@ -52,22 +58,22 @@
 
         <div class="space-y-6">
             <div class="group">
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Email System Access</label>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Access <span class="text-red-500">*</span></label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-300 group-focus-within:text-blue-500 transition-colors">
                         <i class="fa fa-envelope"></i>
                     </span>
-                    <input type="email" id="email" class="w-full pl-11 pr-4 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none transition-all input-focus font-medium" placeholder="admin@example.com">
+                    <input type="email" id="email" required class="w-full pl-11 pr-4 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none transition-all input-focus font-medium" placeholder="admin@example.com">
                 </div>
             </div>
 
             <div>
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Security Key</label>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Security Key <span class="text-red-500">*</span></label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-300 group-focus-within:text-blue-500 transition-colors">
                         <i class="fa fa-lock"></i>
                     </span>
-                    <input type="password" id="pass" class="w-full pl-11 pr-4 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none transition-all input-focus font-medium" placeholder="••••••••">
+                    <input type="password" id="pass" required class="w-full pl-11 pr-4 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none transition-all input-focus font-medium" placeholder="••••••••">
                 </div>
             </div>
         </div>
@@ -76,8 +82,8 @@
             Secure Sign In <i class="fa fa-shield-halved opacity-50 text-sm"></i>
         </button>
 
-        <div class="mt-8 pt-8 border-t border-slate-100">
-            <button id="googleBtn" class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-sm">
+        <div class="mt-8 pt-8 border-t border-slate-100 text-center">
+             <button id="googleBtn" class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-sm">
                 <img src="https://img.icons8.com/color/24/000000/google-logo.png" class="w-5 h-5">
                 Sign in with Google
             </button>
@@ -128,7 +134,7 @@
 
         <div id="tab-price" class="tab-pane active space-y-8">
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                <div class="xl:col-span-1 bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8">
+                <form id="masterForm" class="xl:col-span-1 bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8 h-fit">
                     <h3 class="text-xl font-extrabold text-slate-900 mb-6 flex items-center gap-3">
                         <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-sm">
                             <i class="fa fa-plus"></i>
@@ -139,40 +145,40 @@
                     <div class="space-y-5">
                         <div class="space-y-2">
                             <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Model Name <span class="text-red-500">*</span></label>
-                            <input type="text" id="mName" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="e.g. Yamaha R15 V4">
+                            <input type="text" id="mName" required class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="e.g. Yamaha R15 V4">
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-2">
                                 <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">MRP <span class="text-red-500">*</span></label>
-                                <input type="number" id="mPrice" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="0">
+                                <input type="number" id="mPrice" required class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="0">
                             </div>
                             <div class="space-y-2">
-                                <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Cash Ins.</label>
-                                <input type="number" id="mNormalIns" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="0">
+                                <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Cash Ins. <span class="text-red-500">*</span></label>
+                                <input type="number" id="mNormalIns" required class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="0">
                             </div>
                         </div>
 
                         <div class="space-y-2">
-                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Finance Insurance</label>
-                            <input type="number" id="mFinanceIns" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="0">
+                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Finance Ins. <span class="text-red-500">*</span></label>
+                            <input type="number" id="mFinanceIns" required class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="0">
                         </div>
 
                         <div class="space-y-2">
-                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Thumbnail URL</label>
-                            <input type="text" id="mImg" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold text-xs" placeholder="https://image-link.com">
+                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Image URL <span class="text-red-500">*</span></label>
+                            <input type="text" id="mImg" required class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold text-xs" placeholder="https://image-link.com">
                         </div>
 
-                        <button id="saveModelBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-blue-100 mt-4">
+                        <button type="button" id="saveModelBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-blue-100 mt-4">
                             Update Master List
                         </button>
                     </div>
-                </div>
+                </form>
 
                 <div class="xl:col-span-2 bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-8 border-b border-slate-100 flex justify-between items-center">
                         <h3 class="font-extrabold text-slate-900 text-lg">Price Master Index</h3>
-                        <span class="text-xs font-bold text-slate-400 px-3 py-1 bg-slate-50 rounded-lg">Real-time Sync Active</span>
+                        <span class="text-xs font-bold text-slate-400 px-3 py-1 bg-slate-50 rounded-lg">Live Sync</span>
                     </div>
                     <div class="overflow-x-auto p-4">
                         <table class="w-full text-left border-separate border-spacing-y-2">
@@ -183,8 +189,7 @@
                                     <th class="px-6 py-4 text-center">Manage</th>
                                 </tr>
                             </thead>
-                            <tbody id="masterTableBody">
-                                </tbody>
+                            <tbody id="masterTableBody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -199,34 +204,36 @@
                     </div>
                     <div>
                         <h3 class="text-xl font-extrabold text-slate-900">Receive New Stock</h3>
-                        <p class="text-sm text-slate-500 font-medium italic">All pricing is automatically inherited from Master List</p>
+                        <p class="text-sm text-slate-500 font-medium">Pricing inherits from Master List</p>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                     <div class="space-y-2">
-                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Model Select</label>
-                        <select id="stockModelSelect" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold appearance-none"></select>
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Model <span class="text-red-500">*</span></label>
+                        <select id="stockModelSelect" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold appearance-none">
+                            <option value="">Select...</option>
+                        </select>
                     </div>
                     <div class="space-y-2">
-                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Registration</label>
-                        <input type="text" id="sRegNo" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Reg No <span class="text-red-500">*</span></label>
+                        <input type="text" id="sRegNo" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
                     </div>
                     <div class="space-y-2">
-                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Chassis No.</label>
-                        <input type="text" id="sChassis" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Chassis <span class="text-red-500">*</span></label>
+                        <input type="text" id="sChassis" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
                     </div>
                     <div class="space-y-2">
-                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Engine No.</label>
-                        <input type="text" id="sEngine" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Engine <span class="text-red-500">*</span></label>
+                        <input type="text" id="sEngine" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
                     </div>
                     <div class="space-y-2">
-                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Colorway</label>
-                        <input type="text" id="sColor" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Color <span class="text-red-500">*</span></label>
+                        <input type="text" id="sColor" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
                     </div>
                 </div>
                 <div class="mt-8 flex justify-end">
-                    <button id="saveStockBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-4 rounded-2xl font-bold shadow-lg shadow-emerald-100 transition-all flex items-center gap-2">
+                    <button type="button" id="saveStockBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-4 rounded-2xl font-bold shadow-lg shadow-emerald-100 transition-all flex items-center gap-2">
                         <i class="fa fa-check-circle"></i> Commit to Inventory
                     </button>
                 </div>
@@ -237,8 +244,8 @@
                     <table class="w-full text-left border-separate border-spacing-y-2">
                         <thead class="text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.2em]">
                             <tr>
-                                <th class="px-6 py-4">Unit Identification</th>
-                                <th class="px-6 py-4">Specifications</th>
+                                <th class="px-6 py-4">Unit</th>
+                                <th class="px-6 py-4">Specs</th>
                                 <th class="px-6 py-4">Valuation</th>
                                 <th class="px-6 py-4 text-center">Manage</th>
                             </tr>
@@ -255,16 +262,48 @@
 <script type="module" src="login.js"></script>
 
 <script>
-function switchTab(id, el) {
-    document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(btn => {
-        btn.classList.remove('active', 'border-blue-600', 'text-blue-600');
-        btn.classList.add('text-slate-400', 'border-transparent');
+    // Tab Switching Logic
+    function switchTab(id, el) {
+        document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.classList.remove('active', 'border-blue-600', 'text-blue-600');
+            btn.classList.add('text-slate-400', 'border-transparent');
+        });
+        document.getElementById(id).classList.add('active');
+        el.classList.add('active', 'border-blue-600', 'text-blue-600');
+        el.classList.remove('text-slate-400', 'border-transparent');
+    }
+
+    // Manual Validation Gatekeeper
+    // This ensures your save buttons don't fire if inputs are empty
+    function validateSection(sectionId) {
+        const inputs = document.querySelectorAll(`#${sectionId} [required]`);
+        let allValid = true;
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                input.classList.add('border-red-500', 'bg-red-50');
+                allValid = false;
+            } else {
+                input.classList.remove('border-red-500', 'bg-red-50');
+            }
+        });
+        return allValid;
+    }
+
+    // Hooking into your buttons
+    document.getElementById('saveModelBtn').addEventListener('mousedown', function(e) {
+        if(!validateSection('tab-price')) {
+            e.stopImmediatePropagation(); // Stops login.js from running
+            alert('Please fill all required fields in the Price Setup form.');
+        }
     });
-    document.getElementById(id).classList.add('active');
-    el.classList.add('active', 'border-blue-600', 'text-blue-600');
-    el.classList.remove('text-slate-400', 'border-transparent');
-}
+
+    document.getElementById('saveStockBtn').addEventListener('mousedown', function(e) {
+        if(!validateSection('tab-stock')) {
+            e.stopImmediatePropagation(); // Stops login.js from running
+            alert('Please fill all required fields in the Stock entry form.');
+        }
+    });
 </script>
 
 </body>
