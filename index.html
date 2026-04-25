@@ -3,88 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Go! YNG | Bajaj Showroom</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <title>Bajaj Showroom | Official Price List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-900">
 
-    <nav>
-        <div class="nav_head">
-            <div class="logo" id="home-link">Go! YNG</div>
+    <nav class="bg-white border-b sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0">
+                    <span class="text-2xl font-black text-red-600 tracking-tighter">BAJAJ</span>
+                </div>
 
-            <div class="mobile_toggle" onclick="toggleDrawer()">
-                <i class="fa-solid fa-bars"></i>
-            </div>
+                <div class="hidden md:flex space-x-8 font-semibold text-gray-600">
+                    <a href="#" class="hover:text-red-600">Home</a>
+                    <a href="#prices" class="hover:text-red-600">Price List</a>
+                    <a href="#" class="hover:text-red-600">Contact</a>
+                </div>
 
-            <div class="nav_img">
-                <img src="favicon.png" alt="YNG Profile">
+                <button id="menu-btn" class="md:hidden text-2xl p-2">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <div id="drawerOverlay" class="overlay" onclick="toggleDrawer()"></div>
-    <aside id="appDrawer" class="drawer">
-        <div class="drawer_header">
-            <span>MENU</span>
-            <i class="fa-solid fa-xmark" onclick="toggleDrawer()"></i>
-        </div>
-        <div class="drawer_links">
-            <a href="#home" onclick="toggleDrawer()">Home</a>
-            <a href="#Price_list" onclick="toggleDrawer()">Price List</a>
-            <a href="finance.html">Finance</a>
-            <a href="#Contact" onclick="toggleDrawer()">Contact</a>
-        </div>
-    </aside>
-
-    <section class="hero_section" id="home">
-        <div class="hero_content">
-            <h1 class="hero_title">LET'S <span class="highlight">RACE</span></h1>
-            <p class="hero_subtitle">The All-New Dominance.</p>
-            <div class="hero_buttons">
-                <button class="btn_get_started">GET STARTED</button>
-                <button class="btn_explore" onclick="scrollToPrice()">EXPLORE MODELS</button>
+    <div id="overlay" class="fixed inset-0 bg-black/50 z-[60] hidden backdrop-blur-sm transition-opacity"></div>
+    <div id="drawer" class="fixed top-0 left-0 w-72 h-full bg-white z-[70] shadow-2xl transform -translate-x-full transition-transform duration-300">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-10">
+                <span class="font-bold text-xl uppercase tracking-widest text-red-600">Menu</span>
+                <button id="close-btn" class="text-3xl text-gray-400">&times;</button>
+            </div>
+            <div class="flex flex-col space-y-6 font-medium text-lg">
+                <a href="#" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition"><i class="fa-solid fa-house"></i> <span>Home</span></a>
+                <a href="#prices" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition"><i class="fa-solid fa-motorcycle"></i> <span>Price List</span></a>
+                <a href="#" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition"><i class="fa-solid fa-phone"></i> <span>Contact</span></a>
             </div>
         </div>
-    </section>
+    </div>
 
-    <section id="Price_list" class="price_section">
-        <h2 class="section_title">Price List</h2>
-        
-        <div class="search-box-wrapper">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="search-input" placeholder="Search bikes here...">
-        </div>
-
-        <div id="bike-container" class="bike-grid">
-            <p class="loading-text">Connecting to database...</p>
+    <section class="relative bg-slate-900 text-white overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-black to-transparent z-10"></div>
+        <img src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=2070" class="absolute inset-0 w-full h-full object-cover opacity-50" alt="Bajaj Bike">
+        <div class="relative z-20 max-w-7xl mx-auto px-4 py-24 sm:py-32">
+            <h1 class="text-4xl md:text-7xl font-extrabold mb-6">Unleash the <br><span class="text-red-500">Thrill of Riding.</span></h1>
+            <p class="max-w-xl text-lg text-slate-300 mb-8">Browse the latest 2026 price list and find your perfect match. Authorized partner in Phidim.</p>
+            <a href="#prices" class="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full font-bold transition inline-block">View Price List</a>
         </div>
     </section>
 
-    <footer id="Contact">
-        <div class="footer_content">
-            <h3>Go! YNG</h3>
-            <p>Authorized Bajaj Showroom, Phidim</p>
-            <p>Phone: +977-9802315425</p>
+    <main id="prices" class="max-w-7xl mx-auto px-4 py-20">
+   <section id="Price_list" class="py-20 px-4 max-w-7xl mx-auto flex flex-col items-center">
+    
+    <div class="text-center mb-12">
+        <h2 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter mb-4">
+            FIND YOUR <span class="text-red-600">RIDE</span>
+        </h2>
+        <p class="text-gray-500 font-medium max-w-sm mx-auto">
+            Discover the latest Bajaj prices updated in real-time.
+        </p>
+    </div>
+
+    <div class="w-full max-w-xl relative group mb-16">
+        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+            <i class="fa-solid fa-magnifying-glass text-gray-400 group-focus-within:text-red-600 transition-colors"></i>
+        </div>
+        <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Type bike name (e.g. Pulsar NS)..." 
+            class="w-full bg-white border-2 border-gray-100 rounded-full py-5 pl-14 pr-6 shadow-xl shadow-slate-100 focus:outline-none focus:ring-4 focus:ring-red-500/10 focus:border-red-600 transition-all placeholder:text-gray-400 text-slate-700 text-lg"
+        >
+        <div class="absolute inset-y-2 right-2 hidden md:flex items-center pr-2">
+            <span class="bg-slate-50 text-slate-400 text-[10px] font-bold px-3 py-2 rounded-full border">PHIDIM BAJAJ</span>
+        </div>
+    </div>
+
+    <div id="bike-container" class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div class="col-span-full py-20 text-center">
+            <div class="relative inline-block">
+                <div class="absolute inset-0 rounded-full bg-red-100 animate-ping opacity-25"></div>
+                <div class="relative bg-white p-6 rounded-full shadow-lg text-red-600">
+                    <i class="fa-solid fa-satellite-dish text-3xl"></i>
+                </div>
+            </div>
+            <p class="mt-6 text-slate-400 font-bold uppercase tracking-[0.3em] text-xs">Syncing Live Data</p>
+        </div>
+    </div>
+</section>  
+
+          </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-gray-500 mb-6">Authorized Bajaj Showroom &copy; 2026</p>
+            <div class="flex justify-center space-x-8 text-2xl text-gray-400">
+                <a href="#" class="hover:text-red-600 transition"><i class="fa-brands fa-facebook"></i></a>
+                <a href="#" class="hover:text-red-600 transition"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="#" class="hover:text-red-600 transition"><i class="fa-brands fa-instagram"></i></a>
+            </div>
         </div>
     </footer>
 
-    <script>
-        // Drawer Toggle Function
-        function toggleDrawer() {
-            const drawer = document.getElementById('appDrawer');
-            const overlay = document.getElementById('drawerOverlay');
-            drawer.classList.toggle('active');
-            overlay.classList.toggle('active');
-        }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Smooth Scroll to Price List
-        function scrollToPrice() {
-            document.getElementById('Price_list').scrollIntoView({ behavior: 'smooth' });
-        }
+        // Drawer Controls
+        const btn = document.getElementById('menu-btn');
+        const close = document.getElementById('close-btn');
+        const drawer = document.getElementById('drawer');
+        const overlay = document.getElementById('overlay');
+
+        const toggle = () => {
+            drawer.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        };
+
+        btn.addEventListener('click', toggle);
+        close.addEventListener('click', toggle);
+        overlay.addEventListener('click', toggle);
     </script>
-    
-    <script type="module" src="script.js"></script>
+    <script type="module" src="dashboard.js"></script>
 </body>
 </html>
