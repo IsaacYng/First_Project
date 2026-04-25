@@ -1,245 +1,249 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-50">
+<html lang="en" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Go! YNG - Admin Suite</title>
+    <title>Go! YNG | Admin Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-        
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.01em; }
 
         .glass {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .tab-pane { display: none; }
-        .tab-pane.active { display: block; animation: fadeIn 0.3s ease-out; }
+        .tab-pane.active { display: block; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .input-focus:focus {
+            background-color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
     </style>
 </head>
-<body class="h-full text-slate-800">
+<body class="h-full text-slate-800 antialiased">
 
-<section id="login-section" class="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-950">
-    <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+<section id="login-section" class="min-h-screen flex items-center justify-center relative bg-[#0f172a]">
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div class="absolute -top-[20%] -left-[10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px]"></div>
+        <div class="absolute -bottom-[20%] -right-[10%] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px]"></div>
+    </div>
 
-    <div class="glass w-full max-w-md rounded-3xl shadow-2xl p-10 z-10 mx-4">
+    <div class="glass w-full max-w-md rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-10 z-10 mx-4 relative overflow-hidden">
         <div class="text-center mb-10">
-            <div class="inline-block p-4 rounded-2xl bg-slate-50 mb-4 shadow-sm">
-                <img class="h-12 w-auto" src="favicon.png" alt="Go YNG" 
-                     onerror="this.src='https://cdn-icons-png.flaticon.com/512/8163/8163149.png'">
+            <div class="inline-flex p-4 rounded-3xl bg-white shadow-sm mb-6">
+                <img class="h-10 w-auto" src="favicon.png" alt="Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/8163/8163149.png'">
             </div>
-            <h2 class="text-3xl font-extrabold tracking-tight text-slate-900">Go! YNG Admin</h2>
-            <p class="text-slate-500 mt-2 font-medium">Manage your inventory & finance</p>
+            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Go! YNG Admin</h2>
+            <p class="text-slate-500 mt-2 font-medium">Internal Inventory Control Suite</p>
         </div>
 
-        <div class="space-y-5">
-            <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
+        <div class="space-y-6">
+            <div class="group">
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Email System Access</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-300 group-focus-within:text-blue-500 transition-colors">
                         <i class="fa fa-envelope"></i>
                     </span>
-                    <input type="email" id="email" 
-                           class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-slate-300" 
-                           placeholder="admin@goyng.com">
+                    <input type="email" id="email" class="w-full pl-11 pr-4 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none transition-all input-focus font-medium" placeholder="admin@example.com">
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Password</label>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Security Key</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-300 group-focus-within:text-blue-500 transition-colors">
                         <i class="fa fa-lock"></i>
                     </span>
-                    <input type="password" id="pass" 
-                           class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-slate-300" 
-                           placeholder="••••••••">
+                    <input type="password" id="pass" class="w-full pl-11 pr-4 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none transition-all input-focus font-medium" placeholder="••••••••">
                 </div>
             </div>
         </div>
 
-        <button id="loginBtn" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 flex items-center justify-center gap-3 transform transition hover:-translate-y-0.5 active:scale-95">
-            Sign In 
-            <i class="fa fa-arrow-right text-sm opacity-70"></i>
+        <button id="loginBtn" class="w-full mt-10 bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all transform active:scale-[0.98] flex items-center justify-center gap-3">
+            Secure Sign In <i class="fa fa-shield-halved opacity-50 text-sm"></i>
         </button>
 
-        <div class="relative flex items-center justify-center my-8">
-            <div class="flex-grow border-t border-slate-100"></div>
-            <span class="px-4 text-xs font-bold text-slate-400 uppercase tracking-widest">or continue with</span>
-            <div class="flex-grow border-t border-slate-100"></div>
+        <div class="mt-8 pt-8 border-t border-slate-100">
+            <button id="googleBtn" class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-sm">
+                <img src="https://img.icons8.com/color/24/000000/google-logo.png" class="w-5 h-5">
+                Sign in with Google
+            </button>
         </div>
-
-        <button id="googleBtn" class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all shadow-sm">
-            <img src="https://img.icons8.com/color/24/000000/google-logo.png" class="w-5 h-5">
-            Google Workspace
-        </button>
     </div>
 </section>
 
 
 <section id="admin-section" style="display:none;" class="min-h-screen flex flex-col">
-    <header class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="bg-blue-600 p-2 rounded-lg text-white">
-                    <i class="fa fa-bolt"></i>
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 sticky top-0 z-50">
+        <div class="max-w-[1400px] mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-5">
+                <div class="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <i class="fa fa-layer-group"></i>
                 </div>
                 <div>
-                    <h1 id="greetingText" class="text-lg font-bold text-slate-900 leading-tight">Dashboard</h1>
-                    <p id="currentDate" class="text-xs font-semibold text-slate-400"></p>
+                    <h1 class="text-lg font-extrabold text-slate-900 leading-none">Go! YNG Console</h1>
+                    <p id="currentDate" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1"></p>
                 </div>
             </div>
 
             <div class="flex items-center gap-6">
-                <div class="text-right hidden sm:block">
-                    <p id="headerUserName" class="text-sm font-bold text-slate-800"></p>
-                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-tighter">Verified Admin</p>
+                <div class="text-right">
+                    <p id="headerUserName" class="text-sm font-bold text-slate-900"></p>
+                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> SYSTEM ACTIVE
+                    </span>
                 </div>
-                <button id="logoutBtn" class="h-10 w-10 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all">
+                <button id="logoutBtn" class="h-11 w-11 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all border border-slate-100">
                     <i class="fa fa-power-off"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <div class="bg-white border-b border-slate-200">
-        <div class="max-w-7xl mx-auto px-6 flex gap-8">
-            <button class="nav-item active border-b-2 border-blue-600 text-blue-600 py-4 font-bold text-sm transition-all" onclick="switchTab('tab-price', this)">
-                <i class="fa fa-tag mr-2 opacity-70"></i> Price Setup
+    <nav class="bg-white border-b border-slate-200 px-8">
+        <div class="max-w-[1400px] mx-auto flex gap-10">
+            <button class="nav-item active border-b-4 border-blue-600 text-blue-600 py-5 font-extrabold text-sm transition-all" onclick="switchTab('tab-price', this)">
+                <i class="fa fa-receipt mr-2 opacity-50"></i> Master Pricing
             </button>
-            <button class="nav-item border-b-2 border-transparent text-slate-400 hover:text-slate-600 py-4 font-bold text-sm transition-all" onclick="switchTab('tab-stock', this)">
-                <i class="fa fa-warehouse mr-2 opacity-70"></i> Live Stock
+            <button class="nav-item border-b-4 border-transparent text-slate-400 hover:text-slate-600 py-5 font-extrabold text-sm transition-all" onclick="switchTab('tab-stock', this)">
+                <i class="fa fa-warehouse mr-2 opacity-50"></i> Inventory Management
             </button>
         </div>
-    </div>
+    </nav>
 
-    <main class="flex-1 p-6 max-w-7xl mx-auto w-full bg-slate-50/50">
+    <main class="flex-1 p-8 max-w-[1400px] mx-auto w-full">
 
         <div id="tab-price" class="tab-pane active space-y-8">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h3 class="font-bold text-slate-700 flex items-center gap-2">
-                        <i class="fa fa-cog text-blue-500"></i> Master Price Setup
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                <div class="xl:col-span-1 bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8">
+                    <h3 class="text-xl font-extrabold text-slate-900 mb-6 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-sm">
+                            <i class="fa fa-plus"></i>
+                        </span>
+                        Add New Model
                     </h3>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    
+                    <div class="space-y-5">
                         <div class="space-y-2">
-                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Model Name</label>
-                            <input type="text" id="mName" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Model Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="mName" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="e.g. Yamaha R15 V4">
                         </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">MRP <span class="text-red-500">*</span></label>
+                                <input type="number" id="mPrice" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="0">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Cash Ins.</label>
+                                <input type="number" id="mNormalIns" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="0">
+                            </div>
+                        </div>
+
                         <div class="space-y-2">
-                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">MRP Price</label>
-                            <input type="number" id="mPrice" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" required>
+                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Finance Insurance</label>
+                            <input type="number" id="mFinanceIns" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="0">
                         </div>
+
                         <div class="space-y-2">
-                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Cash Insurance</label>
-                            <input type="number" id="mNormalIns" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" required>
+                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Thumbnail URL</label>
+                            <input type="text" id="mImg" class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold text-xs" placeholder="https://image-link.com">
                         </div>
-                        <div class="space-y-2">
-                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Finance Insurance</label>
-                            <input type="number" id="mFinanceIns" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" required>
-                        </div>
-                        <div class="lg:col-span-4 space-y-2">
-                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Image URL</label>
-                            <input type="text" id="mImg" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="https://image-link.com" required>
-                        </div>
-                    </div>
-                    <div class="mt-8 flex justify-end">
-                        <button id="saveModelBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-100 flex items-center gap-2">
-                            <i class="fa fa-save"></i> Save to Master
+
+                        <button id="saveModelBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-blue-100 mt-4">
+                            Update Master List
                         </button>
                     </div>
                 </div>
-            </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">
-                            <tr>
-                                <th class="px-6 py-4">Vehicle</th>
-                                <th class="px-6 py-4 text-right">Base Price</th>
-                                <th class="px-6 py-4 text-right">Cash Ins.</th>
-                                <th class="px-6 py-4 text-right">Finance Ins.</th>
-                                <th class="px-6 py-4 text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="masterTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
-                    </table>
+                <div class="xl:col-span-2 bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-8 border-b border-slate-100 flex justify-between items-center">
+                        <h3 class="font-extrabold text-slate-900 text-lg">Price Master Index</h3>
+                        <span class="text-xs font-bold text-slate-400 px-3 py-1 bg-slate-50 rounded-lg">Real-time Sync Active</span>
+                    </div>
+                    <div class="overflow-x-auto p-4">
+                        <table class="w-full text-left border-separate border-spacing-y-2">
+                            <thead>
+                                <tr class="text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.2em]">
+                                    <th class="px-6 py-4">Vehicle</th>
+                                    <th class="px-6 py-4">Financials</th>
+                                    <th class="px-6 py-4 text-center">Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="masterTableBody">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-
         <div id="tab-stock" class="tab-pane space-y-8">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="bg-slate-50 px-6 py-4 border-b border-slate-100">
-                    <h3 class="font-bold text-slate-700 flex items-center gap-2">
-                        <i class="fa fa-plus-circle text-emerald-500"></i> New Inventory Entry
-                    </h3>
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+                        <i class="fa fa-plus-circle"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-extrabold text-slate-900">Receive New Stock</h3>
+                        <p class="text-sm text-slate-500 font-medium italic">All pricing is automatically inherited from Master List</p>
+                    </div>
                 </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="space-y-2">
-                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Select Model</label>
-                            <select id="stockModelSelect" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all appearance-none"></select>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Registration No</label>
-                            <input type="text" id="sRegNo" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all" required>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Chassis No</label>
-                            <input type="text" id="sChassis" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all" required>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Engine No</label>
-                            <input type="text" id="sEngine" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all" required>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[11px] font-bold text-slate-400 uppercase ml-1">Color</label>
-                            <input type="text" id="sColor" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all" required>
-                        </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Model Select</label>
+                        <select id="stockModelSelect" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold appearance-none"></select>
                     </div>
-                    <div class="mt-8 flex justify-end">
-                        <button id="saveStockBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-3 rounded-xl font-bold transition-all shadow-lg shadow-emerald-100">
-                            Add to Stock
-                        </button>
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Registration</label>
+                        <input type="text" id="sRegNo" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
                     </div>
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Chassis No.</label>
+                        <input type="text" id="sChassis" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Engine No.</label>
+                        <input type="text" id="sEngine" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Colorway</label>
+                        <input type="text" id="sColor" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end">
+                    <button id="saveStockBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-4 rounded-2xl font-bold shadow-lg shadow-emerald-100 transition-all flex items-center gap-2">
+                        <i class="fa fa-check-circle"></i> Commit to Inventory
+                    </button>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto p-4">
+                    <table class="w-full text-left border-separate border-spacing-y-2">
+                        <thead class="text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.2em]">
                             <tr>
-                                <th class="px-6 py-4">Bike Details</th>
-                                <th class="px-6 py-4">Chassis / Engine</th>
-                                <th class="px-6 py-4">Reg No</th>
-                                <th class="px-6 py-4">Color</th>
-                                <th class="px-6 py-4 text-center">Action</th>
+                                <th class="px-6 py-4">Unit Identification</th>
+                                <th class="px-6 py-4">Specifications</th>
+                                <th class="px-6 py-4">Valuation</th>
+                                <th class="px-6 py-4 text-center">Manage</th>
                             </tr>
                         </thead>
-                        <tbody id="stockTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                        <tbody id="stockTableBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -252,17 +256,12 @@
 
 <script>
 function switchTab(id, el) {
-    // Hide all
     document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(btn => {
         btn.classList.remove('active', 'border-blue-600', 'text-blue-600');
         btn.classList.add('text-slate-400', 'border-transparent');
     });
-
-    // Show selected
     document.getElementById(id).classList.add('active');
-    
-    // Style button
     el.classList.add('active', 'border-blue-600', 'text-blue-600');
     el.classList.remove('text-slate-400', 'border-transparent');
 }
