@@ -57,14 +57,14 @@ function renderBikes(bikes) {
                             <i class="fa-solid fa-shield-halved text-slate-600"></i>
                         </div>
                         <div>
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Insurance Coverage</p>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Insurance</p>
                             <p class="font-bold text-slate-800">Rs. ${bike.Insurance || '0'}</p>
                         </div>
                     </div>
                     
                     <div class="pt-5 border-t border-dashed border-gray-200">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Total MRP Price</span>
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">MRP Price</span>
                             <i class="fa-solid fa-receipt text-gray-300"></i>
                         </div>
                         <div class="text-3xl font-black text-slate-900 flex items-baseline">
