@@ -106,3 +106,21 @@ document.addEventListener('input', (e) => {
 });
 
 fetchBikes();
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Drawer Controls
+        const btn = document.getElementById('menu-btn');
+        const close = document.getElementById('close-btn');
+        const drawer = document.getElementById('drawer');
+        const overlay = document.getElementById('overlay');
+
+        const toggle = () => {
+            drawer.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        };
+
+        btn.addEventListener('click', toggle);
+        close.addEventListener('click', toggle);
+        overlay.addEventListener('click', toggle);
