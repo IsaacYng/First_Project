@@ -11,26 +11,31 @@
 
     /* THE PRINT FIX */
     @media print {
-    /* Hide everything except the print-area */
+    /* Set page size to A4 and remove margins */
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    /* Hide everything that is NOT the print-area */
     body * {
         visibility: hidden;
     }
+
+    /* Only show the print-area and its children */
     #print-area, #print-area * {
         visibility: visible;
     }
+
+    /* Position the print-area at the absolute top-left */
     #print-area {
         position: absolute;
         left: 0;
         top: 0;
-        width: 210mm;
-        height: 297mm;
-        margin: 0;
-        padding: 20mm;
-        border: none;
-    }
-    /* Force background colors and remove margins */
-    @page {
-        size: A4;
-        margin: 0;
+        width: 100%; /* Spans the full A4 width */
+        height: auto;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 15mm !important; /* Professional margin for printer */
     }
 }
