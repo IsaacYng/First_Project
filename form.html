@@ -262,25 +262,56 @@
                 <div class="flex"><span class="w-40 font-semibold">Vehicle Model</span>: <span id="a4Model" class="ml-1 font-bold">Model</span></div>
             </div>
         </div>
-
         <div class="mb-8">
-            <h3 class="font-bold border-b border-gray-400 mb-3 uppercase text-xs tracking-wider">Financial Details</h3>
-            <div class="max-w-[500px] space-y-2 text-sm">
-                <div class="flex justify-between"><span>Retail Price:</span><span id="a4MRP" class="font-mono">0.00</span></div>
-                <div class="flex justify-between"><span>Down Payment:</span><span id="a4DP" class="font-mono">0.00</span></div>
-                <div class="flex justify-between"><span>Loan Amount:</span><span id="a4Loan" class="font-mono">0.00</span></div>
-                <div class="flex justify-between"><span>Interest Rate (%):</span><span id="a4Rate" class="font-mono">0.00</span></div>
-                <div class="flex justify-between"><span>Tenure (Months):</span><span id="a4Tenure" class="font-mono">0</span></div>
-                <div class="flex justify-between italic text-gray-600"><span>Registration / Yatayat:</span><span id="a4Namsari" class="font-mono">3,000.00</span></div>
-                <div class="flex justify-between"><span>Insurance Premium:</span><span id="a4Ins" class="font-mono">0.00</span></div>
-                <div class="flex justify-between"><span>Advance EMI (If Any):</span><span id="a4AdvEmiAmt" class="font-mono">0.00</span></div>
-                <div class="flex justify-between border-t-2 border-black mt-4 pt-2 text-lg font-bold">
-                    <span>Total Down-payment Amount:</span>
-                    <span>RS. <span id="a4TotalDP">0.00</span></span>
-                </div>
+    <h3 class="font-bold border-b-2 border-black mb-4 uppercase text-sm tracking-widest pb-1">Financial Details</h3>
+    
+    <div class="w-full border border-gray-300 rounded-sm overflow-hidden">
+        
+        <div class="grid grid-cols-2 border-b border-gray-200">
+            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Retail Price</div>
+            <div class="p-2 text-right font-mono" id="a4MRP">0.00</div>
+        </div>
+
+        <div class="grid grid-cols-2 border-b border-gray-200">
+            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Down Payment</div>
+            <div class="p-2 text-right font-mono" id="a4DP">0.00</div>
+        </div>
+
+        <div class="grid grid-cols-2 border-b border-gray-200">
+            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Loan Amount</div>
+            <div class="p-2 text-right font-mono font-bold" id="a4Loan">0.00</div>
+        </div>
+
+        <div class="grid grid-cols-2 border-b border-gray-200">
+            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Interest Rate (%) & Tenure</div>
+            <div class="p-2 text-right font-mono">
+                <span id="a4Rate">0.00</span>% / <span id="a4Tenure">0</span> Months
             </div>
         </div>
 
+        <div class="grid grid-cols-2 border-b border-gray-200">
+            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Registration / Yatayat</div>
+            <div class="p-2 text-right font-mono italic text-gray-600" id="a4Namsari">3,000.00</div>
+        </div>
+
+        <div class="grid grid-cols-2 border-b border-gray-200">
+            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Insurance Premium</div>
+            <div class="p-2 text-right font-mono" id="a4Ins">0.00</div>
+        </div>
+
+        <div class="grid grid-cols-2 border-b-2 border-black">
+            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Advance EMI (If Any)</div>
+            <div class="p-2 text-right font-mono" id="a4AdvEmiAmt">0.00</div>
+        </div>
+
+        <div class="grid grid-cols-2 bg-slate-50">
+            <div class="p-3 font-bold text-base uppercase">Total Down-payment Amount</div>
+            <div class="p-3 text-right text-lg font-bold">
+                RS. <span id="a4TotalDP" class="underline decoration-double">0.00</span>
+            </div>
+        </div>
+    </div>
+</div>
         <div class="mb-16">
             <h3 class="font-bold border-b border-gray-400 mb-2 uppercase text-xs tracking-wider">Declaration</h3>
             <p class="text-[11px] leading-relaxed italic text-justify">
