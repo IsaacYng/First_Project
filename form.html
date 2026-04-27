@@ -300,54 +300,83 @@
     </ul>
 </div>
         <div class="mb-8">
-    <h3 class="font-bold border-b-2 border-black mb-4 uppercase text-sm tracking-widest pb-1">Financial Details</h3>
+    <h3 class="font-bold border-b border-black mb-4 uppercase text-sm tracking-widest pb-1">Financial Details</h3>
     
-    <div class="w-full border border-gray-300 rounded-sm overflow-hidden">
+    <ul class="space-y-2 text-[14px] text-gray-900 ml-4 list-none">
         
-        <div class="grid grid-cols-2 border-b border-gray-200">
-            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Retail Price</div>
-            <div class="p-2 text-right font-mono" id="a4MRP">0.00</div>
-        </div>
+        <li class="grid grid-cols-[220px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[10px]">●</span> <span class="font-semibold">Retail Price</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2 font-mono" id="a4MRP">0.00</span>
+        </li>
 
-        <div class="grid grid-cols-2 border-b border-gray-200">
-            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Down Payment</div>
-            <div class="p-2 text-right font-mono" id="a4DP">0.00</div>
-        </div>
+        <li class="grid grid-cols-[220px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[10px]">●</span> <span class="font-semibold">Down Payment</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2 font-mono" id="a4DP">0.00</span>
+        </li>
 
-        <div class="grid grid-cols-2 border-b border-gray-200">
-            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Loan Amount</div>
-            <div class="p-2 text-right font-mono font-bold" id="a4Loan">0.00</div>
-        </div>
+        <li class="grid grid-cols-[220px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[10px]">●</span> <span class="font-semibold">Loan Amount</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2 font-mono font-bold" id="a4Loan">0.00</span>
+        </li>
 
-        <div class="grid grid-cols-2 border-b border-gray-200">
-            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Interest Rate (%) & Tenure</div>
-            <div class="p-2 text-right font-mono">
-                <span id="a4Rate">0.00</span>% / <span id="a4Tenure">0</span> Months
-            </div>
-        </div>
+        <li class="grid grid-cols-[220px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[10px]">●</span> <span class="font-semibold">Interest Rate (%)</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2 font-mono" id="a4Rate">0.00</span>
+        </li>
 
-        <div class="grid grid-cols-2 border-b border-gray-200">
-            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Registration / Yatayat</div>
-            <div class="p-2 text-right font-mono italic text-gray-600" id="a4Namsari">3,000.00</div>
-        </div>
+        <li class="grid grid-cols-[220px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[10px]">●</span> <span class="font-semibold">Tenure (Months)</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2 font-mono" id="a4Tenure">0</span>
+        </li>
 
-        <div class="grid grid-cols-2 border-b border-gray-200">
-            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Insurance Premium</div>
-            <div class="p-2 text-right font-mono" id="a4Ins">0.00</div>
-        </div>
+        <li class="grid grid-cols-[220px_10px_1fr] items-baseline italic text-gray-600">
+            <span class="flex items-center gap-2">
+                <span class="text-[10px]">●</span> <span>Registration / Yatayat</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2 font-mono" id="a4Namsari">3,000.00</span>
+        </li>
 
-        <div class="grid grid-cols-2 border-b-2 border-black">
-            <div class="bg-gray-50 p-2 font-semibold text-gray-700 border-r border-gray-200">Advance EMI (If Any)</div>
-            <div class="p-2 text-right font-mono" id="a4AdvEmiAmt">0.00</div>
-        </div>
+        <li class="grid grid-cols-[220px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[10px]">●</span> <span class="font-semibold">Insurance Premium</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2 font-mono" id="a4Ins">0.00</span>
+        </li>
 
-        <div class="grid grid-cols-2 bg-slate-50">
-            <div class="p-3 font-bold text-base uppercase">Total Down-payment Amount</div>
-            <div class="p-3 text-right text-lg font-bold">
-                RS. <span id="a4TotalDP" class="underline decoration-double">0.00</span>
-            </div>
-        </div>
-    </div>
+        <li class="grid grid-cols-[220px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[10px]">●</span> <span class="font-semibold">Advance EMI (If Any)</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2 font-mono" id="a4AdvEmiAmt">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[220px_10px_1fr] items-baseline pt-4 border-t border-gray-300 mt-2">
+            <span class="flex items-center gap-2">
+                <span class="text-[10px]">●</span> <span class="font-bold text-base">Total Down-payment</span>
+            </span>
+            <span class="font-bold">:</span>
+            <span class="ml-2 font-bold text-lg">RS. <span id="a4TotalDP" class="underline decoration-double">0.00</span></span>
+        </li>
+
+    </ul>
 </div>
         <div class="mb-16">
             <h3 class="font-bold border-b border-gray-400 mb-2 uppercase text-xs tracking-wider">Declaration</h3>
