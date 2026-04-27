@@ -1,54 +1,57 @@
+
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
     
+    /* 1. Reset & Mobile Container Fix */
     body { 
         font-family: 'Inter', sans-serif; 
         margin: 0; 
         padding: 0; 
-        overflow-x: hidden; /* Mobile background scroll rokne */
+        background-color: #f1f5f9; 
     }
 
-    /* --- Screen Layout --- */
+    /* Screen view ma A4 lai scrollable banauna */
     .scroller-container { 
-        background-color: #f1f5f9; 
-        padding: 20px; 
         display: flex; 
         flex-direction: column;
-        align-items: center;
-        /* Mobile ma paper left-right scroll garna milne banauna */
-        overflow-x: auto; 
+        align-items: center; 
+        padding: 20px; 
         width: 100%;
+        overflow-x: auto; /* Mobile ma left-right scroll garna milne */
         -webkit-overflow-scrolling: touch;
+        box-sizing: border-box;
     }
 
+    /* A4 Paper Styling */
     #print-area { 
-        width: 210mm; 
+        width: 210mm; /* Fixed A4 Width */
         min-height: 297mm;
         padding: 15mm; 
         background: white; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
         box-sizing: border-box;
         margin: 0 auto;
-        /* A4 paper mobile ma "Shrink" nahos, scroll hos */
-        flex-shrink: 0; 
+        flex-shrink: 0; /* Mobile ma resize huna bata rokne */
     }
 
-    /* --- THE ULTIMATE 1-PAGE & MOBILE FIX --- */
+    /* --- THE PRINT ENGINE (Fixed for 1 Page) --- */
     @media print {
-        /* Browser ko default margin/header/footer hataune */
+        /* Browser ko default settings hataune */
         @page {
             size: A4;
             margin: 0;
         }
 
+        /* 2. Important: Purei body ko aru kura gayab garne */
         html, body {
-            height: 100%;
-            overflow: hidden !important; /* Page 2 banna didaina */
+            height: 100% !important;
+            overflow: hidden !important; /* Page 2 hatauna */
+            background: white !important;
             margin: 0 !important;
             padding: 0 !important;
         }
 
-        /* Nav, Calculator, Footer sabai purei gayab */
-        nav, footer, header, button, .print-hidden, .calculator-ui, .scroller-container > *:not(#print-area) {
+        /* Nav, Calculator, Footer sabai display none */
+        nav, footer, header, button, .print-hidden, .calculator-ui {
             display: none !important;
         }
 
@@ -56,23 +59,23 @@
             visibility: hidden !important;
         }
 
+        /* 3. Khali Form matrai dekhaune */
         #print-area, #print-area * {
             visibility: visible !important;
-            -webkit-print-color-adjust: exact;
         }
 
+        /* 4. A4 Sheet lai exact sheet ma lock garne */
         #print-area {
             position: absolute !important;
             left: 0 !important;
             top: 0 !important;
             width: 210mm !important;
-            height: 297mm !important;
+            height: 296.5mm !important; /* Sano margin chhoddako extra page na-aawos bhanera */
             margin: 0 !important;
             padding: 15mm !important; 
             border: none !important;
             box-shadow: none !important;
             display: block !important;
-            /* Extra white page rokne line */
             page-break-after: avoid !important;
             break-after: avoid !important;
         }
