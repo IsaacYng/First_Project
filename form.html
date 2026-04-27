@@ -235,10 +235,10 @@
 </div>
 
 
-<div class="bg-gray-200 min-h-screen py-8 print:bg-white print:p-0">
+<div class="scroller-container w-full overflow-x-auto bg-slate-100 py-6 md:py-10 flex flex-col items-center print:bg-white print:p-0 print:overflow-visible">
     
-    <div class="max-w-[210mm] mx-auto mb-6 flex justify-end print:hidden">
-        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg flex items-center gap-2 transition-all">
+    <div class="w-[210mm] flex justify-end mb-4 print:hidden px-4 md:px-0">
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow-lg flex items-center gap-2 transition-all active:scale-95">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
             </svg>
@@ -246,75 +246,35 @@
         </button>
     </div>
 
-    <div id="print-area" class="bg-white mx-auto w-[210mm] min-h-[297mm] p-[20mm] shadow-2xl print:shadow-none print:m-0 print:w-full font-serif text-gray-900 border border-gray-300 print:border-none">
+    <div id="print-area" class="bg-white w-[210mm] min-h-[296mm] p-[15mm] md:p-[20mm] shadow-2xl shrink-0 font-serif text-gray-900 print:shadow-none print:m-0 print:border-none print:w-full">
         
-        <div class="text-center mb-10">
-            <h1 class="text-2xl font-extrabold uppercase tracking-tighter border-b-2 border-black inline-block pb-1">HULAS FINSERV HIRE PURCHASE LIMITED</h1>
-            <h2 class="text-lg font-bold underline mt-4 block">DOWNPAYMENT ALLOCATION FORM</h2>
+        <div class="text-center mb-8 border-b-2 border-black pb-4">
+            <h1 class="text-2xl font-bold uppercase tracking-widest leading-tight">HULAS FINSERV HIRE PURCHASE LIMITED</h1>
+            <h2 class="text-lg font-bold underline mt-2">DOWNPAYMENT ALLOCATION FORM</h2>
         </div>
 
-        <div class="mb-8">
-            <h3 class="font-bold border-b border-gray-800 mb-4 pb-1 text-base">Customer & Vehicle Information</h3>
-            <div class="space-y-2 text-sm">
-                <div class="grid grid-cols-[160px_1fr]">
-                    <span class="font-semibold">Date</span>
-                    <span>: <span id="a4Date">--/--/----</span></span>
-                </div>
-                <div class="grid grid-cols-[160px_1fr]">
-                    <span class="font-semibold">Dealer Name</span>
-                    <span>: <span id="a4Dealer">Samriddhi And Brothers Auto Pvt. Ltd.</span></span>
-                </div>
-                <div class="grid grid-cols-[160px_1fr]">
-                    <span class="font-semibold">Customer Name</span>
-                    <span>: <span id="a4CustName">---</span></span>
-                </div>
-                <div class="grid grid-cols-[160px_1fr]">
-                    <span class="font-semibold">Contact Number</span>
-                    <span>: <span id="a4CustPhone">---</span></span>
-                </div>
-                <div class="grid grid-cols-[160px_1fr]">
-                    <span class="font-semibold">Vehicle Model</span>
-                    <span class="font-bold text-base">: <span id="a4Model">---</span></span>
-                </div>
+        <div class="mb-6">
+            <h3 class="font-bold border-b border-gray-400 mb-3 uppercase text-xs tracking-wider">Customer & Vehicle Information</h3>
+            <div class="grid grid-cols-1 gap-y-2 text-sm">
+                <div class="flex"><span class="w-44 font-semibold">Date</span>: <span id="a4Date" class="ml-1">??/??/????</span></div>
+                <div class="flex"><span class="w-44 font-semibold">Dealer Name</span>: <span id="a4Dealer" class="ml-1">Samriddhi And Brothers Auto Pvt. Ltd.</span></div>
+                <div class="flex"><span class="w-44 font-semibold">Customer Name</span>: <span id="a4CustName" class="ml-1">Name</span></div>
+                <div class="flex"><span class="w-44 font-semibold">Contact Number</span>: <span id="a4CustPhone" class="ml-1">9800000000</span></div>
+                <div class="flex"><span class="w-44 font-semibold">Vehicle Model</span>: <span id="a4Model" class="ml-1 font-bold">Model</span></div>
             </div>
         </div>
 
         <div class="mb-8">
-            <h3 class="font-bold border-b border-gray-800 mb-4 pb-1 text-base">Financial Details</h3>
-            <div class="space-y-2 text-sm max-w-[500px]">
-                <div class="flex justify-between">
-                    <span>Retail Price:</span>
-                    <span class="font-mono font-semibold" id="a4MRP">0.00</span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Down Payment:</span>
-                    <span class="font-mono font-semibold" id="a4DP">0.00</span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Loan Amount:</span>
-                    <span class="font-mono font-semibold" id="a4Loan">0.00</span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Interest Rate (%):</span>
-                    <span class="font-mono font-semibold" id="a4Rate">0.00</span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Tenure (Months):</span>
-                    <span class="font-mono font-semibold" id="a4Tenure">0</span>
-                </div>
-                <div class="flex justify-between italic text-gray-700">
-                    <span>Registration Charge / Yatayat:</span>
-                    <span class="font-mono" id="a4Namsari">3,000.00</span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Insurance Premium:</span>
-                    <span class="font-mono font-semibold" id="a4Ins">0.00</span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Advance EMI (If Any):</span>
-                    <span class="font-mono font-semibold" id="a4AdvEmiAmt">0.00</span>
-                </div>
-                
+            <h3 class="font-bold border-b border-gray-400 mb-3 uppercase text-xs tracking-wider">Financial Details</h3>
+            <div class="max-w-[500px] space-y-2 text-sm">
+                <div class="flex justify-between"><span>Retail Price:</span><span id="a4MRP" class="font-mono">0.00</span></div>
+                <div class="flex justify-between"><span>Down Payment:</span><span id="a4DP" class="font-mono">0.00</span></div>
+                <div class="flex justify-between"><span>Loan Amount:</span><span id="a4Loan" class="font-mono">0.00</span></div>
+                <div class="flex justify-between"><span>Interest Rate (%):</span><span id="a4Rate" class="font-mono">0.00</span></div>
+                <div class="flex justify-between"><span>Tenure (Months):</span><span id="a4Tenure" class="font-mono">0</span></div>
+                <div class="flex justify-between italic text-gray-600"><span>Registration / Yatayat:</span><span id="a4Namsari" class="font-mono">3,000.00</span></div>
+                <div class="flex justify-between"><span>Insurance Premium:</span><span id="a4Ins" class="font-mono">0.00</span></div>
+                <div class="flex justify-between"><span>Advance EMI (If Any):</span><span id="a4AdvEmiAmt" class="font-mono">0.00</span></div>
                 <div class="flex justify-between border-t-2 border-black mt-4 pt-2 text-lg font-bold">
                     <span>Total Down-payment Amount:</span>
                     <span>RS. <span id="a4TotalDP">0.00</span></span>
@@ -322,12 +282,20 @@
             </div>
         </div>
 
-        <div class="mb-20">
-            <h3 class="font-bold border-b border-gray-800 mb-2 pb-1 text-base">Declaration</h3>
-            <p class="text-xs text-justify leading-relaxed">
+        <div class="mb-16">
+            <h3 class="font-bold border-b border-gray-400 mb-2 uppercase text-xs tracking-wider">Declaration</h3>
+            <p class="text-[11px] leading-relaxed italic text-justify">
                 We confirm that the information provided above is accurate, and we acknowledge and agree to the payment amounts and breakdown of the down payment.
             </p>
         </div>
+
+        <div class="mt-20 flex justify-between items-end text-[10px] font-bold text-center uppercase">
+            <div class="w-44 border-t border-black pt-2">Customer's Signature</div>
+            <div class="w-44 border-t border-black pt-2">Dealer's Signature & Stamp</div>
+            <div class="w-44 border-t border-black pt-2">LO's Signature</div>
+        </div>
+    </div>
+</div>
 
         <div class="flex justify-between items-end text-[10px] uppercase font-bold pt-10">
             <div class="w-40 border-t border-black pt-2 text-center">Customer's Signature</div>
