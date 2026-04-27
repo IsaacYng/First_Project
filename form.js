@@ -119,6 +119,7 @@ function updateUI(data) {
     // Customer Sync
     document.getElementById('a4CustName').innerText = document.getElementById('custNameInput').value || "Enter Name";
     document.getElementById('a4CustPhone').innerText = document.getElementById('custPhoneInput').value || "Enter Number";
+    document.getElementById('a4Dealer').innerText = document.getElementById('dealerNameInput').value || "Samriddhi And Brothers Auto Pvt. Ltd.";
 }
 
 // --- Event Listeners & UI Helpers ---
