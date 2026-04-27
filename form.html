@@ -55,50 +55,50 @@
             </div>
         </div>
     </div>
+<main id="finance" class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 font-sans text-slate-900">
+    <div class="max-w-5xl mx-auto space-y-6">
 
-    <main class="max-w-6xl mx-auto py-10 px-4">
-        
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center mb-8 input-section">
-            <p class="text-slate-500 font-bold uppercase text-xs tracking-widest mb-1">Final Downpayment to Pay</p>
-            <div id="displayTotalDP" class="text-5xl font-black text-indigo-600">RS. 0</div>
-            <div class="mt-4 flex justify-center gap-6 text-sm font-medium text-slate-500">
-                <span>EMI: <span id="displayEMI" class="text-slate-900">RS. 0</span></span>
-                <span>Rate: <span id="displayRate" class="text-slate-900">0%</span></span>
-            </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 text-center">
+            <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Finance Calculations</h2>
+            <p class="text-slate-500 mt-1 font-medium uppercase text-xs tracking-widest">Total Downpayment (Amount to Pay Now)</p>
+            <div id="displayTotalDP" class="text-4xl font-black text-red-600 mt-2">RS. 0</div>
+            <p class="text-[10px] text-slate-400 mt-2">*Includes DP + Insurance + Reg. + Advance EMI</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 input-section">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="text-lg font-bold mb-5 flex items-center"><i class="fa-solid fa-motorcycle mr-3 text-indigo-500"></i>Vehicle Selection</h3>
-                    
-                    <select id="modelSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 mb-6 focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <option>Loading Bikes...</option>
-                    </select>
+                    <h3 class="flex items-center text-lg font-bold text-slate-700 mb-5">
+                        <i class="fa-solid fa-motorcycle mr-3 text-red-500"></i> Vehicle Details
+                    </h3>
+
+                    <select id="modelSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block p-3 mb-6 transition-all">
+                        </select>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="bg-slate-50 p-3 rounded-lg">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase">MRP</label>
-                            <p id="mrp" class="text-md font-bold">RS. 0</p>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Retail Price (MRP)</label>
+                            <p id="mrp" class="text-lg font-semibold text-slate-800">RS. 0</p>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Discount</label>
-                            <input type="number" id="discountInput" value="0" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Discount</label>
+                            <input type="number" id="discountInput" value="0" class="w-full bg-white border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-red-500 outline-none">
                         </div>
-                        <div class="bg-green-50 p-3 rounded-lg border border-green-100">
-                            <label class="block text-[10px] font-bold text-green-600 uppercase">After Disc.</label>
-                            <p id="afterDiscount" class="text-md font-bold text-green-700">RS. 0</p>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">After Discount</label>
+                            <p id="afterDiscount" class="text-lg font-semibold text-green-600">RS. 0</p>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Adv. EMI Count</label>
-                            <input type="number" id="advEmiInput" value="0" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Adv. EMI (Months)</label>
+                            <input type="number" id="advEmiInput" value="1" min="0" class="w-full bg-white border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-red-500 outline-none">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-slate-100">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Downpayment %</label>
-                            <select id="dpPercent" class="w-full bg-white border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500">
+                            <select id="dpPercent" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-red-500">
                                 <option value="30">30%</option>
                                 <option value="40">40%</option>
                                 <option value="50" selected>50%</option>
@@ -107,124 +107,74 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Tenure (Months)</label>
-                            <select id="tenure" class="w-full bg-white border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500">
-                                <option value="12" selected>12 Months</option>
+                            <select id="tenure" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-red-500">
+                                <option value="12">12 Months</option>
                                 <option value="18">18 Months</option>
                                 <option value="24">24 Months</option>
-                                <option value="36">36 Months</option>
+                                <option value="36" selected>36 Months</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="text-lg font-bold mb-4 flex items-center"><i class="fa-solid fa-user mr-3 text-indigo-500"></i>Customer Information</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="custNameInput" placeholder="Customer Name" class="border p-3 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <input type="tel" id="custPhoneInput" placeholder="Contact Number" class="border p-3 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <h3 class="flex items-center text-lg font-bold text-slate-700 mb-4">
+                        <i class="fa-solid fa-file-invoice-dollar mr-3 text-red-500"></i> Other Charges
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                            <span class="text-sm text-slate-600 font-medium">Insurance Premium</span>
+                            <p id="displayIns" class="font-bold text-slate-800">RS. 0</p>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                            <span class="text-sm text-slate-600 font-medium">Registration (Yatayat)</span>
+                            <input type="number" id="namsariInput" value="3000" class="w-20 text-right bg-transparent border-b border-red-300 focus:border-red-600 outline-none font-bold">
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="space-y-6">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="font-bold mb-4 text-slate-700">Fees & Extras</h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-slate-500">Insurance</span>
-                            <span id="displayIns" class="font-bold">RS. 0</span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-slate-500">Namsari/Reg.</span>
-                            <input type="number" id="namsariInput" value="3000" class="w-20 text-right border-b font-bold outline-none">
-                        </div>
-                    </div>
-                </div>
+            <div class="lg:col-span-1">
+                <div class="bg-slate-900 rounded-2xl shadow-xl p-6 text-white sticky top-24">
+                    <h3 class="flex items-center text-lg font-bold mb-6 text-red-400">
+                        <i class="fa-solid fa-calculator mr-3"></i> Loan Summary
+                    </h3>
 
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="font-bold mb-4 text-slate-700">Accessories Cost</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase">Helmet</label>
-                            <input type="number" id="helmetInput" value="2500" class="w-full border-b text-sm p-1 outline-none">
+                    <div class="space-y-4 text-sm">
+                        <div class="flex justify-between border-b border-slate-800 pb-2">
+                            <span class="text-slate-400">Interest Rate</span>
+                            <span id="displayRate" class="font-mono text-red-400">11.99%</span>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase">Legguard</label>
-                            <input type="number" id="legguardInput" value="1800" class="w-full border-b text-sm p-1 outline-none">
+                        <div class="flex justify-between border-b border-slate-800 pb-2">
+                            <span class="text-slate-400">Pure Downpayment (DP)</span>
+                            <span id="displayDpAmt" class="font-semibold text-slate-200">RS. 0</span>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase">Seatcover</label>
-                            <input type="number" id="seatcoverInput" value="650" class="w-full border-b text-sm p-1 outline-none">
+                        <div class="flex justify-between border-b border-slate-800 pb-2">
+                            <span class="text-slate-400">Loan Amount</span>
+                            <span id="displayLoanAmt" class="font-semibold text-slate-200">RS. 0</span>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase">Others</label>
-                            <input type="number" id="othersInput" value="0" class="w-full border-b text-sm p-1 outline-none">
+
+                        <div class="bg-red-600 rounded-xl p-4 my-6 text-center shadow-lg">
+                            <label class="block text-[10px] uppercase tracking-widest font-bold text-red-200 mb-1">Monthly EMI</label>
+                            <span id="displayEMI" class="text-3xl font-black">RS. 0</span>
+                        </div>
+
+                        <div class="bg-slate-800 rounded-lg p-3 flex justify-between items-center">
+                            <span class="font-bold text-xs uppercase text-slate-400">Advance EMI Paid</span>
+                            <span id="displayTotalAdvEmi" class="text-lg font-bold text-red-400">RS. 0</span>
+                        </div>
+
+                        <div class="pt-4 space-y-2">
+                             <p class="text-[10px] text-slate-500 italic text-center">Calculated based on Hulas Finserv Reducing Balance method.</p>
                         </div>
                     </div>
-                </div>
-                
-                <div class="bg-indigo-600 rounded-2xl p-6 text-white">
-                    <p class="text-xs font-bold uppercase opacity-80 mb-1">Loan Amount</p>
-                    <p id="displayLoanAmt" class="text-2xl font-black">RS. 0</p>
-                    <p class="text-[10px] mt-4 opacity-70 leading-tight">*Calculation based on Hulas Finserv current interest slabs.</p>
                 </div>
             </div>
+
         </div>
+    </div>
+</main>
 
-        <div class="mt-12 bg-slate-200 rounded-3xl py-10 px-4">
-            <div class="max-w-[210mm] mx-auto flex justify-between items-center mb-6 no-print">
-                <h3 class="font-black text-slate-600 uppercase tracking-widest text-sm">Official Document Preview</h3>
-                <button onclick="window.print()" class="bg-red-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-red-700 transition transform hover:scale-105">
-                    <i class="fa-solid fa-print mr-2"></i> Print Document
-                </button>
-            </div>
-
-            <div class="a4-page">
-                <div class="text-center mb-8">
-                    <h2 class="text-xl font-bold tracking-widest uppercase">HULAS FINSERV HIRE PURCHASE LIMITED</h2>
-                    <h3 class="text-md font-semibold mt-1 underline underline-offset-4 uppercase">Downpayment Allocation Form</h3>
-                </div>
-                
-                <hr class="border-slate-900 mb-8">
-
-                <div class="grid grid-cols-[200px_20px_1fr] gap-y-4 text-[13px]">
-                    <div class="font-bold">• Date</div> <div>:</div> <div id="a4Date">--/--/----</div>
-                    <div class="font-bold">• Dealer Name</div> <div>:</div> <div>Samriddhi And Brothers Auto Pvt. Ltd.</div>
-                    <div class="font-bold">• Customer Name</div> <div>:</div> <div id="a4CustName" class="font-black uppercase">---</div>
-                    <div class="font-bold">• Contact Number</div> <div>:</div> <div id="a4CustPhone">---</div>
-                    <div class="font-bold">• Vehicle Model</div> <div>:</div> <div id="a4Model" class="font-black">---</div>
-                    
-                    <div class="col-span-3 my-2 border-b border-dashed"></div>
-
-                    <div class="font-bold">• Retail Price (MRP)</div> <div>:</div> <div id="a4MRP">0.00</div>
-                    <div class="font-bold">• Down Payment (Initial)</div> <div>:</div> <div id="a4DP">0.00</div>
-                    <div class="font-bold">• Loan Amount</div> <div>:</div> <div id="a4Loan">0.00</div>
-                    <div class="font-bold">• Interest Rate</div> <div>:</div> <div><span id="a4Rate">0.00</span>%</div>
-                    <div class="font-bold">• Tenure</div> <div>:</div> <div><span id="a4Tenure">0</span> Months</div>
-                    <div class="font-bold">• Insurance Premium</div> <div>:</div> <div id="a4Ins">0.00</div>
-                    <div class="font-bold">• Advance EMI + Fees</div> <div>:</div> <div id="a4AdvEmiAmt">0.00</div>
-
-                    <div class="col-span-3 mt-6 p-4 bg-slate-50 border-2 border-black flex justify-between items-center">
-                        <span class="text-lg font-black uppercase">Total Downpayment Paid</span>
-                        <span id="a4TotalDP" class="text-xl font-black underline">0.00</span>
-                    </div>
-                </div>
-
-                <div class="mt-12">
-                    <h4 class="font-bold border-b border-black pb-1 mb-3 text-sm">Declaration</h4>
-                    <p class="text-[11px] leading-relaxed text-justify">
-                        We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment as per the company's hire purchase policies.
-                    </p>
-                </div>
-
-                <div class="mt-24 grid grid-cols-3 gap-8 text-center text-[10px] font-bold uppercase">
-                    <div class="border-t border-black pt-2">Customer's Signature</div>
-                    <div class="border-t border-black pt-2">Dealer's Signature</div>
-                    <div class="border-t border-black pt-2">LO's Signature</div>
-                </div>
-            </div>
-        </div>
-    </main>
 
     <footer class="bg-white border-t py-10 no-print">
         <div class="max-w-7xl mx-auto px-4 text-center">
