@@ -117,8 +117,8 @@ function updateUI(data) {
     document.getElementById('a4TotalDP').innerText = formatDec(data.finalTotalDP);
 
     // Customer Sync
-    document.getElementById('a4CustName').innerText = document.getElementById('custNameInput').value || "---";
-    document.getElementById('a4CustPhone').innerText = document.getElementById('custPhoneInput').value || "---";
+    document.getElementById('a4CustName').innerText = document.getElementById('custNameInput').value || "Enter Name";
+    document.getElementById('a4CustPhone').innerText = document.getElementById('custPhoneInput').value || "Enter Number";
 }
 
 // --- Event Listeners & UI Helpers ---
