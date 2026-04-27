@@ -107,7 +107,7 @@ function updateUI(data) {
 
     // A4 Preview
     document.getElementById('a4Model').innerText = data.bikeName;
-    document.getElementById('a4MRP').innerText = formatDec(data.mrp);
+    document.getElementById('afterDiscount').innerText = formatDec(data.mrp);
     document.getElementById('a4DP').innerText = formatDec(data.dpAmountOnly);
     document.getElementById('a4Loan').innerText = formatDec(data.loanAmount);
     document.getElementById('a4Rate').innerText = data.rate.toFixed(2);
