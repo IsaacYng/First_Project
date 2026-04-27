@@ -10,40 +10,36 @@
     }
 
     /* THE PRINT FIX */
-    @media print {
-    /* 1. Page settings: A4 size setup */
+    /* Print ko bela matrai kaam garne logic */
+@media print {
+    /* 1. Page ko layout fixed garne */
     @page {
         size: A4;
         margin: 0;
     }
 
-    /* 2. Hide everything (Nav, Footer, Buttons, etc.) */
-    body * {
-        visibility: hidden !important;
-        margin: 0 !important;
+    /* 2. Important: Purei page ko sabai kura lai display none garne */
+    html, body, main, nav, footer, div, section, header {
+        display: none !important;
     }
 
-    /* 3. Only show the A4 Form area */
+    /* 3. Khali #print-area lai matrai display block garne */
     #print-area, #print-area * {
+        display: block !important;
         visibility: visible !important;
     }
 
-    /* 4. Fix the position to the very top of the page */
+    /* 4. Print-area lai paper ko fix position ma rakhne */
     #print-area {
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
         width: 210mm !important;
         height: 297mm !important;
-        padding: 15mm !important;
         margin: 0 !important;
+        padding: 15mm !important;
         border: none !important;
-        box-shadow: none !important;
-        background-color: white !important;
-    }
-
-    /* 5. Hide the browser's default scrollbars and extra spacing */
-    body {
         background: white !important;
+        box-shadow: none !important;
     }
 }
