@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
+// --- Configuration ---
 const firebaseConfig = {
     apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
     authDomain: "first-project-2082-12-26.firebaseapp.com",
@@ -16,13 +17,20 @@ const bikesCol = collection(db, "bikes");
 
 let allBikes = [];
 
-// Set current date on load
-document.getElementById('a4Date').innerText = new Date().toLocaleDateString('en-GB');
+// --- Initialization ---
+document.addEventListener('DOMContentLoaded', () => {
+    const dateEl = document.getElementById('a4Date');
+    if (dateEl) dateEl.innerText = new Date().toLocaleDateString('en-GB');
+    fetchBikes();
+    setupEventListeners();
+});
 
+// --- Data Fetching ---
 async function fetchBikes() {
     try {
         const snapshot = await getDocs(bikesCol);
         allBikes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
         const select = document.getElementById('modelSelect');
         if (select) {
             select.innerHTML = allBikes.map(bike => 
@@ -35,92 +43,104 @@ async function fetchBikes() {
     }
 }
 
+// --- Finance Logic ---
 window.calculateFinance = function() {
     const selectedId = document.getElementById('modelSelect').value;
     const bike = allBikes.find(b => b.id === selectedId);
     if (!bike) return;
 
-    // --- Inputs ---
+    // Helper to get numeric values
+    const getVal = (id, fallback = 0) => parseFloat(document.getElementById(id)?.value) || fallback;
+
     const mrp = parseFloat(bike.price) || 0;
     const insurance = parseFloat(bike.Insurance) || 0;
-    const discount = parseFloat(document.getElementById('discountInput').value) || 0;
-    const customerExtraAdv = parseFloat(document.getElementById('advEmiInput').value) || 0; 
-    const namsari = parseFloat(document.getElementById('namsariInput').value) || 3000;
-    const dpPercentVal = parseFloat(document.getElementById('dpPercent').value);
-    const tenure = parseFloat(document.getElementById('tenure').value);
+    const discount = getVal('discountInput');
+    const customerExtraAdv = getVal('advEmiInput');
+    const namsari = getVal('namsariInput', 3000);
+    const dpPercentVal = getVal('dpPercent');
+    const tenure = getVal('tenure');
 
-    const accCost = (parseFloat(document.getElementById('helmetInput').value) || 0) + 
-                     (parseFloat(document.getElementById('legguardInput').value) || 0) + 
-                     (parseFloat(document.getElementById('seatcoverInput').value) || 0) + 
-                     (parseFloat(document.getElementById('othersInput').value) || 0);
+    const accCost = getVal('helmetInput') + getVal('legguardInput') + 
+                   getVal('seatcoverInput') + getVal('othersInput');
 
-    // --- Math Logic ---
+    // Calculations
     const afterDiscount = mrp - discount;
     const dpAmountOnly = afterDiscount * (dpPercentVal / 100);
     const loanAmount = afterDiscount - dpAmountOnly;
 
+    // Interest Rate Logic
     let rate = 13.99;
     if (dpPercentVal >= 60) rate = 9.99;
     else if (dpPercentVal >= 50) rate = 11.99;
     else if (dpPercentVal >= 40) rate = 12.99;
 
     const monthlyRate = (rate / 12) / 100;
-    const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1);
+    const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1) || 0;
 
-    // Rounding and Totals
+    // Downpayment Rounding Logic
     const rawTotalDownpayment = dpAmountOnly + namsari + insurance + emi + accCost + customerExtraAdv;
     const lastThreeDigits = rawTotalDownpayment % 1000;
     const autoRounding = lastThreeDigits > 0 ? (1000 - lastThreeDigits) : 0;
     const finalTotalDP = rawTotalDownpayment + autoRounding;
     const totalAdvEmi = emi + autoRounding + customerExtraAdv;
 
-    // --- Update UI Summary ---
-    document.getElementById('displayTotalDP').innerText = `RS. ${Math.round(finalTotalDP).toLocaleString()}`;
-    document.getElementById('mrp').innerText = `RS. ${mrp.toLocaleString()}`;
-    document.getElementById('afterDiscount').innerText = `RS. ${afterDiscount.toLocaleString()}`;
-    document.getElementById('displayIns').innerText = `RS. ${insurance.toLocaleString()}`;
-    document.getElementById('displayRate').innerText = `${rate}%`;
-    document.getElementById('displayDpAmt').innerText = `RS. ${dpAmountOnly.toLocaleString()}`;
-    document.getElementById('displayLoanAmt').innerText = `RS. ${loanAmount.toLocaleString()}`;
-    document.getElementById('displayEMI').innerText = `RS. ${Math.round(emi).toLocaleString()}`;
-
-    // --- Update A4 Print Preview ---
-    document.getElementById('a4Model').innerText = bike.name;
-    document.getElementById('a4MRP').innerText = mrp.toLocaleString(undefined, {minimumFractionDigits: 2});
-    document.getElementById('a4DP').innerText = dpAmountOnly.toLocaleString(undefined, {minimumFractionDigits: 2});
-    document.getElementById('a4Loan').innerText = loanAmount.toLocaleString(undefined, {minimumFractionDigits: 2});
-    document.getElementById('a4Rate').innerText = rate.toFixed(2);
-    document.getElementById('a4Tenure').innerText = tenure;
-    document.getElementById('a4Ins').innerText = insurance.toLocaleString(undefined, {minimumFractionDigits: 2});
-    document.getElementById('a4AdvEmiAmt').innerText = totalAdvEmi.toLocaleString(undefined, {minimumFractionDigits: 2});
-    document.getElementById('a4TotalDP').innerText = Math.round(finalTotalDP).toLocaleString(undefined, {minimumFractionDigits: 2});
-
-    // Sync Customer Info to A4
-    document.getElementById('a4CustName').innerText = document.getElementById('custNameInput').value || "---";
-    document.getElementById('a4CustPhone').innerText = document.getElementById('custPhoneInput').value || "---";
+    updateUI({
+        bikeName: bike.name,
+        mrp, afterDiscount, insurance, rate, dpAmountOnly, 
+        loanAmount, emi, finalTotalDP, totalAdvEmi, tenure
+    });
 };
 
-// Listen for any changes in inputs to trigger calculation
-document.addEventListener('input', (e) => {
-    calculateFinance();
-});
+function updateUI(data) {
+    const format = (num) => Math.round(num).toLocaleString();
+    const formatDec = (num) => num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-fetchBikes();
+    // Summary Display
+    document.getElementById('displayTotalDP').innerText = `RS. ${format(data.finalTotalDP)}`;
+    document.getElementById('mrp').innerText = `RS. ${format(data.mrp)}`;
+    document.getElementById('afterDiscount').innerText = `RS. ${format(data.afterDiscount)}`;
+    document.getElementById('displayIns').innerText = `RS. ${format(data.insurance)}`;
+    document.getElementById('displayRate').innerText = `${data.rate}%`;
+    document.getElementById('displayDpAmt').innerText = `RS. ${format(data.dpAmountOnly)}`;
+    document.getElementById('displayLoanAmt').innerText = `RS. ${format(data.loanAmount)}`;
+    document.getElementById('displayEMI').innerText = `RS. ${format(data.emi)}`;
 
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    // A4 Preview
+    document.getElementById('a4Model').innerText = data.bikeName;
+    document.getElementById('a4MRP').innerText = formatDec(data.mrp);
+    document.getElementById('a4DP').innerText = formatDec(data.dpAmountOnly);
+    document.getElementById('a4Loan').innerText = formatDec(data.loanAmount);
+    document.getElementById('a4Rate').innerText = data.rate.toFixed(2);
+    document.getElementById('a4Tenure').innerText = data.tenure;
+    document.getElementById('a4Ins').innerText = formatDec(data.insurance);
+    document.getElementById('a4AdvEmiAmt').innerText = formatDec(data.totalAdvEmi);
+    document.getElementById('a4TotalDP').innerText = formatDec(data.finalTotalDP);
 
-        // Drawer Controls
-        const btn = document.getElementById('menu-btn');
-        const close = document.getElementById('close-btn');
-        const drawer = document.getElementById('drawer');
-        const overlay = document.getElementById('overlay');
+    // Customer Sync
+    document.getElementById('a4CustName').innerText = document.getElementById('custNameInput').value || "---";
+    document.getElementById('a4CustPhone').innerText = document.getElementById('custPhoneInput').value || "---";
+}
 
-        const toggle = () => {
-            drawer.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        };
+// --- Event Listeners & UI Helpers ---
+function setupEventListeners() {
+    // Recalculate on any input change
+    const inputs = document.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('input', calculateFinance);
+    });
 
-        btn.addEventListener('click', toggle);
-        close.addEventListener('click', toggle);
-        overlay.addEventListener('click', toggle);
+    // Drawer Logic
+    const menuBtn = document.getElementById('menu-btn');
+    const closeBtn = document.getElementById('close-btn');
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+
+    const toggleDrawer = () => {
+        drawer.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+    };
+
+    [menuBtn, closeBtn, overlay].forEach(el => {
+        el?.addEventListener('click', toggleDrawer);
+    });
+}
