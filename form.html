@@ -233,69 +233,100 @@
         </div>
     </div>
 </div>
-<div class="bg-gray-200 min-h-screen py-4 px-2 sm:px-0">
-
-    <div class="max-w-[210mm] mx-auto flex flex-col sm:flex-row justify-between items-center mb-4 no-print gap-3">
-        <p class="text-sm font-bold text-slate-500 uppercase tracking-widest">Document Preview</p>
-        <button onclick="window.print()" class="bg-red-600 text-white px-6 py-2 rounded font-bold shadow hover:bg-red-700 transition w-full sm:w-auto">
-            <i class="fa-solid fa-print mr-2"></i> Print
-        </button>
-    </div>
-
-    <div class="overflow-x-auto pb-8">
-        <div class="a4-page bg-white">
-
-            <div class="text-center mb-6">
-                <h2 class="text-xl font-bold tracking-widest uppercase">HULAS FINSERV HIRE PURCHASE LIMITED</h2>
-                <h3 class="text-md font-semibold mt-1 underline underline-offset-4 uppercase">Downpayment Allocation Form</h3>
-            </div>
-            <hr class="border-black mb-6">
-
-            <section class="mb-8">
-                <h4 class="font-bold mb-3">Customer & Vehicle Information</h4>
-                <div class="grid grid-cols-[180px_20px_1fr] gap-y-2 text-sm">
-                    <div>• Date</div> <div>:</div> <div id="a4Date">26/04/2026</div>
-                    <div>• Dealer Name</div> <div>:</div> <div id="a4Dealer">Samriddhi And Brothers Auto Pvt. Ltd.</div>
-                    <div>• Customer Name</div> <div>:</div> <div id="a4CustName" class="font-bold">---</div>
-                    <div>• Contact Number</div> <div>:</div> <div id="a4CustPhone">---</div>
-                    <div>• Vehicle Model</div> <div>:</div> <div id="a4Model" class="font-bold">---</div>
-                </div>
-            </section>
-
-            <section class="mb-8">
-                <h4 class="font-bold mb-3">Financial Details</h4>
-                <div class="grid grid-cols-[180px_20px_1fr] gap-y-2 text-sm">
-                    <div>• Retail Price</div> <div>:</div> <div id="a4MRP">0.00</div>
-                    <div>• Down Payment</div> <div>:</div> <div id="a4DP">0.00</div>
-                    <div>• Loan Amount</div> <div>:</div> <div id="a4Loan">0.00</div>
-                    <div>• Interest Rate (%)</div> <div>:</div> <div id="a4Rate">0.00</div>
-                    <div>• Tenure (Months)</div> <div>:</div> <div id="a4Tenure">0</div>
-                    <div>• Registration Charge</div> <div>:</div> <div>3,000.00 <span class="italic text-xs ml-1">(suggested by HH)</span></div>
-                    <div>• Insurance Premium</div> <div>:</div> <div id="a4Ins">0.00</div>
-                    <div>• Advance EMI (Amount)</div> <div>:</div> <div id="a4AdvEmiAmt">0.00</div>
-
-                    <div class="font-bold mt-4 text-lg">• Total Down-payment Paid</div> 
-                    <div class="mt-4 font-bold text-lg">:</div> 
-                    <div id="a4TotalDP" class="mt-4 font-bold text-lg underline">0.00</div>
-                </div>
-            </section>
-            <section class="mb-12">
-                <h4 class="font-bold border-b border-black pb-1 mb-3 text-sm">Declaration</h4>
-                <p class="text-[12px] leading-relaxed">
-                    We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment as per the company's hire purchase policies.
-                </p>
-                <p class="mt-4 text-[12px] font-bold italic">Signatures & Authorization</p>
-            </section>
-
-            <section class="mt-16 grid grid-cols-3 gap-8 text-center text-[10px] font-bold uppercase">
-                <div class="border-t border-black pt-2">Customer's Signature</div>
-                <div class="border-t border-black pt-2">Dealer's Signature & Stamp</div>
-                <div class="border-t border-black pt-2">LO's Signature & Stamp</div>
-            </section>
+<div class="flex justify-center bg-gray-200 py-10 px-4 min-h-screen">
+    <div id="print-area" class="bg-white shadow-2xl w-[210mm] min-h-[297mm] p-[20mm] text-gray-800 font-sans border border-gray-300 print:shadow-none print:border-none print:m-0">
+        
+        <div class="text-center mb-8 border-b-2 border-black pb-4">
+            <h1 class="text-2xl font-bold uppercase tracking-widest">Hulas Finserv Hire Purchase Limited</h1>
+            <h2 class="text-lg font-semibold underline mt-2">DOWNPAYMENT ALLOCATION FORM</h2>
         </div>
+
+        <div class="mb-8">
+            <h3 class="font-bold border-b border-gray-400 mb-4 pb-1">Customer & Vehicle Information</h3>
+            <div class="grid grid-cols-1 gap-y-2 text-sm">
+                <div class="flex">
+                    <span class="w-40 font-semibold">Date</span>
+                    <span>: <span id="a4Date">13/04/2026</span></span>
+                </div>
+                <div class="flex">
+                    <span class="w-40 font-semibold">Dealer Name</span>
+                    <span>: <span id="a4Dealer">Samriddhi And Brothers Auto Pvt. Ltd.</span></span>
+                </div>
+                <div class="flex">
+                    <span class="w-40 font-semibold">Customer Name</span>
+                    <span>: <span id="a4CustName">Your Name</span></span>
+                </div>
+                <div class="flex">
+                    <span class="w-40 font-semibold">Contact Number</span>
+                    <span>: <span id="a4CustPhone">9800000000</span></span>
+                </div>
+                <div class="flex">
+                    <span class="w-40 font-semibold">Vehicle Model</span>
+                    <span class="font-bold">: <span id="a4Model">---</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="font-bold border-b border-gray-400 mb-4 pb-1">Financial Details</h3>
+            <div class="grid grid-cols-1 gap-y-2 text-sm">
+                <div class="flex justify-between max-w-md">
+                    <span class="font-semibold">Retail Price:</span>
+                    <span id="a4MRP">0.00</span>
+                </div>
+                <div class="flex justify-between max-w-md">
+                    <span class="font-semibold">Down Payment:</span>
+                    <span id="a4DP">0.00</span>
+                </div>
+                <div class="flex justify-between max-w-md">
+                    <span class="font-semibold">Loan Amount:</span>
+                    <span id="a4Loan">0.00</span>
+                </div>
+                <div class="flex justify-between max-w-md">
+                    <span class="font-semibold">Interest Rate (%):</span>
+                    <span id="a4Rate">0.00</span>
+                </div>
+                <div class="flex justify-between max-w-md">
+                    <span class="font-semibold">Tenure (Months):</span>
+                    <span id="a4Tenure">0</span>
+                </div>
+                <div class="flex justify-between max-w-md">
+                    <span class="font-semibold">Registration / Yatayat:</span>
+                    <span id="a4Namsari">3,000.00</span>
+                </div>
+                <div class="flex justify-between max-w-md">
+                    <span class="font-semibold">Insurance Premium:</span>
+                    <span id="a4Ins">0.00</span>
+                </div>
+                <div class="flex justify-between max-w-md">
+                    <span class="font-semibold">Advance EMI (If Any):</span>
+                    <span id="a4AdvEmiAmt">0.00</span>
+                </div>
+                
+                <div class="flex justify-between max-w-md border-t-2 border-black mt-2 pt-2 text-base font-bold">
+                    <span>Total Down-payment Amount:</span>
+                    <span>RS. <span id="a4TotalDP">0.00</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-16">
+            <h3 class="font-bold border-b border-gray-400 mb-2 pb-1">Declaration</h3>
+            <p class="text-xs text-justify leading-relaxed italic">
+                We confirm that the information provided above is accurate, and we acknowledge and agree to the payment amounts and breakdown of the down payment.
+            </p>
+        </div>
+
+        <div class="mt-20">
+            <div class="flex justify-between items-end text-center text-xs">
+                <div class="w-48 border-t border-black pt-2">Customer's Signature</div>
+                <div class="w-48 border-t border-black pt-2">Dealer's Signature & Stamp</div>
+                <div class="w-48 border-t border-black pt-2">LO's Signature</div>
+            </div>
+        </div>
+
     </div>
 </div>
-
 </main>
 
 
