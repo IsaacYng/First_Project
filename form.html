@@ -342,3 +342,57 @@
                     <div id="a4TotalDP" class="mt-4 font-bold text-lg underline">0.00</div>
                 </div>
             </section>
+            <section class="mb-12">
+                <h4 class="font-bold border-b border-black pb-1 mb-3 text-sm">Declaration</h4>
+                <p class="text-[12px] leading-relaxed">
+                    We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment as per the company's hire purchase policies.
+                </p>
+                <p class="mt-4 text-[12px] font-bold italic">Signatures & Authorization</p>
+            </section>
+
+            <section class="mt-16 grid grid-cols-3 gap-8 text-center text-[10px] font-bold uppercase">
+                <div class="border-t border-black pt-2">Customer's Signature</div>
+                <div class="border-t border-black pt-2">Dealer's Signature & Stamp</div>
+                <div class="border-t border-black pt-2">LO's Signature & Stamp</div>
+            </section>
+        </div>
+    </div>
+</div>
+
+</main>
+
+
+
+    <footer class="bg-white border-t py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-gray-500 mb-6">Authorized Bajaj Showroom &copy; 2026</p>
+            <div class="flex justify-center space-x-8 text-2xl text-gray-400">
+                <a href="#" class="hover:text-red-600 transition"><i class="fa-brands fa-facebook"></i></a>
+                <a href="#" class="hover:text-red-600 transition"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="#" class="hover:text-red-600 transition"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Drawer Controls
+        const btn = document.getElementById('menu-btn');
+        const close = document.getElementById('close-btn');
+        const drawer = document.getElementById('drawer');
+        const overlay = document.getElementById('overlay');
+
+        const toggle = () => {
+            drawer.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        };
+
+        btn.addEventListener('click', toggle);
+        close.addEventListener('click', toggle);
+        overlay.addEventListener('click', toggle);
+    </script>
+    <script type="module" src="form.js"></script>
+</body>
+</html>
