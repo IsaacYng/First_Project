@@ -126,75 +126,82 @@ document.addEventListener('input', (e) => {
         calculateFinance();
     }
 });
-// Import logic (Already top ma chha bhane pardaina)
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-
-// Database reference
-const stockCol = collection(db, "stock"); // Tapaiko chassis collection ko name yaha halnuhos
-
 window.findChassis = async function() {
-    const searchVal = document.getElementById('chassisSearch').value.trim().toUpperCase();
+    const searchVal = document.getElementById('chassisSearch').value.trim();
     const statusEl = document.getElementById('searchStatus');
     
     if (!searchVal) {
-        statusEl.innerText = "Please enter a chassis number.";
+        statusEl.innerText = "Chassis number halnuhos!";
         statusEl.className = "text-red-500 text-sm mt-2";
         return;
     }
 
-    statusEl.innerText = "Searching...";
+    statusEl.innerText = "Searching in Inventory...";
     statusEl.className = "text-blue-500 text-sm mt-2";
 
     try {
-        // Chassis match garne query
-        const q = query(stockCol, where("chassisNo", "==", searchVal));
+        // Tapaiko admin panel le "inventory" collection ma data save garchha
+        const inventoryCol = collection(db, "inventory");
+        const q = query(inventoryCol, where("chassis", "==", searchVal));
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
-            // Data bhetiyo bhane
             const data = querySnapshot.docs[0].data();
             
-            document.getElementById('manualChassis').value = data.chassisNo || searchVal;
-            document.getElementById('manualEngine').value = data.engineNo || "";
+            // Input fields ma data auto-fill garne
+            document.getElementById('manualChassis').value = data.chassis || searchVal;
+            document.getElementById('manualEngine').value = data.engine || "";
             document.getElementById('manualReg').value = data.regNo || "";
             document.getElementById('manualColor').value = data.color || "";
 
-            statusEl.innerText = "Match found! Data loaded. You can still edit if needed.";
-            statusEl.className = "text-green-600 text-sm mt-2";
+            // Yadi model name match hunchha bhane dropdown pani auto-select gari dine
+            const modelSelect = document.getElementById('modelSelect');
+            if (modelSelect && data.model) {
+                for (let i = 0; i < modelSelect.options.length; i++) {
+                    if (modelSelect.options[i].text === data.model) {
+                        modelSelect.selectedIndex = i;
+                        // Finance calculation refresh garne
+                        calculateFinance();
+                        break;
+                    }
+                }
+            }
+
+            statusEl.innerText = "Match found! Data loaded from Inventory.";
+            statusEl.className = "text-green-600 text-sm mt-2 font-bold";
             
-            // A4 paper ma auto-sync garna
+            // A4 paper display sync garne
             syncToA4();
         } else {
-            // Data bhetiyena bhane
-            statusEl.innerText = "No match found. Please enter manual data.";
+            statusEl.innerText = "Inventory ma bhetiyenna. Manual entry garnuhos.";
             statusEl.className = "text-orange-600 text-sm mt-2";
-            
-            // Khali manually type garna milne banaucha (value clear nagari user lai help huncha)
             document.getElementById('manualChassis').value = searchVal;
         }
     } catch (error) {
-        console.error("Search Error:", error);
-        statusEl.innerText = "Error searching database.";
+        console.error("Search error:", error);
+        statusEl.innerText = "Database error! Connection check garnuhos.";
     }
 };
 
-// Input ma type garda pani A4 ma sync huna parcha
+// Real-time A4 Sync function
 function syncToA4() {
-    const chassis = document.getElementById('manualChassis').value;
-    const engine = document.getElementById('manualEngine').value;
-    const reg = document.getElementById('manualReg').value;
-    const color = document.getElementById('manualColor').value;
+    const fields = {
+        'manualChassis': 'a4Chassis',
+        'manualEngine': 'a4Engine',
+        'manualReg': 'a4Reg',
+        'manualColor': 'a4Color'
+    };
 
-    // A4 Paper ma bhayeko span/div haru ko ID anusar update garne
-    if(document.getElementById('a4Chassis')) document.getElementById('a4Chassis').innerText = chassis;
-    if(document.getElementById('a4Engine')) document.getElementById('a4Engine').innerText = engine;
-    if(document.getElementById('a4Reg')) document.getElementById('a4Reg').innerText = reg;
-    if(document.getElementById('a4Color')) document.getElementById('a4Color').innerText = color;
+    for (let inputId in fields) {
+        const val = document.getElementById(inputId).value;
+        const displayId = fields[inputId];
+        if (document.getElementById(displayId)) {
+            document.getElementById(displayId).innerText = val || "---";
+        }
+    }
 }
 
-// Event listener for real-time manual editing sync
-document.querySelectorAll('#manualChassis, #manualEngine, #manualReg, #manualColor').forEach(el => {
-    el.addEventListener('input', syncToA4);
+// Event listeners for manual typing
+['manualChassis', 'manualEngine', 'manualReg', 'manualColor'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', syncToA4);
 });
-
-fetchBikes();
