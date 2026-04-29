@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-// 1. Firebase Configuration
+// 1. Firebase Configuration (Matches your Admin Panel)
 const firebaseConfig = {
     apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
     authDomain: "first-project-2082-12-26.firebaseapp.com",
@@ -17,7 +17,7 @@ const bikesCol = collection(db, "bikes");
 
 let allBikes = [];
 
-// 2. Initial Fetch: Load Models to Dropdown
+// 2. Fetch Models for Dropdown
 async function fetchBikes() {
     try {
         const snapshot = await getDocs(bikesCol);
@@ -27,20 +27,19 @@ async function fetchBikes() {
             select.innerHTML = allBikes.map(bike => 
                 `<option value="${bike.id}">${bike.name}</option>`
             ).join('');
-            calculateFinance();
+            calculateFinance(); // Initial run
         }
     } catch (e) {
         console.error("Error fetching bikes:", e);
     }
 }
 
-// 3. Chassis Search Function
+// 3. Chassis Search (Loads data from 'inventory' collection)
 window.findChassis = async function() {
     const searchVal = document.getElementById('chassisSearch').value.trim();
     const statusEl = document.getElementById('searchStatus');
     
     if (!statusEl) return;
-
     statusEl.innerText = "Searching Inventory...";
     statusEl.className = "text-blue-500 text-sm mt-1";
 
@@ -52,13 +51,13 @@ window.findChassis = async function() {
         if (!querySnapshot.empty) {
             const data = querySnapshot.docs[0].data();
             
-            // Auto-fill manual fields
+            // Fill Manual Fields
             document.getElementById('manualChassis').value = data.chassis || searchVal;
             document.getElementById('manualEngine').value = data.engine || "";
             document.getElementById('manualReg').value = data.regNo || "";
             document.getElementById('manualColor').value = data.color || "";
 
-            // Auto-select model from dropdown
+            // Auto-select Model Dropdown
             const modelSelect = document.getElementById('modelSelect');
             if (modelSelect && data.model) {
                 for (let i = 0; i < modelSelect.options.length; i++) {
@@ -70,22 +69,21 @@ window.findChassis = async function() {
                 }
             }
 
-            statusEl.innerText = "Match Found!";
+            statusEl.innerText = "Vehicle Found & Loaded!";
             statusEl.className = "text-green-600 text-sm mt-1 font-bold";
             syncToA4ManualFields();
         } else {
-            statusEl.innerText = "Not found. Enter manually.";
+            statusEl.innerText = "Not found in inventory. Manual mode.";
             statusEl.className = "text-orange-600 text-sm mt-1";
             document.getElementById('manualChassis').value = searchVal;
         }
     } catch (error) {
-        console.error("Firebase Search Error:", error);
-        statusEl.innerText = "Database error! Config check garnuhos.";
-        statusEl.className = "text-red-500 text-sm mt-1";
+        console.error("Search Error:", error);
+        statusEl.innerText = "Database Error! Check your connection.";
     }
 };
 
-// 4. Manual Field Sync to A4 Paper
+// 4. Sync Manual Inputs to A4 Preview
 function syncToA4ManualFields() {
     const fields = {
         'manualChassis': 'a4Chassis',
@@ -93,17 +91,16 @@ function syncToA4ManualFields() {
         'manualReg': 'a4Reg',
         'manualColor': 'a4Color'
     };
-
     for (let inputId in fields) {
         const val = document.getElementById(inputId)?.value || "";
         const displayId = fields[inputId];
         if (document.getElementById(displayId)) {
-            document.getElementById(displayId).innerText = val;
+            document.getElementById(displayId).innerText = val || "---";
         }
     }
 }
 
-// 5. Core Finance Calculation Logic
+// 5. Finance Calculation Logic
 window.calculateFinance = function() {
     const selectedId = document.getElementById('modelSelect').value;
     const bike = allBikes.find(b => b.id === selectedId);
@@ -112,31 +109,22 @@ window.calculateFinance = function() {
     const getVal = (id, fallback = 0) => parseFloat(document.getElementById(id)?.value) || fallback;
     const getText = (id, fallback = "") => document.getElementById(id)?.value || fallback;
 
-    // Details from Inputs
-    const custName = getText('custNameInput', 'Your Name');
-    const custPhone = getText('custPhoneInput', 'Contact');
-    const dealerName = getText('dealerNameInput', 'Samriddhi And Brothers Auto Pvt. Ltd.');
-
-    // Pricing & Insurance
+    // Inputs
     const mrp = parseFloat(bike.price) || 0;
+    const discount = getVal('discountInput');
     const cashInsurance = parseFloat(bike.Insurance) || 0;
     const financeInsurance = parseFloat(bike.financeInsurance) || 0;
-
-    // Inputs
-    const discount = getVal('discountInput');
-    const customerExtraAdv = getVal('advEmiInput');
     const namsari = getVal('namsariInput', 3000);
     const dpPercentVal = getVal('dpPercent');
     const tenure = getVal('tenure');
-    const accCost = getVal('helmetInput') + getVal('legguardInput') + 
-                    getVal('seatcoverInput') + getVal('othersInput');
+    const customerExtraAdv = getVal('advEmiInput');
 
-    // Loan Calculation
+    // After Discount calculation
     const afterDiscount = mrp - discount;
     const dpAmountOnly = afterDiscount * (dpPercentVal / 100);
     const loanAmount = afterDiscount - dpAmountOnly;
 
-    // Interest Rate Tier
+    // Interest rate logic
     let rate = 13.99;
     if (dpPercentVal >= 60) rate = 9.99;
     else if (dpPercentVal >= 50) rate = 11.99;
@@ -145,7 +133,8 @@ window.calculateFinance = function() {
     const monthlyRate = (rate / 12) / 100;
     const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1);
 
-    // Rounding & Advance EMI logic
+    // Dashboard Rounding Logic
+    const accCost = getVal('helmetInput') + getVal('legguardInput') + getVal('seatcoverInput') + getVal('othersInput');
     const rawTotalDP_Dash = dpAmountOnly + namsari + cashInsurance + emi + accCost + customerExtraAdv;
     const roundingAdj = rawTotalDP_Dash % 1000 > 0 ? (1000 - (rawTotalDP_Dash % 1000)) : 0;
     
@@ -155,26 +144,23 @@ window.calculateFinance = function() {
 
     updateUI({
         bikeName: bike.name,
-        custName, custPhone, dealerName,
+        custName: getText('custNameInput', 'Your Name'),
+        custPhone: getText('custPhoneInput', 'Contact'),
+        dealerName: getText('dealerNameInput', 'Samriddhi And Brothers Auto Pvt. Ltd.'),
         mrp, afterDiscount, cashInsurance, financeInsurance, rate, dpAmountOnly, 
         loanAmount, emi, roundingAdj, finalTotalDP_Dash, finalTotalDP_A4, totalAdvEmiSync, tenure, namsari
     });
 };
 
-// 6. Update HTML UI
+// 6. UI Update (Fixes MRP 0 issue)
 function updateUI(data) {
     const format = (num) => Math.round(num).toLocaleString();
     const formatDec = (num) => num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     const safeSet = (id, val) => { if(document.getElementById(id)) document.getElementById(id).innerText = val; };
 
-    // --- DASHBOARD PRICE FIX ---
-    // Yadi tapaiko HTML ma MRP display hune thau ko ID 'displayMRP' chha bhane yo use garnuhos
+    // Dashboard Selectors
     safeSet('displayTotalDP', `RS. ${format(data.finalTotalDP_Dash)}`);
-    
-    // Yaha check garnuhos: yadi ID 'mrp' ho ki 'displayMRP' ho? 
-    // Screenshot anusar 'mrp' ID bhayeko thau ma 0 chha, teslai data.mrp le set garnuhos.
-    safeSet('mrp', `RS. ${format(data.mrp)}`); 
-    
+    safeSet('mrp', `RS. ${format(data.mrp)}`); // <-- MRP display fix
     safeSet('afterDiscount', `RS. ${format(data.afterDiscount)}`);
     safeSet('displayIns', `RS. ${format(data.cashInsurance)}`);
     safeSet('displayRate', `${data.rate}`);
@@ -183,10 +169,7 @@ function updateUI(data) {
     safeSet('displayEMI', `RS. ${formatDec(data.emi)}`);
     safeSet('displayTotalAdvEmi', `RS. ${formatDec(data.totalAdvEmiSync)}`);
 
-    // A4 Paper Details... (Aru sabai same rakhnuhos)
-}
-
-    // A4 Paper View
+    // A4 Paper Selectors
     safeSet('a4CustName', data.custName);
     safeSet('a4CustPhone', data.custPhone);
     safeSet('a4Dealer', data.dealerName);
@@ -206,12 +189,11 @@ function updateUI(data) {
 document.addEventListener('input', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
         calculateFinance();
-        // Check if manual inventory fields are changed
         if (['manualChassis', 'manualEngine', 'manualReg', 'manualColor'].includes(e.target.id)) {
             syncToA4ManualFields();
         }
     }
 });
 
-// Run on Load
+// Start the app
 fetchBikes();
