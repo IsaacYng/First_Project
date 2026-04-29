@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
   authDomain: "first-project-2082-12-26.firebaseapp.com",
@@ -26,7 +25,6 @@ async function fetchBikes() {
             select.innerHTML = allBikes.map(bike => 
                 `<option value="${bike.id}">${bike.name}</option>`
             ).join('');
-            // Data fetch bhayepachi matrai calculation call garne
             calculateFinance();
         }
     } catch (e) {
@@ -39,15 +37,20 @@ window.calculateFinance = function() {
     const bike = allBikes.find(b => b.id === selectedId);
     if (!bike) return;
 
-    // Numeric value helper
     const getVal = (id, fallback = 0) => parseFloat(document.getElementById(id)?.value) || fallback;
+    const getText = (id, fallback = "") => document.getElementById(id)?.value || fallback;
 
-    // 1. Raw Data (Cash vs Finance Insurance)
+    // 1. Details from Inputs (Yo thapiyo)
+    const custName = getText('custNameInput', 'Your Name');
+    const custPhone = getText('custPhoneInput', 'Contact');
+    const dealerName = getText('dealerNameInput', 'Samriddhi And Brothers Auto Pvt. Ltd.');
+
+    // 2. Raw Data
     const mrp = parseFloat(bike.price) || 0;
-    const cashInsurance = parseFloat(bike.Insurance) || 0; // Dashboard ko lagi
-    const financeInsurance = parseFloat(bike.financeInsurance) || 0; // A4 ko lagi
+    const cashInsurance = parseFloat(bike.Insurance) || 0;
+    const financeInsurance = parseFloat(bike.financeInsurance) || 0;
 
-    // 2. Inputs
+    // 3. Finance Inputs
     const discount = getVal('discountInput');
     const customerExtraAdv = getVal('advEmiInput');
     const namsari = getVal('namsariInput', 3000);
@@ -56,12 +59,10 @@ window.calculateFinance = function() {
     const accCost = getVal('helmetInput') + getVal('legguardInput') + 
                     getVal('seatcoverInput') + getVal('othersInput');
 
-    // 3. Base Calculation (After Discount)
-    const afterDiscount = mrp - discount; // A4 paper ma yo price load hunchha
+    const afterDiscount = mrp - discount;
     const dpAmountOnly = afterDiscount * (dpPercentVal / 100);
     const loanAmount = afterDiscount - dpAmountOnly;
 
-    // 4. Interest Rate Logic
     let rate = 13.99;
     if (dpPercentVal >= 60) rate = 9.99;
     else if (dpPercentVal >= 50) rate = 11.99;
@@ -70,19 +71,16 @@ window.calculateFinance = function() {
     const monthlyRate = (rate / 12) / 100;
     const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1);
 
-    // 5. Dashboard Calculation (Using Cash Insurance + Accessories)
     const rawTotalDP_Dash = dpAmountOnly + namsari + cashInsurance + emi + accCost + customerExtraAdv;
     const roundingAdj = rawTotalDP_Dash % 1000 > 0 ? (1000 - (rawTotalDP_Dash % 1000)) : 0;
     
-    // Synced Advance EMI (Dubai tira eutai hunchha)
     const totalAdvEmiSync = emi + roundingAdj + customerExtraAdv; 
     const finalTotalDP_Dash = rawTotalDP_Dash + roundingAdj;
-
-    // 6. A4 Paper Calculation (Using Finance Insurance + Sync EMI)
     const finalTotalDP_A4 = dpAmountOnly + namsari + financeInsurance + totalAdvEmiSync;
 
     updateUI({
         bikeName: bike.name,
+        custName, custPhone, dealerName, // UI ma pathaune
         mrp, afterDiscount, cashInsurance, financeInsurance, rate, dpAmountOnly, 
         loanAmount, emi, roundingAdj, finalTotalDP_Dash, finalTotalDP_A4, totalAdvEmiSync, tenure, namsari
     });
@@ -93,7 +91,7 @@ function updateUI(data) {
     const formatDec = (num) => num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     const safeSet = (id, val) => { if(document.getElementById(id)) document.getElementById(id).innerText = val; };
 
-    // --- DASHBOARD (Top View) ---
+    // Dashboard
     safeSet('displayTotalDP', `RS. ${format(data.finalTotalDP_Dash)}`);
     safeSet('mrp', `RS. ${format(data.mrp)}`);
     safeSet('afterDiscount', `RS. ${format(data.afterDiscount)}`);
@@ -105,7 +103,12 @@ function updateUI(data) {
     safeSet('displayAutoAdEmi', `RS. ${data.roundingAdj.toFixed(2)}`);
     safeSet('displayTotalAdvEmi', `RS. ${formatDec(data.totalAdvEmiSync)}`);
 
-    // --- A4 PAPER (Print Area) ---
+    // A4 Paper Customer Details (Yo thapiyo)
+    safeSet('a4CustName', data.custName);
+    safeSet('a4CustPhone', data.custPhone);
+    safeSet('a4Dealer', data.dealerName);
+
+    // A4 Paper Finance Details
     safeSet('a4Model', data.bikeName);
     safeSet('a4MRP', formatDec(data.afterDiscount));
     safeSet('a4DP', formatDec(data.dpAmountOnly));
@@ -118,7 +121,6 @@ function updateUI(data) {
     safeSet('a4Namsari', formatDec(data.namsari));
 }
 
-// Event Listeners setup
 document.addEventListener('input', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
         calculateFinance();
