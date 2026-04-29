@@ -167,8 +167,14 @@ function updateUI(data) {
     const formatDec = (num) => num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     const safeSet = (id, val) => { if(document.getElementById(id)) document.getElementById(id).innerText = val; };
 
-    // Dashboard View
+    // --- DASHBOARD PRICE FIX ---
+    // Yadi tapaiko HTML ma MRP display hune thau ko ID 'displayMRP' chha bhane yo use garnuhos
     safeSet('displayTotalDP', `RS. ${format(data.finalTotalDP_Dash)}`);
+    
+    // Yaha check garnuhos: yadi ID 'mrp' ho ki 'displayMRP' ho? 
+    // Screenshot anusar 'mrp' ID bhayeko thau ma 0 chha, teslai data.mrp le set garnuhos.
+    safeSet('mrp', `RS. ${format(data.mrp)}`); 
+    
     safeSet('afterDiscount', `RS. ${format(data.afterDiscount)}`);
     safeSet('displayIns', `RS. ${format(data.cashInsurance)}`);
     safeSet('displayRate', `${data.rate}`);
@@ -176,6 +182,9 @@ function updateUI(data) {
     safeSet('displayLoanAmt', `RS. ${format(data.loanAmount)}`);
     safeSet('displayEMI', `RS. ${formatDec(data.emi)}`);
     safeSet('displayTotalAdvEmi', `RS. ${formatDec(data.totalAdvEmiSync)}`);
+
+    // A4 Paper Details... (Aru sabai same rakhnuhos)
+}
 
     // A4 Paper View
     safeSet('a4CustName', data.custName);
