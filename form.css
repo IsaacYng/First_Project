@@ -78,3 +78,15 @@
             break-after: avoid !important;
         }
     }
+/* Google Fonts jastai external font use gareko vaye mathi import garne, natra direct system font */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;700&display=swap');
+
+.book-antiqua-font {
+    /* Book Antiqua dherai jaso system ma hunchha, backup ko lagi serif rakhne */
+    font-family: "Book Antiqua", Palatino, "Palatino Linotype", serif;
+}
+
+/* Yadi exact mathi ko jastai look chaincha vane 'font-mono' lai pani override garna sakincha */
+.book-antiqua-font .font-mono {
+    font-family: "Book Antiqua", Palatino, serif !important;
+}
