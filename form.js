@@ -16,7 +16,7 @@ const db = getFirestore(app);
 
 let allBikes = [];
 
-// 2. Fetch Models for Dropdown
+// 2. Fetch Models
 async function fetchBikes() {
     try {
         const snapshot = await getDocs(collection(db, "bikes"));
@@ -31,7 +31,7 @@ async function fetchBikes() {
     } catch (e) { console.error("Error fetching bikes:", e); }
 }
 
-// 3. Chassis Search Logic
+// 3. Chassis Search
 window.findChassis = async function() {
     const searchVal = document.getElementById('chassisSearch').value.trim();
     const statusEl = document.getElementById('searchStatus');
@@ -72,7 +72,7 @@ window.findChassis = async function() {
     } catch (error) { statusEl.innerText = "Connection Error!"; }
 };
 
-// 4. Finance Calculation (Exact Sync Logic)
+// 4. Finance Calculation
 window.calculateFinance = function() {
     const selectedId = document.getElementById('modelSelect').value;
     const bike = allBikes.find(b => b.id === selectedId);
@@ -80,7 +80,6 @@ window.calculateFinance = function() {
 
     const getVal = (id, fallback = 0) => parseFloat(document.getElementById(id)?.value) || fallback;
 
-    // Pricing
     const mrp = parseFloat(bike.price) || 0;
     const discount = getVal('discountInput');
     const cashInsurance = parseFloat(bike.Insurance) || 0;
@@ -91,7 +90,6 @@ window.calculateFinance = function() {
     const customerExtraAdv = getVal('advEmiInput');
     const accCost = getVal('helmetInput') + getVal('legguardInput') + getVal('seatcoverInput') + getVal('othersInput');
 
-    // Loan Math
     const afterDiscount = mrp - discount;
     const dpAmountOnly = afterDiscount * (dpPercentVal / 100);
     const loanAmount = afterDiscount - dpAmountOnly;
@@ -104,16 +102,11 @@ window.calculateFinance = function() {
     const monthlyRate = (rate / 12) / 100;
     const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1);
 
-    // --- DASHBOARD ROUNDING & ADVANCE EMI SYNC ---
     const rawTotalDP_Dash = dpAmountOnly + namsari + cashInsurance + emi + accCost + customerExtraAdv;
-    // Rounding to nearest 1000
     const roundingAdj = rawTotalDP_Dash % 1000 > 0 ? (1000 - (rawTotalDP_Dash % 1000)) : 0;
     
-    // Exact Sync: EMI + Rounding + Extra
     const totalAdvEmiSync = emi + roundingAdj + customerExtraAdv; 
     const finalTotalDP_Dash = rawTotalDP_Dash + roundingAdj;
-    
-    // A4 Paper uses Finance Insurance
     const finalTotalDP_A4 = dpAmountOnly + namsari + financeInsurance + totalAdvEmiSync;
 
     updateUI({
@@ -126,7 +119,7 @@ window.calculateFinance = function() {
     });
 };
 
-// 5. UI Updates (Fixes Price 0 & Advance EMI)
+// 5. UI Update (With DATE Logic)
 function updateUI(data) {
     const format = (num) => Math.round(num).toLocaleString();
     const formatDec = (num) => num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -141,8 +134,12 @@ function updateUI(data) {
     safeSet('displayDpAmt', `RS. ${format(data.dpAmountOnly)}`);
     safeSet('displayLoanAmt', `RS. ${format(data.loanAmount)}`);
     safeSet('displayEMI', `RS. ${formatDec(data.emi)}`);
-    safeSet('displayAutoAdEmi', `RS. ${data.roundingAdj.toFixed(2)}`);
     safeSet('displayTotalAdvEmi', `RS. ${format(data.totalAdvEmiSync)}`);
+
+    // --- TODAY'S DATE LOGIC ---
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    safeSet('a4Date', formattedDate); // A4 Paper ma Today's Date set garchha
 
     // A4 Paper
     safeSet('a4CustName', data.custName);
@@ -162,7 +159,7 @@ function updateUI(data) {
 
 function syncToA4ManualFields() {
     ['manualChassis', 'manualEngine', 'manualReg', 'manualColor'].forEach(id => {
-        const target = id.replace('manual', 'a4'); // manualChassis -> a4Chassis
+        const target = id.replace('manual', 'a4');
         if(document.getElementById(target)) {
             document.getElementById(target).innerText = document.getElementById(id).value || "---";
         }
