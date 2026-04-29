@@ -232,35 +232,22 @@
         </div>
     </div>
 </div>
-<div class="bg-white p-4 rounded-lg shadow-md mb-4 calculator-ui">
-    <h3 class="text-lg font-bold mb-3">Vehicle Inventory Search</h3>
-    <div class="flex gap-2 mb-4">
-        <input type="text" id="chassisSearch" placeholder="Enter Chassis Number" class="border p-2 rounded w-full uppercase">
-        <button onclick="findChassis()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Find</button>
-    </div>
-
-    <!-- Manual/Auto Input Fields -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
-        <div>
-            <label class="block text-sm">Chassis Number</label>
-            <input type="text" id="manualChassis" class="border p-2 rounded w-full uppercase">
-        </div>
-        <div>
-            <label class="block text-sm">Engine Number</label>
-            <input type="text" id="manualEngine" class="border p-2 rounded w-full uppercase">
-        </div>
-        <div>
-            <label class="block text-sm">Registration No. (Optional)</label>
-            <input type="text" id="manualReg" class="border p-2 rounded w-full uppercase">
-        </div>
-        <div>
-            <label class="block text-sm">Colour</label>
-            <input type="text" id="manualColor" class="border p-2 rounded w-full">
-        </div>
-    </div>
-    <p id="searchStatus" class="text-sm mt-2 font-semibold"></p>
+<!-- Search Box -->
+<div class="flex gap-2">
+    <input type="text" id="chassisSearch" placeholder="Chassis No. Search..." class="border p-2 rounded w-full">
+    <button onclick="findChassis()" class="bg-blue-600 text-white px-4 py-2 rounded">Find</button>
 </div>
 
+<!-- Results Area -->
+<div class="grid grid-cols-2 gap-4 mt-4">
+    <input type="text" id="manualChassis" placeholder="Chassis No" class="border p-2 rounded">
+    <input type="text" id="manualEngine" placeholder="Engine No" class="border p-2 rounded">
+    <input type="text" id="manualReg" placeholder="Registration No" class="border p-2 rounded">
+    <input type="text" id="manualColor" placeholder="Color" class="border p-2 rounded">
+</div>
+<p id="searchStatus"></p>
+
+    
 <div class="scroller-container w-full overflow-x-auto bg-slate-100 py-6 md:py-10 flex flex-col items-center print:bg-white print:p-0 print:overflow-visible">
     
     <div class="w-[210mm] flex justify-end mb-4 print:hidden px-4 md:px-0">
