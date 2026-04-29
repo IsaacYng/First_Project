@@ -130,17 +130,12 @@ window.findChassis = async function() {
     const searchVal = document.getElementById('chassisSearch').value.trim();
     const statusEl = document.getElementById('searchStatus');
     
-    if (!searchVal) {
-        statusEl.innerText = "Chassis number halnuhos!";
-        statusEl.className = "text-red-500 text-sm mt-2";
-        return;
-    }
-
-    statusEl.innerText = "Searching in Inventory...";
-    statusEl.className = "text-blue-500 text-sm mt-2";
+    // Status clear garne
+    statusEl.innerText = "Searching...";
+    statusEl.className = "text-blue-500 text-sm mt-1";
 
     try {
-        // Tapaiko admin panel le "inventory" collection ma data save garchha
+        // HAMI "inventory" COLLECTION MA SEARCH GARDAI CHHAU
         const inventoryCol = collection(db, "inventory");
         const q = query(inventoryCol, where("chassis", "==", searchVal));
         const querySnapshot = await getDocs(q);
@@ -148,60 +143,35 @@ window.findChassis = async function() {
         if (!querySnapshot.empty) {
             const data = querySnapshot.docs[0].data();
             
-            // Input fields ma data auto-fill garne
-            document.getElementById('manualChassis').value = data.chassis || searchVal;
+            // Input field ma data halne
+            document.getElementById('manualChassis').value = data.chassis || "";
             document.getElementById('manualEngine').value = data.engine || "";
             document.getElementById('manualReg').value = data.regNo || "";
             document.getElementById('manualColor').value = data.color || "";
 
-            // Yadi model name match hunchha bhane dropdown pani auto-select gari dine
+            // Dropdown matching (Yedi model name exact match hunchha bhane)
             const modelSelect = document.getElementById('modelSelect');
             if (modelSelect && data.model) {
                 for (let i = 0; i < modelSelect.options.length; i++) {
                     if (modelSelect.options[i].text === data.model) {
                         modelSelect.selectedIndex = i;
-                        // Finance calculation refresh garne
-                        calculateFinance();
+                        calculateFinance(); // Price recalculate garna
                         break;
                     }
                 }
             }
 
-            statusEl.innerText = "Match found! Data loaded from Inventory.";
-            statusEl.className = "text-green-600 text-sm mt-2 font-bold";
-            
-            // A4 paper display sync garne
-            syncToA4();
+            statusEl.innerText = "Match Found!";
+            statusEl.className = "text-green-600 text-sm mt-1 font-bold";
+            syncToA4(); // A4 preview update garna
         } else {
-            statusEl.innerText = "Inventory ma bhetiyenna. Manual entry garnuhos.";
-            statusEl.className = "text-orange-600 text-sm mt-2";
+            statusEl.innerText = "Chassis not found in inventory. Enter manually.";
+            statusEl.className = "text-orange-600 text-sm mt-1";
             document.getElementById('manualChassis').value = searchVal;
         }
     } catch (error) {
-        console.error("Search error:", error);
-        statusEl.innerText = "Database error! Connection check garnuhos.";
+        console.error("Firebase Error:", error);
+        statusEl.innerText = "Database connection error! Config check garnuhos.";
+        statusEl.className = "text-red-500 text-sm mt-1";
     }
 };
-
-// Real-time A4 Sync function
-function syncToA4() {
-    const fields = {
-        'manualChassis': 'a4Chassis',
-        'manualEngine': 'a4Engine',
-        'manualReg': 'a4Reg',
-        'manualColor': 'a4Color'
-    };
-
-    for (let inputId in fields) {
-        const val = document.getElementById(inputId).value;
-        const displayId = fields[inputId];
-        if (document.getElementById(displayId)) {
-            document.getElementById(displayId).innerText = val || "---";
-        }
-    }
-}
-
-// Event listeners for manual typing
-['manualChassis', 'manualEngine', 'manualReg', 'manualColor'].forEach(id => {
-    document.getElementById(id)?.addEventListener('input', syncToA4);
-});
