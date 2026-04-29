@@ -47,51 +47,51 @@
         </div>
     </div>
 
-<main id="finance" class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 font-sans text-slate-900">
+<main id="finance" class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8 font-sans text-slate-900">
     <div class="max-w-5xl mx-auto space-y-6">
 
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 text-center">
-            <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Finance Calculations</h2>
-            <p class="text-slate-500 mt-1 font-medium uppercase text-xs tracking-widest">Total Downpayment</p>
-            <div id="displayTotalDP" class="text-4xl font-black text-indigo-600 mt-2">RS. 0</div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 text-center sticky top-2 z-10 lg:static">
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">Finance Calculations</h2>
+            <p class="text-slate-500 mt-1 font-medium uppercase text-[10px] sm:text-xs tracking-widest">Total Downpayment</p>
+            <div id="displayTotalDP" class="text-3xl sm:text-4xl font-black text-indigo-600 mt-2">RS. 0</div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-            <div class="lg:col-span-2 space-y-6">
-
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <div class="lg:col-span-8 space-y-6">
+                
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6">
                     <h3 class="flex items-center text-lg font-bold text-slate-700 mb-5">
                         <i class="fa-solid fa-motorcycle mr-3 text-indigo-500"></i> Select Model
                     </h3>
 
-                    <select id="modelSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-3 mb-6 transition-all">
+                    <select id="modelSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 mb-6 transition-all appearance-none">
                         <option>Loading Bikes...</option>
                     </select>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase">MRP</label>
-                            <p id="mrp" class="text-lg font-semibold text-slate-800">RS. 0</p>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">MRP</label>
+                            <p id="mrp" class="text-base sm:text-lg font-semibold text-slate-800">RS. 0</p>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Discount</label>
-                            <input type="number" id="discountInput" value="0" class="w-full bg-white border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Discount</label>
+                            <input type="number" id="discountInput" value="0" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-xl border border-green-100">
+                            <label class="text-[10px] font-bold text-green-600 uppercase block mb-1">After Disc.</label>
+                            <p id="afterDiscount" class="text-base sm:text-lg font-semibold text-green-700">RS. 0</p>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase">After Discount</label>
-                            <p id="afterDiscount" class="text-lg font-semibold text-green-600">RS. 0</p>
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Adv. EMI</label>
-                            <input type="number" id="advEmiInput" value="0" class="w-full bg-white border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Adv. EMI</label>
+                            <input type="number" id="advEmiInput" value="0" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-slate-100">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Downpayment %</label>
-                            <select id="dpPercent" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Downpayment %</label>
+                            <select id="dpPercent" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                                 <option value="30">30%</option>
                                 <option value="40">40%</option>
                                 <option value="50" selected>50%</option>
@@ -99,8 +99,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Tenure (Months)</label>
-                            <select id="tenure" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Tenure (Months)</label>
+                            <select id="tenure" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                                 <option value="12" selected>12 Months</option>
                                 <option value="18">18 Months</option>
                                 <option value="24">24 Months</option>
@@ -113,16 +113,16 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                         <h3 class="flex items-center text-lg font-bold text-slate-700 mb-4">
-                            <i class="fa-solid fa-gears mr-3 text-indigo-500"></i> Additional Charges
+                            <i class="fa-solid fa-gears mr-3 text-indigo-500"></i> Charges
                         </h3>
                         <div class="space-y-4">
-                            <div class="flex justify-between items-center">
+                            <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
                                 <label class="text-sm text-slate-600">Insurance</label>
-                                <p id="displayIns" class="font-semibold">RS. 0</p>
+                                <p id="displayIns" class="font-bold text-slate-800">RS. 0</p>
                             </div>
-                            <div class="flex justify-between items-center gap-4">
+                            <div class="flex justify-between items-center gap-4 px-2">
                                 <label class="text-sm text-slate-600">Namsari/Reg.</label>
-                                <input type="number" id="namsariInput" value="3000" class="w-24 text-right border-b border-slate-300 focus:border-indigo-500 outline-none text-sm p-1">
+                                <input type="number" id="namsariInput" value="3000" class="w-24 text-right border-b-2 border-slate-200 focus:border-indigo-500 outline-none text-sm p-1 font-semibold">
                             </div>
                         </div>
                     </div>
@@ -131,73 +131,75 @@
                         <h3 class="flex items-center text-lg font-bold text-slate-700 mb-4">
                             <i class="fa-solid fa-helmet-safety mr-3 text-indigo-500"></i> Accessories
                         </h3>
-                        <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-4">
                             <div class="space-y-1">
                                 <label class="text-[10px] font-bold text-slate-400 uppercase">Helmet</label>
-                                <input type="number" id="helmetInput" value="2500" class="w-full text-sm border-b border-slate-200 outline-none p-1">
+                                <input type="number" id="helmetInput" value="2500" class="w-full text-sm border-b border-slate-200 focus:border-indigo-500 outline-none p-1 transition-all">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[10px] font-bold text-slate-400 uppercase">Legguard</label>
-                                <input type="number" id="legguardInput" value="1800" class="w-full text-sm border-b border-slate-200 outline-none p-1">
+                                <input type="number" id="legguardInput" value="1800" class="w-full text-sm border-b border-slate-200 focus:border-indigo-500 outline-none p-1 transition-all">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[10px] font-bold text-slate-400 uppercase">Seatcover</label>
-                                <input type="number" id="seatcoverInput" value="650" class="w-full text-sm border-b border-slate-200 outline-none p-1">
+                                <input type="number" id="seatcoverInput" value="650" class="w-full text-sm border-b border-slate-200 focus:border-indigo-500 outline-none p-1 transition-all">
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[10px] font-bold text-slate-400 uppercase">Others</label>
-                                <input type="number" id="othersInput" value="0" class="w-full text-sm border-b border-slate-200 outline-none p-1">
+                                <input type="number" id="othersInput" value="0" class="w-full text-sm border-b border-slate-200 focus:border-indigo-500 outline-none p-1 transition-all">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            
-<br><br>
-<div class="lg:col-span-2 space-y-6">
-    <div class="bg-white rounded-2xl shadow-sm border p-6">
+            <div class="lg:col-span-4 space-y-6">
+                
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-lg font-bold text-slate-700 mb-4 flex items-center">
+                        <i class="fa-solid fa-user-tag mr-2 text-indigo-500"></i> Customer Info
+                    </h3>
+                    <div class="space-y-4">
+                        <input type="text" id="custNameInput" placeholder="Full Name" 
+                               class="w-full border border-slate-300 p-3 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        
+                        <input type="tel" id="custPhoneInput" placeholder="Contact Number" 
+                               class="w-full border border-slate-300 p-3 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        
+                        <div class="pt-2">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Dealer</label>
+                            <input type="text" id="dealerNameInput" value="Samriddhi And Brothers Auto Pvt. Ltd." 
+                                   class="w-full mt-1 border-none bg-slate-50 p-3 rounded-xl text-xs text-slate-500 outline-none font-medium" readonly>
+                        </div>
+                    </div>
+                </div>
 
-        <h3 class="text-lg font-bold text-slate-700 mb-4 flex items-center">
-            <i class="fa-solid fa-user mr-2 text-indigo-500"></i> Customer Details
-        </h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="flex flex-col">
-                <label for="custNameInput" class="sr-only">Customer Name</label>
-                <input type="text" id="custNameInput" name="customer_name" placeholder="Customer Name" 
-                       class="border p-2 rounded text-sm outline-indigo-500 w-full">
+                <div class="bg-indigo-900 rounded-2xl shadow-lg p-6 text-white">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fa-solid fa-magnifying-glass mr-2"></i> Vehicle Search
+                    </h3>
+                    <div class="flex flex-col sm:flex-row gap-2 mb-4">
+                        <input type="text" id="chassisSearch" placeholder="Chassis No..." 
+                               class="flex-1 p-3 rounded-xl text-slate-900 text-sm focus:outline-none">
+                        <button onclick="findChassis()" class="bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-3 rounded-xl font-bold transition-all text-sm shadow-md">
+                            Find
+                        </button>
+                    </div>
+                    
+                    <div id="searchResults" class="grid grid-cols-1 gap-3">
+                        <input type="text" id="manualChassis" placeholder="Chassis Number" class="w-full bg-indigo-800/50 border border-indigo-700 p-3 rounded-lg text-xs placeholder-indigo-300 outline-none">
+                        <input type="text" id="manualEngine" placeholder="Engine Number" class="w-full bg-indigo-800/50 border border-indigo-700 p-3 rounded-lg text-xs placeholder-indigo-300 outline-none">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="manualReg" placeholder="Reg. No" class="w-full bg-indigo-800/50 border border-indigo-700 p-3 rounded-lg text-xs placeholder-indigo-300 outline-none">
+                            <input type="text" id="manualColor" placeholder="Color" class="w-full bg-indigo-800/50 border border-indigo-700 p-3 rounded-lg text-xs placeholder-indigo-300 outline-none">
+                        </div>
+                    </div>
+                    <p id="searchStatus" class="text-[10px] mt-2 text-indigo-200 italic text-center"></p>
+                </div>
             </div>
 
-            <div class="flex flex-col">
-                <label for="custPhoneInput" class="sr-only">Contact Number</label>
-                <input type="tel" id="custPhoneInput" name="customer_phone" placeholder="Contact Number" 
-                       class="border p-2 rounded text-sm outline-indigo-500 w-full">
-            </div>
-
-            <div class="col-span-1 md:col-span-2 flex flex-col">
-                <label for="dealerNameInput" class="text-xs text-slate-500 mb-1 ml-1">Dealer Name</label>
-                <input type="text" id="dealerNameInput" value="Samriddhi And Brothers Auto Pvt. Ltd." 
-                       class="border p-2 rounded text-sm bg-slate-50 text-slate-600 outline-none">
-            </div>
         </div>
     </div>
-</div>
-<!-- Search Box -->
-<div class="flex gap-2">
-    <input type="text" id="chassisSearch" placeholder="Chassis No. Search..." class="border p-2 rounded w-full">
-    <button onclick="findChassis()" class="bg-blue-600 text-white px-4 py-2 rounded">Find</button>
-</div>
-
-<!-- Results Area -->
-<div class="grid grid-cols-2 gap-4 mt-4">
-    <input type="text" id="manualChassis" placeholder="Chassis No" class="border p-2 rounded">
-    <input type="text" id="manualEngine" placeholder="Engine No" class="border p-2 rounded">
-    <input type="text" id="manualReg" placeholder="Registration No" class="border p-2 rounded">
-    <input type="text" id="manualColor" placeholder="Color" class="border p-2 rounded">
-</div>
-<p id="searchStatus"></p>
-
     
 <div class="scroller-container w-full overflow-x-auto bg-slate-100 py-6 md:py-10 flex flex-col items-center print:bg-white print:p-0 print:overflow-visible">
     
