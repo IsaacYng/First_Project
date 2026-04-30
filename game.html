@@ -1,1 +1,96 @@
-a
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go! YNG | Price List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+      <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <nav class="bg-white border-b sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0">
+                    <span class="text-2xl font-black text-red-600 tracking-tighter">Go! YNG</span>
+                </div>
+
+                <div class="hidden md:flex space-x-8 font-semibold text-gray-600">
+                    <a href="#" class="hover:text-red-600">Home</a>
+                    <a href="form.html" class="hover:text-red-600">Form</a>
+                    <a href="finance.html" class="hover:text-red-600">Finance</a>
+                </div>
+
+                <button id="menu-btn" class="md:hidden text-2xl p-2">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="overlay" class="fixed inset-0 bg-black/50 z-[60] hidden backdrop-blur-sm transition-opacity"></div>
+    <div id="drawer" class="fixed top-0 left-0 w-72 h-full bg-white z-[70] shadow-2xl transform -translate-x-full transition-transform duration-300">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-10">
+                <span class="font-bold text-xl uppercase tracking-widest text-red-600">Menu</span>
+                <button id="close-btn" class="text-3xl text-gray-400">&times;</button>
+            </div>
+            <div class="flex flex-col space-y-6 font-medium text-lg">
+                <a href="#" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition"><i class="fa-solid fa-house"></i> <span>Home</span></a>
+                <a href="form.html" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition"><i class="fa-solid fa-file"></i></i> <span>Form</span></a>
+                <a href="finance.html" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition"><i class="fa-solid fa-money-bill-trend-up"></i><span>Finance</span></a>
+            </div>
+        </div>
+    </div>
+
+    
+
+
+
+
+
+
+
+          </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-gray-500 mb-6">Go your Dream &copy; 2026</p>
+            <div class="flex justify-center space-x-8 text-2xl text-gray-400">
+                <a href="#" class="hover:text-red-600 transition"><i class="fa-brands fa-facebook"></i></a>
+                <a href="#" class="hover:text-red-600 transition"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="#" class="hover:text-red-600 transition"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Drawer Controls
+        const btn = document.getElementById('menu-btn');
+        const close = document.getElementById('close-btn');
+        const drawer = document.getElementById('drawer');
+        const overlay = document.getElementById('overlay');
+
+        const toggle = () => {
+            drawer.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        };
+
+        btn.addEventListener('click', toggle);
+        close.addEventListener('click', toggle);
+        overlay.addEventListener('click', toggle);
+    </script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
