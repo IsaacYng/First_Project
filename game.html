@@ -34,20 +34,19 @@
         </div>
     </nav>
 
-    <div id="overlay" class="fixed inset-0 bg-black/50 z-[60] hidden backdrop-blur-sm transition-opacity"></div>
-    <div id="drawer" class="fixed top-0 left-0 w-72 h-full bg-white z-[70] shadow-2xl transform -translate-x-full transition-transform duration-300">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-10">
-                <span class="font-bold text-xl uppercase tracking-widest text-red-600">Menu</span>
-                <button id="close-btn" class="text-3xl text-gray-400">&times;</button>
-            </div>
-            <div class="flex flex-col space-y-6 font-medium text-lg">
-                <a href="#" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition"><i class="fa-solid fa-house"></i> <span>Home</span></a>
-                <a href="form.html" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition"><i class="fa-solid fa-file"></i></i> <span>Form</span></a>
-                <a href="finance.html" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition"><i class="fa-solid fa-money-bill-trend-up"></i><span>Finance</span></a>
-            </div>
-        </div>
-    </div>
+    
+    <div id="masti-section" class="max-w-xl mx-auto mt-10">
+    <button id="playBtn" class="bg-indigo-600 p-4 rounded-xl text-white font-bold w-full shadow-lg">
+       Masti Quiz Start Gara! 🎯
+    </button>
+    <div id="quiz-container" class="mt-6"></div>
+</div>
+
+<script type="module">
+    import { startOfficeGame } from './game.js';
+    document.getElementById('playBtn').onclick = () => startOfficeGame(5);
+</script>
+
 
     
 
