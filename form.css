@@ -46,47 +46,49 @@ body {
 
 /* 5. IMPROVED PRINT ENGINE */
 @media print {
+    /* 1. Reset the page and body */
     @page {
         size: A4;
-        margin: 0; /* Let the #print-area padding handle the margins */
+        margin: 0;
     }
 
-    /* Better way to hide UI elements without leaving blank spaces */
-    html, body {
-        background: #fff !important;
-        height: 297mm;
-        overflow: hidden; /* Prevents extra blank pages */
+    body {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    /* Hide everything by default */
-    body > *:not(.scroller-container) {
+    /* 2. HIDE: Everything that isn't the print area */
+    /* This targets common UI elements specifically */
+    nav, footer, header, button, .calculator-ui, .print-hidden {
         display: none !important;
     }
 
+    /* 3. SHOW: Ensure the print area and ALL its parents are visible */
+    /* We use display: block to make sure the layout doesn't collapse */
     .scroller-container {
+        display: block !important;
         padding: 0 !important;
         margin: 0 !important;
-        display: block !important;
+        width: 100% !important;
     }
 
-    /* Ensure Print Area is the only thing visible and fills the page */
     #print-area {
-        width: 210mm !important;
-        height: 297mm !important;
-        padding: 15mm !important; /* Adjust as needed for your content */
-        margin: 0 !important;
-        border: none !important;
-        box-shadow: none !important;
-        page-break-after: avoid !important;
-        overflow: hidden !important; /* Strict 1-page containment */
         display: block !important;
         visibility: visible !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        padding: 15mm !important; /* Internal margin for text */
+        margin: 0 auto !important; /* Center it */
+        border: none !important;
+        box-shadow: none !important;
+        position: relative !important;
+        overflow: hidden !important; /* Keep it to one page */
     }
 
-    /* Text Clarity */
-    #print-area {
+    /* 4. Text Fixes */
+    #print-area * {
         color: #000 !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+        background: transparent !important;
     }
 }
