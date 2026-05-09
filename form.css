@@ -1,6 +1,5 @@
 /* 1. Font Imports */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-/* Crimson Pro as a high-quality alternative for Book Antiqua if not on system */
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
 /* 2. Global Reset */
@@ -9,90 +8,82 @@ body {
     padding: 0; 
     background-color: #f1f5f9; 
     -webkit-font-smoothing: antialiased;
+    font-family: 'Inter', sans-serif; /* Default */
 }
 
-/* 3. Book Antiqua Configuration */
-.book-antiqua-font {
-    /* Book Antiqua system ma chaina bhane Crimson Pro use huncha */
-    font-family: "Book Antiqua", "Palatino Linotype", "Palatino", "Crimson Pro", serif;
-}
-
-/* Override all child elements to follow the theme */
+/* 3. Font Configuration */
+/* Simplified the stack to ensure Crimson Pro is the priority fallback */
+.book-antiqua-font, 
 .book-antiqua-font #a4MRP, 
 .book-antiqua-font #a4DP, 
 .book-antiqua-font #a4Loan,
 .book-antiqua-font #a4TotalDP,
 .book-antiqua-font .font-mono {
-    font-family: "Book Antiqua", "Palatino", serif !important;
+    font-family: "Book Antiqua", "Palatino Linotype", "Palatino", "Crimson Pro", serif !important;
 }
 
-/* 4. Layout & Mobile Responsiveness */
+/* 4. Layout */
 .scroller-container { 
     display: flex; 
     flex-direction: column;
     align-items: center; 
     padding: 20px; 
     width: 100%;
-    overflow-x: auto; /* For mobile side-scroll */
-    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
     box-sizing: border-box;
 }
 
-/* A4 Paper Styling (Screen View) */
 #print-area { 
     width: 210mm; 
     min-height: 297mm;
-    padding: 20mm; /* Standard A4 Padding */
+    padding: 20mm;
     background: white; 
     box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
     box-sizing: border-box;
     margin: 0 auto;
     flex-shrink: 0;
-    position: relative;
 }
 
-/* 5. IMPROVED PRINT ENGINE (Strict 1-Page) */
+/* 5. IMPROVED PRINT ENGINE */
 @media print {
     @page {
         size: A4;
-        margin: 0; 
+        margin: 0; /* Let the #print-area padding handle the margins */
     }
 
-    /* Clear everything except the print area */
-    body {
-        background: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
+    /* Better way to hide UI elements without leaving blank spaces */
+    html, body {
+        background: #fff !important;
+        height: 297mm;
+        overflow: hidden; /* Prevents extra blank pages */
     }
 
-    nav, footer, header, button, .print-hidden, .calculator-ui {
+    /* Hide everything by default */
+    body > *:not(.scroller-container) {
         display: none !important;
     }
 
-    body * {
-        visibility: hidden !important;
+    .scroller-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
     }
 
-    #print-area, #print-area * {
+    /* Ensure Print Area is the only thing visible and fills the page */
+    #print-area {
+        width: 210mm !important;
+        height: 297mm !important;
+        padding: 15mm !important; /* Adjust as needed for your content */
+        margin: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        page-break-after: avoid !important;
+        overflow: hidden !important; /* Strict 1-page containment */
+        display: block !important;
         visibility: visible !important;
     }
 
-    #print-area {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 210mm !important;
-        height: 297mm !important; /* Forces 1 page */
-        max-height: 297mm !important;
-        margin: 0 !important;
-        padding: 15mm !important; 
-        border: none !important;
-        box-shadow: none !important;
-        overflow: hidden !important;
-        page-break-after: avoid !important;
-    }
-
-    /* Print ma text ko color black nai hos bhanna ko lagi */
+    /* Text Clarity */
     #print-area {
         color: #000 !important;
         -webkit-print-color-adjust: exact;
