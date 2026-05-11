@@ -173,3 +173,35 @@ document.addEventListener('input', (e) => {
 });
 
 fetchBikes();
+// --- कोटेसन डाटा सिङ्क लोजिक ---
+
+// Discount Logic
+const discountVal = parseFloat(document.getElementById('discountInput')?.value) || 0;
+const a4DiscRow = document.getElementById('a4DiscountRow');
+
+if(discountVal > 0) {
+    a4DiscRow.classList.remove('hidden');
+    document.getElementById('a4DiscountAmt').innerText = discountVal.toLocaleString();
+    document.getElementById('a4NetPrice').innerText = (data.mrp - discountVal).toLocaleString();
+    // Words logic यहाँ थप्न सकिन्छ
+} else {
+    a4DiscRow.classList.add('hidden');
+}
+
+// Basic Info Sync
+document.getElementById('a4MRP').innerText = data.mrp.toLocaleString();
+document.getElementById('a4CustName').innerText = data.custName;
+document.getElementById('a4Model').innerText = data.bikeName;
+
+// Date Sync
+const today = new Date();
+document.getElementById('a4Date').innerText = today.toLocaleDateString('en-GB');
+
+// Manual Field Sync (If searched from Chassis)
+const fields = ['Chassis', 'Engine', 'Reg', 'Color'];
+fields.forEach(f => {
+    const val = document.getElementById('manual' + f)?.value || "---";
+    const el = document.getElementById('a4' + f);
+    if(el) el.innerText = val;
+});
+
