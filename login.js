@@ -30,6 +30,20 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById('admin-section').style.display = 'none';
     }
 });
+document.getElementById('loginBtn').onclick = () => {
+    const email = document.getElementById('email').value; // HTML ko id="email" bata value linchha
+    const pass = document.getElementById('pass').value;   // HTML ko id="pass" bata value linchha
+    
+    // Firebase ko server sanga check garchha
+    signInWithEmailAndPassword(auth, email, pass)
+    .then((userCredential) => {
+        // Login successful bhayo bhane 'onAuthStateChanged' function automatic chalchha
+        console.log("Logged in as:", userCredential.user.email);
+    })
+    .catch((e) => {
+        alert("Login failed: " + e.message); // Galat password bhaye alert dinchha
+    });
+};
 
 // --- 1. MASTER PRICE SETUP ---
 function loadMasterPriceList() {
