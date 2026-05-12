@@ -21,16 +21,24 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let allBikes = [];
+// ================= STATE (SINGLE SOURCE OF TRUTH) =================
 
-// ================= UTIL =================
+const state = {
+    bikes: [],
+    selectedBike: null
+};
+
+// ================= HELPERS =================
 
 const $ = (id) => document.getElementById(id);
 
-const safe = (id, val) => {
+const set = (id, value) => {
     const el = $(id);
-    if (el) el.innerText = val;
+    if (el) el.innerText = value;
 };
+
+const val = (id, fallback = 0) =>
+    parseFloat($(id)?.value) || fallback;
 
 // ================= NUMBER TO WORDS =================
 
@@ -41,49 +49,58 @@ function numberToWords(num) {
     const a = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
     const b = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
 
-    function inWords(n) {
+    function w(n) {
         if (n < 20) return a[n];
         if (n < 100) return b[Math.floor(n/10)] + " " + a[n%10];
-        if (n < 1000) return a[Math.floor(n/100)] + " Hundred " + inWords(n%100);
-        if (n < 100000) return inWords(Math.floor(n/1000)) + " Thousand " + inWords(n%1000);
-        if (n < 10000000) return inWords(Math.floor(n/100000)) + " Lakh " + inWords(n%100000);
-        return inWords(Math.floor(n/10000000)) + " Crore " + inWords(n%10000000);
+        if (n < 1000) return a[Math.floor(n/100)] + " Hundred " + w(n%100);
+        if (n < 100000) return w(Math.floor(n/1000)) + " Thousand " + w(n%1000);
+        if (n < 10000000) return w(Math.floor(n/100000)) + " Lakh " + w(n%100000);
+        return w(Math.floor(n/10000000)) + " Crore " + w(n%10000000);
     }
 
-    return inWords(num).replace(/\s+/g,' ').trim();
+    return w(num).replace(/\s+/g,' ').trim();
 }
 
 // ================= FETCH BIKES =================
 
 async function fetchBikes() {
     const snap = await getDocs(collection(db, "bikes"));
-    allBikes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    state.bikes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     const select = $("modelSelect");
 
     if (select) {
-        select.innerHTML = allBikes
+        select.innerHTML = state.bikes
             .map(b => `<option value="${b.id}">${b.name}</option>`)
             .join("");
 
-        select.addEventListener("change", calculateFinance);
+        select.addEventListener("change", calculate);
     }
 
-    calculateFinance();
+    calculate();
 }
 
 // ================= CHASSIS SEARCH =================
 
 window.findChassis = async function () {
-    const val = $("chassisSearch").value.trim();
+
+    const search = $("chassisSearch").value.trim();
     const status = $("searchStatus");
+
+    if (!search) return;
 
     status.innerText = "Searching...";
 
-    const q = query(collection(db,"inventory"), where("chassis","==",val));
+    const q = query(
+        collection(db, "inventory"),
+        where("chassis", "==", search)
+    );
+
     const snap = await getDocs(q);
 
     if (!snap.empty) {
+
         const d = snap.docs[0].data();
 
         $("manualChassis").value = d.chassis || "";
@@ -91,54 +108,56 @@ window.findChassis = async function () {
         $("manualReg").value = d.regNo || "";
         $("manualColor").value = d.color || "";
 
-        const modelSelect = $("modelSelect");
+        const select = $("modelSelect");
 
-        if (d.model && modelSelect) {
-            for (let i=0;i<modelSelect.options.length;i++) {
-                if (modelSelect.options[i].text === d.model) {
-                    modelSelect.selectedIndex = i;
+        if (d.model && select) {
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].text === d.model) {
+                    select.selectedIndex = i;
                     break;
                 }
             }
         }
 
         status.innerText = "Loaded";
-        syncManualToA4();
-        calculateFinance();
+        syncManual();
+        calculate();
 
     } else {
         status.innerText = "Not found";
     }
 };
 
-// ================= FINANCE =================
+// ================= MAIN CALCULATION =================
 
-window.calculateFinance = function () {
+window.calculate = function () {
 
-    const bike = allBikes.find(b => b.id === $("modelSelect")?.value);
+    const bike = state.bikes.find(
+        b => b.id === $("modelSelect")?.value
+    );
+
     if (!bike) return;
 
-    const v = (id) => parseFloat($(id)?.value) || 0;
+    const mrp = Number(bike.price || 0);
 
-    const mrp = parseFloat(bike.price || 0);
-    const discount = v("discountInput");
+    const discount = val("discountInput");
     const afterDiscount = mrp - discount;
 
-    const dpPercent = v("dpPercent");
-    const tenure = v("tenure");
+    const dpPercent = val("dpPercent");
+    const tenure = val("tenure");
 
-    const insurance = parseFloat(bike.financeInsurance || bike.Insurance || 0);
+    const insurance = Number(bike.financeInsurance || bike.Insurance || 0);
 
-    const namsari = v("namsariInput",3000);
-    const advEmi = v("advEmiInput");
+    const namsari = val("namsariInput", 3000);
+    const advEmi = val("advEmiInput");
 
-    const acc =
-        v("helmetInput") +
-        v("legguardInput") +
-        v("seatcoverInput") +
-        v("othersInput");
+    const accessories =
+        val("helmetInput") +
+        val("legguardInput") +
+        val("seatcoverInput") +
+        val("othersInput");
 
-    const dp = afterDiscount * (dpPercent/100);
+    const dp = afterDiscount * (dpPercent / 100);
     const loan = afterDiscount - dp;
 
     let rate = 13.99;
@@ -146,16 +165,18 @@ window.calculateFinance = function () {
     else if (dpPercent >= 50) rate = 11.99;
     else if (dpPercent >= 40) rate = 12.99;
 
-    const r = rate/12/100;
+    const r = rate / 12 / 100;
 
     const emi =
-        (loan*r*Math.pow(1+r,tenure)) /
-        (Math.pow(1+r,tenure)-1);
+        (loan * r * Math.pow(1 + r, tenure)) /
+        (Math.pow(1 + r, tenure) - 1);
 
     const totalDP =
-        dp + namsari + insurance + emi + acc + advEmi;
+        dp + namsari + insurance + emi + accessories + advEmi;
 
-    updateUI({
+    state.selectedBike = bike;
+
+    state.result = {
         bikeName: bike.name,
         mrp,
         discount,
@@ -169,48 +190,54 @@ window.calculateFinance = function () {
         namsari,
         advEmi,
         totalDP
-    });
+    };
+
+    render();
 };
 
-// ================= UI UPDATE =================
+// ================= RENDER UI =================
 
-function updateUI(d) {
+function render() {
+
+    const d = state.result;
+    if (!d) return;
 
     const f = n => Math.round(n).toLocaleString();
-    const fd = n => Number(n).toLocaleString(undefined,{
-        minimumFractionDigits:2,
-        maximumFractionDigits:2
+    const fd = n => Number(n).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     });
 
     const date = new Date().toLocaleDateString('en-GB');
 
     // DASHBOARD
-    safe("mrp",`RS. ${f(d.mrp)}`);
-    safe("afterDiscount",`RS. ${f(d.afterDiscount)}`);
+    set("mrp", `RS. ${f(d.mrp)}`);
+    set("afterDiscount", `RS. ${f(d.afterDiscount)}`);
+    set("displayTotalDP", `RS. ${f(d.totalDP)}`);
 
-    safe("displayTotalDP",`RS. ${f(d.totalDP)}`);
+    // DATE
+    set("a4Date", date);
+    set("a4Date2", date);
 
-    // A4
-    safe("a4Date",date);
-    safe("a4Date2",date);
+    // CUSTOMER
+    set("a4CustName", $("custNameInput")?.value || "Name");
+    set("a4CustPhone", $("custPhoneInput")?.value || "Contact");
+    set("a4Dealer", $("dealerNameInput")?.value || "");
 
-    safe("a4CustName",$("custNameInput")?.value || "Name");
-    safe("a4CustPhone",$("custPhoneInput")?.value || "Contact");
-    safe("a4Dealer",$("dealerNameInput")?.value || "");
+    // BIKE
+    set("a4Model", d.bikeName);
+    set("a4Model2", d.bikeName);
 
-    safe("a4Model",d.bikeName);
-    safe("a4Model2",d.bikeName);
+    set("a4MRP", fd(d.afterDiscount));
+    set("a4DP", fd(d.dp));
+    set("a4Loan", fd(d.loan));
+    set("a4Rate", d.rate.toFixed(2));
+    set("a4Tenure", d.tenure);
 
-    safe("a4MRP",fd(d.afterDiscount));
-    safe("a4DP",fd(d.dp));
-    safe("a4Loan",fd(d.loan));
-    safe("a4Rate",d.rate.toFixed(2));
-    safe("a4Tenure",d.tenure);
-
-    safe("a4Ins",fd(d.insurance));
-    safe("a4Namsari",fd(d.namsari));
-    safe("a4AdvEmiAmt",fd(d.advEmi));
-    safe("a4TotalDP",fd(d.totalDP));
+    set("a4Ins", fd(d.insurance));
+    set("a4Namsari", fd(d.namsari));
+    set("a4AdvEmiAmt", fd(d.advEmi));
+    set("a4TotalDP", fd(d.totalDP));
 
     // DISCOUNT
     const row = $("a4DiscountRow");
@@ -218,29 +245,38 @@ function updateUI(d) {
     if (row) {
         if (d.discount > 0) {
             row.classList.remove("hidden");
-            safe("a4DiscountAmt",f(d.discount));
-            safe("a4NetPrice",f(d.afterDiscount));
+            set("a4DiscountAmt", f(d.discount));
+            set("a4NetPrice", f(d.afterDiscount));
         } else {
             row.classList.add("hidden");
         }
     }
+
+    syncManual();
 }
 
-// ================= SYNC MANUAL =================
+// ================= MANUAL SYNC =================
 
-function syncManualToA4() {
-    ["Chassis","Engine","Reg","Color"].forEach(f=>{
+function syncManual() {
+
+    const map = ["Chassis","Engine","Reg","Color"];
+
+    map.forEach(f => {
         const v = $("manual"+f)?.value || "---";
-        safe("a4"+f,v);
+        set("a4"+f, v);
     });
 }
 
-// ================= INPUT =================
+// ================= INPUT LISTENER =================
 
-document.addEventListener("input",(e)=>{
-    calculateFinance();
-    if(e.target.id?.startsWith("manual")) syncManualToA4();
+document.addEventListener("input", (e) => {
+    calculate();
+
+    if (e.target.id?.startsWith("manual")) {
+        syncManual();
+    }
 });
 
-// INIT
+// ================= INIT =================
+
 fetchBikes();
