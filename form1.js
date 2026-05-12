@@ -1,3 +1,7 @@
+// ======================================
+// FIREBASE IMPORTS
+// ======================================
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import {
     getFirestore,
@@ -7,7 +11,9 @@ import {
     where
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-// ================= FIREBASE =================
+// ======================================
+// FIREBASE CONFIG
+// ======================================
 
 const firebaseConfig = {
     apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
@@ -21,262 +27,461 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ================= STATE (SINGLE SOURCE OF TRUTH) =================
+let allBikes = [];
 
-const state = {
-    bikes: [],
-    selectedBike: null
-};
-
-// ================= HELPERS =================
-
-const $ = (id) => document.getElementById(id);
-
-const set = (id, value) => {
-    const el = $(id);
-    if (el) el.innerText = value;
-};
-
-const val = (id, fallback = 0) =>
-    parseFloat($(id)?.value) || fallback;
-
-// ================= NUMBER TO WORDS =================
+// ======================================
+// NUMBER TO WORDS
+// ======================================
 
 function numberToWords(num) {
-    num = Math.round(num);
+
     if (num === 0) return "Zero";
 
-    const a = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
-    const b = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+    const a = [
+        "", "One", "Two", "Three", "Four", "Five", "Six",
+        "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
+        "Thirteen", "Fourteen", "Fifteen", "Sixteen",
+        "Seventeen", "Eighteen", "Nineteen"
+    ];
 
-    function w(n) {
+    const b = [
+        "", "", "Twenty", "Thirty", "Forty",
+        "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+    ];
+
+    function inWords(n) {
+
         if (n < 20) return a[n];
-        if (n < 100) return b[Math.floor(n/10)] + " " + a[n%10];
-        if (n < 1000) return a[Math.floor(n/100)] + " Hundred " + w(n%100);
-        if (n < 100000) return w(Math.floor(n/1000)) + " Thousand " + w(n%1000);
-        if (n < 10000000) return w(Math.floor(n/100000)) + " Lakh " + w(n%100000);
-        return w(Math.floor(n/10000000)) + " Crore " + w(n%10000000);
+
+        if (n < 100)
+            return b[Math.floor(n / 10)] + " " + a[n % 10];
+
+        if (n < 1000)
+            return a[Math.floor(n / 100)] + " Hundred " + inWords(n % 100);
+
+        if (n < 100000)
+            return inWords(Math.floor(n / 1000)) + " Thousand " + inWords(n % 1000);
+
+        if (n < 10000000)
+            return inWords(Math.floor(n / 100000)) + " Lakh " + inWords(n % 100000);
+
+        return inWords(Math.floor(n / 10000000)) + " Crore " + inWords(n % 10000000);
     }
 
-    return w(num).replace(/\s+/g,' ').trim();
+    return inWords(num).replace(/\s+/g, ' ').trim();
+
 }
 
-// ================= FETCH BIKES =================
+// ======================================
+// FETCH BIKES
+// ======================================
 
 async function fetchBikes() {
-    const snap = await getDocs(collection(db, "bikes"));
 
-    state.bikes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    try {
 
-    const select = $("modelSelect");
+        const snapshot = await getDocs(collection(db, "bikes"));
 
-    if (select) {
-        select.innerHTML = state.bikes
-            .map(b => `<option value="${b.id}">${b.name}</option>`)
-            .join("");
+        allBikes = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
 
-        select.addEventListener("change", calculate);
+        const select = document.getElementById('modelSelect');
+
+        if (select) {
+
+            select.innerHTML = allBikes.map(bike =>
+                `<option value="${bike.id}">${bike.name}</option>`
+            ).join('');
+
+            calculateFinance();
+        }
+
+    } catch (e) {
+
+        console.error("Error fetching bikes:", e);
+
     }
 
-    calculate();
 }
 
-// ================= CHASSIS SEARCH =================
+// ======================================
+// FIND CHASSIS
+// ======================================
 
 window.findChassis = async function () {
 
-    const search = $("chassisSearch").value.trim();
-    const status = $("searchStatus");
+    const searchVal = document.getElementById('chassisSearch').value.trim();
 
-    if (!search) return;
+    const statusEl = document.getElementById('searchStatus');
 
-    status.innerText = "Searching...";
+    if (!statusEl) return;
 
-    const q = query(
-        collection(db, "inventory"),
-        where("chassis", "==", search)
-    );
+    statusEl.innerText = "Searching Inventory...";
+    statusEl.className = "text-blue-500 text-sm mt-1";
 
-    const snap = await getDocs(q);
+    try {
 
-    if (!snap.empty) {
+        const q = query(
+            collection(db, "inventory"),
+            where("chassis", "==", searchVal)
+        );
 
-        const d = snap.docs[0].data();
+        const querySnapshot = await getDocs(q);
 
-        $("manualChassis").value = d.chassis || "";
-        $("manualEngine").value = d.engine || "";
-        $("manualReg").value = d.regNo || "";
-        $("manualColor").value = d.color || "";
+        if (!querySnapshot.empty) {
 
-        const select = $("modelSelect");
+            const data = querySnapshot.docs[0].data();
 
-        if (d.model && select) {
-            for (let i = 0; i < select.options.length; i++) {
-                if (select.options[i].text === d.model) {
-                    select.selectedIndex = i;
-                    break;
+            document.getElementById('manualChassis').value = data.chassis || "";
+            document.getElementById('manualEngine').value = data.engine || "";
+            document.getElementById('manualReg').value = data.regNo || "";
+            document.getElementById('manualColor').value = data.color || "";
+
+            const modelSelect = document.getElementById('modelSelect');
+
+            if (modelSelect && data.model) {
+
+                for (let i = 0; i < modelSelect.options.length; i++) {
+
+                    if (modelSelect.options[i].text === data.model) {
+
+                        modelSelect.selectedIndex = i;
+
+                        calculateFinance();
+
+                        break;
+                    }
                 }
             }
+
+            statusEl.innerText = "Vehicle Data Loaded!";
+            statusEl.className = "text-green-600 text-sm mt-1 font-bold";
+
+        } else {
+
+            statusEl.innerText = "Not found. Enter manually.";
+            statusEl.className = "text-orange-600 text-sm mt-1";
+
         }
 
-        status.innerText = "Loaded";
-        syncManual();
-        calculate();
+    } catch (error) {
 
-    } else {
-        status.innerText = "Not found";
+        statusEl.innerText = "Connection Error!";
+
     }
+
 };
 
-// ================= MAIN CALCULATION =================
+// ======================================
+// FINANCE CALCULATION
+// ======================================
 
-window.calculate = function () {
+window.calculateFinance = function () {
 
-    const bike = state.bikes.find(
-        b => b.id === $("modelSelect")?.value
-    );
+    const selectedId = document.getElementById('modelSelect').value;
+
+    const bike = allBikes.find(b => b.id === selectedId);
 
     if (!bike) return;
 
-    const mrp = Number(bike.price || 0);
+    const getVal = (id, fallback = 0) =>
+        parseFloat(document.getElementById(id)?.value) || fallback;
 
-    const discount = val("discountInput");
+    const mrp = parseFloat(bike.price) || 0;
+
+    const discount = getVal('discountInput');
+
     const afterDiscount = mrp - discount;
 
-    const dpPercent = val("dpPercent");
-    const tenure = val("tenure");
+    const financeInsurance = parseFloat(bike.financeInsurance) || 0;
 
-    const insurance = Number(bike.financeInsurance || bike.Insurance || 0);
+    const cashInsurance = parseFloat(bike.Insurance) || 0;
 
-    const namsari = val("namsariInput", 3000);
-    const advEmi = val("advEmiInput");
+    const namsari = getVal('namsariInput', 3000);
 
-    const accessories =
-        val("helmetInput") +
-        val("legguardInput") +
-        val("seatcoverInput") +
-        val("othersInput");
+    const dpPercentVal = getVal('dpPercent');
 
-    const dp = afterDiscount * (dpPercent / 100);
-    const loan = afterDiscount - dp;
+    const tenure = getVal('tenure');
+
+    const customerExtraAdv = getVal('advEmiInput');
+
+    const accCost =
+        getVal('helmetInput') +
+        getVal('legguardInput') +
+        getVal('seatcoverInput') +
+        getVal('othersInput');
+
+    // ==================================
+
+    const dpAmountOnly =
+        afterDiscount * (dpPercentVal / 100);
+
+    const loanAmount =
+        afterDiscount - dpAmountOnly;
+
+    // ==================================
 
     let rate = 13.99;
-    if (dpPercent >= 60) rate = 9.99;
-    else if (dpPercent >= 50) rate = 11.99;
-    else if (dpPercent >= 40) rate = 12.99;
 
-    const r = rate / 12 / 100;
+    if (dpPercentVal >= 60) rate = 9.99;
+    else if (dpPercentVal >= 50) rate = 11.99;
+    else if (dpPercentVal >= 40) rate = 12.99;
+
+    // ==================================
+
+    const monthlyRate = (rate / 12) / 100;
 
     const emi =
-        (loan * r * Math.pow(1 + r, tenure)) /
-        (Math.pow(1 + r, tenure) - 1);
+        (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) /
+        (Math.pow(1 + monthlyRate, tenure) - 1);
 
-    const totalDP =
-        dp + namsari + insurance + emi + accessories + advEmi;
+    // ==================================
 
-    state.selectedBike = bike;
+    const rawTotalDP =
+        dpAmountOnly +
+        namsari +
+        cashInsurance +
+        emi +
+        accCost +
+        customerExtraAdv;
 
-    state.result = {
+    const roundingAdj =
+        rawTotalDP % 1000 > 0
+            ? (1000 - (rawTotalDP % 1000))
+            : 0;
+
+    const totalAdvEmiSync =
+        emi + roundingAdj + customerExtraAdv;
+
+    const finalTotalDP =
+        dpAmountOnly +
+        namsari +
+        financeInsurance +
+        totalAdvEmiSync;
+
+    // ==================================
+
+    updateUI({
+
         bikeName: bike.name,
+
+        custName:
+            document.getElementById('custNameInput')?.value ||
+            "Your Name",
+
+        custPhone:
+            document.getElementById('custPhoneInput')?.value ||
+            "Contact",
+
+        dealerName:
+            document.getElementById('dealerNameInput')?.value ||
+            "Samriddhi & Brothers Auto Pvt. Ltd.",
+
         mrp,
         discount,
         afterDiscount,
-        dp,
-        loan,
-        emi,
-        tenure,
+        financeInsurance,
         rate,
-        insurance,
+        dpAmountOnly,
+        loanAmount,
+        emi,
+        totalAdvEmiSync,
+        tenure,
         namsari,
-        advEmi,
-        totalDP
-    };
+        finalTotalDP
 
-    render();
+    });
+
 };
 
-// ================= RENDER UI =================
+// ======================================
+// UPDATE UI
+// ======================================
 
-function render() {
+function updateUI(data) {
 
-    const d = state.result;
-    if (!d) return;
+    const format = (num) =>
+        Math.round(num).toLocaleString();
 
-    const f = n => Math.round(n).toLocaleString();
-    const fd = n => Number(n).toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
+    const formatDec = (num) =>
+        Number(num).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
 
-    const date = new Date().toLocaleDateString('en-GB');
+    const safeSet = (id, val) => {
 
-    // DASHBOARD
-    set("mrp", `RS. ${f(d.mrp)}`);
-    set("afterDiscount", `RS. ${f(d.afterDiscount)}`);
-    set("displayTotalDP", `RS. ${f(d.totalDP)}`);
+        const el = document.getElementById(id);
 
+        if (el) el.innerText = val;
+
+    };
+
+    // ==================================
     // DATE
-    set("a4Date", date);
-    set("a4Date2", date);
+    // ==================================
 
-    // CUSTOMER
-    set("a4CustName", $("custNameInput")?.value || "Name");
-    set("a4CustPhone", $("custPhoneInput")?.value || "Contact");
-    set("a4Dealer", $("dealerNameInput")?.value || "");
+    const today = new Date();
 
-    // BIKE
-    set("a4Model", d.bikeName);
-    set("a4Model2", d.bikeName);
+    const formattedDate =
+        today.toLocaleDateString('en-GB');
 
-    set("a4MRP", fd(d.afterDiscount));
-    set("a4DP", fd(d.dp));
-    set("a4Loan", fd(d.loan));
-    set("a4Rate", d.rate.toFixed(2));
-    set("a4Tenure", d.tenure);
+    // ==================================
+    // TOP CALCULATION DISPLAY FIX
+    // ==================================
 
-    set("a4Ins", fd(d.insurance));
-    set("a4Namsari", fd(d.namsari));
-    set("a4AdvEmiAmt", fd(d.advEmi));
-    set("a4TotalDP", fd(d.totalDP));
+    safeSet('mrp', `RS. ${format(data.mrp)}`);
 
-    // DISCOUNT
-    const row = $("a4DiscountRow");
+    safeSet(
+        'afterDiscount',
+        `RS. ${format(data.afterDiscount)}`
+    );
 
-    if (row) {
-        if (d.discount > 0) {
-            row.classList.remove("hidden");
-            set("a4DiscountAmt", f(d.discount));
-            set("a4NetPrice", f(d.afterDiscount));
+    safeSet(
+        'displayLoanAmt',
+        `RS. ${format(data.loanAmount)}`
+    );
+
+    safeSet(
+        'displayEMI',
+        `RS. ${formatDec(data.emi)}`
+    );
+
+    safeSet(
+        'displayDpAmt',
+        `RS. ${format(data.dpAmountOnly)}`
+    );
+
+    // ==================================
+    // A4 FORM
+    // ==================================
+
+    safeSet('a4Date', formattedDate);
+
+    safeSet('a4CustName', data.custName);
+    safeSet('a4CustPhone', data.custPhone);
+    safeSet('a4Dealer', data.dealerName);
+
+    safeSet('a4Model', data.bikeName);
+
+    safeSet('a4MRP', formatDec(data.afterDiscount));
+
+    safeSet('a4DP', formatDec(data.dpAmountOnly));
+
+    safeSet('a4Loan', formatDec(data.loanAmount));
+
+    safeSet('a4Rate', data.rate.toFixed(2));
+
+    safeSet('a4Tenure', data.tenure);
+
+    safeSet('a4Ins', formatDec(data.financeInsurance));
+
+    safeSet('a4AdvEmiAmt', formatDec(data.totalAdvEmiSync));
+
+    safeSet('a4TotalDP', formatDec(data.finalTotalDP));
+
+    safeSet('a4Namsari', formatDec(data.namsari));
+
+    // ==================================
+    // QUOTATION
+    // ==================================
+
+    safeSet('a4Date2', formattedDate);
+
+    safeSet('a4CustName2', data.custName);
+
+    safeSet('a4Model2', data.bikeName);
+
+    safeSet('a4MRP2', format(data.mrp));
+
+    // ==================================
+    // IN WORDS
+    // ==================================
+
+    safeSet(
+        'a4PriceWords',
+        numberToWords(Math.round(data.mrp)) + " rupees only."
+    );
+
+    safeSet(
+        'a4NetPriceWords',
+        numberToWords(Math.round(data.afterDiscount)) + " rupees only."
+    );
+
+    safeSet(
+        'a4DiscountWords',
+        numberToWords(Math.round(data.discount)) + " rupees only."
+    );
+
+    // ==================================
+    // INVENTORY DATA
+    // ==================================
+
+    safeSet(
+        'a4Color2',
+        document.getElementById('manualColor')?.value || "---"
+    );
+
+    safeSet(
+        'a4Reg2',
+        document.getElementById('manualReg')?.value || "---"
+    );
+
+    safeSet(
+        'a4Engine2',
+        document.getElementById('manualEngine')?.value || "---"
+    );
+
+    safeSet(
+        'a4Chassis2',
+        document.getElementById('manualChassis')?.value || "---"
+    );
+
+    // ==================================
+    // DISCOUNT SHOW / HIDE
+    // ==================================
+
+    const a4DiscRow =
+        document.getElementById('a4DiscountRow');
+
+    if (a4DiscRow) {
+
+        if (data.discount > 0) {
+
+            a4DiscRow.classList.remove('hidden');
+
+            safeSet(
+                'a4DiscountAmt',
+                format(data.discount)
+            );
+
+            safeSet(
+                'a4NetPrice',
+                format(data.afterDiscount)
+            );
+
         } else {
-            row.classList.add("hidden");
+
+            a4DiscRow.classList.add('hidden');
+
         }
+
     }
 
-    syncManual();
 }
 
-// ================= MANUAL SYNC =================
+// ======================================
+// AUTO INPUT LISTENER
+// ======================================
 
-function syncManual() {
+document.addEventListener('input', () => {
 
-    const map = ["Chassis","Engine","Reg","Color"];
+    calculateFinance();
 
-    map.forEach(f => {
-        const v = $("manual"+f)?.value || "---";
-        set("a4"+f, v);
-    });
-}
-
-// ================= INPUT LISTENER =================
-
-document.addEventListener("input", (e) => {
-    calculate();
-
-    if (e.target.id?.startsWith("manual")) {
-        syncManual();
-    }
 });
 
-// ================= INIT =================
+// ======================================
 
 fetchBikes();
