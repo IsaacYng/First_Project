@@ -204,3 +204,54 @@ fields.forEach(f => {
     const el = document.getElementById('a4' + f);
     if(el) el.innerText = val;
 });
+// ===============================
+// QUOTATION + DISCOUNT SYNC LOGIC
+// ===============================
+
+// Today's Date
+const today = new Date();
+const formattedDate = today.toLocaleDateString('en-GB');
+
+safeSet('a4Date2', formattedDate);
+
+// Basic Info
+safeSet('a4CustName2', data.custName);
+safeSet('a4Model2', data.bikeName);
+safeSet('a4MRP2', format(data.mrp));
+
+// Manual Vehicle Fields
+safeSet('a4Color2', document.getElementById('manualColor')?.value || "---");
+safeSet('a4Reg2', document.getElementById('manualReg')?.value || "---");
+safeSet('a4Engine2', document.getElementById('manualEngine')?.value || "---");
+safeSet('a4Chassis2', document.getElementById('manualChassis')?.value || "---");
+
+// ===============================
+// DISCOUNT SHOW / HIDE LOGIC
+// ===============================
+
+const discountVal = parseFloat(document.getElementById('discountInput')?.value) || 0;
+
+const a4DiscRow = document.getElementById('a4DiscountRow');
+
+if (a4DiscRow) {
+
+    if (discountVal > 0) {
+
+        // SHOW DISCOUNT SECTION
+        a4DiscRow.classList.remove('hidden');
+
+        safeSet('a4DiscountAmt', format(discountVal));
+
+        // Final Price After Discount
+        const finalPrice = data.mrp - discountVal;
+
+        safeSet('a4NetPrice', format(finalPrice));
+
+    } else {
+
+        // HIDE DISCOUNT SECTION
+        a4DiscRow.classList.add('hidden');
+
+    }
+
+}
