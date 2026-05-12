@@ -378,76 +378,172 @@
 </div>
 
 
+<div class="scroller-container w-full overflow-x-auto bg-slate-100 py-6 md:py-10 flex flex-col items-center print:bg-white print:p-0 print:overflow-visible font-['Book_Antiqua',_Palatino,_serif]">
+    
+    <div class="w-[210mm] flex justify-end mb-4 print:hidden px-4 md:px-0">
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow-lg flex items-center gap-2 transition-all active:scale-95">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+        Print 
+        </button>
+    </div>
 
-<div class="preview-scroll">
-    <div class="a4-page shadow-2xl border border-gray-200">
+    <div id="print-area" class="bg-white w-[210mm] min-h-[296mm] p-[15mm] md:p-[20mm] shadow-2xl shrink-0 text-gray-900 print:shadow-none print:m-0 print:border-none print:w-full">
         
-        <div class="text-center border-b-2 border-black pb-4 relative">
-            <div class="absolute left-0 top-0">
-                <img src="favicon.png" class="h-16" alt="Logo">
-            </div>
-            <h1 class="text-[20pt] font-bold uppercase tracking-tight">Samriddhi & Brothers Auto Pvt. Ltd.</h1>
-            <h2 class="text-[14pt] font-bold">Authorized Dealer of Bajaj Motorcycle</h2>
-            <p class="text-[9pt] text-blue-600 font-bold">Phidim-04, Panchthar, Nepal Tel: 024-523144, 9802315425 Email: Samriddhi.bajaj@gmail.com</p>
+        <div class="text-center mb-8 border-b-2 border-black pb-4">
+            <h2 class="text-2xl font-bold uppercase tracking-widest leading-tight">HULAS FINSERV HIRE PURCHASE LIMITED</h2>
+            <h2 class="text-2xl font-bold uppercase tracking-widest leading-tight">DOWNPAYMENT ALLOCATION FORM</h2>
         </div>
 
-        <div class="text-right mt-2 text-[11pt]">
-            Date: <span id="a4Date">11/05/2026</span>
+        <div class="mb-1">
+    <h3 class="font-bold text-[17px]">Customer & Vehicle Information</h3>
+    
+    <ul class="space-y-2 text-[17px] text-gray-900 ml-4 list-none">
+        
+        <li class="grid grid-cols-[140px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span class="font-semibold">Date</span>
+            </span>
+            <span>:</span>
+            <span id="a4Date" class="ml-2">Date</span>
+        </li>
+
+        <li class="grid grid-cols-[150px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span class="font-semibold">Dealer Name</span>
+            </span>
+            <span>:</span>
+            <span id="a4Dealer" class="ml-2">Dealer Name</span>
+        </li>
+
+        <li class="grid grid-cols-[150px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span class="font-semibold">Customer Name</span>
+            </span>
+            <span>:</span>
+            <span id="a4CustName" class="ml-2 bold text-gray-700">Your Name</span>
+        </li>
+
+        <li class="grid grid-cols-[150px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span class="font-semibold">Contact Number</span>
+            </span>
+            <span>:</span>
+            <span id="a4CustPhone" class="ml-2">Contact</span>
+        </li>
+
+        <li class="grid grid-cols-[150px_10px_1fr] items-baseline pt-1">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span class="font-semibold">Vehicle Model</span>
+            </span>
+            <span>:</span>
+            <span id="a4Model" class="ml-2">Model</span>
+        </li>
+
+    </ul>
+</div>
+        <div class="mb-8">
+    <h3 class="font-bold text-[17px]">Financial Details</h3>
+    
+    <ul class="space-y-2 text-[17px] text-gray-900 ml-4 list-none">
+        
+        <li class="grid grid-cols-[180px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Retail Price</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2" id="a4MRP">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[180px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Down Payment</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2" id="a4DP">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[180px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Loan Amount</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2 font-bold" id="a4Loan">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[180px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Interest Rate (%)</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2" id="a4Rate">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[180px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Tenure (Months)</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2" id="a4Tenure">0</span>
+        </li>
+
+        <li class="grid grid-cols-[320px_10px_1fr] items-baseline">
+    <span class="flex items-center gap-2">
+        <span class="text-[17px]">●</span> 
+        <span>Registration Charge / Yatayat Expence</span>
+    </span>
+    <span>:</span>
+    <span class="ml-2">
+        <span id="a4Namsari">3,000.00</span> 
+        <span class="ml-1 text-[12px] font-sans">(Suggested By HH)</span>
+    </span>
+</li>
+
+
+        <li class="grid grid-cols-[190px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Insurance Premium</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2" id="a4Ins">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[190px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Advance EMI (If Any)</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2" id="a4AdvEmiAmt">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[400px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span class="font-semibold">Total Down-payment Amount Paid by Customer</span>
+            </span>
+            <span>:</span>
+            <span id="a4TotalDP" class="ml-2">0.00</span>
+        </li>
+
+    </ul>
+</div>
+        <div class="mb-35">
+            <h3 class="font-bold text-[17px] border-b-2 border-black pb-4">Declaration</h3>
+            <p class="text-[17px] leading-relaxed text-justify">
+                We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.
+            </p>
+<p class="mt-2 text-[17px] leading-relaxed text-justify">
+                Signature & Authorization 
+            </p>
         </div>
 
-        <div class="text-center mt-2">
-            <h3 class="text-[13pt] font-bold underline underline-offset-4 tracking-[0.2em] uppercase">QUOTATION</h3>
+        <div class="mt-40 flex justify-between items-end text-[16px] font-bold text-center">
+            <div class="w-44 border-t border-black pt-2">Customer's Signature</div>
+            <div class="w-50 border-t border-black pt-2">Dealer's Signature & Stamp</div>
+            <div class="w-50 border-t border-black pt-2">LO's Signature & Stamp</div>
         </div>
-
-        <div class="mt-8 text-[11pt] space-y-4">
-            <p>To Hulas Finserv Hire Purchase Limited</p>
-            <p class="font-bold uppercase">C/O <span id="a4CustName">YOUR NAME</span></p>
-            <p>Dear Sir/Madam,</p>
-            <p>We are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
-            <p class="font-bold">Details :</p>
-        </div>
-
-        <div class="mt-2 text-[11pt] space-y-2">
-            <p><span class="font-bold">Model:</span> <span id="a4Model" class="font-bold">Pulsar N 160 DC ABS BS VI</span></p>
-            <p><span class="font-bold">Price: <span id="a4MRP">4,28,900.00</span>/-</span> &nbsp; <span class="italic text-gray-700 font-medium">In Words: <span id="a4MRPWords">Four lakh twenty eight thousand nine hundred only.</span></span></p>
-            
-            <div class="grid grid-cols-2 gap-y-2 pt-2">
-                <p><span class="font-bold">Color:</span> <span id="a4Color">---</span></p>
-                <p><span class="font-bold">Regd No:</span> <span id="a4Reg">---</span></p>
-                <p><span class="font-bold">Engine No:</span> <span id="a4Engine">---</span></p>
-                <p><span class="font-bold">Chassis No:</span> <span id="a4Chassis">---</span></p>
-            </div>
-            <p><span class="font-bold">Make Year:</span> 2026</p>
-
-            <div id="discountBlock" class="hidden border-t border-dotted border-black pt-2 mt-2">
-                <p><span class="font-bold text-red-700">Discount: <span id="a4DiscountAmt">1,900</span>/-</span></p>
-                <p><span class="font-bold underline decoration-double">Net Price: <span id="a4NetPrice">4,27,000</span>/-</span></p>
-            </div>
-        </div>
-
-        <div class="mt-8 text-[9pt] leading-tight space-y-1">
-            <p class="font-bold underline">Terms and Conditions :-</p>
-            <p>- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
-            <p>- Delivery :- Subject to availability</p>
-            <p>- Price Validity:- Subject to change without prior notice.</p>
-            <p>- Taxes and Duties:- Inclusive of 13% VAT. Local taxes on purchaser's account.</p>
-            <p>- Warranty:- Warranty Policy is detailed in the Owner's manual.</p>
-            <p>- Servicing - 7 Free Servicing.</p>
-        </div>
-
-        <div class="absolute bottom-[20mm] right-[20mm] text-center w-64">
-            <p class="font-bold italic mb-16">Sincerly Your's</p>
-            <div class="border-t-2 border-black pt-1">
-                <p class="font-bold text-[10pt] uppercase tracking-wider">Authorized Signature</p>
-            </div>
-        </div>
-
     </div>
 </div>
-
-
-
-
 
     </div>
 </div>
