@@ -30,10 +30,11 @@ const db = getFirestore(app);
 let allBikes = [];
 
 // ======================================
-// NUMBER TO WORDS
+// NUMBER TO WORDS (FIXED)
 // ======================================
 
 function numberToWords(num) {
+    num = Math.round(num);
 
     if (num === 0) return "Zero";
 
@@ -50,26 +51,15 @@ function numberToWords(num) {
     ];
 
     function inWords(n) {
-
         if (n < 20) return a[n];
-
-        if (n < 100)
-            return b[Math.floor(n / 10)] + " " + a[n % 10];
-
-        if (n < 1000)
-            return a[Math.floor(n / 100)] + " Hundred " + inWords(n % 100);
-
-        if (n < 100000)
-            return inWords(Math.floor(n / 1000)) + " Thousand " + inWords(n % 1000);
-
-        if (n < 10000000)
-            return inWords(Math.floor(n / 100000)) + " Lakh " + inWords(n % 100000);
-
+        if (n < 100) return b[Math.floor(n / 10)] + " " + a[n % 10];
+        if (n < 1000) return a[Math.floor(n / 100)] + " Hundred " + inWords(n % 100);
+        if (n < 100000) return inWords(Math.floor(n / 1000)) + " Thousand " + inWords(n % 1000);
+        if (n < 10000000) return inWords(Math.floor(n / 100000)) + " Lakh " + inWords(n % 100000);
         return inWords(Math.floor(n / 10000000)) + " Crore " + inWords(n % 10000000);
     }
 
-    return inWords(num).replace(/\s+/g, ' ').trim();
-
+    return inWords(num).replace(/\s+/g, " ").trim();
 }
 
 // ======================================
@@ -77,9 +67,7 @@ function numberToWords(num) {
 // ======================================
 
 async function fetchBikes() {
-
     try {
-
         const snapshot = await getDocs(collection(db, "bikes"));
 
         allBikes = snapshot.docs.map(doc => ({
@@ -90,20 +78,18 @@ async function fetchBikes() {
         const select = document.getElementById('modelSelect');
 
         if (select) {
+            select.innerHTML = allBikes
+                .map(bike => `<option value="${bike.id}">${bike.name}</option>`)
+                .join('');
 
-            select.innerHTML = allBikes.map(bike =>
-                `<option value="${bike.id}">${bike.name}</option>`
-            ).join('');
-
-            calculateFinance();
+            select.addEventListener('change', calculateFinance);
         }
 
+        calculateFinance();
+
     } catch (e) {
-
         console.error("Error fetching bikes:", e);
-
     }
-
 }
 
 // ======================================
@@ -111,28 +97,24 @@ async function fetchBikes() {
 // ======================================
 
 window.findChassis = async function () {
-
     const searchVal = document.getElementById('chassisSearch').value.trim();
-
     const statusEl = document.getElementById('searchStatus');
 
-    if (!statusEl) return;
+    if (!searchVal) return;
 
-    statusEl.innerText = "Searching Inventory...";
+    statusEl.innerText = "Searching...";
     statusEl.className = "text-blue-500 text-sm mt-1";
 
     try {
-
         const q = query(
             collection(db, "inventory"),
             where("chassis", "==", searchVal)
         );
 
-        const querySnapshot = await getDocs(q);
+        const snap = await getDocs(q);
 
-        if (!querySnapshot.empty) {
-
-            const data = querySnapshot.docs[0].data();
+        if (!snap.empty) {
+            const data = snap.docs[0].data();
 
             document.getElementById('manualChassis').value = data.chassis || "";
             document.getElementById('manualEngine').value = data.engine || "";
@@ -141,37 +123,29 @@ window.findChassis = async function () {
 
             const modelSelect = document.getElementById('modelSelect');
 
-            if (modelSelect && data.model) {
-
+            if (data.model) {
                 for (let i = 0; i < modelSelect.options.length; i++) {
-
                     if (modelSelect.options[i].text === data.model) {
-
                         modelSelect.selectedIndex = i;
-
-                        calculateFinance();
-
                         break;
                     }
                 }
             }
 
-            statusEl.innerText = "Vehicle Data Loaded!";
+            calculateFinance();
+
+            statusEl.innerText = "Vehicle Loaded!";
             statusEl.className = "text-green-600 text-sm mt-1 font-bold";
 
         } else {
-
-            statusEl.innerText = "Not found. Enter manually.";
+            statusEl.innerText = "Not found.";
             statusEl.className = "text-orange-600 text-sm mt-1";
-
         }
 
-    } catch (error) {
-
-        statusEl.innerText = "Connection Error!";
-
+    } catch (err) {
+        statusEl.innerText = "Error!";
+        console.error(err);
     }
-
 };
 
 // ======================================
@@ -180,308 +154,145 @@ window.findChassis = async function () {
 
 window.calculateFinance = function () {
 
-    const selectedId = document.getElementById('modelSelect').value;
-
-    const bike = allBikes.find(b => b.id === selectedId);
+    const bike = allBikes.find(
+        b => b.id === document.getElementById('modelSelect')?.value
+    );
 
     if (!bike) return;
 
-    const getVal = (id, fallback = 0) =>
-        parseFloat(document.getElementById(id)?.value) || fallback;
+    const val = (id, d = 0) =>
+        parseFloat(document.getElementById(id)?.value) || d;
 
     const mrp = parseFloat(bike.price) || 0;
 
-    const discount = getVal('discountInput');
-
+    const discount = val('discountInput');
     const afterDiscount = mrp - discount;
 
-    const financeInsurance = parseFloat(bike.financeInsurance) || 0;
+    const dpPercent = val('dpPercent');
+    const tenure = val('tenure');
 
-    const cashInsurance = parseFloat(bike.Insurance) || 0;
+    const insurance = parseFloat(bike.financeInsurance || bike.Insurance || 0);
 
-    const namsari = getVal('namsariInput', 3000);
+    const namsari = val('namsariInput', 3000);
 
-    const dpPercentVal = getVal('dpPercent');
+    const accessories =
+        val('helmetInput') +
+        val('legguardInput') +
+        val('seatcoverInput') +
+        val('othersInput');
 
-    const tenure = getVal('tenure');
+    const advEmi = val('advEmiInput');
 
-    const customerExtraAdv = getVal('advEmiInput');
-
-    const accCost =
-        getVal('helmetInput') +
-        getVal('legguardInput') +
-        getVal('seatcoverInput') +
-        getVal('othersInput');
-
-    // ==================================
-
-    const dpAmountOnly =
-        afterDiscount * (dpPercentVal / 100);
-
-    const loanAmount =
-        afterDiscount - dpAmountOnly;
-
-    // ==================================
+    const dpAmount = afterDiscount * (dpPercent / 100);
+    const loanAmount = afterDiscount - dpAmount;
 
     let rate = 13.99;
+    if (dpPercent >= 60) rate = 9.99;
+    else if (dpPercent >= 50) rate = 11.99;
+    else if (dpPercent >= 40) rate = 12.99;
 
-    if (dpPercentVal >= 60) rate = 9.99;
-    else if (dpPercentVal >= 50) rate = 11.99;
-    else if (dpPercentVal >= 40) rate = 12.99;
-
-    // ==================================
-
-    const monthlyRate = (rate / 12) / 100;
+    const r = rate / 12 / 100;
 
     const emi =
-        (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) /
-        (Math.pow(1 + monthlyRate, tenure) - 1);
+        (loanAmount * r * Math.pow(1 + r, tenure)) /
+        (Math.pow(1 + r, tenure) - 1);
 
-    // ==================================
-
-    const rawTotalDP =
-        dpAmountOnly +
-        namsari +
-        cashInsurance +
-        emi +
-        accCost +
-        customerExtraAdv;
-
-    const roundingAdj =
-        rawTotalDP % 1000 > 0
-            ? (1000 - (rawTotalDP % 1000))
-            : 0;
-
-    const totalAdvEmiSync =
-        emi + roundingAdj + customerExtraAdv;
-
-    const finalTotalDP =
-        dpAmountOnly +
-        namsari +
-        financeInsurance +
-        totalAdvEmiSync;
-
-    // ==================================
+    const totalDP =
+        dpAmount + namsari + insurance + accessories + advEmi + emi;
 
     updateUI({
-
         bikeName: bike.name,
-
-        custName:
-            document.getElementById('custNameInput')?.value ||
-            "Your Name",
-
-        custPhone:
-            document.getElementById('custPhoneInput')?.value ||
-            "Contact",
-
-        dealerName:
-            document.getElementById('dealerNameInput')?.value ||
-            "Samriddhi & Brothers Auto Pvt. Ltd.",
-
         mrp,
         discount,
         afterDiscount,
-        financeInsurance,
-        rate,
-        dpAmountOnly,
+        dpAmount,
         loanAmount,
         emi,
-        totalAdvEmiSync,
         tenure,
+        rate,
+        insurance,
         namsari,
-        finalTotalDP
-
+        totalDP
     });
-
 };
 
 // ======================================
-// UPDATE UI
+// UI UPDATE (FIXED)
 // ======================================
 
-function updateUI(data) {
+function updateUI(d) {
 
-    const format = (num) =>
-        Math.round(num).toLocaleString();
+    const f = n => Math.round(n).toLocaleString();
+    const fd = n => Number(n).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 
-    const formatDec = (num) =>
-        Number(num).toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-
-    const safeSet = (id, val) => {
-
+    const set = (id, v) => {
         const el = document.getElementById(id);
-
-        if (el) el.innerText = val;
-
+        if (el) el.innerText = v;
     };
 
-    // ==================================
-    // DATE
-    // ==================================
+    const date = new Date().toLocaleDateString('en-GB');
 
-    const today = new Date();
+    // TOP
+    set('mrp', `RS. ${f(d.mrp)}`);
+    set('afterDiscount', `RS. ${f(d.afterDiscount)}`);
 
-    const formattedDate =
-        today.toLocaleDateString('en-GB');
-
-    // ==================================
-    // TOP CALCULATION DISPLAY FIX
-    // ==================================
-
-    safeSet('mrp', `RS. ${format(data.mrp)}`);
-
-    safeSet(
-        'afterDiscount',
-        `RS. ${format(data.afterDiscount)}`
-    );
-
-    safeSet(
-        'displayLoanAmt',
-        `RS. ${format(data.loanAmount)}`
-    );
-
-    safeSet(
-        'displayEMI',
-        `RS. ${formatDec(data.emi)}`
-    );
-
-    safeSet(
-        'displayDpAmt',
-        `RS. ${format(data.dpAmountOnly)}`
-    );
-
-    // ==================================
     // A4 FORM
-    // ==================================
+    set('a4Date', date);
+    set('a4Date2', date);
 
-    safeSet('a4Date', formattedDate);
+    set('a4CustName', document.getElementById('custNameInput')?.value || "Name");
+    set('a4CustPhone', document.getElementById('custPhoneInput')?.value || "Contact");
+    set('a4Dealer', document.getElementById('dealerNameInput')?.value || "");
 
-    safeSet('a4CustName', data.custName);
-    safeSet('a4CustPhone', data.custPhone);
-    safeSet('a4Dealer', data.dealerName);
+    set('a4Model', d.bikeName);
+    set('a4Model2', d.bikeName);
 
-    safeSet('a4Model', data.bikeName);
+    set('a4MRP', fd(d.afterDiscount));
+    set('a4DP', fd(d.dpAmount));
+    set('a4Loan', fd(d.loanAmount));
+    set('a4Rate', d.rate.toFixed(2));
+    set('a4Tenure', d.tenure);
 
-    safeSet('a4MRP', formatDec(data.afterDiscount));
+    set('a4Ins', fd(d.insurance));
+    set('a4Namsari', fd(d.namsari));
+    set('a4TotalDP', fd(d.totalDP));
 
-    safeSet('a4DP', formatDec(data.dpAmountOnly));
+    // QUOTE PRICE
+    set('a4MRP2', f(d.mrp));
 
-    safeSet('a4Loan', formatDec(data.loanAmount));
+    set('a4DiscountWords', numberToWords(d.discount) + " rupees only.");
+    set('a4NetPriceWords', numberToWords(d.afterDiscount) + " rupees only.");
 
-    safeSet('a4Rate', data.rate.toFixed(2));
+    // DISCOUNT BLOCK
+    const block = document.getElementById('a4DiscountRow');
 
-    safeSet('a4Tenure', data.tenure);
-
-    safeSet('a4Ins', formatDec(data.financeInsurance));
-
-    safeSet('a4AdvEmiAmt', formatDec(data.totalAdvEmiSync));
-
-    safeSet('a4TotalDP', formatDec(data.finalTotalDP));
-
-    safeSet('a4Namsari', formatDec(data.namsari));
-
-    // ==================================
-    // QUOTATION
-    // ==================================
-
-    safeSet('a4Date2', formattedDate);
-
-    safeSet('a4CustName2', data.custName);
-
-    safeSet('a4Model2', data.bikeName);
-
-    safeSet('a4MRP2', format(data.mrp));
-
-    // ==================================
-    // IN WORDS
-    // ==================================
-
-    safeSet(
-        'a4PriceWords',
-        numberToWords(Math.round(data.mrp)) + " rupees only."
-    );
-
-    safeSet(
-        'a4NetPriceWords',
-        numberToWords(Math.round(data.afterDiscount)) + " rupees only."
-    );
-
-    safeSet(
-        'a4DiscountWords',
-        numberToWords(Math.round(data.discount)) + " rupees only."
-    );
-
-    // ==================================
-    // INVENTORY DATA
-    // ==================================
-
-    safeSet(
-        'a4Color2',
-        document.getElementById('manualColor')?.value || "---"
-    );
-
-    safeSet(
-        'a4Reg2',
-        document.getElementById('manualReg')?.value || "---"
-    );
-
-    safeSet(
-        'a4Engine2',
-        document.getElementById('manualEngine')?.value || "---"
-    );
-
-    safeSet(
-        'a4Chassis2',
-        document.getElementById('manualChassis')?.value || "---"
-    );
-
-    // ==================================
-    // DISCOUNT SHOW / HIDE
-    // ==================================
-
-    const a4DiscRow =
-        document.getElementById('a4DiscountRow');
-
-    if (a4DiscRow) {
-
-        if (data.discount > 0) {
-
-            a4DiscRow.classList.remove('hidden');
-
-            safeSet(
-                'a4DiscountAmt',
-                format(data.discount)
-            );
-
-            safeSet(
-                'a4NetPrice',
-                format(data.afterDiscount)
-            );
-
+    if (block) {
+        if (d.discount > 0) {
+            block.classList.remove('hidden');
+            set('a4DiscountAmt', f(d.discount));
+            set('a4NetPrice', f(d.afterDiscount));
         } else {
-
-            a4DiscRow.classList.add('hidden');
-
+            block.classList.add('hidden');
         }
-
     }
 
+    // INVENTORY
+    set('a4Color2', document.getElementById('manualColor')?.value || "---");
+    set('a4Reg2', document.getElementById('manualReg')?.value || "---");
+    set('a4Engine2', document.getElementById('manualEngine')?.value || "---");
+    set('a4Chassis2', document.getElementById('manualChassis')?.value || "---");
 }
 
 // ======================================
-// AUTO INPUT LISTENER
+// LIVE INPUT
 // ======================================
 
 document.addEventListener('input', () => {
-
     calculateFinance();
-
 });
 
-// ======================================
-
+// INIT
 fetchBikes();
