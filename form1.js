@@ -30,6 +30,49 @@ const db = getFirestore(app);
 let allBikes = [];
 
 // ======================================
+// NUMBER TO WORDS
+// ======================================
+
+function numberToWords(num) {
+
+    if (num === 0) return "Zero";
+
+    const a = [
+        "", "One", "Two", "Three", "Four", "Five", "Six",
+        "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
+        "Thirteen", "Fourteen", "Fifteen", "Sixteen",
+        "Seventeen", "Eighteen", "Nineteen"
+    ];
+
+    const b = [
+        "", "", "Twenty", "Thirty", "Forty",
+        "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+    ];
+
+    function inWords(n) {
+
+        if (n < 20) return a[n];
+
+        if (n < 100)
+            return b[Math.floor(n / 10)] + " " + a[n % 10];
+
+        if (n < 1000)
+            return a[Math.floor(n / 100)] + " Hundred " + inWords(n % 100);
+
+        if (n < 100000)
+            return inWords(Math.floor(n / 1000)) + " Thousand " + inWords(n % 1000);
+
+        if (n < 10000000)
+            return inWords(Math.floor(n / 100000)) + " Lakh " + inWords(n % 100000);
+
+        return inWords(Math.floor(n / 10000000)) + " Crore " + inWords(n % 10000000);
+    }
+
+    return inWords(num).replace(/\s+/g, ' ').trim();
+
+}
+
+// ======================================
 // FETCH BIKES
 // ======================================
 
@@ -150,6 +193,8 @@ window.calculateFinance = function () {
 
     const discount = getVal('discountInput');
 
+    const afterDiscount = mrp - discount;
+
     const financeInsurance = parseFloat(bike.financeInsurance) || 0;
 
     const cashInsurance = parseFloat(bike.Insurance) || 0;
@@ -168,15 +213,15 @@ window.calculateFinance = function () {
         getVal('seatcoverInput') +
         getVal('othersInput');
 
-    // =========================
+    // ==================================
 
-    const afterDiscount = mrp - discount;
+    const dpAmountOnly =
+        afterDiscount * (dpPercentVal / 100);
 
-    const dpAmountOnly = afterDiscount * (dpPercentVal / 100);
+    const loanAmount =
+        afterDiscount - dpAmountOnly;
 
-    const loanAmount = afterDiscount - dpAmountOnly;
-
-    // =========================
+    // ==================================
 
     let rate = 13.99;
 
@@ -184,7 +229,7 @@ window.calculateFinance = function () {
     else if (dpPercentVal >= 50) rate = 11.99;
     else if (dpPercentVal >= 40) rate = 12.99;
 
-    // =========================
+    // ==================================
 
     const monthlyRate = (rate / 12) / 100;
 
@@ -192,7 +237,7 @@ window.calculateFinance = function () {
         (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) /
         (Math.pow(1 + monthlyRate, tenure) - 1);
 
-    // =========================
+    // ==================================
 
     const rawTotalDP =
         dpAmountOnly +
@@ -210,13 +255,13 @@ window.calculateFinance = function () {
     const totalAdvEmiSync =
         emi + roundingAdj + customerExtraAdv;
 
-    const finalTotalDP_A4 =
+    const finalTotalDP =
         dpAmountOnly +
         namsari +
         financeInsurance +
         totalAdvEmiSync;
 
-    // =========================
+    // ==================================
 
     updateUI({
 
@@ -232,7 +277,7 @@ window.calculateFinance = function () {
 
         dealerName:
             document.getElementById('dealerNameInput')?.value ||
-            "Samriddhi And Brothers Auto Pvt. Ltd.",
+            "Samriddhi & Brothers Auto Pvt. Ltd.",
 
         mrp,
         discount,
@@ -245,7 +290,7 @@ window.calculateFinance = function () {
         totalAdvEmiSync,
         tenure,
         namsari,
-        finalTotalDP_A4
+        finalTotalDP
 
     });
 
@@ -274,26 +319,44 @@ function updateUI(data) {
 
     };
 
-    // ======================================
-    // TODAY DATE
-    // ======================================
+    // ==================================
+    // DATE
+    // ==================================
 
     const today = new Date();
 
     const formattedDate =
         today.toLocaleDateString('en-GB');
 
-    // ======================================
-    // DASHBOARD
-    // ======================================
+    // ==================================
+    // TOP CALCULATION DISPLAY FIX
+    // ==================================
 
-    safeSet('displayLoanAmt', `RS. ${format(data.loanAmount)}`);
-    safeSet('displayEMI', `RS. ${formatDec(data.emi)}`);
-    safeSet('displayDpAmt', `RS. ${format(data.dpAmountOnly)}`);
+    safeSet('mrp', `RS. ${format(data.mrp)}`);
 
-    // ======================================
+    safeSet(
+        'afterDiscount',
+        `RS. ${format(data.afterDiscount)}`
+    );
+
+    safeSet(
+        'displayLoanAmt',
+        `RS. ${format(data.loanAmount)}`
+    );
+
+    safeSet(
+        'displayEMI',
+        `RS. ${formatDec(data.emi)}`
+    );
+
+    safeSet(
+        'displayDpAmt',
+        `RS. ${format(data.dpAmountOnly)}`
+    );
+
+    // ==================================
     // A4 FORM
-    // ======================================
+    // ==================================
 
     safeSet('a4Date', formattedDate);
 
@@ -317,13 +380,13 @@ function updateUI(data) {
 
     safeSet('a4AdvEmiAmt', formatDec(data.totalAdvEmiSync));
 
-    safeSet('a4TotalDP', formatDec(data.finalTotalDP_A4));
+    safeSet('a4TotalDP', formatDec(data.finalTotalDP));
 
     safeSet('a4Namsari', formatDec(data.namsari));
 
-    // ======================================
+    // ==================================
     // QUOTATION
-    // ======================================
+    // ==================================
 
     safeSet('a4Date2', formattedDate);
 
@@ -333,7 +396,28 @@ function updateUI(data) {
 
     safeSet('a4MRP2', format(data.mrp));
 
-    // DATABASE / INPUT VALUES
+    // ==================================
+    // IN WORDS
+    // ==================================
+
+    safeSet(
+        'a4PriceWords',
+        numberToWords(Math.round(data.mrp)) + " rupees only."
+    );
+
+    safeSet(
+        'a4NetPriceWords',
+        numberToWords(Math.round(data.afterDiscount)) + " rupees only."
+    );
+
+    safeSet(
+        'a4DiscountWords',
+        numberToWords(Math.round(data.discount)) + " rupees only."
+    );
+
+    // ==================================
+    // INVENTORY DATA
+    // ==================================
 
     safeSet(
         'a4Color2',
@@ -355,9 +439,9 @@ function updateUI(data) {
         document.getElementById('manualChassis')?.value || "---"
     );
 
-    // ======================================
+    // ==================================
     // DISCOUNT SHOW / HIDE
-    // ======================================
+    // ==================================
 
     const a4DiscRow =
         document.getElementById('a4DiscountRow');
@@ -389,7 +473,7 @@ function updateUI(data) {
 }
 
 // ======================================
-// LISTENERS
+// AUTO INPUT LISTENER
 // ======================================
 
 document.addEventListener('input', () => {
