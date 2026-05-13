@@ -211,142 +211,174 @@
     </div>
     
 <!-- Main Print Container -->
-<div class="no-print flex justify-center mb-6">
-        <button onclick="window.print()" class="bg-slate-800 text-white px-8 py-3 rounded-full shadow-lg hover:bg-black transition flex items-center gap-2">
-            <i class="fa-solid fa-print"></i> Print Full Document
-        </button>
-    </div>
-
-    <!-- Scroll Wrapper for Mobile View -->
-    <div class="mobile-scroll-wrapper">
+<div class="bg-gray-100 min-h-screen">
+    
+    <!-- Mobile Horizontal Scroll Wrapper -->
+    <div class="a4-scroll-area overflow-x-auto w-full px-4 py-8">
         
-        <!-- ══════════════════════════════════════
-             SECTION 1: ALLOCATION FORM
-        ══════════════════════════════════════ -->
-        <section class="a4-container text-gray-900 border border-gray-200">
-            <div class="text-center mb-10">
-                <h2 class="text-2xl font-bold uppercase tracking-tight">Hulas Finserv Hire Purchase Limited</h2>
-                <div class="h-px bg-black w-full my-2"></div>
-                <h2 class="text-xl font-semibold uppercase">Downpayment Allocation Form</h2>
+        <div class="a4-inner min-w-[210mm] max-w-[210mm] mx-auto">
+
+            <!-- Print Button (Hidden during print) -->
+            <div class="print-btn-row flex justify-end mb-6 no-print">
+                <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-200 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Print Both Forms
+                </button>
             </div>
 
-            <div class="grid grid-cols-1 gap-8">
-                <!-- Info Section -->
-                <div>
-                    <h3 class="font-bold text-lg border-b border-gray-300 mb-4 pb-1">Customer & Vehicle Information</h3>
-                    <div class="space-y-2 text-[16px]">
-                        <div class="flex"><span class="w-48 font-medium">• Date</span><span class="mr-2">:</span><span>13/05/2026</span></div>
-                        <div class="flex"><span class="w-48 font-medium">• Dealer Name</span><span class="mr-2">:</span><span>Samriddhi And Brothers Auto Pvt. Ltd.</span></div>
-                        <div class="flex"><span class="w-48 font-medium">• Customer Name</span><span class="mr-2">:</span><span class="font-bold uppercase text-blue-900">Dipak Tamang</span></div>
-                        <div class="flex"><span class="w-48 font-medium">• Contact Number</span><span class="mr-2">:</span><span>9705222938</span></div>
-                        <div class="flex"><span class="w-48 font-medium">• Vehicle Model</span><span class="mr-2">:</span><span class="font-bold uppercase">Pul 220 F ABS FI BS VI</span></div>
-                    </div>
+            <!-- ════════════════════ PAGE 1 : ALLOCATION FORM ════════════════════ -->
+            <div class="a4-page bg-white p-[20mm] rounded-sm text-gray-800 border border-gray-200">
+                
+                <div class="text-center border-b-2 border-blue-600 pb-4 mb-8">
+                    <h2 class="text-2xl font-black text-blue-900 leading-tight">HULAS FINSERV HIRE PURCHASE LIMITED</h2>
+                    <h2 class="text-lg font-bold text-gray-600 tracking-widest mt-1 uppercase">Downpayment Allocation Form</h2>
                 </div>
 
-                <!-- Finance Section -->
-                <div>
-                    <h3 class="font-bold text-lg border-b border-gray-300 mb-4 pb-1">Financial Details</h3>
-                    <div class="space-y-2 text-[16px]">
-                        <div class="flex"><span class="w-48 font-medium">• Retail Price</span><span class="mr-2">:</span><span>447,900.00</span></div>
-                        <div class="flex"><span class="w-48 font-medium">• Down Payment</span><span class="mr-2">:</span><span>268,740.00</span></div>
-                        <div class="flex"><span class="w-48 font-medium">• Loan Amount</span><span class="mr-2">:</span><span>179,160.00</span></div>
-                        <div class="flex"><span class="w-48 font-medium">• Interest Rate (%)</span><span class="mr-2">:</span><span>9.99</span></div>
-                        <div class="flex"><span class="w-48 font-medium">• Tenure (Months)</span><span class="mr-2">:</span><span>24</span></div>
-                        <div class="flex"><span class="w-48 font-medium">• Registration/Yatayat</span><span class="mr-2">:</span><span>3,000.00 <span class="text-xs italic">(suggested by HH)</span></span></div>
-                        <div class="flex"><span class="w-48 font-medium">• Insurance Premium</span><span class="mr-2">:</span><span>9,436.00</span></div>
-                        <div class="flex text-lg font-bold mt-4 pt-2 border-t border-dashed border-gray-400">
-                            <span class="w-48 uppercase">• Total Down-payment</span>
-                            <span class="mr-2">:</span>
-                            <span>Rs. 289,486.00</span>
+                <!-- Customer Section -->
+                <div class="mb-8">
+                    <p class="text-blue-800 font-bold uppercase text-sm mb-4 bg-blue-50 px-3 py-1 inline-block rounded">Customer & Vehicle Information</p>
+                    <div class="grid grid-cols-1 gap-y-3 mt-2">
+                        <div class="flex items-center border-b border-gray-100 pb-1">
+                            <span class="w-40 font-semibold flex items-center gap-2"><span class="text-blue-500">•</span> Date</span>
+                            <span class="mr-4">:</span>
+                            <span id="a4Date" class="text-gray-700">Date</span>
+                        </div>
+                        <div class="flex items-center border-b border-gray-100 pb-1">
+                            <span class="w-40 font-semibold flex items-center gap-2"><span class="text-blue-500">•</span> Dealer Name</span>
+                            <span class="mr-4">:</span>
+                            <span id="a4Dealer" class="text-gray-700">Dealer Name</span>
+                        </div>
+                        <div class="flex items-center border-b border-gray-100 pb-1">
+                            <span class="w-40 font-semibold flex items-center gap-2"><span class="text-blue-500">•</span> Customer Name</span>
+                            <span class="mr-4">:</span>
+                            <span id="a4CustName" class="text-gray-900 font-bold">Your Name</span>
+                        </div>
+                        <div class="flex items-center border-b border-gray-100 pb-1">
+                            <span class="w-40 font-semibold flex items-center gap-2"><span class="text-blue-500">•</span> Contact</span>
+                            <span class="mr-4">:</span>
+                            <span id="a4CustPhone" class="text-gray-700">Contact</span>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Declaration -->
-            <div class="mt-12">
-                <h4 class="font-bold border-b border-black mb-3">Declaration</h4>
-                <p class="text-[14px] leading-relaxed italic text-justify text-gray-700">
-                    We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.
-                </p>
-                <p class="mt-6 font-bold uppercase text-xs tracking-wider">Signatures & Authorization</p>
-            </div>
-
-            <!-- Signature Boxes -->
-            <div class="flex justify-between mt-24 text-center text-[13px] font-semibold">
-                <div class="w-1/4 border-t border-black pt-2">Customer's Signature</div>
-                <div class="w-1/4 border-t border-black pt-2">Dealer's Stamp</div>
-                <div class="w-1/4 border-t border-black pt-2">LO's Signature</div>
-            </div>
-        </section>
-
-        <!-- ══════════════════════════════════════
-             SECTION 2: QUOTATION
-        ══════════════════════════════════════ -->
-        <section class="a4-container text-gray-900 border border-gray-200">
-            <!-- Header with Logo -->
-            <div class="flex items-start justify-between border-b-2 border-black pb-4 mb-6">
-                <div class="w-20">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/d/d1/Bajaj_Auto_logo.svg/1200px-Bajaj_Auto_logo.svg.png" alt="Bajaj" class="w-full">
+                <!-- Financial Section -->
+                <div class="mb-10">
+                    <p class="text-blue-800 font-bold uppercase text-sm mb-4 bg-blue-50 px-3 py-1 inline-block rounded">Financial Details</p>
+                    <div class="grid grid-cols-1 gap-y-3">
+                        <!-- Items with Tailwind Flex -->
+                        <div class="flex justify-between border-b border-dashed border-gray-300 pb-1">
+                            <span class="font-medium">Retail Price (MRP)</span>
+                            <span id="a4MRP" class="font-mono">Rs. 0.00</span>
+                        </div>
+                        <div class="flex justify-between border-b border-dashed border-gray-300 pb-1">
+                            <span class="font-medium">Down Payment Amount</span>
+                            <span id="a4DP" class="font-mono">Rs. 0.00</span>
+                        </div>
+                        <div class="flex justify-between border-b border-dashed border-gray-300 pb-1 text-blue-700 font-bold bg-blue-50 px-2 py-1 rounded">
+                            <span>Loan Amount Requested</span>
+                            <span id="a4Loan" class="font-mono underline decoration-double">Rs. 0.00</span>
+                        </div>
+                        <div class="flex justify-between border-b border-dashed border-gray-300 pb-1">
+                            <span>Insurance Premium</span>
+                            <span id="a4Ins" class="font-mono text-gray-600">Rs. 0.00</span>
+                        </div>
+                        <div class="flex justify-between mt-6 bg-gray-900 text-white p-4 rounded-lg shadow-inner">
+                            <span class="font-bold text-lg uppercase">Total Paid by Customer</span>
+                            <span id="a4TotalDP" class="font-bold text-xl font-mono">Rs. 0.00</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <h1 class="text-2xl font-bold italic tracking-tight text-blue-900">Samriddhi & Brothers Auto Pvt. Ltd.</h1>
-                    <p class="text-sm font-bold">Authorized Dealer of Bajaj Motorcycle</p>
-                    <p class="text-[11px] text-gray-600 mt-1">Phidim-04, Panchthar, Nepal | Tel: 024-523144</p>
-                    <p class="text-[11px] text-gray-600">Email: Sambriddhi.bajaj@gmail.com</p>
-                </div>
-            </div>
 
-            <div class="flex justify-between items-baseline mb-6">
-                <div class="text-center flex-1 ml-20">
-                    <h2 class="text-xl font-bold uppercase underline decoration-double">Quotation</h2>
-                </div>
-                <div class="text-sm font-semibold">Date: 13/05/2026</div>
-            </div>
-
-            <!-- Content -->
-            <div class="text-[15px] space-y-4">
-                <p>To, <br><strong>Hulas Finserv Hire Purchase Limited</strong></p>
-                <p><strong>C/O DIPAK TAMANG</strong></p>
-                <p>Dear Sir/Madam,</p>
-                <p>We are pleased to furnish quotation of Bajaj Motorcycle as per following details:</p>
-                
-                <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg space-y-3">
-                    <p><span class="font-bold underline">Model:</span> Pul 220 F ABS FI BS VI</p>
-                    <p>
-                        <span class="font-bold underline">Price:</span> Rs. 447,900/- 
-                        <span class="block mt-1 text-[13px] italic font-semibold text-gray-700 underline">In Words: Four lakh forty seven thousand nine hundred rupees only.</span>
+                <!-- Declaration & Signatures -->
+                <div class="mt-auto pt-10">
+                    <p class="text-xs italic text-gray-500 mb-12 text-center">
+                        We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.
                     </p>
-                    
-                    <div class="grid grid-cols-2 gap-y-2 mt-4 text-[14px]">
-                        <p><strong>Color:</strong> Black Cherry Red</p>
-                        <p><strong>Regd No:</strong> PR-01-02-60Pa5803</p>
-                        <p><strong>Engine No:</strong> DKXCTL26496</p>
-                        <p><strong>Chassis No:</strong> MD2A13EX7TCL83148</p>
-                    </div>
-                </div>
-
-                <div class="mt-6">
-                    <p class="font-bold text-sm mb-2 underline">Terms and Conditions :-</p>
-                    <ul class="text-[12px] space-y-1 text-gray-700 list-disc pl-4">
-                        <li>Payment: Cash, Cheque or Demand Draft at delivery.</li>
-                        <li>Price inclusive of 13% VAT. Road Tax on purchaser account.</li>
-                        <li>Warranty as per company policy (detailed in Owner's Manual).</li>
-                        <li>Servicing: 7 Free Servicings included.</li>
-                    </ul>
-                </div>
-
-                <!-- Footer Sign -->
-                <div class="pt-20 flex justify-end">
-                    <div class="text-center w-64">
-                        <p class="italic mb-12">Sincerely Yours,</p>
-                        <div class="border-t border-black pt-2 font-bold uppercase text-xs">Authorized Signature</div>
+                    <div class="grid grid-cols-3 gap-8 text-center text-[10pt]">
+                        <div class="border-t border-gray-400 pt-2 font-medium">Customer's Signature</div>
+                        <div class="border-t border-gray-400 pt-2 font-medium">Dealer's Signature & Stamp</div>
+                        <div class="border-t border-gray-400 pt-2 font-medium">LO's Signature & Stamp</div>
                     </div>
                 </div>
             </div>
-        </section>
 
+            <!-- ════════════════════ PAGE 2 : QUOTATION ════════════════════ -->
+            <div class="a4-page bg-white p-[20mm] rounded-sm text-gray-800 border border-gray-200 relative">
+                
+                <!-- Header -->
+                <div class="flex items-center gap-6 border-b-4 border-black pb-4 mb-6">
+                    <div class="w-24 h-24 bg-gray-100 flex items-center justify-center rounded">
+                        <img src="logo.jpg" alt="Logo" class="max-w-full">
+                    </div>
+                    <div class="flex-1">
+                        <h1 class="text-2xl font-black uppercase text-red-600 leading-tight">Samriddhi & Brothers Auto Pvt. Ltd.</h1>
+                        <h2 class="text-md font-bold text-gray-700">Authorized Dealer of Bajaj Motorcycle</h2>
+                        <p class="text-xs text-gray-500 mt-1">Phidim-04, Panchthar, Nepal | Tel: 024-523144, 9802315425</p>
+                        <p class="text-xs text-gray-500">Email: Sambriddhi.bajaj@gmail.com</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-start mb-6">
+                    <div class="bg-gray-100 px-4 py-2 rounded">
+                        <h2 class="font-black uppercase tracking-widest text-xl underline decoration-2">Quotation</h2>
+                    </div>
+                    <p class="font-bold border-b border-gray-800">Date: <span id="a4Date2"></span></p>
+                </div>
+
+                <!-- Quotation Body -->
+                <div class="space-y-4 text-sm leading-relaxed">
+                    <div>
+                        <p>To,</p>
+                        <p class="font-bold text-blue-900">Hulas Finserv Hire Purchase Limited</p>
+                        <p>C/O <span id="a4CustName2" class="font-bold underline decoration-1 italic">Your Name</span></p>
+                    </div>
+
+                    <p>Dear Sir/Madam, we are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
+
+                    <!-- Table-like Details -->
+                    <div class="border border-gray-300 rounded-md overflow-hidden">
+                        <div class="grid grid-cols-2 bg-gray-50 border-b border-gray-300">
+                            <div class="p-2 font-bold">Model: <span id="a4Model2" class="font-normal">—</span></div>
+                            <div class="p-2 font-bold border-l border-gray-300 text-red-600">Price: Rs. <span id="a4MRP2">0</span>/-</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-px bg-gray-300">
+                            <div class="bg-white p-2">Color: <span id="a4Color2">—</span></div>
+                            <div class="bg-white p-2">Regd No: <span id="a4Reg2">—</span></div>
+                            <div class="bg-white p-2">Engine No: <span id="a4Engine2">—</span></div>
+                            <div class="bg-white p-2">Chassis No: <span id="a4Chassis2">—</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Terms -->
+                    <div class="mt-6 pt-4">
+                        <p class="font-bold text-xs uppercase underline mb-2">Terms and Conditions :-</p>
+                        <ul class="text-[10pt] space-y-1 list-disc ml-4 text-gray-600 italic">
+                            <li>Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</li>
+                            <li>Taxes:- Price quoted above is inclusive of 13% VAT.</li>
+                            <li>Other local taxes like Road Tax & Registration will be on purchaser account.</li>
+                            <li>Warranty:- As per manufacturer policy detailed in owner's manual.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Page 2 Footer -->
+                <div class="absolute bottom-[20mm] left-[20mm] right-[20mm]">
+                    <div class="flex justify-between items-end">
+                        <div class="text-xs">
+                            <p>Sincerely Your's,</p>
+                            <div class="mt-12 border-t border-gray-400 w-48 text-center pt-1 font-bold">Authorized Signature</div>
+                        </div>
+                    </div>
+                    <div class="mt-8 h-1 bg-gradient-to-r from-red-600 via-gray-400 to-black w-full"></div>
+                </div>
+
+            </div>
+
+        </div>
     </div>
+</div>
 </main>
 
 
