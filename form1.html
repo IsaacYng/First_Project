@@ -225,90 +225,160 @@
 
             <!-- ════════════════════ PAGE 1 : ALLOCATION FORM ════════════════════ -->
             <!-- Referencing layout from 123_page-0001.jpg -->
-            <div class="a4-page p-[15mm] text-gray-900 leading-relaxed relative">
-                
-                <div class="text-center border-b border-gray-400 pb-2 mb-8">
-                    <h1 class="text-xl font-bold uppercase tracking-wide">Hulas Finserv Hire Purchase Limited</h1>
-                    <h2 class="text-lg font-semibold uppercase mt-1">Downpayment Allocation Form</h2>
-                </div>
+             <div id="print-area" class="bg-white w-[210mm] min-h-[296mm] p-[15mm] md:p-[20mm] shadow-2xl shrink-0 text-gray-900 print:shadow-none print:m-0 print:border-none print:w-full">
+        
+        <div class="text-center mb-8 border-b-2 border-black pb-4">
+            <h2 class="text-2xl font-bold uppercase tracking-widest leading-tight">HULAS FINSERV HIRE PURCHASE LIMITED</h2>
+            <h2 class="text-2xl font-bold uppercase tracking-widest leading-tight">DOWNPAYMENT ALLOCATION FORM</h2>
+        </div>
 
-                <!-- Section: Customer & Vehicle -->
-                <div class="mb-6">
-                    <h3 class="font-bold text-[11pt] mb-2 underline">Customer & Vehicle Information</h3>
-                    <div class="ml-4 space-y-1">
-                        <div class="flex">
-                            <span class="w-48 flex items-center gap-2">● Date</span>
-                            <span class="mr-4">:</span>
-                            <span id="a4Date" class="font-semibold underline">13/05/2026</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-48 flex items-center gap-2">● Dealer Name</span>
-                            <span class="mr-4">:</span>
-                            <span id="a4Dealer">Samriddhi And Brothers Auto Pvt. Ltd.</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-48 flex items-center gap-2">● Customer Name</span>
-                            <span class="mr-4">:</span>
-                            <span id="a4CustName" class="font-bold">Dipak Tamang</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-48 flex items-center gap-2">● Contact Number</span>
-                            <span class="mr-4">:</span>
-                            <span id="a4CustPhone">9705222938</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-48 flex items-center gap-2">● Vehicle Model</span>
-                            <span class="mr-4">:</span>
-                            <span id="a4Model" class="font-bold uppercase tracking-tight">Pul 220 F ABS FI BS VI</span>
-                        </div>
-                    </div>
-                </div>
+        <div class="mb-1">
+    <h3 class="font-bold text-[17px]">Customer & Vehicle Information</h3>
+    
+    <ul class="space-y-2 text-[17px] text-gray-900 ml-4 list-none">
+        
+        <li class="grid grid-cols-[140px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span class="font-semibold">Date</span>
+            </span>
+            <span>:</span>
+            <span id="a4Date" class="ml-2">Date</span>
+        </li>
 
-                <!-- Section: Financial Details -->
-                <div class="mb-10">
-                    <h3 class="font-bold text-[11pt] mb-2 underline">Financial Details</h3>
-                    <div class="ml-4 space-y-1">
-                        <div class="flex"><span class="w-64">● Retail Price</span><span class="mr-4">:</span><span id="a4MRP">447,900.00</span></div>
-                        <div class="flex"><span class="w-64">● Down Payment</span><span class="mr-4">:</span><span id="a4DP">268,740.00</span></div>
-                        <div class="flex"><span class="w-64">● Loan Amount</span><span class="mr-4">:</span><span id="a4Loan">179,160.00</span></div>
-                        <div class="flex"><span class="w-64">● Interest Rate (%)</span><span class="mr-4">:</span><span id="a4Rate">9.99</span></div>
-                        <div class="flex"><span class="w-64">● Tenure (Months)</span><span class="mr-4">:</span><span id="a4Tenure">24</span></div>
-                        <div class="flex"><span class="w-64">● Registration Charge / Yatayat Expenses</span><span class="mr-4">:</span><span>3,000.00 &nbsp; <span class="italic text-xs">(suggested by HH)</span></span></div>
-                        <div class="flex"><span class="w-64">● Insurance Premium</span><span class="mr-4">:</span><span id="a4Ins">9,436.00</span></div>
-                        <div class="flex"><span class="w-64">● Advance EMI (If Any)</span><span class="mr-4">:</span><span id="a4AdvEmiAmt">8,310.00</span></div>
-                        <div class="flex font-bold mt-2 pt-2 border-t border-gray-100">
-                            <span class="w-64 uppercase text-[9pt]">● Total Down-payment Amount paid by Customer</span>
-                            <span class="mr-4">:</span>
-                            <span id="a4TotalDP" class="text-md underline">289,486.00</span>
-                        </div>
-                    </div>
-                </div>
+        <li class="grid grid-cols-[150px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span class="font-semibold">Dealer Name</span>
+            </span>
+            <span>:</span>
+            <span id="a4Dealer" class="ml-2">Dealer Name</span>
+        </li>
 
-                <!-- Declaration -->
-                <div class="mb-20">
-                    <h3 class="font-bold text-[11pt] mb-2">Declaration</h3>
-                    <p class="text-[10pt] leading-tight text-justify border-t border-gray-400 pt-2">
-                        We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.
-                    </p>
-                    <p class="mt-4 font-semibold text-[10pt]">Signatures & Authorization</p>
-                </div>
+        <li class="grid grid-cols-[150px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span class="font-semibold">Customer Name</span>
+            </span>
+            <span>:</span>
+            <span id="a4CustName" class="ml-2 bold text-gray-700">Your Name</span>
+        </li>
 
-                <!-- Signature Section -->
-                <div class="grid grid-cols-3 gap-4 text-center text-[9pt] absolute bottom-24 left-[15mm] right-[15mm]">
-                    <div>
-                        <div class="border-t border-gray-400 pt-1">Customer's Signature</div>
-                    </div>
-                    <div>
-                        <div class="border-t border-gray-400 pt-1">Dealer's Signature & Stamp</div>
-                    </div>
-                    <div>
-                        <div class="border-t border-gray-400 pt-1">LO's Signature & Stamp</div>
-                    </div>
-                </div>
+        <li class="grid grid-cols-[150px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span class="font-semibold">Contact Number</span>
+            </span>
+            <span>:</span>
+            <span id="a4CustPhone" class="ml-2">Contact</span>
+        </li>
 
-                <div class="absolute bottom-10 left-[15mm] right-[15mm] border-t border-gray-400"></div>
-                <div class="absolute bottom-4 left-[15mm] right-[15mm] border-t border-gray-400"></div>
-            </div>
+        <li class="grid grid-cols-[150px_10px_1fr] items-baseline pt-1">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span class="font-semibold">Vehicle Model</span>
+            </span>
+            <span>:</span>
+            <span id="a4Model" class="ml-2">Model</span>
+        </li>
+
+    </ul>
+</div>
+        <div class="mb-8">
+    <h3 class="font-bold text-[17px]">Financial Details</h3>
+    
+    <ul class="space-y-2 text-[17px] text-gray-900 ml-4 list-none">
+        
+        <li class="grid grid-cols-[180px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Retail Price</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2" id="a4MRP">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[180px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Down Payment</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2" id="a4DP">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[180px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Loan Amount</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2 font-bold" id="a4Loan">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[180px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Interest Rate (%)</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2" id="a4Rate">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[180px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Tenure (Months)</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2" id="a4Tenure">0</span>
+        </li>
+
+        <li class="grid grid-cols-[320px_10px_1fr] items-baseline">
+    <span class="flex items-center gap-2">
+        <span class="text-[17px]">●</span> 
+        <span>Registration Charge / Yatayat Expence</span>
+    </span>
+    <span>:</span>
+    <span class="ml-2">
+        <span id="a4Namsari">3,000.00</span> 
+        <span class="ml-1 text-[12px] font-sans">(Suggested By HH)</span>
+    </span>
+</li>
+
+
+        <li class="grid grid-cols-[190px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Insurance Premium</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2" id="a4Ins">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[190px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span>Advance EMI (If Any)</span>
+            </span>
+            <span>:</span>
+            <span class="ml-2" id="a4AdvEmiAmt">0.00</span>
+        </li>
+
+        <li class="grid grid-cols-[400px_10px_1fr] items-baseline">
+            <span class="flex items-center gap-2">
+                <span class="text-[17px]">●</span> <span class="font-semibold">Total Down-payment Amount Paid by Customer</span>
+            </span>
+            <span>:</span>
+            <span id="a4TotalDP" class="ml-2">0.00</span>
+        </li>
+
+    </ul>
+</div>
+        <div class="mb-35">
+            <h3 class="font-bold text-[17px] border-b-2 border-black pb-4">Declaration</h3>
+            <p class="text-[17px] leading-relaxed text-justify">
+                We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.
+            </p>
+<p class="mt-2 text-[17px] leading-relaxed text-justify">
+                Signature & Authorization 
+            </p>
+        </div>
+
+        <div class="mt-40 flex justify-between items-end text-[16px] font-bold text-center">
+            <div class="w-44 border-t border-black pt-2">Customer's Signature</div>
+            <div class="w-50 border-t border-black pt-2">Dealer's Signature & Stamp</div>
+            <div class="w-50 border-t border-black pt-2">LO's Signature & Stamp</div>
+        </div>
+    </div>
 
             <!-- ════════════════════ PAGE 2 : QUOTATION ════════════════════ -->
             <!-- Referencing layout from 123_page-0002.jpg -->
