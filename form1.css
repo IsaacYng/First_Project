@@ -2,51 +2,70 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
-/* 2. Global Reset */
-body { 
-    margin: 0; 
-    padding: 0; 
-    background-color: #f1f5f9; 
+/* 2. Base Configuration */
+:root {
+    --a4-width: 210mm;
+    --a4-height: 297mm;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f1f5f9;
     -webkit-font-smoothing: antialiased;
-    font-family: 'Inter', sans-serif; /* Default */
+    font-family: 'Inter', sans-serif;
 }
 
-/* 3. Font Configuration */
-/* Simplified the stack to ensure Crimson Pro is the priority fallback */
-.book-antiqua-font, 
-.book-antiqua-font #a4MRP, 
-.book-antiqua-font #a4DP, 
-.book-antiqua-font #a4Loan,
-.book-antiqua-font #a4TotalDP,
-.book-antiqua-font .font-mono {
-    font-family: "Book Antiqua", "Palatino Linotype", "Palatino", "Crimson Pro", serif !important;
+/* 3. Professional Font Stack (Crimson Pro for Finance/Legal look) */
+.font-serif-professional {
+    font-family: 'Crimson Pro', "Book Antiqua", "Palatino", serif !important;
 }
 
-/* 4. Layout */
-.scroller-container { 
-    display: flex; 
-    flex-direction: column;
-    align-items: center; 
-    padding: 20px; 
+/* 4. Mobile Scroll Logic */
+.a4-scroll-area {
     width: 100%;
     overflow-x: auto;
-    box-sizing: border-box;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 10px;
+    display: flex;
+    justify-content: flex-start; /* Mobile ma left bata start hunchha */
 }
 
-#print-area { 
-    width: 210mm; 
-    min-height: 297mm;
-    padding: 20mm;
-    background: white; 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-    box-sizing: border-box;
-    margin: 0 auto;
-    flex-shrink: 0;
+/* Screen ma matra page jasto dekhina ko lagi */
+@media screen {
+    .a4-inner {
+        min-width: var(--a4-width);
+        margin: 0 auto;
+    }
+
+    .a4-page {
+        width: var(--a4-width);
+        min-height: var(--a4-height);
+        background: white;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        padding: 15mm 20mm; /* A4 standardized margins */
+        box-sizing: border-box;
+        border-radius: 2px;
+    }
 }
 
-/* 5. IMPROVED PRINT ENGINE */
+/* 5. ULTIMATE PRINT ENGINE */
 @media print {
-    /* 1. Reset the page and body */
+    /* Hide everything except the print area */
+    body * {
+        visibility: hidden !important;
+    }
+
+    .a4-scroll-area,
+    .a4-inner,
+    .a4-page,
+    .a4-page * {
+        visibility: visible !important;
+    }
+
+    /* Print settings reset */
     @page {
         size: A4;
         margin: 0;
@@ -57,81 +76,39 @@ body {
         margin: 0 !important;
         padding: 0 !important;
     }
-   /* --- PRINT ENGINE (Specify Area Only) --- */
-@media print {
-    /* 1. Purai sansar lai lukai dine (Body and children) */
-    body * {
-        visibility: hidden !important;
+
+    .no-print {
+        display: none !important;
     }
 
-    /* 2. Print area ra tesko parent lai matra biujhaune */
-    /* .scroller-container ra #print-area ko path khulla hunu parcha */
-    .scroller-container, 
-    #print-area, 
-    #print-area * {
-        visibility: visible !important;
+    .a4-scroll-area {
+        padding: 0 !important;
+        overflow: visible !important;
+        display: block !important;
     }
 
-    /* 3. Print area lai top left ma lock garne */
-    #print-area {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 210mm !important;
-        height: 297mm !important;
+    .a4-inner {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .a4-page {
+        position: relative !important;
+        width: var(--a4-width) !important;
+        height: var(--a4-height) !important;
         margin: 0 !important;
-        padding: 15mm !important;
+        padding: 15mm !important; /* Printing margins adjust */
         box-shadow: none !important;
         border: none !important;
-        background-color: white !important;
+        page-break-after: always; /* Form 1 pachi automatic naya page */
     }
 
-    /* 4. Background noise ra extra pages hataune */
-    @page {
-        size: A4;
-        margin: 0;
-    }
-    
-    html, body {
-        background: none !important;
-        height: 100%;
-        overflow: hidden !important; /* Arko page banna didaina */
+    /* Fix image and font rendering for print */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 }
 
-/* ड्यासबोर्डमा हेर्दा बायाँ-दायाँ स्क्रोल गर्न */
-        .preview-scroll {
-            overflow-x: auto;
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 1rem;
-        }
-
-        /* A4 Page Styling */
-        .a4-page {
-            width: 210mm;
-            min-height: 297mm;
-            padding: 15mm 20mm;
-            margin: 0 auto;
-            background: white;
-            font-family: 'Times New Roman', serif;
-            color: black;
-            position: relative;
-            box-sizing: border-box;
-        }
-
-        @media print {
-            body { margin: 0; padding: 0; background: white; }
-            .no-print { display: none !important; }
-            .preview-scroll { padding: 0; overflow: visible; }
-            .a4-page { 
-                box-shadow: none !important; 
-                border: none !important;
-                margin: 0 !important;
-                width: 210mm;
-                height: 297mm;
-            }
-            @page { size: A4; margin: 0; }
-        }
-
-        .line-height-tight { line-height: 1.2; }
+/* Utility Classes */
+.line-height-tight { line-height: 1.25; }
