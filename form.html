@@ -51,30 +51,62 @@
 
         /* ── Print — exactly 2 A4 pages ── */
         @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area *,
-            #quotation-print-area, #quotation-print-area * { visibility: visible; }
-            .no-print { display: none !important; }
-            body { background: white !important; margin: 0; padding: 0; }
-            #print-area {
-                position: fixed; top: 0; left: 0;
-                width: 210mm; height: 296mm;
-                padding: 15mm 20mm 10mm 20mm;
-                margin: 0; box-shadow: none !important; border: none !important;
-                overflow: hidden;
-                page-break-after: always; break-after: page;
-            }
-            #quotation-print-area {
-                position: fixed; top: 0; left: 0;
-                width: 210mm; height: 296mm;
-                padding: 15mm 20mm 10mm 20mm;
-                margin: 0; box-shadow: none !important; border: none !important;
-                overflow: hidden;
-                page-break-before: always; break-before: page;
-                page-break-after: avoid; break-after: avoid;
-            }
-            @page { size: A4 portrait; margin: 0; }
-        }
+
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+
+    html,
+    body {
+        width: 210mm;
+        margin: 0;
+        padding: 0;
+        background: white !important;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    #print-area,
+    #print-area *,
+    #quotation-print-area,
+    #quotation-print-area * {
+        visibility: visible;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    /* PAGE COMMON */
+    #print-area,
+    #quotation-print-area {
+        position: relative !important;
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        padding: 15mm 20mm 10mm 20mm;
+        box-sizing: border-box;
+        background: white !important;
+        overflow: hidden;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    /* FIRST PAGE */
+    #print-area {
+        page-break-after: always;
+        break-after: page;
+    }
+
+    /* SECOND PAGE */
+    #quotation-print-area {
+        page-break-before: always;
+        break-before: page;
+    }
+}
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
@@ -503,40 +535,9 @@
 
 <!-- Print: exactly 2 A4 pages -->
 <script>
-    function printBothPages() {
-        var s = document.createElement('style');
-        s.id = '_ps';
-        s.innerHTML = `
-            @page { size: A4 portrait; margin: 0; }
-            @media print {
-                body * { visibility: hidden; }
-                #print-area, #print-area *,
-                #quotation-print-area, #quotation-print-area * { visibility: visible; }
-                .no-print { display: none !important; }
-                body { background: white !important; margin: 0; padding: 0; }
-                #print-area {
-                    position: fixed; top: 0; left: 0;
-                    width: 210mm; height: 296mm;
-                    padding: 15mm 20mm 10mm 20mm;
-                    margin: 0; box-shadow: none !important; border: none !important;
-                    overflow: hidden;
-                    page-break-after: always; break-after: page;
-                }
-                #quotation-print-area {
-                    position: fixed; top: 0; left: 0;
-                    width: 210mm; height: 296mm;
-                    padding: 15mm 20mm 10mm 20mm;
-                    margin: 0; box-shadow: none !important; border: none !important;
-                    overflow: hidden;
-                    page-break-before: always; break-before: page;
-                    page-break-after: avoid; break-after: avoid;
-                }
-            }
-        `;
-        document.head.appendChild(s);
-        window.print();
-        setTimeout(() => { var e = document.getElementById('_ps'); if(e) e.remove(); }, 2000);
-    }
+   function printBothPages() {
+    window.print();
+}
 </script>
 
 <script type="module" src="form.js"></script>
