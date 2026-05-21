@@ -48,16 +48,12 @@
         .doc-list li .lbl { display:flex; align-items:baseline; gap:7px; }
 
         /* ══════════════════════════════════════
-           PRINT STYLES — the real fix
-           Two pages via normal document flow.
-           Each .print-page is exactly one A4 page.
+           PRINT STYLES
         ══════════════════════════════════════ */
         @media print {
-            /* hide everything on the screen page */
             body > *:not(#print-wrapper) { display: none !important; }
             #print-wrapper { display: block !important; }
 
-            /* reset body */
             html, body {
                 margin: 0 !important;
                 padding: 0 !important;
@@ -65,23 +61,25 @@
                 width: 210mm !important;
             }
 
-            /* each page wrapper = exactly one A4 sheet */
             .print-page {
                 width: 210mm !important;
-                height: 296mm !important;
-                padding: 15mm 10mm 12mm 10mm !important;
+                height: 297mm !important;
+                padding: 15mm 15mm 12mm 15mm !important;
                 margin: 0 !important;
                 box-sizing: border-box !important;
                 overflow: hidden !important;
                 page-break-after: always !important;
                 break-after: page !important;
+                position: relative !important;
             }
 
-            /* last page — no trailing blank sheet */
             .print-page:last-child {
                 page-break-after: avoid !important;
                 break-after: avoid !important;
             }
+
+            /* FIX: ensure paragraph spacing in quotation page */
+            .print-page p { margin: 0 0 1.5mm 0 !important; }
 
             @page {
                 size: A4 portrait;
@@ -89,9 +87,14 @@
             }
         }
 
-        /* Screen preview of print pages */
-        #print-wrapper {
-            display: none; /* hidden on screen; shown only when printing */
+        /* Screen preview hidden */
+        #print-wrapper { display: none; }
+
+        /* ── Screen preview paper shadow styling ── */
+        .screen-page {
+            background: white;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.18), 0 1.5px 6px rgba(0,0,0,0.10);
+            border: 1px solid #e0e0e0;
         }
     </style>
 </head>
@@ -280,10 +283,10 @@
                     </button>
                 </div>
 
-                <!-- Screen: Page 1 preview -->
+                <!-- ═══ SCREEN PAGE 1 — Allocation Form ═══ -->
                 <div id="print-area"
-                     class="a4-paper bg-white w-[210mm] min-h-[296mm] shadow-2xl mx-auto mb-8"
-                     style="padding:15mm 20mm 12mm 20mm;">
+                     class="a4-paper screen-page w-[210mm] mx-auto mb-8"
+                     style="min-height:297mm; padding:15mm 15mm 12mm 15mm; box-sizing:border-box;">
 
                     <div style="text-align:center; margin-bottom:3mm;">
                         <p style="font-size:14pt;font-weight:bold;margin:0;">HULAS FINSERV HIRE PURCHASE LIMITED</p>
@@ -323,13 +326,15 @@
                         <div style="width:200px;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:12pt;">Dealer's Signature &amp; Stamp</div>
                         <div style="width:200px;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:12pt;">LO's Signature &amp; Stamp</div>
                     </div>
+                    <!-- FIX: Two closing lines at bottom matching the printed image -->
                     <hr style="border:none;border-top:1px solid #000;margin-top:4mm;">
+                    <hr style="border:none;border-top:1px solid #000;margin-top:2px;">
                 </div><!-- /screen page 1 -->
 
-                <!-- Screen: Page 2 preview -->
+                <!-- ═══ SCREEN PAGE 2 — Quotation ═══ -->
                 <div id="quotation-print-area"
-                     class="a4-paper bg-white w-[210mm] shadow-2xl mx-auto"
-                     style="padding:15mm 10mm 12mm 10mm;">
+                     class="a4-paper screen-page w-[210mm] mx-auto"
+                     style="min-height:297mm; padding:15mm 15mm 12mm 15mm; box-sizing:border-box;">
 
                     <div style="display:flex;align-items:center;margin-bottom:2mm;">
                         <div style="flex-shrink:0;margin-right:16px;">
@@ -368,7 +373,8 @@
                         <p style="margin:0 0 1mm 0;">Net Price: Rs. <span id="a4NetPrice">0</span>/- &nbsp;&nbsp; In Words: <em id="a4NetPriceWords">---</em></p>
                     </div>
 
-                    <div style="font-size:12pt;margin-top:1mm;line-height:1.5;">
+                    <!-- FIX: Corrected <p> tag (was broken: <p=Terms...) -->
+                    <div style="font-size:12pt;margin-top:1mm;line-height:1.6;">
                         <p style="margin:0 0 1mm 0;">Terms and Conditions :-</p>
                         <p style="margin:0 0 1mm 0;">- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
                         <p style="margin:0 0 1mm 0;">- Delivery :- Subject to availability</p>
@@ -380,7 +386,7 @@
                     </div>
 
                     <div style="text-align:right;font-size:12pt;margin-top:2mm;"><p style="margin:0;">Sincerely Your's</p></div>
-                    <div style="text-align:right;font-size:12pt;margin-top:6mm;"><p style="margin:0;">Authorized Signature</p></div>
+                    <div style="text-align:right;font-size:12pt;margin-top:14mm;"><p style="margin:0;">Authorized Signature</p></div>
                     <hr style="border:none;border-top:1px solid #000;margin-top:4mm;">
                 </div><!-- /screen page 2 -->
 
@@ -390,13 +396,11 @@
 </main>
 
 <!-- ══════════════════════════════════════════
-     PRINT WRAPPER — completely separate from screen layout.
-     JS copies live data into this before printing.
-     Two .print-page divs = exactly 2 sheets.
+     PRINT WRAPPER — Two .print-page divs = exactly 2 sheets.
 ══════════════════════════════════════════ -->
 <div id="print-wrapper">
 
-    <!-- PRINT PAGE 1 : ALLOCATION FORM -->
+    <!-- ═══ PRINT PAGE 1 : ALLOCATION FORM ═══ -->
     <div class="print-page a4-paper">
 
         <div style="text-align:center;margin-bottom:3mm;">
@@ -437,11 +441,12 @@
             <div style="width:191px;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:12pt;">Dealer's Signature &amp; Stamp</div>
             <div style="width:191px;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:12pt;">LO's Signature &amp; Stamp</div>
         </div>
+        <!-- FIX: Double bottom line to match printed output -->
         <hr style="border:none;border-top:1px solid #000;margin-top:4mm;">
         <hr style="border:none;border-top:1px solid #000;margin-top:2px;">
     </div><!-- /PRINT PAGE 1 -->
 
-    <!-- PRINT PAGE 2 : QUOTATION -->
+    <!-- ═══ PRINT PAGE 2 : QUOTATION ═══ -->
     <div class="print-page a4-paper">
 
         <div style="display:flex;align-items:center;margin-bottom:2mm;">
@@ -458,15 +463,15 @@
         <div style="text-align:right;font-size:13pt;margin-bottom:2mm;">Date: &nbsp;<span id="p2Date">--/--/----</span></div>
         <div style="text-align:center;margin-bottom:3mm;"><strong style="font-size:14pt;text-decoration:underline;letter-spacing:0.5px;">QUOTATION</strong></div>
 
-        <p style="font-size:12pt;">To Hulas Finserv Hire Purchase Limited</p>
-        <p style="font-size:12pt;font-weight:bold;">C/O &nbsp;<span id="p2CustName">--</span></p>
-        <p style="font-size:12pt;">Dear Sir/Madam,</p>
-        <p style="font-size:12pt;">We are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
-        <p style="font-size:12pt;">Details :</p>
-        <p style="font-size:12pt;font-weight:bold;">Model: <span id="p2Model">---</span></p>
-        <p style="font-size:12pt;font-weight:bold;">Price: <span id="p2MRP">0</span>/- In Words: <span id="p2PriceWords">---</span></p>
+        <p style="font-size:12pt;margin:0 0 1mm 0;">To Hulas Finserv Hire Purchase Limited</p>
+        <p style="font-size:12pt;font-weight:bold;margin:0 0 1mm 0;">C/O &nbsp;<span id="p2CustName">--</span></p>
+        <p style="font-size:12pt;margin:0 0 1mm 0;">Dear Sir/Madam,</p>
+        <p style="font-size:12pt;margin:0 0 1mm 0;">We are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
+        <p style="font-size:12pt;margin:0 0 1mm 0;">Details :</p>
+        <p style="font-size:12pt;font-weight:bold;margin:0 0 1mm 0;">Model: <span id="p2Model">---</span></p>
+        <p style="font-size:12pt;font-weight:bold;margin:0 0 2mm 0;">Price: <span id="p2MRP">0</span>/- In Words: <span id="p2PriceWords">---</span></p>
 
-        <div style="font-size:12pt;">
+        <div style="font-size:12pt;margin-bottom:2mm;">
             <div style="display:grid;grid-template-columns:1fr 1fr;row-gap:3px;">
                 <p style="margin:0;">Color: <span id="p2Color">---</span></p>
                 <p style="margin:0;">Regd No: <span id="p2Reg">---</span></p>
@@ -476,24 +481,25 @@
             </div>
         </div>
 
-        <div id="p2DiscountRow" style="display:none;font-size:12pt;">
-            <p>Discount: Rs. <span id="p2DiscountAmt">0</span>/-  In Words: <em id="p2DiscountWords">---</em></p>
-            <p>Net Price: Rs. <span id="p2NetPrice">0</span>/-  In Words: <em id="p2NetPriceWords">---</em></p>
+        <div id="p2DiscountRow" style="display:none;font-size:12pt;margin-bottom:2mm;">
+            <p style="margin:0 0 1mm 0;">Discount: Rs. <span id="p2DiscountAmt">0</span>/-  In Words: <em id="p2DiscountWords">---</em></p>
+            <p style="margin:0 0 1mm 0;">Net Price: Rs. <span id="p2NetPrice">0</span>/-  In Words: <em id="p2NetPriceWords">---</em></p>
         </div>
 
-        <div style="font-size:12pt; line-height:1.5;">
-            <p=Terms and Conditions :-</p>
-            <p>- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
-            <p>- Delivery :- Subject to availability</p>
-            <p>- Price Validity:- Subject to change without prior notice unless booked in advance at prevailing price.</p>
-            <p>- Taxes and Duties:- The price quoted above is inclusive of 13% VAT. However, other local taxes like – Road Tax, Registration Fees, Municipality Tax etc. will be on the account of purchaser.</p>
-            <p>- Insurance:- On account of purchaser.</p>
-            <p>- Warranty:- Warranty is not applicable on wear and tear and the items like Battery, Tyre, Tube, Brake Shoe, Clutch, Plate Cable, Chain Spocket and Bulb. Warranty Policy is detailed in the Owner's manual which will be provided at the time of the delivery of motorcycle.</p>
-            <p>- Servicing – 7 Free Servicing.</p>
+        <!-- FIX: Was broken tag <p=Terms... — now correct <p> -->
+        <div style="font-size:12pt;line-height:1.6;">
+            <p style="margin:0 0 1mm 0;">Terms and Conditions :-</p>
+            <p style="margin:0 0 1mm 0;">- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
+            <p style="margin:0 0 1mm 0;">- Delivery :- Subject to availability</p>
+            <p style="margin:0 0 1mm 0;">- Price Validity:- Subject to change without prior notice unless booked in advance at prevailing price.</p>
+            <p style="margin:0 0 1mm 0;">- Taxes and Duties:- The price quoted above is inclusive of 13% VAT. However, other local taxes like – Road Tax, Registration Fees, Municipality Tax etc. will be on the account of purchaser.</p>
+            <p style="margin:0 0 1mm 0;">- Insurance:- On account of purchaser.</p>
+            <p style="margin:0 0 1mm 0;">- Warranty:- Warranty is not applicable on wear and tear and the items like Battery, Tyre, Tube, Brake Shoe, Clutch, Plate Cable, Chain Spocket and Bulb. Warranty Policy is detailed in the Owner's manual which will be provided at the time of the delivery of motorcycle.</p>
+            <p style="margin:0 0 1mm 0;">- Servicing – 7 Free Servicing.</p>
         </div>
 
         <div style="text-align:right;font-size:13pt;margin-top:2mm;"><p style="margin:0;">Sincerely Your's</p></div>
-        <div style="text-align:right;font-size:13pt;margin-top:12mm;"><p style="margin:0;">Authorized Signature</p></div>
+        <div style="text-align:right;font-size:13pt;margin-top:14mm;"><p style="margin:0;">Authorized Signature</p></div>
         <hr style="border:none;border-top:1px solid #000;margin-top:4mm;">
     </div><!-- /PRINT PAGE 2 -->
 
@@ -529,12 +535,6 @@
 </script>
 
 <script>
-    /* ── printBothPages ──
-       1. Copy all live values from screen elements → print-wrapper elements
-       2. Show print-wrapper, hide everything else
-       3. window.print()
-       4. Restore screen layout
-    ─────────────────────── */
     function syncField(srcId, dstId) {
         var src = document.getElementById(srcId);
         var dst = document.getElementById(dstId);
