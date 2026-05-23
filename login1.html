@@ -118,6 +118,9 @@ tr:hover td{background:#1e2d4299;}
 .b-purple{background:#2d1b69;color:#a78bfa;}
 .b-gray{background:#1a1a2e;color:#64748b;}
 .sn-cell{font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;color:var(--muted);}
+.sn-input{width:52px;background:#0d1526;border:1.5px solid var(--border);border-radius:6px;padding:.25rem .4rem;color:var(--gold);font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;text-align:center;outline:none;transition:border-color .2s,box-shadow .2s;cursor:text;}
+.sn-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px #F5A62322;}
+.sn-input:hover{border-color:#4a6fa5;}
 .img-preview{width:46px;height:34px;border-radius:6px;object-fit:cover;border:1px solid var(--border);background:#0d1526;}
 .no-img{width:46px;height:34px;border-radius:6px;background:#0d1526;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.65rem;}
 .act-btns{display:flex;gap:.4rem;}
@@ -286,6 +289,10 @@ footer{background:#080c17;border-top:1px solid var(--border);margin-top:3rem;}
       <div class="form-card">
         <div class="form-card-title"><i class="fas fa-plus-circle"></i><span id="masterFormTitle">Add New Bike Model</span></div>
         <div class="frow">
+          <div class="fg">
+            <label>S.N <span>*</span></label>
+            <input type="number" id="mSn" placeholder="e.g. 1" min="1"/>
+          </div>
           <div class="fg" style="grid-column:span 2;">
             <label>Model Name <span>*</span></label>
             <input type="text" id="mName" placeholder="e.g. Pulsar NS200"/>
@@ -360,6 +367,10 @@ footer{background:#080c17;border-top:1px solid var(--border);margin-top:3rem;}
       <div class="form-card">
         <div class="form-card-title"><i class="fas fa-plus-circle"></i> Add Inventory Unit</div>
         <div class="frow">
+          <div class="fg">
+            <label>S.N <span>*</span></label>
+            <input type="number" id="sSn" placeholder="e.g. 1" min="1"/>
+          </div>
           <div class="fg">
             <label>Model <span>*</span></label>
             <select id="stockModelSelect"><option value="">— Select Model —</option></select>
@@ -575,9 +586,15 @@ function renderMasterTable() {
     tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fas fa-motorcycle"></i><p>No models yet. Use the form above to add your first bike.</p></div></td></tr>`;
     return;
   }
-  tbody.innerHTML = allMasterBikes.map((b, i) => `
+  const sorted = [...allMasterBikes].sort((a,b) => (Number(a.sn)||9999) - (Number(b.sn)||9999));
+  tbody.innerHTML = sorted.map((b) => `
     <tr>
-      <td class="sn-cell">${String(i+1).padStart(2,'0')}</td>
+      <td>
+        <input class="sn-input" type="number" value="${b.sn||''}" min="1" placeholder="—"
+          title="Click to edit S.N"
+          onblur="window._saveSn('bikes','${b.id}',this.value)"
+          onkeydown="if(event.key==='Enter'){this.blur();}"/>
+      </td>
       <td>${b.img ? `<img src="${b.img}" class="img-preview" onerror="this.style.display='none'">` : `<div class="no-img"><i class="fas fa-image"></i></div>`}</td>
       <td><span style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:1rem;">${b.name}</span></td>
       <td><span class="badge b-blue">₹${Number(b.price).toLocaleString('en-IN')}</span></td>
