@@ -1,321 +1,1555 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-50">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Go! YNG | Admin Control</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-     <link rel="icon" type="image/png" href="favicon.png">
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.01em; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bajaj Bikes — Admin Panel</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  :root {
+    --bajaj-blue: #003087;
+    --bajaj-red: #E8003D;
+    --bajaj-gold: #F5A623;
+    --bajaj-dark: #0A0E1A;
+    --bajaj-panel: #111827;
+    --bajaj-card: #1a2235;
+    --bajaj-border: #1e3a5f;
+    --bajaj-text: #e2e8f0;
+    --bajaj-muted: #64748b;
+  }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .tab-pane { display: none; }
-        .tab-pane.active { display: block; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  body {
+    font-family: 'Exo 2', sans-serif;
+    background: var(--bajaj-dark);
+    color: var(--bajaj-text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+  /* ========== LOGIN PAGE ========== */
+  #loginPage {
+    min-height: 100vh;
+    display: flex;
+    align-items: stretch;
+  }
 
-        .input-focus:focus {
-            background-color: white;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
+  .login-left {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 3rem;
+    background: linear-gradient(135deg, #003087 0%, #001a4d 60%, #0A0E1A 100%);
+  }
 
-        /* Highlight invalid fields when user tries to submit */
-        input:invalid:focus {
-            border-color: #ef4444;
-            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
-        }
-    </style>
+  .login-left::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80') center/cover no-repeat;
+    opacity: 0.18;
+    mix-blend-mode: luminosity;
+  }
+
+  .login-left::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #003087ee 0%, transparent 60%);
+  }
+
+  .login-brand {
+    position: relative;
+    z-index: 2;
+  }
+
+  .login-brand .logo-ring {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    border: 3px solid var(--bajaj-gold);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 0 32px #F5A62355;
+  }
+
+  .login-brand h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    letter-spacing: 1px;
+  }
+
+  .login-brand h1 span { color: var(--bajaj-gold); }
+
+  .login-brand p {
+    margin-top: 0.8rem;
+    color: #94b8e8;
+    font-size: 0.95rem;
+    max-width: 340px;
+    line-height: 1.6;
+  }
+
+  .bike-silhouette {
+    position: absolute;
+    bottom: 80px;
+    right: -30px;
+    z-index: 1;
+    opacity: 0.13;
+    font-size: 18rem;
+    color: var(--bajaj-gold);
+    transform: scaleX(-1);
+  }
+
+  /* Floating badges */
+  .stat-badge {
+    position: absolute;
+    z-index: 2;
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(245,166,35,0.3);
+    border-radius: 12px;
+    padding: 0.8rem 1.2rem;
+    display: flex; align-items: center; gap: 0.7rem;
+    animation: floatBadge 4s ease-in-out infinite;
+  }
+
+  .stat-badge:nth-child(2) { animation-delay: -2s; top: 20%; left: 10%; }
+  .stat-badge:nth-child(3) { animation-delay: -1s; top: 40%; right: 15%; }
+
+  @keyframes floatBadge {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* Login right */
+  .login-right {
+    width: 480px;
+    min-height: 100vh;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3rem 3.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-right::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #003087 0%, #E8003D 100%);
+    opacity: 0.07;
+  }
+
+  .login-right::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #F5A623 0%, #E8003D 100%);
+    opacity: 0.07;
+  }
+
+  .login-right h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--bajaj-blue);
+    line-height: 1.1;
+  }
+
+  .login-right .subtitle {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+    margin-bottom: 2.2rem;
+  }
+
+  .input-group {
+    position: relative;
+    margin-bottom: 1.4rem;
+  }
+
+  .input-group label {
+    position: absolute;
+    top: -0.55rem;
+    left: 1rem;
+    background: #fff;
+    padding: 0 0.3rem;
+    font-size: 0.75rem;
+    color: var(--bajaj-blue);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    z-index: 1;
+  }
+
+  .input-group input {
+    width: 100%;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 0.9rem 1rem 0.9rem 3rem;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.95rem;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fff;
+  }
+
+  .input-group input:focus {
+    border-color: var(--bajaj-blue);
+    box-shadow: 0 0 0 3px #00308715;
+  }
+
+  .input-group .icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 1rem;
+  }
+
+  .btn-login {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--bajaj-blue) 0%, #0052cc 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 0.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-login::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--bajaj-red) 0%, #cc0033 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .btn-login:hover::after { opacity: 1; }
+  .btn-login span { position: relative; z-index: 1; }
+
+  .divider {
+    display: flex; align-items: center; gap: 1rem;
+    margin: 1.5rem 0;
+    color: #94a3b8;
+    font-size: 0.82rem;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1;
+    height: 1px; background: #e2e8f0;
+  }
+
+  .social-btn {
+    flex: 1;
+    padding: 0.7rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.82rem;
+    color: #475569;
+    font-weight: 500;
+  }
+  .social-btn:hover {
+    border-color: var(--bajaj-blue);
+    background: #f8faff;
+    transform: translateY(-1px);
+  }
+
+  .contact-links {
+    margin-top: 1.8rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .contact-links p { color: #64748b; font-size: 0.82rem; margin-bottom: 0.8rem; }
+
+  .contact-btn {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+    border: none;
+  }
+
+  .whatsapp-btn { background: #25D366; color: #fff; }
+  .gmail-btn { background: #EA4335; color: #fff; }
+  .contact-btn:hover { transform: translateX(4px); opacity: 0.9; }
+
+  .error-msg {
+    color: var(--bajaj-red);
+    font-size: 0.82rem;
+    margin-top: 0.5rem;
+    display: none;
+  }
+
+  /* ========== ADMIN PANEL ========== */
+  #adminPanel { display: none; min-height: 100vh; }
+
+  /* TOP NAV */
+  .top-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: #0d1526;
+    border-bottom: 2px solid var(--bajaj-border);
+    display: flex; align-items: center;
+    padding: 0 2rem;
+    height: 64px;
+    box-shadow: 0 4px 24px #00000040;
+  }
+
+  .nav-brand {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--bajaj-gold);
+    letter-spacing: 1px;
+    display: flex; align-items: center; gap: 0.7rem;
+    margin-right: 2.5rem;
+    white-space: nowrap;
+  }
+
+  .nav-brand i { color: var(--bajaj-red); }
+
+  .nav-links { display: flex; gap: 0.5rem; flex: 1; }
+
+  .nav-link {
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid transparent;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .nav-link.active, .nav-link:hover {
+    color: #fff;
+    background: var(--bajaj-blue);
+    border-color: var(--bajaj-blue);
+  }
+
+  .nav-link.active { background: linear-gradient(135deg, var(--bajaj-blue), #0052cc); }
+
+  .nav-right {
+    display: flex; align-items: center; gap: 1rem;
+    margin-left: auto;
+  }
+
+  .nav-user {
+    display: flex; align-items: center; gap: 0.6rem;
+    background: var(--bajaj-card);
+    border: 1px solid var(--bajaj-border);
+    border-radius: 8px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
+    color: #94b8e8;
+  }
+
+  .btn-logout {
+    background: transparent;
+    border: 1.5px solid var(--bajaj-red);
+    color: var(--bajaj-red);
+    border-radius: 8px;
+    padding: 0.4rem 1rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-logout:hover { background: var(--bajaj-red); color: #fff; }
+
+  /* MAIN CONTENT */
+  .main-content { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+
+  .section-panel { display: none; }
+  .section-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--bajaj-card);
+    border: 1px solid var(--bajaj-border);
+    border-radius: 14px;
+    padding: 1.4rem 1.6rem;
+    display: flex; align-items: center; gap: 1.2rem;
+    transition: transform 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-3px); }
+
+  .stat-icon {
+    width: 50px; height: 50px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+  }
+
+  .stat-card .val {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .stat-card .lbl { font-size: 0.78rem; color: var(--bajaj-muted); margin-top: 0.2rem; }
+
+  /* TABLE WRAPPER */
+  .table-wrap {
+    background: var(--bajaj-card);
+    border: 1px solid var(--bajaj-border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .table-header {
+    padding: 1.4rem 1.8rem;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--bajaj-border);
+  }
+
+  .table-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+
+  .table-title i { color: var(--bajaj-gold); }
+
+  .btn-add {
+    background: linear-gradient(135deg, var(--bajaj-blue) 0%, #0052cc 100%);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    padding: 0.6rem 1.3rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .btn-add:hover { transform: translateY(-1px); box-shadow: 0 4px 16px #003087aa; }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  th {
+    background: #0d1526;
+    padding: 0.9rem 1.2rem;
+    text-align: left;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--bajaj-gold);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.9rem 1.2rem;
+    font-size: 0.88rem;
+    color: var(--bajaj-text);
+    border-bottom: 1px solid #1e2d42;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr:hover td { background: #1e2d4299; }
+
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 0.25rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-blue { background: #003087; color: #7ec8e3; }
+  .badge-green { background: #064e3b; color: #34d399; }
+  .badge-gold { background: #451a03; color: var(--bajaj-gold); }
+
+  .sn-cell {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--bajaj-muted);
+  }
+
+  .img-preview {
+    width: 46px; height: 34px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid var(--bajaj-border);
+    background: #0d1526;
+  }
+
+  .no-img {
+    width: 46px; height: 34px;
+    border-radius: 6px;
+    background: #0d1526;
+    border: 1px dashed var(--bajaj-border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--bajaj-muted);
+    font-size: 0.65rem;
+  }
+
+  .action-btns { display: flex; gap: 0.4rem; }
+
+  .btn-edit {
+    background: transparent;
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+    border-radius: 6px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Exo 2', sans-serif;
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+
+  .btn-edit:hover { background: #3b82f6; color: #fff; }
+
+  .btn-del {
+    background: transparent;
+    border: 1px solid var(--bajaj-red);
+    color: var(--bajaj-red);
+    border-radius: 6px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Exo 2', sans-serif;
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+
+  .btn-del:hover { background: var(--bajaj-red); color: #fff; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: #00000088;
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bajaj-panel);
+    border: 1px solid var(--bajaj-border);
+    border-radius: 18px;
+    padding: 2rem 2.2rem;
+    width: 100%;
+    max-width: 580px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 0.6rem;
+    border-bottom: 1px solid var(--bajaj-border);
+    padding-bottom: 1rem;
+  }
+
+  .modal-title i { color: var(--bajaj-gold); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .form-row.single { grid-template-columns: 1fr; }
+
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+
+  .form-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--bajaj-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-group label span { color: var(--bajaj-red); }
+
+  .form-group input, .form-group select {
+    background: #0d1526;
+    border: 1.5px solid var(--bajaj-border);
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+    color: var(--bajaj-text);
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--bajaj-blue);
+  }
+
+  .form-group select option { background: #0d1526; }
+
+  .modal-footer {
+    display: flex; gap: 0.8rem; justify-content: flex-end;
+    margin-top: 1.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--bajaj-border);
+  }
+
+  .btn-cancel {
+    background: transparent;
+    border: 1.5px solid var(--bajaj-border);
+    color: var(--bajaj-muted);
+    border-radius: 9px;
+    padding: 0.6rem 1.4rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-cancel:hover { border-color: var(--bajaj-red); color: var(--bajaj-red); }
+
+  .btn-save {
+    background: linear-gradient(135deg, var(--bajaj-blue), #0052cc);
+    border: none;
+    color: #fff;
+    border-radius: 9px;
+    padding: 0.6rem 1.6rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+
+  .btn-save:hover { box-shadow: 0 4px 20px #003087aa; transform: translateY(-1px); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 2rem; right: 2rem;
+    background: var(--bajaj-card);
+    border: 1px solid var(--bajaj-border);
+    border-left: 4px solid var(--bajaj-gold);
+    border-radius: 10px;
+    padding: 1rem 1.4rem;
+    font-size: 0.88rem;
+    color: #fff;
+    z-index: 300;
+    display: none;
+    box-shadow: 0 8px 32px #00000060;
+    min-width: 240px;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* FOOTER */
+  footer {
+    background: #080c17;
+    border-top: 1px solid var(--bajaj-border);
+    padding: 0;
+    margin-top: 3rem;
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 2.5rem;
+    padding: 3rem 3rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .footer-brand-logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--bajaj-gold);
+    letter-spacing: 1px;
+    display: flex; align-items: center; gap: 0.7rem;
+    margin-bottom: 1rem;
+  }
+
+  .footer-brand-logo i { color: var(--bajaj-red); }
+
+  .footer-brand p {
+    color: #64748b;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    max-width: 280px;
+    margin-bottom: 1.4rem;
+  }
+
+  .footer-social { display: flex; gap: 0.6rem; }
+
+  .fsocial {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .fsocial-wa { background: #25D36622; color: #25D366; border: 1px solid #25D36644; }
+  .fsocial-gm { background: #EA433522; color: #EA4335; border: 1px solid #EA433544; }
+  .fsocial-tw { background: #1DA1F222; color: #1DA1F2; border: 1px solid #1DA1F244; }
+  .fsocial:hover { transform: translateY(-3px); }
+
+  .footer-col h4 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--bajaj-gold);
+    letter-spacing: 0.5px;
+    margin-bottom: 1.2rem;
+    text-transform: uppercase;
+  }
+
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+
+  .footer-col ul li {
+    color: #64748b;
+    font-size: 0.83rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .footer-col ul li:hover { color: var(--bajaj-text); }
+  .footer-col ul li i { font-size: 0.7rem; color: var(--bajaj-muted); }
+
+  .footer-contact-item {
+    display: flex; align-items: flex-start; gap: 0.7rem;
+    color: #64748b;
+    font-size: 0.83rem;
+    margin-bottom: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .footer-contact-item i { color: var(--bajaj-gold); margin-top: 0.1rem; font-size: 0.85rem; }
+
+  .footer-bottom {
+    border-top: 1px solid var(--bajaj-border);
+    padding: 1.2rem 3rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .footer-bottom p { color: #475569; font-size: 0.78rem; }
+  .footer-bottom span { color: var(--bajaj-gold); }
+
+  .footer-bottom-links { display: flex; gap: 1.5rem; }
+  .footer-bottom-links a { color: #475569; font-size: 0.78rem; text-decoration: none; transition: color 0.2s; }
+  .footer-bottom-links a:hover { color: var(--bajaj-text); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 4rem;
+    color: var(--bajaj-muted);
+  }
+
+  .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+  .empty-state p { font-size: 0.9rem; }
+
+  /* Required star */
+  .req { color: var(--bajaj-red); }
+
+  @media(max-width: 900px) {
+    .login-left { display: none; }
+    .login-right { width: 100%; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media(max-width: 600px) {
+    .stats-row { grid-template-columns: 1fr; }
+    .footer-top { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
-<body class="h-full text-slate-800 antialiased">
+<body>
 
-<section id="login-section" class="min-h-screen flex items-center justify-center relative bg-[#0f172a]">
-    <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div class="absolute -top-[20%] -left-[10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px]"></div>
-        <div class="absolute -bottom-[20%] -right-[10%] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px]"></div>
+<!-- ===== LOGIN PAGE ===== -->
+<div id="loginPage">
+  <!-- LEFT PANEL -->
+  <div class="login-left">
+    <div class="stat-badge" style="top:18%;left:8%;">
+      <i class="fas fa-motorcycle" style="color:#F5A623;font-size:1.2rem;"></i>
+      <div>
+        <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#fff;font-size:1rem;">500+</div>
+        <div style="font-size:0.7rem;color:#94b8e8;">Bikes in Stock</div>
+      </div>
+    </div>
+    <div class="stat-badge" style="top:38%;right:12%;">
+      <i class="fas fa-chart-line" style="color:#34d399;font-size:1.2rem;"></i>
+      <div>
+        <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#fff;font-size:1rem;">₹2.1Cr</div>
+        <div style="font-size:0.7rem;color:#94b8e8;">Monthly Revenue</div>
+      </div>
+    </div>
+    <i class="fas fa-motorcycle bike-silhouette"></i>
+    <div class="login-brand">
+      <div class="logo-ring">
+        <i class="fas fa-motorcycle" style="color:var(--bajaj-gold);font-size:1.8rem;"></i>
+      </div>
+      <h1>BAJAJ <span>BIKES</span></h1>
+      <p>Admin Control Panel — Manage your entire inventory, pricing & dealership operations from one place.</p>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="login-right">
+    <div style="margin-bottom:0.5rem;">
+      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1.5rem;">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--bajaj-red);"></div>
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--bajaj-gold);"></div>
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--bajaj-blue);"></div>
+      </div>
+      <h2>Admin Login</h2>
+      <p class="subtitle">Sign in to your dealership dashboard</p>
     </div>
 
-    <div class="glass w-full max-w-md rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-10 z-10 mx-4 relative overflow-hidden">
-        <div class="text-center mb-10">
-            <div class="inline-flex p-4 rounded-3xl bg-white shadow-sm mb-6">
-                <img class="h-10 w-auto" src="favicon.png" alt="Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/8163/8163149.png'">
-            </div>
-            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Go! YNG Admin</h2>
-            <p class="text-slate-500 mt-2 font-medium">Welcome Back</p>
-        </div>
-
-        <div class="space-y-6">
-            <div class="group">
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Access <span class="text-red-500">*</span></label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-300 group-focus-within:text-blue-500 transition-colors">
-                        <i class="fa fa-envelope"></i>
-                    </span>
-                    <input type="email" id="email" required class="w-full pl-11 pr-4 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none transition-all input-focus font-medium" placeholder="admin@example.com">
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Security Key <span class="text-red-500">*</span></label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-300 group-focus-within:text-blue-500 transition-colors">
-                        <i class="fa fa-lock"></i>
-                    </span>
-                    <input type="password" id="pass" required class="w-full pl-11 pr-4 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none transition-all input-focus font-medium" placeholder="••••••••">
-                </div>
-            </div>
-        </div>
-
-        <button id="loginBtn" class="w-full mt-10 bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all transform active:scale-[0.98] flex items-center justify-center gap-3">
-        Sign In <i class="fa fa-shield-halved opacity-50 text-sm"></i>
-        </button>
-
-        <div class="mt-8 pt-8 border-t border-slate-100 text-center">
-             <button id="googleBtn" class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-sm">
-                <img src="https://img.icons8.com/color/24/000000/google-logo.png" class="w-5 h-5">
-                Sign in with Google
-            </button>
-        </div>
+    <div class="input-group">
+      <label>Email ID</label>
+      <i class="fas fa-envelope icon"></i>
+      <input type="email" id="loginEmail" placeholder="admin@bajaj.com"/>
     </div>
-</section>
 
+    <div class="input-group">
+      <label>Password</label>
+      <i class="fas fa-lock icon"></i>
+      <input type="password" id="loginPass" placeholder="••••••••••••"/>
+    </div>
 
-<section id="admin-section" style="display:none;" class="min-h-screen flex flex-col">
-    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 sticky top-0 z-50">
-        <div class="max-w-[1400px] mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-5">
-                <div class="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
-                    <i class="fa fa-layer-group"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-extrabold text-slate-900 leading-none">Go! YNG Console</h1>
-                    <p id="currentDate" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1"></p>
-                </div>
-            </div>
+    <div style="text-align:right;margin-bottom:1rem;">
+      <a href="#" style="font-size:0.8rem;color:#003087;text-decoration:none;" onclick="alert('Contact admin to reset password')">Forgot your password?</a>
+    </div>
 
-            <div class="flex items-center gap-6">
-                <div class="text-right">
-                    <p id="headerUserName" class="text-sm font-bold text-slate-900"></p>
-                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> SYSTEM ACTIVE
-                    </span>
-                </div>
-                <button id="logoutBtn" class="h-11 w-11 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all border border-slate-100">
-                    <i class="fa fa-power-off"></i>
-                </button>
-            </div>
+    <p class="error-msg" id="loginError"><i class="fas fa-circle-exclamation"></i> Invalid email or password</p>
+
+    <button class="btn-login" onclick="doLogin()"><span><i class="fas fa-right-to-bracket"></i> SIGN IN TO PANEL</span></button>
+
+    <div class="divider">OR SIGN IN WITH</div>
+
+    <div style="display:flex;gap:0.8rem;margin-bottom:0.5rem;">
+      <button class="social-btn"><img src="https://www.google.com/favicon.ico" width="16"/> Google</button>
+      <button class="social-btn"><i class="fab fa-facebook" style="color:#1877F2;"></i> Facebook</button>
+      <button class="social-btn"><i class="fab fa-apple" style="color:#111;"></i> Apple</button>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="contact-links">
+      <p><i class="fas fa-headset"></i> &nbsp;Need help? Contact support to get new ID</p>
+      <a class="contact-btn whatsapp-btn" href="https://wa.me/919876543210?text=Hi%2C%20I%20need%20a%20new%20admin%20ID%20for%20Bajaj%20Bikes%20panel" target="_blank">
+        <i class="fab fa-whatsapp fa-lg"></i> WhatsApp Support
+      </a>
+      <a class="contact-btn gmail-btn" href="mailto:bajajadmin@gmail.com?subject=New%20Admin%20ID%20Request&body=Hello%2C%20I%20need%20a%20new%20admin%20ID%20for%20the%20Bajaj%20Bikes%20panel." target="_blank">
+        <i class="fas fa-envelope fa-lg"></i> Email via Gmail
+      </a>
+    </div>
+    <p style="font-size:0.7rem;color:#cbd5e1;margin-top:1rem;text-align:center;">Demo: admin@bajaj.com / admin123</p>
+  </div>
+</div>
+
+<!-- ===== ADMIN PANEL ===== -->
+<div id="adminPanel">
+
+  <!-- TOP NAV -->
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <i class="fas fa-motorcycle"></i> BAJAJ <span style="color:#fff;margin:0 0.2rem;">ADMIN</span>
+    </div>
+    <div class="nav-links">
+      <div class="nav-link active" id="navPriceList" onclick="switchSection('priceList')">
+        <i class="fas fa-tags"></i> Price List
+      </div>
+      <div class="nav-link" id="navInventory" onclick="switchSection('inventory')">
+        <i class="fas fa-warehouse"></i> Inventory
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-user">
+        <i class="fas fa-user-shield" style="color:var(--bajaj-gold);"></i>
+        <span id="adminName">Admin</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()"><i class="fas fa-right-from-bracket"></i> Logout</button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- PRICE LIST SECTION -->
+    <div class="section-panel active" id="sectionPriceList">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#003087;">
+            <i class="fas fa-motorcycle" style="color:var(--bajaj-gold);"></i>
+          </div>
+          <div>
+            <div class="val" id="statModels">0</div>
+            <div class="lbl">Total Models</div>
+          </div>
         </div>
-    </header>
-
-    <nav class="bg-white border-b border-slate-200 px-8">
-        <div class="max-w-[1400px] mx-auto flex gap-10">
-            <button class="nav-item active border-b-4 border-blue-600 text-blue-600 py-5 font-extrabold text-sm transition-all" onclick="switchTab('tab-price', this)">
-                <i class="fa fa-receipt mr-2 opacity-50"></i> Master Pricing
-            </button>
-            <button class="nav-item border-b-4 border-transparent text-slate-400 hover:text-slate-600 py-5 font-extrabold text-sm transition-all" onclick="switchTab('tab-stock', this)">
-                <i class="fa fa-warehouse mr-2 opacity-50"></i> Inventory Management
-            </button>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#064e3b;">
+            <i class="fas fa-rupee-sign" style="color:#34d399;"></i>
+          </div>
+          <div>
+            <div class="val" id="statAvgPrice">—</div>
+            <div class="lbl">Avg. Price</div>
+          </div>
         </div>
-    </nav>
-
-    <main class="flex-1 p-8 max-w-[1400px] mx-auto w-full">
-
-        <div id="tab-price" class="tab-pane active space-y-8">
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                <form id="masterForm" class="xl:col-span-1 bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8 h-fit">
-                    <h3 class="text-xl font-extrabold text-slate-900 mb-6 flex items-center gap-3">
-                        <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-sm">
-                            <i class="fa fa-plus"></i>
-                        </span>
-                        Add New Model
-                    </h3>
-                    
-                    <div class="space-y-5">
-                        <div class="space-y-2">
-                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">S.N <span class="text-red-500">*</span></label>
-                            <input type="text" id="sn" required class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="S.N">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Model Name <span class="text-red-500">*</span></label>
-                            <input type="text" id="mName" required class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="Enter Model">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">MRP <span class="text-red-500">*</span></label>
-                                <input type="number" id="mPrice" required class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="0">
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Cash Ins. <span class="text-red-500">*</span></label>
-                                <input type="number" id="mNormalIns" required class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="0">
-                            </div>
-                        </div>
-
-                        <div class="space-y-2">
-                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Finance Ins. <span class="text-red-500">*</span></label>
-                            <input type="number" id="mFinanceIns" required class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold" placeholder="0">
-                        </div>
-
-                        <div class="space-y-2">
-                            <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Image URL <span class="text-red-500">*</span></label>
-                            <input type="text" id="mImg" required class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-semibold text-xs" placeholder="https://image-link.com">
-                        </div>
-
-                        <button type="button" id="saveModelBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-blue-100 mt-4">
-                            Update Master List
-                        </button>
-                    </div>
-                </form>
-
-                <div class="xl:col-span-2 bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="p-8 border-b border-slate-100 flex justify-between items-center">
-                        <h3 class="font-extrabold text-slate-900 text-lg">Price Master Index</h3>
-                        <span class="text-xs font-bold text-slate-400 px-3 py-1 bg-slate-50 rounded-lg">Live Sync</span>
-                    </div>
-                    <div class="overflow-x-auto p-4">
-                        <table class="w-full text-left border-separate border-spacing-y-2">
-                            <thead>
-                                <tr class="text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.2em]">
-                                    <th class="px-6 py-4">Image</th>
-                                    <th class="px-6 py-4">Model</th>
-<th class="px-6 py-4">Price</th>
-                                    <th class="px-6 py-4 text-center">insurance</th>
-<th class="px-6 py-4">Finance Ins.</th>
-<th class="px-6 py-4">manage</th>
-                                </tr>
-                            </thead>
-                            <tbody id="masterTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#451a03;">
+            <i class="fas fa-shield-halved" style="color:var(--bajaj-gold);"></i>
+          </div>
+          <div>
+            <div class="val" id="statInsured">0</div>
+            <div class="lbl">With Insurance</div>
+          </div>
         </div>
-
-        <div id="tab-stock" class="tab-pane space-y-8">
-            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
-                        <i class="fa fa-plus-circle"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-extrabold text-slate-900">Receive New Stock</h3>
-                        <p class="text-sm text-slate-500 font-medium">Pricing inherits from Master List</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Model <span class="text-red-500">*</span></label>
-                        <select id="stockModelSelect" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold appearance-none">
-                            <option value="">Select...</option>
-                        </select>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Reg No <span class="text-red-500">*</span></label>
-                        <input type="text" id="sRegNo" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Chassis <span class="text-red-500">*</span></label>
-                        <input type="text" id="sChassis" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Engine <span class="text-red-500">*</span></label>
-                        <input type="text" id="sEngine" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Color <span class="text-red-500">*</span></label>
-                        <input type="text" id="sColor" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none input-focus font-bold">
-                    </div>
-                </div>
-                <div class="mt-8 flex justify-end">
-                    <button type="button" id="saveStockBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-4 rounded-2xl font-bold shadow-lg shadow-emerald-100 transition-all flex items-center gap-2">
-                        <i class="fa fa-check-circle"></i> Commit to Inventory
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto p-4">
-                    <table class="w-full text-left border-separate border-spacing-y-2">
-                        <thead class="text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.2em]">
-                            <tr>
-                                <th class="px-6 py-4">Model</th>
-                                <th class="px-6 py-4">Price</th>
-                                <th class="px-6 py-4">Chassis</th>
-                                <th class="px-6 py-4 text-center">Engine</th>
-<th class="px-6 py-4 text-center">Registration No.</th>
-<th class="px-6 py-4 text-center">Colour</th>
-<th class="px-6 py-4 text-center">Delete</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stockTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#2d1b69;">
+            <i class="fas fa-file-invoice-dollar" style="color:#a78bfa;"></i>
+          </div>
+          <div>
+            <div class="val" id="statFinance">0</div>
+            <div class="lbl">Finance Available</div>
+          </div>
         </div>
+      </div>
 
-    </main>
-</section>
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title"><i class="fas fa-tags"></i> Bike Price List</div>
+          <button class="btn-add" onclick="openPriceModal()"><i class="fas fa-plus"></i> Add Model</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="priceTable">
+            <thead>
+              <tr>
+                <th>S.N</th>
+                <th>Image</th>
+                <th>Model Name</th>
+                <th>Price (₹)</th>
+                <th>Insurance</th>
+                <th>Finance Ins.</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="priceTableBody">
+              <tr id="priceEmptyRow">
+                <td colspan="7">
+                  <div class="empty-state">
+                    <i class="fas fa-motorcycle"></i>
+                    <p>No models added yet. Click <strong>Add Model</strong> to begin.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-<script type="module" src="login1.js"></script>
+    <!-- INVENTORY SECTION -->
+    <div class="section-panel" id="sectionInventory">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#003087;">
+            <i class="fas fa-warehouse" style="color:var(--bajaj-gold);"></i>
+          </div>
+          <div>
+            <div class="val" id="statInvTotal">0</div>
+            <div class="lbl">Total Units</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#064e3b;">
+            <i class="fas fa-check-circle" style="color:#34d399;"></i>
+          </div>
+          <div>
+            <div class="val" id="statInvReg">0</div>
+            <div class="lbl">Registered</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#451a03;">
+            <i class="fas fa-hourglass-half" style="color:var(--bajaj-gold);"></i>
+          </div>
+          <div>
+            <div class="val" id="statInvPending">0</div>
+            <div class="lbl">Pending Reg.</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#1a1035;">
+            <i class="fas fa-palette" style="color:#a78bfa;"></i>
+          </div>
+          <div>
+            <div class="val" id="statInvColors">0</div>
+            <div class="lbl">Colour Variants</div>
+          </div>
+        </div>
+      </div>
 
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title"><i class="fas fa-warehouse"></i> Inventory Records</div>
+          <button class="btn-add" onclick="openInvModal()"><i class="fas fa-plus"></i> Add Unit</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="invTable">
+            <thead>
+              <tr>
+                <th>S.N</th>
+                <th>Model</th>
+                <th>Price (₹)</th>
+                <th>Chassis No</th>
+                <th>Engine No</th>
+                <th>Reg. No</th>
+                <th>Colour</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="invTableBody">
+              <tr id="invEmptyRow">
+                <td colspan="8">
+                  <div class="empty-state">
+                    <i class="fas fa-warehouse"></i>
+                    <p>No inventory records yet. Click <strong>Add Unit</strong> to start.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-brand-logo"><i class="fas fa-motorcycle"></i> BAJAJ BIKES</div>
+        <p>Your trusted Bajaj dealership. Premium bikes, competitive pricing, and complete post-sale support — all managed from one powerful admin dashboard.</p>
+        <div class="footer-social">
+          <a class="fsocial fsocial-wa" href="https://wa.me/919876543210" target="_blank"><i class="fab fa-whatsapp"></i></a>
+          <a class="fsocial fsocial-gm" href="mailto:bajajadmin@gmail.com" target="_blank"><i class="fas fa-envelope"></i></a>
+          <a class="fsocial fsocial-tw" href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Nav</h4>
+        <ul>
+          <li onclick="switchSection('priceList')"><i class="fas fa-chevron-right"></i> Price List</li>
+          <li onclick="switchSection('inventory')"><i class="fas fa-chevron-right"></i> Inventory</li>
+          <li onclick="openPriceModal()"><i class="fas fa-chevron-right"></i> Add Model</li>
+          <li onclick="openInvModal()"><i class="fas fa-chevron-right"></i> Add Unit</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Bajaj Models</h4>
+        <ul>
+          <li><i class="fas fa-circle-dot"></i> Pulsar Series</li>
+          <li><i class="fas fa-circle-dot"></i> Dominar Series</li>
+          <li><i class="fas fa-circle-dot"></i> CT Series</li>
+          <li><i class="fas fa-circle-dot"></i> Platina Series</li>
+          <li><i class="fas fa-circle-dot"></i> Avenger Series</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <div class="footer-contact-item">
+          <i class="fab fa-whatsapp"></i>
+          <span>+91 98765 43210</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-envelope"></i>
+          <span>bajajadmin@gmail.com</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Bajaj Showroom, Main Road, Your City</span>
+        </div>
+        <div class="footer-contact-item">
+          <i class="fas fa-clock"></i>
+          <span>Mon–Sat: 9 AM – 7 PM</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom" style="max-width:100%;padding:1.2rem 3rem;">
+      <p>&copy; 2026 <span>Bajaj Bikes Admin Panel</span>. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Support</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ===== PRICE LIST MODAL ===== -->
+<div class="modal-overlay" id="priceModal">
+  <div class="modal">
+    <div class="modal-title">
+      <i class="fas fa-tags"></i>
+      <span id="priceModalTitle">Add New Model</span>
+    </div>
+    <input type="hidden" id="priceEditId"/>
+    <div class="form-row single">
+      <div class="form-group">
+        <label>Model Name <span>*</span></label>
+        <input type="text" id="pModelName" placeholder="e.g. Pulsar NS200"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Price (₹) <span>*</span></label>
+        <input type="number" id="pPrice" placeholder="e.g. 145000"/>
+      </div>
+      <div class="form-group">
+        <label>Insurance (₹) <span>*</span></label>
+        <input type="number" id="pInsurance" placeholder="e.g. 8500"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Finance Insurance (₹) <span>*</span></label>
+        <input type="number" id="pFinance" placeholder="e.g. 3200"/>
+      </div>
+      <div class="form-group">
+        <label>Image URL <small style="color:var(--bajaj-muted);">(optional)</small></label>
+        <input type="text" id="pImage" placeholder="https://...image.jpg"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('priceModal')">Cancel</button>
+      <button class="btn-save" onclick="savePriceEntry()"><i class="fas fa-floppy-disk"></i> Save Model</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== INVENTORY MODAL ===== -->
+<div class="modal-overlay" id="invModal">
+  <div class="modal">
+    <div class="modal-title">
+      <i class="fas fa-warehouse"></i>
+      <span id="invModalTitle">Add Inventory Unit</span>
+    </div>
+    <input type="hidden" id="invEditId"/>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Model <span>*</span></label>
+        <select id="iModel">
+          <option value="">— Select Model —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Price (₹) <span>*</span></label>
+        <input type="number" id="iPrice" placeholder="Auto-fills or custom"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Chassis No <span>*</span></label>
+        <input type="text" id="iChassis" placeholder="MD2A12EY..."/>
+      </div>
+      <div class="form-group">
+        <label>Engine No <span>*</span></label>
+        <input type="text" id="iEngine" placeholder="BSVI2024..."/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Registration No <span>*</span></label>
+        <input type="text" id="iRegNo" placeholder="MH12AB1234"/>
+      </div>
+      <div class="form-group">
+        <label>Colour <span>*</span></label>
+        <input type="text" id="iColour" placeholder="e.g. Fiery Orange"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('invModal')">Cancel</button>
+      <button class="btn-save" onclick="saveInvEntry()"><i class="fas fa-floppy-disk"></i> Save Unit</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><i class="fas fa-circle-check" style="color:var(--bajaj-gold);margin-right:0.5rem;"></i><span id="toastMsg"></span></div>
+
+    <script type="module" src="login.js"></script>
 <script>
-    // Tab Switching Logic
-    function switchTab(id, el) {
-        document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.classList.remove('active', 'border-blue-600', 'text-blue-600');
-            btn.classList.add('text-slate-400', 'border-transparent');
-        });
-        document.getElementById(id).classList.add('active');
-        el.classList.add('active', 'border-blue-600', 'text-blue-600');
-        el.classList.remove('text-slate-400', 'border-transparent');
+// ---- AUTH ----
+const ADMIN = { email: 'admin@bajaj.com', pass: 'admin123' };
+
+function doLogin() {
+  const e = document.getElementById('loginEmail').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  const err = document.getElementById('loginError');
+  if (e === ADMIN.email && p === ADMIN.pass) {
+    err.style.display = 'none';
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('adminName').textContent = 'Admin';
+    updatePriceStats();
+    updateInvStats();
+  } else {
+    err.style.display = 'block';
+  }
+}
+
+function doLogout() {
+  document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+// Enter key login
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') doLogin();
+});
+
+// ---- NAV ----
+function switchSection(sec) {
+  document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  if (sec === 'priceList') {
+    document.getElementById('sectionPriceList').classList.add('active');
+    document.getElementById('navPriceList').classList.add('active');
+  } else {
+    document.getElementById('sectionInventory').classList.add('active');
+    document.getElementById('navInventory').classList.add('active');
+    populateModelDropdown();
+  }
+}
+
+// ---- DATA STORE ----
+let priceList = [];
+let inventory = [];
+let pidCounter = 1;
+let iidCounter = 1;
+
+// ---- PRICE LIST ----
+function openPriceModal(id = null) {
+  clearForm('price');
+  document.getElementById('priceEditId').value = id || '';
+  document.getElementById('priceModalTitle').textContent = id ? 'Edit Model' : 'Add New Model';
+  if (id) {
+    const item = priceList.find(x => x.id === id);
+    if (item) {
+      document.getElementById('pModelName').value = item.modelName;
+      document.getElementById('pPrice').value = item.price;
+      document.getElementById('pInsurance').value = item.insurance;
+      document.getElementById('pFinance').value = item.finance;
+      document.getElementById('pImage').value = item.imageUrl || '';
     }
+  }
+  document.getElementById('priceModal').classList.add('open');
+}
 
-    // Manual Validation Gatekeeper
-    // This ensures your save buttons don't fire if inputs are empty
-    function validateSection(sectionId) {
-        const inputs = document.querySelectorAll(`#${sectionId} [required]`);
-        let allValid = true;
-        inputs.forEach(input => {
-            if (!input.value.trim()) {
-                input.classList.add('border-red-500', 'bg-red-50');
-                allValid = false;
-            } else {
-                input.classList.remove('border-red-500', 'bg-red-50');
-            }
-        });
-        return allValid;
+function savePriceEntry() {
+  const modelName = document.getElementById('pModelName').value.trim();
+  const price = document.getElementById('pPrice').value.trim();
+  const insurance = document.getElementById('pInsurance').value.trim();
+  const finance = document.getElementById('pFinance').value.trim();
+  const imageUrl = document.getElementById('pImage').value.trim();
+  const editId = document.getElementById('priceEditId').value;
+
+  if (!modelName || !price || !insurance || !finance) {
+    showToast('Please fill all required fields!', 'error'); return;
+  }
+
+  const entry = { id: editId || 'P' + pidCounter++, modelName, price: parseFloat(price), insurance: parseFloat(insurance), finance: parseFloat(finance), imageUrl };
+
+  if (editId) {
+    const idx = priceList.findIndex(x => x.id === editId);
+    if (idx >= 0) priceList[idx] = entry;
+    showToast('Model updated successfully!');
+  } else {
+    priceList.push(entry);
+    showToast('Model added successfully!');
+  }
+
+  closeModal('priceModal');
+  renderPriceTable();
+  updatePriceStats();
+}
+
+function renderPriceTable() {
+  const tbody = document.getElementById('priceTableBody');
+  document.getElementById('priceEmptyRow').style.display = priceList.length ? 'none' : '';
+  const rows = priceList.map((item, i) => `
+    <tr>
+      <td class="sn-cell">${String(i+1).padStart(2,'0')}</td>
+      <td>${item.imageUrl ? `<img src="${item.imageUrl}" class="img-preview" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="no-img" style="display:none"><i class='fas fa-image'></i></div>` : `<div class='no-img'><i class='fas fa-image'></i></div>`}</td>
+      <td><span style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:1rem;">${item.modelName}</span></td>
+      <td><span class="badge badge-blue">₹${item.price.toLocaleString('en-IN')}</span></td>
+      <td><span class="badge badge-green">₹${item.insurance.toLocaleString('en-IN')}</span></td>
+      <td><span class="badge badge-gold">₹${item.finance.toLocaleString('en-IN')}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-edit" onclick="openPriceModal('${item.id}')"><i class="fas fa-pen"></i> Edit</button>
+          <button class="btn-del" onclick="deletePrice('${item.id}')"><i class="fas fa-trash"></i> Del</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+  tbody.innerHTML = `<tr id="priceEmptyRow" style="display:${priceList.length ? 'none' : ''}"><td colspan="7"><div class="empty-state"><i class="fas fa-motorcycle"></i><p>No models added yet. Click <strong>Add Model</strong> to begin.</p></div></td></tr>` + rows;
+}
+
+function deletePrice(id) {
+  if (!confirm('Delete this model?')) return;
+  priceList = priceList.filter(x => x.id !== id);
+  renderPriceTable();
+  updatePriceStats();
+  showToast('Model removed.');
+}
+
+function updatePriceStats() {
+  document.getElementById('statModels').textContent = priceList.length;
+  if (priceList.length) {
+    const avg = priceList.reduce((s, x) => s + x.price, 0) / priceList.length;
+    document.getElementById('statAvgPrice').textContent = '₹' + Math.round(avg).toLocaleString('en-IN');
+  } else {
+    document.getElementById('statAvgPrice').textContent = '—';
+  }
+  document.getElementById('statInsured').textContent = priceList.filter(x => x.insurance > 0).length;
+  document.getElementById('statFinance').textContent = priceList.filter(x => x.finance > 0).length;
+}
+
+// ---- INVENTORY ----
+function populateModelDropdown() {
+  const sel = document.getElementById('iModel');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Select Model —</option>' + priceList.map(m =>
+    `<option value="${m.id}" data-price="${m.price}">${m.modelName}</option>`
+  ).join('');
+  if (cur) sel.value = cur;
+}
+
+document.addEventListener('change', e => {
+  if (e.target.id === 'iModel') {
+    const opt = e.target.selectedOptions[0];
+    if (opt && opt.dataset.price) document.getElementById('iPrice').value = opt.dataset.price;
+    else document.getElementById('iPrice').value = '';
+  }
+});
+
+function openInvModal(id = null) {
+  clearForm('inv');
+  populateModelDropdown();
+  document.getElementById('invEditId').value = id || '';
+  document.getElementById('invModalTitle').textContent = id ? 'Edit Inventory Unit' : 'Add Inventory Unit';
+  if (id) {
+    const item = inventory.find(x => x.id === id);
+    if (item) {
+      document.getElementById('iModel').value = item.modelId;
+      document.getElementById('iPrice').value = item.price;
+      document.getElementById('iChassis').value = item.chassis;
+      document.getElementById('iEngine').value = item.engine;
+      document.getElementById('iRegNo').value = item.regNo;
+      document.getElementById('iColour').value = item.colour;
     }
+  }
+  document.getElementById('invModal').classList.add('open');
+}
 
-    // Hooking into your buttons
-    document.getElementById('saveModelBtn').addEventListener('mousedown', function(e) {
-        if(!validateSection('tab-price')) {
-            e.stopImmediatePropagation(); // Stops login.js from running
-            alert('Please fill all required fields in the Price Setup form.');
-        }
-    });
+function saveInvEntry() {
+  const modelId = document.getElementById('iModel').value;
+  const price = document.getElementById('iPrice').value.trim();
+  const chassis = document.getElementById('iChassis').value.trim();
+  const engine = document.getElementById('iEngine').value.trim();
+  const regNo = document.getElementById('iRegNo').value.trim();
+  const colour = document.getElementById('iColour').value.trim();
+  const editId = document.getElementById('invEditId').value;
 
-    document.getElementById('saveStockBtn').addEventListener('mousedown', function(e) {
-        if(!validateSection('tab-stock')) {
-            e.stopImmediatePropagation(); // Stops login.js from running
-            alert('Please fill all required fields in the Stock entry form.');
-        }
-    });
+  if (!modelId || !price || !chassis || !engine || !regNo || !colour) {
+    showToast('Please fill all required fields!', 'error'); return;
+  }
+
+  const model = priceList.find(x => x.id === modelId);
+  const entry = {
+    id: editId || 'I' + iidCounter++,
+    modelId, modelName: model ? model.modelName : '—',
+    price: parseFloat(price), chassis, engine, regNo, colour
+  };
+
+  if (editId) {
+    const idx = inventory.findIndex(x => x.id === editId);
+    if (idx >= 0) inventory[idx] = entry;
+    showToast('Unit updated!');
+  } else {
+    inventory.push(entry);
+    showToast('Unit added to inventory!');
+  }
+
+  closeModal('invModal');
+  renderInvTable();
+  updateInvStats();
+}
+
+function renderInvTable() {
+  const tbody = document.getElementById('invTableBody');
+  const rows = inventory.map((item, i) => `
+    <tr>
+      <td class="sn-cell">${String(i+1).padStart(2,'0')}</td>
+      <td><span style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:1rem;">${item.modelName}</span></td>
+      <td><span class="badge badge-blue">₹${item.price.toLocaleString('en-IN')}</span></td>
+      <td><code style="font-size:0.8rem;color:#94b8e8;">${item.chassis}</code></td>
+      <td><code style="font-size:0.8rem;color:#94b8e8;">${item.engine}</code></td>
+      <td>${item.regNo ? `<span class="badge badge-green">${item.regNo}</span>` : `<span class="badge" style="background:#1a1a2e;color:#64748b;">Pending</span>`}</td>
+      <td>
+        <span style="display:inline-flex;align-items:center;gap:0.4rem;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colourCode(item.colour)};border:1px solid #ffffff33;"></span>
+          ${item.colour}
+        </span>
+      </td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-edit" onclick="openInvModal('${item.id}')"><i class="fas fa-pen"></i> Edit</button>
+          <button class="btn-del" onclick="deleteInv('${item.id}')"><i class="fas fa-trash"></i> Del</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+  tbody.innerHTML = `<tr id="invEmptyRow" style="display:${inventory.length ? 'none' : ''}"><td colspan="8"><div class="empty-state"><i class="fas fa-warehouse"></i><p>No inventory records yet. Click <strong>Add Unit</strong> to start.</p></div></td></tr>` + rows;
+}
+
+function colourCode(col) {
+  const map = { red:'#ef4444', blue:'#3b82f6', black:'#1f2937', white:'#f8fafc', orange:'#f97316', green:'#22c55e', yellow:'#eab308', silver:'#94a3b8', grey:'#64748b', gray:'#64748b' };
+  const k = col.toLowerCase().split(' ').find(w => map[w]);
+  return k ? map[k] : '#6366f1';
+}
+
+function deleteInv(id) {
+  if (!confirm('Delete this inventory record?')) return;
+  inventory = inventory.filter(x => x.id !== id);
+  renderInvTable();
+  updateInvStats();
+  showToast('Unit removed from inventory.');
+}
+
+function updateInvStats() {
+  document.getElementById('statInvTotal').textContent = inventory.length;
+  document.getElementById('statInvReg').textContent = inventory.filter(x => x.regNo && x.regNo.trim()).length;
+  document.getElementById('statInvPending').textContent = inventory.filter(x => !x.regNo || !x.regNo.trim()).length;
+  const colours = new Set(inventory.map(x => x.colour.toLowerCase()));
+  document.getElementById('statInvColors').textContent = colours.size;
+}
+
+// ---- UTILS ----
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function clearForm(type) {
+  if (type === 'price') {
+    ['pModelName','pPrice','pInsurance','pFinance','pImage','priceEditId'].forEach(id => document.getElementById(id).value = '');
+  } else {
+    ['iModel','iPrice','iChassis','iEngine','iRegNo','iColour','invEditId'].forEach(id => { document.getElementById(id).value = ''; });
+  }
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  const icon = t.querySelector('i');
+  icon.className = type === 'error' ? 'fas fa-circle-xmark' : 'fas fa-circle-check';
+  icon.style.color = type === 'error' ? '#E8003D' : '#F5A623';
+  t.style.borderLeftColor = type === 'error' ? '#E8003D' : '#F5A623';
+  document.getElementById('toastMsg').textContent = msg;
+  t.style.display = 'flex';
+  t.style.alignItems = 'center';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
 </script>
-
 </body>
 </html>
