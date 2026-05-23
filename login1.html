@@ -165,8 +165,56 @@ footer{background:#080c17;border-top:1px solid var(--border);margin-top:3rem;}
 .fbl a{color:#475569;font-size:.78rem;text-decoration:none;transition:color .2s;}
 .fbl a:hover{color:var(--text);}
 
-@media(max-width:900px){.ll{display:none;}.lr{width:100%;}.stats-row{grid-template-columns:repeat(2,1fr);}.footer-top{grid-template-columns:1fr 1fr;}.frow{grid-template-columns:1fr 1fr;}}
-@media(max-width:600px){.stats-row{grid-template-columns:1fr;}.footer-top{grid-template-columns:1fr;}.frow{grid-template-columns:1fr;}.top-nav{flex-wrap:wrap;height:auto;gap:.5rem;padding:.8rem;}.nav-links{flex-wrap:wrap;}.main-content{padding:1rem;}}
+@media(max-width:900px){
+  .ll{display:none;}
+  .lr{width:100%;padding:2rem 1.8rem;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .footer-top{grid-template-columns:1fr 1fr;}
+  .frow{grid-template-columns:1fr 1fr;}
+  .top-nav{height:auto;flex-wrap:wrap;gap:.5rem;padding:.8rem 1rem;}
+  .nav-brand{font-size:1.1rem;margin-right:1rem;}
+  .nav-links{order:3;width:100%;padding-bottom:.3rem;}
+  .nav-right{margin-left:auto;}
+  .nav-date{display:none;}
+  .main-content{padding:1rem;}
+  .form-card{padding:1.2rem 1rem;}
+}
+@media(max-width:600px){
+  .lr{padding:1.5rem 1.2rem;}
+  .lr h2{font-size:1.8rem;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .stat-card{padding:.9rem;}
+  .stat-card .val{font-size:1.3rem;}
+  .stat-ico{width:40px;height:40px;font-size:1.1rem;}
+  .footer-top{grid-template-columns:1fr;padding:1.5rem 1rem 1rem;}
+  .frow{grid-template-columns:1fr;}
+  .top-nav{padding:.6rem .8rem;}
+  .nav-brand{font-size:1rem;}
+  .nav-link{padding:.4rem .8rem;font-size:.85rem;}
+  .nav-user span{display:none;}
+  .main-content{padding:.7rem;}
+  .form-card{padding:.9rem .8rem;margin-bottom:1.2rem;}
+  .form-card-title{font-size:1rem;}
+  .table-header{padding:.9rem 1rem;flex-direction:column;align-items:flex-start;gap:.5rem;}
+  .table-title{font-size:1rem;}
+  th{padding:.55rem .6rem;font-size:.7rem;}
+  td{padding:.6rem .6rem;font-size:.78rem;}
+  .act-btns{flex-direction:column;gap:.25rem;}
+  .btn-edit-row,.btn-del-row{font-size:.72rem;padding:.22rem .5rem;}
+  .sn-input{width:42px;font-size:.88rem;}
+  .footer-bottom{flex-direction:column;gap:.5rem;text-align:center;padding:1rem;}
+  .fbl{flex-wrap:wrap;justify-content:center;gap:1rem;}
+  .badge{font-size:.68rem;padding:.18rem .45rem;}
+  code{font-size:.68rem !important;}
+  .img-preview,.no-img{width:36px;height:28px;}
+}
+@media(max-width:420px){
+  .stats-row{grid-template-columns:1fr;}
+  .nav-link{padding:.35rem .55rem;font-size:.78rem;}
+  .nav-brand .admin-txt{display:none;}
+  .btn-logout{padding:.35rem .7rem;font-size:.8rem;}
+  .nav-user{display:none;}
+}
 </style>
 </head>
 <body>
@@ -248,7 +296,7 @@ footer{background:#080c17;border-top:1px solid var(--border);margin-top:3rem;}
 
   <!-- NAV -->
   <nav class="top-nav">
-    <div class="nav-brand"><i class="fas fa-motorcycle"></i> BAJAJ <span style="color:#fff;margin:0 .2rem;">ADMIN</span></div>
+    <div class="nav-brand"><i class="fas fa-motorcycle"></i> BAJAJ <span class="admin-txt" style="color:#fff;margin:0 .2rem;">ADMIN</span></div>
     <div class="nav-links">
       <div class="nav-link active" id="navPrice" onclick="switchSec('price')"><i class="fas fa-tags"></i> Price List</div>
       <div class="nav-link" id="navInv" onclick="switchSec('inv')"><i class="fas fa-warehouse"></i> Inventory</div>
@@ -635,6 +683,7 @@ document.getElementById('stockModelSelect').addEventListener('change', function(
 window._editMaster = (id) => {
   const b = allMasterBikes.find(x=>x.id===id);
   if (!b) return;
+  document.getElementById('mSn').value = b.sn || '';
   document.getElementById('mName').value = b.name;
   document.getElementById('mPrice').value = b.price;
   document.getElementById('mNormalIns').value = b.Insurance || 0;
@@ -660,12 +709,14 @@ window.cancelMasterEdit = () => {
 };
 
 document.getElementById('saveModelBtn').addEventListener('click', async () => {
+  const sn = document.getElementById('mSn').value.trim();
   const name = document.getElementById('mName').value.trim();
   const price = document.getElementById('mPrice').value.trim();
   const ins = document.getElementById('mNormalIns').value.trim();
   const fin = document.getElementById('mFinanceIns').value.trim();
-  if (!name || !price || !ins || !fin) { toast('Please fill all required fields!','err'); return; }
+  if (!sn || !name || !price || !ins || !fin) { toast('Please fill all required fields! (S.N is required)','err'); return; }
   const data = {
+    sn: Number(sn),
     name,
     price: Number(price),
     Insurance: Number(ins) || 0,
@@ -685,11 +736,12 @@ document.getElementById('saveModelBtn').addEventListener('click', async () => {
 });
 
 function clearMasterForm() {
-  ['mName','mPrice','mNormalIns','mFinanceIns','mImg'].forEach(id => document.getElementById(id).value='');
+  ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mImg'].forEach(id => document.getElementById(id).value='');
 }
 
 // ---- LIVE STOCK / INVENTORY ----
 document.getElementById('saveStockBtn').addEventListener('click', async () => {
+  const sn = document.getElementById('sSn').value.trim();
   const modelName = document.getElementById('stockModelSelect').value;
   const bikeInfo = allMasterBikes.find(b=>b.name===modelName);
   const price = document.getElementById('sPrice').value.trim();
@@ -698,17 +750,19 @@ document.getElementById('saveStockBtn').addEventListener('click', async () => {
   const regNo = document.getElementById('sRegNo').value.trim();
   const color = document.getElementById('sColor').value.trim();
 
+  if (!sn) { toast('S.N is required!','err'); return; }
   if (!modelName || !bikeInfo) { toast('Please select a valid model!','err'); return; }
   if (!price || !chassis || !engine || !color) { toast('Please fill all required fields!','err'); return; }
 
   try {
     await addDoc(collection(db, "inventory"), {
+      sn: Number(sn),
       model: modelName,
       price: Number(price),
       chassis, engine, regNo, color,
       addedAt: new Date()
     });
-    ['sRegNo','sChassis','sEngine','sColor'].forEach(id => document.getElementById(id).value='');
+    ['sSn','sRegNo','sChassis','sEngine','sColor'].forEach(id => document.getElementById(id).value='');
     document.getElementById('stockModelSelect').value='';
     document.getElementById('sPrice').value='';
     toast('Unit added to inventory!');
@@ -730,11 +784,17 @@ function renderInvTable(docs) {
     tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-warehouse"></i><p>No inventory records yet. Add a unit using the form above.</p></div></td></tr>`;
     return;
   }
-  tbody.innerHTML = docs.map((d, i) => {
+  const sorted = [...docs].sort((a,b) => (Number(a.data().sn)||9999) - (Number(b.data().sn)||9999));
+  tbody.innerHTML = sorted.map((d) => {
     const s = d.data();
     return `
     <tr>
-      <td class="sn-cell">${String(i+1).padStart(2,'0')}</td>
+      <td>
+        <input class="sn-input" type="number" value="${s.sn||''}" min="1" placeholder="—"
+          title="Click to edit S.N"
+          onblur="window._saveSn('inventory','${d.id}',this.value)"
+          onkeydown="if(event.key==='Enter'){this.blur();}"/>
+      </td>
       <td><span style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:1rem;">${s.model}</span></td>
       <td><span class="badge b-blue">₹${Number(s.price).toLocaleString('en-IN')}</span></td>
       <td><code style="font-size:.78rem;color:#94b8e8;background:#0d1526;padding:.2rem .5rem;border-radius:4px;">${s.chassis||'—'}</code></td>
@@ -742,7 +802,7 @@ function renderInvTable(docs) {
       <td>${s.regNo ? `<span class="badge b-green">${s.regNo}</span>` : `<span class="badge b-gray">Pending</span>`}</td>
       <td>
         <span style="display:inline-flex;align-items:center;gap:.4rem;">
-          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colourDot(s.color||'')};border:1px solid #ffffff33;"></span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colourDot(s.color||'')};border:1px solid #ffffff33;flex-shrink:0;"></span>
           ${s.color||'—'}
         </span>
       </td>
@@ -761,6 +821,16 @@ function updateInvStats() {
   document.getElementById('statInvPend').textContent = invData.filter(x=>!x.regNo||!x.regNo.trim()).length;
   document.getElementById('statInvCol').textContent = new Set(invData.map(x=>(x.color||'').toLowerCase())).size;
 }
+
+// ---- INLINE SN SAVE ----
+window._saveSn = async (col, id, val) => {
+  const num = Number(val);
+  if (!val || isNaN(num) || num < 1) { toast('S.N must be a positive number','err'); return; }
+  try {
+    await updateDoc(doc(db, col, id), { sn: num });
+    toast('S.N updated to ' + num);
+  } catch(e) { toast('Failed to update S.N: '+e.message,'err'); }
+};
 
 // ---- DELETE ----
 window._deleteEntry = async (col, id) => {
