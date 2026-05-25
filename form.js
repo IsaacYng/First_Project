@@ -323,16 +323,20 @@ function updateUI(data) {
     syncManualFieldsToA4();
 
     // Discount Row — show only if discount > 0
-    const a4DiscRow = document.getElementById('a4DiscountRow');
-    if (a4DiscRow) {
-        if (data.discount > 0) {
-            a4DiscRow.classList.remove('hidden');
-            safeSet('a4DiscountAmt', format(data.discount));
-            safeSet('a4NetPrice',    format(data.afterDiscount));
-        } else {
-            a4DiscRow.classList.add('hidden');
-        }
+const a4DiscRow = document.getElementById('a4DiscountRow');
+const p2DiscRow = document.getElementById('p2DiscountRow');  // ← ADD THIS
+
+if (a4DiscRow) {
+    if (data.discount > 0) {
+        a4DiscRow.classList.remove('hidden');
+        safeSet('a4DiscountAmt', format(data.discount));
+        safeSet('a4NetPrice',    format(data.afterDiscount));
+        if (p2DiscRow) p2DiscRow.style.display = 'block';   // ← ADD THIS
+    } else {
+        a4DiscRow.classList.add('hidden');
+        if (p2DiscRow) p2DiscRow.style.display = 'none';    // ← ADD THIS
     }
+}
 }
 
 // ======================================
