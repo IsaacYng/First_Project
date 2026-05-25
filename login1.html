@@ -4,491 +4,902 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Bajaj Bikes — Admin Panel</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <style>
 :root {
-  --blue:#003087; --red:#E8003D; --gold:#F5A623;
-  --dark:#0A0E1A; --panel:#111827; --card:#1a2235;
-  --border:#1e3a5f; --text:#e2e8f0; --muted:#64748b;
+  --bg:#060912;
+  --surface:#0c1221;
+  --card:#111c30;
+  --card2:#162035;
+  --border:#1d3055;
+  --border2:#243a60;
+  --blue:#1560e8;
+  --blue2:#1a72ff;
+  --red:#f0163a;
+  --gold:#f5a500;
+  --gold2:#ffbe2e;
+  --green:#10d06b;
+  --purple:#7c5cfc;
+  --text:#dce8ff;
+  --muted:#5a7599;
+  --muted2:#7a9abf;
+  --white:#ffffff;
+  --nav-h:64px;
+  --radius:12px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Exo 2',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden;}
+html{scroll-behavior:smooth;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 
-/* ====== LOGIN ====== */
-#login-section{min-height:100vh;display:flex;align-items:stretch;}
-.ll{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:3rem;background:linear-gradient(135deg,#003087,#001a4d,#0A0E1A);}
-.ll::before{content:'';position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80') center/cover no-repeat;opacity:.18;mix-blend-mode:luminosity;}
-.ll::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,#003087ee 0%,transparent 60%);}
-.ll-brand{position:relative;z-index:2;}
-.ll-ring{width:72px;height:72px;border-radius:50%;border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;margin-bottom:1.2rem;box-shadow:0 0 32px #F5A62355;}
-.ll-brand h1{font-family:'Rajdhani',sans-serif;font-size:2.8rem;font-weight:700;color:#fff;line-height:1;}
-.ll-brand h1 span{color:var(--gold);}
-.ll-brand p{margin-top:.8rem;color:#94b8e8;font-size:.95rem;max-width:340px;line-height:1.6;}
-.ll-badge{position:absolute;z-index:2;background:rgba(255,255,255,.07);backdrop-filter:blur(12px);border:1px solid rgba(245,166,35,.3);border-radius:12px;padding:.8rem 1.2rem;display:flex;align-items:center;gap:.7rem;animation:floatB 4s ease-in-out infinite;}
-@keyframes floatB{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
-.bike-ghost{position:absolute;bottom:80px;right:-30px;z-index:1;opacity:.1;font-size:16rem;color:var(--gold);transform:scaleX(-1);}
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity:.4;
+}
 
-.lr{width:480px;min-height:100vh;background:#fff;display:flex;flex-direction:column;justify-content:center;padding:3rem 3.5rem;position:relative;overflow:hidden;}
-.lr::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:linear-gradient(135deg,#003087,#E8003D);opacity:.07;}
-.lr::after{content:'';position:absolute;bottom:-40px;left:-40px;width:160px;height:160px;border-radius:50%;background:linear-gradient(135deg,#F5A623,#E8003D);opacity:.07;}
-.lr h2{font-family:'Rajdhani',sans-serif;font-size:2.4rem;font-weight:700;color:var(--blue);line-height:1.1;}
-.lr .sub{color:#64748b;font-size:.9rem;margin-top:.3rem;margin-bottom:2.2rem;}
-.ig{position:relative;margin-bottom:1.4rem;}
-.ig label{position:absolute;top:-.55rem;left:1rem;background:#fff;padding:0 .3rem;font-size:.75rem;color:var(--blue);font-weight:600;letter-spacing:.5px;z-index:1;}
-.ig input{width:100%;border:1.5px solid #cbd5e1;border-radius:10px;padding:.9rem 1rem .9rem 3rem;font-family:'Exo 2',sans-serif;font-size:.95rem;color:#1e293b;outline:none;transition:border-color .2s,box-shadow .2s;}
-.ig input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #00308715;}
-.ig .ico{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:1rem;}
-.btn-login{width:100%;padding:1rem;background:linear-gradient(135deg,var(--blue),#0052cc);color:#fff;border:none;border-radius:10px;font-family:'Rajdhani',sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s;margin-top:.5rem;position:relative;overflow:hidden;}
-.btn-login:hover{background:linear-gradient(135deg,var(--red),#cc0033);}
-.btn-login:disabled{opacity:.6;cursor:not-allowed;}
-.divider{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;color:#94a3b8;font-size:.82rem;}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:#e2e8f0;}
-.soc-btn{flex:1;padding:.7rem;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;cursor:pointer;font-size:.82rem;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.5rem;color:#475569;font-weight:500;font-family:'Exo 2',sans-serif;}
-.soc-btn:hover{border-color:var(--blue);background:#f8faff;transform:translateY(-1px);}
-.contact-links{margin-top:1.8rem;padding-top:1.5rem;border-top:1px solid #f1f5f9;}
-.contact-links p{color:#64748b;font-size:.82rem;margin-bottom:.8rem;}
-.cbtn{display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;margin-bottom:.5rem;border:none;}
-.cbtn-wa{background:#25D366;color:#fff;}
-.cbtn-gm{background:#EA4335;color:#fff;}
-.cbtn:hover{transform:translateX(4px);opacity:.9;}
-.err-msg{color:var(--red);font-size:.82rem;margin-top:.5rem;display:none;}
-.spin{display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;margin:0 auto;}
+/* ══════════════════ LOGIN PAGE ══════════════════ */
+#login-section{
+  min-height:100vh;display:flex;align-items:stretch;position:relative;
+}
+/* Left hero */
+.ll{
+  flex:1;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:3.5rem;background:#060912;
+}
+.ll-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(21,96,232,.08) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(21,96,232,.08) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.ll-glow{position:absolute;top:-100px;left:-80px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(21,96,232,.18) 0%,transparent 70%);}
+.ll-glow2{position:absolute;bottom:-80px;right:80px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(245,165,0,.12) 0%,transparent 70%);}
+.ll-bike{position:absolute;right:-20px;bottom:100px;font-size:18rem;color:rgba(21,96,232,.06);transform:scaleX(-1);line-height:1;}
+.ll-content{position:relative;z-index:2;}
+.ll-eyebrow{display:inline-flex;align-items:center;gap:.5rem;background:rgba(21,96,232,.15);border:1px solid rgba(21,96,232,.35);border-radius:100px;padding:.35rem .9rem;font-size:.72rem;font-weight:700;letter-spacing:2px;color:var(--blue2);text-transform:uppercase;margin-bottom:1.5rem;}
+.ll-eyebrow i{color:var(--gold);}
+.ll-title{font-family:'Bebas Neue',cursive;font-size:clamp(3.5rem,7vw,6.5rem);line-height:.95;color:var(--white);letter-spacing:2px;}
+.ll-title span{color:var(--gold);}
+.ll-desc{margin-top:1.2rem;color:var(--muted2);font-size:1rem;max-width:380px;line-height:1.65;font-weight:400;}
+.ll-stats{display:flex;gap:2rem;margin-top:2rem;}
+.ll-stat{border-left:2px solid var(--border2);padding-left:1rem;}
+.ll-stat-val{font-family:'Bebas Neue',cursive;font-size:2rem;color:var(--white);letter-spacing:1px;line-height:1;}
+.ll-stat-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.2rem;}
+.ll-badges{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:2.2rem;}
+.ll-badge-chip{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:8px;padding:.55rem .9rem;font-size:.78rem;color:var(--muted2);}
+.ll-badge-chip i{font-size:.85rem;}
+
+/* Right form */
+.lr{
+  width:460px;flex-shrink:0;
+  background:var(--surface);
+  border-left:1px solid var(--border);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:3rem 3rem;
+  position:relative;overflow:hidden;
+}
+.lr-top-bar{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--gold),var(--red));}
+.lr-logo{display:flex;align-items:center;gap:.7rem;margin-bottom:2.5rem;}
+.lr-logo-icon{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--blue),#0a3d9e);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;box-shadow:0 4px 20px rgba(21,96,232,.4);}
+.lr-logo-name{font-family:'Bebas Neue',cursive;font-size:1.6rem;color:var(--white);letter-spacing:2px;line-height:1;}
+.lr-logo-sub{font-size:.65rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.lr h2{font-family:'Bebas Neue',cursive;font-size:2.4rem;color:var(--white);letter-spacing:1px;line-height:1;}
+.lr .sub{color:var(--muted2);font-size:.88rem;margin-top:.4rem;margin-bottom:2rem;line-height:1.5;}
+
+.fg-login{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.2rem;}
+.fg-login label{font-size:.7rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;}
+.fg-login .inp-wrap{position:relative;}
+.fg-login .ico{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;}
+.fg-login input{
+  width:100%;background:var(--card);border:1.5px solid var(--border2);border-radius:10px;
+  padding:.8rem .9rem .8rem 2.6rem;
+  font-family:'Barlow',sans-serif;font-size:.95rem;color:var(--text);outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.fg-login input:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(21,96,232,.18);}
+.fg-login input::placeholder{color:var(--muted);}
+.forgot-link{text-align:right;margin-bottom:1.2rem;}
+.forgot-link a{font-size:.78rem;color:var(--muted2);text-decoration:none;transition:color .2s;}
+.forgot-link a:hover{color:var(--gold);}
+.err-msg{color:var(--red);font-size:.8rem;margin-bottom:.8rem;display:none;align-items:center;gap:.4rem;background:rgba(240,22,58,.1);border:1px solid rgba(240,22,58,.25);border-radius:8px;padding:.55rem .8rem;}
+.btn-login{
+  width:100%;padding:.88rem;
+  background:linear-gradient(135deg,var(--blue),#1a72ff);
+  color:#fff;border:none;border-radius:10px;
+  font-family:'Bebas Neue',cursive;font-size:1.3rem;letter-spacing:3px;
+  cursor:pointer;transition:all .25s;
+  box-shadow:0 4px 24px rgba(21,96,232,.4);
+  display:flex;align-items:center;justify-content:center;gap:.6rem;
+}
+.btn-login:hover{background:linear-gradient(135deg,#1a72ff,var(--red));box-shadow:0 6px 28px rgba(240,22,58,.35);transform:translateY(-1px);}
+.btn-login:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.divider{display:flex;align-items:center;gap:.8rem;margin:1.4rem 0;color:var(--muted);font-size:.75rem;letter-spacing:.5px;text-transform:uppercase;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.soc-row{display:flex;gap:.6rem;}
+.soc-btn{
+  flex:1;padding:.65rem;border:1.5px solid var(--border2);border-radius:9px;
+  background:var(--card);cursor:pointer;font-size:.8rem;
+  font-family:'Barlow',sans-serif;font-weight:600;
+  color:var(--muted2);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.4rem;
+}
+.soc-btn:hover{border-color:var(--blue2);background:var(--card2);color:var(--text);}
+.contact-area{margin-top:1.6rem;padding-top:1.4rem;border-top:1px solid var(--border);}
+.contact-area p{font-size:.78rem;color:var(--muted);margin-bottom:.7rem;display:flex;align-items:center;gap:.4rem;}
+.cbtn{
+  display:flex;align-items:center;gap:.55rem;padding:.55rem 1rem;
+  border-radius:8px;font-size:.8rem;font-weight:700;
+  cursor:pointer;text-decoration:none;margin-bottom:.45rem;border:none;
+  transition:all .2s;letter-spacing:.3px;
+}
+.cbtn-wa{background:rgba(37,211,102,.15);color:#25D366;border:1px solid rgba(37,211,102,.3);}
+.cbtn-wa:hover{background:#25D366;color:#fff;}
+.cbtn-gm{background:rgba(234,67,53,.12);color:#EA4335;border:1px solid rgba(234,67,53,.25);}
+.cbtn-gm:hover{background:#EA4335;color:#fff;}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ====== ADMIN PANEL ====== */
+/* ══════════════════ NAVBAR ══════════════════ */
 #admin-section{display:none;flex-direction:column;min-height:100vh;}
-.top-nav{position:sticky;top:0;z-index:100;background:#0d1526;border-bottom:2px solid var(--border);display:flex;align-items:center;padding:0 2rem;height:64px;box-shadow:0 4px 24px #00000040;}
-.nav-brand{font-family:'Rajdhani',sans-serif;font-size:1.4rem;font-weight:700;color:var(--gold);letter-spacing:1px;display:flex;align-items:center;gap:.7rem;margin-right:2.5rem;white-space:nowrap;}
-.nav-brand i{color:var(--red);}
-.nav-links{display:flex;gap:.5rem;flex:1;}
-.nav-link{padding:.5rem 1.2rem;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:600;letter-spacing:.5px;color:#94a3b8;cursor:pointer;transition:all .2s;border:1.5px solid transparent;display:flex;align-items:center;gap:.5rem;}
-.nav-link.active,.nav-link:hover{color:#fff;background:var(--blue);border-color:var(--blue);}
-.nav-right{display:flex;align-items:center;gap:1rem;margin-left:auto;}
-.nav-date{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:.4rem;}
-.nav-user{display:flex;align-items:center;gap:.6rem;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.4rem .9rem;font-size:.85rem;color:#94b8e8;}
-.btn-logout{background:transparent;border:1.5px solid var(--red);color:var(--red);border-radius:8px;padding:.4rem 1rem;font-family:'Rajdhani',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
-.btn-logout:hover{background:var(--red);color:#fff;}
+.top-nav{
+  position:sticky;top:0;z-index:100;
+  height:var(--nav-h);
+  background:rgba(6,9,18,.92);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 1.5rem;
+  gap:1rem;
+}
+.nav-brand{
+  display:flex;align-items:center;gap:.7rem;
+  text-decoration:none;flex-shrink:0;
+}
+.nav-brand-icon{
+  width:36px;height:36px;border-radius:8px;
+  background:linear-gradient(135deg,var(--blue),#0a3d9e);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;color:#fff;
+  box-shadow:0 2px 12px rgba(21,96,232,.5);
+}
+.nav-brand-text{font-family:'Bebas Neue',cursive;font-size:1.35rem;color:var(--white);letter-spacing:2px;line-height:1;}
+.nav-brand-text span{color:var(--gold);}
+.nav-brand-badge{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.nav-divider{width:1px;height:28px;background:var(--border);flex-shrink:0;}
 
-.main-content{padding:2rem;max-width:1400px;margin:0 auto;flex:1;}
+.nav-tabs{display:flex;gap:.3rem;flex:1;}
+.nav-tab{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.45rem 1rem;border-radius:8px;
+  font-family:'Barlow',sans-serif;font-weight:700;font-size:.82rem;
+  text-transform:uppercase;letter-spacing:.8px;
+  color:var(--muted2);cursor:pointer;border:1px solid transparent;
+  transition:all .2s;white-space:nowrap;
+}
+.nav-tab i{font-size:.8rem;}
+.nav-tab:hover{color:var(--text);background:var(--card);}
+.nav-tab.active{color:var(--white);background:rgba(21,96,232,.2);border-color:rgba(21,96,232,.4);}
+.nav-tab.active i{color:var(--blue2);}
+
+.nav-right{display:flex;align-items:center;gap:.8rem;margin-left:auto;flex-shrink:0;}
+.nav-date-chip{
+  display:flex;align-items:center;gap:.4rem;
+  font-size:.73rem;color:var(--muted);
+  background:var(--card);border:1px solid var(--border);
+  border-radius:6px;padding:.3rem .7rem;
+  font-family:'JetBrains Mono',monospace;
+}
+.nav-user-chip{
+  display:flex;align-items:center;gap:.5rem;
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:8px;padding:.35rem .8rem;
+}
+.nav-avatar{
+  width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;color:#fff;font-weight:700;
+}
+.nav-user-name{font-size:.78rem;color:var(--text);font-weight:600;}
+.btn-logout{
+  background:transparent;border:1.5px solid rgba(240,22,58,.4);
+  color:var(--red);border-radius:8px;
+  padding:.38rem .9rem;font-family:'Barlow',sans-serif;
+  font-size:.78rem;font-weight:700;letter-spacing:.5px;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.4rem;
+}
+.btn-logout:hover{background:var(--red);color:#fff;border-color:var(--red);}
+
+/* Mobile hamburger */
+.hamburger{
+  display:none;width:36px;height:36px;border-radius:8px;
+  background:var(--card);border:1px solid var(--border2);
+  align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text);font-size:.95rem;flex-shrink:0;
+}
+.mobile-menu{
+  display:none;position:fixed;top:var(--nav-h);left:0;right:0;z-index:99;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:1rem 1.5rem;flex-direction:column;gap:.4rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+.mobile-menu.open{display:flex;}
+.mobile-tab{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.7rem 1rem;border-radius:8px;
+  font-weight:700;font-size:.88rem;letter-spacing:.5px;
+  color:var(--muted2);cursor:pointer;border:1px solid transparent;
+  transition:all .2s;
+}
+.mobile-tab.active{color:var(--white);background:rgba(21,96,232,.15);border-color:rgba(21,96,232,.35);}
+
+/* ══════════════════ MAIN ══════════════════ */
+.main-wrap{flex:1;padding:1.8rem 1.5rem;max-width:1440px;margin:0 auto;width:100%;}
 .sec-panel{display:none;}
-.sec-panel.active{display:block;animation:fadeIn .3s ease;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.sec-panel.active{display:block;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
-/* STATS */
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:2rem;}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem 1.6rem;display:flex;align-items:center;gap:1.2rem;transition:transform .2s;}
-.stat-card:hover{transform:translateY(-3px);}
-.stat-ico{width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;}
-.stat-card .val{font-family:'Rajdhani',sans-serif;font-size:1.8rem;font-weight:700;color:#fff;line-height:1;}
-.stat-card .lbl{font-size:.78rem;color:var(--muted);margin-top:.2rem;}
+/* PAGE HEADER */
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:1.8rem;gap:1rem;}
+.page-header-left{}
+.page-eyebrow{font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue2);margin-bottom:.3rem;display:flex;align-items:center;gap:.4rem;}
+.page-eyebrow::before{content:'';display:inline-block;width:16px;height:2px;background:var(--blue2);}
+.page-title{font-family:'Bebas Neue',cursive;font-size:clamp(1.8rem,4vw,2.6rem);color:var(--white);letter-spacing:1px;line-height:1;}
+.page-title span{color:var(--gold);}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.3rem 1.4rem;position:relative;overflow:hidden;
+  transition:transform .2s,border-color .2s;cursor:default;
+}
+.stat-card:hover{transform:translateY(-3px);border-color:var(--border2);}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card:nth-child(1)::after{background:linear-gradient(90deg,var(--blue),var(--blue2));}
+.stat-card:nth-child(2)::after{background:linear-gradient(90deg,var(--green),#0a8a46);}
+.stat-card:nth-child(3)::after{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.stat-card:nth-child(4)::after{background:linear-gradient(90deg,var(--purple),#5a3fc4);}
+.stat-inner{display:flex;align-items:center;gap:1rem;}
+.stat-icon{
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:1.15rem;
+  flex-shrink:0;
+}
+.stat-card:nth-child(1) .stat-icon{background:rgba(21,96,232,.15);color:var(--blue2);}
+.stat-card:nth-child(2) .stat-icon{background:rgba(16,208,107,.12);color:var(--green);}
+.stat-card:nth-child(3) .stat-icon{background:rgba(245,165,0,.12);color:var(--gold);}
+.stat-card:nth-child(4) .stat-icon{background:rgba(124,92,252,.12);color:var(--purple);}
+.stat-val{font-family:'Bebas Neue',cursive;font-size:1.9rem;color:var(--white);letter-spacing:1px;line-height:1;}
+.stat-lbl{font-size:.72rem;color:var(--muted2);margin-top:.2rem;text-transform:uppercase;letter-spacing:.5px;}
+.stat-bg-icon{
+  position:absolute;right:-.5rem;bottom:-.5rem;font-size:4.5rem;
+  color:rgba(255,255,255,.02);pointer-events:none;
+}
 
 /* FORM CARD */
-.form-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.6rem 2rem;margin-bottom:2rem;}
-.form-card-title{font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:.6rem;margin-bottom:1.4rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
-.form-card-title i{color:var(--gold);}
-.frow{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1rem;}
-.fg{display:flex;flex-direction:column;gap:.4rem;}
-.fg label{font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
-.fg label span{color:var(--red);}
-.fg input,.fg select{background:#0d1526;border:1.5px solid var(--border);border-radius:8px;padding:.65rem .9rem;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;}
-.fg input:focus,.fg select:focus{border-color:var(--blue);}
-.fg select option{background:#0d1526;}
-.btn-save-form{background:linear-gradient(135deg,var(--blue),#0052cc);color:#fff;border:none;border-radius:9px;padding:.65rem 1.6rem;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.5px;display:inline-flex;align-items:center;gap:.4rem;}
-.btn-save-form:hover{transform:translateY(-1px);box-shadow:0 4px 16px #003087aa;}
-.btn-save-form.edit-mode{background:linear-gradient(135deg,#0052cc,#7c3aed);}
-.btn-cancel-form{background:transparent;border:1.5px solid var(--border);color:var(--muted);border-radius:9px;padding:.65rem 1.2rem;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;display:none;}
-.btn-cancel-form:hover{border-color:var(--red);color:var(--red);}
+.form-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.6rem;margin-bottom:1.8rem;
+}
+.form-card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1.4rem;padding-bottom:1.1rem;
+  border-bottom:1px solid var(--border);
+}
+.form-card-title{
+  display:flex;align-items:center;gap:.6rem;
+  font-family:'Bebas Neue',cursive;font-size:1.35rem;color:var(--white);letter-spacing:1px;
+}
+.form-card-title i{color:var(--gold);font-size:1rem;}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.9rem;margin-bottom:1.2rem;}
+.fg{display:flex;flex-direction:column;gap:.35rem;}
+.fg label{font-size:.67rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.8px;}
+.fg label .req{color:var(--red);}
+.fg input,.fg select{
+  background:var(--surface);border:1.5px solid var(--border2);
+  border-radius:8px;padding:.65rem .85rem;
+  font-family:'Barlow',sans-serif;font-size:.88rem;color:var(--text);
+  outline:none;transition:border-color .2s,box-shadow .2s;width:100%;
+}
+.fg input:focus,.fg select:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(21,96,232,.15);}
+.fg input::placeholder{color:var(--muted);}
+.fg select option{background:var(--surface);}
+.form-actions{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:.45rem;
+  padding:.65rem 1.6rem;border-radius:8px;border:none;
+  font-family:'Barlow',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:.3px;
+  cursor:pointer;transition:all .2s;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;
+  box-shadow:0 3px 16px rgba(21,96,232,.35);
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(21,96,232,.45);}
+.btn-primary.edit-mode{background:linear-gradient(135deg,#2d6ef8,var(--purple));}
+.btn-outline{
+  display:inline-flex;align-items:center;gap:.45rem;
+  padding:.65rem 1.2rem;border-radius:8px;
+  font-family:'Barlow',sans-serif;font-weight:700;font-size:.88rem;
+  cursor:pointer;transition:all .2s;
+  background:transparent;border:1.5px solid var(--border2);color:var(--muted2);
+}
+.btn-outline:hover{border-color:var(--red);color:var(--red);}
+.btn-cancel{display:none;}
 
-/* TABLE */
-.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
-.table-header{padding:1.4rem 1.8rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
-.table-title{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:.6rem;}
-.table-title i{color:var(--gold);}
-.tbl-count{background:#0d1526;border:1px solid var(--border);border-radius:6px;padding:.2rem .7rem;font-size:.78rem;color:var(--muted);}
+/* TABLE CARD */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.table-toolbar{
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:1.2rem 1.4rem;border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+}
+.table-toolbar-left{display:flex;align-items:center;gap:.8rem;}
+.table-card-title{font-family:'Bebas Neue',cursive;font-size:1.35rem;color:var(--white);letter-spacing:1px;display:flex;align-items:center;gap:.6rem;}
+.table-card-title i{color:var(--gold);}
+.count-badge{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:6px;padding:.2rem .65rem;
+  font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted2);
+}
+.tbl-overflow{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;}
-th{background:#0d1526;padding:.9rem 1.2rem;text-align:left;font-family:'Rajdhani',sans-serif;font-size:.82rem;font-weight:700;color:var(--gold);letter-spacing:.8px;text-transform:uppercase;white-space:nowrap;}
-td{padding:.9rem 1.2rem;font-size:.86rem;color:var(--text);border-bottom:1px solid #1e2d42;vertical-align:middle;}
+thead tr{background:rgba(13,18,33,.8);}
+th{
+  padding:.8rem 1rem;text-align:left;
+  font-family:'Barlow',sans-serif;font-size:.68rem;font-weight:800;
+  color:var(--muted2);letter-spacing:1.2px;text-transform:uppercase;white-space:nowrap;
+  border-bottom:1px solid var(--border);
+}
+td{
+  padding:.8rem 1rem;font-size:.84rem;color:var(--text);
+  border-bottom:1px solid rgba(29,48,85,.5);vertical-align:middle;
+}
 tr:last-child td{border-bottom:none;}
-tr:hover td{background:#1e2d4299;}
-.badge{display:inline-flex;align-items:center;padding:.25rem .7rem;border-radius:6px;font-size:.75rem;font-weight:700;letter-spacing:.3px;}
-.b-blue{background:#003087;color:#7ec8e3;}
-.b-green{background:#064e3b;color:#34d399;}
-.b-gold{background:#451a03;color:var(--gold);}
-.b-purple{background:#2d1b69;color:#a78bfa;}
-.b-gray{background:#1a1a2e;color:#64748b;}
-.sn-cell{font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;color:var(--muted);}
-.sn-input{width:52px;background:#0d1526;border:1.5px solid var(--border);border-radius:6px;padding:.25rem .4rem;color:var(--gold);font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;text-align:center;outline:none;transition:border-color .2s,box-shadow .2s;cursor:text;}
-.sn-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px #F5A62322;}
-.sn-input:hover{border-color:#4a6fa5;}
-.img-preview{width:46px;height:34px;border-radius:6px;object-fit:cover;border:1px solid var(--border);background:#0d1526;}
-.no-img{width:46px;height:34px;border-radius:6px;background:#0d1526;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.65rem;}
-.act-btns{display:flex;gap:.4rem;}
-.btn-edit-row{background:transparent;border:1px solid #3b82f6;color:#3b82f6;border-radius:6px;padding:.3rem .7rem;font-size:.78rem;cursor:pointer;transition:all .2s;font-family:'Exo 2',sans-serif;display:flex;align-items:center;gap:.3rem;}
-.btn-edit-row:hover{background:#3b82f6;color:#fff;}
-.btn-del-row{background:transparent;border:1px solid var(--red);color:var(--red);border-radius:6px;padding:.3rem .7rem;font-size:.78rem;cursor:pointer;transition:all .2s;font-family:'Exo 2',sans-serif;display:flex;align-items:center;gap:.3rem;}
-.btn-del-row:hover{background:var(--red);color:#fff;}
-.empty-state{text-align:center;padding:4rem;color:var(--muted);}
-.empty-state i{font-size:3rem;margin-bottom:1rem;opacity:.4;display:block;}
-.empty-state p{font-size:.9rem;}
+tr:hover td{background:rgba(21,96,232,.04);}
+.badge{
+  display:inline-flex;align-items:center;
+  padding:.22rem .65rem;border-radius:6px;
+  font-size:.73rem;font-weight:700;letter-spacing:.3px;
+  font-family:'JetBrains Mono',monospace;
+}
+.b-blue{background:rgba(21,96,232,.18);color:#7bb3ff;border:1px solid rgba(21,96,232,.3);}
+.b-green{background:rgba(16,208,107,.12);color:#34d399;border:1px solid rgba(16,208,107,.25);}
+.b-gold{background:rgba(245,165,0,.12);color:var(--gold2);border:1px solid rgba(245,165,0,.25);}
+.b-purple{background:rgba(124,92,252,.12);color:#a78bfa;border:1px solid rgba(124,92,252,.25);}
+.b-gray{background:rgba(90,117,153,.12);color:var(--muted2);border:1px solid rgba(90,117,153,.2);}
+.b-red{background:rgba(240,22,58,.12);color:#f87171;border:1px solid rgba(240,22,58,.2);}
+.bike-name-cell{font-family:'Barlow',sans-serif;font-weight:700;font-size:.93rem;color:var(--white);}
+.model-name-cell{font-family:'Barlow',sans-serif;font-weight:700;font-size:.9rem;color:var(--white);}
+.code-cell{font-family:'JetBrains Mono',monospace;font-size:.73rem;color:#7bb3ff;background:rgba(21,96,232,.08);padding:.18rem .5rem;border-radius:5px;}
+.img-cell img{width:44px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border2);}
+.no-img-cell{width:44px;height:32px;border-radius:6px;background:var(--surface);border:1px dashed var(--border2);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.65rem;}
+.sn-input{
+  width:48px;background:var(--surface);border:1.5px solid var(--border2);
+  border-radius:6px;padding:.22rem .4rem;
+  color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;
+  text-align:center;outline:none;transition:border-color .2s;
+}
+.sn-input:focus{border-color:var(--gold);}
+.act-btns{display:flex;gap:.35rem;}
+.btn-edit-sm{
+  display:inline-flex;align-items:center;gap:.3rem;
+  background:transparent;border:1px solid rgba(59,130,246,.4);color:#60a5fa;
+  border-radius:6px;padding:.28rem .6rem;font-size:.73rem;font-weight:700;
+  cursor:pointer;transition:all .2s;font-family:'Barlow',sans-serif;
+}
+.btn-edit-sm:hover{background:#3b82f6;color:#fff;border-color:#3b82f6;}
+.btn-del-sm{
+  display:inline-flex;align-items:center;gap:.3rem;
+  background:transparent;border:1px solid rgba(240,22,58,.35);color:#f87171;
+  border-radius:6px;padding:.28rem .6rem;font-size:.73rem;font-weight:700;
+  cursor:pointer;transition:all .2s;font-family:'Barlow',sans-serif;
+}
+.btn-del-sm:hover{background:var(--red);color:#fff;border-color:var(--red);}
+.empty-state{text-align:center;padding:4rem 2rem;color:var(--muted);}
+.empty-state i{font-size:2.5rem;opacity:.25;display:block;margin-bottom:1rem;}
+.empty-state p{font-size:.88rem;}
+.loading-row{text-align:center;padding:3rem;color:var(--muted);}
+.loading-row i{animation:spin .8s linear infinite;font-size:1.2rem;color:var(--gold);display:block;margin-bottom:.5rem;}
+.colour-dot{display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid rgba(255,255,255,.2);flex-shrink:0;}
 
-/* LOADER OVERLAY */
-.tbl-loading{text-align:center;padding:3rem;color:var(--muted);}
-.tbl-loading i{animation:spin .8s linear infinite;font-size:1.5rem;color:var(--gold);display:block;margin-bottom:.5rem;}
+/* ══════════════════ FOOTER ══════════════════ */
+footer{
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  margin-top:auto;position:relative;overflow:hidden;
+}
+footer::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--blue),var(--gold),var(--red),transparent);
+}
+.footer-body{
+  display:grid;grid-template-columns:2.2fr 1fr 1.1fr 1.4fr;
+  gap:2.5rem;padding:3rem 2.5rem 2rem;
+  max-width:1440px;margin:0 auto;
+}
+.f-brand{}
+.f-brand-logo{
+  display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;
+}
+.f-brand-icon{
+  width:38px;height:38px;border-radius:9px;
+  background:linear-gradient(135deg,var(--blue),#0a3d9e);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;color:#fff;box-shadow:0 3px 14px rgba(21,96,232,.4);
+}
+.f-brand-name{font-family:'Bebas Neue',cursive;font-size:1.6rem;color:var(--white);letter-spacing:2px;}
+.f-brand-name span{color:var(--gold);}
+.f-brand p{color:var(--muted);font-size:.83rem;line-height:1.65;max-width:280px;margin-bottom:1.3rem;}
+.f-socials{display:flex;gap:.5rem;}
+.f-soc{
+  width:34px;height:34px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;cursor:pointer;transition:all .2s;text-decoration:none;
+}
+.f-soc-wa{background:rgba(37,211,102,.12);color:#25D366;border:1px solid rgba(37,211,102,.25);}
+.f-soc-gm{background:rgba(234,67,53,.1);color:#EA4335;border:1px solid rgba(234,67,53,.2);}
+.f-soc-tw{background:rgba(29,161,242,.1);color:#1DA1F2;border:1px solid rgba(29,161,242,.2);}
+.f-soc:hover{transform:translateY(-2px);filter:brightness(1.15);}
+.f-col h5{
+  font-family:'Barlow',sans-serif;font-weight:800;font-size:.7rem;
+  text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);
+  margin-bottom:1.1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);
+}
+.f-col ul{list-style:none;display:flex;flex-direction:column;gap:.5rem;}
+.f-col li{
+  color:var(--muted);font-size:.82rem;cursor:pointer;
+  transition:color .2s;display:flex;align-items:center;gap:.45rem;
+}
+.f-col li:hover{color:var(--text);}
+.f-col li i{font-size:.65rem;color:var(--muted);}
+.f-contact-item{display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.7rem;}
+.f-contact-item i{color:var(--gold);font-size:.82rem;margin-top:.1rem;flex-shrink:0;}
+.f-contact-item span{color:var(--muted);font-size:.82rem;line-height:1.5;}
+.footer-bottom{
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 2.5rem;max-width:1440px;margin:0 auto;width:100%;
+  flex-wrap:wrap;gap:.8rem;
+}
+.footer-copy{color:var(--muted);font-size:.75rem;}
+.footer-copy span{color:var(--gold);}
+.footer-links{display:flex;gap:1.5rem;}
+.footer-links a{color:var(--muted);font-size:.75rem;text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--text);}
 
-/* TOAST */
-.toast{position:fixed;bottom:2rem;right:2rem;background:var(--card);border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:10px;padding:1rem 1.4rem;font-size:.88rem;color:#fff;z-index:300;display:none;box-shadow:0 8px 32px #00000060;min-width:240px;align-items:center;gap:.6rem;}
+/* ══════════════════ TOAST ══════════════════ */
+.toast{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:500;
+  background:var(--card2);border:1px solid var(--border2);
+  border-radius:10px;padding:.85rem 1.2rem;
+  font-size:.84rem;color:var(--text);
+  display:none;align-items:center;gap:.6rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);min-width:220px;max-width:320px;
+  animation:slideIn .3s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.toast-bar{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:10px 0 0 10px;}
+.toast-bar.ok{background:var(--gold);}
+.toast-bar.err{background:var(--red);}
 
-/* FOOTER */
-footer{background:#080c17;border-top:1px solid var(--border);margin-top:3rem;}
-.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2.5rem;padding:3rem 3rem 2rem;max-width:1400px;margin:0 auto;}
-.f-brand-logo{font-family:'Rajdhani',sans-serif;font-size:1.8rem;font-weight:700;color:var(--gold);letter-spacing:1px;display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;}
-.f-brand-logo i{color:var(--red);}
-.f-brand p{color:#64748b;font-size:.85rem;line-height:1.7;max-width:280px;margin-bottom:1.4rem;}
-.f-social{display:flex;gap:.6rem;}
-.fsoc{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer;transition:all .2s;text-decoration:none;}
-.fsoc-wa{background:#25D36622;color:#25D366;border:1px solid #25D36644;}
-.fsoc-gm{background:#EA433522;color:#EA4335;border:1px solid #EA433544;}
-.fsoc-tw{background:#1DA1F222;color:#1DA1F2;border:1px solid #1DA1F244;}
-.fsoc:hover{transform:translateY(-3px);}
-.f-col h4{font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;color:var(--gold);letter-spacing:.5px;margin-bottom:1.2rem;text-transform:uppercase;}
-.f-col ul{list-style:none;display:flex;flex-direction:column;gap:.6rem;}
-.f-col ul li{color:#64748b;font-size:.83rem;cursor:pointer;transition:color .2s;display:flex;align-items:center;gap:.5rem;}
-.f-col ul li:hover{color:var(--text);}
-.f-col ul li i{font-size:.7rem;color:var(--muted);}
-.f-ci{display:flex;align-items:flex-start;gap:.7rem;color:#64748b;font-size:.83rem;margin-bottom:.8rem;line-height:1.5;}
-.f-ci i{color:var(--gold);margin-top:.1rem;font-size:.85rem;}
-.footer-bottom{border-top:1px solid var(--border);padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;}
-.footer-bottom p{color:#475569;font-size:.78rem;}
-.footer-bottom span{color:var(--gold);}
-.fbl{display:flex;gap:1.5rem;}
-.fbl a{color:#475569;font-size:.78rem;text-decoration:none;transition:color .2s;}
-.fbl a:hover{color:var(--text);}
-
+/* ══════════════════ RESPONSIVE ══════════════════ */
+@media(max-width:1100px){
+  .footer-body{grid-template-columns:1fr 1fr;gap:2rem;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+}
 @media(max-width:900px){
   .ll{display:none;}
-  .lr{width:100%;padding:2rem 1.8rem;}
-  .stats-row{grid-template-columns:repeat(2,1fr);}
-  .footer-top{grid-template-columns:1fr 1fr;}
-  .frow{grid-template-columns:1fr 1fr;}
-  .top-nav{height:auto;flex-wrap:wrap;gap:.5rem;padding:.8rem 1rem;}
-  .nav-brand{font-size:1.1rem;margin-right:1rem;}
-  .nav-links{order:3;width:100%;padding-bottom:.3rem;}
-  .nav-right{margin-left:auto;}
-  .nav-date{display:none;}
-  .main-content{padding:1rem;}
-  .form-card{padding:1.2rem 1rem;}
+  .lr{width:100%;min-height:100vh;padding:2.5rem 2rem;}
+  .nav-tabs{display:none;}
+  .hamburger{display:flex;}
+  .nav-date-chip{display:none;}
 }
-@media(max-width:600px){
-  .lr{padding:1.5rem 1.2rem;}
-  .lr h2{font-size:1.8rem;}
-  .stats-row{grid-template-columns:1fr 1fr;}
-  .stat-card{padding:.9rem;}
-  .stat-card .val{font-size:1.3rem;}
-  .stat-ico{width:40px;height:40px;font-size:1.1rem;}
-  .footer-top{grid-template-columns:1fr;padding:1.5rem 1rem 1rem;}
-  .frow{grid-template-columns:1fr;}
-  .top-nav{padding:.6rem .8rem;}
-  .nav-brand{font-size:1rem;}
-  .nav-link{padding:.4rem .8rem;font-size:.85rem;}
-  .nav-user span{display:none;}
-  .main-content{padding:.7rem;}
-  .form-card{padding:.9rem .8rem;margin-bottom:1.2rem;}
-  .form-card-title{font-size:1rem;}
-  .table-header{padding:.9rem 1rem;flex-direction:column;align-items:flex-start;gap:.5rem;}
-  .table-title{font-size:1rem;}
-  th{padding:.55rem .6rem;font-size:.7rem;}
-  td{padding:.6rem .6rem;font-size:.78rem;}
+@media(max-width:700px){
+  .main-wrap{padding:1.2rem 1rem;}
+  .form-grid{grid-template-columns:1fr 1fr;}
+  .footer-body{grid-template-columns:1fr;gap:1.5rem;padding:2rem 1.2rem 1.5rem;}
+  .footer-bottom{padding:.8rem 1.2rem;flex-direction:column;align-items:flex-start;}
+  .page-header{flex-direction:column;align-items:flex-start;}
+  .table-toolbar{flex-direction:column;align-items:flex-start;}
   .act-btns{flex-direction:column;gap:.25rem;}
-  .btn-edit-row,.btn-del-row{font-size:.72rem;padding:.22rem .5rem;}
-  .sn-input{width:42px;font-size:.88rem;}
-  .footer-bottom{flex-direction:column;gap:.5rem;text-align:center;padding:1rem;}
-  .fbl{flex-wrap:wrap;justify-content:center;gap:1rem;}
-  .badge{font-size:.68rem;padding:.18rem .45rem;}
-  code{font-size:.68rem !important;}
-  .img-preview,.no-img{width:36px;height:28px;}
 }
-@media(max-width:420px){
-  .stats-row{grid-template-columns:1fr;}
-  .nav-link{padding:.35rem .55rem;font-size:.78rem;}
-  .nav-brand .admin-txt{display:none;}
-  .btn-logout{padding:.35rem .7rem;font-size:.8rem;}
-  .nav-user{display:none;}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .stat-val{font-size:1.5rem;}
+  .stat-icon{width:36px;height:36px;font-size:.9rem;}
+  .stat-card{padding:1rem;}
+  .form-grid{grid-template-columns:1fr;}
+  .lr{padding:1.5rem 1.2rem;}
+  .form-card{padding:1.1rem;}
+  th{padding:.6rem .6rem;font-size:.62rem;}
+  td{padding:.65rem .6rem;font-size:.79rem;}
+  .btn-edit-sm,.btn-del-sm{font-size:.68rem;padding:.22rem .45rem;}
+  .img-cell img,.no-img-cell{width:34px;height:26px;}
+  .footer-links{flex-wrap:wrap;gap:.8rem;}
+  .sn-input{width:40px;}
+  .badge{font-size:.66rem;padding:.16rem .45rem;}
+}
+@media(max-width:380px){
+  .stats-grid{grid-template-columns:1fr;}
+  .nav-user-name{display:none;}
 }
 </style>
 </head>
 <body>
 
-<!-- ============================= LOGIN ============================= -->
+<!-- ══════════════════ LOGIN ══════════════════ -->
 <div id="login-section">
   <div class="ll">
-    <div class="ll-badge" style="top:18%;left:8%;animation-delay:-2s;">
-      <i class="fas fa-motorcycle" style="color:var(--gold);font-size:1.2rem;"></i>
-      <div>
-        <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#fff;font-size:1rem;">500+</div>
-        <div style="font-size:.7rem;color:#94b8e8;">Bikes in Stock</div>
+    <div class="ll-grid"></div>
+    <div class="ll-glow"></div>
+    <div class="ll-glow2"></div>
+    <i class="fas fa-motorcycle ll-bike"></i>
+    <div class="ll-content">
+      <div class="ll-eyebrow"><i class="fas fa-circle-dot"></i> Authorized Personnel Only</div>
+      <div class="ll-title">BAJAJ<br><span>BIKES</span></div>
+      <p class="ll-desc">Command your entire dealership — pricing, inventory, and operations — from a single powerful dashboard.</p>
+      <div class="ll-stats">
+        <div class="ll-stat">
+          <div class="ll-stat-val">500+</div>
+          <div class="ll-stat-lbl">Bikes in Stock</div>
+        </div>
+        <div class="ll-stat">
+          <div class="ll-stat-val">₹2.1Cr</div>
+          <div class="ll-stat-lbl">Monthly Rev.</div>
+        </div>
+        <div class="ll-stat">
+          <div class="ll-stat-val">12+</div>
+          <div class="ll-stat-lbl">Models Listed</div>
+        </div>
       </div>
-    </div>
-    <div class="ll-badge" style="top:38%;right:12%;animation-delay:-1s;">
-      <i class="fas fa-chart-line" style="color:#34d399;font-size:1.2rem;"></i>
-      <div>
-        <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#fff;font-size:1rem;">₹2.1Cr</div>
-        <div style="font-size:.7rem;color:#94b8e8;">Monthly Revenue</div>
+      <div class="ll-badges">
+        <div class="ll-badge-chip"><i class="fas fa-shield-halved" style="color:var(--green)"></i> Secure Login</div>
+        <div class="ll-badge-chip"><i class="fas fa-bolt" style="color:var(--gold)"></i> Real-time Sync</div>
+        <div class="ll-badge-chip"><i class="fas fa-mobile-screen-button" style="color:var(--blue2)"></i> Mobile Ready</div>
       </div>
-    </div>
-    <i class="fas fa-motorcycle bike-ghost"></i>
-    <div class="ll-brand">
-      <div class="ll-ring"><i class="fas fa-motorcycle" style="color:var(--gold);font-size:1.8rem;"></i></div>
-      <h1>BAJAJ <span>BIKES</span></h1>
-      <p>Admin Control Panel — Manage your entire inventory, pricing & dealership operations from one place.</p>
     </div>
   </div>
 
   <div class="lr">
-    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;">
-      <div style="width:10px;height:10px;border-radius:50%;background:var(--red);"></div>
-      <div style="width:8px;height:8px;border-radius:50%;background:var(--gold);"></div>
-      <div style="width:6px;height:6px;border-radius:50%;background:var(--blue);"></div>
+    <div class="lr-top-bar"></div>
+    <div class="lr-logo">
+      <div class="lr-logo-icon"><i class="fas fa-motorcycle"></i></div>
+      <div>
+        <div class="lr-logo-name">BAJAJ <span style="color:var(--gold)">ADMIN</span></div>
+        <div class="lr-logo-sub">Dealer Control Panel</div>
+      </div>
     </div>
-    <h2>Admin Login</h2>
-    <p class="sub">Sign in to your dealership dashboard</p>
+    <h2>Welcome Back</h2>
+    <p class="sub">Sign in to manage your dealership</p>
 
-    <div class="ig">
-      <label>Email ID</label>
-      <i class="fas fa-envelope ico"></i>
-      <input type="email" id="email" placeholder="admin@bajaj.com"/>
+    <div class="fg-login">
+      <label>Email Address</label>
+      <div class="inp-wrap">
+        <i class="fas fa-envelope ico"></i>
+        <input type="email" id="email" placeholder="admin@bajaj.com" autocomplete="email"/>
+      </div>
     </div>
-    <div class="ig">
+    <div class="fg-login">
       <label>Password</label>
-      <i class="fas fa-lock ico"></i>
-      <input type="password" id="pass" placeholder="••••••••••"/>
+      <div class="inp-wrap">
+        <i class="fas fa-lock ico"></i>
+        <input type="password" id="pass" placeholder="••••••••••" autocomplete="current-password"/>
+      </div>
     </div>
-    <div style="text-align:right;margin-bottom:1rem;">
-      <a href="#" style="font-size:.8rem;color:var(--blue);text-decoration:none;" onclick="alert('Contact admin to reset your password')">Forgot your password?</a>
+    <div class="forgot-link"><a href="#" onclick="alert('Contact admin to reset your password');return false;">Forgot password?</a></div>
+
+    <div class="err-msg" id="loginErr">
+      <i class="fas fa-circle-xmark"></i>
+      <span id="loginErrText">Invalid credentials</span>
     </div>
-    <p class="err-msg" id="loginErr"><i class="fas fa-circle-exclamation"></i> <span id="loginErrText">Invalid credentials</span></p>
+
     <button class="btn-login" id="loginBtn">
-      <span id="loginBtnText"><i class="fas fa-right-to-bracket"></i> SIGN IN TO PANEL</span>
+      <span id="loginBtnText"><i class="fas fa-right-to-bracket"></i> Sign In to Panel</span>
       <div class="spin" id="loginSpin"></div>
     </button>
 
-    <div class="divider">OR SIGN IN WITH</div>
-    <div style="display:flex;gap:.8rem;margin-bottom:.5rem;">
-      <button class="soc-btn"><img src="https://www.google.com/favicon.ico" width="16"/> Google</button>
+    <div class="divider">Or continue with</div>
+    <div class="soc-row">
+      <button class="soc-btn"><img src="https://www.google.com/favicon.ico" width="14" style="border-radius:2px;"/> Google</button>
       <button class="soc-btn"><i class="fab fa-facebook" style="color:#1877F2;"></i> Facebook</button>
-      <button class="soc-btn"><i class="fab fa-apple" style="color:#111;"></i> Apple</button>
+      <button class="soc-btn"><i class="fab fa-apple"></i> Apple</button>
     </div>
 
-    <div class="contact-links">
-      <p><i class="fas fa-headset"></i> &nbsp;Need help? Contact support for a new ID</p>
+    <div class="contact-area">
+      <p><i class="fas fa-headset" style="color:var(--gold)"></i> Need a new admin ID? Contact support</p>
       <a class="cbtn cbtn-wa" href="https://wa.me/919876543210?text=Hi%2C%20I%20need%20a%20new%20admin%20ID%20for%20Bajaj%20panel" target="_blank">
         <i class="fab fa-whatsapp fa-lg"></i> WhatsApp Support
       </a>
-      <a class="cbtn cbtn-gm" href="mailto:bajajadmin@gmail.com?subject=New%20Admin%20ID%20Request&body=Hello%2C%20I%20need%20a%20new%20admin%20ID%20for%20the%20Bajaj%20Bikes%20panel." target="_blank">
+      <a class="cbtn cbtn-gm" href="mailto:bajajadmin@gmail.com?subject=New%20Admin%20ID%20Request&body=Hello%2C%20I%20need%20a%20new%20admin%20ID." target="_blank">
         <i class="fas fa-envelope fa-lg"></i> Email via Gmail
       </a>
     </div>
   </div>
 </div>
 
-<!-- ============================= ADMIN PANEL ============================= -->
+<!-- ══════════════════ ADMIN PANEL ══════════════════ -->
 <div id="admin-section">
 
-  <!-- NAV -->
+  <!-- NAVBAR -->
   <nav class="top-nav">
-    <div class="nav-brand"><i class="fas fa-motorcycle"></i> BAJAJ <span class="admin-txt" style="color:#fff;margin:0 .2rem;">ADMIN</span></div>
-    <div class="nav-links">
-      <div class="nav-link active" id="navPrice" onclick="switchSec('price')"><i class="fas fa-tags"></i> Price List</div>
-      <div class="nav-link" id="navInv" onclick="switchSec('inv')"><i class="fas fa-warehouse"></i> Inventory</div>
+    <div class="nav-brand">
+      <div class="nav-brand-icon"><i class="fas fa-motorcycle"></i></div>
+      <div>
+        <div class="nav-brand-text">BAJAJ <span>ADMIN</span></div>
+        <div class="nav-brand-badge">Dealer Panel</div>
+      </div>
     </div>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-tabs">
+      <div class="nav-tab active" id="navPrice" onclick="switchSec('price')">
+        <i class="fas fa-tags"></i> Price List
+      </div>
+      <div class="nav-tab" id="navInv" onclick="switchSec('inv')">
+        <i class="fas fa-warehouse"></i> Inventory
+      </div>
+    </div>
+
     <div class="nav-right">
-      <div class="nav-date"><i class="fas fa-calendar-days" style="color:var(--gold);"></i><span id="currentDate"></span></div>
-      <div class="nav-user"><i class="fas fa-user-shield" style="color:var(--gold);"></i><span id="headerUserName">Admin</span></div>
-      <button class="btn-logout" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Logout</button>
+      <div class="nav-date-chip">
+        <i class="fas fa-calendar" style="color:var(--gold);font-size:.7rem;"></i>
+        <span id="currentDate"></span>
+      </div>
+      <div class="nav-user-chip">
+        <div class="nav-avatar" id="navAvatar">A</div>
+        <span class="nav-user-name" id="headerUserName">Admin</span>
+      </div>
+      <button class="btn-logout" id="logoutBtn">
+        <i class="fas fa-right-from-bracket"></i> <span class="logout-txt">Logout</span>
+      </button>
+      <div class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </div>
     </div>
   </nav>
 
-  <div class="main-content">
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-tab active" id="mNavPrice" onclick="switchSec('price');closeMobileMenu()"><i class="fas fa-tags"></i> Price List</div>
+    <div class="mobile-tab" id="mNavInv" onclick="switchSec('inv');closeMobileMenu()"><i class="fas fa-warehouse"></i> Inventory</div>
+  </div>
 
-    <!-- ====== PRICE LIST SECTION ====== -->
+  <div class="main-wrap">
+
+    <!-- ═══ PRICE LIST SECTION ═══ -->
     <div class="sec-panel active" id="secPrice">
-
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-ico" style="background:#003087;"><i class="fas fa-motorcycle" style="color:var(--gold);"></i></div>
-          <div><div class="val" id="statModels">0</div><div class="lbl">Total Models</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-ico" style="background:#064e3b;"><i class="fas fa-rupee-sign" style="color:#34d399;"></i></div>
-          <div><div class="val" id="statAvg">—</div><div class="lbl">Avg Price</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-ico" style="background:#451a03;"><i class="fas fa-shield-halved" style="color:var(--gold);"></i></div>
-          <div><div class="val" id="statIns">0</div><div class="lbl">With Insurance</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-ico" style="background:#2d1b69;"><i class="fas fa-file-invoice-dollar" style="color:#a78bfa;"></i></div>
-          <div><div class="val" id="statFin">0</div><div class="lbl">Finance Available</div></div>
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-eyebrow"><i class="fas fa-tags" style="font-size:.6rem;"></i> Management</div>
+          <div class="page-title">Master <span>Price List</span></div>
         </div>
       </div>
 
-      <!-- Add / Edit Form -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-icon"><i class="fas fa-motorcycle"></i></div>
+            <div><div class="stat-val" id="statModels">0</div><div class="stat-lbl">Total Models</div></div>
+          </div>
+          <i class="fas fa-motorcycle stat-bg-icon"></i>
+        </div>
+        <div class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-icon"><i class="fas fa-indian-rupee-sign"></i></div>
+            <div><div class="stat-val" id="statAvg">—</div><div class="stat-lbl">Avg Price</div></div>
+          </div>
+          <i class="fas fa-chart-line stat-bg-icon"></i>
+        </div>
+        <div class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-icon"><i class="fas fa-shield-halved"></i></div>
+            <div><div class="stat-val" id="statIns">0</div><div class="stat-lbl">With Insurance</div></div>
+          </div>
+          <i class="fas fa-shield-halved stat-bg-icon"></i>
+        </div>
+        <div class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div><div class="stat-val" id="statFin">0</div><div class="stat-lbl">Finance Available</div></div>
+          </div>
+          <i class="fas fa-file-invoice-dollar stat-bg-icon"></i>
+        </div>
+      </div>
+
+      <!-- Form -->
       <div class="form-card">
-        <div class="form-card-title"><i class="fas fa-plus-circle"></i><span id="masterFormTitle">Add New Bike Model</span></div>
-        <div class="frow">
-          <div class="fg">
-            <label>S.N <span>*</span></label>
-            <input type="number" id="mSn" placeholder="e.g. 1" min="1"/>
+        <div class="form-card-header">
+          <div class="form-card-title"><i class="fas fa-plus-circle"></i><span id="masterFormTitle">Add New Bike Model</span></div>
+        </div>
+        <div class="form-grid">
+          <div class="fg" style="max-width:100px;">
+            <label>S.N <span class="req">*</span></label>
+            <input type="number" id="mSn" placeholder="1" min="1"/>
           </div>
           <div class="fg" style="grid-column:span 2;">
-            <label>Model Name <span>*</span></label>
+            <label>Model Name <span class="req">*</span></label>
             <input type="text" id="mName" placeholder="e.g. Pulsar NS200"/>
           </div>
           <div class="fg">
-            <label>Price (₹) <span>*</span></label>
-            <input type="number" id="mPrice" placeholder="e.g. 145000"/>
+            <label>Price (₹) <span class="req">*</span></label>
+            <input type="number" id="mPrice" placeholder="145000"/>
           </div>
           <div class="fg">
-            <label>Insurance (₹) <span>*</span></label>
-            <input type="number" id="mNormalIns" placeholder="e.g. 8500"/>
+            <label>Insurance (₹) <span class="req">*</span></label>
+            <input type="number" id="mNormalIns" placeholder="8500"/>
           </div>
           <div class="fg">
-            <label>Finance Insurance (₹) <span>*</span></label>
-            <input type="number" id="mFinanceIns" placeholder="e.g. 3200"/>
+            <label>Finance Insurance (₹) <span class="req">*</span></label>
+            <input type="number" id="mFinanceIns" placeholder="3200"/>
           </div>
           <div class="fg">
-            <label>Image URL <small style="color:var(--muted);text-transform:none;">(optional)</small></label>
+            <label>Image URL <small style="text-transform:none;color:var(--muted);font-weight:400;letter-spacing:0;">(optional)</small></label>
             <input type="text" id="mImg" placeholder="https://...image.jpg"/>
           </div>
         </div>
-        <div style="display:flex;gap:.8rem;align-items:center;margin-top:.5rem;">
-          <button class="btn-save-form" id="saveModelBtn"><i class="fas fa-floppy-disk"></i> Save to Master List</button>
-          <button class="btn-cancel-form" id="cancelMasterBtn" onclick="cancelMasterEdit()"><i class="fas fa-xmark"></i> Cancel Edit</button>
+        <div class="form-actions">
+          <button class="btn-primary" id="saveModelBtn"><i class="fas fa-floppy-disk"></i> Save to Master List</button>
+          <button class="btn-outline btn-cancel" id="cancelMasterBtn" onclick="cancelMasterEdit()"><i class="fas fa-xmark"></i> Cancel Edit</button>
         </div>
       </div>
 
       <!-- Table -->
-      <div class="table-wrap">
-        <div class="table-header">
-          <div class="table-title"><i class="fas fa-tags"></i> Master Price List <span class="tbl-count" id="priceCount">0 models</span></div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="table-toolbar-left">
+            <div class="table-card-title"><i class="fas fa-tags"></i> Price Catalogue</div>
+            <span class="count-badge" id="priceCount">0 models</span>
+          </div>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="tbl-overflow">
           <table>
             <thead>
-              <tr>
-                <th>S.N</th><th>Image</th><th>Model Name</th><th>Price (₹)</th><th>Insurance</th><th>Finance Ins.</th><th>Actions</th>
-              </tr>
+              <tr><th>S.N</th><th>Image</th><th>Model Name</th><th>Price</th><th>Insurance</th><th>Finance Ins.</th><th>Actions</th></tr>
             </thead>
             <tbody id="masterTableBody">
-              <tr><td colspan="7"><div class="tbl-loading"><i class="fas fa-circle-notch"></i>Loading data from Firebase…</div></td></tr>
+              <tr><td colspan="7"><div class="loading-row"><i class="fas fa-circle-notch"></i>Connecting to database…</div></td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ====== INVENTORY SECTION ====== -->
+    <!-- ═══ INVENTORY SECTION ═══ -->
     <div class="sec-panel" id="secInv">
-
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-ico" style="background:#003087;"><i class="fas fa-warehouse" style="color:var(--gold);"></i></div>
-          <div><div class="val" id="statInvTotal">0</div><div class="lbl">Total Units</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-ico" style="background:#064e3b;"><i class="fas fa-check-circle" style="color:#34d399;"></i></div>
-          <div><div class="val" id="statInvReg">0</div><div class="lbl">Registered</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-ico" style="background:#451a03;"><i class="fas fa-hourglass-half" style="color:var(--gold);"></i></div>
-          <div><div class="val" id="statInvPend">0</div><div class="lbl">Pending Reg.</div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-ico" style="background:#1a1035;"><i class="fas fa-palette" style="color:#a78bfa;"></i></div>
-          <div><div class="val" id="statInvCol">0</div><div class="lbl">Colour Variants</div></div>
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-eyebrow"><i class="fas fa-warehouse" style="font-size:.6rem;"></i> Stock Management</div>
+          <div class="page-title">Live <span>Inventory</span></div>
         </div>
       </div>
 
-      <!-- Add Unit Form -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-icon"><i class="fas fa-warehouse"></i></div>
+            <div><div class="stat-val" id="statInvTotal">0</div><div class="stat-lbl">Total Units</div></div>
+          </div>
+          <i class="fas fa-warehouse stat-bg-icon"></i>
+        </div>
+        <div class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-icon"><i class="fas fa-circle-check"></i></div>
+            <div><div class="stat-val" id="statInvReg">0</div><div class="stat-lbl">Registered</div></div>
+          </div>
+          <i class="fas fa-id-card stat-bg-icon"></i>
+        </div>
+        <div class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+            <div><div class="stat-val" id="statInvPend">0</div><div class="stat-lbl">Pending Reg.</div></div>
+          </div>
+          <i class="fas fa-hourglass stat-bg-icon"></i>
+        </div>
+        <div class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-icon"><i class="fas fa-palette"></i></div>
+            <div><div class="stat-val" id="statInvCol">0</div><div class="stat-lbl">Colour Variants</div></div>
+          </div>
+          <i class="fas fa-palette stat-bg-icon"></i>
+        </div>
+      </div>
+
+      <!-- Form -->
       <div class="form-card">
-        <div class="form-card-title"><i class="fas fa-plus-circle"></i> Add Inventory Unit</div>
-        <div class="frow">
-          <div class="fg">
-            <label>S.N <span>*</span></label>
-            <input type="number" id="sSn" placeholder="e.g. 1" min="1"/>
+        <div class="form-card-header">
+          <div class="form-card-title"><i class="fas fa-plus-circle"></i> Add Inventory Unit</div>
+        </div>
+        <div class="form-grid">
+          <div class="fg" style="max-width:100px;">
+            <label>S.N <span class="req">*</span></label>
+            <input type="number" id="sSn" placeholder="1" min="1"/>
           </div>
           <div class="fg">
-            <label>Model <span>*</span></label>
+            <label>Model <span class="req">*</span></label>
             <select id="stockModelSelect"><option value="">— Select Model —</option></select>
           </div>
           <div class="fg">
-            <label>Price (₹) <span>*</span></label>
-            <input type="number" id="sPrice" placeholder="Auto-fills from model"/>
+            <label>Price (₹) <span class="req">*</span></label>
+            <input type="number" id="sPrice" placeholder="Auto-fills"/>
           </div>
           <div class="fg">
-            <label>Chassis No <span>*</span></label>
+            <label>Chassis No <span class="req">*</span></label>
             <input type="text" id="sChassis" placeholder="MD2A12EY..."/>
           </div>
           <div class="fg">
-            <label>Engine No <span>*</span></label>
+            <label>Engine No <span class="req">*</span></label>
             <input type="text" id="sEngine" placeholder="BSVI2024..."/>
           </div>
           <div class="fg">
-            <label>Registration No <span>*</span></label>
-            <input type="text" id="sRegNo" placeholder="MH12AB1234"/>
+            <label>Registration No</label>
+            <input type="text" id="sRegNo" placeholder="BA 2 PA 1234"/>
           </div>
           <div class="fg">
-            <label>Colour <span>*</span></label>
+            <label>Colour <span class="req">*</span></label>
             <input type="text" id="sColor" placeholder="e.g. Fiery Orange"/>
           </div>
         </div>
-        <button class="btn-save-form" id="saveStockBtn"><i class="fas fa-floppy-disk"></i> Save Unit</button>
+        <div class="form-actions">
+          <button class="btn-primary" id="saveStockBtn"><i class="fas fa-floppy-disk"></i> Save Unit</button>
+        </div>
       </div>
 
       <!-- Inventory Table -->
-      <div class="table-wrap">
-        <div class="table-header">
-          <div class="table-title"><i class="fas fa-warehouse"></i> Live Stock <span class="tbl-count" id="invCount">0 units</span></div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="table-toolbar-left">
+            <div class="table-card-title"><i class="fas fa-warehouse"></i> Stock Register</div>
+            <span class="count-badge" id="invCount">0 units</span>
+          </div>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="tbl-overflow">
           <table>
             <thead>
-              <tr>
-                <th>S.N</th><th>Model</th><th>Price (₹)</th><th>Chassis No</th><th>Engine No</th><th>Reg. No</th><th>Colour</th><th>Actions</th>
-              </tr>
+              <tr><th>S.N</th><th>Model</th><th>Price</th><th>Chassis No</th><th>Engine No</th><th>Reg. No</th><th>Colour</th><th>Actions</th></tr>
             </thead>
             <tbody id="stockTableBody">
-              <tr><td colspan="8"><div class="tbl-loading"><i class="fas fa-circle-notch"></i>Loading inventory…</div></td></tr>
+              <tr><td colspan="8"><div class="loading-row"><i class="fas fa-circle-notch"></i>Loading inventory…</div></td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  </div>
+
+  </div><!-- /main-wrap -->
 
   <!-- FOOTER -->
   <footer>
-    <div class="footer-top">
+    <div class="footer-body">
       <div class="f-brand">
-        <div class="f-brand-logo"><i class="fas fa-motorcycle"></i> BAJAJ BIKES</div>
+        <div class="f-brand-logo">
+          <div class="f-brand-icon"><i class="fas fa-motorcycle"></i></div>
+          <div class="f-brand-name">BAJAJ <span>BIKES</span></div>
+        </div>
         <p>Your trusted Bajaj dealership. Premium bikes, competitive pricing, and complete post-sale support — all managed from one powerful admin dashboard.</p>
-        <div class="f-social">
-          <a class="fsoc fsoc-wa" href="https://wa.me/919876543210" target="_blank"><i class="fab fa-whatsapp"></i></a>
-          <a class="fsoc fsoc-gm" href="mailto:bajajadmin@gmail.com" target="_blank"><i class="fas fa-envelope"></i></a>
-          <a class="fsoc fsoc-tw" href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+        <div class="f-socials">
+          <a class="f-soc f-soc-wa" href="https://wa.me/919876543210" target="_blank"><i class="fab fa-whatsapp"></i></a>
+          <a class="f-soc f-soc-gm" href="mailto:bajajadmin@gmail.com" target="_blank"><i class="fas fa-envelope"></i></a>
+          <a class="f-soc f-soc-tw" href="#" target="_blank"><i class="fab fa-twitter"></i></a>
         </div>
       </div>
+
       <div class="f-col">
-        <h4>Quick Nav</h4>
+        <h5>Quick Nav</h5>
         <ul>
           <li onclick="switchSec('price')"><i class="fas fa-chevron-right"></i> Price List</li>
           <li onclick="switchSec('inv')"><i class="fas fa-chevron-right"></i> Inventory</li>
         </ul>
       </div>
+
       <div class="f-col">
-        <h4>Bajaj Models</h4>
+        <h5>Bajaj Models</h5>
         <ul>
           <li><i class="fas fa-circle-dot"></i> Pulsar Series</li>
           <li><i class="fas fa-circle-dot"></i> Dominar Series</li>
@@ -497,41 +908,45 @@ footer{background:#080c17;border-top:1px solid var(--border);margin-top:3rem;}
           <li><i class="fas fa-circle-dot"></i> Avenger Series</li>
         </ul>
       </div>
+
       <div class="f-col">
-        <h4>Contact Us</h4>
-        <div class="f-ci"><i class="fab fa-whatsapp"></i><span>+91 98765 43210</span></div>
-        <div class="f-ci"><i class="fas fa-envelope"></i><span>bajajadmin@gmail.com</span></div>
-        <div class="f-ci"><i class="fas fa-map-marker-alt"></i><span>Bajaj Showroom, Main Road, Your City</span></div>
-        <div class="f-ci"><i class="fas fa-clock"></i><span>Mon–Sat: 9 AM – 7 PM</span></div>
+        <h5>Contact Us</h5>
+        <div class="f-contact-item"><i class="fab fa-whatsapp"></i><span>+91 98765 43210</span></div>
+        <div class="f-contact-item"><i class="fas fa-envelope"></i><span>bajajadmin@gmail.com</span></div>
+        <div class="f-contact-item"><i class="fas fa-location-dot"></i><span>Bajaj Showroom, Main Road, Your City</span></div>
+        <div class="f-contact-item"><i class="fas fa-clock"></i><span>Mon–Sat: 9 AM – 7 PM</span></div>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 <span>Bajaj Bikes Admin Panel</span>. All rights reserved.</p>
-      <div class="fbl"><a href="#">Privacy Policy</a><a href="#">Terms of Use</a><a href="#">Support</a></div>
+      <p class="footer-copy">&copy; 2026 <span>Bajaj Bikes Admin Panel</span>. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Support</a>
+      </div>
     </div>
   </footer>
 </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast">
-  <i id="toastIcon" class="fas fa-circle-check" style="color:var(--gold);font-size:1.1rem;"></i>
+  <div class="toast-bar" id="toastBar"></div>
+  <i id="toastIcon" class="fas fa-circle-check" style="font-size:1rem;flex-shrink:0;"></i>
   <span id="toastMsg"></span>
 </div>
 
-<!-- ============================= FIREBASE JS (MODULE) ============================= -->
+<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-// ---- Firebase Config ----
 const firebaseConfig = {
   apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
   authDomain: "first-project-2082-12-26.firebaseapp.com",
   projectId: "first-project-2082-12-26",
   appId: "1:545170954251:web:0d2f7905834af3b0be8f0e"
 };
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -540,30 +955,31 @@ let currentEditId = null;
 let allMasterBikes = [];
 let invData = [];
 
-// ---- Helpers ----
+/* ─── Helpers ─── */
 function toast(msg, type='ok') {
   const t = document.getElementById('toast');
   const ic = document.getElementById('toastIcon');
+  const bar = document.getElementById('toastBar');
   ic.className = type==='err' ? 'fas fa-circle-xmark' : 'fas fa-circle-check';
-  ic.style.color = type==='err' ? '#E8003D' : '#F5A623';
-  t.style.borderLeftColor = type==='err' ? '#E8003D' : '#F5A623';
+  ic.style.color = type==='err' ? '#f87171' : '#f5a500';
+  bar.className = `toast-bar ${type}`;
   document.getElementById('toastMsg').textContent = msg;
   t.style.display = 'flex';
-  setTimeout(() => t.style.display='none', 3200);
+  setTimeout(()=>{ t.style.display='none'; }, 3200);
 }
 
-function colourDot(col='') {
-  const map = {red:'#ef4444',blue:'#3b82f6',black:'#374151',white:'#f8fafc',orange:'#f97316',green:'#22c55e',yellow:'#eab308',silver:'#94a3b8',grey:'#64748b',gray:'#64748b',maroon:'#be123c',brown:'#92400e',purple:'#7c3aed',pink:'#ec4899'};
-  const k = col.toLowerCase().split(/\s+/).find(w => map[w]);
+function colourHex(col='') {
+  const map={red:'#ef4444',blue:'#3b82f6',black:'#374151',white:'#f8fafc',orange:'#f97316',green:'#22c55e',yellow:'#eab308',silver:'#94a3b8',grey:'#64748b',gray:'#64748b',maroon:'#be123c',brown:'#92400e',purple:'#7c3aed',pink:'#ec4899'};
+  const k = col.toLowerCase().split(/\s+/).find(w=>map[w]);
   return k ? map[k] : '#6366f1';
 }
 
-// ---- AUTH STATE ----
+/* ─── Auth ─── */
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('admin-section').style.display = 'flex';
-    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     await loadProfile(user.uid);
     loadMasterPriceList();
     loadLiveStock();
@@ -575,13 +991,12 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ---- LOGIN ----
 function setBtnState(loading) {
   const btn = document.getElementById('loginBtn');
   const txt = document.getElementById('loginBtnText');
   const sp = document.getElementById('loginSpin');
   btn.disabled = loading;
-  txt.style.display = loading ? 'none' : 'block';
+  txt.style.display = loading ? 'none' : 'flex';
   sp.style.display = loading ? 'block' : 'none';
 }
 
@@ -590,266 +1005,224 @@ document.getElementById('loginBtn').addEventListener('click', () => {
   const pass = document.getElementById('pass').value;
   const errEl = document.getElementById('loginErr');
   errEl.style.display = 'none';
-  if (!email || !pass) { errEl.style.display='block'; document.getElementById('loginErrText').textContent='Please enter email and password.'; return; }
+  if (!email||!pass) { errEl.style.display='flex'; document.getElementById('loginErrText').textContent='Please enter email and password.'; return; }
   setBtnState(true);
   signInWithEmailAndPassword(auth, email, pass)
-    .then(uc => console.log("Logged in:", uc.user.email))
     .catch(e => {
-      errEl.style.display = 'block';
-      document.getElementById('loginErrText').textContent = e.code==='auth/invalid-credential' ? 'Wrong email or password.' : e.message;
+      errEl.style.display='flex';
+      document.getElementById('loginErrText').textContent = e.code==='auth/invalid-credential'?'Wrong email or password.':e.message;
       setBtnState(false);
     });
 });
-
-// Enter key login
 document.addEventListener('keydown', e => {
   if (e.key==='Enter' && document.getElementById('login-section').style.display!=='none') document.getElementById('loginBtn').click();
 });
+document.getElementById('logoutBtn').addEventListener('click', ()=>signOut(auth));
 
-// ---- LOGOUT ----
-document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
-
-// ---- PROFILE ----
 async function loadProfile(uid) {
   try {
-    const snap = await getDoc(doc(db, "profiles", uid));
-    document.getElementById('headerUserName').innerText = snap.exists() ? (snap.data().name || 'Admin') : 'Administrator';
-  } catch { document.getElementById('headerUserName').innerText = 'Administrator'; }
+    const snap = await getDoc(doc(db,"profiles",uid));
+    const name = snap.exists() ? (snap.data().name||'Admin') : 'Administrator';
+    document.getElementById('headerUserName').textContent = name;
+    document.getElementById('navAvatar').textContent = name.charAt(0).toUpperCase();
+  } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
 }
 
-// ---- MASTER PRICE LIST ----
+/* ─── Master Price List ─── */
 function loadMasterPriceList() {
-  onSnapshot(collection(db, "bikes"), (snap) => {
-    allMasterBikes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderMasterTable();
-    updatePriceStats();
-    populateModelDropdown();
+  onSnapshot(collection(db,"bikes"), snap => {
+    allMasterBikes = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderMasterTable(); updatePriceStats(); populateModelDropdown();
   });
 }
-
 function renderMasterTable() {
   const tbody = document.getElementById('masterTableBody');
-  document.getElementById('priceCount').textContent = allMasterBikes.length + ' model' + (allMasterBikes.length!==1?'s':'');
+  document.getElementById('priceCount').textContent = allMasterBikes.length+' model'+(allMasterBikes.length!==1?'s':'');
   if (!allMasterBikes.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fas fa-motorcycle"></i><p>No models yet. Use the form above to add your first bike.</p></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><i class="fas fa-motorcycle"></i><p>No models yet. Add your first bike above.</p></div></td></tr>`;
     return;
   }
-  const sorted = [...allMasterBikes].sort((a,b) => (Number(a.sn)||9999) - (Number(b.sn)||9999));
-  tbody.innerHTML = sorted.map((b) => `
+  const sorted=[...allMasterBikes].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
+  tbody.innerHTML = sorted.map(b=>`
     <tr>
-      <td>
-        <input class="sn-input" type="number" value="${b.sn||''}" min="1" placeholder="—"
-          title="Click to edit S.N"
-          onblur="window._saveSn('bikes','${b.id}',this.value)"
-          onkeydown="if(event.key==='Enter'){this.blur();}"/>
-      </td>
-      <td>${b.img ? `<img src="${b.img}" class="img-preview" onerror="this.style.display='none'">` : `<div class="no-img"><i class="fas fa-image"></i></div>`}</td>
-      <td><span style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:1rem;">${b.name}</span></td>
+      <td><input class="sn-input" type="number" value="${b.sn||''}" min="1" placeholder="—"
+        onblur="window._saveSn('bikes','${b.id}',this.value)"
+        onkeydown="if(event.key==='Enter')this.blur()"/></td>
+      <td class="img-cell">${b.img?`<img src="${b.img}" onerror="this.style.display='none'" alt="">`:`<div class="no-img-cell"><i class="fas fa-image" style="font-size:.6rem;color:var(--muted)"></i></div>`}</td>
+      <td><span class="bike-name-cell">${b.name}</span></td>
       <td><span class="badge b-blue">₹${Number(b.price).toLocaleString('en-IN')}</span></td>
       <td><span class="badge b-green">₹${Number(b.Insurance||0).toLocaleString('en-IN')}</span></td>
       <td><span class="badge b-gold">₹${Number(b.financeInsurance||0).toLocaleString('en-IN')}</span></td>
-      <td>
-        <div class="act-btns">
-          <button class="btn-edit-row" onclick="window._editMaster('${b.id}')"><i class="fas fa-pen"></i> Edit</button>
-          <button class="btn-del-row" onclick="window._deleteEntry('bikes','${b.id}')"><i class="fas fa-trash"></i> Del</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
+      <td><div class="act-btns">
+        <button class="btn-edit-sm" onclick="window._editMaster('${b.id}')"><i class="fas fa-pen"></i> Edit</button>
+        <button class="btn-del-sm" onclick="window._deleteEntry('bikes','${b.id}')"><i class="fas fa-trash"></i> Del</button>
+      </div></td>
+    </tr>`).join('');
 }
-
 function updatePriceStats() {
-  const n = allMasterBikes.length;
-  document.getElementById('statModels').textContent = n;
-  document.getElementById('statAvg').textContent = n ? '₹'+Math.round(allMasterBikes.reduce((s,x)=>s+Number(x.price),0)/n).toLocaleString('en-IN') : '—';
-  document.getElementById('statIns').textContent = allMasterBikes.filter(x=>Number(x.Insurance||0)>0).length;
-  document.getElementById('statFin').textContent = allMasterBikes.filter(x=>Number(x.financeInsurance||0)>0).length;
+  const n=allMasterBikes.length;
+  document.getElementById('statModels').textContent=n;
+  document.getElementById('statAvg').textContent=n?'₹'+Math.round(allMasterBikes.reduce((s,x)=>s+Number(x.price),0)/n).toLocaleString('en-IN'):'—';
+  document.getElementById('statIns').textContent=allMasterBikes.filter(x=>Number(x.Insurance||0)>0).length;
+  document.getElementById('statFin').textContent=allMasterBikes.filter(x=>Number(x.financeInsurance||0)>0).length;
 }
-
 function populateModelDropdown() {
-  const sel = document.getElementById('stockModelSelect');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">— Select Model —</option>' + allMasterBikes.map(b => `<option value="${b.name}" data-price="${b.price}">${b.name}</option>`).join('');
-  if (cur) sel.value = cur;
+  const sel=document.getElementById('stockModelSelect');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— Select Model —</option>'+allMasterBikes.map(b=>`<option value="${b.name}" data-price="${b.price}">${b.name}</option>`).join('');
+  if(cur) sel.value=cur;
 }
-
-// Auto-fill price when model selected
-document.getElementById('stockModelSelect').addEventListener('change', function() {
-  const opt = this.selectedOptions[0];
-  document.getElementById('sPrice').value = opt && opt.dataset.price ? opt.dataset.price : '';
+document.getElementById('stockModelSelect').addEventListener('change',function(){
+  const opt=this.selectedOptions[0];
+  document.getElementById('sPrice').value=opt&&opt.dataset.price?opt.dataset.price:'';
 });
 
-// Edit master
-window._editMaster = (id) => {
-  const b = allMasterBikes.find(x=>x.id===id);
-  if (!b) return;
-  document.getElementById('mSn').value = b.sn || '';
-  document.getElementById('mName').value = b.name;
-  document.getElementById('mPrice').value = b.price;
-  document.getElementById('mNormalIns').value = b.Insurance || 0;
-  document.getElementById('mFinanceIns').value = b.financeInsurance || 0;
-  document.getElementById('mImg').value = b.img || '';
-  currentEditId = id;
-  const btn = document.getElementById('saveModelBtn');
-  btn.innerHTML = '<i class="fas fa-rotate"></i> Update Model Info';
+window._editMaster=(id)=>{
+  const b=allMasterBikes.find(x=>x.id===id); if(!b)return;
+  document.getElementById('mSn').value=b.sn||'';
+  document.getElementById('mName').value=b.name;
+  document.getElementById('mPrice').value=b.price;
+  document.getElementById('mNormalIns').value=b.Insurance||0;
+  document.getElementById('mFinanceIns').value=b.financeInsurance||0;
+  document.getElementById('mImg').value=b.img||'';
+  currentEditId=id;
+  const btn=document.getElementById('saveModelBtn');
+  btn.innerHTML='<i class="fas fa-rotate"></i> Update Model Info';
   btn.classList.add('edit-mode');
-  document.getElementById('masterFormTitle').textContent = 'Edit Bike Model';
-  document.getElementById('cancelMasterBtn').style.display = 'inline-flex';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('masterFormTitle').textContent='Edit Bike Model';
+  document.getElementById('cancelMasterBtn').style.display='inline-flex';
+  window.scrollTo({top:0,behavior:'smooth'});
   toast('Model loaded for editing');
 };
-
-window.cancelMasterEdit = () => {
-  currentEditId = null;
-  clearMasterForm();
-  document.getElementById('saveModelBtn').innerHTML = '<i class="fas fa-floppy-disk"></i> Save to Master List';
+window.cancelMasterEdit=()=>{
+  currentEditId=null; clearMasterForm();
+  document.getElementById('saveModelBtn').innerHTML='<i class="fas fa-floppy-disk"></i> Save to Master List';
   document.getElementById('saveModelBtn').classList.remove('edit-mode');
-  document.getElementById('masterFormTitle').textContent = 'Add New Bike Model';
-  document.getElementById('cancelMasterBtn').style.display = 'none';
+  document.getElementById('masterFormTitle').textContent='Add New Bike Model';
+  document.getElementById('cancelMasterBtn').style.display='none';
 };
-
-document.getElementById('saveModelBtn').addEventListener('click', async () => {
-  const sn = document.getElementById('mSn').value.trim();
-  const name = document.getElementById('mName').value.trim();
-  const price = document.getElementById('mPrice').value.trim();
-  const ins = document.getElementById('mNormalIns').value.trim();
-  const fin = document.getElementById('mFinanceIns').value.trim();
-  if (!sn || !name || !price || !ins || !fin) { toast('Please fill all required fields! (S.N is required)','err'); return; }
-  const data = {
-    sn: Number(sn),
-    name,
-    price: Number(price),
-    Insurance: Number(ins) || 0,
-    financeInsurance: Number(fin) || 0,
-    img: document.getElementById('mImg').value.trim()
-  };
+document.getElementById('saveModelBtn').addEventListener('click',async()=>{
+  const sn=document.getElementById('mSn').value.trim();
+  const name=document.getElementById('mName').value.trim();
+  const price=document.getElementById('mPrice').value.trim();
+  const ins=document.getElementById('mNormalIns').value.trim();
+  const fin=document.getElementById('mFinanceIns').value.trim();
+  if(!sn||!name||!price||!ins||!fin){toast('Fill all required fields!','err');return;}
+  const data={sn:Number(sn),name,price:Number(price),Insurance:Number(ins)||0,financeInsurance:Number(fin)||0,img:document.getElementById('mImg').value.trim()};
   try {
-    if (currentEditId) {
-      await updateDoc(doc(db, "bikes", currentEditId), data);
-      toast('Model updated successfully!');
-    } else {
-      await addDoc(collection(db, "bikes"), data);
-      toast('Model added to price list!');
-    }
+    if(currentEditId){await updateDoc(doc(db,"bikes",currentEditId),data);toast('Model updated!');}
+    else{await addDoc(collection(db,"bikes"),data);toast('Model added!');}
     window.cancelMasterEdit();
-  } catch(e) { toast('Error: '+e.message,'err'); }
+  }catch(e){toast('Error: '+e.message,'err');}
 });
+function clearMasterForm(){['mSn','mName','mPrice','mNormalIns','mFinanceIns','mImg'].forEach(id=>document.getElementById(id).value='');}
 
-function clearMasterForm() {
-  ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mImg'].forEach(id => document.getElementById(id).value='');
-}
-
-// ---- LIVE STOCK / INVENTORY ----
-document.getElementById('saveStockBtn').addEventListener('click', async () => {
-  const sn = document.getElementById('sSn').value.trim();
-  const modelName = document.getElementById('stockModelSelect').value;
-  const bikeInfo = allMasterBikes.find(b=>b.name===modelName);
-  const price = document.getElementById('sPrice').value.trim();
-  const chassis = document.getElementById('sChassis').value.trim();
-  const engine = document.getElementById('sEngine').value.trim();
-  const regNo = document.getElementById('sRegNo').value.trim();
-  const color = document.getElementById('sColor').value.trim();
-
-  if (!sn) { toast('S.N is required!','err'); return; }
-  if (!modelName || !bikeInfo) { toast('Please select a valid model!','err'); return; }
-  if (!price || !chassis || !engine || !color) { toast('Please fill all required fields!','err'); return; }
-
+/* ─── Inventory ─── */
+document.getElementById('saveStockBtn').addEventListener('click',async()=>{
+  const sn=document.getElementById('sSn').value.trim();
+  const modelName=document.getElementById('stockModelSelect').value;
+  const bikeInfo=allMasterBikes.find(b=>b.name===modelName);
+  const price=document.getElementById('sPrice').value.trim();
+  const chassis=document.getElementById('sChassis').value.trim();
+  const engine=document.getElementById('sEngine').value.trim();
+  const regNo=document.getElementById('sRegNo').value.trim();
+  const color=document.getElementById('sColor').value.trim();
+  if(!sn){toast('S.N is required!','err');return;}
+  if(!modelName||!bikeInfo){toast('Select a valid model!','err');return;}
+  if(!price||!chassis||!engine||!color){toast('Fill all required fields!','err');return;}
   try {
-    await addDoc(collection(db, "inventory"), {
-      sn: Number(sn),
-      model: modelName,
-      price: Number(price),
-      chassis, engine, regNo, color,
-      addedAt: new Date()
-    });
-    ['sSn','sRegNo','sChassis','sEngine','sColor'].forEach(id => document.getElementById(id).value='');
+    await addDoc(collection(db,"inventory"),{sn:Number(sn),model:modelName,price:Number(price),chassis,engine,regNo,color,addedAt:new Date()});
+    ['sSn','sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('stockModelSelect').value='';
     document.getElementById('sPrice').value='';
     toast('Unit added to inventory!');
-  } catch(e) { toast('Error: '+e.message,'err'); }
+  }catch(e){toast('Error: '+e.message,'err');}
 });
-
-function loadLiveStock() {
-  onSnapshot(collection(db, "inventory"), (snap) => {
-    invData = snap.docs.map(d => ({id:d.id,...d.data()}));
-    renderInvTable(snap.docs);
-    updateInvStats();
+function loadLiveStock(){
+  onSnapshot(collection(db,"inventory"),snap=>{
+    invData=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderInvTable(snap.docs); updateInvStats();
   });
 }
-
-function renderInvTable(docs) {
-  const tbody = document.getElementById('stockTableBody');
-  document.getElementById('invCount').textContent = docs.length + ' unit' + (docs.length!==1?'s':'');
-  if (!docs.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-warehouse"></i><p>No inventory records yet. Add a unit using the form above.</p></div></td></tr>`;
+function renderInvTable(docs){
+  const tbody=document.getElementById('stockTableBody');
+  document.getElementById('invCount').textContent=docs.length+' unit'+(docs.length!==1?'s':'');
+  if(!docs.length){
+    tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><i class="fas fa-warehouse"></i><p>No inventory yet. Add a unit using the form above.</p></div></td></tr>`;
     return;
   }
-  const sorted = [...docs].sort((a,b) => (Number(a.data().sn)||9999) - (Number(b.data().sn)||9999));
-  tbody.innerHTML = sorted.map((d) => {
-    const s = d.data();
-    return `
-    <tr>
-      <td>
-        <input class="sn-input" type="number" value="${s.sn||''}" min="1" placeholder="—"
-          title="Click to edit S.N"
-          onblur="window._saveSn('inventory','${d.id}',this.value)"
-          onkeydown="if(event.key==='Enter'){this.blur();}"/>
-      </td>
-      <td><span style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:1rem;">${s.model}</span></td>
+  const sorted=[...docs].sort((a,b)=>(Number(a.data().sn)||9999)-(Number(b.data().sn)||9999));
+  tbody.innerHTML=sorted.map(d=>{
+    const s=d.data();
+    return`<tr>
+      <td><input class="sn-input" type="number" value="${s.sn||''}" min="1" placeholder="—"
+        onblur="window._saveSn('inventory','${d.id}',this.value)"
+        onkeydown="if(event.key==='Enter')this.blur()"/></td>
+      <td><span class="model-name-cell">${s.model}</span></td>
       <td><span class="badge b-blue">₹${Number(s.price).toLocaleString('en-IN')}</span></td>
-      <td><code style="font-size:.78rem;color:#94b8e8;background:#0d1526;padding:.2rem .5rem;border-radius:4px;">${s.chassis||'—'}</code></td>
-      <td><code style="font-size:.78rem;color:#94b8e8;background:#0d1526;padding:.2rem .5rem;border-radius:4px;">${s.engine||'—'}</code></td>
-      <td>${s.regNo ? `<span class="badge b-green">${s.regNo}</span>` : `<span class="badge b-gray">Pending</span>`}</td>
-      <td>
-        <span style="display:inline-flex;align-items:center;gap:.4rem;">
-          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colourDot(s.color||'')};border:1px solid #ffffff33;flex-shrink:0;"></span>
-          ${s.color||'—'}
-        </span>
-      </td>
-      <td>
-        <div class="act-btns">
-          <button class="btn-del-row" onclick="window._deleteEntry('inventory','${d.id}')"><i class="fas fa-trash"></i> Del</button>
-        </div>
-      </td>
+      <td><span class="code-cell">${s.chassis||'—'}</span></td>
+      <td><span class="code-cell">${s.engine||'—'}</span></td>
+      <td>${s.regNo?`<span class="badge b-green">${s.regNo}</span>`:`<span class="badge b-gray">Pending</span>`}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:.4rem;">
+        <span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}
+      </span></td>
+      <td><div class="act-btns"><button class="btn-del-sm" onclick="window._deleteEntry('inventory','${d.id}')"><i class="fas fa-trash"></i> Del</button></div></td>
     </tr>`;
   }).join('');
 }
-
-function updateInvStats() {
-  document.getElementById('statInvTotal').textContent = invData.length;
-  document.getElementById('statInvReg').textContent = invData.filter(x=>x.regNo&&x.regNo.trim()).length;
-  document.getElementById('statInvPend').textContent = invData.filter(x=>!x.regNo||!x.regNo.trim()).length;
-  document.getElementById('statInvCol').textContent = new Set(invData.map(x=>(x.color||'').toLowerCase())).size;
+function updateInvStats(){
+  document.getElementById('statInvTotal').textContent=invData.length;
+  document.getElementById('statInvReg').textContent=invData.filter(x=>x.regNo&&x.regNo.trim()).length;
+  document.getElementById('statInvPend').textContent=invData.filter(x=>!x.regNo||!x.regNo.trim()).length;
+  document.getElementById('statInvCol').textContent=new Set(invData.map(x=>(x.color||'').toLowerCase())).size;
 }
 
-// ---- INLINE SN SAVE ----
-window._saveSn = async (col, id, val) => {
-  const num = Number(val);
-  if (!val || isNaN(num) || num < 1) { toast('S.N must be a positive number','err'); return; }
-  try {
-    await updateDoc(doc(db, col, id), { sn: num });
-    toast('S.N updated to ' + num);
-  } catch(e) { toast('Failed to update S.N: '+e.message,'err'); }
+window._saveSn=async(col,id,val)=>{
+  const num=Number(val);
+  if(!val||isNaN(num)||num<1){toast('S.N must be a positive number','err');return;}
+  try{await updateDoc(doc(db,col,id),{sn:num});toast('S.N updated to '+num);}
+  catch(e){toast('Failed: '+e.message,'err');}
+};
+window._deleteEntry=async(col,id)=>{
+  if(!confirm('Delete this entry?'))return;
+  try{
+    await deleteDoc(doc(db,col,id));
+    toast(col==='bikes'?'Model deleted.':'Unit removed.');
+  }catch(e){toast('Delete failed: '+e.message,'err');}
 };
 
-// ---- DELETE ----
-window._deleteEntry = async (col, id) => {
-  if (!confirm('Are you sure you want to delete this entry?')) return;
-  try {
-    await deleteDoc(doc(db, col, id));
-    toast(col==='bikes' ? 'Model deleted.' : 'Unit removed from inventory.');
-  } catch(e) { toast('Delete failed: '+e.message,'err'); }
-};
-
-// ---- NAV ----
-window.switchSec = (sec) => {
+/* ─── Nav ─── */
+window.switchSec=(sec)=>{
   document.querySelectorAll('.sec-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(l=>l.classList.remove('active'));
+  document.querySelectorAll('.mobile-tab').forEach(l=>l.classList.remove('active'));
   document.getElementById(sec==='price'?'secPrice':'secInv').classList.add('active');
   document.getElementById(sec==='price'?'navPrice':'navInv').classList.add('active');
-  if (sec==='inv') populateModelDropdown();
+  if(sec==='inv'){
+    document.getElementById('mNavInv').classList.add('active');
+    populateModelDropdown();
+  } else {
+    document.getElementById('mNavPrice').classList.add('active');
+  }
 };
+</script>
 
+<script>
+function toggleMobileMenu(){
+  const m=document.getElementById('mobileMenu');
+  m.classList.toggle('open');
+}
+function closeMobileMenu(){
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+// Close on outside click
+document.addEventListener('click',function(e){
+  const menu=document.getElementById('mobileMenu');
+  const hamburger=document.getElementById('hamburger');
+  if(menu&&!menu.contains(e.target)&&!hamburger.contains(e.target)){
+    menu.classList.remove('open');
+  }
+});
 </script>
 </body>
 </html>
