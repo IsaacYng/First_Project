@@ -390,8 +390,10 @@
     /* ── A4 paper base ── */
     .a4-paper {
       font-family: 'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;
-      font-size: 13pt; color: #000 !important;
-      background: #fff !important; line-height: 1.55;
+      font-size: 11.5pt !important;
+      color: #000 !important;
+      background: #fff !important;
+      line-height: 1.45 !important;
     }
     .a4-paper * {
       font-family: 'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;
@@ -399,10 +401,10 @@
     }
     .doc-list { list-style: none; margin: 0 0 0 4px; padding: 0; }
     .doc-list li {
-      display: grid; grid-template-columns: 155px 16px 1fr;
-      align-items: baseline; margin-bottom: 4px; font-size: 13pt;
+      display: grid; grid-template-columns: 145px 16px 1fr;
+      align-items: baseline; margin-bottom: 2.5px; font-size: 11.5pt;
     }
-    .doc-list.fin li { grid-template-columns: 210px 16px 1fr; }
+    .doc-list.fin li { grid-template-columns: 200px 16px 1fr; }
     .doc-list li .lbl { display: flex; align-items: baseline; gap: 7px; }
 
     .screen-page {
@@ -411,22 +413,73 @@
       border: 1px solid #e0e0e0;
     }
 
+    /* ══ SIGNATURE ROW — always single line ══ */
+    .sig-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .sig-box {
+      flex: 1;
+      text-align: center;
+      border-top: 1px solid #000;
+      padding-top: 3px;
+      font-size: 10pt !important;
+      min-width: 0;
+      white-space: nowrap;
+    }
+
     /* ══ PRINT ══ */
     @media print {
       body > *:not(#print-wrapper) { display: none !important; }
       #print-wrapper { display: block !important; }
-      html, body { margin: 0 !important; padding: 0 !important; background: white !important; width: 210mm !important; }
-      .print-page {
-        width: 210mm !important; height: 297mm !important;
-        padding: 15mm 15mm 12mm 15mm !important;
-        margin: 0 !important; box-sizing: border-box !important;
-        overflow: hidden !important;
-        page-break-after: always !important; break-after: page !important;
-        position: relative !important;
+      html, body {
+        margin: 0 !important; padding: 0 !important;
+        background: white !important;
+        width: 210mm !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
-      .print-page:last-child { page-break-after: avoid !important; break-after: avoid !important; }
-      .print-page p { margin: 0 0 1.5mm 0 !important; }
+      .print-page {
+        width: 210mm !important;
+        height: 297mm !important;
+        padding: 12mm 14mm 10mm 14mm !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        position: relative !important;
+        font-size: 10.5pt !important;
+        line-height: 1.38 !important;
+      }
+      .print-page:last-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+      .print-page p { margin: 0 0 1mm 0 !important; }
       @page { size: A4 portrait; margin: 0; }
+
+      /* Force signature row single-line in print */
+      .print-sig-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-end !important;
+        gap: 6px !important;
+        white-space: nowrap !important;
+      }
+      .print-sig-box {
+        flex: 1 !important;
+        text-align: center !important;
+        border-top: 1px solid #000 !important;
+        padding-top: 2px !important;
+        font-size: 9.5pt !important;
+        white-space: nowrap !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+      }
     }
     #print-wrapper { display: none; }
 
@@ -487,14 +540,38 @@
       .f-cols { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 540px) {
-      .total-dp-banner { flex-direction: column; align-items: flex-start; }
+      /* Banner */
+      .total-dp-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem 1.25rem;
+        gap: 0.5rem;
+      }
+      .tdp-label { font-size: 10px; }
+      .tdp-title { font-size: 16px; }
+      .tdp-value { font-size: 32px; line-height: 1; }
+      .tdp-badge { font-size: 11px; padding: 6px 12px; }
+
+      /* Layout */
       .config-row { grid-template-columns: 1fr; }
       .f-cols { grid-template-columns: 1fr; }
       .foot-in { padding: 2.5rem 1rem 2rem; }
+      .calc-wrap { padding: 1.25rem 0.75rem 2rem; }
+
+      /* Metrics */
+      .metrics-row { gap: 0.625rem; }
+      .metric-box { padding: 0.625rem 0.75rem; }
+      .metric-val, .metric-box input { font-size: 17px; }
+
+      /* Cards */
+      .card, .vsearch-card { padding: 1.125rem; }
     }
     @media (max-width: 380px) {
       .acc-grid { grid-template-columns: 1fr; }
       .vfield-row { grid-template-columns: 1fr; }
+      .tdp-value { font-size: 28px; }
+      .hero-h1 { font-size: clamp(38px, 13vw, 60px) !important; }
+      .hero-body { padding: 2rem 1rem 2.5rem; }
     }
   </style>
 </head>
@@ -723,16 +800,16 @@
       <!-- ═══ SCREEN PAGE 1 — Allocation Form ═══ -->
       <div id="print-area"
            class="a4-paper screen-page"
-           style="width:210mm;min-height:297mm;padding:15mm 15mm 12mm 15mm;box-sizing:border-box;margin-bottom:2rem;">
+           style="width:210mm;min-height:297mm;padding:12mm 14mm 10mm 14mm;box-sizing:border-box;margin-bottom:2rem;">
 
         <div style="text-align:center;margin-bottom:3mm;">
-          <p style="font-size:14pt;font-weight:bold;margin:0;">HULAS FINSERV HIRE PURCHASE LIMITED</p>
-          <p style="font-size:14pt;font-weight:bold;margin:3px 0 0 0;">DOWNPAYMENT ALLOCATION FORM</p>
+          <p style="font-size:13.5pt;font-weight:bold;margin:0;">HULAS FINSERV HIRE PURCHASE LIMITED</p>
+          <p style="font-size:13.5pt;font-weight:bold;margin:2px 0 0 0;">DOWNPAYMENT ALLOCATION FORM</p>
         </div>
-        <hr style="border:none;border-top:2px solid #000;margin:0 0 5mm 0;">
+        <hr style="border:none;border-top:2px solid #000;margin:0 0 4mm 0;">
 
-        <p style="font-size:13pt;font-weight:bold;margin:0 0 3px 0;">Customer &amp; Vehicle Information</p>
-        <ul class="doc-list" style="margin-bottom:4mm;">
+        <p style="font-size:12pt;font-weight:bold;margin:0 0 2px 0;">Customer &amp; Vehicle Information</p>
+        <ul class="doc-list" style="margin-bottom:3.5mm;">
           <li><span class="lbl"><span>•</span><span>Date</span></span><span>:</span><span id="a4Date">--</span></li>
           <li><span class="lbl"><span>•</span><span>Dealer Name</span></span><span>:</span><span id="a4Dealer">Samriddhi And Brothers Auto Pvt. Ltd.</span></li>
           <li><span class="lbl"><span>•</span><span>Customer Name</span></span><span>:</span><strong id="a4CustName">--</strong></li>
@@ -740,27 +817,29 @@
           <li><span class="lbl"><span>•</span><span>Vehicle Model</span></span><span>:</span><strong id="a4Model">--</strong></li>
         </ul>
 
-        <p style="font-size:13pt;font-weight:bold;margin:0 0 3px 0;">Financial Details</p>
-        <ul class="doc-list fin" style="margin-bottom:4mm;">
+        <p style="font-size:12pt;font-weight:bold;margin:0 0 2px 0;">Financial Details</p>
+        <ul class="doc-list fin" style="margin-bottom:3.5mm;">
           <li><span class="lbl"><span>•</span><span>Retail Price</span></span><span>:</span><span id="a4MRP">0.00</span></li>
           <li><span class="lbl"><span>•</span><span>Down Payment</span></span><span>:</span><span id="a4DP">0.00</span></li>
           <li><span class="lbl"><span>•</span><span>Loan Amount</span></span><span>:</span><span id="a4Loan">0.00</span></li>
           <li><span class="lbl"><span>•</span><span>Interest Rate (%)</span></span><span>:</span><span id="a4Rate">--</span></li>
           <li><span class="lbl"><span>•</span><span>Tenure (Months)</span></span><span>:</span><span id="a4Tenure">--</span></li>
-          <li style="display:block;margin-bottom:4px;">• &nbsp;Registration Charge / Yatayat Expenses: &nbsp;<span id="a4Namsari">3,000.00</span>&nbsp;<em style="font-size:11pt;">(suggested by HH)</em></li>
-          <li style="display:block;margin-bottom:4px;">• &nbsp;Insurance Premium : &nbsp;<span id="a4Ins">0.00</span></li>
-          <li style="display:block;margin-bottom:4px;">• &nbsp;Advance EMI (If Any) : &nbsp;<span id="a4AdvEmiAmt">0.00</span></li>
-          <li style="display:block;margin-bottom:4px;">• &nbsp;Total Down-payment Amount paid by Customer : &nbsp;<strong id="a4TotalDP">0.00</strong></li>
+          <li style="display:block;margin-bottom:3px;">• &nbsp;Registration Charge / Yatayat Expenses: &nbsp;<span id="a4Namsari">3,000.00</span>&nbsp;<em style="font-size:10pt;">(suggested by HH)</em></li>
+          <li style="display:block;margin-bottom:3px;">• &nbsp;Insurance Premium : &nbsp;<span id="a4Ins">0.00</span></li>
+          <li style="display:block;margin-bottom:3px;">• &nbsp;Advance EMI (If Any) : &nbsp;<span id="a4AdvEmiAmt">0.00</span></li>
+          <li style="display:block;margin-bottom:3px;">• &nbsp;Total Down-payment Amount paid by Customer : &nbsp;<strong id="a4TotalDP">0.00</strong></li>
         </ul>
 
-        <p style="font-size:13pt;font-weight:bold;margin:4mm 0 0 0;">Declaration</p>
-        <hr style="border:none;border-top:1px solid #000;margin:2px 0 3mm 0;">
-        <p style="font-size:13pt;margin:0 0 2mm 0;line-height:1.6;">We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.</p>
-        <p style="font-size:13pt;margin:0;">Signatures &amp; Authorization</p>
-        <div style="margin-top:26mm;display:flex;justify-content:space-between;align-items:flex-end;">
-          <div style="width:190px;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:12pt;">Customer's Signature</div>
-          <div style="width:240px;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:12pt;">Dealer's Signature &amp; Stamp</div>
-          <div style="width:200px;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:12pt;">LO's Signature &amp; Stamp</div>
+        <p style="font-size:12pt;font-weight:bold;margin:3mm 0 0 0;">Declaration</p>
+        <hr style="border:none;border-top:1px solid #000;margin:2px 0 2.5mm 0;">
+        <p style="font-size:11.5pt;margin:0 0 1.5mm 0;line-height:1.5;">We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.</p>
+        <p style="font-size:11.5pt;margin:0;">Signatures &amp; Authorization</p>
+
+        <!-- SCREEN signature row — always single line -->
+        <div class="sig-row" style="margin-top:22mm;">
+          <div class="sig-box">Customer's Signature</div>
+          <div class="sig-box">Dealer's Signature &amp; Stamp</div>
+          <div class="sig-box">LO's Signature &amp; Stamp</div>
         </div>
         <hr style="border:none;border-top:1px solid #000;margin-top:4mm;">
         <hr style="border:none;border-top:1px solid #000;margin-top:2px;">
@@ -769,31 +848,31 @@
       <!-- ═══ SCREEN PAGE 2 — Quotation ═══ -->
       <div id="quotation-print-area"
            class="a4-paper screen-page"
-           style="width:210mm;min-height:297mm;padding:15mm 15mm 12mm 15mm;box-sizing:border-box;">
+           style="width:210mm;min-height:297mm;padding:12mm 14mm 10mm 14mm;box-sizing:border-box;">
 
         <div style="display:flex;align-items:center;margin-bottom:2mm;">
           <div style="flex-shrink:0;margin-right:16px;">
-            <img src="logo.jpg" alt="Bajaj Logo" style="height:76px;width:auto;object-fit:contain;" onerror="this.style.display='none'">
+            <img src="logo.jpg" alt="Bajaj Logo" style="height:70px;width:auto;object-fit:contain;" onerror="this.style.display='none'">
           </div>
           <div>
-            <p id="q4DealerName" style="font-size:16pt;font-weight:bold;margin:0 0 1px 0;text-align:center;">Samriddhi &amp; Brothers Auto Pvt. Ltd.</p>
-            <p style="font-size:14pt;font-weight:bold;margin:0 0 2px 0;text-align:center;">Authorized Dealer of Bajaj Motorcycle</p>
-            <p style="font-size:10pt;margin:0;text-decoration:underline;text-align:center;">Phidim-04, Panchthar, Nepal &nbsp; Tel: 024-523144, 9802315425 &nbsp; Email: Samriddhi.bajaj@gmail.com</p>
+            <p id="q4DealerName" style="font-size:15pt;font-weight:bold;margin:0 0 1px 0;text-align:center;">Samriddhi &amp; Brothers Auto Pvt. Ltd.</p>
+            <p style="font-size:13pt;font-weight:bold;margin:0 0 2px 0;text-align:center;">Authorized Dealer of Bajaj Motorcycle</p>
+            <p style="font-size:9.5pt;margin:0;text-decoration:underline;text-align:center;">Phidim-04, Panchthar, Nepal &nbsp; Tel: 024-523144, 9802315425 &nbsp; Email: Samriddhi.bajaj@gmail.com</p>
           </div>
         </div>
-        <hr style="border:none;border-top:1.5px solid #000;margin:0 0 3mm 0;">
-        <div style="text-align:right;font-size:12pt;margin-bottom:2mm;">Date: &nbsp;<span id="a4Date2">--/--/----</span></div>
-        <div style="text-align:center;margin-bottom:3mm;"><strong style="font-size:14pt;text-decoration:underline;letter-spacing:0.5px;">QUOTATION</strong></div>
+        <hr style="border:none;border-top:1.5px solid #000;margin:0 0 2.5mm 0;">
+        <div style="text-align:right;font-size:11pt;margin-bottom:2mm;">Date: &nbsp;<span id="a4Date2">--/--/----</span></div>
+        <div style="text-align:center;margin-bottom:2.5mm;"><strong style="font-size:13pt;text-decoration:underline;letter-spacing:0.5px;">QUOTATION</strong></div>
 
-        <p style="font-size:12pt;margin:0 0 1mm 0;">To Hulas Finserv Hire Purchase Limited</p>
-        <p style="font-size:12pt;font-weight:bold;margin:0 0 2mm 0;">C/O &nbsp;<span id="a4CustName2">--</span></p>
-        <p style="font-size:12pt;margin:0 0 1mm 0;">Dear Sir/Madam,</p>
-        <p style="font-size:12pt;margin:0 0 2mm 0;">We are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
-        <p style="font-size:12pt;margin:0 0 1mm 0;">Details :</p>
-        <p style="font-size:12pt;font-weight:bold;margin:0 0 1mm 0;">Model: <span id="a4Model2">---</span></p>
-        <p style="font-size:12pt;font-weight:bold;margin:0 0 2mm 0;">Price: <span id="a4MRP2">0</span>/- &nbsp;&nbsp;&nbsp; In Words: <span id="a4PriceWords">---</span></p>
-        <div style="font-size:12pt;margin-bottom:2mm;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;row-gap:3px;">
+        <p style="font-size:11pt;margin:0 0 1mm 0;">To Hulas Finserv Hire Purchase Limited</p>
+        <p style="font-size:11pt;font-weight:bold;margin:0 0 1.5mm 0;">C/O &nbsp;<span id="a4CustName2">--</span></p>
+        <p style="font-size:11pt;margin:0 0 1mm 0;">Dear Sir/Madam,</p>
+        <p style="font-size:11pt;margin:0 0 1.5mm 0;">We are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
+        <p style="font-size:11pt;margin:0 0 1mm 0;">Details :</p>
+        <p style="font-size:11pt;font-weight:bold;margin:0 0 1mm 0;">Model: <span id="a4Model2">---</span></p>
+        <p style="font-size:11pt;font-weight:bold;margin:0 0 1.5mm 0;">Price: <span id="a4MRP2">0</span>/- &nbsp;&nbsp;&nbsp; In Words: <span id="a4PriceWords">---</span></p>
+        <div style="font-size:11pt;margin-bottom:1.5mm;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;row-gap:2px;">
             <p style="margin:0;">Color: <span id="a4Color2">---</span></p>
             <p style="margin:0;">Regd No: <span id="a4Reg2">---</span></p>
             <p style="margin:0;">Engine No: <span id="a4Engine2">---</span></p>
@@ -802,13 +881,12 @@
           </div>
         </div>
 
-        <!-- ★ DISCOUNT ROW — hidden by default with inline style ★ -->
-        <div id="a4DiscountRow" style="display:none;font-size:12pt;margin-bottom:2mm;">
+        <div id="a4DiscountRow" style="display:none;font-size:11pt;margin-bottom:1.5mm;">
           <p style="margin:0 0 1mm 0;">Discount: Rs. <span id="a4DiscountAmt">0</span>/- &nbsp;&nbsp; In Words: <em id="a4DiscountWords">---</em></p>
           <p style="margin:0 0 1mm 0;">Net Price: Rs. <span id="a4NetPrice">0</span>/- &nbsp;&nbsp; In Words: <em id="a4NetPriceWords">---</em></p>
         </div>
 
-        <div style="font-size:12pt;margin-top:1mm;line-height:1.6;">
+        <div style="font-size:11pt;margin-top:1mm;line-height:1.5;">
           <p style="margin:0 0 1mm 0;">Terms and Conditions :-</p>
           <p style="margin:0 0 1mm 0;">- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
           <p style="margin:0 0 1mm 0;">- Delivery :- Subject to availability</p>
@@ -818,8 +896,8 @@
           <p style="margin:0 0 1mm 0;">- Warranty:- Warranty is not applicable on wear and tear and the items like Battery, Tyre, Tube, Brake Shoe, Clutch, Plate Cable, Chain Spocket and Bulb. Warranty Policy is detailed in the Owner's manual which will be provided at the time of the delivery of motorcycle.</p>
           <p style="margin:0 0 1mm 0;">- Servicing – 7 Free Servicing.</p>
         </div>
-        <div style="text-align:right;font-size:12pt;margin-top:2mm;"><p style="margin:0;">Sincerely Your's</p></div>
-        <div style="text-align:right;font-size:12pt;margin-top:14mm;"><p style="margin:0;">Authorized Signature</p></div>
+        <div style="text-align:right;font-size:11pt;margin-top:1.5mm;"><p style="margin:0;">Sincerely Your's</p></div>
+        <div style="text-align:right;font-size:11pt;margin-top:12mm;"><p style="margin:0;">Authorized Signature</p></div>
         <hr style="border:none;border-top:1px solid #000;margin-top:4mm;">
       </div>
 
@@ -830,68 +908,73 @@
 
 <!-- ════════════ PRINT WRAPPER ════════════ -->
 <div id="print-wrapper">
+
+  <!-- PRINT PAGE 1 -->
   <div class="print-page a4-paper">
     <div style="text-align:center;margin-bottom:3mm;">
-      <p style="font-size:14pt;font-weight:bold;margin:0;">HULAS FINSERV HIRE PURCHASE LIMITED</p>
-      <p style="font-size:14pt;font-weight:bold;margin:3px 0 0 0;">DOWNPAYMENT ALLOCATION FORM</p>
+      <p style="font-size:13.5pt;font-weight:bold;margin:0;">HULAS FINSERV HIRE PURCHASE LIMITED</p>
+      <p style="font-size:13.5pt;font-weight:bold;margin:2px 0 0 0;">DOWNPAYMENT ALLOCATION FORM</p>
     </div>
-    <hr style="border:none;border-top:2px solid #000;margin:0 0 5mm 0;">
-    <p style="font-size:13pt;font-weight:bold;margin:0 0 3px 0;">Customer &amp; Vehicle Information</p>
-    <ul class="doc-list" style="margin-bottom:4mm;">
+    <hr style="border:none;border-top:2px solid #000;margin:0 0 4mm 0;">
+    <p style="font-size:12pt;font-weight:bold;margin:0 0 2px 0;">Customer &amp; Vehicle Information</p>
+    <ul class="doc-list" style="margin-bottom:3.5mm;">
       <li><span class="lbl"><span>•</span><span>Date</span></span><span>:</span><span id="p1Date">--</span></li>
       <li><span class="lbl"><span>•</span><span>Dealer Name</span></span><span>:</span><span id="p1Dealer">Samriddhi And Brothers Auto Pvt. Ltd.</span></li>
       <li><span class="lbl"><span>•</span><span>Customer Name</span></span><span>:</span><strong id="p1CustName">--</strong></li>
       <li><span class="lbl"><span>•</span><span>Contact Number</span></span><span>:</span><span id="p1CustPhone">--</span></li>
       <li><span class="lbl"><span>•</span><span>Vehicle Model</span></span><span>:</span><strong id="p1Model">--</strong></li>
     </ul>
-    <p style="font-size:13pt;font-weight:bold;margin:0 0 3px 0;">Financial Details</p>
-    <ul class="doc-list fin" style="margin-bottom:4mm;">
+    <p style="font-size:12pt;font-weight:bold;margin:0 0 2px 0;">Financial Details</p>
+    <ul class="doc-list fin" style="margin-bottom:3.5mm;">
       <li><span class="lbl"><span>•</span><span>Retail Price</span></span><span>:</span><span id="p1MRP">0.00</span></li>
       <li><span class="lbl"><span>•</span><span>Down Payment</span></span><span>:</span><span id="p1DP">0.00</span></li>
       <li><span class="lbl"><span>•</span><span>Loan Amount</span></span><span>:</span><span id="p1Loan">0.00</span></li>
       <li><span class="lbl"><span>•</span><span>Interest Rate (%)</span></span><span>:</span><span id="p1Rate">--</span></li>
       <li><span class="lbl"><span>•</span><span>Tenure (Months)</span></span><span>:</span><span id="p1Tenure">--</span></li>
-      <li style="display:block;margin-bottom:4px;">• &nbsp;Registration Charge / Yatayat Expenses: &nbsp;<span id="p1Namsari">3,000.00</span>&nbsp;<em style="font-size:11pt;">(suggested by HH)</em></li>
-      <li style="display:block;margin-bottom:4px;">• &nbsp;Insurance Premium : &nbsp;<span id="p1Ins">0.00</span></li>
-      <li style="display:block;margin-bottom:4px;">• &nbsp;Advance EMI (If Any) : &nbsp;<span id="p1AdvEmi">0.00</span></li>
-      <li style="display:block;margin-bottom:4px;">• &nbsp;Total Down-payment Amount paid by Customer : &nbsp;<strong id="p1TotalDP">0.00</strong></li>
+      <li style="display:block;margin-bottom:3px;">• &nbsp;Registration Charge / Yatayat Expenses: &nbsp;<span id="p1Namsari">3,000.00</span>&nbsp;<em style="font-size:10pt;">(suggested by HH)</em></li>
+      <li style="display:block;margin-bottom:3px;">• &nbsp;Insurance Premium : &nbsp;<span id="p1Ins">0.00</span></li>
+      <li style="display:block;margin-bottom:3px;">• &nbsp;Advance EMI (If Any) : &nbsp;<span id="p1AdvEmi">0.00</span></li>
+      <li style="display:block;margin-bottom:3px;">• &nbsp;Total Down-payment Amount paid by Customer : &nbsp;<strong id="p1TotalDP">0.00</strong></li>
     </ul>
-    <p style="font-size:13pt;font-weight:bold;margin:4mm 0 0 0;">Declaration</p>
-    <hr style="border:none;border-top:1px solid #000;margin:2px 0 3mm 0;">
-    <p style="font-size:13pt;margin:0 0 2mm 0;line-height:1.6;">We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.</p>
-    <p style="font-size:13pt;margin:0;">Signatures &amp; Authorization</p>
-    <div style="margin-top:26mm;display:flex;justify-content:space-between;align-items:flex-end;">
-      <div style="width:181px;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:12pt;">Customer's Signature</div>
-      <div style="width:191px;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:12pt;">Dealer's Signature &amp; Stamp</div>
-      <div style="width:191px;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:12pt;">LO's Signature &amp; Stamp</div>
+    <p style="font-size:12pt;font-weight:bold;margin:3mm 0 0 0;">Declaration</p>
+    <hr style="border:none;border-top:1px solid #000;margin:2px 0 2.5mm 0;">
+    <p style="font-size:10.5pt;margin:0 0 1.5mm 0;line-height:1.5;">We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.</p>
+    <p style="font-size:10.5pt;margin:0;">Signatures &amp; Authorization</p>
+
+    <!-- PRINT signature row — forced single line via flex + nowrap -->
+    <div class="print-sig-row" style="margin-top:20mm;display:flex;justify-content:space-between;align-items:flex-end;gap:6px;white-space:nowrap;">
+      <div class="print-sig-box" style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:9.5pt;white-space:nowrap;">Customer's Signature</div>
+      <div class="print-sig-box" style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:9.5pt;white-space:nowrap;">Dealer's Signature &amp; Stamp</div>
+      <div class="print-sig-box" style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:9.5pt;white-space:nowrap;">LO's Signature &amp; Stamp</div>
     </div>
     <hr style="border:none;border-top:1px solid #000;margin-top:4mm;">
     <hr style="border:none;border-top:1px solid #000;margin-top:2px;">
   </div>
 
+  <!-- PRINT PAGE 2 -->
   <div class="print-page a4-paper">
     <div style="display:flex;align-items:center;margin-bottom:2mm;">
       <div style="flex-shrink:0;margin-right:16px;">
-        <img src="logo.jpg" alt="Bajaj Logo" style="height:72px;width:auto;object-fit:contain;" onerror="this.style.display='none'">
+        <img src="logo.jpg" alt="Bajaj Logo" style="height:66px;width:auto;object-fit:contain;" onerror="this.style.display='none'">
       </div>
       <div>
-        <p id="p2DealerName" style="font-size:16pt;font-weight:bold;margin:0 0 1px 0;text-align:center;">Samriddhi &amp; Brothers Auto Pvt. Ltd.</p>
-        <p style="font-size:14pt;font-weight:bold;margin:0 0 2px 0;text-align:center;">Authorized Dealer of Bajaj Motorcycle</p>
-        <p style="font-size:10pt;margin:0;text-decoration:underline;text-align:center;">Phidim-04, Panchthar, Nepal &nbsp; Tel: 024-523144, 9802315425 &nbsp; Email: Samriddhi.bajaj@gmail.com</p>
+        <p id="p2DealerName" style="font-size:15pt;font-weight:bold;margin:0 0 1px 0;text-align:center;">Samriddhi &amp; Brothers Auto Pvt. Ltd.</p>
+        <p style="font-size:13pt;font-weight:bold;margin:0 0 2px 0;text-align:center;">Authorized Dealer of Bajaj Motorcycle</p>
+        <p style="font-size:9.5pt;margin:0;text-decoration:underline;text-align:center;">Phidim-04, Panchthar, Nepal &nbsp; Tel: 024-523144, 9802315425 &nbsp; Email: Samriddhi.bajaj@gmail.com</p>
       </div>
     </div>
-    <hr style="border:none;border-top:1.5px solid #000;margin:0 0 3mm 0;">
-    <div style="text-align:right;font-size:13pt;margin-bottom:2mm;">Date: &nbsp;<span id="p2Date">--/--/----</span></div>
-    <div style="text-align:center;margin-bottom:3mm;"><strong style="font-size:14pt;text-decoration:underline;letter-spacing:0.5px;">QUOTATION</strong></div>
-    <p style="font-size:12pt;margin:0 0 1mm 0;">To Hulas Finserv Hire Purchase Limited</p>
-    <p style="font-size:12pt;font-weight:bold;margin:0 0 1mm 0;">C/O &nbsp;<span id="p2CustName">--</span></p>
-    <p style="font-size:12pt;margin:0 0 1mm 0;">Dear Sir/Madam,</p>
-    <p style="font-size:12pt;margin:0 0 1mm 0;">We are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
-    <p style="font-size:12pt;margin:0 0 1mm 0;">Details :</p>
-    <p style="font-size:12pt;font-weight:bold;margin:0 0 1mm 0;">Model: <span id="p2Model">---</span></p>
-    <p style="font-size:12pt;font-weight:bold;margin:0 0 2mm 0;">Price: <span id="p2MRP">0</span>/- In Words: <span id="p2PriceWords">---</span></p>
-    <div style="font-size:12pt;margin-bottom:2mm;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;row-gap:3px;">
+    <hr style="border:none;border-top:1.5px solid #000;margin:0 0 2.5mm 0;">
+    <div style="text-align:right;font-size:11pt;margin-bottom:2mm;">Date: &nbsp;<span id="p2Date">--/--/----</span></div>
+    <div style="text-align:center;margin-bottom:2.5mm;"><strong style="font-size:13pt;text-decoration:underline;letter-spacing:0.5px;">QUOTATION</strong></div>
+    <p style="font-size:11pt;margin:0 0 1mm 0;">To Hulas Finserv Hire Purchase Limited</p>
+    <p style="font-size:11pt;font-weight:bold;margin:0 0 1mm 0;">C/O &nbsp;<span id="p2CustName">--</span></p>
+    <p style="font-size:11pt;margin:0 0 1mm 0;">Dear Sir/Madam,</p>
+    <p style="font-size:11pt;margin:0 0 1mm 0;">We are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
+    <p style="font-size:11pt;margin:0 0 1mm 0;">Details :</p>
+    <p style="font-size:11pt;font-weight:bold;margin:0 0 1mm 0;">Model: <span id="p2Model">---</span></p>
+    <p style="font-size:11pt;font-weight:bold;margin:0 0 1.5mm 0;">Price: <span id="p2MRP">0</span>/- In Words: <span id="p2PriceWords">---</span></p>
+    <div style="font-size:11pt;margin-bottom:1.5mm;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;row-gap:2px;">
         <p style="margin:0;">Color: <span id="p2Color">---</span></p>
         <p style="margin:0;">Regd No: <span id="p2Reg">---</span></p>
         <p style="margin:0;">Engine No: <span id="p2Engine">---</span></p>
@@ -900,13 +983,12 @@
       </div>
     </div>
 
-    <!-- ★ PRINT DISCOUNT ROW — hidden by default with inline style ★ -->
-    <div id="p2DiscountRow" style="display:none;font-size:12pt;margin-bottom:2mm;">
+    <div id="p2DiscountRow" style="display:none;font-size:11pt;margin-bottom:1.5mm;">
       <p style="margin:0 0 1mm 0;">Discount: Rs. <span id="p2DiscountAmt">0</span>/- In Words: <em id="p2DiscountWords">---</em></p>
       <p style="margin:0 0 1mm 0;">Net Price: Rs. <span id="p2NetPrice">0</span>/- In Words: <em id="p2NetPriceWords">---</em></p>
     </div>
 
-    <div style="font-size:12pt;line-height:1.6;">
+    <div style="font-size:11pt;line-height:1.5;">
       <p style="margin:0 0 1mm 0;">Terms and Conditions :-</p>
       <p style="margin:0 0 1mm 0;">- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
       <p style="margin:0 0 1mm 0;">- Delivery :- Subject to availability</p>
@@ -916,10 +998,11 @@
       <p style="margin:0 0 1mm 0;">- Warranty:- Warranty is not applicable on wear and tear and the items like Battery, Tyre, Tube, Brake Shoe, Clutch, Plate Cable, Chain Spocket and Bulb. Warranty Policy is detailed in the Owner's manual which will be provided at the time of the delivery of motorcycle.</p>
       <p style="margin:0 0 1mm 0;">- Servicing – 7 Free Servicing.</p>
     </div>
-    <div style="text-align:right;font-size:13pt;margin-top:2mm;"><p style="margin:0;">Sincerely Your's</p></div>
-    <div style="text-align:right;font-size:13pt;margin-top:14mm;"><p style="margin:0;">Authorized Signature</p></div>
+    <div style="text-align:right;font-size:11pt;margin-top:1.5mm;"><p style="margin:0;">Sincerely Your's</p></div>
+    <div style="text-align:right;font-size:11pt;margin-top:12mm;"><p style="margin:0;">Authorized Signature</p></div>
     <hr style="border:none;border-top:1px solid #000;margin-top:4mm;">
   </div>
+
 </div>
 
 
@@ -990,7 +1073,7 @@
   drawBg.addEventListener('click', () => setDrawer(false));
   drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setDrawer(false)));
 
-  /* Print — sync screen fields into hidden print wrapper, then print */
+  /* Sync a screen element's innerHTML into a print element */
   function syncField(srcId, dstId) {
     var src = document.getElementById(srcId);
     var dst = document.getElementById(dstId);
@@ -1015,30 +1098,28 @@
     syncField('a4TotalDP',   'p1TotalDP');
 
     /* Page 2 fields */
-    syncField('a4Date2',          'p2Date');
-    syncField('a4CustName2',      'p2CustName');
-    syncField('a4Model2',         'p2Model');
-    syncField('a4MRP2',           'p2MRP');
-    syncField('a4PriceWords',     'p2PriceWords');
-    syncField('a4Color2',         'p2Color');
-    syncField('a4Reg2',           'p2Reg');
-    syncField('a4Engine2',        'p2Engine');
-    syncField('a4Chassis2',       'p2Chassis');
-    syncField('a4DiscountAmt',    'p2DiscountAmt');
-    syncField('a4DiscountWords',  'p2DiscountWords');
-    syncField('a4NetPrice',       'p2NetPrice');
-    syncField('a4NetPriceWords',  'p2NetPriceWords');
+    syncField('a4Date2',         'p2Date');
+    syncField('a4CustName2',     'p2CustName');
+    syncField('a4Model2',        'p2Model');
+    syncField('a4MRP2',          'p2MRP');
+    syncField('a4PriceWords',    'p2PriceWords');
+    syncField('a4Color2',        'p2Color');
+    syncField('a4Reg2',          'p2Reg');
+    syncField('a4Engine2',       'p2Engine');
+    syncField('a4Chassis2',      'p2Chassis');
+    syncField('a4DiscountAmt',   'p2DiscountAmt');
+    syncField('a4DiscountWords', 'p2DiscountWords');
+    syncField('a4NetPrice',      'p2NetPrice');
+    syncField('a4NetPriceWords', 'p2NetPriceWords');
 
     /* Sync discount row visibility */
     var discSrc = document.getElementById('a4DiscountRow');
     var discDst = document.getElementById('p2DiscountRow');
-    if (discSrc && discDst) {
-      discDst.style.display = discSrc.style.display;
-    }
+    if (discSrc && discDst) discDst.style.display = discSrc.style.display;
 
     window.print();
   }
 </script>
 <script type="module" src="form.js"></script>
 </body>
-</html>f
+</html>
