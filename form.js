@@ -25,7 +25,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db  = getFirestore(app);
 
 let allBikes = [];
 
@@ -50,12 +50,12 @@ function numberToWords(num) {
     ];
 
     function inWords(n) {
-        if (n < 20)        return a[n];
-        if (n < 100)       return b[Math.floor(n / 10)] + " " + a[n % 10];
-        if (n < 1000)      return a[Math.floor(n / 100)] + " Hundred " + inWords(n % 100);
-        if (n < 100000)    return inWords(Math.floor(n / 1000)) + " Thousand " + inWords(n % 1000);
-        if (n < 10000000)  return inWords(Math.floor(n / 100000)) + " Lakh " + inWords(n % 100000);
-        return inWords(Math.floor(n / 10000000)) + " Crore " + inWords(n % 10000000);
+        if (n < 20)       return a[n];
+        if (n < 100)      return b[Math.floor(n / 10)] + " " + a[n % 10];
+        if (n < 1000)     return a[Math.floor(n / 100)] + " Hundred " + inWords(n % 100);
+        if (n < 100000)   return inWords(Math.floor(n / 1000))    + " Thousand " + inWords(n % 1000);
+        if (n < 10000000) return inWords(Math.floor(n / 100000))  + " Lakh "     + inWords(n % 100000);
+        return               inWords(Math.floor(n / 10000000)) + " Crore "    + inWords(n % 10000000);
     }
 
     return inWords(num).replace(/\s+/g, ' ').trim();
@@ -94,11 +94,10 @@ window.findChassis = async function () {
 
     const searchVal = document.getElementById('chassisSearch').value.trim();
     const statusEl  = document.getElementById('searchStatus');
-
     if (!statusEl) return;
 
     statusEl.innerText = "Searching Inventory...";
-    statusEl.className = "text-blue-500 text-sm mt-1";
+    statusEl.style.color = "#60a5fa";
 
     try {
         const q             = query(collection(db, "inventory"), where("chassis", "==", searchVal));
@@ -124,19 +123,19 @@ window.findChassis = async function () {
                 }
             }
 
-            statusEl.innerText = "Vehicle Data Loaded!";
-            statusEl.className = "text-green-600 text-sm mt-1 font-bold";
-
+            statusEl.innerText   = "Vehicle Data Loaded!";
+            statusEl.style.color = "#22c55e";
             syncManualFieldsToA4();
 
         } else {
             document.getElementById('manualChassis').value = searchVal;
-            statusEl.innerText = "Not found. Enter manually.";
-            statusEl.className = "text-orange-600 text-sm mt-1";
+            statusEl.innerText   = "Not found. Enter manually.";
+            statusEl.style.color = "#f97316";
         }
 
     } catch (error) {
-        statusEl.innerText = "Connection Error!";
+        statusEl.innerText   = "Connection Error!";
+        statusEl.style.color = "#ef4444";
         console.error("Chassis search error:", error);
     }
 };
@@ -214,10 +213,7 @@ window.calculateFinance = function () {
                             ? (1000 - (rawTotalDP_Dash % 1000))
                             : 0;
 
-    // Adv EMI synced (includes rounding + customer extra)
-    const totalAdvEmiSync = emi + roundingAdj + customerExtraAdv;
-
-    // --- Total DP: Dashboard vs A4 ---
+    const totalAdvEmiSync   = emi + roundingAdj + customerExtraAdv;
     const finalTotalDP_Dash = rawTotalDP_Dash + roundingAdj;
     const finalTotalDP_A4   = dpAmountOnly + namsari + financeInsurance + totalAdvEmiSync;
 
@@ -314,7 +310,6 @@ function updateUI(data) {
     safeSet('a4Model2',    data.bikeName);
     safeSet('a4MRP2',      format(data.mrp));
 
-    // In Words (for Quotation)
     safeSet('a4PriceWords',    numberToWords(Math.round(data.mrp))           + " rupees only.");
     safeSet('a4NetPriceWords', numberToWords(Math.round(data.afterDiscount)) + " rupees only.");
     safeSet('a4DiscountWords', numberToWords(Math.round(data.discount))      + " rupees only.");
@@ -324,38 +319,29 @@ function updateUI(data) {
 
     // ==================
     // DISCOUNT ROW TOGGLE
-    // — screen preview (a4DiscountRow) and print wrapper (p2DiscountRow)
-    // — show only when discount > 0, hide when 0 or empty
+    // Controlled purely by inline style — no Tailwind dependency
     // ==================
 
     const a4DiscRow = document.getElementById('a4DiscountRow');
     const p2DiscRow = document.getElementById('p2DiscountRow');
 
     if (data.discount > 0) {
-        // Show both rows
-        if (a4DiscRow) {
-            a4DiscRow.classList.remove('hidden');
-            a4DiscRow.style.display = '';
-        }
-        if (p2DiscRow) {
-            p2DiscRow.style.display = 'block';
-        }
-        // Set values
+        // ── SHOW both rows ──
+        if (a4DiscRow) a4DiscRow.style.display = 'block';
+        if (p2DiscRow) p2DiscRow.style.display = 'block';
+
+        // Fill in the values
         safeSet('a4DiscountAmt',   format(data.discount));
         safeSet('a4NetPrice',      format(data.afterDiscount));
         safeSet('p2DiscountAmt',   format(data.discount));
-        safeSet('p2DiscountWords', numberToWords(Math.round(data.discount))      + " rupees only.");
         safeSet('p2NetPrice',      format(data.afterDiscount));
+        safeSet('p2DiscountWords', numberToWords(Math.round(data.discount))      + " rupees only.");
         safeSet('p2NetPriceWords', numberToWords(Math.round(data.afterDiscount)) + " rupees only.");
+
     } else {
-        // Hide both rows
-        if (a4DiscRow) {
-            a4DiscRow.classList.add('hidden');
-            a4DiscRow.style.display = 'none';
-        }
-        if (p2DiscRow) {
-            p2DiscRow.style.display = 'none';
-        }
+        // ── HIDE both rows ──
+        if (a4DiscRow) a4DiscRow.style.display = 'none';
+        if (p2DiscRow) p2DiscRow.style.display = 'none';
     }
 }
 
