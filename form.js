@@ -97,8 +97,8 @@ window.findChassis = async function () {
 
     if (!statusEl) return;
 
-    statusEl.innerText   = "Searching Inventory...";
-    statusEl.className   = "text-blue-500 text-sm mt-1";
+    statusEl.innerText = "Searching Inventory...";
+    statusEl.className = "text-blue-500 text-sm mt-1";
 
     try {
         const q             = query(collection(db, "inventory"), where("chassis", "==", searchVal));
@@ -218,8 +218,8 @@ window.calculateFinance = function () {
     const totalAdvEmiSync = emi + roundingAdj + customerExtraAdv;
 
     // --- Total DP: Dashboard vs A4 ---
-    const finalTotalDP_Dash = rawTotalDP_Dash + roundingAdj;           // Uses cashInsurance
-    const finalTotalDP_A4   = dpAmountOnly + namsari + financeInsurance + totalAdvEmiSync;  // Uses financeInsurance
+    const finalTotalDP_Dash = rawTotalDP_Dash + roundingAdj;
+    const finalTotalDP_A4   = dpAmountOnly + namsari + financeInsurance + totalAdvEmiSync;
 
     // --- Pass to UI ---
     updateUI({
@@ -275,68 +275,88 @@ function updateUI(data) {
     // DASHBOARD DISPLAY
     // ==================
 
-    safeSet('mrp',               `RS. ${format(data.mrp)}`);
-    safeSet('afterDiscount',     `RS. ${format(data.afterDiscount)}`);
-    safeSet('displayTotalDP',    `RS. ${format(data.finalTotalDP_Dash)}`);
-    safeSet('displayIns',        `RS. ${format(data.cashInsurance)}`);
-    safeSet('displayRate',       `${data.rate}`);
-    safeSet('displayDpAmt',      `RS. ${format(data.dpAmountOnly)}`);
-    safeSet('displayLoanAmt',    `RS. ${format(data.loanAmount)}`);
-    safeSet('displayEMI',        `RS. ${formatDec(data.emi)}`);
-    safeSet('displayTotalAdvEmi',`RS. ${format(data.totalAdvEmiSync)}`);
+    safeSet('mrp',                `RS. ${format(data.mrp)}`);
+    safeSet('afterDiscount',      `RS. ${format(data.afterDiscount)}`);
+    safeSet('displayTotalDP',     `RS. ${format(data.finalTotalDP_Dash)}`);
+    safeSet('displayIns',         `RS. ${format(data.cashInsurance)}`);
+    safeSet('displayRate',        `${data.rate}`);
+    safeSet('displayDpAmt',       `RS. ${format(data.dpAmountOnly)}`);
+    safeSet('displayLoanAmt',     `RS. ${format(data.loanAmount)}`);
+    safeSet('displayEMI',         `RS. ${formatDec(data.emi)}`);
+    safeSet('displayTotalAdvEmi', `RS. ${format(data.totalAdvEmiSync)}`);
 
     // ==================
     // A4 FINANCE FORM
     // ==================
 
-    safeSet('a4Date',       formattedDate);
-    safeSet('a4CustName',   data.custName);
-    safeSet('a4CustPhone',  data.custPhone);
-    safeSet('a4Dealer',     data.dealerName);
-    safeSet('a4Model',      data.bikeName);
+    safeSet('a4Date',      formattedDate);
+    safeSet('a4CustName',  data.custName);
+    safeSet('a4CustPhone', data.custPhone);
+    safeSet('a4Dealer',    data.dealerName);
+    safeSet('a4Model',     data.bikeName);
 
-    safeSet('a4MRP',        formatDec(data.afterDiscount));
-    safeSet('a4DP',         formatDec(data.dpAmountOnly));
-    safeSet('a4Loan',       formatDec(data.loanAmount));
-    safeSet('a4Rate',       data.rate.toFixed(2));
-    safeSet('a4Tenure',     data.tenure);
-    safeSet('a4Ins',        formatDec(data.financeInsurance));
-    safeSet('a4AdvEmiAmt',  formatDec(data.totalAdvEmiSync));
-    safeSet('a4TotalDP',    formatDec(data.finalTotalDP_A4));
-    safeSet('a4Namsari',    formatDec(data.namsari));
+    safeSet('a4MRP',       formatDec(data.afterDiscount));
+    safeSet('a4DP',        formatDec(data.dpAmountOnly));
+    safeSet('a4Loan',      formatDec(data.loanAmount));
+    safeSet('a4Rate',      data.rate.toFixed(2));
+    safeSet('a4Tenure',    data.tenure);
+    safeSet('a4Ins',       formatDec(data.financeInsurance));
+    safeSet('a4AdvEmiAmt', formatDec(data.totalAdvEmiSync));
+    safeSet('a4TotalDP',   formatDec(data.finalTotalDP_A4));
+    safeSet('a4Namsari',   formatDec(data.namsari));
 
     // ==================
     // QUOTATION FORM
     // ==================
 
-    safeSet('a4Date2',    formattedDate);
-    safeSet('a4CustName2',data.custName);
-    safeSet('a4Model2',   data.bikeName);
-    safeSet('a4MRP2',     format(data.mrp));
+    safeSet('a4Date2',     formattedDate);
+    safeSet('a4CustName2', data.custName);
+    safeSet('a4Model2',    data.bikeName);
+    safeSet('a4MRP2',      format(data.mrp));
 
     // In Words (for Quotation)
-    safeSet('a4PriceWords',    numberToWords(Math.round(data.mrp))          + " rupees only.");
+    safeSet('a4PriceWords',    numberToWords(Math.round(data.mrp))           + " rupees only.");
     safeSet('a4NetPriceWords', numberToWords(Math.round(data.afterDiscount)) + " rupees only.");
     safeSet('a4DiscountWords', numberToWords(Math.round(data.discount))      + " rupees only.");
 
     // Manual / Inventory Fields
     syncManualFieldsToA4();
 
-    // Discount Row — show only if discount > 0
-const a4DiscRow = document.getElementById('a4DiscountRow');
-const p2DiscRow = document.getElementById('p2DiscountRow');  // ← ADD THIS
+    // ==================
+    // DISCOUNT ROW TOGGLE
+    // — screen preview (a4DiscountRow) and print wrapper (p2DiscountRow)
+    // — show only when discount > 0, hide when 0 or empty
+    // ==================
 
-if (a4DiscRow) {
+    const a4DiscRow = document.getElementById('a4DiscountRow');
+    const p2DiscRow = document.getElementById('p2DiscountRow');
+
     if (data.discount > 0) {
-        a4DiscRow.classList.remove('hidden');
-        safeSet('a4DiscountAmt', format(data.discount));
-        safeSet('a4NetPrice',    format(data.afterDiscount));
-        if (p2DiscRow) p2DiscRow.style.display = 'block';   // ← ADD THIS
+        // Show both rows
+        if (a4DiscRow) {
+            a4DiscRow.classList.remove('hidden');
+            a4DiscRow.style.display = '';
+        }
+        if (p2DiscRow) {
+            p2DiscRow.style.display = 'block';
+        }
+        // Set values
+        safeSet('a4DiscountAmt',   format(data.discount));
+        safeSet('a4NetPrice',      format(data.afterDiscount));
+        safeSet('p2DiscountAmt',   format(data.discount));
+        safeSet('p2DiscountWords', numberToWords(Math.round(data.discount))      + " rupees only.");
+        safeSet('p2NetPrice',      format(data.afterDiscount));
+        safeSet('p2NetPriceWords', numberToWords(Math.round(data.afterDiscount)) + " rupees only.");
     } else {
-        a4DiscRow.classList.add('hidden');
-        if (p2DiscRow) p2DiscRow.style.display = 'none';    // ← ADD THIS
+        // Hide both rows
+        if (a4DiscRow) {
+            a4DiscRow.classList.add('hidden');
+            a4DiscRow.style.display = 'none';
+        }
+        if (p2DiscRow) {
+            p2DiscRow.style.display = 'none';
+        }
     }
-}
 }
 
 // ======================================
