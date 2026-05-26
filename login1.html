@@ -4,934 +4,616 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Bajaj Bikes — Admin Panel</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Bebas Neue', 'cursive'],
+          body: ['DM Sans', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+        colors: {
+          brand: {
+            50:  '#eff6ff',
+            100: '#dbeafe',
+            200: '#bfdbfe',
+            400: '#60a5fa',
+            500: '#3b82f6',
+            600: '#2563eb',
+            700: '#1d4ed8',
+          },
+          gold: {
+            400: '#fbbf24',
+            500: '#f59e0b',
+            600: '#d97706',
+          },
+          danger: '#ef4444',
+          success: '#10b981',
+        },
+        boxShadow: {
+          card: '0 1px 4px 0 rgba(30,64,175,0.06), 0 4px 16px 0 rgba(30,64,175,0.05)',
+          'card-hover': '0 4px 24px 0 rgba(30,64,175,0.13)',
+          btn: '0 2px 12px 0 rgba(37,99,235,0.25)',
+        },
+        animation: {
+          fadeUp: 'fadeUp 0.3s ease both',
+          slideIn: 'slideIn 0.3s ease both',
+          spin: 'spin 0.6s linear infinite',
+        },
+        keyframes: {
+          fadeUp: { from: { opacity:'0', transform:'translateY(10px)' }, to: { opacity:'1', transform:'translateY(0)' } },
+          slideIn: { from: { opacity:'0', transform:'translateY(20px)' }, to: { opacity:'1', transform:'translateY(0)' } },
+        },
+      }
+    }
+  }
+</script>
 <style>
-:root {
-  --bg:#060912;
-  --surface:#0c1221;
-  --card:#111c30;
-  --card2:#162035;
-  --border:#1d3055;
-  --border2:#243a60;
-  --blue:#1560e8;
-  --blue2:#1a72ff;
-  --red:#f0163a;
-  --gold:#f5a500;
-  --gold2:#ffbe2e;
-  --green:#10d06b;
-  --purple:#7c5cfc;
-  --text:#dce8ff;
-  --muted:#5a7599;
-  --muted2:#7a9abf;
-  --white:#ffffff;
-  --nav-h:64px;
-  --radius:12px;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-track{background:var(--bg);}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; }
 
-/* ── NOISE TEXTURE OVERLAY ── */
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-  opacity:.4;
-}
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: #f1f5f9; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-/* ══════════════════ LOGIN PAGE ══════════════════ */
-#login-section{
-  min-height:100vh;display:flex;align-items:stretch;position:relative;
-}
-/* Left hero */
-.ll{
-  flex:1;position:relative;overflow:hidden;
-  display:flex;flex-direction:column;justify-content:flex-end;
-  padding:3.5rem;background:#060912;
-}
-.ll-grid{
-  position:absolute;inset:0;
-  background-image:
-    linear-gradient(rgba(21,96,232,.08) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(21,96,232,.08) 1px,transparent 1px);
-  background-size:40px 40px;
-}
-.ll-glow{position:absolute;top:-100px;left:-80px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(21,96,232,.18) 0%,transparent 70%);}
-.ll-glow2{position:absolute;bottom:-80px;right:80px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(245,165,0,.12) 0%,transparent 70%);}
-.ll-bike{position:absolute;right:-20px;bottom:100px;font-size:18rem;color:rgba(21,96,232,.06);transform:scaleX(-1);line-height:1;}
-.ll-content{position:relative;z-index:2;}
-.ll-eyebrow{display:inline-flex;align-items:center;gap:.5rem;background:rgba(21,96,232,.15);border:1px solid rgba(21,96,232,.35);border-radius:100px;padding:.35rem .9rem;font-size:.72rem;font-weight:700;letter-spacing:2px;color:var(--blue2);text-transform:uppercase;margin-bottom:1.5rem;}
-.ll-eyebrow i{color:var(--gold);}
-.ll-title{font-family:'Bebas Neue',cursive;font-size:clamp(3.5rem,7vw,6.5rem);line-height:.95;color:var(--white);letter-spacing:2px;}
-.ll-title span{color:var(--gold);}
-.ll-desc{margin-top:1.2rem;color:var(--muted2);font-size:1rem;max-width:380px;line-height:1.65;font-weight:400;}
-.ll-stats{display:flex;gap:2rem;margin-top:2rem;}
-.ll-stat{border-left:2px solid var(--border2);padding-left:1rem;}
-.ll-stat-val{font-family:'Bebas Neue',cursive;font-size:2rem;color:var(--white);letter-spacing:1px;line-height:1;}
-.ll-stat-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.2rem;}
-.ll-badges{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:2.2rem;}
-.ll-badge-chip{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:8px;padding:.55rem .9rem;font-size:.78rem;color:var(--muted2);}
-.ll-badge-chip i{font-size:.85rem;}
+  /* Section transitions */
+  .sec-panel { display: none; }
+  .sec-panel.active { display: block; animation: fadeUp 0.3s ease both; }
 
-/* Right form */
-.lr{
-  width:460px;flex-shrink:0;
-  background:var(--surface);
-  border-left:1px solid var(--border);
-  display:flex;flex-direction:column;justify-content:center;
-  padding:3rem 3rem;
-  position:relative;overflow:hidden;
-}
-.lr-top-bar{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--gold),var(--red));}
-.lr-logo{display:flex;align-items:center;gap:.7rem;margin-bottom:2.5rem;}
-.lr-logo-icon{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--blue),#0a3d9e);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;box-shadow:0 4px 20px rgba(21,96,232,.4);}
-.lr-logo-name{font-family:'Bebas Neue',cursive;font-size:1.6rem;color:var(--white);letter-spacing:2px;line-height:1;}
-.lr-logo-sub{font-size:.65rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
-.lr h2{font-family:'Bebas Neue',cursive;font-size:2.4rem;color:var(--white);letter-spacing:1px;line-height:1;}
-.lr .sub{color:var(--muted2);font-size:.88rem;margin-top:.4rem;margin-bottom:2rem;line-height:1.5;}
+  /* SN input */
+  .sn-input {
+    width: 48px; background: #f8fafc; border: 1.5px solid #e2e8f0;
+    border-radius: 6px; padding: 3px 6px; text-align: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: #d97706; font-weight: 600; outline: none;
+    transition: border-color 0.2s;
+  }
+  .sn-input:focus { border-color: #f59e0b; }
 
-.fg-login{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.2rem;}
-.fg-login label{font-size:.7rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;}
-.fg-login .inp-wrap{position:relative;}
-.fg-login .ico{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;}
-.fg-login input{
-  width:100%;background:var(--card);border:1.5px solid var(--border2);border-radius:10px;
-  padding:.8rem .9rem .8rem 2.6rem;
-  font-family:'Barlow',sans-serif;font-size:.95rem;color:var(--text);outline:none;
-  transition:border-color .2s,box-shadow .2s;
-}
-.fg-login input:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(21,96,232,.18);}
-.fg-login input::placeholder{color:var(--muted);}
-.forgot-link{text-align:right;margin-bottom:1.2rem;}
-.forgot-link a{font-size:.78rem;color:var(--muted2);text-decoration:none;transition:color .2s;}
-.forgot-link a:hover{color:var(--gold);}
-.err-msg{color:var(--red);font-size:.8rem;margin-bottom:.8rem;display:none;align-items:center;gap:.4rem;background:rgba(240,22,58,.1);border:1px solid rgba(240,22,58,.25);border-radius:8px;padding:.55rem .8rem;}
-.btn-login{
-  width:100%;padding:.88rem;
-  background:linear-gradient(135deg,var(--blue),#1a72ff);
-  color:#fff;border:none;border-radius:10px;
-  font-family:'Bebas Neue',cursive;font-size:1.3rem;letter-spacing:3px;
-  cursor:pointer;transition:all .25s;
-  box-shadow:0 4px 24px rgba(21,96,232,.4);
-  display:flex;align-items:center;justify-content:center;gap:.6rem;
-}
-.btn-login:hover{background:linear-gradient(135deg,#1a72ff,var(--red));box-shadow:0 6px 28px rgba(240,22,58,.35);transform:translateY(-1px);}
-.btn-login:disabled{opacity:.6;cursor:not-allowed;transform:none;}
-.divider{display:flex;align-items:center;gap:.8rem;margin:1.4rem 0;color:var(--muted);font-size:.75rem;letter-spacing:.5px;text-transform:uppercase;}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
-.soc-row{display:flex;gap:.6rem;}
-.soc-btn{
-  flex:1;padding:.65rem;border:1.5px solid var(--border2);border-radius:9px;
-  background:var(--card);cursor:pointer;font-size:.8rem;
-  font-family:'Barlow',sans-serif;font-weight:600;
-  color:var(--muted2);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.4rem;
-}
-.soc-btn:hover{border-color:var(--blue2);background:var(--card2);color:var(--text);}
-.contact-area{margin-top:1.6rem;padding-top:1.4rem;border-top:1px solid var(--border);}
-.contact-area p{font-size:.78rem;color:var(--muted);margin-bottom:.7rem;display:flex;align-items:center;gap:.4rem;}
-.cbtn{
-  display:flex;align-items:center;gap:.55rem;padding:.55rem 1rem;
-  border-radius:8px;font-size:.8rem;font-weight:700;
-  cursor:pointer;text-decoration:none;margin-bottom:.45rem;border:none;
-  transition:all .2s;letter-spacing:.3px;
-}
-.cbtn-wa{background:rgba(37,211,102,.15);color:#25D366;border:1px solid rgba(37,211,102,.3);}
-.cbtn-wa:hover{background:#25D366;color:#fff;}
-.cbtn-gm{background:rgba(234,67,53,.12);color:#EA4335;border:1px solid rgba(234,67,53,.25);}
-.cbtn-gm:hover{background:#EA4335;color:#fff;}
-.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;}
-@keyframes spin{to{transform:rotate(360deg);}}
+  /* Spinner */
+  .spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite; display:none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ══════════════════ NAVBAR ══════════════════ */
-#admin-section{display:none;flex-direction:column;min-height:100vh;}
-.top-nav{
-  position:sticky;top:0;z-index:100;
-  height:var(--nav-h);
-  background:rgba(6,9,18,.92);
-  backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;
-  padding:0 1.5rem;
-  gap:1rem;
-}
-.nav-brand{
-  display:flex;align-items:center;gap:.7rem;
-  text-decoration:none;flex-shrink:0;
-}
-.nav-brand-icon{
-  width:36px;height:36px;border-radius:8px;
-  background:linear-gradient(135deg,var(--blue),#0a3d9e);
-  display:flex;align-items:center;justify-content:center;
-  font-size:.95rem;color:#fff;
-  box-shadow:0 2px 12px rgba(21,96,232,.5);
-}
-.nav-brand-text{font-family:'Bebas Neue',cursive;font-size:1.35rem;color:var(--white);letter-spacing:2px;line-height:1;}
-.nav-brand-text span{color:var(--gold);}
-.nav-brand-badge{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
-.nav-divider{width:1px;height:28px;background:var(--border);flex-shrink:0;}
+  /* Toast */
+  @keyframes slideIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
 
-.nav-tabs{display:flex;gap:.3rem;flex:1;}
-.nav-tab{
-  display:flex;align-items:center;gap:.5rem;
-  padding:.45rem 1rem;border-radius:8px;
-  font-family:'Barlow',sans-serif;font-weight:700;font-size:.82rem;
-  text-transform:uppercase;letter-spacing:.8px;
-  color:var(--muted2);cursor:pointer;border:1px solid transparent;
-  transition:all .2s;white-space:nowrap;
-}
-.nav-tab i{font-size:.8rem;}
-.nav-tab:hover{color:var(--text);background:var(--card);}
-.nav-tab.active{color:var(--white);background:rgba(21,96,232,.2);border-color:rgba(21,96,232,.4);}
-.nav-tab.active i{color:var(--blue2);}
+  /* Table row hover */
+  tbody tr { transition: background 0.12s; }
+  tbody tr:hover { background: #f0f7ff; }
 
-.nav-right{display:flex;align-items:center;gap:.8rem;margin-left:auto;flex-shrink:0;}
-.nav-date-chip{
-  display:flex;align-items:center;gap:.4rem;
-  font-size:.73rem;color:var(--muted);
-  background:var(--card);border:1px solid var(--border);
-  border-radius:6px;padding:.3rem .7rem;
-  font-family:'JetBrains Mono',monospace;
-}
-.nav-user-chip{
-  display:flex;align-items:center;gap:.5rem;
-  background:var(--card);border:1px solid var(--border2);
-  border-radius:8px;padding:.35rem .8rem;
-}
-.nav-avatar{
-  width:26px;height:26px;border-radius:50%;
-  background:linear-gradient(135deg,var(--blue),var(--purple));
-  display:flex;align-items:center;justify-content:center;
-  font-size:.65rem;color:#fff;font-weight:700;
-}
-.nav-user-name{font-size:.78rem;color:var(--text);font-weight:600;}
-.btn-logout{
-  background:transparent;border:1.5px solid rgba(240,22,58,.4);
-  color:var(--red);border-radius:8px;
-  padding:.38rem .9rem;font-family:'Barlow',sans-serif;
-  font-size:.78rem;font-weight:700;letter-spacing:.5px;
-  cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.4rem;
-}
-.btn-logout:hover{background:var(--red);color:#fff;border-color:var(--red);}
+  /* Mobile menu transition */
+  .mobile-menu { display: none; }
+  .mobile-menu.open { display: flex; }
 
-/* Mobile hamburger */
-.hamburger{
-  display:none;width:36px;height:36px;border-radius:8px;
-  background:var(--card);border:1px solid var(--border2);
-  align-items:center;justify-content:center;
-  cursor:pointer;color:var(--text);font-size:.95rem;flex-shrink:0;
-}
-.mobile-menu{
-  display:none;position:fixed;top:var(--nav-h);left:0;right:0;z-index:99;
-  background:var(--surface);border-bottom:1px solid var(--border);
-  padding:1rem 1.5rem;flex-direction:column;gap:.4rem;
-  box-shadow:0 8px 32px rgba(0,0,0,.5);
-}
-.mobile-menu.open{display:flex;}
-.mobile-tab{
-  display:flex;align-items:center;gap:.7rem;
-  padding:.7rem 1rem;border-radius:8px;
-  font-weight:700;font-size:.88rem;letter-spacing:.5px;
-  color:var(--muted2);cursor:pointer;border:1px solid transparent;
-  transition:all .2s;
-}
-.mobile-tab.active{color:var(--white);background:rgba(21,96,232,.15);border-color:rgba(21,96,232,.35);}
+  /* Colour dot */
+  .colour-dot { display:inline-block; width:9px; height:9px; border-radius:50%; border:1px solid rgba(0,0,0,.12); flex-shrink:0; }
 
-/* ══════════════════ MAIN ══════════════════ */
-.main-wrap{flex:1;padding:1.8rem 1.5rem;max-width:1440px;margin:0 auto;width:100%;}
-.sec-panel{display:none;}
-.sec-panel.active{display:block;animation:fadeUp .3s ease;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  /* Input focus ring */
+  input:focus, select:focus { outline: none; border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59,130,246,0.15) !important; }
 
-/* PAGE HEADER */
-.page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:1.8rem;gap:1rem;}
-.page-header-left{}
-.page-eyebrow{font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue2);margin-bottom:.3rem;display:flex;align-items:center;gap:.4rem;}
-.page-eyebrow::before{content:'';display:inline-block;width:16px;height:2px;background:var(--blue2);}
-.page-title{font-family:'Bebas Neue',cursive;font-size:clamp(1.8rem,4vw,2.6rem);color:var(--white);letter-spacing:1px;line-height:1;}
-.page-title span{color:var(--gold);}
+  /* Gradient top bar */
+  .top-bar-grad { background: linear-gradient(90deg, #2563eb, #f59e0b, #ef4444); }
 
-/* STATS GRID */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
-.stat-card{
-  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-  padding:1.3rem 1.4rem;position:relative;overflow:hidden;
-  transition:transform .2s,border-color .2s;cursor:default;
-}
-.stat-card:hover{transform:translateY(-3px);border-color:var(--border2);}
-.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
-.stat-card:nth-child(1)::after{background:linear-gradient(90deg,var(--blue),var(--blue2));}
-.stat-card:nth-child(2)::after{background:linear-gradient(90deg,var(--green),#0a8a46);}
-.stat-card:nth-child(3)::after{background:linear-gradient(90deg,var(--gold),var(--gold2));}
-.stat-card:nth-child(4)::after{background:linear-gradient(90deg,var(--purple),#5a3fc4);}
-.stat-inner{display:flex;align-items:center;gap:1rem;}
-.stat-icon{
-  width:44px;height:44px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;font-size:1.15rem;
-  flex-shrink:0;
-}
-.stat-card:nth-child(1) .stat-icon{background:rgba(21,96,232,.15);color:var(--blue2);}
-.stat-card:nth-child(2) .stat-icon{background:rgba(16,208,107,.12);color:var(--green);}
-.stat-card:nth-child(3) .stat-icon{background:rgba(245,165,0,.12);color:var(--gold);}
-.stat-card:nth-child(4) .stat-icon{background:rgba(124,92,252,.12);color:var(--purple);}
-.stat-val{font-family:'Bebas Neue',cursive;font-size:1.9rem;color:var(--white);letter-spacing:1px;line-height:1;}
-.stat-lbl{font-size:.72rem;color:var(--muted2);margin-top:.2rem;text-transform:uppercase;letter-spacing:.5px;}
-.stat-bg-icon{
-  position:absolute;right:-.5rem;bottom:-.5rem;font-size:4.5rem;
-  color:rgba(255,255,255,.02);pointer-events:none;
-}
+  /* Page header eyebrow */
+  .eyebrow-line::before { content:''; display:inline-block; width:14px; height:2px; background:#2563eb; margin-right:6px; vertical-align:middle; }
 
-/* FORM CARD */
-.form-card{
-  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-  padding:1.6rem;margin-bottom:1.8rem;
-}
-.form-card-header{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:1.4rem;padding-bottom:1.1rem;
-  border-bottom:1px solid var(--border);
-}
-.form-card-title{
-  display:flex;align-items:center;gap:.6rem;
-  font-family:'Bebas Neue',cursive;font-size:1.35rem;color:var(--white);letter-spacing:1px;
-}
-.form-card-title i{color:var(--gold);font-size:1rem;}
-.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.9rem;margin-bottom:1.2rem;}
-.fg{display:flex;flex-direction:column;gap:.35rem;}
-.fg label{font-size:.67rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.8px;}
-.fg label .req{color:var(--red);}
-.fg input,.fg select{
-  background:var(--surface);border:1.5px solid var(--border2);
-  border-radius:8px;padding:.65rem .85rem;
-  font-family:'Barlow',sans-serif;font-size:.88rem;color:var(--text);
-  outline:none;transition:border-color .2s,box-shadow .2s;width:100%;
-}
-.fg input:focus,.fg select:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(21,96,232,.15);}
-.fg input::placeholder{color:var(--muted);}
-.fg select option{background:var(--surface);}
-.form-actions{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;}
-.btn-primary{
-  display:inline-flex;align-items:center;gap:.45rem;
-  padding:.65rem 1.6rem;border-radius:8px;border:none;
-  font-family:'Barlow',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:.3px;
-  cursor:pointer;transition:all .2s;
-  background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;
-  box-shadow:0 3px 16px rgba(21,96,232,.35);
-}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(21,96,232,.45);}
-.btn-primary.edit-mode{background:linear-gradient(135deg,#2d6ef8,var(--purple));}
-.btn-outline{
-  display:inline-flex;align-items:center;gap:.45rem;
-  padding:.65rem 1.2rem;border-radius:8px;
-  font-family:'Barlow',sans-serif;font-weight:700;font-size:.88rem;
-  cursor:pointer;transition:all .2s;
-  background:transparent;border:1.5px solid var(--border2);color:var(--muted2);
-}
-.btn-outline:hover{border-color:var(--red);color:var(--red);}
-.btn-cancel{display:none;}
-
-/* TABLE CARD */
-.table-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
-.table-toolbar{
-  display:flex;align-items:center;justify-content:space-between;gap:1rem;
-  padding:1.2rem 1.4rem;border-bottom:1px solid var(--border);
-  flex-wrap:wrap;
-}
-.table-toolbar-left{display:flex;align-items:center;gap:.8rem;}
-.table-card-title{font-family:'Bebas Neue',cursive;font-size:1.35rem;color:var(--white);letter-spacing:1px;display:flex;align-items:center;gap:.6rem;}
-.table-card-title i{color:var(--gold);}
-.count-badge{
-  background:var(--surface);border:1px solid var(--border2);
-  border-radius:6px;padding:.2rem .65rem;
-  font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted2);
-}
-.tbl-overflow{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;}
-thead tr{background:rgba(13,18,33,.8);}
-th{
-  padding:.8rem 1rem;text-align:left;
-  font-family:'Barlow',sans-serif;font-size:.68rem;font-weight:800;
-  color:var(--muted2);letter-spacing:1.2px;text-transform:uppercase;white-space:nowrap;
-  border-bottom:1px solid var(--border);
-}
-td{
-  padding:.8rem 1rem;font-size:.84rem;color:var(--text);
-  border-bottom:1px solid rgba(29,48,85,.5);vertical-align:middle;
-}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(21,96,232,.04);}
-.badge{
-  display:inline-flex;align-items:center;
-  padding:.22rem .65rem;border-radius:6px;
-  font-size:.73rem;font-weight:700;letter-spacing:.3px;
-  font-family:'JetBrains Mono',monospace;
-}
-.b-blue{background:rgba(21,96,232,.18);color:#7bb3ff;border:1px solid rgba(21,96,232,.3);}
-.b-green{background:rgba(16,208,107,.12);color:#34d399;border:1px solid rgba(16,208,107,.25);}
-.b-gold{background:rgba(245,165,0,.12);color:var(--gold2);border:1px solid rgba(245,165,0,.25);}
-.b-purple{background:rgba(124,92,252,.12);color:#a78bfa;border:1px solid rgba(124,92,252,.25);}
-.b-gray{background:rgba(90,117,153,.12);color:var(--muted2);border:1px solid rgba(90,117,153,.2);}
-.b-red{background:rgba(240,22,58,.12);color:#f87171;border:1px solid rgba(240,22,58,.2);}
-.bike-name-cell{font-family:'Barlow',sans-serif;font-weight:700;font-size:.93rem;color:var(--white);}
-.model-name-cell{font-family:'Barlow',sans-serif;font-weight:700;font-size:.9rem;color:var(--white);}
-.code-cell{font-family:'JetBrains Mono',monospace;font-size:.73rem;color:#7bb3ff;background:rgba(21,96,232,.08);padding:.18rem .5rem;border-radius:5px;}
-.img-cell img{width:44px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border2);}
-.no-img-cell{width:44px;height:32px;border-radius:6px;background:var(--surface);border:1px dashed var(--border2);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.65rem;}
-.sn-input{
-  width:48px;background:var(--surface);border:1.5px solid var(--border2);
-  border-radius:6px;padding:.22rem .4rem;
-  color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;
-  text-align:center;outline:none;transition:border-color .2s;
-}
-.sn-input:focus{border-color:var(--gold);}
-.act-btns{display:flex;gap:.35rem;}
-.btn-edit-sm{
-  display:inline-flex;align-items:center;gap:.3rem;
-  background:transparent;border:1px solid rgba(59,130,246,.4);color:#60a5fa;
-  border-radius:6px;padding:.28rem .6rem;font-size:.73rem;font-weight:700;
-  cursor:pointer;transition:all .2s;font-family:'Barlow',sans-serif;
-}
-.btn-edit-sm:hover{background:#3b82f6;color:#fff;border-color:#3b82f6;}
-.btn-del-sm{
-  display:inline-flex;align-items:center;gap:.3rem;
-  background:transparent;border:1px solid rgba(240,22,58,.35);color:#f87171;
-  border-radius:6px;padding:.28rem .6rem;font-size:.73rem;font-weight:700;
-  cursor:pointer;transition:all .2s;font-family:'Barlow',sans-serif;
-}
-.btn-del-sm:hover{background:var(--red);color:#fff;border-color:var(--red);}
-.empty-state{text-align:center;padding:4rem 2rem;color:var(--muted);}
-.empty-state i{font-size:2.5rem;opacity:.25;display:block;margin-bottom:1rem;}
-.empty-state p{font-size:.88rem;}
-.loading-row{text-align:center;padding:3rem;color:var(--muted);}
-.loading-row i{animation:spin .8s linear infinite;font-size:1.2rem;color:var(--gold);display:block;margin-bottom:.5rem;}
-.colour-dot{display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid rgba(255,255,255,.2);flex-shrink:0;}
-
-/* ══════════════════ FOOTER ══════════════════ */
-footer{
-  background:var(--surface);
-  border-top:1px solid var(--border);
-  margin-top:auto;position:relative;overflow:hidden;
-}
-footer::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--blue),var(--gold),var(--red),transparent);
-}
-.footer-body{
-  display:grid;grid-template-columns:2.2fr 1fr 1.1fr 1.4fr;
-  gap:2.5rem;padding:3rem 2.5rem 2rem;
-  max-width:1440px;margin:0 auto;
-}
-.f-brand{}
-.f-brand-logo{
-  display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;
-}
-.f-brand-icon{
-  width:38px;height:38px;border-radius:9px;
-  background:linear-gradient(135deg,var(--blue),#0a3d9e);
-  display:flex;align-items:center;justify-content:center;
-  font-size:1rem;color:#fff;box-shadow:0 3px 14px rgba(21,96,232,.4);
-}
-.f-brand-name{font-family:'Bebas Neue',cursive;font-size:1.6rem;color:var(--white);letter-spacing:2px;}
-.f-brand-name span{color:var(--gold);}
-.f-brand p{color:var(--muted);font-size:.83rem;line-height:1.65;max-width:280px;margin-bottom:1.3rem;}
-.f-socials{display:flex;gap:.5rem;}
-.f-soc{
-  width:34px;height:34px;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.85rem;cursor:pointer;transition:all .2s;text-decoration:none;
-}
-.f-soc-wa{background:rgba(37,211,102,.12);color:#25D366;border:1px solid rgba(37,211,102,.25);}
-.f-soc-gm{background:rgba(234,67,53,.1);color:#EA4335;border:1px solid rgba(234,67,53,.2);}
-.f-soc-tw{background:rgba(29,161,242,.1);color:#1DA1F2;border:1px solid rgba(29,161,242,.2);}
-.f-soc:hover{transform:translateY(-2px);filter:brightness(1.15);}
-.f-col h5{
-  font-family:'Barlow',sans-serif;font-weight:800;font-size:.7rem;
-  text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);
-  margin-bottom:1.1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);
-}
-.f-col ul{list-style:none;display:flex;flex-direction:column;gap:.5rem;}
-.f-col li{
-  color:var(--muted);font-size:.82rem;cursor:pointer;
-  transition:color .2s;display:flex;align-items:center;gap:.45rem;
-}
-.f-col li:hover{color:var(--text);}
-.f-col li i{font-size:.65rem;color:var(--muted);}
-.f-contact-item{display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.7rem;}
-.f-contact-item i{color:var(--gold);font-size:.82rem;margin-top:.1rem;flex-shrink:0;}
-.f-contact-item span{color:var(--muted);font-size:.82rem;line-height:1.5;}
-.footer-bottom{
-  border-top:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:1rem 2.5rem;max-width:1440px;margin:0 auto;width:100%;
-  flex-wrap:wrap;gap:.8rem;
-}
-.footer-copy{color:var(--muted);font-size:.75rem;}
-.footer-copy span{color:var(--gold);}
-.footer-links{display:flex;gap:1.5rem;}
-.footer-links a{color:var(--muted);font-size:.75rem;text-decoration:none;transition:color .2s;}
-.footer-links a:hover{color:var(--text);}
-
-/* ══════════════════ TOAST ══════════════════ */
-.toast{
-  position:fixed;bottom:1.5rem;right:1.5rem;z-index:500;
-  background:var(--card2);border:1px solid var(--border2);
-  border-radius:10px;padding:.85rem 1.2rem;
-  font-size:.84rem;color:var(--text);
-  display:none;align-items:center;gap:.6rem;
-  box-shadow:0 8px 32px rgba(0,0,0,.5);min-width:220px;max-width:320px;
-  animation:slideIn .3s ease;
-}
-@keyframes slideIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-.toast-bar{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:10px 0 0 10px;}
-.toast-bar.ok{background:var(--gold);}
-.toast-bar.err{background:var(--red);}
-
-/* ══════════════════ RESPONSIVE ══════════════════ */
-@media(max-width:1100px){
-  .footer-body{grid-template-columns:1fr 1fr;gap:2rem;}
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
-}
-@media(max-width:900px){
-  .ll{display:none;}
-  .lr{width:100%;min-height:100vh;padding:2.5rem 2rem;}
-  .nav-tabs{display:none;}
-  .hamburger{display:flex;}
-  .nav-date-chip{display:none;}
-}
-@media(max-width:700px){
-  .main-wrap{padding:1.2rem 1rem;}
-  .form-grid{grid-template-columns:1fr 1fr;}
-  .footer-body{grid-template-columns:1fr;gap:1.5rem;padding:2rem 1.2rem 1.5rem;}
-  .footer-bottom{padding:.8rem 1.2rem;flex-direction:column;align-items:flex-start;}
-  .page-header{flex-direction:column;align-items:flex-start;}
-  .table-toolbar{flex-direction:column;align-items:flex-start;}
-  .act-btns{flex-direction:column;gap:.25rem;}
-}
-@media(max-width:480px){
-  .stats-grid{grid-template-columns:1fr 1fr;}
-  .stat-val{font-size:1.5rem;}
-  .stat-icon{width:36px;height:36px;font-size:.9rem;}
-  .stat-card{padding:1rem;}
-  .form-grid{grid-template-columns:1fr;}
-  .lr{padding:1.5rem 1.2rem;}
-  .form-card{padding:1.1rem;}
-  th{padding:.6rem .6rem;font-size:.62rem;}
-  td{padding:.65rem .6rem;font-size:.79rem;}
-  .btn-edit-sm,.btn-del-sm{font-size:.68rem;padding:.22rem .45rem;}
-  .img-cell img,.no-img-cell{width:34px;height:26px;}
-  .footer-links{flex-wrap:wrap;gap:.8rem;}
-  .sn-input{width:40px;}
-  .badge{font-size:.66rem;padding:.16rem .45rem;}
-}
-@media(max-width:380px){
-  .stats-grid{grid-template-columns:1fr;}
-  .nav-user-name{display:none;}
-}
+  @media (max-width: 640px) {
+    .sn-input { width: 40px; }
+    .hide-mobile { display: none !important; }
+  }
 </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-700 min-h-screen">
 
 <!-- ══════════════════ LOGIN ══════════════════ -->
-<div id="login-section">
-  <div class="ll">
-    <div class="ll-grid"></div>
-    <div class="ll-glow"></div>
-    <div class="ll-glow2"></div>
-    <i class="fas fa-motorcycle ll-bike"></i>
-    <div class="ll-content">
-      <div class="ll-eyebrow"><i class="fas fa-circle-dot"></i> Authorized Personnel Only</div>
-      <div class="ll-title">BAJAJ<br><span>BIKES</span></div>
-      <p class="ll-desc">Command your entire dealership — pricing, inventory, and operations — from a single powerful dashboard.</p>
-      <div class="ll-stats">
-        <div class="ll-stat">
-          <div class="ll-stat-val">500+</div>
-          <div class="ll-stat-lbl">Bikes in Stock</div>
-        </div>
-        <div class="ll-stat">
-          <div class="ll-stat-val">₹2.1Cr</div>
-          <div class="ll-stat-lbl">Monthly Rev.</div>
-        </div>
-        <div class="ll-stat">
-          <div class="ll-stat-val">12+</div>
-          <div class="ll-stat-lbl">Models Listed</div>
-        </div>
+<div id="login-section" class="min-h-screen flex">
+
+  <!-- Left hero — hidden on mobile -->
+  <div class="hidden lg:flex flex-1 flex-col justify-end p-14 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 relative overflow-hidden">
+    <!-- Grid bg -->
+    <div class="absolute inset-0" style="background-image:linear-gradient(rgba(96,165,250,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(96,165,250,.07) 1px,transparent 1px);background-size:40px 40px;"></div>
+    <!-- Glow -->
+    <div class="absolute -top-24 -left-20 w-96 h-96 rounded-full" style="background:radial-gradient(circle,rgba(37,99,235,.22) 0%,transparent 70%);"></div>
+    <div class="absolute -bottom-16 right-20 w-72 h-72 rounded-full" style="background:radial-gradient(circle,rgba(245,158,11,.14) 0%,transparent 70%);"></div>
+    <i class="fas fa-motorcycle absolute right-[-20px] bottom-24 text-blue-900 opacity-20" style="font-size:16rem;transform:scaleX(-1);"></i>
+
+    <div class="relative z-10">
+      <div class="inline-flex items-center gap-2 bg-blue-500/15 border border-blue-400/30 rounded-full px-4 py-1.5 text-xs font-bold tracking-widest text-blue-300 uppercase mb-6">
+        <i class="fas fa-circle-dot text-amber-400 text-xs"></i> Authorized Personnel Only
       </div>
-      <div class="ll-badges">
-        <div class="ll-badge-chip"><i class="fas fa-shield-halved" style="color:var(--green)"></i> Secure Login</div>
-        <div class="ll-badge-chip"><i class="fas fa-bolt" style="color:var(--gold)"></i> Real-time Sync</div>
-        <div class="ll-badge-chip"><i class="fas fa-mobile-screen-button" style="color:var(--blue2)"></i> Mobile Ready</div>
+      <div class="font-display text-8xl text-white leading-none tracking-wide">BAJAJ<br><span class="text-amber-400">BIKES</span></div>
+      <p class="mt-4 text-slate-400 text-sm leading-relaxed max-w-xs">Command your entire dealership — pricing, inventory, and operations — from one powerful dashboard.</p>
+      <div class="flex gap-8 mt-6">
+        <div class="border-l-2 border-slate-600 pl-4"><div class="font-display text-3xl text-white">500+</div><div class="text-xs text-slate-500 uppercase tracking-wide mt-0.5">Bikes in Stock</div></div>
+        <div class="border-l-2 border-slate-600 pl-4"><div class="font-display text-3xl text-white">₹2.1Cr</div><div class="text-xs text-slate-500 uppercase tracking-wide mt-0.5">Monthly Rev.</div></div>
+        <div class="border-l-2 border-slate-600 pl-4"><div class="font-display text-3xl text-white">12+</div><div class="text-xs text-slate-500 uppercase tracking-wide mt-0.5">Models Listed</div></div>
+      </div>
+      <div class="flex flex-wrap gap-3 mt-6">
+        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400"><i class="fas fa-shield-halved text-emerald-400"></i> Secure Login</div>
+        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400"><i class="fas fa-bolt text-amber-400"></i> Real-time Sync</div>
+        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400"><i class="fas fa-mobile-screen-button text-blue-400"></i> Mobile Ready</div>
       </div>
     </div>
   </div>
 
-  <div class="lr">
-    <div class="lr-top-bar"></div>
-    <div class="lr-logo">
-      <div class="lr-logo-icon"><i class="fas fa-motorcycle"></i></div>
+  <!-- Right form -->
+  <div class="w-full lg:w-[440px] flex-shrink-0 bg-white flex flex-col justify-center px-8 py-10 relative border-l border-slate-200">
+    <div class="top-bar-grad absolute top-0 left-0 right-0 h-1 rounded-t-none"></div>
+
+    <!-- Logo -->
+    <div class="flex items-center gap-3 mb-8">
+      <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white shadow-btn">
+        <i class="fas fa-motorcycle text-lg"></i>
+      </div>
       <div>
-        <div class="lr-logo-name">BAJAJ <span style="color:var(--gold)">ADMIN</span></div>
-        <div class="lr-logo-sub">Dealer Control Panel</div>
+        <div class="font-display text-2xl text-slate-900 tracking-widest leading-none">BAJAJ <span class="text-amber-500">ADMIN</span></div>
+        <div class="text-[10px] text-slate-400 tracking-widest uppercase mt-0.5">Dealer Control Panel</div>
       </div>
     </div>
-    <h2>Welcome Back</h2>
-    <p class="sub">Sign in to manage your dealership</p>
 
-    <div class="fg-login">
-      <label>Email Address</label>
-      <div class="inp-wrap">
-        <i class="fas fa-envelope ico"></i>
-        <input type="email" id="email" placeholder="admin@bajaj.com" autocomplete="email"/>
-      </div>
-    </div>
-    <div class="fg-login">
-      <label>Password</label>
-      <div class="inp-wrap">
-        <i class="fas fa-lock ico"></i>
-        <input type="password" id="pass" placeholder="••••••••••" autocomplete="current-password"/>
-      </div>
-    </div>
-    <div class="forgot-link"><a href="#" onclick="alert('Contact admin to reset your password');return false;">Forgot password?</a></div>
+    <h2 class="font-display text-4xl text-slate-900 tracking-wide">Welcome Back</h2>
+    <p class="text-sm text-slate-500 mt-1 mb-7">Sign in to manage your dealership</p>
 
-    <div class="err-msg" id="loginErr">
-      <i class="fas fa-circle-xmark"></i>
+    <!-- Email -->
+    <div class="flex flex-col gap-1.5 mb-4">
+      <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Email Address</label>
+      <div class="relative">
+        <i class="fas fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input type="email" id="email" placeholder="admin@bajaj.com" autocomplete="email"
+          class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+      </div>
+    </div>
+
+    <!-- Password -->
+    <div class="flex flex-col gap-1.5 mb-2">
+      <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Password</label>
+      <div class="relative">
+        <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input type="password" id="pass" placeholder="••••••••••" autocomplete="current-password"
+          class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+      </div>
+    </div>
+
+    <div class="text-right mb-4">
+      <a href="#" onclick="alert('Contact admin to reset your password');return false;" class="text-xs text-slate-400 hover:text-amber-500 transition-colors">Forgot password?</a>
+    </div>
+
+    <!-- Error -->
+    <div id="loginErr" class="hidden items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 text-sm text-red-600 mb-3">
+      <i class="fas fa-circle-xmark flex-shrink-0"></i>
       <span id="loginErrText">Invalid credentials</span>
     </div>
 
-    <button class="btn-login" id="loginBtn">
-      <span id="loginBtnText"><i class="fas fa-right-to-bracket"></i> Sign In to Panel</span>
+    <!-- Login btn -->
+    <button id="loginBtn" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-bold text-base tracking-wider shadow-btn transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+      <span id="loginBtnText" class="flex items-center gap-2"><i class="fas fa-right-to-bracket"></i> Sign In to Panel</span>
       <div class="spin" id="loginSpin"></div>
     </button>
 
-    <div class="divider">Or continue with</div>
-    <div class="soc-row">
-      <button class="soc-btn"><img src="https://www.google.com/favicon.ico" width="14" style="border-radius:2px;"/> Google</button>
-      <button class="soc-btn"><i class="fab fa-facebook" style="color:#1877F2;"></i> Facebook</button>
-      <button class="soc-btn"><i class="fab fa-apple"></i> Apple</button>
+    <div class="flex items-center gap-3 my-5 text-xs text-slate-400 uppercase tracking-wider">
+      <div class="flex-1 h-px bg-slate-200"></div>Or continue with<div class="flex-1 h-px bg-slate-200"></div>
     </div>
 
-    <div class="contact-area">
-      <p><i class="fas fa-headset" style="color:var(--gold)"></i> Need a new admin ID? Contact support</p>
-      <a class="cbtn cbtn-wa" href="https://wa.me/919876543210?text=Hi%2C%20I%20need%20a%20new%20admin%20ID%20for%20Bajaj%20panel" target="_blank">
-        <i class="fab fa-whatsapp fa-lg"></i> WhatsApp Support
+    <div class="flex gap-2 mb-6">
+      <button class="flex-1 flex items-center justify-center gap-2 border-2 border-slate-200 rounded-xl py-2.5 text-xs font-bold text-slate-500 hover:border-blue-400 hover:bg-blue-50 transition-all">
+        <img src="https://www.google.com/favicon.ico" width="13" class="rounded-sm"/> Google
+      </button>
+      <button class="flex-1 flex items-center justify-center gap-2 border-2 border-slate-200 rounded-xl py-2.5 text-xs font-bold text-slate-500 hover:border-blue-400 hover:bg-blue-50 transition-all">
+        <i class="fab fa-facebook text-blue-600"></i> Facebook
+      </button>
+      <button class="flex-1 flex items-center justify-center gap-2 border-2 border-slate-200 rounded-xl py-2.5 text-xs font-bold text-slate-500 hover:border-blue-400 hover:bg-blue-50 transition-all">
+        <i class="fab fa-apple"></i> Apple
+      </button>
+    </div>
+
+    <div class="border-t border-slate-100 pt-5">
+      <p class="flex items-center gap-2 text-xs text-slate-400 mb-3"><i class="fas fa-headset text-amber-500"></i> Need a new admin ID? Contact support</p>
+      <a class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 hover:bg-emerald-500 hover:text-white transition-all mb-2"
+         href="https://wa.me/919876543210?text=Hi%2C%20I%20need%20a%20new%20admin%20ID%20for%20Bajaj%20panel" target="_blank">
+        <i class="fab fa-whatsapp text-lg"></i> WhatsApp Support
       </a>
-      <a class="cbtn cbtn-gm" href="mailto:bajajadmin@gmail.com?subject=New%20Admin%20ID%20Request&body=Hello%2C%20I%20need%20a%20new%20admin%20ID." target="_blank">
-        <i class="fas fa-envelope fa-lg"></i> Email via Gmail
+      <a class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-500 hover:text-white transition-all"
+         href="mailto:bajajadmin@gmail.com?subject=New%20Admin%20ID%20Request&body=Hello%2C%20I%20need%20a%20new%20admin%20ID." target="_blank">
+        <i class="fas fa-envelope text-lg"></i> Email via Gmail
       </a>
     </div>
   </div>
 </div>
 
 <!-- ══════════════════ ADMIN PANEL ══════════════════ -->
-<div id="admin-section">
+<div id="admin-section" class="hidden flex-col min-h-screen">
 
   <!-- NAVBAR -->
-  <nav class="top-nav">
-    <div class="nav-brand">
-      <div class="nav-brand-icon"><i class="fas fa-motorcycle"></i></div>
-      <div>
-        <div class="nav-brand-text">BAJAJ <span>ADMIN</span></div>
-        <div class="nav-brand-badge">Dealer Panel</div>
+  <nav class="sticky top-0 z-50 h-16 bg-white/95 backdrop-blur border-b border-slate-200 flex items-center px-4 gap-3 shadow-sm">
+    <!-- Brand -->
+    <div class="flex items-center gap-2.5 flex-shrink-0">
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white shadow-btn flex-shrink-0">
+        <i class="fas fa-motorcycle text-sm"></i>
+      </div>
+      <div class="hidden sm:block">
+        <div class="font-display text-xl text-slate-900 tracking-widest leading-none">BAJAJ <span class="text-amber-500">ADMIN</span></div>
+        <div class="text-[9px] text-slate-400 tracking-widest uppercase">Dealer Panel</div>
       </div>
     </div>
 
-    <div class="nav-divider"></div>
+    <div class="w-px h-7 bg-slate-200 hidden md:block flex-shrink-0"></div>
 
-    <div class="nav-tabs">
-      <div class="nav-tab active" id="navPrice" onclick="switchSec('price')">
-        <i class="fas fa-tags"></i> Price List
-      </div>
-      <div class="nav-tab" id="navInv" onclick="switchSec('inv')">
-        <i class="fas fa-warehouse"></i> Inventory
-      </div>
+    <!-- Desktop Tabs -->
+    <div class="hidden md:flex gap-1.5">
+      <button id="navPrice" onclick="switchSec('price')"
+        class="nav-tab flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide text-slate-500 border border-transparent hover:bg-slate-100 transition-all active-tab">
+        <i class="fas fa-tags text-xs"></i> Price List
+      </button>
+      <button id="navInv" onclick="switchSec('inv')"
+        class="nav-tab flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide text-slate-500 border border-transparent hover:bg-slate-100 transition-all">
+        <i class="fas fa-warehouse text-xs"></i> Inventory
+      </button>
     </div>
 
-    <div class="nav-right">
-      <div class="nav-date-chip">
-        <i class="fas fa-calendar" style="color:var(--gold);font-size:.7rem;"></i>
+    <!-- Right -->
+    <div class="ml-auto flex items-center gap-2 flex-shrink-0">
+      <div class="hidden sm:flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-500 font-mono">
+        <i class="fas fa-calendar text-amber-500 text-xs"></i>
         <span id="currentDate"></span>
       </div>
-      <div class="nav-user-chip">
-        <div class="nav-avatar" id="navAvatar">A</div>
-        <span class="nav-user-name" id="headerUserName">Admin</span>
+      <div class="flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1.5">
+        <div id="navAvatar" class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">A</div>
+        <span id="headerUserName" class="text-xs font-semibold text-slate-700 hidden sm:block">Admin</span>
       </div>
-      <button class="btn-logout" id="logoutBtn">
-        <i class="fas fa-right-from-bracket"></i> <span class="logout-txt">Logout</span>
+      <button id="logoutBtn" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-red-200 text-red-500 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white hover:border-red-500 transition-all">
+        <i class="fas fa-right-from-bracket"></i> <span class="hidden sm:inline">Logout</span>
       </button>
-      <div class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
-        <i class="fas fa-bars"></i>
-      </div>
+      <!-- Hamburger -->
+      <button id="hamburger" onclick="toggleMobileMenu()" class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200 transition-all">
+        <i class="fas fa-bars text-sm"></i>
+      </button>
     </div>
   </nav>
 
-  <!-- MOBILE MENU -->
-  <div class="mobile-menu" id="mobileMenu">
-    <div class="mobile-tab active" id="mNavPrice" onclick="switchSec('price');closeMobileMenu()"><i class="fas fa-tags"></i> Price List</div>
-    <div class="mobile-tab" id="mNavInv" onclick="switchSec('inv');closeMobileMenu()"><i class="fas fa-warehouse"></i> Inventory</div>
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="mobile-menu md:hidden flex-col gap-1 bg-white border-b border-slate-200 px-4 py-3 shadow-lg">
+    <button id="mNavPrice" onclick="switchSec('price');closeMobileMenu()" class="mobile-tab flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 border border-transparent hover:bg-slate-100 transition-all active-mob">
+      <i class="fas fa-tags text-blue-500"></i> Price List
+    </button>
+    <button id="mNavInv" onclick="switchSec('inv');closeMobileMenu()" class="mobile-tab flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 border border-transparent hover:bg-slate-100 transition-all">
+      <i class="fas fa-warehouse text-blue-500"></i> Inventory
+    </button>
   </div>
 
-  <div class="main-wrap">
+  <div class="flex-1 px-4 py-6 max-w-7xl mx-auto w-full">
 
-    <!-- ═══ PRICE LIST SECTION ═══ -->
+    <!-- ═══ PRICE LIST ═══ -->
     <div class="sec-panel active" id="secPrice">
-      <div class="page-header">
-        <div class="page-header-left">
-          <div class="page-eyebrow"><i class="fas fa-tags" style="font-size:.6rem;"></i> Management</div>
-          <div class="page-title">Master <span>Price List</span></div>
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="eyebrow-line text-xs font-bold uppercase tracking-widest text-blue-600 mb-1">Management</div>
+          <div class="font-display text-4xl sm:text-5xl text-slate-900 tracking-wide leading-none">Master <span class="text-amber-500">Price List</span></div>
         </div>
       </div>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-inner">
-            <div class="stat-icon"><i class="fas fa-motorcycle"></i></div>
-            <div><div class="stat-val" id="statModels">0</div><div class="stat-lbl">Total Models</div></div>
+      <!-- Stats -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-400"></div>
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0"><i class="fas fa-motorcycle text-sm"></i></div>
+            <div class="min-w-0">
+              <div id="statModels" class="font-display text-3xl text-slate-900 leading-none">0</div>
+              <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Total Models</div>
+            </div>
           </div>
-          <i class="fas fa-motorcycle stat-bg-icon"></i>
         </div>
-        <div class="stat-card">
-          <div class="stat-inner">
-            <div class="stat-icon"><i class="fas fa-indian-rupee-sign"></i></div>
-            <div><div class="stat-val" id="statAvg">—</div><div class="stat-lbl">Avg Price</div></div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-400"></div>
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0"><i class="fas fa-indian-rupee-sign text-sm"></i></div>
+            <div class="min-w-0">
+              <div id="statAvg" class="font-display text-3xl text-slate-900 leading-none truncate">—</div>
+              <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Avg Price</div>
+            </div>
           </div>
-          <i class="fas fa-chart-line stat-bg-icon"></i>
         </div>
-        <div class="stat-card">
-          <div class="stat-inner">
-            <div class="stat-icon"><i class="fas fa-shield-halved"></i></div>
-            <div><div class="stat-val" id="statIns">0</div><div class="stat-lbl">With Insurance</div></div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-500 to-amber-400"></div>
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0"><i class="fas fa-shield-halved text-sm"></i></div>
+            <div class="min-w-0">
+              <div id="statIns" class="font-display text-3xl text-slate-900 leading-none">0</div>
+              <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">With Insurance</div>
+            </div>
           </div>
-          <i class="fas fa-shield-halved stat-bg-icon"></i>
         </div>
-        <div class="stat-card">
-          <div class="stat-inner">
-            <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-            <div><div class="stat-val" id="statFin">0</div><div class="stat-lbl">Finance Available</div></div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-400"></div>
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0"><i class="fas fa-file-invoice-dollar text-sm"></i></div>
+            <div class="min-w-0">
+              <div id="statFin" class="font-display text-3xl text-slate-900 leading-none">0</div>
+              <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Finance Avail.</div>
+            </div>
           </div>
-          <i class="fas fa-file-invoice-dollar stat-bg-icon"></i>
         </div>
       </div>
 
-      <!-- Form -->
-      <div class="form-card">
-        <div class="form-card-header">
-          <div class="form-card-title"><i class="fas fa-plus-circle"></i><span id="masterFormTitle">Add New Bike Model</span></div>
-        </div>
-        <div class="form-grid">
-          <div class="fg" style="max-width:100px;">
-            <label>S.N <span class="req">*</span></label>
-            <input type="number" id="mSn" placeholder="1" min="1"/>
-          </div>
-          <div class="fg" style="grid-column:span 2;">
-            <label>Model Name <span class="req">*</span></label>
-            <input type="text" id="mName" placeholder="e.g. Pulsar NS200"/>
-          </div>
-          <div class="fg">
-            <label>Price (₹) <span class="req">*</span></label>
-            <input type="number" id="mPrice" placeholder="145000"/>
-          </div>
-          <div class="fg">
-            <label>Insurance (₹) <span class="req">*</span></label>
-            <input type="number" id="mNormalIns" placeholder="8500"/>
-          </div>
-          <div class="fg">
-            <label>Finance Insurance (₹) <span class="req">*</span></label>
-            <input type="number" id="mFinanceIns" placeholder="3200"/>
-          </div>
-          <div class="fg">
-            <label>Image URL <small style="text-transform:none;color:var(--muted);font-weight:400;letter-spacing:0;">(optional)</small></label>
-            <input type="text" id="mImg" placeholder="https://...image.jpg"/>
+      <!-- Form Card -->
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-card p-5 mb-5">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 font-display text-2xl text-slate-900 tracking-wide">
+            <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
+            <span id="masterFormTitle">Add New Bike Model</span>
           </div>
         </div>
-        <div class="form-actions">
-          <button class="btn-primary" id="saveModelBtn"><i class="fas fa-floppy-disk"></i> Save to Master List</button>
-          <button class="btn-outline btn-cancel" id="cancelMasterBtn" onclick="cancelMasterEdit()"><i class="fas fa-xmark"></i> Cancel Edit</button>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
+          <div class="flex flex-col gap-1.5" style="max-width:100px;">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">S.N <span class="text-red-400">*</span></label>
+            <input type="number" id="mSn" placeholder="1" min="1"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5 col-span-2 sm:col-span-2">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Model Name <span class="text-red-400">*</span></label>
+            <input type="text" id="mName" placeholder="e.g. Pulsar NS200"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price (₹) <span class="text-red-400">*</span></label>
+            <input type="number" id="mPrice" placeholder="145000"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Insurance (₹) <span class="text-red-400">*</span></label>
+            <input type="number" id="mNormalIns" placeholder="8500"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Finance Ins. (₹) <span class="text-red-400">*</span></label>
+            <input type="number" id="mFinanceIns" placeholder="3200"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5 col-span-2 sm:col-span-1 lg:col-span-1">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Image URL <span class="text-slate-400 font-normal normal-case">(opt.)</span></label>
+            <input type="text" id="mImg" placeholder="https://...image.jpg"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button id="saveModelBtn" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all">
+            <i class="fas fa-floppy-disk"></i> Save to Master List
+          </button>
+          <button id="cancelMasterBtn" onclick="cancelMasterEdit()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
+            <i class="fas fa-xmark"></i> Cancel Edit
+          </button>
         </div>
       </div>
 
       <!-- Table -->
-      <div class="table-card">
-        <div class="table-toolbar">
-          <div class="table-toolbar-left">
-            <div class="table-card-title"><i class="fas fa-tags"></i> Price Catalogue</div>
-            <span class="count-badge" id="priceCount">0 models</span>
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-card overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 font-display text-2xl text-slate-900 tracking-wide"><i class="fas fa-tags text-amber-500"></i> Price Catalogue</div>
+            <span id="priceCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 models</span>
           </div>
         </div>
-        <div class="tbl-overflow">
-          <table>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse">
             <thead>
-              <tr><th>S.N</th><th>Image</th><th>Model Name</th><th>Price</th><th>Insurance</th><th>Finance Ins.</th><th>Actions</th></tr>
+              <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Image</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model Name</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Price</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Insurance</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Finance Ins.</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
+              </tr>
             </thead>
             <tbody id="masterTableBody">
-              <tr><td colspan="7"><div class="loading-row"><i class="fas fa-circle-notch"></i>Connecting to database…</div></td></tr>
+              <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Connecting to database…
+              </td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ═══ INVENTORY SECTION ═══ -->
+    <!-- ═══ INVENTORY ═══ -->
     <div class="sec-panel" id="secInv">
-      <div class="page-header">
-        <div class="page-header-left">
-          <div class="page-eyebrow"><i class="fas fa-warehouse" style="font-size:.6rem;"></i> Stock Management</div>
-          <div class="page-title">Live <span>Inventory</span></div>
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="eyebrow-line text-xs font-bold uppercase tracking-widest text-blue-600 mb-1">Stock Management</div>
+          <div class="font-display text-4xl sm:text-5xl text-slate-900 tracking-wide leading-none">Live <span class="text-amber-500">Inventory</span></div>
         </div>
       </div>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-inner">
-            <div class="stat-icon"><i class="fas fa-warehouse"></i></div>
-            <div><div class="stat-val" id="statInvTotal">0</div><div class="stat-lbl">Total Units</div></div>
-          </div>
-          <i class="fas fa-warehouse stat-bg-icon"></i>
-        </div>
-        <div class="stat-card">
-          <div class="stat-inner">
-            <div class="stat-icon"><i class="fas fa-circle-check"></i></div>
-            <div><div class="stat-val" id="statInvReg">0</div><div class="stat-lbl">Registered</div></div>
-          </div>
-          <i class="fas fa-id-card stat-bg-icon"></i>
-        </div>
-        <div class="stat-card">
-          <div class="stat-inner">
-            <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
-            <div><div class="stat-val" id="statInvPend">0</div><div class="stat-lbl">Pending Reg.</div></div>
-          </div>
-          <i class="fas fa-hourglass stat-bg-icon"></i>
-        </div>
-        <div class="stat-card">
-          <div class="stat-inner">
-            <div class="stat-icon"><i class="fas fa-palette"></i></div>
-            <div><div class="stat-val" id="statInvCol">0</div><div class="stat-lbl">Colour Variants</div></div>
-          </div>
-          <i class="fas fa-palette stat-bg-icon"></i>
-        </div>
-      </div>
-
-      <!-- Form -->
-      <div class="form-card">
-        <div class="form-card-header">
-          <div class="form-card-title"><i class="fas fa-plus-circle"></i> Add Inventory Unit</div>
-        </div>
-        <div class="form-grid">
-          <div class="fg" style="max-width:100px;">
-            <label>S.N <span class="req">*</span></label>
-            <input type="number" id="sSn" placeholder="1" min="1"/>
-          </div>
-          <div class="fg">
-            <label>Model <span class="req">*</span></label>
-            <select id="stockModelSelect"><option value="">— Select Model —</option></select>
-          </div>
-          <div class="fg">
-            <label>Price (₹) <span class="req">*</span></label>
-            <input type="number" id="sPrice" placeholder="Auto-fills"/>
-          </div>
-          <div class="fg">
-            <label>Chassis No <span class="req">*</span></label>
-            <input type="text" id="sChassis" placeholder="MD2A12EY..."/>
-          </div>
-          <div class="fg">
-            <label>Engine No <span class="req">*</span></label>
-            <input type="text" id="sEngine" placeholder="BSVI2024..."/>
-          </div>
-          <div class="fg">
-            <label>Registration No</label>
-            <input type="text" id="sRegNo" placeholder="BA 2 PA 1234"/>
-          </div>
-          <div class="fg">
-            <label>Colour <span class="req">*</span></label>
-            <input type="text" id="sColor" placeholder="e.g. Fiery Orange"/>
+      <!-- Stats -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-400"></div>
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0"><i class="fas fa-warehouse text-sm"></i></div>
+            <div class="min-w-0">
+              <div id="statInvTotal" class="font-display text-3xl text-slate-900 leading-none">0</div>
+              <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Total Units</div>
+            </div>
           </div>
         </div>
-        <div class="form-actions">
-          <button class="btn-primary" id="saveStockBtn"><i class="fas fa-floppy-disk"></i> Save Unit</button>
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-400"></div>
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0"><i class="fas fa-circle-check text-sm"></i></div>
+            <div class="min-w-0">
+              <div id="statInvReg" class="font-display text-3xl text-slate-900 leading-none">0</div>
+              <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Registered</div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-500 to-amber-400"></div>
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0"><i class="fas fa-hourglass-half text-sm"></i></div>
+            <div class="min-w-0">
+              <div id="statInvPend" class="font-display text-3xl text-slate-900 leading-none">0</div>
+              <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Pending Reg.</div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-400"></div>
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0"><i class="fas fa-palette text-sm"></i></div>
+            <div class="min-w-0">
+              <div id="statInvCol" class="font-display text-3xl text-slate-900 leading-none">0</div>
+              <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Colours</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Inventory Table -->
-      <div class="table-card">
-        <div class="table-toolbar">
-          <div class="table-toolbar-left">
-            <div class="table-card-title"><i class="fas fa-warehouse"></i> Stock Register</div>
-            <span class="count-badge" id="invCount">0 units</span>
+      <!-- Inv Form -->
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-card p-5 mb-5">
+        <div class="flex items-center gap-2 font-display text-2xl text-slate-900 tracking-wide mb-4 pb-4 border-b border-slate-100">
+          <i class="fas fa-plus-circle text-amber-500 text-lg"></i> Add Inventory Unit
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
+          <div class="flex flex-col gap-1.5" style="max-width:100px;">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">S.N <span class="text-red-400">*</span></label>
+            <input type="number" id="sSn" placeholder="1" min="1"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Model <span class="text-red-400">*</span></label>
+            <select id="stockModelSelect" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="">— Select Model —</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price (₹) <span class="text-red-400">*</span></label>
+            <input type="number" id="sPrice" placeholder="Auto-fills"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Chassis No <span class="text-red-400">*</span></label>
+            <input type="text" id="sChassis" placeholder="MD2A12EY..."
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Engine No <span class="text-red-400">*</span></label>
+            <input type="text" id="sEngine" placeholder="BSVI2024..."
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Registration No</label>
+            <input type="text" id="sRegNo" placeholder="BA 2 PA 1234"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Colour <span class="text-red-400">*</span></label>
+            <input type="text" id="sColor" placeholder="e.g. Fiery Orange"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
         </div>
-        <div class="tbl-overflow">
-          <table>
+        <div class="flex gap-2">
+          <button id="saveStockBtn" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all">
+            <i class="fas fa-floppy-disk"></i> Save Unit
+          </button>
+        </div>
+      </div>
+
+      <!-- Inv Table -->
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-card overflow-hidden">
+        <div class="flex items-center gap-2 px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center gap-2 font-display text-2xl text-slate-900 tracking-wide"><i class="fas fa-warehouse text-amber-500"></i> Stock Register</div>
+          <span id="invCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse">
             <thead>
-              <tr><th>S.N</th><th>Model</th><th>Price</th><th>Chassis No</th><th>Engine No</th><th>Reg. No</th><th>Colour</th><th>Actions</th></tr>
+              <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Price</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Chassis No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Engine No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Reg. No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Colour</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
+              </tr>
             </thead>
             <tbody id="stockTableBody">
-              <tr><td colspan="8"><div class="loading-row"><i class="fas fa-circle-notch"></i>Loading inventory…</div></td></tr>
+              <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading inventory…
+              </td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-  </div><!-- /main-wrap -->
+  </div><!-- /main content -->
 
   <!-- FOOTER -->
-  <footer>
-    <div class="footer-body">
-      <div class="f-brand">
-        <div class="f-brand-logo">
-          <div class="f-brand-icon"><i class="fas fa-motorcycle"></i></div>
-          <div class="f-brand-name">BAJAJ <span>BIKES</span></div>
+  <footer class="bg-white border-t border-slate-200 mt-auto relative overflow-hidden">
+    <div class="top-bar-grad absolute top-0 left-0 right-0 h-px"></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-6 py-10 max-w-7xl mx-auto">
+      <div>
+        <div class="flex items-center gap-2.5 mb-3">
+          <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white"><i class="fas fa-motorcycle text-sm"></i></div>
+          <div class="font-display text-xl text-slate-900 tracking-widest">BAJAJ <span class="text-amber-500">BIKES</span></div>
         </div>
-        <p>Your trusted Bajaj dealership. Premium bikes, competitive pricing, and complete post-sale support — all managed from one powerful admin dashboard.</p>
-        <div class="f-socials">
-          <a class="f-soc f-soc-wa" href="https://wa.me/919876543210" target="_blank"><i class="fab fa-whatsapp"></i></a>
-          <a class="f-soc f-soc-gm" href="mailto:bajajadmin@gmail.com" target="_blank"><i class="fas fa-envelope"></i></a>
-          <a class="f-soc f-soc-tw" href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+        <p class="text-xs text-slate-500 leading-relaxed max-w-xs mb-4">Your trusted Bajaj dealership. Premium bikes, competitive pricing, complete post-sale support.</p>
+        <div class="flex gap-2">
+          <a href="https://wa.me/919876543210" target="_blank" class="w-8 h-8 rounded-lg bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-600 text-sm hover:-translate-y-0.5 transition-all"><i class="fab fa-whatsapp"></i></a>
+          <a href="mailto:bajajadmin@gmail.com" target="_blank" class="w-8 h-8 rounded-lg bg-red-100 border border-red-200 flex items-center justify-center text-red-500 text-sm hover:-translate-y-0.5 transition-all"><i class="fas fa-envelope"></i></a>
+          <a href="#" class="w-8 h-8 rounded-lg bg-sky-100 border border-sky-200 flex items-center justify-center text-sky-500 text-sm hover:-translate-y-0.5 transition-all"><i class="fab fa-twitter"></i></a>
         </div>
       </div>
-
-      <div class="f-col">
-        <h5>Quick Nav</h5>
-        <ul>
-          <li onclick="switchSec('price')"><i class="fas fa-chevron-right"></i> Price List</li>
-          <li onclick="switchSec('inv')"><i class="fas fa-chevron-right"></i> Inventory</li>
+      <div>
+        <h5 class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-4 pb-2 border-b border-slate-100">Quick Nav</h5>
+        <ul class="space-y-2">
+          <li onclick="switchSec('price')" class="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-800 cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-300"></i> Price List</li>
+          <li onclick="switchSec('inv')" class="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-800 cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-300"></i> Inventory</li>
         </ul>
       </div>
-
-      <div class="f-col">
-        <h5>Bajaj Models</h5>
-        <ul>
-          <li><i class="fas fa-circle-dot"></i> Pulsar Series</li>
-          <li><i class="fas fa-circle-dot"></i> Dominar Series</li>
-          <li><i class="fas fa-circle-dot"></i> CT Series</li>
-          <li><i class="fas fa-circle-dot"></i> Platina Series</li>
-          <li><i class="fas fa-circle-dot"></i> Avenger Series</li>
+      <div>
+        <h5 class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-4 pb-2 border-b border-slate-100">Bajaj Models</h5>
+        <ul class="space-y-2">
+          <li class="flex items-center gap-2 text-xs text-slate-500"><i class="fas fa-circle-dot text-[7px] text-slate-300"></i> Pulsar Series</li>
+          <li class="flex items-center gap-2 text-xs text-slate-500"><i class="fas fa-circle-dot text-[7px] text-slate-300"></i> Dominar Series</li>
+          <li class="flex items-center gap-2 text-xs text-slate-500"><i class="fas fa-circle-dot text-[7px] text-slate-300"></i> CT Series</li>
+          <li class="flex items-center gap-2 text-xs text-slate-500"><i class="fas fa-circle-dot text-[7px] text-slate-300"></i> Platina Series</li>
+          <li class="flex items-center gap-2 text-xs text-slate-500"><i class="fas fa-circle-dot text-[7px] text-slate-300"></i> Avenger Series</li>
         </ul>
       </div>
-
-      <div class="f-col">
-        <h5>Contact Us</h5>
-        <div class="f-contact-item"><i class="fab fa-whatsapp"></i><span>+91 98765 43210</span></div>
-        <div class="f-contact-item"><i class="fas fa-envelope"></i><span>bajajadmin@gmail.com</span></div>
-        <div class="f-contact-item"><i class="fas fa-location-dot"></i><span>Bajaj Showroom, Main Road, Your City</span></div>
-        <div class="f-contact-item"><i class="fas fa-clock"></i><span>Mon–Sat: 9 AM – 7 PM</span></div>
+      <div>
+        <h5 class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-4 pb-2 border-b border-slate-100">Contact Us</h5>
+        <div class="space-y-2.5">
+          <div class="flex items-start gap-2 text-xs text-slate-500"><i class="fab fa-whatsapp text-amber-500 mt-0.5 flex-shrink-0"></i>+91 98765 43210</div>
+          <div class="flex items-start gap-2 text-xs text-slate-500"><i class="fas fa-envelope text-amber-500 mt-0.5 flex-shrink-0"></i>bajajadmin@gmail.com</div>
+          <div class="flex items-start gap-2 text-xs text-slate-500"><i class="fas fa-location-dot text-amber-500 mt-0.5 flex-shrink-0"></i>Bajaj Showroom, Main Road, Your City</div>
+          <div class="flex items-start gap-2 text-xs text-slate-500"><i class="fas fa-clock text-amber-500 mt-0.5 flex-shrink-0"></i>Mon–Sat: 9 AM – 7 PM</div>
+        </div>
       </div>
     </div>
-    <div class="footer-bottom">
-      <p class="footer-copy">&copy; 2026 <span>Bajaj Bikes Admin Panel</span>. All rights reserved.</p>
-      <div class="footer-links">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Use</a>
-        <a href="#">Support</a>
+    <div class="flex items-center justify-between px-6 py-3 border-t border-slate-100 max-w-7xl mx-auto w-full flex-wrap gap-2">
+      <p class="text-xs text-slate-400">&copy; 2026 <span class="text-amber-500 font-semibold">Bajaj Bikes Admin Panel</span>. All rights reserved.</p>
+      <div class="flex gap-4">
+        <a href="#" class="text-xs text-slate-400 hover:text-slate-700 transition-colors">Privacy Policy</a>
+        <a href="#" class="text-xs text-slate-400 hover:text-slate-700 transition-colors">Terms of Use</a>
+        <a href="#" class="text-xs text-slate-400 hover:text-slate-700 transition-colors">Support</a>
       </div>
     </div>
   </footer>
 </div>
 
 <!-- TOAST -->
-<div class="toast" id="toast">
-  <div class="toast-bar" id="toastBar"></div>
-  <i id="toastIcon" class="fas fa-circle-check" style="font-size:1rem;flex-shrink:0;"></i>
+<div id="toast" class="hidden fixed bottom-5 right-5 z-[500] bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-700 flex items-center gap-2.5 shadow-xl min-w-[200px] max-w-xs" style="animation:slideIn .3s ease;">
+  <div id="toastBar" class="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"></div>
+  <i id="toastIcon" class="fas fa-circle-check text-base flex-shrink-0"></i>
   <span id="toastMsg"></span>
 </div>
 
@@ -960,19 +642,41 @@ function toast(msg, type='ok') {
   const t = document.getElementById('toast');
   const ic = document.getElementById('toastIcon');
   const bar = document.getElementById('toastBar');
-  ic.className = type==='err' ? 'fas fa-circle-xmark' : 'fas fa-circle-check';
-  ic.style.color = type==='err' ? '#f87171' : '#f5a500';
-  bar.className = `toast-bar ${type}`;
+  ic.className = type==='err' ? 'fas fa-circle-xmark text-base flex-shrink-0' : 'fas fa-circle-check text-base flex-shrink-0';
+  ic.style.color = type==='err' ? '#ef4444' : '#10b981';
+  bar.style.background = type==='err' ? '#ef4444' : '#f59e0b';
   document.getElementById('toastMsg').textContent = msg;
   t.style.display = 'flex';
   setTimeout(()=>{ t.style.display='none'; }, 3200);
 }
 
 function colourHex(col='') {
-  const map={red:'#ef4444',blue:'#3b82f6',black:'#374151',white:'#f8fafc',orange:'#f97316',green:'#22c55e',yellow:'#eab308',silver:'#94a3b8',grey:'#64748b',gray:'#64748b',maroon:'#be123c',brown:'#92400e',purple:'#7c3aed',pink:'#ec4899'};
+  const map={red:'#ef4444',blue:'#3b82f6',black:'#374151',white:'#e2e8f0',orange:'#f97316',green:'#22c55e',yellow:'#eab308',silver:'#94a3b8',grey:'#64748b',gray:'#64748b',maroon:'#be123c',brown:'#92400e',purple:'#7c3aed',pink:'#ec4899'};
   const k = col.toLowerCase().split(/\s+/).find(w=>map[w]);
   return k ? map[k] : '#6366f1';
 }
+
+/* ─── Active tab styles ─── */
+function setActiveTab(sec) {
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
+    t.classList.add('text-slate-500','border-transparent');
+  });
+  document.querySelectorAll('.mobile-tab').forEach(t => {
+    t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
+    t.classList.add('text-slate-600','border-transparent');
+  });
+  const tid = sec==='price' ? 'navPrice' : 'navInv';
+  const mtid = sec==='price' ? 'mNavPrice' : 'mNavInv';
+  const tab = document.getElementById(tid);
+  const mtab = document.getElementById(mtid);
+  if(tab) { tab.classList.add('bg-blue-50','border-blue-200','text-blue-700'); tab.classList.remove('text-slate-500','border-transparent'); }
+  if(mtab) { mtab.classList.add('bg-blue-50','border-blue-200','text-blue-700'); mtab.classList.remove('text-slate-600','border-transparent'); }
+}
+// Set initial active state
+document.querySelectorAll('.nav-tab').forEach(t=>t.classList.add('border'));
+document.querySelectorAll('.mobile-tab').forEach(t=>t.classList.add('border'));
+setActiveTab('price');
 
 /* ─── Auth ─── */
 onAuthStateChanged(auth, async (user) => {
@@ -1004,15 +708,17 @@ document.getElementById('loginBtn').addEventListener('click', () => {
   const email = document.getElementById('email').value.trim();
   const pass = document.getElementById('pass').value;
   const errEl = document.getElementById('loginErr');
-  errEl.style.display = 'none';
-  if (!email||!pass) { errEl.style.display='flex'; document.getElementById('loginErrText').textContent='Please enter email and password.'; return; }
+  errEl.classList.add('hidden'); errEl.classList.remove('flex');
+  if (!email||!pass) {
+    errEl.classList.remove('hidden'); errEl.classList.add('flex');
+    document.getElementById('loginErrText').textContent='Please enter email and password.'; return;
+  }
   setBtnState(true);
-  signInWithEmailAndPassword(auth, email, pass)
-    .catch(e => {
-      errEl.style.display='flex';
-      document.getElementById('loginErrText').textContent = e.code==='auth/invalid-credential'?'Wrong email or password.':e.message;
-      setBtnState(false);
-    });
+  signInWithEmailAndPassword(auth, email, pass).catch(e => {
+    errEl.classList.remove('hidden'); errEl.classList.add('flex');
+    document.getElementById('loginErrText').textContent = e.code==='auth/invalid-credential'?'Wrong email or password.':e.message;
+    setBtnState(false);
+  });
 });
 document.addEventListener('keydown', e => {
   if (e.key==='Enter' && document.getElementById('login-section').style.display!=='none') document.getElementById('loginBtn').click();
@@ -1035,30 +741,40 @@ function loadMasterPriceList() {
     renderMasterTable(); updatePriceStats(); populateModelDropdown();
   });
 }
+
 function renderMasterTable() {
   const tbody = document.getElementById('masterTableBody');
   document.getElementById('priceCount').textContent = allMasterBikes.length+' model'+(allMasterBikes.length!==1?'s':'');
   if (!allMasterBikes.length) {
-    tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><i class="fas fa-motorcycle"></i><p>No models yet. Add your first bike above.</p></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="7"><div class="py-12 text-center text-slate-400"><i class="fas fa-motorcycle text-3xl opacity-25 block mb-2"></i><p class="text-sm">No models yet. Add your first bike above.</p></div></td></tr>`;
     return;
   }
   const sorted=[...allMasterBikes].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
   tbody.innerHTML = sorted.map(b=>`
-    <tr>
-      <td><input class="sn-input" type="number" value="${b.sn||''}" min="1" placeholder="—"
-        onblur="window._saveSn('bikes','${b.id}',this.value)"
-        onkeydown="if(event.key==='Enter')this.blur()"/></td>
-      <td class="img-cell">${b.img?`<img src="${b.img}" onerror="this.style.display='none'" alt="">`:`<div class="no-img-cell"><i class="fas fa-image" style="font-size:.6rem;color:var(--muted)"></i></div>`}</td>
-      <td><span class="bike-name-cell">${b.name}</span></td>
-      <td><span class="badge b-blue">₹${Number(b.price).toLocaleString('en-IN')}</span></td>
-      <td><span class="badge b-green">₹${Number(b.Insurance||0).toLocaleString('en-IN')}</span></td>
-      <td><span class="badge b-gold">₹${Number(b.financeInsurance||0).toLocaleString('en-IN')}</span></td>
-      <td><div class="act-btns">
-        <button class="btn-edit-sm" onclick="window._editMaster('${b.id}')"><i class="fas fa-pen"></i> Edit</button>
-        <button class="btn-del-sm" onclick="window._deleteEntry('bikes','${b.id}')"><i class="fas fa-trash"></i> Del</button>
-      </div></td>
+    <tr class="border-b border-slate-100">
+      <td class="px-4 py-3">
+        <input class="sn-input" type="number" value="${b.sn||''}" min="1" placeholder="—"
+          onblur="window._saveSn('bikes','${b.id}',this.value)"
+          onkeydown="if(event.key==='Enter')this.blur()"/>
+      </td>
+      <td class="px-4 py-3">
+        ${b.img
+          ? `<img src="${b.img}" onerror="this.style.display='none'" alt="" class="w-11 h-8 object-cover rounded-lg border border-slate-200">`
+          : `<div class="w-11 h-8 rounded-lg bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs"><i class="fas fa-image"></i></div>`}
+      </td>
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap">${b.name}</td>
+      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-mono font-bold border border-blue-200">₹${Number(b.price).toLocaleString('en-IN')}</span></td>
+      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-mono font-bold border border-emerald-200">₹${Number(b.Insurance||0).toLocaleString('en-IN')}</span></td>
+      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 text-xs font-mono font-bold border border-amber-200">₹${Number(b.financeInsurance||0).toLocaleString('en-IN')}</span></td>
+      <td class="px-4 py-3">
+        <div class="flex gap-1.5 flex-wrap">
+          <button onclick="window._editMaster('${b.id}')" class="flex items-center gap-1 px-2.5 py-1 border border-blue-200 text-blue-600 text-xs font-bold rounded-lg hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all"><i class="fas fa-pen text-[10px]"></i> Edit</button>
+          <button onclick="window._deleteEntry('bikes','${b.id}')" class="flex items-center gap-1 px-2.5 py-1 border border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"><i class="fas fa-trash text-[10px]"></i> Del</button>
+        </div>
+      </td>
     </tr>`).join('');
 }
+
 function updatePriceStats() {
   const n=allMasterBikes.length;
   document.getElementById('statModels').textContent=n;
@@ -1066,12 +782,14 @@ function updatePriceStats() {
   document.getElementById('statIns').textContent=allMasterBikes.filter(x=>Number(x.Insurance||0)>0).length;
   document.getElementById('statFin').textContent=allMasterBikes.filter(x=>Number(x.financeInsurance||0)>0).length;
 }
+
 function populateModelDropdown() {
   const sel=document.getElementById('stockModelSelect');
   const cur=sel.value;
   sel.innerHTML='<option value="">— Select Model —</option>'+allMasterBikes.map(b=>`<option value="${b.name}" data-price="${b.price}">${b.name}</option>`).join('');
   if(cur) sel.value=cur;
 }
+
 document.getElementById('stockModelSelect').addEventListener('change',function(){
   const opt=this.selectedOptions[0];
   document.getElementById('sPrice').value=opt&&opt.dataset.price?opt.dataset.price:'';
@@ -1088,19 +806,26 @@ window._editMaster=(id)=>{
   currentEditId=id;
   const btn=document.getElementById('saveModelBtn');
   btn.innerHTML='<i class="fas fa-rotate"></i> Update Model Info';
-  btn.classList.add('edit-mode');
+  btn.classList.add('from-purple-600','to-purple-700');
+  btn.classList.remove('from-blue-600','to-blue-700');
   document.getElementById('masterFormTitle').textContent='Edit Bike Model';
-  document.getElementById('cancelMasterBtn').style.display='inline-flex';
+  const cancel = document.getElementById('cancelMasterBtn');
+  cancel.classList.remove('hidden'); cancel.classList.add('flex');
   window.scrollTo({top:0,behavior:'smooth'});
   toast('Model loaded for editing');
 };
+
 window.cancelMasterEdit=()=>{
   currentEditId=null; clearMasterForm();
-  document.getElementById('saveModelBtn').innerHTML='<i class="fas fa-floppy-disk"></i> Save to Master List';
-  document.getElementById('saveModelBtn').classList.remove('edit-mode');
+  const btn=document.getElementById('saveModelBtn');
+  btn.innerHTML='<i class="fas fa-floppy-disk"></i> Save to Master List';
+  btn.classList.remove('from-purple-600','to-purple-700');
+  btn.classList.add('from-blue-600','to-blue-700');
   document.getElementById('masterFormTitle').textContent='Add New Bike Model';
-  document.getElementById('cancelMasterBtn').style.display='none';
+  const cancel = document.getElementById('cancelMasterBtn');
+  cancel.classList.add('hidden'); cancel.classList.remove('flex');
 };
+
 document.getElementById('saveModelBtn').addEventListener('click',async()=>{
   const sn=document.getElementById('mSn').value.trim();
   const name=document.getElementById('mName').value.trim();
@@ -1115,6 +840,7 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
     window.cancelMasterEdit();
   }catch(e){toast('Error: '+e.message,'err');}
 });
+
 function clearMasterForm(){['mSn','mName','mPrice','mNormalIns','mFinanceIns','mImg'].forEach(id=>document.getElementById(id).value='');}
 
 /* ─── Inventory ─── */
@@ -1138,38 +864,50 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
     toast('Unit added to inventory!');
   }catch(e){toast('Error: '+e.message,'err');}
 });
+
 function loadLiveStock(){
   onSnapshot(collection(db,"inventory"),snap=>{
     invData=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderInvTable(snap.docs); updateInvStats();
   });
 }
+
 function renderInvTable(docs){
   const tbody=document.getElementById('stockTableBody');
   document.getElementById('invCount').textContent=docs.length+' unit'+(docs.length!==1?'s':'');
   if(!docs.length){
-    tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><i class="fas fa-warehouse"></i><p>No inventory yet. Add a unit using the form above.</p></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="8"><div class="py-12 text-center text-slate-400"><i class="fas fa-warehouse text-3xl opacity-25 block mb-2"></i><p class="text-sm">No inventory yet. Add a unit using the form above.</p></div></td></tr>`;
     return;
   }
   const sorted=[...docs].sort((a,b)=>(Number(a.data().sn)||9999)-(Number(b.data().sn)||9999));
   tbody.innerHTML=sorted.map(d=>{
     const s=d.data();
-    return`<tr>
-      <td><input class="sn-input" type="number" value="${s.sn||''}" min="1" placeholder="—"
-        onblur="window._saveSn('inventory','${d.id}',this.value)"
-        onkeydown="if(event.key==='Enter')this.blur()"/></td>
-      <td><span class="model-name-cell">${s.model}</span></td>
-      <td><span class="badge b-blue">₹${Number(s.price).toLocaleString('en-IN')}</span></td>
-      <td><span class="code-cell">${s.chassis||'—'}</span></td>
-      <td><span class="code-cell">${s.engine||'—'}</span></td>
-      <td>${s.regNo?`<span class="badge b-green">${s.regNo}</span>`:`<span class="badge b-gray">Pending</span>`}</td>
-      <td><span style="display:inline-flex;align-items:center;gap:.4rem;">
-        <span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}
-      </span></td>
-      <td><div class="act-btns"><button class="btn-del-sm" onclick="window._deleteEntry('inventory','${d.id}')"><i class="fas fa-trash"></i> Del</button></div></td>
+    return`<tr class="border-b border-slate-100">
+      <td class="px-4 py-3">
+        <input class="sn-input" type="number" value="${s.sn||''}" min="1" placeholder="—"
+          onblur="window._saveSn('inventory','${d.id}',this.value)"
+          onkeydown="if(event.key==='Enter')this.blur()"/>
+      </td>
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap">${s.model}</td>
+      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-mono font-bold border border-blue-200">₹${Number(s.price).toLocaleString('en-IN')}</span></td>
+      <td class="px-4 py-3"><code class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-md border border-blue-100 font-mono">${s.chassis||'—'}</code></td>
+      <td class="px-4 py-3"><code class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-md border border-blue-100 font-mono">${s.engine||'—'}</code></td>
+      <td class="px-4 py-3">${s.regNo
+        ? `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200">${s.regNo}</span>`
+        : `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 text-xs font-bold border border-slate-200">Pending</span>`}
+      </td>
+      <td class="px-4 py-3">
+        <span class="flex items-center gap-1.5 text-sm text-slate-600">
+          <span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}
+        </span>
+      </td>
+      <td class="px-4 py-3">
+        <button onclick="window._deleteEntry('inventory','${d.id}')" class="flex items-center gap-1 px-2.5 py-1 border border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"><i class="fas fa-trash text-[10px]"></i> Del</button>
+      </td>
     </tr>`;
   }).join('');
 }
+
 function updateInvStats(){
   document.getElementById('statInvTotal').textContent=invData.length;
   document.getElementById('statInvReg').textContent=invData.filter(x=>x.regNo&&x.regNo.trim()).length;
@@ -1183,6 +921,7 @@ window._saveSn=async(col,id,val)=>{
   try{await updateDoc(doc(db,col,id),{sn:num});toast('S.N updated to '+num);}
   catch(e){toast('Failed: '+e.message,'err');}
 };
+
 window._deleteEntry=async(col,id)=>{
   if(!confirm('Delete this entry?'))return;
   try{
@@ -1194,32 +933,23 @@ window._deleteEntry=async(col,id)=>{
 /* ─── Nav ─── */
 window.switchSec=(sec)=>{
   document.querySelectorAll('.sec-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(l=>l.classList.remove('active'));
-  document.querySelectorAll('.mobile-tab').forEach(l=>l.classList.remove('active'));
   document.getElementById(sec==='price'?'secPrice':'secInv').classList.add('active');
-  document.getElementById(sec==='price'?'navPrice':'navInv').classList.add('active');
-  if(sec==='inv'){
-    document.getElementById('mNavInv').classList.add('active');
-    populateModelDropdown();
-  } else {
-    document.getElementById('mNavPrice').classList.add('active');
-  }
+  setActiveTab(sec);
+  if(sec==='inv') populateModelDropdown();
 };
 </script>
 
 <script>
 function toggleMobileMenu(){
-  const m=document.getElementById('mobileMenu');
-  m.classList.toggle('open');
+  document.getElementById('mobileMenu').classList.toggle('open');
 }
 function closeMobileMenu(){
   document.getElementById('mobileMenu').classList.remove('open');
 }
-// Close on outside click
 document.addEventListener('click',function(e){
   const menu=document.getElementById('mobileMenu');
   const hamburger=document.getElementById('hamburger');
-  if(menu&&!menu.contains(e.target)&&!hamburger.contains(e.target)){
+  if(menu&&!menu.contains(e.target)&&hamburger&&!hamburger.contains(e.target)){
     menu.classList.remove('open');
   }
 });
