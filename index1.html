@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Samriddhi Auto | Bajaj Motorcycles – Phidim, Panchthar</title>
+  <title>Samriddhi Auto | Bajaj & Chetak – Phidim, Panchthar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -24,15 +25,12 @@
           fontFamily: {
             display: ['"Bebas Neue"', 'cursive'],
             body: ['"DM Sans"', 'sans-serif'],
-          },
-          backgroundImage: {
-            'hero-gradient': 'linear-gradient(135deg, #F0F7FF 0%, #EBF4FF 50%, #DCEEFB 100%)',
-            'card-shimmer': 'linear-gradient(135deg, #F8FAFF 0%, #EEF5FF 100%)',
           }
         }
       }
     }
   </script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -40,33 +38,20 @@
 
     /* ── NAV ── */
     .nav-blur {
-      background: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.88);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(0,94,166,0.08);
       box-shadow: 0 2px 24px rgba(0,0,0,0.06);
     }
     .nav-link {
-      position: relative;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: color 0.2s;
+      position: relative; font-size: 0.875rem; font-weight: 500; color: #374151;
+      display: flex; align-items: center; gap: 5px; transition: color 0.2s;
       padding: 4px 2px;
     }
     .nav-link::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: #005EA6;
-      border-radius: 2px;
-      transition: width 0.25s ease;
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 2px; background: #005EA6; border-radius: 2px; transition: width 0.25s ease;
     }
     .nav-link:hover { color: #005EA6; }
     .nav-link:hover::after { width: 100%; }
@@ -74,282 +59,145 @@
     .nav-link.active::after { width: 100%; }
 
     /* Mobile menu */
-    #mobile-menu {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease;
-      opacity: 0;
-    }
-    #mobile-menu.open { max-height: 520px; opacity: 1; }
+    #mobile-menu { max-height: 0; overflow: hidden; transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease; opacity: 0; }
+    #mobile-menu.open { max-height: 560px; opacity: 1; }
 
     /* ── HERO ── */
     .hero-section {
       background: linear-gradient(135deg, #F0F7FF 0%, #EBF4FF 60%, #DCEEFB 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      overflow: hidden;
-      position: relative;
+      min-height: 100vh; display: flex; align-items: center;
+      overflow: hidden; position: relative;
     }
     .hero-section::before {
-      content: '';
-      position: absolute;
-      top: -80px; right: -80px;
+      content: ''; position: absolute; top: -80px; right: -80px;
       width: 480px; height: 480px;
       background: radial-gradient(circle, rgba(0,94,166,0.08) 0%, transparent 70%);
-      border-radius: 50%;
-      pointer-events: none;
+      border-radius: 50%; pointer-events: none;
     }
     .hero-section::after {
-      content: '';
-      position: absolute;
-      bottom: -60px; left: -60px;
+      content: ''; position: absolute; bottom: -60px; left: -60px;
       width: 320px; height: 320px;
       background: radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 70%);
-      border-radius: 50%;
-      pointer-events: none;
+      border-radius: 50%; pointer-events: none;
     }
-    .headline-display {
-      font-family: 'Bebas Neue', cursive;
-      line-height: 0.95;
-      letter-spacing: 0.01em;
-    }
+    .headline-display { font-family: 'Bebas Neue', cursive; line-height: 0.95; letter-spacing: 0.01em; }
     .price-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #005EA6;
-      color: #fff;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 600;
-      font-size: 0.75rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 6px 14px;
-      border-radius: 999px;
-      box-shadow: 0 4px 14px rgba(0,94,166,0.28);
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #005EA6; color: #fff;
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.75rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 6px 14px; border-radius: 999px; box-shadow: 0 4px 14px rgba(0,94,166,0.28);
     }
     .cta-primary {
-      background: #005EA6;
-      color: #fff;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 600;
-      font-size: 0.925rem;
-      letter-spacing: 0.02em;
-      padding: 14px 28px;
-      border-radius: 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.22s ease;
-      box-shadow: 0 4px 18px rgba(0,94,166,0.3);
-      text-decoration: none;
-      border: 2px solid #005EA6;
+      background: #005EA6; color: #fff;
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.925rem;
+      letter-spacing: 0.02em; padding: 14px 28px; border-radius: 10px;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: all 0.22s ease; box-shadow: 0 4px 18px rgba(0,94,166,0.3);
+      text-decoration: none; border: 2px solid #005EA6;
     }
-    .cta-primary:hover {
-      background: #004A85;
-      border-color: #004A85;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 26px rgba(0,94,166,0.38);
-    }
+    .cta-primary:hover { background: #004A85; border-color: #004A85; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(0,94,166,0.38); }
     .cta-secondary {
-      background: transparent;
-      color: #005EA6;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 600;
-      font-size: 0.925rem;
-      letter-spacing: 0.02em;
-      padding: 14px 28px;
-      border-radius: 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: 2px solid #005EA6;
-      transition: all 0.22s ease;
-      text-decoration: none;
+      background: transparent; color: #005EA6;
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.925rem;
+      letter-spacing: 0.02em; padding: 14px 28px; border-radius: 10px;
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 2px solid #005EA6; transition: all 0.22s ease; text-decoration: none;
     }
-    .cta-secondary:hover {
-      background: #005EA6;
-      color: #fff;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 26px rgba(0,94,166,0.22);
-    }
+    .cta-secondary:hover { background: #005EA6; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(0,94,166,0.22); }
 
-    /* Bike visual placeholder */
-    .bike-visual-wrap {
-      position: relative;
-    }
-    .bike-ring {
-      position: absolute;
-      border-radius: 50%;
-      border: 1.5px solid rgba(0,94,166,0.12);
-    }
+    /* Bike visual */
+    .bike-ring { position: absolute; border-radius: 50%; border: 1.5px solid rgba(0,94,166,0.12); }
     .bike-placeholder {
-      width: 100%;
-      aspect-ratio: 4/3;
-      border-radius: 24px;
+      width: 100%; aspect-ratio: 4/3; border-radius: 24px;
       background: linear-gradient(135deg, #E8F2FB 0%, #D4E9F7 40%, #C5DDEF 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
       box-shadow: 0 20px 60px rgba(0,94,166,0.14), 0 4px 16px rgba(0,0,0,0.06);
     }
     .bike-placeholder::before {
-      content: '';
-      position: absolute;
-      inset: 0;
+      content: ''; position: absolute; inset: 0;
       background: radial-gradient(ellipse at 60% 40%, rgba(255,255,255,0.5) 0%, transparent 65%);
     }
+    .bike-svg-wrap { width: 82%; position: relative; z-index: 1; filter: drop-shadow(0 12px 32px rgba(0,94,166,0.22)); }
 
-    /* Bike SVG illustration */
-    .bike-svg-wrap {
-      width: 82%;
-      position: relative;
-      z-index: 1;
-      filter: drop-shadow(0 12px 32px rgba(0,94,166,0.22));
-    }
-
-    /* Stats bar */
+    /* Stats */
     .stat-chip {
-      background: #fff;
-      border: 1px solid rgba(0,94,166,0.12);
-      border-radius: 12px;
-      padding: 14px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      background: #fff; border: 1px solid rgba(0,94,166,0.12); border-radius: 12px;
+      padding: 14px 20px; display: flex; flex-direction: column; align-items: center;
+      gap: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.05);
     }
 
-    /* ── PRICE CARDS ── */
-    .section-label {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #005EA6;
-    }
-    .section-title {
-      font-family: 'Bebas Neue', cursive;
-      line-height: 1;
-      letter-spacing: 0.01em;
-      color: #0F172A;
-    }
-    .bike-card {
-      background: #fff;
-      border-radius: 20px;
-      border: 1px solid rgba(0,94,166,0.08);
-      overflow: hidden;
-      transition: all 0.28s cubic-bezier(0.4,0,0.2,1);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-      display: flex;
-      flex-direction: column;
-    }
-    .bike-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 16px 48px rgba(0,94,166,0.14), 0 4px 16px rgba(0,0,0,0.06);
-      border-color: rgba(0,94,166,0.22);
-    }
-    .bike-card-img {
-      background: linear-gradient(135deg, #EEF5FF 0%, #DCEEFB 100%);
-      padding: 28px 24px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      min-height: 160px;
-    }
-    .bike-card-img::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 40px;
-      background: linear-gradient(transparent, rgba(238,245,255,0.6));
-    }
-    .badge-cc {
-      position: absolute;
-      top: 12px; right: 12px;
-      background: rgba(0,94,166,0.1);
-      color: #005EA6;
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      padding: 3px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(0,94,166,0.15);
-    }
-    .bike-card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
-    .bike-model { font-family: 'Bebas Neue', cursive; font-size: 1.45rem; letter-spacing: 0.02em; color: #0F172A; line-height: 1; }
-    .bike-variant { font-size: 0.78rem; color: #64748B; margin-top: 2px; font-weight: 500; }
-    .bike-price {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 700;
-      font-size: 1.35rem;
-      color: #005EA6;
-      margin-top: 12px;
-    }
-    .bike-price-label { font-size: 0.68rem; color: #94A3B8; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
-    .card-btn {
-      margin-top: 16px;
-      background: #EBF4FF;
-      color: #005EA6;
-      font-weight: 600;
-      font-size: 0.82rem;
-      letter-spacing: 0.02em;
-      padding: 10px 0;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+    /* ── PRICE SECTION ── */
+    .section-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #005EA6; }
+    .section-title { font-family: 'Bebas Neue', cursive; line-height: 1; letter-spacing: 0.01em; color: #0F172A; }
+
+    /* Filter tabs */
+    .tab-btn {
+      padding: 8px 20px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; border: 1.5px solid #E2E8F0; background: #fff; color: #64748B;
       transition: all 0.2s ease;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      width: 100%;
     }
-    .card-btn:hover {
-      background: #005EA6;
-      color: #fff;
+    .tab-btn:hover { border-color: #005EA6; color: #005EA6; }
+    .tab-btn.active { background: #005EA6; color: #fff; border-color: #005EA6; box-shadow: 0 4px 14px rgba(0,94,166,0.28); }
+
+    /* Search bar */
+    .search-wrap {
+      position: relative; max-width: 360px; width: 100%;
+    }
+    .search-wrap input {
+      width: 100%; padding: 10px 16px 10px 42px; border-radius: 10px;
+      border: 1.5px solid #E2E8F0; font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem; color: #0F172A; outline: none;
+      transition: border-color 0.2s; background: #fff;
+    }
+    .search-wrap input:focus { border-color: #005EA6; box-shadow: 0 0 0 3px rgba(0,94,166,0.1); }
+    .search-wrap svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+
+    /* ── BIKE CARDS (Firebase-powered) ── */
+    #bike-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
     }
 
-    /* ── WHY US ── */
-    .feature-icon-wrap {
-      width: 52px; height: 52px;
-      border-radius: 14px;
-      background: #EBF4FF;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+    .yng-card {
+      background: #fff; border-radius: 18px; border: 1px solid #E8E6E1;
+      overflow: hidden; display: flex; flex-direction: column;
+      transition: transform .24s cubic-bezier(.25,.46,.45,.94),
+                  box-shadow .24s cubic-bezier(.25,.46,.45,.94),
+                  border-color .24s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      animation: fadeUp 0.45s ease both;
     }
+    .yng-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 48px rgba(0,94,166,0.13);
+      border-color: rgba(0,94,166,0.28) !important;
+    }
+    .yng-card:hover .yng-img  { transform: scale(1.05); }
+    .yng-card:hover .yng-arr  { background: #005EA6 !important; border-color: #005EA6 !important; color: #fff !important; }
+    .yng-card:hover .yng-arr i { transform: translateX(2px); }
+    .yng-img  { transition: transform .38s cubic-bezier(.25,.46,.45,.94); }
+    .yng-arr  { transition: background .18s, border-color .18s, color .18s; }
+    .yng-arr i { transition: transform .18s; }
 
-    /* ── FINANCE CTA BANNER ── */
+    /* ── FINANCE BANNER ── */
     .finance-banner {
       background: linear-gradient(120deg, #005EA6 0%, #004A85 60%, #003B6E 100%);
-      position: relative;
-      overflow: hidden;
-      border-radius: 28px;
+      position: relative; overflow: hidden; border-radius: 28px;
     }
     .finance-banner::before {
-      content: '';
-      position: absolute;
-      top: -80px; right: -60px;
+      content: ''; position: absolute; top: -80px; right: -60px;
       width: 360px; height: 360px;
       background: radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 70%);
       border-radius: 50%;
     }
-    .finance-banner::after {
-      content: '';
-      position: absolute;
-      bottom: -60px; left: 60px;
-      width: 220px; height: 220px;
-      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-      border-radius: 50%;
+
+    /* ── WHY US feature icon ── */
+    .feature-icon-wrap {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: #EBF4FF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
 
     /* ── FOOTER ── */
@@ -357,38 +205,44 @@
     .footer-link { color: #94A3B8; font-size: 0.875rem; transition: color 0.18s; text-decoration: none; }
     .footer-link:hover { color: #fff; }
 
-    /* Scrollbar */
+    /* Loading & empty states */
+    #loading-state {
+      grid-column: 1/-1; display: flex; flex-direction: column;
+      align-items: center; gap: 16px; padding: 4rem 1rem; text-align: center;
+    }
+    .loader-ring {
+      width: 48px; height: 48px; border: 3px solid #E8F2FB;
+      border-top-color: #005EA6; border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    /* Animations */
+    @keyframes spin  { to { transform: rotate(360deg); } }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .float-anim { animation: float 4s ease-in-out infinite; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up  { animation: fadeUp 0.55s ease both; }
+    .fade-up-2 { animation: fadeUp 0.55s 0.1s ease both; }
+    .fade-up-3 { animation: fadeUp 0.55s 0.2s ease both; }
+
+    @media (prefers-reduced-motion: reduce) { .float-anim,.fade-up,.fade-up-2,.fade-up-3,.yng-card { animation: none !important; } }
+
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: rgba(0,94,166,0.3); border-radius: 99px; }
-
-    /* Animations */
-    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-    .float-anim { animation: float 4s ease-in-out infinite; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
-    .fade-up { animation: fadeUp 0.6s ease both; }
-    .fade-up-2 { animation: fadeUp 0.6s 0.12s ease both; }
-    .fade-up-3 { animation: fadeUp 0.6s 0.24s ease both; }
-
-    @media (prefers-reduced-motion: reduce) {
-      .float-anim, .fade-up, .fade-up-2, .fade-up-3 { animation: none !important; }
-    }
   </style>
 </head>
 <body>
 
-<!-- ════════════════════════════════════════
-     NAVIGATION
-════════════════════════════════════════ -->
+<!-- ══════════ NAVIGATION ══════════ -->
 <header class="nav-blur fixed top-0 left-0 right-0 z-50">
   <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
 
       <!-- Brand -->
-      <a href="#" class="flex items-center gap-2.5 group" aria-label="Samriddhi Auto Home">
-        <!-- Logo mark -->
+      <a href="#" class="flex items-center gap-2.5" aria-label="Samriddhi Auto Home">
         <div class="w-9 h-9 rounded-lg bg-bajaj-blue flex items-center justify-center shadow-sm flex-shrink-0">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
             <path d="M4 16 Q7 8 11 7 Q15 6 18 10" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none"/>
             <circle cx="5" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
             <circle cx="17" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
@@ -448,35 +302,14 @@
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="lg:hidden">
       <div class="py-4 border-t border-slate-100 space-y-1">
-        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          Home
-        </a>
-        <a href="#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-          Price List
-        </a>
-        <a href="#finance" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          Finance
-        </a>
-        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          Allocations
-        </a>
-        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          KYC
-        </a>
-        <a href="#about" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          About
-        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Home</a>
+        <a href="#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Price List</a>
+        <a href="#finance" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Finance</a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Allocations</a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">KYC</a>
+        <a href="#about" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">About</a>
         <div class="pt-2 grid grid-cols-2 gap-2">
-          <a href="tel:+97723420000" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-bajaj-blue text-bajaj-blue text-sm font-semibold">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
-            Call Us
-          </a>
+          <a href="tel:+97723420000" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-bajaj-blue text-bajaj-blue text-sm font-semibold">Call Us</a>
           <a href="#prices" class="flex items-center justify-center py-2.5 rounded-xl bg-bajaj-blue text-white text-sm font-semibold">Test Ride</a>
         </div>
       </div>
@@ -485,39 +318,30 @@
 </header>
 
 
-<!-- ════════════════════════════════════════
-     HERO SECTION
-════════════════════════════════════════ -->
+<!-- ══════════ HERO ══════════ -->
 <section class="hero-section pt-16">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-0 w-full">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center min-h-[calc(100vh-64px)]">
 
       <!-- Left: Copy -->
       <div class="space-y-7 fade-up">
-        <!-- Eyebrow badge -->
         <span class="price-badge">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          Authorized Bajaj Dealer · Phidim, Panchthar
+          Authorized Bajaj & Chetak Dealer · Phidim, Panchthar
         </span>
-
-        <!-- Headline -->
         <h1 class="headline-display text-[clamp(3.2rem,8vw,5.2rem)] text-slate-900">
           Nepal's Hills<br/>
           <span style="color:#005EA6;">Deserve</span><br/>
           <span class="relative inline-block">
             Bold Rides.
-            <svg class="absolute -bottom-2 left-0 w-full" viewBox="0 0 280 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <svg class="absolute -bottom-2 left-0 w-full" viewBox="0 0 280 12" fill="none" aria-hidden="true">
               <path d="M4 8 Q70 2 140 6 Q210 10 276 4" stroke="#F59E0B" stroke-width="3.5" stroke-linecap="round" fill="none"/>
             </svg>
           </span>
         </h1>
-
-        <!-- Sub copy -->
         <p class="text-slate-500 text-base lg:text-lg leading-relaxed max-w-md fade-up-2">
-          Explore every Bajaj model — from the iconic Pulsar to the rugged CT series — with transparent ex-showroom prices, easy EMI options, and on-the-spot delivery in Panchthar.
+          Explore every Bajaj & Chetak model — from the iconic Pulsar to the future-ready Chetak Electric — with transparent ex-showroom prices, easy EMI, and on-the-spot delivery in Panchthar.
         </p>
-
-        <!-- CTAs -->
         <div class="flex flex-wrap gap-3 fade-up-3">
           <a href="#prices" class="cta-primary">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
@@ -528,41 +352,33 @@
             Finance Options
           </a>
         </div>
-
-        <!-- Stats -->
         <div class="grid grid-cols-3 gap-3 pt-2 fade-up-3">
           <div class="stat-chip">
-            <span class="font-display text-2xl text-bajaj-blue leading-none" style="font-family:'Bebas Neue',cursive;font-size:1.6rem;">15+</span>
+            <span style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:#005EA6;line-height:1;">15+</span>
             <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide text-center">Models<br/>Available</span>
           </div>
           <div class="stat-chip">
-            <span class="font-display text-2xl text-bajaj-blue leading-none" style="font-family:'Bebas Neue',cursive;font-size:1.6rem;">0%</span>
+            <span style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:#005EA6;line-height:1;">0%</span>
             <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide text-center">Interest<br/>Schemes</span>
           </div>
           <div class="stat-chip">
-            <span class="font-display text-2xl text-bajaj-blue leading-none" style="font-family:'Bebas Neue',cursive;font-size:1.6rem;">10+</span>
+            <span style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:#005EA6;line-height:1;">10+</span>
             <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide text-center">Years<br/>Serving</span>
           </div>
         </div>
       </div>
 
       <!-- Right: Bike Visual -->
-      <div class="bike-visual-wrap flex items-center justify-center relative lg:py-12 fade-up-2">
-        <!-- Decorative rings -->
+      <div class="flex items-center justify-center relative lg:py-12 fade-up-2">
         <div class="bike-ring w-[340px] h-[340px] lg:w-[440px] lg:h-[440px] absolute" style="top:50%;left:50%;transform:translate(-50%,-50%);"></div>
         <div class="bike-ring w-[280px] h-[280px] lg:w-[360px] lg:h-[360px] absolute" style="top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.6;"></div>
-
         <div class="bike-placeholder max-w-[480px] w-full float-anim">
-          <!-- Embedded SVG motorcycle illustration -->
           <div class="bike-svg-wrap">
             <svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" aria-label="Bajaj Pulsar motorcycle illustration">
-              <!-- Shadow -->
               <ellipse cx="260" cy="320" rx="180" ry="14" fill="rgba(0,94,166,0.1)"/>
-              <!-- Rear wheel -->
               <circle cx="140" cy="268" r="56" fill="none" stroke="#0F172A" stroke-width="14"/>
               <circle cx="140" cy="268" r="42" fill="none" stroke="#334155" stroke-width="4"/>
               <circle cx="140" cy="268" r="14" fill="#0F172A"/>
-              <!-- Spoke pattern rear -->
               <line x1="140" y1="226" x2="140" y2="254" stroke="#64748B" stroke-width="2"/>
               <line x1="140" y1="282" x2="140" y2="310" stroke="#64748B" stroke-width="2"/>
               <line x1="98" y1="268" x2="126" y2="268" stroke="#64748B" stroke-width="2"/>
@@ -571,106 +387,60 @@
               <line x1="150" y1="278" x2="170" y2="298" stroke="#64748B" stroke-width="2"/>
               <line x1="170" y1="238" x2="150" y2="258" stroke="#64748B" stroke-width="2"/>
               <line x1="110" y1="298" x2="130" y2="278" stroke="#64748B" stroke-width="2"/>
-
-              <!-- Front wheel -->
               <circle cx="380" cy="268" r="52" fill="none" stroke="#0F172A" stroke-width="14"/>
               <circle cx="380" cy="268" r="38" fill="none" stroke="#334155" stroke-width="4"/>
               <circle cx="380" cy="268" r="12" fill="#0F172A"/>
-              <!-- Spoke pattern front -->
               <line x1="380" y1="230" x2="380" y2="256" stroke="#64748B" stroke-width="2"/>
               <line x1="380" y1="280" x2="380" y2="306" stroke="#64748B" stroke-width="2"/>
               <line x1="342" y1="268" x2="368" y2="268" stroke="#64748B" stroke-width="2"/>
               <line x1="392" y1="268" x2="418" y2="268" stroke="#64748B" stroke-width="2"/>
-              <line x1="353" y1="241" x2="371" y2="259" stroke="#64748B" stroke-width="2"/>
-              <line x1="389" y1="277" x2="407" y2="295" stroke="#64748B" stroke-width="2"/>
-              <line x1="407" y1="241" x2="389" y2="259" stroke="#64748B" stroke-width="2"/>
-              <line x1="353" y1="295" x2="371" y2="277" stroke="#64748B" stroke-width="2"/>
-
-              <!-- Swingarm -->
               <path d="M140 262 Q200 240 250 245" stroke="#0F172A" stroke-width="10" stroke-linecap="round" fill="none"/>
-
-              <!-- Main frame -->
               <path d="M250 245 L280 168 L340 148 L370 155" stroke="#1E293B" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-              <!-- Down tube -->
               <path d="M280 168 L268 220 L250 245" stroke="#1E293B" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-
-              <!-- Engine block -->
               <rect x="220" y="218" width="80" height="52" rx="8" fill="#1E293B"/>
               <rect x="228" y="226" width="64" height="36" rx="5" fill="#334155"/>
-              <!-- Engine fins -->
               <line x1="235" y1="230" x2="235" y2="258" stroke="#475569" stroke-width="2"/>
               <line x1="248" y1="228" x2="248" y2="260" stroke="#475569" stroke-width="2"/>
               <line x1="261" y1="228" x2="261" y2="260" stroke="#475569" stroke-width="2"/>
               <line x1="274" y1="228" x2="274" y2="260" stroke="#475569" stroke-width="2"/>
               <line x1="287" y1="230" x2="287" y2="258" stroke="#475569" stroke-width="2"/>
-
-              <!-- Fairing / fuel tank -->
               <path d="M264 148 Q300 130 345 142 L370 155 L340 148 L280 168 Z" fill="#005EA6"/>
               <path d="M264 148 Q298 134 340 148 L340 148 L295 170 Z" fill="#0070C7"/>
-              <!-- Tank highlight -->
               <path d="M278 142 Q305 134 338 145" stroke="rgba(255,255,255,0.3)" stroke-width="3" stroke-linecap="round" fill="none"/>
-
-              <!-- Seat unit -->
               <path d="M200 210 Q230 196 270 198 L280 168 L250 178 Q218 198 200 210 Z" fill="#0F172A"/>
-              <path d="M200 210 Q228 200 265 200" stroke="#334155" stroke-width="2" stroke-linecap="round" fill="none"/>
-              <!-- Pillion seat -->
               <path d="M165 226 Q182 212 200 210 Q195 220 178 228 Z" fill="#1E293B"/>
-
-              <!-- Headlight fairing -->
               <ellipse cx="372" cy="180" rx="24" ry="32" fill="#1E293B" transform="rotate(-15,372,180)"/>
-              <!-- Headlight lens -->
               <ellipse cx="378" cy="178" rx="14" ry="18" fill="#93C5FD" opacity="0.6" transform="rotate(-15,378,178)"/>
-              <ellipse cx="375" cy="175" rx="7" ry="9" fill="#DBEAFE" opacity="0.8" transform="rotate(-15,375,175)"/>
-
-              <!-- Front fork -->
               <path d="M355 215 L370 155" stroke="#334155" stroke-width="9" stroke-linecap="round"/>
               <path d="M368 220 L380 162" stroke="#475569" stroke-width="6" stroke-linecap="round"/>
-
-              <!-- Handlebar -->
               <path d="M338 140 Q356 128 375 134" stroke="#0F172A" stroke-width="7" stroke-linecap="round" fill="none"/>
               <circle cx="335" cy="141" r="5" fill="#334155"/>
               <circle cx="377" cy="135" r="5" fill="#334155"/>
-
-              <!-- Exhaust -->
               <path d="M250 265 Q290 275 350 270 Q380 268 395 278" stroke="#94A3B8" stroke-width="8" stroke-linecap="round" fill="none"/>
-              <circle cx="396" cy="278" r="7" fill="#94A3B8"/>
-              <circle cx="396" cy="278" r="4" fill="#CBD5E1"/>
-
-              <!-- Bajaj logo area on fairing -->
               <rect x="294" y="148" width="32" height="14" rx="3" fill="rgba(255,255,255,0.15)"/>
-              <text x="310" y="159" text-anchor="middle" font-size="7" font-weight="bold" fill="white" font-family="Arial, sans-serif">BAJAJ</text>
-
-              <!-- Amber accent stripe on fairing -->
+              <text x="310" y="159" text-anchor="middle" font-size="7" font-weight="bold" fill="white" font-family="Arial,sans-serif">BAJAJ</text>
               <path d="M266 155 Q300 142 342 152" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-
-              <!-- Rear indicator -->
               <circle cx="168" cy="212" r="5" fill="#F59E0B" opacity="0.8"/>
-              <!-- Front indicator -->
               <circle cx="408" cy="192" r="5" fill="#F59E0B" opacity="0.8"/>
             </svg>
           </div>
-          <!-- Floating price tag — the signature element -->
           <div class="absolute bottom-5 left-5 bg-white rounded-2xl shadow-xl px-4 py-3 border border-bajaj-blueLight">
             <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Starting from</div>
-            <div class="text-bajaj-blue font-bold text-lg leading-tight" style="font-family:'DM Sans',sans-serif;">NPR 1,99,900</div>
+            <div class="text-bajaj-blue font-bold text-lg leading-tight">NPR 1,99,900</div>
             <div class="text-[10px] text-slate-400 mt-0.5">Ex-Showroom · Phidim</div>
           </div>
-          <!-- Model badge -->
           <div class="absolute top-5 right-5 bg-bajaj-blue text-white rounded-xl px-3 py-2 text-center">
             <div class="text-[10px] font-semibold uppercase tracking-wider opacity-80">New Arrivals</div>
-            <div class="font-bold text-sm leading-tight" style="font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:0.04em;">Pulsar Series</div>
+            <div class="font-bold text-sm leading-tight" style="font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:0.04em;">Chetak EV</div>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </section>
 
 
-<!-- ════════════════════════════════════════
-     TRUST BAR
-════════════════════════════════════════ -->
+<!-- ══════════ TRUST BAR ══════════ -->
 <section class="border-y border-slate-100 bg-white py-5">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm font-medium text-slate-500">
@@ -691,416 +461,76 @@
       <span class="w-px h-4 bg-slate-200 hidden sm:block"></span>
       <span class="flex items-center gap-2">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#005EA6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        Free Service for 1 Year
+        Chetak Electric · Now Available
       </span>
     </div>
   </div>
 </section>
 
 
-<!-- ════════════════════════════════════════
-     PRICE LIST SECTION
-════════════════════════════════════════ -->
+<!-- ══════════ PRICE LIST SECTION ══════════ -->
 <section id="prices" class="py-20 lg:py-28 bg-white">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <!-- Section header -->
-    <div class="text-center mb-12 lg:mb-16">
-      <span class="section-label">Current Prices · FY 2081/82</span>
-      <h2 class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-2">
-        Our Bike Collection
-      </h2>
+    <div class="text-center mb-10 lg:mb-14">
+      <span class="section-label">Live Prices · FY 2081/82</span>
+      <h2 class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-2">Our Bike Collection</h2>
       <p class="text-slate-500 mt-4 max-w-xl mx-auto leading-relaxed">
-        All prices are ex-showroom for Phidim, Panchthar. On-road pricing includes registration, insurance & first service.
+        All prices are ex-showroom for Phidim, Panchthar. Prices update live from our database — always accurate.
       </p>
     </div>
 
-    <!-- Filter tabs -->
-    <div class="flex flex-wrap justify-center gap-2 mb-10" role="tablist">
-      <button class="tab-btn px-5 py-2 rounded-full text-sm font-semibold bg-bajaj-blue text-white shadow-sm transition-all" data-filter="all">All Models</button>
-      <button class="tab-btn px-5 py-2 rounded-full text-sm font-semibold bg-white border border-slate-200 text-slate-600 hover:border-bajaj-blue hover:text-bajaj-blue transition-all" data-filter="pulsar">Pulsar</button>
-      <button class="tab-btn px-5 py-2 rounded-full text-sm font-semibold bg-white border border-slate-200 text-slate-600 hover:border-bajaj-blue hover:text-bajaj-blue transition-all" data-filter="ct">CT / Platina</button>
-      <button class="tab-btn px-5 py-2 rounded-full text-sm font-semibold bg-white border border-slate-200 text-slate-600 hover:border-bajaj-blue hover:text-bajaj-blue transition-all" data-filter="dominar">Dominar</button>
-      <button class="tab-btn px-5 py-2 rounded-full text-sm font-semibold bg-white border border-slate-200 text-slate-600 hover:border-bajaj-blue hover:text-bajaj-blue transition-all" data-filter="avenger">Avenger</button>
+    <!-- Controls: Filters + Search -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+
+      <!-- Filter tabs -->
+      <div class="flex flex-wrap gap-2" role="tablist">
+        <button class="tab-btn active" data-filter="all">All Models</button>
+        <button class="tab-btn" data-filter="pulsar">Pulsar</button>
+        <button class="tab-btn" data-filter="platina">Platina</button>
+        <button class="tab-btn" data-filter="dominar">Dominar</button>
+        <button class="tab-btn" data-filter="avenger">Avenger</button>
+        <button class="tab-btn" data-filter="chetak">
+          <span style="display:inline-flex;align-items:center;gap:5px;">
+            ⚡ Chetak
+          </span>
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="search-input" type="search" placeholder="Search model…" autocomplete="off" />
+      </div>
     </div>
 
-    <!-- Bike Cards Grid -->
-    <div id="bike-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-      <!-- Card: CT 100 -->
-      <div class="bike-card" data-category="ct">
-        <div class="bike-card-img">
-          <span class="badge-cc">102cc</span>
-          <svg viewBox="0 0 260 160" class="w-full max-w-[220px]" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="130" cy="148" rx="90" ry="8" fill="rgba(0,94,166,0.08)"/>
-            <circle cx="70" cy="122" r="26" fill="none" stroke="#1E293B" stroke-width="7"/><circle cx="70" cy="122" r="10" fill="#1E293B"/>
-            <circle cx="190" cy="122" r="24" fill="none" stroke="#1E293B" stroke-width="7"/><circle cx="190" cy="122" r="9" fill="#1E293B"/>
-            <path d="M70 118 Q100 95 130 96 L150 88 L175 92 L190 112" stroke="#1E293B" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M100 96 L95 116" stroke="#334155" stroke-width="5" stroke-linecap="round"/>
-            <rect x="90" y="108" width="50" height="24" rx="4" fill="#1E293B"/>
-            <path d="M150 88 Q168 78 180 82" stroke="#1E293B" stroke-width="5" fill="none" stroke-linecap="round"/>
-            <rect x="148" y="82" width="26" height="22" rx="4" fill="#334155"/>
-            <ellipse cx="162" cy="84" rx="8" ry="11" fill="#60A5FA" opacity="0.5" transform="rotate(-10,162,84)"/>
-            <path d="M70 122 L190 122" stroke="#94A3B8" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
-            <path d="M50 118 Q60 108 72 106" stroke="#94A3B8" stroke-width="4" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="bike-card-body">
-          <div class="bike-model">CT 100</div>
-          <div class="bike-variant">Kick Start · Single Seat</div>
-          <div class="flex items-center gap-3 mt-3">
-            <div>
-              <div class="bike-price-label">Ex-Showroom</div>
-              <div class="bike-price">NPR 1,99,900</div>
-            </div>
-            <div class="ml-auto text-right">
-              <div class="bike-price-label">EMI from</div>
-              <div class="text-sm font-bold text-slate-700">NPR 4,800<span class="text-xs font-medium text-slate-400">/mo</span></div>
-            </div>
-          </div>
-          <a href="#finance" class="card-btn mt-4">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            EMI Calculator
-          </a>
-        </div>
+    <!-- Bike Cards Grid (Firebase-powered) -->
+    <div id="bike-grid">
+      <!-- Loading state -->
+      <div id="loading-state">
+        <div class="loader-ring"></div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:#0F172A;letter-spacing:.04em;">Loading Models…</div>
+        <p style="font-size:13px;color:#64748B;">Fetching live prices from our database</p>
       </div>
-
-      <!-- Card: Platina 100 -->
-      <div class="bike-card" data-category="ct">
-        <div class="bike-card-img">
-          <span class="badge-cc">102cc</span>
-          <svg viewBox="0 0 260 160" class="w-full max-w-[220px]" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="130" cy="148" rx="90" ry="8" fill="rgba(0,94,166,0.08)"/>
-            <circle cx="70" cy="122" r="26" fill="none" stroke="#1E293B" stroke-width="7"/><circle cx="70" cy="122" r="10" fill="#1E293B"/>
-            <circle cx="190" cy="122" r="24" fill="none" stroke="#1E293B" stroke-width="7"/><circle cx="190" cy="122" r="9" fill="#1E293B"/>
-            <path d="M70 118 Q105 90 135 91 L155 82 L180 88 L190 108" stroke="#1E293B" stroke-width="6" fill="none" stroke-linecap="round"/>
-            <path d="M105 90 L100 114" stroke="#334155" stroke-width="5" stroke-linecap="round"/>
-            <rect x="92" y="106" width="55" height="22" rx="5" fill="#334155"/>
-            <!-- Seat cowl -->
-            <path d="M55 108 Q65 94 80 90 L105 88 L100 98 Q78 102 58 114 Z" fill="#1E293B"/>
-            <path d="M155 82 Q174 71 185 76" stroke="#1E293B" stroke-width="5" fill="none" stroke-linecap="round"/>
-            <rect x="152" y="74" width="28" height="24" rx="4" fill="#005EA6"/>
-            <ellipse cx="167" cy="76" rx="9" ry="12" fill="#93C5FD" opacity="0.5" transform="rotate(-12,167,76)"/>
-            <path d="M50 118 Q60 108 72 104" stroke="#94A3B8" stroke-width="4" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="bike-card-body">
-          <div class="bike-model">Platina 100</div>
-          <div class="bike-variant">Electric Start · Drum Brake</div>
-          <div class="flex items-center gap-3 mt-3">
-            <div>
-              <div class="bike-price-label">Ex-Showroom</div>
-              <div class="bike-price">NPR 2,19,900</div>
-            </div>
-            <div class="ml-auto text-right">
-              <div class="bike-price-label">EMI from</div>
-              <div class="text-sm font-bold text-slate-700">NPR 5,200<span class="text-xs font-medium text-slate-400">/mo</span></div>
-            </div>
-          </div>
-          <a href="#finance" class="card-btn">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            EMI Calculator
-          </a>
-        </div>
-      </div>
-
-      <!-- Card: Pulsar N150 -->
-      <div class="bike-card" data-category="pulsar">
-        <div class="bike-card-img" style="background:linear-gradient(135deg,#EEF5FF,#D6EBFA);">
-          <span class="badge-cc">150cc</span>
-          <div class="absolute top-2 left-2">
-            <span class="text-[10px] font-bold text-bajaj-amber bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">Popular</span>
-          </div>
-          <svg viewBox="0 0 260 160" class="w-full max-w-[220px]" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="130" cy="150" rx="95" ry="9" fill="rgba(0,94,166,0.1)"/>
-            <circle cx="65" cy="120" r="28" fill="none" stroke="#0F172A" stroke-width="8"/><circle cx="65" cy="120" r="11" fill="#0F172A"/>
-            <circle cx="195" cy="120" r="26" fill="none" stroke="#0F172A" stroke-width="8"/><circle cx="195" cy="120" r="10" fill="#0F172A"/>
-            <!-- Sporty frame -->
-            <path d="M65 115 Q110 80 150 78 L175 66 L200 72 L195 108" stroke="#0F172A" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M115 80 L108 114" stroke="#1E293B" stroke-width="6" stroke-linecap="round"/>
-            <!-- Engine -->
-            <rect x="100" y="106" width="60" height="28" rx="6" fill="#1E293B"/>
-            <rect x="108" y="112" width="44" height="16" rx="3" fill="#334155"/>
-            <!-- Fairing -->
-            <path d="M148 78 Q172 60 196 68 L200 72 L175 66 Z" fill="#005EA6"/>
-            <path d="M150 78 Q170 62 195 68" stroke="#0070C7" stroke-width="2" fill="none"/>
-            <path d="M152 72 Q172 62 193 68" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-            <!-- Seat -->
-            <path d="M50 110 Q80 88 115 85 L110 96 Q82 100 52 118 Z" fill="#0F172A"/>
-            <!-- Headlight -->
-            <rect x="195" y="72" width="28" height="36" rx="5" fill="#1E293B" transform="rotate(-12,195,72)"/>
-            <ellipse cx="205" cy="82" rx="9" ry="13" fill="#93C5FD" opacity="0.7" transform="rotate(-12,205,82)"/>
-            <!-- Exhaust -->
-            <path d="M130 134 Q165 140 200 136" stroke="#94A3B8" stroke-width="5" stroke-linecap="round" fill="none"/>
-            <!-- Amber accent -->
-            <path d="M152 72 Q175 62 196 68" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" fill="none"/>
-          </svg>
-        </div>
-        <div class="bike-card-body">
-          <div class="bike-model">Pulsar N150</div>
-          <div class="bike-variant">Single Channel ABS · LED</div>
-          <div class="flex items-center gap-3 mt-3">
-            <div>
-              <div class="bike-price-label">Ex-Showroom</div>
-              <div class="bike-price">NPR 3,39,900</div>
-            </div>
-            <div class="ml-auto text-right">
-              <div class="bike-price-label">EMI from</div>
-              <div class="text-sm font-bold text-slate-700">NPR 7,900<span class="text-xs font-medium text-slate-400">/mo</span></div>
-            </div>
-          </div>
-          <a href="#finance" class="card-btn">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            EMI Calculator
-          </a>
-        </div>
-      </div>
-
-      <!-- Card: Pulsar N160 -->
-      <div class="bike-card" data-category="pulsar">
-        <div class="bike-card-img" style="background:linear-gradient(135deg,#EEF5FF,#D6EBFA);">
-          <span class="badge-cc">160cc</span>
-          <svg viewBox="0 0 260 160" class="w-full max-w-[220px]" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="130" cy="150" rx="95" ry="9" fill="rgba(0,94,166,0.1)"/>
-            <circle cx="63" cy="120" r="28" fill="none" stroke="#0F172A" stroke-width="8"/><circle cx="63" cy="120" r="11" fill="#0F172A"/>
-            <circle cx="197" cy="120" r="26" fill="none" stroke="#0F172A" stroke-width="8"/><circle cx="197" cy="120" r="10" fill="#0F172A"/>
-            <path d="M63 115 Q108 78 150 76 L176 64 L202 70 L197 108" stroke="#0F172A" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M114 78 L107 114" stroke="#1E293B" stroke-width="6" stroke-linecap="round"/>
-            <rect x="98" y="104" width="64" height="30" rx="7" fill="#1E293B"/>
-            <rect x="106" y="110" width="48" height="18" rx="4" fill="#334155"/>
-            <path d="M148 76 Q174 57 198 64 L202 68 L176 64 Z" fill="#D97706"/>
-            <path d="M150 76 Q172 59 197 64" stroke="#F59E0B" stroke-width="2.5" fill="none"/>
-            <path d="M152 70 Q173 58 196 64" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-            <path d="M50 108 Q78 86 114 82 L109 94 Q80 98 52 116 Z" fill="#0F172A"/>
-            <rect x="197" y="70" width="30" height="38" rx="5" fill="#1E293B" transform="rotate(-12,197,70)"/>
-            <ellipse cx="207" cy="80" rx="10" ry="14" fill="#93C5FD" opacity="0.7" transform="rotate(-12,207,80)"/>
-            <path d="M128 134 Q166 142 202 137" stroke="#94A3B8" stroke-width="5" stroke-linecap="round" fill="none"/>
-          </svg>
-        </div>
-        <div class="bike-card-body">
-          <div class="bike-model">Pulsar N160</div>
-          <div class="bike-variant">Dual Channel ABS · TFT</div>
-          <div class="flex items-center gap-3 mt-3">
-            <div>
-              <div class="bike-price-label">Ex-Showroom</div>
-              <div class="bike-price">NPR 3,79,900</div>
-            </div>
-            <div class="ml-auto text-right">
-              <div class="bike-price-label">EMI from</div>
-              <div class="text-sm font-bold text-slate-700">NPR 8,900<span class="text-xs font-medium text-slate-400">/mo</span></div>
-            </div>
-          </div>
-          <a href="#finance" class="card-btn">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            EMI Calculator
-          </a>
-        </div>
-      </div>
-
-      <!-- Card: Pulsar P150 -->
-      <div class="bike-card" data-category="pulsar">
-        <div class="bike-card-img" style="background:linear-gradient(135deg,#EEF5FF,#D6EBFA);">
-          <span class="badge-cc">150cc</span>
-          <svg viewBox="0 0 260 160" class="w-full max-w-[220px]" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="130" cy="150" rx="90" ry="8" fill="rgba(0,94,166,0.08)"/>
-            <circle cx="68" cy="120" r="27" fill="none" stroke="#0F172A" stroke-width="7"/><circle cx="68" cy="120" r="10" fill="#0F172A"/>
-            <circle cx="192" cy="120" r="25" fill="none" stroke="#0F172A" stroke-width="7"/><circle cx="192" cy="120" r="9" fill="#0F172A"/>
-            <path d="M68 116 Q108 84 144 80 L170 70 L195 76 L192 109" stroke="#0F172A" stroke-width="6.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M110 84 L105 112" stroke="#1E293B" stroke-width="5.5" stroke-linecap="round"/>
-            <rect x="97" y="104" width="58" height="26" rx="6" fill="#1E293B"/>
-            <path d="M142 80 Q166 65 190 70 L195 76 L170 70 Z" fill="#005EA6"/>
-            <path d="M52 110 Q76 90 110 86 L106 96 Q78 100 52 116 Z" fill="#0F172A"/>
-            <rect x="190" y="74" width="27" height="34" rx="5" fill="#1E293B" transform="rotate(-10,190,74)"/>
-            <ellipse cx="199" cy="83" rx="9" ry="12" fill="#93C5FD" opacity="0.6" transform="rotate(-10,199,83)"/>
-            <path d="M130 132 Q162 138 195 133" stroke="#94A3B8" stroke-width="5" stroke-linecap="round" fill="none"/>
-            <path d="M144 75 Q167 63 191 69" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" fill="none"/>
-          </svg>
-        </div>
-        <div class="bike-card-body">
-          <div class="bike-model">Pulsar P150</div>
-          <div class="bike-variant">Twin Disc · Semi-Digital</div>
-          <div class="flex items-center gap-3 mt-3">
-            <div>
-              <div class="bike-price-label">Ex-Showroom</div>
-              <div class="bike-price">NPR 3,15,900</div>
-            </div>
-            <div class="ml-auto text-right">
-              <div class="bike-price-label">EMI from</div>
-              <div class="text-sm font-bold text-slate-700">NPR 7,400<span class="text-xs font-medium text-slate-400">/mo</span></div>
-            </div>
-          </div>
-          <a href="#finance" class="card-btn">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            EMI Calculator
-          </a>
-        </div>
-      </div>
-
-      <!-- Card: Avenger Street 160 -->
-      <div class="bike-card" data-category="avenger">
-        <div class="bike-card-img" style="background:linear-gradient(135deg,#FFF7ED,#FEE9C7);">
-          <span class="badge-cc" style="color:#D97706;background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.25);">160cc</span>
-          <svg viewBox="0 0 260 160" class="w-full max-w-[220px]" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="130" cy="152" rx="95" ry="9" fill="rgba(245,158,11,0.1)"/>
-            <circle cx="60" cy="124" r="28" fill="none" stroke="#1E293B" stroke-width="7"/><circle cx="60" cy="124" r="10" fill="#1E293B"/>
-            <circle cx="200" cy="124" r="26" fill="none" stroke="#1E293B" stroke-width="7"/><circle cx="200" cy="124" r="9" fill="#1E293B"/>
-            <!-- Cruiser low frame -->
-            <path d="M60 120 Q90 110 130 108 L165 98 L200 108 L200 118" stroke="#1E293B" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M100 110 L98 128" stroke="#334155" stroke-width="5.5" stroke-linecap="round"/>
-            <!-- Wide engine (cruiser style) -->
-            <rect x="88" y="112" width="70" height="28" rx="6" fill="#1E293B"/>
-            <rect x="96" y="118" width="54" height="16" rx="3" fill="#374151"/>
-            <!-- Low seat -->
-            <path d="M40 114 Q70 104 100 106 L98 116 Q68 115 42 122 Z" fill="#0F172A"/>
-            <!-- Headlight (round - cruiser) -->
-            <circle cx="200" cy="98" r="22" fill="#1E293B"/>
-            <circle cx="200" cy="98" r="14" fill="#93C5FD" opacity="0.5"/>
-            <circle cx="200" cy="98" r="7" fill="#DBEAFE" opacity="0.7"/>
-            <!-- High handlebar -->
-            <path d="M158 98 Q178 76 200 80" stroke="#0F172A" stroke-width="7" fill="none" stroke-linecap="round"/>
-            <circle cx="154" cy="100" r="5" fill="#334155"/>
-            <circle cx="202" cy="80" r="5" fill="#334155"/>
-            <!-- Low exhaust cruiser -->
-            <path d="M98 140 Q148 148 198 144 Q208 143 215 150" stroke="#D97706" stroke-width="7" stroke-linecap="round" fill="none"/>
-            <circle cx="216" cy="150" r="6" fill="#F59E0B"/>
-          </svg>
-        </div>
-        <div class="bike-card-body">
-          <div class="bike-model">Avenger St. 160</div>
-          <div class="bike-variant">Cruiser · Disc Brake</div>
-          <div class="flex items-center gap-3 mt-3">
-            <div>
-              <div class="bike-price-label">Ex-Showroom</div>
-              <div class="bike-price">NPR 3,49,900</div>
-            </div>
-            <div class="ml-auto text-right">
-              <div class="bike-price-label">EMI from</div>
-              <div class="text-sm font-bold text-slate-700">NPR 8,200<span class="text-xs font-medium text-slate-400">/mo</span></div>
-            </div>
-          </div>
-          <a href="#finance" class="card-btn">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            EMI Calculator
-          </a>
-        </div>
-      </div>
-
-      <!-- Card: Dominar 250 -->
-      <div class="bike-card" data-category="dominar">
-        <div class="bike-card-img" style="background:linear-gradient(135deg,#F5F3FF,#EDE9FE);">
-          <span class="badge-cc" style="color:#7C3AED;background:rgba(124,58,237,0.08);border-color:rgba(124,58,237,0.2);">250cc</span>
-          <div class="absolute top-2 left-2">
-            <span class="text-[10px] font-bold text-purple-700 bg-purple-50 border border-purple-200 rounded-full px-2 py-0.5">Premium</span>
-          </div>
-          <svg viewBox="0 0 260 160" class="w-full max-w-[220px]" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="130" cy="150" rx="95" ry="9" fill="rgba(124,58,237,0.08)"/>
-            <circle cx="62" cy="118" r="30" fill="none" stroke="#0F172A" stroke-width="9"/><circle cx="62" cy="118" r="12" fill="#0F172A"/>
-            <circle cx="198" cy="118" r="28" fill="none" stroke="#0F172A" stroke-width="9"/><circle cx="198" cy="118" r="11" fill="#0F172A"/>
-            <!-- Adventure frame -->
-            <path d="M62 112 Q105 72 148 68 L176 56 L202 62 L198 106" stroke="#0F172A" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M112 72 L105 110" stroke="#1E293B" stroke-width="7" stroke-linecap="round"/>
-            <!-- Big engine -->
-            <rect x="96" y="100" width="68" height="34" rx="7" fill="#1E293B"/>
-            <rect x="104" y="107" width="52" height="20" rx="4" fill="#312E81"/>
-            <!-- Full fairing -->
-            <path d="M146 68 Q172 52 198 58 L202 62 L176 56 Z" fill="#7C3AED"/>
-            <path d="M148 68 Q170 54 198 58" stroke="#A78BFA" stroke-width="2" fill="none"/>
-            <path d="M150 62 Q170 52 197 58" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-            <!-- Seat -->
-            <path d="M46 104 Q74 82 112 76 L108 88 Q76 94 48 112 Z" fill="#0F172A"/>
-            <!-- Headlight full fairing -->
-            <rect x="198" y="62" width="34" height="44" rx="8" fill="#1E293B" transform="rotate(-12,198,62)"/>
-            <ellipse cx="210" cy="76" rx="11" ry="15" fill="#93C5FD" opacity="0.6" transform="rotate(-12,210,76)"/>
-            <!-- Exhaust -->
-            <path d="M125 136 Q165 144 202 138" stroke="#94A3B8" stroke-width="6" stroke-linecap="round" fill="none"/>
-            <circle cx="204" cy="138" r="7" fill="#94A3B8"/>
-          </svg>
-        </div>
-        <div class="bike-card-body">
-          <div class="bike-model">Dominar 250</div>
-          <div class="bike-variant">Full Fairing · Dual ABS</div>
-          <div class="flex items-center gap-3 mt-3">
-            <div>
-              <div class="bike-price-label">Ex-Showroom</div>
-              <div class="bike-price">NPR 4,89,900</div>
-            </div>
-            <div class="ml-auto text-right">
-              <div class="bike-price-label">EMI from</div>
-              <div class="text-sm font-bold text-slate-700">NPR 11,400<span class="text-xs font-medium text-slate-400">/mo</span></div>
-            </div>
-          </div>
-          <a href="#finance" class="card-btn">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            EMI Calculator
-          </a>
-        </div>
-      </div>
-
-      <!-- Card: Pulsar NS200 -->
-      <div class="bike-card" data-category="pulsar">
-        <div class="bike-card-img" style="background:linear-gradient(135deg,#EEF5FF,#D6EBFA);">
-          <span class="badge-cc">199.5cc</span>
-          <svg viewBox="0 0 260 160" class="w-full max-w-[220px]" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="130" cy="150" rx="95" ry="9" fill="rgba(0,94,166,0.1)"/>
-            <circle cx="60" cy="118" r="29" fill="none" stroke="#0F172A" stroke-width="8.5"/><circle cx="60" cy="118" r="11" fill="#0F172A"/>
-            <circle cx="200" cy="118" r="27" fill="none" stroke="#0F172A" stroke-width="8.5"/><circle cx="200" cy="118" r="10" fill="#0F172A"/>
-            <path d="M60 112 Q104 72 148 68 L176 56 L202 62 L200 106" stroke="#0F172A" stroke-width="7.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M112 72 L106 110" stroke="#1E293B" stroke-width="6.5" stroke-linecap="round"/>
-            <rect x="94" y="102" width="66" height="30" rx="7" fill="#1E293B"/>
-            <rect x="102" y="108" width="50" height="18" rx="4" fill="#334155"/>
-            <!-- Naked bike aggressive fairing -->
-            <path d="M146 68 Q168 54 196 60 L202 64 L176 56 Z" fill="#D97706"/>
-            <path d="M148 68 Q168 55 196 60" stroke="#F59E0B" stroke-width="3" fill="none"/>
-            <path d="M44 106 Q72 84 112 78 L108 90 Q76 96 46 114 Z" fill="#0F172A"/>
-            <rect x="199" y="62" width="32" height="40" rx="6" fill="#1E293B" transform="rotate(-12,199,62)"/>
-            <ellipse cx="208" cy="75" rx="10" ry="13" fill="#93C5FD" opacity="0.65" transform="rotate(-12,208,75)"/>
-            <!-- Under-seat exhaust -->
-            <path d="M122 132 Q158 128 192 120 Q204 116 210 106" stroke="#D97706" stroke-width="6" stroke-linecap="round" fill="none"/>
-            <circle cx="211" cy="106" r="6" fill="#F59E0B"/>
-          </svg>
-        </div>
-        <div class="bike-card-body">
-          <div class="bike-model">Pulsar NS200</div>
-          <div class="bike-variant">Naked · Under-seat Exhaust</div>
-          <div class="flex items-center gap-3 mt-3">
-            <div>
-              <div class="bike-price-label">Ex-Showroom</div>
-              <div class="bike-price">NPR 4,49,900</div>
-            </div>
-            <div class="ml-auto text-right">
-              <div class="bike-price-label">EMI from</div>
-              <div class="text-sm font-bold text-slate-700">NPR 10,500<span class="text-xs font-medium text-slate-400">/mo</span></div>
-            </div>
-          </div>
-          <a href="#finance" class="card-btn">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            EMI Calculator
-          </a>
-        </div>
-      </div>
-
     </div>
 
-    <!-- View all CTA -->
+    <!-- View all -->
     <div class="flex justify-center mt-12">
       <a href="#" class="cta-secondary">
         View All Models & Live Prices
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
-
   </div>
 </section>
 
 
-<!-- ════════════════════════════════════════
-     FINANCE SECTION
-════════════════════════════════════════ -->
-<section id="finance" class="py-20 lg:py-28" style="background: #F8FAFC;">
+<!-- ══════════ FINANCE SECTION ══════════ -->
+<section id="finance" class="py-20 lg:py-28" style="background:#F8FAFC;">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="finance-banner p-8 sm:p-12 lg:p-16">
       <div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-        <!-- Left -->
         <div class="space-y-6">
           <span class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-white text-xs font-semibold uppercase tracking-wider">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -1117,12 +547,9 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
               Calculate My EMI
             </a>
-            <a href="#" class="inline-flex items-center gap-2 bg-white/10 border border-white/25 text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">
-              Apply for Finance
-            </a>
+            <a href="#" class="inline-flex items-center gap-2 bg-white/10 border border-white/25 text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">Apply for Finance</a>
           </div>
         </div>
-        <!-- Right: feature list -->
         <div class="grid grid-cols-2 gap-4">
           <div class="bg-white/10 border border-white/15 rounded-2xl p-5 space-y-2">
             <div class="text-bajaj-amber font-bold" style="font-family:'Bebas Neue',cursive;font-size:2rem;line-height:1;">10%</div>
@@ -1151,13 +578,10 @@
 </section>
 
 
-<!-- ════════════════════════════════════════
-     WHY CHOOSE US
-════════════════════════════════════════ -->
+<!-- ══════════ WHY CHOOSE US ══════════ -->
 <section id="about" class="py-20 lg:py-28 bg-white">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
-      <!-- Left: Text -->
       <div class="space-y-8">
         <div>
           <span class="section-label">Why Choose Samriddhi Auto</span>
@@ -1165,7 +589,7 @@
             Panchthar's Most<br/>Trusted Bajaj Dealer
           </h2>
           <p class="text-slate-500 mt-5 leading-relaxed">
-            For over a decade, we've been the go-to showroom for riders across Phidim, Taplejung, and Ilam. We believe buying a bike should be as exciting as riding one.
+            For over a decade, we've been the go-to showroom for riders across Phidim, Taplejung, and Ilam — and now Nepal's first stop for the Chetak Electric scooter.
           </p>
         </div>
         <div class="space-y-5">
@@ -1189,11 +613,11 @@
           </div>
           <div class="flex items-start gap-4">
             <div class="feature-icon-wrap">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#005EA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+              <i class="fa-solid fa-bolt" style="color:#005EA6;font-size:18px;"></i>
             </div>
             <div>
-              <div class="font-semibold text-slate-900">After-Sales Support</div>
-              <div class="text-slate-500 text-sm mt-1 leading-relaxed">Our trained technicians and dedicated helpline keep you on the road, season after season.</div>
+              <div class="font-semibold text-slate-900">Chetak Electric — Go Green</div>
+              <div class="text-slate-500 text-sm mt-1 leading-relaxed">Panchthar's first authorized Chetak EV dealer. Test ride, subsidy guidance, and home charging setup support.</div>
             </div>
           </div>
           <div class="flex items-start gap-4">
@@ -1211,13 +635,13 @@
           Visit Our Showroom
         </a>
       </div>
-      <!-- Right: Map / Contact card -->
-      <div class="space-y-4">
-        <!-- Contact Info Card -->
+
+      <!-- Contact card -->
+      <div>
         <div class="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
           <div class="bg-bajaj-blue p-5">
-            <div class="text-white font-display text-xl" style="font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:0.04em;">Samriddhi And Brothers Auto Pvt. Ltd.</div>
-            <div class="text-blue-200 text-sm mt-1">Authorized Bajaj 3S Dealer</div>
+            <div class="text-white font-bold" style="font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:0.04em;">Samriddhi And Brothers Auto Pvt. Ltd.</div>
+            <div class="text-blue-200 text-sm mt-1">Authorized Bajaj & Chetak 3S Dealer</div>
           </div>
           <div class="p-5 space-y-4">
             <div class="flex items-center gap-3 text-sm">
@@ -1247,9 +671,8 @@
                 <div class="text-slate-500 text-xs">Sunday – Friday · 9:00 AM – 6:00 PM</div>
               </div>
             </div>
-            <!-- Placeholder map -->
             <div class="rounded-xl bg-gradient-to-br from-slate-100 to-bajaj-blueLight h-36 mt-2 flex items-center justify-center border border-bajaj-blueLight overflow-hidden relative">
-              <svg class="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 400 150" xmlns="http://www.w3.org/2000/svg">
+              <svg class="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 400 150">
                 <path d="M0 75 Q50 30 100 70 Q150 110 200 50 Q250 -10 300 65 Q350 130 400 60" stroke="#005EA6" stroke-width="2" fill="none"/>
                 <path d="M0 100 Q60 140 120 90 Q180 40 240 100 Q300 145 360 80 L400 90 L400 150 L0 150 Z" fill="rgba(0,94,166,0.06)"/>
                 <circle cx="180" cy="80" r="8" fill="#005EA6" opacity="0.6"/>
@@ -1268,34 +691,30 @@
 </section>
 
 
-<!-- ════════════════════════════════════════
-     FOOTER
-════════════════════════════════════════ -->
+<!-- ══════════ FOOTER ══════════ -->
 <footer class="py-12 lg:py-14">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
-      <!-- Brand -->
-      <div class="space-y-4 lg:col-span-1">
+      <div class="space-y-4">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-lg bg-bajaj-blue flex items-center justify-center">
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 16 Q7 8 11 7 Q15 6 18 10" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none"/><circle cx="5" cy="17" r="2.2" fill="#fff" opacity="0.9"/><circle cx="17" cy="17" r="2.2" fill="#fff" opacity="0.9"/></svg>
           </div>
           <div>
             <div class="text-sm font-bold text-white">Samriddhi Auto</div>
-            <div class="text-[10px] text-slate-400 uppercase tracking-wide">Bajaj Authorized Dealer</div>
+            <div class="text-[10px] text-slate-400 uppercase tracking-wide">Bajaj · Chetak Dealer</div>
           </div>
         </div>
-        <p class="text-slate-400 text-sm leading-relaxed">Panchthar's premier destination for Bajaj motorcycles, genuine parts, and trusted after-sales service.</p>
+        <p class="text-slate-400 text-sm leading-relaxed">Panchthar's premier destination for Bajaj motorcycles, Chetak electric scooters, genuine parts, and trusted after-sales service.</p>
         <div class="flex gap-3">
           <a href="#" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-bajaj-blue transition-all" aria-label="Facebook">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
           </a>
-          <a href="#" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-bajaj-blue transition-all" aria-label="Phone">
+          <a href="tel:+97723420000" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-bajaj-blue transition-all" aria-label="Phone">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
           </a>
         </div>
       </div>
-      <!-- Quick links -->
       <div>
         <h4 class="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Quick Links</h4>
         <ul class="space-y-2.5">
@@ -1307,7 +726,6 @@
           <li><a href="#about" class="footer-link">About Us</a></li>
         </ul>
       </div>
-      <!-- Models -->
       <div>
         <h4 class="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Popular Models</h4>
         <ul class="space-y-2.5">
@@ -1316,10 +734,9 @@
           <li><a href="#prices" class="footer-link">Pulsar NS200</a></li>
           <li><a href="#prices" class="footer-link">Dominar 250</a></li>
           <li><a href="#prices" class="footer-link">Avenger Street 160</a></li>
-          <li><a href="#prices" class="footer-link">CT 100 / Platina</a></li>
+          <li><a href="#prices" class="footer-link">⚡ Chetak Electric</a></li>
         </ul>
       </div>
-      <!-- Contact -->
       <div>
         <h4 class="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Contact</h4>
         <ul class="space-y-3">
@@ -1338,7 +755,6 @@
         </ul>
       </div>
     </div>
-    <!-- Bottom bar -->
     <div class="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
       <p class="text-slate-500 text-xs text-center sm:text-left">© 2081/82 Samriddhi And Brothers Auto Pvt. Ltd. All prices are indicative and subject to change without notice.</p>
       <p class="text-slate-600 text-xs">Powered by <span class="text-bajaj-blue font-semibold">Go! YNG</span></p>
@@ -1347,76 +763,337 @@
 </footer>
 
 
-<script>
-  // ── Hamburger toggle ──
-  const btn = document.getElementById('hamburger-btn');
-  const menu = document.getElementById('mobile-menu');
-  const iconOpen = document.getElementById('icon-open');
-  const iconClose = document.getElementById('icon-close');
+<!-- ══════════ SCRIPTS ══════════ -->
+<script type="module">
+  import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-  btn.addEventListener('click', () => {
-    const isOpen = menu.classList.toggle('open');
-    btn.setAttribute('aria-expanded', isOpen);
-    iconOpen.classList.toggle('hidden', isOpen);
-    iconClose.classList.toggle('hidden', !isOpen);
+  /* ── Firebase config ── */
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
+    authDomain:        "first-project-2082-12-26.firebaseapp.com",
+    projectId:         "first-project-2082-12-26",
+    storageBucket:     "first-project-2082-12-26.firebasestorage.app",
+    messagingSenderId: "545170954251",
+    appId:             "1:545170954251:web:0d2f7905834af3b0be8f0e",
+    measurementId:     "G-17X7R542YC"
+  };
+  const app      = initializeApp(firebaseConfig);
+  const db       = getFirestore(app);
+  const bikesCol = collection(db, "bikes");
+
+  /* ── State ── */
+  let allBikes     = [];
+  let activeFilter = "all";
+
+  /* ── Helpers ── */
+  function sortBySn(bikes) {
+    return [...bikes].sort((a, b) => {
+      const A = (a.sn != null && a.sn !== "") ? Number(a.sn) : 9999;
+      const B = (b.sn != null && b.sn !== "") ? Number(b.sn) : 9999;
+      return A - B;
+    });
+  }
+
+  function getCategory(name = "") {
+    const n = name.toLowerCase();
+    if (n.includes("chetak"))  return "chetak";
+    if (n.includes("pulsar"))  return "pulsar";
+    if (n.includes("dominar")) return "dominar";
+    if (n.includes("avenger")) return "avenger";
+    if (n.includes("platina")) return "platina";
+    // ── CT model removed — map to "other" so it gets filtered/hidden ──
+    if (n.includes(" ct ") || n.startsWith("ct ") || n === "ct" || /\bct\d/.test(n)) return "other";
+    return "other";
+  }
+
+  function getSeries(name = "") {
+    const cat = getCategory(name);
+    const map = {
+      chetak:  "Chetak Electric",
+      pulsar:  "Pulsar Series",
+      dominar: "Dominar Series",
+      avenger: "Avenger Series",
+      platina: "Platina Series",
+    };
+    return map[cat] || "Bajaj Motorcycles";
+  }
+
+  function fmtPrice(val) {
+    const n = parseFloat(val);
+    if (!val || isNaN(n)) return "On Request";
+    return "Rs. " + n.toLocaleString("en-IN");
+  }
+
+  function fmtInsurance(val) {
+    const n = Number(val);
+    if (!val || isNaN(n) || n === 0) return null;
+    return "Rs. " + n.toLocaleString("en-IN");
+  }
+
+  /* ── Build card ── */
+  function buildCard(bike, idx) {
+    const name   = bike.name || "Bajaj";
+    const series = getSeries(bike.name);
+    const price  = fmtPrice(bike.price);
+    const ins    = fmtInsurance(bike.Insurance);
+    const isNew  = !!bike.isNew;
+    const badge  = bike.badge || null;
+    const cat    = getCategory(bike.name);
+    const isChetak = cat === "chetak";
+
+    const imgSrc = bike.img
+      || `https://placehold.co/600x340/EBF4FF/005EA6?text=${encodeURIComponent(name)}`;
+
+    /* Top-left chip */
+    let chipL = "";
+    if (isChetak) {
+      chipL = `<span style="position:absolute;top:11px;left:11px;
+        background:linear-gradient(135deg,#005EA6,#10B981);color:#fff;
+        font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+        padding:4px 10px;border-radius:6px;display:flex;align-items:center;gap:4px;">
+        <i class="fa-solid fa-bolt" style="font-size:9px;"></i> ELECTRIC
+      </span>`;
+    } else if (isNew) {
+      chipL = `<span style="position:absolute;top:11px;left:11px;
+        background:#005EA6;color:#fff;
+        font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+        padding:4px 10px;border-radius:6px;">NEW</span>`;
+    } else if (badge) {
+      chipL = `<span style="position:absolute;top:11px;left:11px;
+        background:#0F172A;color:#fff;
+        font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+        padding:4px 10px;border-radius:6px;">${badge}</span>`;
+    }
+
+    /* Top-right "Official" chip */
+    const chipR = `
+      <span style="position:absolute;top:11px;right:11px;
+        background:rgba(255,255,255,.94);border:1px solid #E8E6E1;
+        color:#1A6B3C;font-size:10px;font-weight:700;letter-spacing:.06em;
+        padding:4px 9px;border-radius:6px;
+        display:flex;align-items:center;gap:5px;">
+        <i class="fa-solid fa-circle-check" style="font-size:10px;color:#1A6B3C;"></i>
+        Official
+      </span>`;
+
+    /* Insurance row */
+    const insRow = ins ? `
+      <div style="display:flex;align-items:center;justify-content:space-between;
+        padding:10px 0;border-bottom:1px solid #E8E6E1;">
+        <span style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#6B6B68;">
+          <i class="fa-solid fa-shield-halved" style="color:#005EA6;font-size:12px;"></i>
+          Insurance
+        </span>
+        <span style="font-size:13px;font-weight:600;color:#3A3A38;">${ins}</span>
+      </div>` : "";
+
+    /* Optional specs */
+    const specs = [];
+    if (bike.cc)      specs.push({ l: "Engine",  v: bike.cc + (isChetak ? " kWh" : " cc") });
+    if (bike.power)   specs.push({ l: "Power",   v: bike.power });
+    if (bike.mileage) specs.push({ l: isChetak ? "Range" : "Mileage", v: bike.mileage });
+    if (bike.weight)  specs.push({ l: "Weight",  v: bike.weight });
+
+    const specGrid = specs.length ? `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px;border-top:1px solid #E8E6E1;">
+        ${specs.map(s => `
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <span style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9A9A97;">${s.l}</span>
+            <span style="font-size:12.5px;font-weight:500;color:#3A3A38;">${s.v}</span>
+          </div>`).join("")}
+      </div>` : "";
+
+    /* Card bg tint for Chetak */
+    const imgBg = isChetak
+      ? "linear-gradient(135deg,#E8F5F0,#D1FAE5)"
+      : "linear-gradient(135deg,#EBF4FF,#DCEEFB)";
+
+    /* Price badge accent */
+    const priceAccent = isChetak ? "#10B981" : "#005EA6";
+    const priceBgAccent = isChetak ? "rgba(16,185,129,0.08)" : "#EBF4FF";
+    const priceBorder   = isChetak ? "rgba(16,185,129,0.18)" : "rgba(0,94,166,0.14)";
+
+    const delay = `${Math.min(idx, 9) * 55}ms`;
+
+    return `
+      <div class="yng-card" style="animation-delay:${delay};">
+        <!-- Image -->
+        <div style="position:relative;height:200px;background:${imgBg};overflow:hidden;display:flex;align-items:center;justify-content:center;">
+          <img class="yng-img"
+            src="${imgSrc}"
+            alt="${name}"
+            loading="lazy"
+            onerror="this.src='https://placehold.co/600x340/EBF4FF/005EA6?text=Bajaj'"
+            style="width:100%;height:100%;object-fit:cover;"
+          >
+          ${chipL}
+          ${chipR}
+        </div>
+
+        <!-- Body -->
+        <div style="padding:1.1rem;display:flex;flex-direction:column;gap:.85rem;flex:1;">
+
+          <!-- Name + Price -->
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;">
+            <div style="flex:1;min-width:0;">
+              <div style="font-family:'Bebas Neue',cursive;font-size:21px;letter-spacing:.03em;line-height:1.1;color:#111110;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                ${name}
+              </div>
+              <div style="font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#6B6B68;margin-top:2px;">
+                ${series}
+              </div>
+            </div>
+            <div style="flex-shrink:0;background:${priceBgAccent};border:1px solid ${priceBorder};border-radius:8px;padding:7px 11px;text-align:right;">
+              <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${priceAccent};margin-bottom:1px;">
+                MRP Price
+              </div>
+              <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:.02em;color:${priceAccent};line-height:1.2;white-space:nowrap;">
+                ${price}
+              </div>
+            </div>
+          </div>
+
+          ${insRow}
+          ${specGrid}
+
+          <!-- Footer row -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:.15rem;">
+            <span style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:#6B6B68;">
+              <i class="fa-solid fa-${isChetak ? 'bolt' : 'hand-holding-dollar'}" style="color:${priceAccent};font-size:13px;"></i>
+              ${isChetak ? "EV Subsidy Available" : "EMI Available"}
+            </span>
+            <span class="yng-arr" style="width:30px;height:30px;border-radius:7px;
+              background:#F6F4F0;border:1px solid #E8E6E1;
+              display:flex;align-items:center;justify-content:center;
+              color:#3A3A38;font-size:11px;">
+              <i class="fa-solid fa-arrow-right"></i>
+            </span>
+          </div>
+
+        </div>
+      </div>`;
+  }
+
+  /* ── Empty state ── */
+  function emptyState(msg) {
+    return `
+      <div style="grid-column:1/-1;display:flex;flex-direction:column;
+        align-items:center;padding:4.5rem 1rem;gap:1rem;text-align:center;">
+        <div style="width:58px;height:58px;border-radius:14px;
+          background:#EBF4FF;border:1px solid rgba(0,94,166,0.15);
+          display:flex;align-items:center;justify-content:center;
+          color:#005EA6;font-size:22px;">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:.03em;color:#0F172A;">No Results Found</div>
+        <p style="font-size:13.5px;color:#64748B;max-width:240px;line-height:1.7;">${msg}</p>
+      </div>`;
+  }
+
+  /* ── Render ── */
+  function render(bikes) {
+    const grid = document.getElementById("bike-grid");
+    if (!grid) return;
+
+    const q = (document.getElementById("search-input")?.value || "").toLowerCase().trim();
+
+    const list = sortBySn(
+      bikes.filter(b => {
+        const n   = (b.name || "").toLowerCase();
+        const cat = getCategory(b.name);
+        if (cat === "other") return false; // hide CT and unrecognized
+        return (!q || n.includes(q)) &&
+               (activeFilter === "all" || cat === activeFilter);
+      })
+    );
+
+    if (!list.length) {
+      grid.innerHTML = emptyState(
+        q ? `No bikes found for "${q}". Try a different name.`
+          : "No bikes listed in this category yet."
+      );
+      return;
+    }
+
+    grid.innerHTML = list.map((b, i) => buildCard(b, i)).join("");
+  }
+
+  /* ── Firebase real-time listener ── */
+  onSnapshot(bikesCol, snap => {
+    allBikes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render(allBikes);
+  }, err => {
+    /* Fallback: show demo Chetak + Pulsar cards if Firebase is unreachable */
+    console.warn("Firebase error:", err.message);
+    allBikes = [
+      { id:"demo1", sn:1, name:"Chetak Electric",        price:389900, isNew:true, img:"" },
+      { id:"demo2", sn:2, name:"Chetak Premium",         price:449900, isNew:true, img:"" },
+      { id:"demo3", sn:3, name:"Platina 100",             price:219900, img:"" },
+      { id:"demo4", sn:4, name:"Pulsar N150",             price:339900, img:"" },
+      { id:"demo5", sn:5, name:"Pulsar N160",             price:379900, img:"" },
+      { id:"demo6", sn:6, name:"Pulsar P150",             price:315900, img:"" },
+      { id:"demo7", sn:7, name:"Pulsar NS200",            price:449900, img:"" },
+      { id:"demo8", sn:8, name:"Avenger Street 160",      price:349900, img:"" },
+      { id:"demo9", sn:9, name:"Dominar 250",             price:489900, img:"" },
+    ];
+    render(allBikes);
   });
 
-  // Close on nav link click
-  menu.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      menu.classList.remove('open');
-      btn.setAttribute('aria-expanded', 'false');
-      iconOpen.classList.remove('hidden');
-      iconClose.classList.add('hidden');
+  /* ── Wire up controls ── */
+  document.querySelectorAll(".tab-btn").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      activeFilter = tab.dataset.filter;
+      render(allBikes);
     });
   });
 
-  // ── Card filter tabs ──
-  const tabs = document.querySelectorAll('.tab-btn');
-  const cards = document.querySelectorAll('#bike-grid .bike-card');
+  document.getElementById("search-input")?.addEventListener("input", () => render(allBikes));
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const filter = tab.dataset.filter;
 
-      // Update tab styles
-      tabs.forEach(t => {
-        t.classList.remove('bg-bajaj-blue', 'text-white', 'shadow-sm');
-        t.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-600');
-      });
-      tab.classList.add('bg-bajaj-blue', 'text-white', 'shadow-sm');
-      tab.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-600');
+  /* ── Hamburger ── */
+  const btn      = document.getElementById("hamburger-btn");
+  const mMenu    = document.getElementById("mobile-menu");
+  const icoOpen  = document.getElementById("icon-open");
+  const icoClose = document.getElementById("icon-close");
 
-      // Filter cards
-      cards.forEach(card => {
-        if (filter === 'all' || card.dataset.category === filter) {
-          card.style.display = '';
-          card.style.animation = 'fadeUp 0.35s ease both';
-        } else {
-          card.style.display = 'none';
-        }
-      });
+  btn?.addEventListener("click", () => {
+    const open = mMenu.classList.toggle("open");
+    btn.setAttribute("aria-expanded", open);
+    icoOpen.classList.toggle("hidden", open);
+    icoClose.classList.toggle("hidden", !open);
+  });
+
+  mMenu?.querySelectorAll("a").forEach(a => {
+    a.addEventListener("click", () => {
+      mMenu.classList.remove("open");
+      btn.setAttribute("aria-expanded", "false");
+      icoOpen.classList.remove("hidden");
+      icoClose.classList.add("hidden");
     });
   });
 
-  // ── Intersection observer for scroll animations ──
-  const observerOptions = { threshold: 0.12, rootMargin: '0px 0px -40px 0px' };
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-        observer.unobserve(entry.target);
+
+  /* ── Scroll-reveal for static elements ── */
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = "1";
+        e.target.style.transform = "translateY(0)";
+        revealObs.unobserve(e.target);
       }
     });
-  }, observerOptions);
+  }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
 
-  document.querySelectorAll('.bike-card, .stat-chip, .feature-icon-wrap').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(18px)';
-    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-    observer.observe(el);
+  document.querySelectorAll(".stat-chip, .feature-icon-wrap").forEach(el => {
+    el.style.opacity = "0";
+    el.style.transform = "translateY(16px)";
+    el.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+    revealObs.observe(el);
   });
 </script>
+
 </body>
 </html>
