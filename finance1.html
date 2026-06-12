@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Go! YNG — Premium Finance & EMI Platform</title>
+  <meta name="description" content="Calculate your Bajaj bike EMI and finance plan at Go! YNG, Phidim. Premium finance options available.">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    /* ─── RESET & REFINED SYSTEM TOKENS ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    img  { display: block; max-width: 100%; }
+    a    { text-decoration: none; color: inherit; }
+    ul   { list-style: none; }
+    button { border: none; background: none; cursor: pointer; font: inherit; }
+    input, select { font: inherit; }
+
+    :root {
+      --bajaj-blue: #005EA6;
+      --bajaj-blue-dk: #004B84;
+      --bajaj-blue-lt: #EEF6FC;
+      --ink:    #1E293B;
+      --ink2:   #334155;
+      --ink3:   #64748B;
+      --ink4:   #94A3B8;
+      --line:   #E2E8F0;
+      --bg:     #F8FAFC;
+      --white:  #FFFFFF;
+      --green:  #10B981;
+      --green-lt: #ECFDF5;
+      --red:    #EF4444;
+      --D: 'Bebas Neue', sans-serif;
+      --B: 'DM Sans', sans-serif;
+      --ease: cubic-bezier(.25,.46,.45,.94);
+      --nav-h: 68px;
+      --r8:  8px;
+      --r12: 12px;
+      --r14: 14px;
+      --r16: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--B);
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── PREMIUM STICKY NAVIGATION ─── */
+    .nav {
+      position: sticky; top: 0; z-index: 300;
+      height: var(--nav-h);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner {
+      max-width: 1320px; margin: 0 auto;
+      padding: 0 1.25rem; height: 100%;
+      display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+    }
+    .logo { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .logo-mark {
+      width: 36px; height: 36px; flex-shrink: 0;
+      background: var(--bajaj-blue); border-radius: var(--r8);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-mark svg { width: 18px; height: 18px; }
+    .logo-copy { line-height: 1.2; }
+    .logo-name { font-family: var(--D); font-size: 20px; letter-spacing: .04em; color: var(--bajaj-blue); display: block; }
+    .logo-sub  { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); display: block; }
+    
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-links a {
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 14px; border-radius: var(--r8);
+      font-size: 13.5px; font-weight: 500; color: var(--ink2);
+      transition: background .16s, color .16s;
+    }
+    .nav-links a:hover  { background: var(--bg); color: var(--bajaj-blue); }
+    .nav-links a.active { background: var(--bajaj-blue-lt); color: var(--bajaj-blue); }
+    
+    .nav-wa {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 18px; background: var(--bajaj-blue); color: var(--white);
+      border-radius: var(--r8); font-size: 13.5px; font-weight: 600;
+      transition: background .16s, transform .16s; white-space: nowrap;
+    }
+    .nav-wa:hover { background: var(--bajaj-blue-dk); transform: translateY(-1px); }
+    
+    .ham {
+      display: none; width: 40px; height: 40px; border-radius: var(--r8);
+      border: 1px solid var(--line);
+      flex-direction: column; align-items: center; justify-content: center; gap: 5px; flex-shrink: 0;
+    }
+    .ham span {
+      display: block; width: 18px; height: 2px;
+      background: var(--ink); border-radius: 2px;
+      transition: transform .26s var(--ease), opacity .18s;
+    }
+    .ham.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .ham.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .ham.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .draw-bg {
+      display: none; position: fixed; inset: 0; z-index: 280;
+      background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(6px);
+    }
+    .draw-bg.open { display: block; }
+    .drawer {
+      position: fixed; top: var(--nav-h); right: 0; bottom: 0;
+      width: min(320px, 88vw); z-index: 290;
+      background: var(--white); transform: translateX(110%);
+      transition: transform .3s var(--ease);
+      padding: 1.5rem; display: flex; flex-direction: column; gap: .5rem;
+      overflow-y: auto; border-left: 1px solid var(--line);
+    }
+    .drawer.open { transform: translateX(0); }
+    .draw-tag { font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--ink4); padding: 0 4px; }
+    .drawer a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border-radius: var(--r12);
+      font-size: 14.5px; font-weight: 500; color: var(--ink2);
+      transition: background .16s;
+    }
+    .drawer a:hover { background: var(--bg); color: var(--bajaj-blue); }
+    .drawer a i { width: 18px; text-align: center; color: var(--ink3); }
+    .drawer hr { border: none; border-top: 1px solid var(--line); margin: .5rem 0; }
+    .d-cta { background: var(--bajaj-blue) !important; color: var(--white) !important; justify-content: center; border-radius: var(--r12) !important; }
+    .d-cta:hover { background: var(--bajaj-blue-dk) !important; }
+
+    /* ─── PREMIUM INTEGRATED HERO SECTION ─── */
+    .hero {
+      position: relative; min-height: 48vh;
+      display: flex; align-items: center; overflow: hidden;
+      background: #0F172A;
+    }
+    .hero-img {
+      position: absolute; right: 0; top: 0; width: 55%; height: 100%; object-fit: cover; opacity: 0.45;
+    }
+    .hero-grad {
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, #0F172A 0%, #0F172A 45%, rgba(15, 23, 42, 0.8) 70%, rgba(15, 23, 42, 0) 100%);
+    }
+    .hero-body {
+      position: relative; z-index: 2;
+      max-width: 1320px; margin: 0 auto; width: 100%;
+      padding: 4rem 1.25rem;
+    }
+    .hero-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0, 94, 166, 0.2); border: 1px solid rgba(0, 94, 166, 0.4);
+      color: #60A5FA; padding: 6px 14px; border-radius: 100px;
+      font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+    h1.hero-h1 {
+      font-family: var(--D); font-size: clamp(44px, 7vw, 96px);
+      line-height: 0.95; letter-spacing: .02em; color: var(--white); margin-bottom: 1.25rem;
+    }
+    h1.hero-h1 .accent { color: var(--bajaj-blue); background: linear-gradient(to right, #38BDF8, #005EA6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-desc { max-width: 460px; color: var(--ink4); font-size: 14.5px; font-weight: 400; line-height: 1.7; }
+
+    /* ─── DYNAMIC LAYOUT ENGINE ─── */
+    .main { max-width: 1320px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+
+    /* Total Payment Top Header Summary Banner */
+    .total-dp-banner {
+      background: var(--white); border: 1px solid var(--line);
+      border-radius: var(--r16); padding: 1.75rem 2.25rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem;
+      box-shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.08);
+    }
+    .tdp-left { display: flex; flex-direction: column; gap: 4px; }
+    .tdp-label { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); }
+    .tdp-title { font-family: var(--D); font-size: 24px; letter-spacing: .02em; color: var(--ink); }
+    .tdp-value { font-family: var(--D); font-size: 48px; letter-spacing: .01em; line-height: 1; color: var(--bajaj-blue); }
+    .tdp-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--bajaj-blue-lt); border: 1px solid rgba(0, 94, 166, 0.15);
+      padding: 8px 16px; border-radius: var(--r8);
+      font-size: 12.5px; font-weight: 600; color: var(--bajaj-blue);
+    }
+
+    /* Core Components Grid Split */
+    .calc-grid { display: grid; grid-template-columns: 1fr 360px; gap: 1.5rem; align-items: start; }
+    .calc-left { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* Cards Structure Styling */
+    .card {
+      background: var(--white); border: 1px solid var(--line);
+      border-radius: var(--r16); padding: 1.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .card-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 15px; font-weight: 700; color: var(--ink);
+      letter-spacing: -0.01em; margin-bottom: 1.5rem;
+    }
+    .card-title .icon {
+      width: 36px; height: 36px; border-radius: var(--r12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; background: var(--bajaj-blue-lt); color: var(--bajaj-blue);
+      flex-shrink: 0;
+    }
+
+    /* Input Modules & Structured Typography */
+    .field-label { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink3); margin-bottom: 8px; display: block; }
+    select.styled, input.styled {
+      width: 100%; height: 46px;
+      border: 1.5px solid var(--line); border-radius: var(--r12);
+      background: var(--bg); padding: 0 14px;
+      font-family: var(--B); font-size: 14.5px; color: var(--ink);
+      outline: none; transition: border-color .2s, box-shadow .2s;
+      appearance: none; -webkit-appearance: none;
+    }
+    select.styled {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px;
+    }
+    select.styled:focus, input.styled:focus {
+      border-color: var(--bajaj-blue); box-shadow: 0 0 0 4px rgba(0, 94, 166, 0.08); background-color: var(--white);
+    }
+
+    .metrics-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem; }
+    .metric-box {
+      background: var(--bg); border: 1px solid var(--line);
+      border-radius: var(--r12); padding: 1rem;
+      display: flex; flex-direction: column; gap: 4px; transition: border-color .2s;
+    }
+    .metric-box.has-input:focus-within { border-color: var(--bajaj-blue); background-color: var(--white); }
+    .metric-lbl { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink3); }
+    .metric-val { font-family: var(--D); font-size: 24px; letter-spacing: .02em; color: var(--ink); line-height: 1.2; }
+    .metric-val.green { color: var(--green); }
+    .metric-box input {
+      border: none; background: transparent; padding: 0;
+      font-family: var(--D); font-size: 24px; color: var(--ink);
+      outline: none; width: 100%; letter-spacing: .02em; line-height: 1.2;
+    }
+    .metric-box input::-webkit-outer-spin-button,
+    .metric-box input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .config-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; padding-top: 1.5rem; border-top: 1px solid var(--line); margin-top: 1.5rem; }
+    .two-up { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+    /* Charge Items & Input Configuration Rows */
+    .charge-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .charge-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .charge-row label { font-size: 14px; color: var(--ink2); font-weight: 500; }
+    .charge-row .val { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+    .charge-row input {
+      text-align: right; border: none; border-bottom: 2px solid var(--line);
+      background: transparent; outline: none; font-size: 14.5px; font-weight: 600;
+      color: var(--ink); width: 120px; padding: 2px 4px; transition: border-color .18s;
+    }
+    .charge-row input:focus { border-color: var(--bajaj-blue); }
+    .charge-row input::-webkit-outer-spin-button,
+    .charge-row input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .acc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .acc-field { display: flex; flex-direction: column; gap: 6px; }
+    .acc-field label { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); }
+    .acc-field input {
+      border: none; border-bottom: 2px solid var(--line);
+      background: transparent; outline: none; font-size: 15px; font-weight: 600;
+      color: var(--ink); padding: 4px 2px; transition: border-color .18s;
+    }
+    .acc-field input:focus { border-color: var(--bajaj-blue); }
+    .acc-field input::-webkit-outer-spin-button,
+    .acc-field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    /* ─── PREMIUM SIDEBAR INVOICE SUMMARY PANEL ─── */
+    .results-panel {
+      background: #1E293B; border-radius: var(--r16); padding: 1.75rem; color: var(--white);
+      position: sticky; top: calc(var(--nav-h) + 1.5rem);
+      box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.15);
+    }
+    .res-title {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--ink4); margin-bottom: 1.5rem;
+    }
+    .res-title i { color: #38BDF8; }
+
+    .res-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .res-row:last-child { border-bottom: none; }
+    .res-lbl { font-size: 13px; color: #94A3B8; font-weight: 400; }
+    .res-val { font-size: 14px; font-weight: 600; color: #F1F5F9; }
+    .res-val.blue-highlight { color: #38BDF8; font-weight: 700; }
+    .res-val.green-highlight { color: #34D399; }
+    .res-val.red-highlight { color: #F87171; }
+    .res-val.info-text { color: #94A3B8; font-style: italic; font-size: 12.5px; font-weight: 400; }
+
+    /* Dynamic Value Matrices Containers */
+    .emi-box { background: var(--bajaj-blue); border-radius: var(--r12); padding: 1.5rem; margin: 1.5rem 0; text-align: center; }
+    .emi-box-lbl { font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,0.8); margin-bottom: 4px; }
+    .emi-box-val { font-family: var(--D); font-size: 44px; letter-spacing: .02em; line-height: 1; }
+
+    .adv-box {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--r12); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .adv-box-lbl { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #94A3B8; }
+    .adv-box-val { font-family: var(--D); font-size: 26px; letter-spacing: .02em; color: #38BDF8; }
+
+    /* ─── FOOTER REGION ─── */
+    .foot { background: var(--white); border-top: 1px solid var(--line); }
+    .foot-in {
+      max-width: 1320px; margin: 0 auto; padding: 4rem 1.25rem 3rem;
+      display: grid; grid-template-columns: 260px 1fr; gap: 4rem;
+    }
+    .f-nm  { font-family: var(--D); font-size: 32px; letter-spacing: .03em; color: var(--bajaj-blue); margin-bottom: 2px; }
+    .f-sub { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); margin-bottom: 1.25rem; }
+    .f-adr { font-size: 13.5px; color: var(--ink3); line-height: 1.8; font-style: normal; font-weight: 400; }
+    .f-soc { display: flex; gap: 10px; margin-top: 1.5rem; }
+    .f-soc a {
+      width: 36px; height: 36px; border-radius: var(--r8);
+      border: 1px solid var(--line); background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; color: var(--ink3); transition: all .16s;
+    }
+    .f-soc a:hover { background: var(--bajaj-blue-lt); color: var(--bajaj-blue); border-color: rgba(0, 94, 166, 0.2); }
+    
+    .f-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+    .f-col-h { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); margin-bottom: 1rem; }
+    .f-col-l { display: flex; flex-direction: column; gap: 10px; }
+    .f-col-l a { font-size: 13.5px; color: var(--ink3); font-weight: 400; transition: color .16s; }
+    .f-col-l a:hover { color: var(--bajaj-blue); }
+    
+    .foot-bot {
+      max-width: 1320px; margin: 0 auto; padding: 1.25rem 1.25rem; border-top: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    }
+    .f-copy { font-size: 12px; color: var(--ink4); font-weight: 400; }
+    .f-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--bg); border: 1px solid var(--line);
+      padding: 5px 14px; border-radius: 100px;
+      font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3);
+    }
+    .f-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--bajaj-blue); flex-shrink: 0; }
+
+    /* ─── MOBILE RESPONSIVE BEAT SCREEN MATRICES ─── */
+    @media (max-width: 1024px) {
+      .calc-grid { grid-template-columns: 1fr; }
+      .results-panel { position: static; }
+      .foot-in { grid-template-columns: 1fr; gap: 2.5rem; }
+    }
+    @media (max-width: 768px) {
+      .nav-links, .nav-wa { display: none; }
+      .ham { display: flex; }
+      .metrics-row { grid-template-columns: 1fr 1fr; }
+      .two-up { grid-template-columns: 1fr; }
+      .f-cols { grid-template-columns: 1fr 1fr; }
+      .hero-img { width: 100%; opacity: 0.3; }
+      .hero-grad { background: linear-gradient(0deg, #0F172A 0%, rgba(15, 23, 42, 0.9) 60%, rgba(15, 23, 42, 0.4) 100%); }
+    }
+    @media (max-width: 540px) {
+      .total-dp-banner { flex-direction: column; align-items: flex-start; padding: 1.5rem; }
+      .metrics-row { grid-template-columns: 1fr; }
+      .config-row  { grid-template-columns: 1fr; }
+      .f-cols      { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 16 16" fill="none">
+          <path d="M2 12.5 L8 3 L14 12.5 M4.5 9.5 L11.5 9.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="logo-copy">
+        <span class="logo-name">Go! YNG</span>
+        <span class="logo-sub">Bajaj Partner · Phidim</span>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+      <li><a href="index.html#prices"><i class="fa-solid fa-list-ul"></i> Prices</a></li>
+      <li><a href="finance.html" class="active"><i class="fa-solid fa-calculator"></i> Finance</a></li>
+      <li><a href="form.html"><i class="fa-solid fa-file-lines"></i> Form</a></li>
+      <li><a href="https://yonghangishak.com.np/" target="_blank"><i class="fa-solid fa-user-tie"></i> About</a></li>
+    </ul>
+
+    <a href="https://wa.me/9779802315425" target="_blank" class="nav-wa">
+      <i class="fa-brands fa-whatsapp"></i> WhatsApp
+    </a>
+
+    <button class="ham" id="ham" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="draw-bg" id="draw-bg"></div>
+<div class="drawer" id="drawer">
+  <p class="draw-tag">Navigation</p>
+  <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+  <a href="index.html#prices"><i class="fa-solid fa-list-ul"></i> Price List</a>
+  <a href="finance.html"><i class="fa-solid fa-calculator"></i> Finance</a>
+  <a href="form.html"><i class="fa-solid fa-file-lines"></i> Form</a>
+  <a href="https://yonghangishak.com.np/" target="_blank"><i class="fa-solid fa-user-tie"></i> About</a>
+  <hr>
+  <a href="https://wa.me/9779802315425" target="_blank" class="d-cta">
+    <i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp
+  </a>
+</div>
+
+<section class="hero">
+  <img class="hero-img" src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=2070" alt="Bajaj Premium Showroom">
+  <div class="hero-grad"></div>
+  <div class="hero-body">
+    <div class="hero-pill"><i class="fa-solid fa-shield-halved"></i> Premium Financial Engine</div>
+    <h1 class="hero-h1">INTELLIGENT<br><span class="accent">FINANCE MATRIX.</span></h1>
+    <p class="hero-desc">Experience our real-time calculations engine. Setup accurate customized EMI schedules and rounded booking upfront pricing with absolute precision.</p>
+  </div>
+</section>
+
+<main id="finance" class="main">
+
+  <div class="total-dp-banner">
+    <div class="tdp-left">
+      <span class="tdp-label">Calculated Upfront Amount Due</span>
+      <span class="tdp-title">Adjusted Showroom Downpayment (With Accessories)</span>
+    </div>
+    <div id="displayTotalDP" class="tdp-value">Rs. 0</div>
+    <div class="tdp-badge"><i class="fa-solid fa-bolt"></i> Real-time Active Sync</div>
+  </div>
+
+  <div class="calc-grid">
+
+    <div class="calc-left">
+
+      <div class="card">
+        <div class="card-title">
+          <span class="icon"><i class="fa-solid fa-sliders"></i></span>
+          Model Metrics & Configuration Setup
+        </div>
+
+        <label class="field-label">Select Bike Variant</label>
+        <select id="modelSelect" class="styled">
+          <option value="390000">Pulsar NS 200 FI ABS — Rs. 3,90,000</option>
+          <option value="310000">Pulsar 150 Twin Disc — Rs. 3,10,000</option>
+          <option value="240000">Discover 125 ST — Rs. 2,40,000</option>
+          <option value="589900">Dominar 400 UG — Rs. 5,89,900</option>
+        </select>
+
+        <div class="metrics-row">
+          <div class="metric-box">
+            <span class="metric-lbl">Showroom Price (MRP)</span>
+            <span class="metric-val" id="mrp">Rs. 0</span>
+          </div>
+          <div class="metric-box has-input">
+            <span class="metric-lbl">Cash Discount</span>
+            <input type="number" id="discountInput" value="0" placeholder="0">
+          </div>
+          <div class="metric-box">
+            <span class="metric-lbl">Net Price After Disc.</span>
+            <span class="metric-val green" id="afterDiscount">Rs. 0</span>
+          </div>
+        </div>
+
+        <div class="config-row">
+          <div>
+            <label class="field-label">Downpayment Option</label>
+            <select id="dpPercent" class="styled">
+              <option value="30">30% Downpayment</option>
+              <option value="40">40% Downpayment</option>
+              <option value="50" selected>50% Downpayment</option>
+              <option value="60">60% Downpayment</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Financing Term (Tenure)</label>
+            <select id="tenure" class="styled">
+              <option value="12" selected>12 Months Plan</option>
+              <option value="18">18 Months Plan</option>
+              <option value="24">24 Months Plan</option>
+              <option value="36">36 Months Plan</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-up">
+        <div class="card">
+          <div class="card-title">
+            <span class="icon"><i class="fa-solid fa-building-columns"></i></span>
+            Mandatory Official Processing
+          </div>
+          <div class="charge-row">
+            <label>Auto-Insurance Premium</label>
+            <span class="val id-colored text-green" id="displayIns">Rs. 0</span>
+          </div>
+          <div class="charge-row">
+            <label>Registration / Namsari</label>
+            <input type="number" id="namsariInput" value="3000">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span class="icon"><i class="fa-solid fa-shield"></i></span>
+            Showroom Genuine Accessories
+          </div>
+          <div class="acc-grid">
+            <div class="acc-field">
+              <label>Helmet</label>
+              <input type="number" id="helmetInput" value="2500">
+            </div>
+            <div class="acc-field">
+              <label>Leg Guard</label>
+              <input type="number" id="legguardInput" value="1800">
+            </div>
+            <div class="acc-field">
+              <label>Seat Cover</label>
+              <input type="number" id="seatcoverInput" value="650">
+            </div>
+            <div class="acc-field">
+              <label>Others Matrix</label>
+              <input type="number" id="othersInput" value="0">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="results-panel">
+      <div class="res-title">
+        <i class="fa-solid fa-file-invoice-dollar"></i> Live Quotation Matrix
+      </div>
+
+      <div class="res-row">
+        <span class="res-lbl">Dynamic Interest Rate</span>
+        <span class="res-val blue-highlight" id="displayRate">0%</span>
+      </div>
+      <div class="res-row">
+        <span class="res-lbl">Calculated Net DP</span>
+        <span class="res-val" id="displayDpAmt">Rs. 0</span>
+      </div>
+      <div class="res-row">
+        <span class="res-lbl">Net Finance Principle</span>
+        <span class="res-val" id="displayLoanAmt">Rs. 0</span>
+      </div>
+
+      <div class="emi-box">
+        <div class="emi-box-lbl">Monthly Base Installment (EMI)</div>
+        <div class="emi-box-val" id="displayEMI">Rs. 0</div>
+      </div>
+
+      <div class="res-row">
+        <span class="res-lbl">Ceiling Precision Round Adj.</span>
+        <span class="res-val green-highlight" id="displayAutoAdEmi">Rs. 0</span>
+      </div>
+
+      <div class="adv-box" style="margin: 1rem 0;">
+        <span class="adv-box-lbl">Target Adjusted Upfront Value</span>
+        <span class="adv-box-val" id="displayTotalAdvEmi">Rs. 0</span>
+      </div>
+
+      <div class="res-row">
+        <span class="res-lbl">Accessories Subtotal</span>
+        <span class="res-val" id="displayAccTotal">Rs. 0</span>
+      </div>
+      <div class="res-row">
+        <span class="res-lbl">Total Financing Cost Over Run</span>
+        <span class="res-val red-highlight" id="displayTotalInterest">Rs. 0</span>
+      </div>
+      <div class="res-row" style="margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.15)">
+        <span class="res-lbl" style="color: #FFF; font-weight: 600;">Grand Total Showroom Payable</span>
+        <span class="res-val blue-highlight" id="displayGrandTotal" style="font-size: 16px;">Rs. 0</span>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <div>
+      <div class="f-nm">Go! YNG</div>
+      <div class="f-sub">Authorized Bajaj Partner</div>
+      <address class="f-adr">Phidim-1, Panchthar<br>Koshi Province, Nepal</address>
+      <div class="f-soc">
+        <a href="https://www.facebook.com/sambridhi.brothers" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="https://wa.me/9779802315425" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://www.tiktok.com/@bajajphidim" target="_blank" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+      </div>
+    </div>
+    <div class="f-cols">
+      <div>
+        <div class="f-col-h">Navigate</div>
+        <div class="f-col-l">
+          <a href="index.html">Home</a>
+          <a href="index.html#prices">Price List</a>
+          <a href="finance.html">Finance</a>
+          <a href="form.html">Form</a>
+          <a href="https://yonghangishak.com.np/" target="_blank">About Dashboard</a>
+        </div>
+      </div>
+      <div>
+        <div class="f-col-h">Models Matrix</div>
+        <div class="f-col-l">
+          <a href="index.html">Pulsar NS Series</a>
+          <a href="index.html">Dominar Series</a>
+          <a href="index.html">Avenger Series</a>
+          <a href="index.html">Discover Series</a>
+        </div>
+      </div>
+      <div>
+        <div class="f-col-h">Direct Connect</div>
+        <div class="f-col-l">
+          <a href="https://wa.me/9779802315425" target="_blank">+977 980-231-5425</a>
+          <a href="https://www.facebook.com/sambridhi.brothers" target="_blank">Showroom Digital Channel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot-bot">
+    <span class="f-copy">&copy; 2026 Go! YNG — Premium Engine Platform</span>
+    <span class="f-badge"><span class="dot"></span> Official Authorized Partner</span>
+  </div>
+</footer>
+
+<script>
+  /* Navigation Drawer Setup */
+  const ham = document.getElementById('ham');
+  const drawBg = document.getElementById('draw-bg');
+  const drawer = document.getElementById('drawer');
+
+  function setDrawer(open) {
+    ham.classList.toggle('open', open);
+    drawer.classList.toggle('open', open);
+    drawBg.classList.toggle('open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+  ham.addEventListener('click', () => setDrawer(!drawer.classList.contains('open')));
+  drawBg.addEventListener('click', () => setDrawer(false));
+
+  /* Core Mechanical Calculations Execution Block */
+  const modelSelect = document.getElementById('modelSelect');
+  const discountInput = document.getElementById('discountInput');
+  const dpPercentSelect = document.getElementById('dpPercent');
+  const tenureSelect = document.getElementById('tenure');
+  const namsariInput = document.getElementById('namsariInput');
+  
+  /* Accessories Targets */
+  const helmetInput = document.getElementById('helmetInput');
+  const legguardInput = document.getElementById('legguardInput');
+  const seatcoverInput = document.getElementById('seatcoverInput');
+  const othersInput = document.getElementById('othersInput');
+
+  /* UI Targets Output nodes */
+  const lblMrp = document.getElementById('mrp');
+  const lblAfterDiscount = document.getElementById('afterDiscount');
+  const lblDisplayIns = document.getElementById('displayIns');
+  const lblDisplayRate = document.getElementById('displayRate');
+  const lblDisplayDpAmt = document.getElementById('displayDpAmt');
+  const lblDisplayLoanAmt = document.getElementById('displayLoanAmt');
+  const lblDisplayEMI = document.getElementById('displayEMI');
+  const lblDisplayAutoAdEmi = document.getElementById('displayAutoAdEmi');
+  const lblDisplayTotalAdvEmi = document.getElementById('displayTotalAdvEmi');
+  const lblDisplayAccTotal = document.getElementById('displayAccTotal');
+  const lblDisplayTotalInterest = document.getElementById('displayTotalInterest');
+  const lblDisplayGrandTotal = document.getElementById('displayGrandTotal');
+  const displayTotalDPTopBanner = document.getElementById('displayTotalDP');
+
+  function formatCurrency(num) {
+    return "Rs. " + Math.round(num).toLocaleString('en-IN');
+  }
+
+  function executeCalculationsEngine() {
+    // 1. Initial pricing acquisitions
+    const basePrice = parseFloat(modelSelect.value) || 0;
+    const discount = parseFloat(discountInput.value) || 0;
+    const netPrice = Math.max(0, basePrice - discount);
+
+    lblMrp.textContent = formatCurrency(basePrice);
+    lblAfterDiscount.textContent = formatCurrency(netPrice);
+
+    // 2. Automated Step-Tier Insurance Structure
+    const insurance = netPrice >= 300000 ? 11000 : 8000;
+    lblDisplayIns.textContent = formatCurrency(insurance);
+
+    // 3. Dynamic Interest rates matrix config
+    const dpPercent = parseFloat(dpPercentSelect.value) || 50;
+    let interestRate = 11.99;
+    if (dpPercent === 60) interestRate = 9.99;
+    else if (dpPercent === 50) interestRate = 11.99;
+    else if (dpPercent === 40) interestRate = 12.99;
+    else if (dpPercent === 30) interestRate = 13.99;
+
+    lblDisplayRate.textContent = interestRate + "%";
+
+    // 4. Principal allocations math
+    const downpaymentAmount = netPrice * (dpPercent / 100);
+    const loanAmount = Math.max(0, netPrice - downpaymentAmount);
+
+    lblDisplayDpAmt.textContent = formatCurrency(downpaymentAmount);
+    lblDisplayLoanAmt.textContent = formatCurrency(loanAmount);
+
+    // 5. Monthly compounding mathematical algorithms
+    const tenureMonths = parseInt(tenureSelect.value) || 12;
+    let monthlyEmi = 0;
+    let totalInterestPayable = 0;
+
+    if (loanAmount > 0) {
+      const monthlyRate = (interestRate / 12) / 100;
+      monthlyEmi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenureMonths)) / (Math.pow(1 + monthlyRate, tenureMonths) - 1);
+      totalInterestPayable = (monthlyEmi * tenureMonths) - loanAmount;
+    }
+
+    lblDisplayEMI.textContent = formatCurrency(monthlyEmi);
+    lblDisplayTotalInterest.textContent = formatCurrency(Math.max(0, totalInterestPayable));
+
+    // 6. Upfront Booking Accumulator & Ceiling Precision Adjust Logic
+    const namsari = parseFloat(namsariInput.value) || 0;
+    const initialUpfrontTotal = downpaymentAmount + monthlyEmi + insurance + namsari;
+
+    // Nearest Upper 1000 ceiling computation threshold
+    const targetRoundedUpfront = Math.ceil(initialUpfrontTotal / 1000) * 1000;
+    const adjustmentDifference = Math.max(0, targetRoundedUpfront - initialUpfrontTotal);
+
+    lblDisplayAutoAdEmi.textContent = formatCurrency(adjustmentDifference);
+    lblDisplayTotalAdvEmi.textContent = formatCurrency(targetRoundedUpfront);
+
+    // 7. Accessories aggregation engine
+    const hlm = parseFloat(helmetInput.value) || 0;
+    const lg = parseFloat(legguardInput.value) || 0;
+    const sc = parseFloat(seatcoverInput.value) || 0;
+    const oth = parseFloat(othersInput.value) || 0;
+    const accessoriesTotal = hlm + lg + sc + oth;
+
+    lblDisplayAccTotal.textContent = formatCurrency(accessoriesTotal);
+
+    // 8. Reconcile final targets outputs variables
+    const grandShowroomTotalPayable = targetRoundedUpfront + accessoriesTotal;
+    lblDisplayGrandTotal.textContent = formatCurrency(grandShowroomTotalPayable);
+    displayTotalDPTopBanner.textContent = formatCurrency(grandShowroomTotalPayable);
+  }
+
+  /* Listeners mapping vectors initialization */
+  const inputEventVectors = [modelSelect, discountInput, dpPercentSelect, tenureSelect, namsariInput, helmetInput, legguardInput, seatcoverInput, othersInput];
+  inputEventVectors.forEach(element => {
+    element.addEventListener('input', executeCalculationsEngine);
+    element.addEventListener('change', executeCalculationsEngine);
+  });
+
+  // Execute initial matrix state runtime loop
+  window.addEventListener('DOMContentLoaded', executeCalculationsEngine);
+</script>
+</body>
+</html>
