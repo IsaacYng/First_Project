@@ -1,801 +1,444 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Go! YNG — Allocation & Quotation Form</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Allocation & Quotation Form | Samriddhi And Brothers – Bajaj Phidim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bajaj: {
+              blue: '#005EA6',
+              blueDark: '#004A85',
+              blueLight: '#E8F2FB',
+              amber: '#F59E0B',
+              amberDark: '#D97706',
+            }
+          },
+          fontFamily: {
+            display: ['"Bebas Neue"', 'cursive'],
+            body: ['"DM Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    /* ─── RESET ─── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    img    { display: block; max-width: 100%; }
-    a      { text-decoration: none; color: inherit; }
-    ul     { list-style: none; }
-    button { border: none; background: none; cursor: pointer; font: inherit; }
-    input, select, textarea { font: inherit; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body { font-family: 'DM Sans', sans-serif; background: #F0F4F8; color: #0F172A; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
-    /* ─── DESIGN TOKENS ─── */
-    :root {
-      --red:    #D0271D;
-      --red-dk: #A01E16;
-      --red-lt: #FDF1F0;
-      --ink:    #111110;
-      --ink2:   #3A3A38;
-      --ink3:   #6B6B68;
-      --ink4:   #9A9A97;
-      --line:   #E8E6E1;
-      --bg:     #F6F4F0;
-      --white:  #FFFFFF;
-      --indigo:    #4F46E5;
-      --indigo-lt: #EEF2FF;
-      --green:     #16A34A;
-      --D: 'Bebas Neue', sans-serif;
-      --B: 'DM Sans', sans-serif;
-      --ease: cubic-bezier(.25,.46,.45,.94);
-      --nav-h: 64px;
-      --r8:  8px;
-      --r12: 12px;
-      --r16: 16px;
+    /* ── NAV (from index.html) ── */
+    .nav-blur {
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(0,94,166,0.08);
+      box-shadow: 0 2px 24px rgba(0,0,0,0.06);
     }
+    .nav-link {
+      position: relative; font-size: 0.875rem; font-weight: 500; color: #374151;
+      display: flex; align-items: center; gap: 5px; transition: color 0.2s;
+      padding: 4px 2px;
+    }
+    .nav-link::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 2px; background: #005EA6; border-radius: 2px; transition: width 0.25s ease;
+    }
+    .nav-link:hover { color: #005EA6; }
+    .nav-link:hover::after { width: 100%; }
+    .nav-link.active { color: #005EA6; }
+    .nav-link.active::after { width: 100%; }
+    #mobile-menu { max-height: 0; overflow: hidden; transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease; opacity: 0; }
+    #mobile-menu.open { max-height: 560px; opacity: 1; }
 
-    html {
-      scroll-behavior: smooth;
-      /* KEY FIX: prevent horizontal scroll on the whole page */
-      overflow-x: hidden;
+    /* ── HERO BANNER ── */
+    .form-hero {
+      background: linear-gradient(135deg, #003B6E 0%, #004A85 50%, #005EA6 100%);
+      padding: 80px 0 40px;
+      position: relative; overflow: hidden;
     }
-    body {
-      font-family: var(--B);
-      background: var(--bg);
-      color: var(--ink);
-      line-height: 1.6;
-      /* KEY FIX: prevent horizontal scroll on the whole page */
-      overflow-x: hidden;
-      width: 100%;
-      -webkit-font-smoothing: antialiased;
+    .form-hero::before {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 360px; height: 360px;
+      background: radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%);
+      border-radius: 50%;
     }
-
-    /* ══════════════════════════════════
-       NAV — FULLY FIXED WIDTH, NO SCROLL
-    ══════════════════════════════════ */
-    .nav {
-      position: sticky;
-      top: 0;
-      left: 0;
-      /* KEY FIX: full viewport width, never overflows */
-      width: 100vw;
-      z-index: 300;
-      height: var(--nav-h);
-      background: rgba(255,255,255,.97);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--line);
-      /* Prevent nav itself from causing horizontal scroll */
-      overflow: hidden;
-    }
-    .nav-inner {
-      max-width: 1320px;
-      margin: 0 auto;
-      /* KEY FIX: use 100% not something that overflows */
-      padding: 0 1rem;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: .75rem;
-    }
-    .logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-    .logo-mark {
-      width: 34px; height: 34px; flex-shrink: 0;
-      background: var(--red); border-radius: var(--r8);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .logo-mark svg { width: 16px; height: 16px; }
-    .logo-copy { line-height: 1.15; }
-    .logo-name { font-family: var(--D); font-size: 18px; letter-spacing: .05em; color: var(--red); display: block; }
-    .logo-sub  { font-size: 9.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ink3); display: block; }
-    .nav-links { display: flex; align-items: center; gap: 2px; }
-    .nav-links a {
-      display: flex; align-items: center; gap: 6px;
-      padding: 7px 13px; border-radius: var(--r8);
-      font-size: 13.5px; font-weight: 500; color: var(--ink2);
-      transition: background .16s, color .16s;
-    }
-    .nav-links a:hover  { background: var(--bg); color: var(--ink); }
-    .nav-links a.active { background: var(--red-lt); color: var(--red); }
-    .nav-wa {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 8px 16px; background: var(--red); color: var(--white);
-      border-radius: var(--r8); font-size: 13px; font-weight: 600;
-      transition: background .16s, transform .16s; white-space: nowrap;
-    }
-    .nav-wa:hover { background: var(--red-dk); transform: translateY(-1px); }
-    .ham {
-      display: none; width: 38px; height: 38px; border-radius: var(--r8);
-      border: 1px solid var(--line);
-      flex-direction: column; align-items: center; justify-content: center; gap: 5px; flex-shrink: 0;
-    }
-    .ham span {
-      display: block; width: 17px; height: 1.5px;
-      background: var(--ink); border-radius: 2px;
-      transition: transform .26s var(--ease), opacity .18s;
-    }
-    .ham.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
-    .ham.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-    .ham.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
-
-    /* Drawer overlay */
-    .draw-bg {
-      display: none; position: fixed; inset: 0; z-index: 280;
-      background: rgba(17,17,16,.5); backdrop-filter: blur(4px);
-    }
-    .draw-bg.open { display: block; }
-    .drawer {
-      position: fixed; top: var(--nav-h); right: 0; bottom: 0;
-      width: min(300px, 86vw); z-index: 290;
-      background: var(--white);
-      transform: translateX(110%);
-      transition: transform .3s var(--ease);
-      padding: 1.25rem; display: flex; flex-direction: column; gap: .375rem;
-      overflow-y: auto;
-    }
-    .drawer.open { transform: translateX(0); }
-    .draw-tag { font-size: 9.5px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--ink4); padding: 0 4px; margin-bottom: 2px; }
-    .drawer a {
-      display: flex; align-items: center; gap: 11px;
-      padding: 12px 13px; border-radius: var(--r12);
-      font-size: 14px; font-weight: 500; color: var(--ink2);
-      transition: background .16s;
-    }
-    .drawer a:hover { background: var(--bg); }
-    .drawer a i { width: 16px; text-align: center; color: var(--ink3); }
-    .drawer hr { border: none; border-top: 1px solid var(--line); margin: .375rem 0; }
-    .d-cta { background: var(--red) !important; color: var(--white) !important; justify-content: center; border-radius: var(--r12) !important; }
-    .d-cta:hover { background: var(--red-dk) !important; }
-    .d-cta i { color: var(--white) !important; }
-
-    /* ══════════════════════════════════
-       HERO
-    ══════════════════════════════════ */
-    .hero {
-      position: relative; min-height: 44vh;
-      display: flex; align-items: flex-end; overflow: hidden;
-      /* KEY FIX: constrain hero width */
-      width: 100%;
-    }
-    .hero-bg  { position: absolute; inset: 0; background: #0D0D0C; }
-    .hero-img {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%; object-fit: cover; opacity: .65;
-    }
-    .hero-grad {
-      position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(13,13,12,.96) 0%, rgba(13,13,12,.5) 45%, rgba(13,13,12,.08) 100%);
-    }
-    .hero-body {
-      position: relative; z-index: 2;
-      max-width: 1320px; margin: 0 auto; width: 100%;
-      padding: 3rem 1.25rem 3.5rem;
-    }
-    .hero-pill {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: rgba(208,39,29,.12); border: 1px solid rgba(208,39,29,.3);
-      color: #F07B74; padding: 5px 13px; border-radius: 100px;
-      font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
-      margin-bottom: 1.1rem;
-    }
-    h1.hero-h1 {
-      font-family: var(--D);
-      font-size: clamp(48px, 9vw, 110px);
-      line-height: .92; letter-spacing: .025em;
-      color: var(--white); margin-bottom: 1rem;
-    }
-    h1.hero-h1 .r { color: var(--red); }
-    .hero-desc { max-width: 400px; color: rgba(255,255,255,.5); font-size: 14px; font-weight: 300; line-height: 1.8; }
-
-    /* ══════════════════════════════════
-       CALCULATOR WRAPPER
-    ══════════════════════════════════ */
-    .calc-wrap {
-      max-width: 1320px; margin: 0 auto;
-      padding: 2.5rem 1rem 3rem;
-      /* KEY FIX: don't let this overflow */
-      width: 100%;
+    .form-hero::after {
+      content: ''; position: absolute; bottom: -40px; left: -40px;
+      width: 240px; height: 240px;
+      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+      border-radius: 50%;
     }
 
-    /* Total DP banner */
-    .total-dp-banner {
-      background: var(--white); border: 1px solid var(--line);
-      border-radius: var(--r16); padding: 1.25rem 1.75rem;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+    /* ── FORM CARD ── */
+    .form-card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
     }
-    .tdp-left { display: flex; flex-direction: column; gap: 2px; }
-    .tdp-label { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--ink3); }
-    .tdp-title { font-family: var(--D); font-size: 20px; letter-spacing: .03em; color: var(--ink); }
-    .tdp-value { font-family: var(--D); font-size: 44px; letter-spacing: .02em; line-height: 1; color: var(--indigo); }
-    .tdp-badge {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: var(--indigo-lt); border: 1px solid rgba(79,70,229,.18);
-      padding: 8px 16px; border-radius: var(--r8);
-      font-size: 12px; font-weight: 600; color: var(--indigo);
-    }
-
-    /* Main grid */
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1fr 320px;
-      gap: 1.25rem;
-      align-items: start;
-    }
-    .left-col { display: flex; flex-direction: column; gap: 1.25rem; }
-    .right-col { display: flex; flex-direction: column; gap: 1.25rem; }
-
-    /* Cards */
-    .card {
-      background: var(--white); border: 1px solid var(--line);
-      border-radius: var(--r16); padding: 1.5rem;
-    }
-    .card-title {
+    .card-section-title {
       display: flex; align-items: center; gap: 10px;
-      font-size: 14px; font-weight: 700; color: var(--ink);
-      margin-bottom: 1.25rem;
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #005EA6;
+      padding-bottom: 12px; border-bottom: 1.5px solid #E8F2FB;
+      margin-bottom: 16px;
     }
-    .card-title .cicon {
-      width: 30px; height: 30px; border-radius: var(--r8);
-      background: var(--indigo-lt); color: var(--indigo);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; flex-shrink: 0;
+    .card-section-title .icon-wrap {
+      width: 28px; height: 28px; border-radius: 7px;
+      background: #E8F2FB; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
 
-    /* Select */
-    .flabel { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); margin-bottom: 6px; display: block; }
-    select.fs, input.fs {
-      width: 100%; height: 44px;
-      border: 1.5px solid var(--line); border-radius: var(--r12);
-      background: var(--bg); padding: 0 12px;
-      font-family: var(--B); font-size: 14px; color: var(--ink);
-      outline: none; transition: border-color .2s, box-shadow .2s;
+    /* ── INPUTS ── */
+    .field-label { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #64748B; margin-bottom: 5px; display: block; }
+    .field-input {
+      width: 100%; height: 42px; border: 1.5px solid #E2E8F0; border-radius: 9px;
+      background: #F8FAFC; padding: 0 12px;
+      font-family: 'DM Sans', sans-serif; font-size: 14px; color: #0F172A;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field-input:focus { border-color: #005EA6; box-shadow: 0 0 0 3px rgba(0,94,166,0.09); background: #fff; }
+    select.field-input {
       appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+      background-color: #F8FAFC;
+      padding-right: 32px; cursor: pointer;
     }
-    select.fs {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B6B68' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 14px center;
-      padding-right: 36px; cursor: pointer;
-    }
-    select.fs:focus, input.fs:focus {
-      border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(79,70,229,.09);
-    }
+    select.field-input:focus { background-color: #fff; }
 
-    /* Metrics row */
-    .metrics-row {
-      display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-top: 1.25rem;
-    }
+    /* ── METRIC BOXES ── */
     .metric-box {
-      background: var(--bg); border: 1px solid var(--line);
-      border-radius: var(--r12); padding: .875rem 1rem;
-      display: flex; flex-direction: column; gap: 5px;
+      background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;
+      padding: 12px 14px; display: flex; flex-direction: column; gap: 3px;
     }
-    .metric-lbl { font-size: 9.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); }
-    .metric-val { font-family: var(--D); font-size: 20px; letter-spacing: .02em; color: var(--ink); line-height: 1.1; }
-    .metric-val.green { color: var(--green); }
+    .metric-label { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #94A3B8; }
+    .metric-value { font-family: 'Bebas Neue', cursive; font-size: 20px; letter-spacing: 0.02em; color: #0F172A; line-height: 1.1; }
+    .metric-value.blue { color: #005EA6; }
+    .metric-value.green { color: #16A34A; }
     .metric-box input {
       border: none; background: transparent; padding: 0;
-      font-family: var(--D); font-size: 20px; color: var(--ink);
-      outline: none; width: 100%; letter-spacing: .02em; line-height: 1.1;
+      font-family: 'Bebas Neue', cursive; font-size: 20px; color: #0F172A;
+      outline: none; width: 100%; letter-spacing: 0.02em; line-height: 1.1;
     }
     .metric-box input::-webkit-outer-spin-button,
     .metric-box input::-webkit-inner-spin-button { -webkit-appearance: none; }
     .metric-box input[type=number] { -moz-appearance: textfield; }
 
-    /* Config row */
-    .config-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
-      padding-top: 1.25rem; border-top: 1px solid var(--line); margin-top: 1.25rem;
-    }
-
-    /* Two-up */
-    .two-up { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-
-    /* Charge row */
+    /* ── CHARGE ROWS ── */
     .charge-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 0; border-bottom: 1px solid var(--line);
+      padding: 9px 0; border-bottom: 1px solid #F1F5F9;
     }
-    .charge-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .charge-row label { font-size: 13.5px; color: var(--ink2); font-weight: 500; }
-    .charge-row .val  { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .charge-row:last-child { border-bottom: none; }
+    .charge-row label { font-size: 13px; color: #475569; font-weight: 500; }
+    .charge-row .cval { font-size: 14px; font-weight: 600; color: #0F172A; }
     .charge-row input {
-      text-align: right; border: none; border-bottom: 1.5px solid var(--line);
-      background: transparent; outline: none; font-size: 14px; font-weight: 600;
-      color: var(--ink); width: 110px; padding: 3px 4px;
-      transition: border-color .18s;
+      text-align: right; border: none; border-bottom: 1.5px solid #E2E8F0;
+      background: transparent; outline: none; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 600; color: #0F172A;
+      width: 110px; padding: 3px 4px; transition: border-color 0.18s;
     }
-    .charge-row input:focus { border-color: var(--indigo); }
+    .charge-row input:focus { border-color: #005EA6; }
     .charge-row input::-webkit-outer-spin-button,
     .charge-row input::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-    /* Accessories */
-    .acc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .acc-field { display: flex; flex-direction: column; gap: 5px; }
-    .acc-field label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink3); }
+    /* ── ACC FIELDS ── */
+    .acc-field label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #94A3B8; margin-bottom: 4px; display: block; }
     .acc-field input {
-      border: none; border-bottom: 1.5px solid var(--line);
-      background: transparent; outline: none;
-      font-size: 15px; font-weight: 600; color: var(--ink);
-      padding: 4px 2px; transition: border-color .18s;
+      border: none; border-bottom: 1.5px solid #E2E8F0;
+      background: transparent; outline: none; font-family: 'DM Sans', sans-serif;
+      font-size: 15px; font-weight: 600; color: #0F172A;
+      padding: 4px 2px; transition: border-color 0.18s; width: 100%;
     }
-    .acc-field input:focus { border-color: var(--indigo); }
+    .acc-field input:focus { border-color: #005EA6; }
     .acc-field input::-webkit-outer-spin-button,
     .acc-field input::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-    /* Customer info inputs */
-    .cust-input {
-      width: 100%; border: 1.5px solid var(--line); border-radius: var(--r12);
-      background: var(--bg); padding: 10px 13px;
-      font-family: var(--B); font-size: 14px; color: var(--ink);
-      outline: none; transition: border-color .2s, box-shadow .2s;
-      margin-bottom: .75rem;
-    }
-    .cust-input:last-child { margin-bottom: 0; }
-    .cust-input::placeholder { color: var(--ink4); font-weight: 300; }
-    .cust-input:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(79,70,229,.09); }
-    .cust-input[readonly] {
-      background: var(--bg); color: var(--ink3); font-size: 12px;
-      border-color: var(--line); cursor: default;
+    /* ── TOTAL DP BANNER ── */
+    .total-dp-banner {
+      background: linear-gradient(135deg, #005EA6 0%, #004A85 100%);
+      border-radius: 14px; padding: 20px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap;
+      box-shadow: 0 8px 28px rgba(0,94,166,0.28);
     }
 
-    /* Vehicle Search card (dark) */
+    /* ── VEHICLE SEARCH CARD ── */
     .vsearch-card {
-      background: var(--ink); border-radius: var(--r16);
-      padding: 1.5rem; color: var(--white);
+      background: #0F172A; border-radius: 14px; padding: 20px;
     }
-    .vsearch-title {
-      display: flex; align-items: center; gap: 9px;
-      font-size: 13px; font-weight: 700; letter-spacing: .06em;
-      text-transform: uppercase; color: rgba(255,255,255,.5);
-      margin-bottom: 1.1rem;
-    }
-    .vsearch-title i { color: rgba(208,39,29,.8); }
-    .vsearch-row { display: flex; gap: 8px; margin-bottom: 1rem; }
-    .vsearch-row input {
-      flex: 1; padding: 10px 13px; border-radius: var(--r12);
-      border: 1.5px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06); color: var(--white);
-      font-family: var(--B); font-size: 14px; outline: none;
-      transition: border-color .2s;
-    }
-    .vsearch-row input::placeholder { color: rgba(255,255,255,.3); }
-    .vsearch-row input:focus { border-color: rgba(255,255,255,.3); }
-    .vsearch-btn {
-      padding: 10px 18px; background: var(--red); color: var(--white);
-      border-radius: var(--r12); font-size: 13px; font-weight: 700;
-      cursor: pointer; border: none; transition: background .16s; white-space: nowrap;
-    }
-    .vsearch-btn:hover { background: var(--red-dk); }
-    .vfield {
-      width: 100%; padding: 9px 12px; border-radius: var(--r8);
-      border: 1px solid rgba(255,255,255,.1);
-      background: rgba(255,255,255,.06); color: var(--white);
-      font-family: var(--B); font-size: 13px; outline: none;
-      margin-bottom: .5rem; transition: border-color .2s;
-    }
-    .vfield::placeholder { color: rgba(255,255,255,.3); }
-    .vfield:focus { border-color: rgba(255,255,255,.25); }
-    .vfield-row { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
-    .vsearch-status { font-size: 11px; color: rgba(255,255,255,.35); text-align: center; font-style: italic; margin-top: .5rem; }
 
-    /* Print button */
-    .print-btn-wrap { display: flex; justify-content: center; margin-bottom: 1.25rem; }
-    .print-btn {
-      display: inline-flex; align-items: center; gap: 9px;
-      padding: 11px 28px; background: var(--ink); color: var(--white);
-      border-radius: var(--r12); font-size: 13px; font-weight: 700;
-      letter-spacing: .06em; text-transform: uppercase;
-      cursor: pointer; border: none; transition: background .16s;
+    /* ── CTA BUTTONS ── */
+    .cta-primary {
+      background: #005EA6; color: #fff;
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.9rem;
+      letter-spacing: 0.02em; padding: 12px 24px; border-radius: 10px;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: all 0.22s ease; box-shadow: 0 4px 18px rgba(0,94,166,0.3);
+      text-decoration: none; border: 2px solid #005EA6; cursor: pointer;
     }
-    .print-btn:hover { background: #2a2a28; }
+    .cta-primary:hover { background: #004A85; border-color: #004A85; transform: translateY(-2px); }
+    .cta-secondary {
+      background: transparent; color: #005EA6;
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.9rem;
+      letter-spacing: 0.02em; padding: 12px 24px; border-radius: 10px;
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 2px solid #005EA6; transition: all 0.22s ease;
+      text-decoration: none; cursor: pointer;
+    }
+    .cta-secondary:hover { background: #005EA6; color: #fff; }
 
-    /* ══════════════════════════════════
-       A4 SECTION — ONLY THIS SCROLLS HORIZONTALLY
-    ══════════════════════════════════ */
+    /* ── A4 PREVIEW AREA ── */
     .a4-section {
-      background: #E0DDD8;
-      margin-top: 2rem;
-      /* KEY FIX: allow this section to contain its own horizontal scroll */
-      width: 100%;
-      overflow: hidden; /* clip, inner scroll-area handles it */
+      background: #D1D5DB;
+      padding: 24px 0 32px;
     }
-    .scroll-hint {
-      display: none; align-items: center; justify-content: center; gap: 8px;
-      background: var(--indigo); color: var(--white);
-      font-size: 12px; font-weight: 600; padding: 9px 1rem;
-    }
-    /* KEY FIX: Only this scrolls horizontally */
-    .a4-scroll-area {
+    .a4-scroll-wrapper {
       overflow-x: auto;
-      overflow-y: visible;
       -webkit-overflow-scrolling: touch;
-      padding: 1.5rem 1rem;
+      padding: 0 16px;
     }
     .a4-inner {
       width: 210mm;
       min-width: 210mm;
       margin: 0 auto;
     }
-
-    @media (max-width: 768px) {
-      .scroll-hint { display: flex; }
+    .scroll-hint-bar {
+      display: none;
+      background: #005EA6; color: #fff;
+      font-size: 12px; font-weight: 600;
+      padding: 8px 16px; text-align: center;
+      gap: 8px; align-items: center; justify-content: center;
     }
+    @media (max-width: 820px) { .scroll-hint-bar { display: flex; } }
 
-    /* ── A4 paper base ── */
+    /* ── A4 PAPER ── */
     .a4-paper {
-      font-family: 'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;
+      font-family: 'Book Antiqua', 'Palatino Linotype', 'Palatino', Georgia, serif !important;
       font-size: 11.5pt !important;
       color: #000 !important;
       background: #fff !important;
       line-height: 1.45 !important;
     }
     .a4-paper * {
-      font-family: 'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;
+      font-family: 'Book Antiqua', 'Palatino Linotype', 'Palatino', Georgia, serif !important;
       color: #000 !important;
     }
-    .doc-list { list-style: none; margin: 0 0 0 4px; padding: 0; }
-    .doc-list li {
-      display: grid; grid-template-columns: 145px 16px 1fr;
-      align-items: baseline; margin-bottom: 2.5px; font-size: 11.5pt;
-    }
-    .doc-list.fin li { grid-template-columns: 200px 16px 1fr; }
-    .doc-list li .lbl { display: flex; align-items: baseline; gap: 7px; }
-
     .screen-page {
       background: white;
-      box-shadow: 0 4px 32px rgba(0,0,0,.18), 0 1.5px 6px rgba(0,0,0,.10);
-      border: 1px solid #e0e0e0;
+      box-shadow: 0 6px 40px rgba(0,0,0,0.22);
+      border: 1px solid #ddd;
     }
+    .doc-list { list-style: none; margin: 0; padding: 0; }
+    .doc-list li {
+      display: grid; grid-template-columns: 140px 16px 1fr;
+      align-items: baseline; margin-bottom: 3px; font-size: 11.5pt;
+    }
+    .doc-list.fin li { grid-template-columns: 195px 16px 1fr; }
+    .doc-list li .lbl { display: flex; align-items: baseline; gap: 6px; }
+    .sig-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; white-space: nowrap; }
+    .sig-box { flex: 1; text-align: center; border-top: 1px solid #000; padding-top: 3px; font-size: 10pt !important; min-width: 0; }
 
-    /* ══ SIGNATURE ROW ══ */
-    .sig-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 8px;
-      white-space: nowrap;
-    }
-    .sig-box {
-      flex: 1;
-      text-align: center;
-      border-top: 1px solid #000;
-      padding-top: 3px;
-      font-size: 10pt !important;
-      min-width: 0;
-      white-space: nowrap;
-    }
-
-    /* ══ PRINT ══ */
+    /* ── PRINT ── */
     @media print {
       body > *:not(#print-wrapper) { display: none !important; }
       #print-wrapper { display: block !important; }
-      html, body {
-        margin: 0 !important; padding: 0 !important;
-        background: white !important;
-        width: 210mm !important;
-        overflow: visible !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      .print-page {
-        width: 210mm !important;
-        height: 297mm !important;
-        padding: 12mm 14mm 10mm 14mm !important;
-        margin: 0 !important;
-        box-sizing: border-box !important;
-        overflow: hidden !important;
-        page-break-after: always !important;
-        break-after: page !important;
-        position: relative !important;
-        font-size: 10.5pt !important;
-        line-height: 1.38 !important;
-      }
-      .print-page:last-child {
-        page-break-after: avoid !important;
-        break-after: avoid !important;
-      }
-      .print-page p { margin: 0 0 1mm 0 !important; }
+      html, body { margin: 0 !important; padding: 0 !important; background: white !important; width: 210mm !important; overflow: visible !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .print-page { width: 210mm !important; height: 297mm !important; padding: 12mm 14mm 10mm 14mm !important; margin: 0 !important; box-sizing: border-box !important; overflow: hidden !important; page-break-after: always !important; break-after: page !important; }
+      .print-page:last-child { page-break-after: avoid !important; break-after: avoid !important; }
       @page { size: A4 portrait; margin: 0; }
-
-      .print-sig-row {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: flex-end !important;
-        gap: 6px !important;
-        white-space: nowrap !important;
-      }
-      .print-sig-box {
-        flex: 1 !important;
-        text-align: center !important;
-        border-top: 1px solid #000 !important;
-        padding-top: 2px !important;
-        font-size: 9.5pt !important;
-        white-space: nowrap !important;
-        min-width: 0 !important;
-        overflow: hidden !important;
-      }
     }
     #print-wrapper { display: none; }
 
-    /* ══════════════════════════════════
-       FOOTER
-    ══════════════════════════════════ */
-    .foot { background: var(--white); border-top: 1px solid var(--line); }
-    .foot-in {
-      max-width: 1320px; margin: 0 auto; padding: 3rem 1.25rem 2.5rem;
-      display: grid; grid-template-columns: 220px 1fr; gap: 3rem;
-    }
-    .f-nm  { font-family: var(--D); font-size: 28px; letter-spacing: .04em; color: var(--red); margin-bottom: 3px; }
-    .f-sub { font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ink3); margin-bottom: 1rem; }
-    .f-adr { font-size: 13px; color: var(--ink3); line-height: 1.9; font-weight: 300; }
-    .f-soc { display: flex; gap: 8px; margin-top: 1.25rem; }
-    .f-soc a {
-      width: 34px; height: 34px; border-radius: 7px;
-      border: 1px solid var(--line); background: var(--bg);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; color: var(--ink3);
-      transition: background .16s, color .16s, border-color .16s;
-    }
-    .f-soc a:hover { background: var(--red-lt); color: var(--red); border-color: rgba(208,39,29,.2); }
-    .f-cols { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.75rem; }
-    .f-col-h { font-size: 10.5px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--ink); margin-bottom: .9rem; }
-    .f-col-l { display: flex; flex-direction: column; gap: 8px; }
-    .f-col-l a { font-size: 13px; color: var(--ink3); font-weight: 300; transition: color .16s; }
-    .f-col-l a:hover { color: var(--red); }
-    .foot-bot {
-      max-width: 1320px; margin: 0 auto; padding: 1.1rem 1.25rem;
-      border-top: 1px solid var(--line);
-      display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
-    }
-    .f-copy { font-size: 11.5px; color: var(--ink4); font-weight: 300; }
-    .f-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--bg); border: 1px solid var(--line);
-      padding: 4px 11px; border-radius: 100px;
-      font-size: 10.5px; font-weight: 600; letter-spacing: .07em;
-      text-transform: uppercase; color: var(--ink3);
-    }
-    .f-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+    /* ── FOOTER ── */
+    footer { background: #0F172A; }
+    .footer-link { color: #94A3B8; font-size: 0.875rem; transition: color 0.18s; text-decoration: none; }
+    .footer-link:hover { color: #fff; }
 
-    /* ══════════════════════════════════
-       RESPONSIVE
-    ══════════════════════════════════ */
-    @media (max-width: 1024px) {
-      .main-grid { grid-template-columns: 1fr; }
-      .right-col { display: grid; grid-template-columns: 1fr 1fr; }
-      .foot-in   { grid-template-columns: 1fr; gap: 2.25rem; }
-    }
-    @media (max-width: 768px) {
-      .nav-links, .nav-wa { display: none; }
-      .ham { display: flex; }
-      .metrics-row { grid-template-columns: 1fr 1fr; }
-      .two-up { grid-template-columns: 1fr; }
-      .right-col { grid-template-columns: 1fr; }
-      .f-cols { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 540px) {
-      .total-dp-banner {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 1rem 1.25rem;
-        gap: 0.5rem;
-      }
-      .tdp-label { font-size: 10px; }
-      .tdp-title { font-size: 16px; }
-      .tdp-value { font-size: 32px; line-height: 1; }
-      .tdp-badge { font-size: 11px; padding: 6px 12px; }
-      .config-row { grid-template-columns: 1fr; }
-      .f-cols { grid-template-columns: 1fr; }
-      .foot-in { padding: 2.5rem 1rem 2rem; }
-      .calc-wrap { padding: 1.25rem 0.75rem 2rem; }
-      .metrics-row { gap: 0.625rem; }
-      .metric-box { padding: 0.625rem 0.75rem; }
-      .metric-val, .metric-box input { font-size: 17px; }
-      .card, .vsearch-card { padding: 1.125rem; }
-    }
-    @media (max-width: 380px) {
-      .acc-grid { grid-template-columns: 1fr; }
-      .vfield-row { grid-template-columns: 1fr; }
-      .tdp-value { font-size: 28px; }
-      .hero-h1 { font-size: clamp(38px, 13vw, 60px) !important; }
-      .hero-body { padding: 2rem 1rem 2.5rem; }
-    }
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: rgba(0,94,166,0.3); border-radius: 99px; }
 
-    /* ══════════════════════════════════
-       A4 CONTENT STYLES (accurate to images 2 & 3)
-    ══════════════════════════════════ */
-    .a4-header-row {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 3mm;
-    }
-    .a4-header-logo {
-      flex-shrink: 0;
-    }
-    .a4-header-logo img {
-      height: 70px;
-      width: auto;
-      object-fit: contain;
-      display: block;
-    }
-    .a4-header-text {
-      flex: 1;
-      text-align: center;
-    }
-    .a4-dealer-name {
-      font-size: 15pt !important;
-      font-weight: bold !important;
-      margin: 0 0 1px 0 !important;
-    }
-    .a4-dealer-sub {
-      font-size: 13pt !important;
-      font-weight: bold !important;
-      margin: 0 0 2px 0 !important;
-    }
-    .a4-dealer-contact {
-      font-size: 9.5pt !important;
-      margin: 0 !important;
-      text-decoration: underline;
-    }
-    .a4-section-divider {
-      border: none;
-      border-top: 1.5px solid #000;
-      margin: 0 0 3mm 0;
-    }
-    .a4-double-rule-top {
-      border: none;
-      border-top: 2px solid #000;
-      margin: 0 0 4mm 0;
-    }
-    .a4-rule {
-      border: none;
-      border-top: 1px solid #000;
-      margin: 4mm 0 0 0;
-    }
-    .a4-rule-bottom {
-      border: none;
-      border-top: 1px solid #000;
-      margin: 2px 0 0 0;
-    }
-    .a4-info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      row-gap: 2px;
-      font-size: 11pt !important;
-      margin-bottom: 3mm;
-    }
-    .a4-info-grid p { margin: 0; font-size: 11pt !important; }
-    .a4-tc-block { font-size: 11pt !important; line-height: 1.55 !important; }
-    .a4-tc-block p { margin: 0 0 1mm 0 !important; font-size: 11pt !important; }
-    .a4-sig-right { text-align: right; font-size: 11pt !important; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation: fadeUp 0.45s ease both; }
   </style>
 </head>
 <body>
 
-<!-- ════════════ NAV ════════════ -->
-<nav class="nav">
-  <div class="nav-inner">
-    <a href="index.html" class="logo">
-      <div class="logo-mark">
-        <svg viewBox="0 0 16 16" fill="none">
-          <path d="M2 12.5 L8 3 L14 12.5 M4.5 9.5 L11.5 9.5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+<!-- ══════════ NAVIGATION (from index.html) ══════════ -->
+<header class="nav-blur fixed top-0 left-0 right-0 z-50">
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Brand -->
+      <a href="index.html" class="flex items-center gap-2.5" aria-label="Samriddhi Auto Home">
+        <div class="w-9 h-9 rounded-lg bg-bajaj-blue flex items-center justify-center shadow-sm flex-shrink-0">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M4 16 Q7 8 11 7 Q15 6 18 10" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            <circle cx="5" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+            <circle cx="17" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+            <path d="M5 17 L17 17" stroke="#fff" stroke-width="1.4" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="leading-tight">
+          <div class="text-sm font-bold text-slate-900 tracking-tight leading-none">Samriddhi And Brothers</div>
+          <div class="text-[10px] font-medium text-bajaj-blue leading-none tracking-wide uppercase mt-0.5">Bajaj Authorized Dealer</div>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <div class="hidden lg:flex items-center gap-7">
+        <a href="index.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </a>
+        <a href="index.html#prices" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Price List
+        </a>
+        <a href="finance.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Finance
+        </a>
+        <a href="form.html" class="nav-link active">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Allocations
+        </a>
+        <a href="#" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          KYC
+        </a>
+        <a href="https://yonghangishak.com.np/" target="_blank" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          About
+        </a>
       </div>
-      <div class="logo-copy">
-        <span class="logo-name">Go! YNG</span>
-        <span class="logo-sub">Bajaj Partner · Phidim</span>
+
+      <!-- Desktop CTA -->
+      <div class="hidden lg:flex items-center gap-3">
+        <a href="tel:+9779820907795" class="text-sm font-semibold text-bajaj-blue flex items-center gap-1.5 hover:text-bajaj-blueDark transition-colors">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+          Call Showroom
+        </a>
+        <a href="index.html#prices" class="cta-primary text-sm py-2.5 px-5">Book a Test Ride</a>
       </div>
-    </a>
-    <ul class="nav-links">
-      <li><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
-      <li><a href="index.html#prices"><i class="fa-solid fa-list-ul"></i> Prices</a></li>
-      <li><a href="finance.html"><i class="fa-solid fa-calculator"></i> Finance</a></li>
-      <li><a href="form.html" class="active"><i class="fa-solid fa-file-lines"></i> Form</a></li>
-      <li><a href="https://yonghangishak.com.np/" target="_blank"><i class="fa-solid fa-user-tie"></i> About</a></li>
-    </ul>
-    <a href="https://wa.me/9779802315425" target="_blank" class="nav-wa">
-      <i class="fa-brands fa-whatsapp"></i> WhatsApp
-    </a>
-    <button class="ham" id="ham" aria-label="Open menu">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
-</nav>
 
-<div class="draw-bg" id="draw-bg"></div>
-<div class="drawer" id="drawer">
-  <p class="draw-tag">Navigation</p>
-  <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
-  <a href="index.html#prices"><i class="fa-solid fa-list-ul"></i> Price List</a>
-  <a href="finance.html"><i class="fa-solid fa-calculator"></i> Finance</a>
-  <a href="form.html"><i class="fa-solid fa-file-lines"></i> Form</a>
-  <a href="https://yonghangishak.com.np/" target="_blank"><i class="fa-solid fa-user-tie"></i> About</a>
-  <hr>
-  <a href="https://wa.me/9779802315425" target="_blank" class="d-cta">
-    <i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp
-  </a>
-</div>
+      <!-- Hamburger -->
+      <button id="hamburger-btn" class="lg:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors" aria-label="Toggle menu" aria-expanded="false">
+        <svg id="icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg id="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hidden"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="lg:hidden">
+      <div class="py-4 border-t border-slate-100 space-y-1">
+        <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Home</a>
+        <a href="index.html#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Price List</a>
+        <a href="finance.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Finance</a>
+        <a href="form.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Allocations</a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">KYC</a>
+        <a href="https://yonghangishak.com.np/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">About</a>
+        <div class="pt-2 grid grid-cols-2 gap-2">
+          <a href="tel:+9779802315425" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-bajaj-blue text-bajaj-blue text-sm font-semibold">Call Us</a>
+          <a href="index.html#prices" class="flex items-center justify-center py-2.5 rounded-xl bg-bajaj-blue text-white text-sm font-semibold">Prices</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
 
 
-<!-- ════════════ HERO ════════════ -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <img class="hero-img"
-       src="https://live.staticflickr.com/65535/52360118963_33c8110f10_b.jpg"
-       alt="Bajaj motorcycle">
-  <div class="hero-grad"></div>
-  <div class="hero-body">
-    <div class="hero-pill"><i class="fa-solid fa-file-lines"></i> Allocation & Quotation Form</div>
-    <h1 class="hero-h1">FILL &amp;<br><span class="r">PRINT.</span></h1>
-    <p class="hero-desc">Generate the Hulas Finserv downpayment allocation form and dealer quotation — ready to print in one click.</p>
+<!-- ══════════ HERO BANNER ══════════ -->
+<section class="form-hero">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="fade-up">
+      <span class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-white text-xs font-semibold uppercase tracking-wider mb-4">
+        <i class="fa-solid fa-file-lines text-bajaj-amber"></i>
+        Allocation &amp; Quotation Form
+      </span>
+      <h1 class="font-display text-5xl sm:text-6xl lg:text-7xl text-white leading-none mb-3">
+        Fill &amp; <span style="color:#F59E0B;">Print.</span>
+      </h1>
+      <p class="text-blue-200 text-sm sm:text-base max-w-md leading-relaxed">
+        Generate the Hulas Finserv downpayment allocation form and dealer quotation — ready to print in one click.
+      </p>
+    </div>
   </div>
 </section>
 
 
-<!-- ════════════ CALCULATOR ════════════ -->
-<div id="finance" class="calc-wrap">
-
-  <!-- Total DP Banner -->
+<!-- ══════════ TOTAL DP BANNER ══════════ -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20 mb-6">
   <div class="total-dp-banner">
-    <div class="tdp-left">
-      <span class="tdp-label">Total Amount Due Today</span>
-      <span class="tdp-title">Total Downpayment</span>
+    <div>
+      <div class="text-blue-200 text-xs font-semibold uppercase tracking-widest mb-1">Total Amount Due Today</div>
+      <div class="text-white font-display text-2xl leading-none">Total Downpayment</div>
     </div>
-    <div id="displayTotalDP" class="tdp-value">Rs. 0</div>
-    <div class="tdp-badge"><i class="fa-solid fa-circle-check"></i> Live Calculation</div>
+    <div id="displayTotalDP" class="text-white font-display text-4xl sm:text-5xl leading-none">Rs. 0</div>
+    <div class="flex items-center gap-2 bg-white/15 border border-white/20 rounded-lg px-4 py-2 text-white text-xs font-semibold">
+      <i class="fa-solid fa-circle-check text-green-400"></i> Live Calculation
+    </div>
   </div>
+</div>
 
-  <div class="main-grid">
 
-    <!-- ── LEFT ── -->
-    <div class="left-col">
+<!-- ══════════ MAIN FORM AREA ══════════ -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
-      <!-- Model & Pricing -->
-      <div class="card">
-        <div class="card-title">
-          <span class="cicon"><i class="fa-solid fa-motorcycle"></i></span>
-          Select Model
+    <!-- ── LEFT: Model + Charges ── -->
+    <div class="xl:col-span-2 flex flex-col gap-5">
+
+      <!-- Model & Pricing Card -->
+      <div class="form-card p-5">
+        <div class="card-section-title">
+          <div class="icon-wrap"><i class="fa-solid fa-motorcycle text-bajaj-blue text-xs"></i></div>
+          Select Model &amp; Pricing
         </div>
-        <label class="flabel">Bike Model</label>
-        <select id="modelSelect" class="fs">
-          <option value="">— Loading models… —</option>
-        </select>
 
-        <div class="metrics-row">
+        <div class="mb-4">
+          <label class="field-label">Bike Model</label>
+          <select id="modelSelect" class="field-input">
+            <option value="">— Loading models… —</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           <div class="metric-box">
-            <span class="metric-lbl">MRP Price</span>
-            <span class="metric-val" id="mrp">0</span>
+            <span class="metric-label">MRP Price</span>
+            <span class="metric-value blue" id="mrp">0</span>
           </div>
           <div class="metric-box">
-            <span class="metric-lbl">Discount</span>
+            <span class="metric-label">Discount</span>
             <input type="number" id="discountInput" value="0" min="0" placeholder="0">
           </div>
           <div class="metric-box">
-            <span class="metric-lbl">After Discount</span>
-            <span class="metric-val green" id="afterDiscount">0</span>
+            <span class="metric-label">After Discount</span>
+            <span class="metric-value green" id="afterDiscount">0</span>
           </div>
           <div class="metric-box">
-            <span class="metric-lbl">Advance EMI</span>
+            <span class="metric-label">Advance EMI</span>
             <input type="number" id="advEmiInput" value="0" min="0" placeholder="0">
           </div>
         </div>
 
-        <div class="config-row">
+        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
           <div>
-            <label class="flabel">Downpayment %</label>
-            <select id="dpPercent" class="fs">
+            <label class="field-label">Downpayment %</label>
+            <select id="dpPercent" class="field-input">
               <option value="30">30%</option>
               <option value="40">40%</option>
               <option value="50" selected>50%</option>
@@ -803,8 +446,8 @@
             </select>
           </div>
           <div>
-            <label class="flabel">Loan Tenure</label>
-            <select id="tenure" class="fs">
+            <label class="field-label">Loan Tenure</label>
+            <select id="tenure" class="field-input">
               <option value="12" selected>12 Months</option>
               <option value="18">18 Months</option>
               <option value="24">24 Months</option>
@@ -815,27 +458,27 @@
       </div>
 
       <!-- Charges + Accessories -->
-      <div class="two-up">
-        <div class="card">
-          <div class="card-title">
-            <span class="cicon"><i class="fa-solid fa-gears"></i></span>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="form-card p-5">
+          <div class="card-section-title">
+            <div class="icon-wrap"><i class="fa-solid fa-gears text-bajaj-blue text-xs"></i></div>
             Additional Charges
           </div>
           <div class="charge-row">
             <label>Insurance</label>
-            <span class="val" id="displayIns">Rs. 0</span>
+            <span class="cval" id="displayIns">Rs. 0</span>
           </div>
           <div class="charge-row">
             <label>Namsari / Reg.</label>
             <input type="number" id="namsariInput" value="3000" min="0">
           </div>
         </div>
-        <div class="card">
-          <div class="card-title">
-            <span class="cicon"><i class="fa-solid fa-helmet-safety"></i></span>
+        <div class="form-card p-5">
+          <div class="card-section-title">
+            <div class="icon-wrap"><i class="fa-solid fa-helmet-safety text-bajaj-blue text-xs"></i></div>
             Accessories
           </div>
-          <div class="acc-grid">
+          <div class="grid grid-cols-2 gap-4">
             <div class="acc-field"><label>Helmet</label><input type="number" id="helmetInput" value="2500" min="0"></div>
             <div class="acc-field"><label>Leg Guard</label><input type="number" id="legguardInput" value="1800" min="0"></div>
             <div class="acc-field"><label>Seat Cover</label><input type="number" id="seatcoverInput" value="650" min="0"></div>
@@ -845,42 +488,67 @@
       </div>
     </div>
 
-    <!-- ── RIGHT ── -->
-    <div class="right-col">
+    <!-- ── RIGHT: Customer + Vehicle ── -->
+    <div class="flex flex-col gap-5">
 
       <!-- Customer Info -->
-      <div class="card">
-        <div class="card-title">
-          <span class="cicon"><i class="fa-solid fa-user-tag"></i></span>
+      <div class="form-card p-5">
+        <div class="card-section-title">
+          <div class="icon-wrap"><i class="fa-solid fa-user-tag text-bajaj-blue text-xs"></i></div>
           Customer Info
         </div>
-        <input type="text" id="custNameInput"  class="cust-input" placeholder="Full Name">
-        <input type="tel"  id="custPhoneInput" class="cust-input" placeholder="Contact Number">
-        <div>
-          <label class="flabel" style="margin-bottom:6px;">Dealer</label>
-          <input type="text" id="dealerNameInput" class="cust-input"
-                 value="Samriddhi And Brothers Auto Pvt. Ltd." readonly>
+        <div class="flex flex-col gap-3">
+          <div>
+            <label class="field-label">Full Name</label>
+            <input type="text" id="custNameInput" class="field-input" placeholder="Customer full name">
+          </div>
+          <div>
+            <label class="field-label">Contact Number</label>
+            <input type="tel" id="custPhoneInput" class="field-input" placeholder="Phone number">
+          </div>
+          <div>
+            <label class="field-label">Dealer</label>
+            <input type="text" id="dealerNameInput" class="field-input" value="Samriddhi And Brothers Auto Pvt. Ltd." readonly style="font-size:12px;color:#64748B;">
+          </div>
         </div>
       </div>
 
       <!-- Vehicle Search -->
       <div class="vsearch-card">
-        <div class="vsearch-title">
-          <i class="fa-solid fa-magnifying-glass"></i> Vehicle Search
+        <div class="flex items-center gap-2 mb-4">
+          <i class="fa-solid fa-magnifying-glass" style="color:rgba(208,39,29,0.8);"></i>
+          <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Vehicle Search</span>
         </div>
-        <div class="vsearch-row">
-          <input type="text" id="chassisSearch" placeholder="Chassis No…">
-          <button class="vsearch-btn" onclick="findChassis()">Find</button>
+        <div class="flex gap-2 mb-3">
+          <input type="text" id="chassisSearch" placeholder="Chassis No…"
+            style="flex:1;padding:9px 12px;border-radius:9px;border:1.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;"
+            onfocus="this.style.borderColor='rgba(255,255,255,0.3)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+          <button onclick="findChassis()"
+            style="padding:9px 16px;background:#D0271D;color:#fff;border-radius:9px;font-size:13px;font-weight:700;border:none;cursor:pointer;">Find</button>
         </div>
-        <div id="searchResults">
-          <input type="text" id="manualChassis" class="vfield" placeholder="Chassis Number">
-          <input type="text" id="manualEngine"  class="vfield" placeholder="Engine Number">
-          <div class="vfield-row">
-            <input type="text" id="manualReg"   class="vfield" placeholder="Reg. No">
-            <input type="text" id="manualColor" class="vfield" placeholder="Color">
+
+        <!-- Manual fields -->
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <input type="text" id="manualChassis" placeholder="Chassis Number"
+            style="width:100%;padding:8px 11px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+          <input type="text" id="manualEngine" placeholder="Engine Number"
+            style="width:100%;padding:8px 11px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <input type="text" id="manualReg" placeholder="Reg. No"
+              style="width:100%;padding:8px 11px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+            <input type="text" id="manualColor" placeholder="Color"
+              style="width:100%;padding:8px 11px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:4px;">Make Year</div>
+              <input type="text" id="makeYearInput" placeholder="e.g. 2026" value="2026"
+                style="width:100%;padding:8px 11px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+            </div>
+            <div></div>
           </div>
         </div>
-        <p id="searchStatus" class="vsearch-status"></p>
+        <p id="searchStatus" style="font-size:11px;color:rgba(255,255,255,0.35);text-align:center;font-style:italic;margin-top:8px;"></p>
       </div>
 
     </div>
@@ -888,37 +556,35 @@
 </div>
 
 
-<!-- ════════════ A4 PREVIEW ════════════ -->
+<!-- ══════════ A4 PREVIEW ══════════ -->
 <div class="a4-section">
-  <div class="scroll-hint">
+  <div class="scroll-hint-bar">
     <i class="fa-solid fa-left-right"></i>
-    <span>Swipe left / right to view full A4 form</span>
+    Swipe left/right to view full A4 form
     <i class="fa-solid fa-left-right"></i>
   </div>
-  <div class="a4-scroll-area">
+  <div class="a4-scroll-wrapper">
     <div class="a4-inner">
 
-      <div class="print-btn-wrap">
-        <button class="print-btn" onclick="printBothPages()">
+      <!-- Print button -->
+      <div style="display:flex;justify-content:center;margin-bottom:20px;">
+        <button onclick="printBothPages()" class="cta-primary">
           <i class="fa-solid fa-print"></i> Print Both Forms
         </button>
       </div>
 
-      <!-- ═══ SCREEN PAGE 1 — Allocation Form (matches Image 3) ═══ -->
-      <div id="print-area"
-           class="a4-paper screen-page"
-           style="width:210mm;min-height:297mm;padding:14mm 16mm 12mm 16mm;box-sizing:border-box;margin-bottom:2rem;">
+      <!-- ══ SCREEN PAGE 1 — DOWNPAYMENT ALLOCATION FORM ══ -->
+      <div id="print-area" class="a4-paper screen-page"
+           style="width:210mm;min-height:297mm;padding:14mm 16mm 12mm 16mm;box-sizing:border-box;margin-bottom:24px;">
 
-        <!-- Title block -->
-        <div style="text-align:center;margin-bottom:4mm;">
+        <div style="text-align:center;margin-bottom:5mm;">
           <p style="font-size:14pt;font-weight:bold;margin:0;">HULAS FINSERV HIRE PURCHASE LIMITED</p>
-          <p style="font-size:14pt;font-weight:bold;margin:3px 0 0 0;">DOWNPAYMENT ALLOCATION FORM</p>
+          <p style="font-size:14pt;font-weight:bold;margin:4px 0 0 0;">DOWNPAYMENT ALLOCATION FORM</p>
         </div>
-        <hr class="a4-double-rule-top">
+        <hr style="border:none;border-top:2px solid #000;margin:0 0 5mm 0;">
 
-        <!-- Customer & Vehicle -->
         <p style="font-size:12pt;font-weight:bold;margin:0 0 3px 0;">Customer &amp; Vehicle Information</p>
-        <ul class="doc-list" style="margin-bottom:4mm;">
+        <ul class="doc-list" style="margin-bottom:5mm;">
           <li><span class="lbl"><span>•</span><span>Date</span></span><span>:</span><span id="a4Date">--</span></li>
           <li><span class="lbl"><span>•</span><span>Dealer Name</span></span><span>:</span><span id="a4Dealer">Samriddhi And Brothers Auto Pvt. Ltd.</span></li>
           <li><span class="lbl"><span>•</span><span>Customer Name</span></span><span>:</span><strong id="a4CustName">--</strong></li>
@@ -926,9 +592,8 @@
           <li><span class="lbl"><span>•</span><span>Vehicle Model</span></span><span>:</span><strong id="a4Model">--</strong></li>
         </ul>
 
-        <!-- Financial -->
         <p style="font-size:12pt;font-weight:bold;margin:0 0 3px 0;">Financial Details</p>
-        <ul class="doc-list fin" style="margin-bottom:4mm;">
+        <ul class="doc-list fin" style="margin-bottom:5mm;">
           <li><span class="lbl"><span>•</span><span>Retail Price</span></span><span>:</span><span id="a4MRP">0.00</span></li>
           <li><span class="lbl"><span>•</span><span>Down Payment</span></span><span>:</span><span id="a4DP">0.00</span></li>
           <li><span class="lbl"><span>•</span><span>Loan Amount</span></span><span>:</span><span id="a4Loan">0.00</span></li>
@@ -940,90 +605,79 @@
           <li style="display:block;margin-bottom:3px;">• &nbsp;Total Down-payment Amount paid by Customer : &nbsp;<strong id="a4TotalDP">0.00</strong></li>
         </ul>
 
-        <!-- Declaration -->
         <p style="font-size:12pt;font-weight:bold;margin:4mm 0 0 0;">Declaration</p>
         <hr style="border:none;border-top:1px solid #000;margin:3px 0 3mm 0;">
         <p style="font-size:11.5pt;margin:0 0 2mm 0;line-height:1.55;">We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.</p>
         <p style="font-size:11.5pt;margin:0;">Signatures &amp; Authorization</p>
 
-        <!-- Signature row -->
-        <div class="sig-row" style="margin-top:24mm;">
+        <div class="sig-row" style="margin-top:28mm;">
           <div class="sig-box">Customer's Signature</div>
           <div class="sig-box">Dealer's Signature &amp; Stamp</div>
           <div class="sig-box">LO's Signature &amp; Stamp</div>
         </div>
-        <hr class="a4-rule">
-        <hr class="a4-rule-bottom">
+        <hr style="border:none;border-top:1px solid #000;margin-top:4mm;">
+        <hr style="border:none;border-top:1px solid #000;margin-top:2px;">
       </div>
 
-      <!-- ═══ SCREEN PAGE 2 — Quotation (matches Image 2) ═══ -->
-      <div id="quotation-print-area"
-           class="a4-paper screen-page"
+      <!-- ══ SCREEN PAGE 2 — QUOTATION ══ -->
+      <div id="quotation-print-area" class="a4-paper screen-page"
            style="width:210mm;min-height:297mm;padding:14mm 16mm 12mm 16mm;box-sizing:border-box;">
 
-        <!-- Header with logo + dealer info -->
-        <div class="a4-header-row">
-          <div class="a4-header-logo">
-            <img src="logo.jpg" alt="Bajaj Logo" onerror="this.style.display='none'">
+        <!-- Header -->
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:3mm;">
+          <div style="flex-shrink:0;">
+            <img src="logo.jpg" alt="Bajaj Logo" style="height:70px;width:auto;object-fit:contain;" onerror="this.style.display='none'">
           </div>
-          <div class="a4-header-text">
-            <p id="q4DealerName" class="a4-dealer-name">Samriddhi &amp; Brothers Auto Pvt. Ltd.</p>
-            <p class="a4-dealer-sub">Authorized Dealer of Bajaj Motorcycle</p>
-            <p class="a4-dealer-contact">Phidim-04, Panchthar, Nepal &nbsp; Tel: 024-523144, 9802315425 &nbsp; Email: Sambriddhi.bajaj@gmail.com</p>
+          <div style="flex:1;text-align:center;">
+            <p style="font-size:15pt;font-weight:bold;margin:0 0 1px 0;">Samriddhi &amp; Brothers Auto Pvt. Ltd.</p>
+            <p style="font-size:13pt;font-weight:bold;margin:0 0 2px 0;">Authorized Dealer of Bajaj Motorcycle</p>
+            <p style="font-size:9.5pt;margin:0;text-decoration:underline;">Phidim-04, Panchthar, Nepal &nbsp; Tel: 024-523144, 9802315425 &nbsp; Email: Sambriddhi.bajaj@gmail.com</p>
           </div>
         </div>
-        <hr class="a4-section-divider">
+        <hr style="border:none;border-top:1.5px solid #000;margin:0 0 3mm 0;">
 
-        <!-- Date -->
         <div style="text-align:right;font-size:11pt;margin-bottom:2mm;">Date: &nbsp;<span id="a4Date2">--/--/----</span></div>
-
-        <!-- QUOTATION heading -->
-        <div style="text-align:center;margin-bottom:3mm;">
+        <div style="text-align:center;margin-bottom:4mm;">
           <strong style="font-size:13pt;text-decoration:underline;letter-spacing:0.5px;">QUOTATION</strong>
         </div>
 
-        <!-- Addressee -->
         <p style="font-size:11pt;margin:0 0 1mm 0;">To Hulas Finserv Hire Purchase Limited</p>
         <p style="font-size:11pt;font-weight:bold;margin:0 0 1mm 0;">C/O &nbsp;<span id="a4CustName2">--</span></p>
         <p style="font-size:11pt;margin:0 0 1mm 0;">Dear Sir/Madam,</p>
         <p style="font-size:11pt;margin:0 0 2mm 0;">We are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
 
-        <!-- Details -->
         <p style="font-size:11pt;margin:0 0 1mm 0;">Details :</p>
         <p style="font-size:11pt;font-weight:bold;margin:0 0 1mm 0;">Model: <span id="a4Model2">---</span></p>
         <p style="font-size:11pt;font-weight:bold;margin:0 0 2mm 0;">Price: <span id="a4MRP2">0</span>/- &nbsp;&nbsp;&nbsp; In Words: <span id="a4PriceWords">---</span></p>
 
-        <!-- Vehicle info grid -->
-        <div class="a4-info-grid" style="margin-bottom:2mm;">
-          <p>Color: <span id="a4Color2">---</span></p>
-          <p>Regd No: <span id="a4Reg2">---</span></p>
-          <p>Engine No: <span id="a4Engine2">---</span></p>
-          <p>Chassis No: <span id="a4Chassis2" style="text-transform:uppercase;">---</span></p>
-          <p>Make Year: &nbsp;2026</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;row-gap:2px;font-size:11pt;margin-bottom:2mm;">
+          <p style="margin:0;">Color: <span id="a4Color2">---</span></p>
+          <p style="margin:0;">Regd No: <span id="a4Reg2">---</span></p>
+          <p style="margin:0;">Engine No: <span id="a4Engine2">---</span></p>
+          <p style="margin:0;">Chassis No: <span id="a4Chassis2" style="text-transform:uppercase;">---</span></p>
+          <p style="margin:0;">Make Year: &nbsp;<span id="a4MakeYear">2026</span></p>
         </div>
 
-        <!-- Discount block (shown when discount > 0) -->
+        <!-- Discount block — shown only when discount > 0 -->
         <div id="a4DiscountRow" style="display:none;font-size:11pt;margin-bottom:2mm;">
           <p style="margin:0 0 1mm 0;">Discount: Rs. <span id="a4DiscountAmt">0</span>/- &nbsp;&nbsp; In Words: <em id="a4DiscountWords">---</em></p>
           <p style="margin:0 0 1mm 0;">Net Price: Rs. <span id="a4NetPrice">0</span>/- &nbsp;&nbsp; In Words: <em id="a4NetPriceWords">---</em></p>
         </div>
 
-        <!-- Terms & Conditions -->
-        <div class="a4-tc-block" style="margin-top:1mm;">
-          <p>Terms and Conditions :-</p>
-          <p>- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
-          <p>- Delivery :- Subject to availability</p>
-          <p>- Price Validity:- Subject to change without prior notice unless booked in advance at prevailing price.</p>
-          <p>- Taxes and Duties:- The price quoted above is inclusive of 13% VAT. However, other local taxes like – Road Tax, Registration Fees, Municipality Tax etc. will be on the account of purchaser.</p>
-          <p>- Insurance:- On account of purchaser.</p>
-          <p>- Warranty:- Warranty is not applicable on wear and tear and the items like Battery, Tyre, Tube, Brake Shoe, Clutch, Plate Cable, Chain Spocket and Bulb. Warranty Policy is detailed in the Owner's manual which will be provided at the time of the delivery of motorcycle.</p>
-          <p>- Servicing – 7 Free Servicing.</p>
+        <div style="font-size:11pt;line-height:1.55;margin-top:1mm;">
+          <p style="margin:0 0 1mm 0;">Terms and Conditions :-</p>
+          <p style="margin:0 0 1mm 0;">- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
+          <p style="margin:0 0 1mm 0;">- Delivery :- Subject to availability</p>
+          <p style="margin:0 0 1mm 0;">- Price Validity:- Subject to change without prior notice unless booked in advance at prevailing price.</p>
+          <p style="margin:0 0 1mm 0;">- Taxes and Duties:- The price quoted above is inclusive of 13% VAT. However, other local taxes like – Road Tax, Registration Fees, Municipality Tax etc. will be on the account of purchaser.</p>
+          <p style="margin:0 0 1mm 0;">- Insurance:- On account of purchaser.</p>
+          <p style="margin:0 0 1mm 0;">- Warranty:- Warranty is not applicable on wear and tear and the items like Battery, Tyre, Tube, Brake Shoe, Clutch, Plate Cable, Chain Spocket and Bulb. Warranty Policy is detailed in the Owner's manual which will be provided at the time of the delivery of motorcycle.</p>
+          <p style="margin:0 0 1mm 0;">- Servicing – 7 Free Servicing.</p>
         </div>
 
-        <!-- Sincerely + Signature -->
-        <div class="a4-sig-right" style="margin-top:2mm;"><p style="margin:0;">Sincerely Your's</p></div>
-        <div class="a4-sig-right" style="margin-top:14mm;"><p style="margin:0;">Authorized Signature</p></div>
-        <hr class="a4-rule">
+        <div style="text-align:right;font-size:11pt;margin-top:3mm;"><p style="margin:0;">Sincerely Your's</p></div>
+        <div style="text-align:right;font-size:11pt;margin-top:15mm;"><p style="margin:0;">Authorized Signature</p></div>
+        <hr style="border:none;border-top:1px solid #000;margin-top:4mm;">
       </div>
 
     </div>
@@ -1031,28 +685,25 @@
 </div>
 
 
-<!-- ════════════ PRINT WRAPPER ════════════ -->
+<!-- ══════════ PRINT WRAPPER ══════════ -->
 <div id="print-wrapper">
-
   <!-- PRINT PAGE 1 -->
   <div class="print-page a4-paper">
-    <div style="text-align:center;margin-bottom:4mm;">
+    <div style="text-align:center;margin-bottom:5mm;">
       <p style="font-size:14pt;font-weight:bold;margin:0;">HULAS FINSERV HIRE PURCHASE LIMITED</p>
-      <p style="font-size:14pt;font-weight:bold;margin:3px 0 0 0;">DOWNPAYMENT ALLOCATION FORM</p>
+      <p style="font-size:14pt;font-weight:bold;margin:4px 0 0 0;">DOWNPAYMENT ALLOCATION FORM</p>
     </div>
-    <hr style="border:none;border-top:2px solid #000;margin:0 0 4mm 0;">
-
+    <hr style="border:none;border-top:2px solid #000;margin:0 0 5mm 0;">
     <p style="font-size:12pt;font-weight:bold;margin:0 0 3px 0;">Customer &amp; Vehicle Information</p>
-    <ul class="doc-list" style="margin-bottom:4mm;">
+    <ul class="doc-list" style="margin-bottom:5mm;">
       <li><span class="lbl"><span>•</span><span>Date</span></span><span>:</span><span id="p1Date">--</span></li>
       <li><span class="lbl"><span>•</span><span>Dealer Name</span></span><span>:</span><span id="p1Dealer">Samriddhi And Brothers Auto Pvt. Ltd.</span></li>
       <li><span class="lbl"><span>•</span><span>Customer Name</span></span><span>:</span><strong id="p1CustName">--</strong></li>
       <li><span class="lbl"><span>•</span><span>Contact Number</span></span><span>:</span><span id="p1CustPhone">--</span></li>
       <li><span class="lbl"><span>•</span><span>Vehicle Model</span></span><span>:</span><strong id="p1Model">--</strong></li>
     </ul>
-
     <p style="font-size:12pt;font-weight:bold;margin:0 0 3px 0;">Financial Details</p>
-    <ul class="doc-list fin" style="margin-bottom:4mm;">
+    <ul class="doc-list fin" style="margin-bottom:5mm;">
       <li><span class="lbl"><span>•</span><span>Retail Price</span></span><span>:</span><span id="p1MRP">0.00</span></li>
       <li><span class="lbl"><span>•</span><span>Down Payment</span></span><span>:</span><span id="p1DP">0.00</span></li>
       <li><span class="lbl"><span>•</span><span>Loan Amount</span></span><span>:</span><span id="p1Loan">0.00</span></li>
@@ -1063,16 +714,14 @@
       <li style="display:block;margin-bottom:3px;">• &nbsp;Advance EMI (If Any) : &nbsp;<span id="p1AdvEmi">0.00</span></li>
       <li style="display:block;margin-bottom:3px;">• &nbsp;Total Down-payment Amount paid by Customer : &nbsp;<strong id="p1TotalDP">0.00</strong></li>
     </ul>
-
     <p style="font-size:12pt;font-weight:bold;margin:4mm 0 0 0;">Declaration</p>
     <hr style="border:none;border-top:1px solid #000;margin:3px 0 3mm 0;">
     <p style="font-size:10.5pt;margin:0 0 2mm 0;line-height:1.55;">We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.</p>
     <p style="font-size:10.5pt;margin:0;">Signatures &amp; Authorization</p>
-
-    <div class="print-sig-row" style="margin-top:22mm;display:flex;justify-content:space-between;align-items:flex-end;gap:6px;white-space:nowrap;">
-      <div class="print-sig-box" style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:9.5pt;white-space:nowrap;">Customer's Signature</div>
-      <div class="print-sig-box" style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:9.5pt;white-space:nowrap;">Dealer's Signature &amp; Stamp</div>
-      <div class="print-sig-box" style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:9.5pt;white-space:nowrap;">LO's Signature &amp; Stamp</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:6px;white-space:nowrap;margin-top:24mm;">
+      <div style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:9.5pt;white-space:nowrap;">Customer's Signature</div>
+      <div style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:9.5pt;white-space:nowrap;">Dealer's Signature &amp; Stamp</div>
+      <div style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:9.5pt;white-space:nowrap;">LO's Signature &amp; Stamp</div>
     </div>
     <hr style="border:none;border-top:1px solid #000;margin-top:4mm;">
     <hr style="border:none;border-top:1px solid #000;margin-top:2px;">
@@ -1085,16 +734,14 @@
         <img src="logo.jpg" alt="Bajaj Logo" style="height:66px;width:auto;object-fit:contain;" onerror="this.style.display='none'">
       </div>
       <div style="flex:1;text-align:center;">
-        <p id="p2DealerName" style="font-size:15pt;font-weight:bold;margin:0 0 1px 0;">Samriddhi &amp; Brothers Auto Pvt. Ltd.</p>
+        <p style="font-size:15pt;font-weight:bold;margin:0 0 1px 0;">Samriddhi &amp; Brothers Auto Pvt. Ltd.</p>
         <p style="font-size:13pt;font-weight:bold;margin:0 0 2px 0;">Authorized Dealer of Bajaj Motorcycle</p>
         <p style="font-size:9.5pt;margin:0;text-decoration:underline;">Phidim-04, Panchthar, Nepal &nbsp; Tel: 024-523144, 9802315425 &nbsp; Email: Sambriddhi.bajaj@gmail.com</p>
       </div>
     </div>
     <hr style="border:none;border-top:1.5px solid #000;margin:0 0 3mm 0;">
-
     <div style="text-align:right;font-size:11pt;margin-bottom:2mm;">Date: &nbsp;<span id="p2Date">--/--/----</span></div>
-    <div style="text-align:center;margin-bottom:3mm;"><strong style="font-size:13pt;text-decoration:underline;letter-spacing:0.5px;">QUOTATION</strong></div>
-
+    <div style="text-align:center;margin-bottom:4mm;"><strong style="font-size:13pt;text-decoration:underline;letter-spacing:0.5px;">QUOTATION</strong></div>
     <p style="font-size:11pt;margin:0 0 1mm 0;">To Hulas Finserv Hire Purchase Limited</p>
     <p style="font-size:11pt;font-weight:bold;margin:0 0 1mm 0;">C/O &nbsp;<span id="p2CustName">--</span></p>
     <p style="font-size:11pt;margin:0 0 1mm 0;">Dear Sir/Madam,</p>
@@ -1102,20 +749,17 @@
     <p style="font-size:11pt;margin:0 0 1mm 0;">Details :</p>
     <p style="font-size:11pt;font-weight:bold;margin:0 0 1mm 0;">Model: <span id="p2Model">---</span></p>
     <p style="font-size:11pt;font-weight:bold;margin:0 0 2mm 0;">Price: <span id="p2MRP">0</span>/- In Words: <span id="p2PriceWords">---</span></p>
-
     <div style="display:grid;grid-template-columns:1fr 1fr;row-gap:2px;font-size:11pt;margin-bottom:2mm;">
       <p style="margin:0;">Color: <span id="p2Color">---</span></p>
       <p style="margin:0;">Regd No: <span id="p2Reg">---</span></p>
       <p style="margin:0;">Engine No: <span id="p2Engine">---</span></p>
       <p style="margin:0;">Chassis No: <span id="p2Chassis" style="text-transform:uppercase;">---</span></p>
-      <p style="margin:0;">Make Year: &nbsp;2026</p>
+      <p style="margin:0;">Make Year: &nbsp;<span id="p2MakeYear">2026</span></p>
     </div>
-
     <div id="p2DiscountRow" style="display:none;font-size:11pt;margin-bottom:2mm;">
       <p style="margin:0 0 1mm 0;">Discount: Rs. <span id="p2DiscountAmt">0</span>/- In Words: <em id="p2DiscountWords">---</em></p>
       <p style="margin:0 0 1mm 0;">Net Price: Rs. <span id="p2NetPrice">0</span>/- In Words: <em id="p2NetPriceWords">---</em></p>
     </div>
-
     <div style="font-size:11pt;line-height:1.5;">
       <p style="margin:0 0 1mm 0;">Terms and Conditions :-</p>
       <p style="margin:0 0 1mm 0;">- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
@@ -1126,90 +770,116 @@
       <p style="margin:0 0 1mm 0;">- Warranty:- Warranty is not applicable on wear and tear and the items like Battery, Tyre, Tube, Brake Shoe, Clutch, Plate Cable, Chain Spocket and Bulb. Warranty Policy is detailed in the Owner's manual which will be provided at the time of the delivery of motorcycle.</p>
       <p style="margin:0 0 1mm 0;">- Servicing – 7 Free Servicing.</p>
     </div>
-    <div style="text-align:right;font-size:11pt;margin-top:2mm;"><p style="margin:0;">Sincerely Your's</p></div>
-    <div style="text-align:right;font-size:11pt;margin-top:13mm;"><p style="margin:0;">Authorized Signature</p></div>
+    <div style="text-align:right;font-size:11pt;margin-top:3mm;"><p style="margin:0;">Sincerely Your's</p></div>
+    <div style="text-align:right;font-size:11pt;margin-top:14mm;"><p style="margin:0;">Authorized Signature</p></div>
     <hr style="border:none;border-top:1px solid #000;margin-top:4mm;">
   </div>
-
 </div>
 
 
-<!-- ════════════ FOOTER ════════════ -->
-<footer class="foot">
-  <div class="foot-in">
-    <div>
-      <div class="f-nm">Go! YNG</div>
-      <div class="f-sub">Authorized Bajaj Partner</div>
-      <address class="f-adr" style="font-style:normal;">Phidim-1, Panchthar<br>Koshi Province, Nepal</address>
-      <div class="f-soc">
-        <a href="https://www.facebook.com/sambridhi.brothers" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-        <a href="https://wa.me/9779802315425" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-        <a href="https://www.tiktok.com/@bajajphidim" target="_blank" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+<!-- ══════════ FOOTER (from index.html) ══════════ -->
+<footer class="py-12 lg:py-14">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+      <div class="space-y-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-lg bg-bajaj-blue flex items-center justify-center">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 16 Q7 8 11 7 Q15 6 18 10" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none"/><circle cx="5" cy="17" r="2.2" fill="#fff" opacity="0.9"/><circle cx="17" cy="17" r="2.2" fill="#fff" opacity="0.9"/></svg>
+          </div>
+          <div>
+            <div class="text-sm font-bold text-white">Samriddhi Auto</div>
+            <div class="text-[10px] text-slate-400 uppercase tracking-wide">Bajaj</div>
+          </div>
+        </div>
+        <p class="text-slate-400 text-sm leading-relaxed">Panchthar's premier destination for Bajaj motorcycles, genuine parts, and trusted after-sales service.</p>
+        <div class="flex gap-3">
+          <a href="https://www.facebook.com/sambridhi.brothers" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-bajaj-blue transition-all" aria-label="Facebook">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+          </a>
+          <a href="tel:+9779802315425" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-bajaj-blue transition-all" aria-label="Phone">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Quick Links</h4>
+        <ul class="space-y-2.5">
+          <li><a href="index.html" class="footer-link">Home</a></li>
+          <li><a href="index.html#prices" class="footer-link">Price List</a></li>
+          <li><a href="finance.html" class="footer-link">Finance / EMI</a></li>
+          <li><a href="form.html" class="footer-link">Allocations</a></li>
+          <li><a href="#" class="footer-link">KYC Form</a></li>
+          <li><a href="#" class="footer-link">About Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Popular Models</h4>
+        <ul class="space-y-2.5">
+          <li><a href="index.html#prices" class="footer-link">Pulsar N150</a></li>
+          <li><a href="index.html#prices" class="footer-link">Pulsar N160</a></li>
+          <li><a href="index.html#prices" class="footer-link">Pulsar NS200</a></li>
+          <li><a href="index.html#prices" class="footer-link">Dominar 250</a></li>
+          <li><a href="index.html#prices" class="footer-link">Avenger Street 160</a></li>
+          <li><a href="index.html#prices" class="footer-link">Chetak Electric</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Contact</h4>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-2 text-slate-400 text-sm">
+            <svg class="mt-0.5 flex-shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#005EA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Phidim, Panchthar, Koshi Province, Nepal
+          </li>
+          <li class="flex items-start gap-2 text-slate-400 text-sm">
+            <svg class="mt-0.5 flex-shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#005EA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+            +977-9802315425
+          </li>
+          <li class="flex items-start gap-2 text-slate-400 text-sm">
+            <svg class="mt-0.5 flex-shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#005EA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Sun – Fri: 9AM – 6PM
+          </li>
+        </ul>
       </div>
     </div>
-    <div class="f-cols">
-      <div>
-        <div class="f-col-h">Navigate</div>
-        <div class="f-col-l">
-          <a href="index.html">Home</a>
-          <a href="index.html#prices">Price List</a>
-          <a href="finance.html">Finance</a>
-          <a href="form.html">Form</a>
-          <a href="https://yonghangishak.com.np/" target="_blank">About</a>
-        </div>
-      </div>
-      <div>
-        <div class="f-col-h">Models</div>
-        <div class="f-col-l">
-          <a href="index.html">Pulsar Series</a>
-          <a href="index.html">Dominar Series</a>
-          <a href="index.html">Avenger Series</a>
-          <a href="index.html">Platina Series</a>
-          <a href="index.html">N/A Series</a>
-        </div>
-      </div>
-      <div>
-        <div class="f-col-h">Contact</div>
-        <div class="f-col-l">
-          <a href="https://wa.me/9779802315425" target="_blank">+977 980-231-5425</a>
-          <a href="https://www.facebook.com/sambridhi.brothers" target="_blank">Facebook Page</a>
-          <a href="https://www.tiktok.com/@bajajphidim" target="_blank">TikTok</a>
-        </div>
-      </div>
+    <div class="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p class="text-slate-500 text-xs text-center sm:text-left">© Samriddhi And Brothers Auto Pvt. Ltd. All prices are indicative and subject to change without notice.</p>
+      <p class="text-slate-600 text-xs">Powered by <span class="text-bajaj-blue font-semibold">Go! YNG</span></p>
     </div>
-  </div>
-  <div class="foot-bot">
-    <span class="f-copy">&copy; 2026 Go! YNG — Go Your Dream</span>
-    <span class="f-badge"><span class="dot"></span> Authorized Bajaj Dealer</span>
   </div>
 </footer>
 
 
-<!-- ════════════ SCRIPTS ════════════ -->
+<!-- ══════════ SCRIPTS ══════════ -->
 <script>
-  /* Mobile nav */
-  const ham    = document.getElementById('ham');
-  const drawBg = document.getElementById('draw-bg');
-  const drawer = document.getElementById('drawer');
-  function setDrawer(open) {
-    ham.classList.toggle('open', open);
-    drawer.classList.toggle('open', open);
-    drawBg.classList.toggle('open', open);
-    document.body.style.overflow = open ? 'hidden' : '';
-  }
-  ham.addEventListener('click', () => setDrawer(!drawer.classList.contains('open')));
-  drawBg.addEventListener('click', () => setDrawer(false));
-  drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setDrawer(false)));
+  /* ── Hamburger ── */
+  const btn = document.getElementById('hamburger-btn');
+  const mMenu = document.getElementById('mobile-menu');
+  const icoOpen = document.getElementById('icon-open');
+  const icoClose = document.getElementById('icon-close');
+  btn?.addEventListener('click', () => {
+    const open = mMenu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+    icoOpen.classList.toggle('hidden', open);
+    icoClose.classList.toggle('hidden', !open);
+  });
+  mMenu?.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      mMenu.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      icoOpen.classList.remove('hidden');
+      icoClose.classList.add('hidden');
+    });
+  });
 
-  /* Sync a screen element's innerHTML into a print element */
+  /* ── Sync helper ── */
   function syncField(srcId, dstId) {
-    var src = document.getElementById(srcId);
-    var dst = document.getElementById(dstId);
+    const src = document.getElementById(srcId);
+    const dst = document.getElementById(dstId);
     if (src && dst) dst.innerHTML = src.innerHTML;
   }
 
+  /* ── Print ── */
   function printBothPages() {
-    /* Page 1 */
     syncField('a4Date',      'p1Date');
     syncField('a4Dealer',    'p1Dealer');
     syncField('a4CustName',  'p1CustName');
@@ -1224,7 +894,6 @@
     syncField('a4Ins',       'p1Ins');
     syncField('a4AdvEmiAmt', 'p1AdvEmi');
     syncField('a4TotalDP',   'p1TotalDP');
-    /* Page 2 */
     syncField('a4Date2',         'p2Date');
     syncField('a4CustName2',     'p2CustName');
     syncField('a4Model2',        'p2Model');
@@ -1234,18 +903,248 @@
     syncField('a4Reg2',          'p2Reg');
     syncField('a4Engine2',       'p2Engine');
     syncField('a4Chassis2',      'p2Chassis');
+    syncField('a4MakeYear',      'p2MakeYear');
     syncField('a4DiscountAmt',   'p2DiscountAmt');
     syncField('a4DiscountWords', 'p2DiscountWords');
     syncField('a4NetPrice',      'p2NetPrice');
     syncField('a4NetPriceWords', 'p2NetPriceWords');
-    /* Sync discount row visibility */
-    var discSrc = document.getElementById('a4DiscountRow');
-    var discDst = document.getElementById('p2DiscountRow');
+    const discSrc = document.getElementById('a4DiscountRow');
+    const discDst = document.getElementById('p2DiscountRow');
     if (discSrc && discDst) discDst.style.display = discSrc.style.display;
-
     window.print();
   }
 </script>
-<script type="module" src="form.js"></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
+    authDomain: "first-project-2082-12-26.firebaseapp.com",
+    projectId: "first-project-2082-12-26",
+    storageBucket: "first-project-2082-12-26.firebasestorage.app",
+    messagingSenderId: "545170954251",
+    appId: "1:545170954251:web:0d2f7905834af3b0be8f0e"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+  let allBikes = [];
+
+  /* ── Number to Words ── */
+  function numberToWords(num) {
+    if (num === 0) return "Zero";
+    const a = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+    const b = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+    function inWords(n) {
+      if (n < 20)       return a[n];
+      if (n < 100)      return b[Math.floor(n/10)] + " " + a[n%10];
+      if (n < 1000)     return a[Math.floor(n/100)] + " Hundred " + inWords(n%100);
+      if (n < 100000)   return inWords(Math.floor(n/1000))   + " Thousand " + inWords(n%1000);
+      if (n < 10000000) return inWords(Math.floor(n/100000)) + " Lakh "     + inWords(n%100000);
+      return inWords(Math.floor(n/10000000)) + " Crore " + inWords(n%10000000);
+    }
+    return inWords(num).replace(/\s+/g,' ').trim();
+  }
+
+  /* ── Fetch bikes ── */
+  async function fetchBikes() {
+    try {
+      const snapshot = await getDocs(collection(db, "bikes"));
+      allBikes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const select = document.getElementById('modelSelect');
+      if (select) {
+        select.innerHTML = allBikes.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+        calculateFinance();
+      }
+    } catch(e) {
+      console.error("Error fetching bikes:", e);
+      // Fallback demo data
+      allBikes = [
+        { id:"d1", name:"Pulsar N150",        price:339900, Insurance:8500, financeInsurance:7890 },
+        { id:"d2", name:"Pulsar N160",        price:379900, Insurance:9200, financeInsurance:8400 },
+        { id:"d3", name:"Pulsar NS200",       price:449900, Insurance:10500, financeInsurance:9800 },
+        { id:"d4", name:"Dominar 250",        price:489900, Insurance:11500, financeInsurance:10500 },
+        { id:"d5", name:"Avenger Street 160", price:349900, Insurance:8800, financeInsurance:8100 },
+        { id:"d6", name:"Platina 100",        price:219900, Insurance:6200, financeInsurance:5800 },
+        { id:"d7", name:"Chetak Electric",    price:389900, Insurance:7500, financeInsurance:6900 },
+      ];
+      const select = document.getElementById('modelSelect');
+      if (select) {
+        select.innerHTML = allBikes.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+        calculateFinance();
+      }
+    }
+  }
+
+  /* ── Chassis search ── */
+  window.findChassis = async function() {
+    const searchVal = document.getElementById('chassisSearch').value.trim();
+    const statusEl  = document.getElementById('searchStatus');
+    if (!statusEl || !searchVal) return;
+    statusEl.innerText = "Searching Inventory...";
+    statusEl.style.color = "#60a5fa";
+    try {
+      const q = query(collection(db, "inventory"), where("chassis", "==", searchVal));
+      const qs = await getDocs(q);
+      if (!qs.empty) {
+        const data = qs.docs[0].data();
+        document.getElementById('manualChassis').value = data.chassis || searchVal;
+        document.getElementById('manualEngine').value  = data.engine  || "";
+        document.getElementById('manualReg').value     = data.regNo   || "";
+        document.getElementById('manualColor').value   = data.color   || "";
+        if (data.model) {
+          const sel = document.getElementById('modelSelect');
+          for (let i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].text === data.model) { sel.selectedIndex = i; calculateFinance(); break; }
+          }
+        }
+        statusEl.innerText = "Vehicle Data Loaded!"; statusEl.style.color = "#22c55e";
+        syncManualToA4();
+      } else {
+        document.getElementById('manualChassis').value = searchVal;
+        statusEl.innerText = "Not found. Enter manually."; statusEl.style.color = "#f97316";
+      }
+    } catch(error) {
+      statusEl.innerText = "Connection Error!"; statusEl.style.color = "#ef4444";
+    }
+  };
+
+  /* ── Sync manual fields to A4 ── */
+  function syncManualToA4() {
+    const map = {
+      manualChassis: 'a4Chassis2',
+      manualEngine:  'a4Engine2',
+      manualReg:     'a4Reg2',
+      manualColor:   'a4Color2'
+    };
+    for (const [input, display] of Object.entries(map)) {
+      const el = document.getElementById(display);
+      if (el) el.innerText = document.getElementById(input)?.value || "---";
+    }
+    // Make Year
+    const myEl = document.getElementById('a4MakeYear');
+    if (myEl) myEl.innerText = document.getElementById('makeYearInput')?.value || "2026";
+  }
+
+  /* ── Finance calc ── */
+  window.calculateFinance = function() {
+    const selectedId = document.getElementById('modelSelect')?.value;
+    const bike = allBikes.find(b => b.id === selectedId);
+    if (!bike) return;
+
+    const getVal = (id, fb=0) => parseFloat(document.getElementById(id)?.value) || fb;
+
+    const mrp              = parseFloat(bike.price)            || 0;
+    const cashInsurance    = parseFloat(bike.Insurance)        || 0;
+    const financeInsurance = parseFloat(bike.financeInsurance) || 0;
+    const discount         = getVal('discountInput');
+    const namsari          = getVal('namsariInput', 3000);
+    const dpPercentVal     = getVal('dpPercent');
+    const tenure           = getVal('tenure');
+    const customerExtraAdv = getVal('advEmiInput');
+    const accCost          = getVal('helmetInput') + getVal('legguardInput') + getVal('seatcoverInput') + getVal('othersInput');
+
+    const afterDiscount = mrp - discount;
+    const dpAmountOnly  = afterDiscount * (dpPercentVal / 100);
+    const loanAmount    = afterDiscount - dpAmountOnly;
+
+    let rate = 13.99;
+    if      (dpPercentVal >= 60) rate = 9.99;
+    else if (dpPercentVal >= 50) rate = 11.99;
+    else if (dpPercentVal >= 40) rate = 12.99;
+
+    const monthlyRate = (rate / 12) / 100;
+    const emi = loanAmount > 0
+      ? (loanAmount * monthlyRate * Math.pow(1+monthlyRate, tenure)) / (Math.pow(1+monthlyRate, tenure) - 1)
+      : 0;
+
+    const rawTotalDP = dpAmountOnly + namsari + cashInsurance + emi + accCost + customerExtraAdv;
+    const roundingAdj = rawTotalDP % 1000 > 0 ? (1000 - (rawTotalDP % 1000)) : 0;
+    const totalAdvEmiSync   = emi + roundingAdj + customerExtraAdv;
+    const finalTotalDP_Dash = rawTotalDP + roundingAdj;
+    const finalTotalDP_A4   = dpAmountOnly + namsari + financeInsurance + totalAdvEmiSync;
+
+    updateUI({
+      bikeName: bike.name,
+      custName: document.getElementById('custNameInput')?.value   || "--",
+      custPhone: document.getElementById('custPhoneInput')?.value || "--",
+      dealerName: document.getElementById('dealerNameInput')?.value || "Samriddhi And Brothers Auto Pvt. Ltd.",
+      mrp, discount, afterDiscount, cashInsurance, financeInsurance,
+      rate, dpAmountOnly, loanAmount, emi, roundingAdj, totalAdvEmiSync,
+      tenure, namsari, finalTotalDP_Dash, finalTotalDP_A4
+    });
+  };
+
+  function updateUI(data) {
+    const fmt    = n => Math.round(n).toLocaleString('en-IN');
+    const fmtDec = n => Number(n).toLocaleString('en-IN', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    const set    = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric' });
+
+    // Dashboard
+    set('mrp',           `RS. ${fmt(data.mrp)}`);
+    set('afterDiscount', `RS. ${fmt(data.afterDiscount)}`);
+    set('displayTotalDP',`RS. ${fmt(data.finalTotalDP_Dash)}`);
+    set('displayIns',    `RS. ${fmt(data.cashInsurance)}`);
+
+    // Page 1 — Allocation
+    set('a4Date',      dateStr);
+    set('a4CustName',  data.custName);
+    set('a4CustPhone', data.custPhone);
+    set('a4Dealer',    data.dealerName);
+    set('a4Model',     data.bikeName);
+    set('a4MRP',       fmtDec(data.afterDiscount));
+    set('a4DP',        fmtDec(data.dpAmountOnly));
+    set('a4Loan',      fmtDec(data.loanAmount));
+    set('a4Rate',      data.rate.toFixed(2));
+    set('a4Tenure',    data.tenure);
+    set('a4Ins',       fmtDec(data.financeInsurance));
+    set('a4AdvEmiAmt', fmtDec(data.totalAdvEmiSync));
+    set('a4TotalDP',   fmtDec(data.finalTotalDP_A4));
+    set('a4Namsari',   fmtDec(data.namsari));
+
+    // Page 2 — Quotation
+    set('a4Date2',      dateStr);
+    set('a4CustName2',  data.custName);
+    set('a4Model2',     data.bikeName);
+    set('a4MRP2',       fmt(data.mrp));
+    set('a4PriceWords', numberToWords(Math.round(data.mrp)) + " rupees only.");
+    set('a4NetPriceWords', numberToWords(Math.round(data.afterDiscount)) + " rupees only.");
+    set('a4DiscountWords', numberToWords(Math.round(data.discount)) + " rupees only.");
+
+    // Sync manual/vehicle fields
+    syncManualToA4();
+
+    // Discount row toggle
+    const a4Row = document.getElementById('a4DiscountRow');
+    const p2Row = document.getElementById('p2DiscountRow');
+    if (data.discount > 0) {
+      if (a4Row) a4Row.style.display = 'block';
+      if (p2Row) p2Row.style.display = 'block';
+      set('a4DiscountAmt', fmt(data.discount));
+      set('a4NetPrice',    fmt(data.afterDiscount));
+      set('p2DiscountAmt', fmt(data.discount));
+      set('p2NetPrice',    fmt(data.afterDiscount));
+      set('p2DiscountWords', numberToWords(Math.round(data.discount)) + " rupees only.");
+      set('p2NetPriceWords', numberToWords(Math.round(data.afterDiscount)) + " rupees only.");
+    } else {
+      if (a4Row) a4Row.style.display = 'none';
+      if (p2Row) p2Row.style.display = 'none';
+    }
+  }
+
+  /* ── Event listeners ── */
+  document.addEventListener('input', e => {
+    calculateFinance();
+    if (e.target.id?.startsWith('manual') || e.target.id === 'makeYearInput') {
+      syncManualToA4();
+    }
+  });
+
+  fetchBikes();
+</script>
 </body>
 </html>
