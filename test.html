@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sanction Ledger — Two-Wheeler EMI Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Site nav bar dependencies (matches index.html / finance.html) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bajaj: {
+            blue: '#005EA6',
+            blueDark: '#004A85',
+            blueLight: '#E8F2FB',
+            amber: '#F59E0B',
+            amberDark: '#D97706',
+          }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  :root{
+    --ink:#152238;          /* deep slate ink */
+    --ink-soft:#3c4a63;
+    --paper:#F6F1E6;        /* warm ivory paper */
+    --paper-deep:#EFE7D6;
+    --card:#FFFDF8;
+    --gold:#B8863B;
+    --gold-bright:#D9AE5C;
+    --gold-line:rgba(184,134,59,0.35);
+    --emerald:#1B5E48;
+    --emerald-soft:#E4EFE9;
+    --danger:#9A3B26;
+    --shadow-lg: 0 20px 45px -18px rgba(21,34,56,0.28);
+    --shadow-sm: 0 8px 20px -10px rgba(21,34,56,0.18);
+    --radius: 18px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background:
+      radial-gradient(1200px 600px at 90% -10%, rgba(184,134,59,0.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, rgba(27,94,72,0.08), transparent 55%),
+      var(--paper);
+    color:var(--ink);
+    font-family:'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+
+  .font-display{ font-family:'Fraunces', serif; }
+  .font-mono{ font-family:'IBM Plex Mono', monospace; }
+
+  ::selection{ background:var(--gold-bright); color:var(--ink); }
+
+  a, button{ font-family:inherit; }
+
+  :focus-visible{
+    outline:2px solid var(--gold);
+    outline-offset:2px;
+    border-radius:6px;
+  }
+
+  /* ---------- site nav bar (shared with index.html / finance.html) ---------- */
+  body{ padding-top:64px; }
+
+  .nav-blur{
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(0,94,166,0.08);
+    box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+  }
+  .nav-link{
+    position: relative; font-size: 0.875rem; font-weight: 500; color: #374151;
+    display: flex; align-items: center; gap: 5px; transition: color 0.2s;
+    padding: 4px 2px;
+  }
+  .nav-link::after{
+    content: ''; position: absolute; bottom: -2px; left: 0;
+    width: 0; height: 2px; background: #005EA6; border-radius: 2px; transition: width 0.25s ease;
+  }
+  .nav-link:hover{ color: #005EA6; }
+  .nav-link:hover::after{ width: 100%; }
+  .nav-link.active{ color: #005EA6; }
+  .nav-link.active::after{ width: 100%; }
+
+  #mobile-menu{ max-height: 0; overflow: hidden; transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease; opacity: 0; }
+  #mobile-menu.open{ max-height: 560px; opacity: 1; }
+
+  .cta-primary{
+    background: #005EA6; color: #fff;
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.925rem;
+    letter-spacing: 0.02em; padding: 14px 28px; border-radius: 10px;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: all 0.22s ease; box-shadow: 0 4px 18px rgba(0,94,166,0.3);
+    text-decoration: none; border: 2px solid #005EA6;
+  }
+  .cta-primary:hover{ background: #004A85; border-color: #004A85; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(0,94,166,0.38); }
+
+  /* ---------- layout shell ---------- */
+  .shell{
+    max-width:1200px;
+    margin:0 auto;
+    padding:20px 16px 120px;
+  }
+
+  @media (min-width:1024px){
+    .shell{ padding:44px 32px 64px; }
+  }
+
+  #ledgerAnchor{ scroll-margin-top:84px; }
+
+  .brandbar{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px; margin-bottom:22px;
+  }
+
+  .brand-mark{ display:flex; align-items:center; gap:12px; }
+
+  .brand-crest{
+    width:44px; height:44px; border-radius:12px;
+    background:linear-gradient(155deg, var(--ink) 0%, #223252 60%, var(--ink) 100%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:var(--shadow-sm);
+    border:1px solid rgba(217,174,92,0.4);
+    flex-shrink:0;
+  }
+  .brand-crest svg{ width:22px; height:22px; }
+
+  .brand-title{ line-height:1.15; }
+  .brand-title .eyebrow{
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--gold); font-weight:600;
+  }
+  .brand-title h1{
+    margin:2px 0 0; font-size:19px; font-weight:600;
+    font-family:'Fraunces', serif;
+    color:var(--ink);
+  }
+  @media (min-width:640px){ .brand-title h1{ font-size:23px; } }
+
+  .badge-live{
+    display:flex; align-items:center; gap:7px;
+    font-size:11px; font-weight:600; letter-spacing:.05em;
+    color:var(--emerald); background:var(--emerald-soft);
+    padding:7px 12px; border-radius:999px;
+    border:1px solid rgba(27,94,72,0.18);
+  }
+  .badge-live .dot{
+    width:7px; height:7px; border-radius:50%; background:var(--emerald);
+    box-shadow:0 0 0 0 rgba(27,94,72,.5);
+    animation:pulseDot 2.2s ease-in-out infinite;
+  }
+  @keyframes pulseDot{
+    0%{ box-shadow:0 0 0 0 rgba(27,94,72,.45); }
+    70%{ box-shadow:0 0 0 8px rgba(27,94,72,0); }
+    100%{ box-shadow:0 0 0 0 rgba(27,94,72,0); }
+  }
+
+  .banner-warning{
+    display:none;
+    align-items:flex-start; gap:10px;
+    background:#FBEFE9; border:1px solid rgba(154,59,38,0.25);
+    color:var(--danger); padding:11px 14px; border-radius:12px;
+    font-size:12.5px; margin-bottom:18px; line-height:1.5;
+  }
+  .banner-warning.show{ display:flex; }
+
+  /* ---------- grid ---------- */
+  .grid-wrap{ display:grid; grid-template-columns:1fr; gap:20px; }
+  @media (min-width:1024px){
+    .grid-wrap{ grid-template-columns:5fr 7fr; align-items:start; gap:28px; }
+    .ledger-col{ position:sticky; top:calc(64px + 28px); }
+  }
+
+  /* ---------- glass input cards ---------- */
+  .card{
+    background:rgba(255,253,248,0.82);
+    backdrop-filter:blur(14px) saturate(140%);
+    -webkit-backdrop-filter:blur(14px) saturate(140%);
+    border:1px solid rgba(21,34,56,0.07);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-sm);
+    padding:20px;
+    margin-bottom:18px;
+  }
+  @media (min-width:640px){ .card{ padding:24px; } }
+
+  .card-head{ display:flex; align-items:baseline; gap:10px; margin-bottom:16px; }
+  .card-head .idx{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; color:var(--gold);
+    border:1px solid var(--gold-line);
+    border-radius:6px; padding:2px 7px;
+  }
+  .card-head h2{
+    font-family:'Fraunces', serif;
+    font-size:16px; font-weight:600; margin:0;
+    color:var(--ink);
+  }
+  .card-head p{ margin:2px 0 0; font-size:12px; color:var(--ink-soft); }
+
+  .field{ margin-bottom:14px; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{
+    display:block; font-size:12px; font-weight:600;
+    color:var(--ink-soft); margin-bottom:6px;
+    letter-spacing:.01em;
+  }
+  .field .hint{ font-size:11px; color:#8a93a6; margin-top:5px; }
+
+  .input, select.input{
+    width:100%; padding:11px 13px;
+    border-radius:11px; border:1.5px solid #E4DCC8;
+    background:#FFFEFB;
+    font-size:14.5px; color:var(--ink);
+    font-family:'DM Sans', sans-serif;
+    transition:border-color .15s ease, box-shadow .15s ease;
+    appearance:none; -webkit-appearance:none;
+  }
+  .input:hover{ border-color:#d8ccae; }
+  .input:focus{
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(184,134,59,0.14);
+    outline:none;
+  }
+  .input[readonly]{ background:var(--paper-deep); color:var(--ink-soft); cursor:not-allowed; }
+
+  .select-wrap{ position:relative; }
+  .select-wrap::after{
+    content:""; position:absolute; right:14px; top:50%; transform:translateY(-65%);
+    width:8px; height:8px;
+    border-right:1.6px solid var(--ink-soft);
+    border-bottom:1.6px solid var(--ink-soft);
+    rotate:45deg; pointer-events:none;
+  }
+
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .row3{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  .chip-live{
+    display:inline-flex; align-items:baseline; gap:6px;
+    font-family:'IBM Plex Mono', monospace;
+    background:var(--paper-deep); border:1px solid var(--gold-line);
+    padding:8px 12px; border-radius:10px;
+    font-size:14px; color:var(--ink); font-weight:600;
+    width:100%;
+  }
+  .chip-live .lbl{
+    font-family:'DM Sans', sans-serif; font-weight:600;
+    font-size:11px; color:var(--ink-soft); text-transform:uppercase;
+    letter-spacing:.06em; margin-right:auto;
+  }
+
+  /* slab ladder */
+  .slab-ladder{ display:flex; flex-direction:column; gap:6px; margin-top:14px; }
+  .slab-row{
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:12.5px; padding:8px 11px; border-radius:9px;
+    border:1px solid transparent; color:var(--ink-soft);
+    background:transparent; transition:all .25s ease;
+  }
+  .slab-row .slab-rate{ font-family:'IBM Plex Mono',monospace; font-weight:600; }
+  .slab-row.active{
+    background:linear-gradient(90deg, rgba(184,134,59,.14), rgba(184,134,59,.04));
+    border-color:var(--gold-line);
+    color:var(--ink); font-weight:600;
+  }
+  .slab-row.active .slab-rate{ color:var(--gold); }
+  .slab-row.active::before{ content:"●"; color:var(--gold); margin-right:6px; font-size:8px; }
+
+  /* ---------- ledger / receipt ---------- */
+  .ledger{
+    background:var(--card);
+    border-radius:22px;
+    box-shadow:var(--shadow-lg);
+    border:1px solid rgba(21,34,56,0.06);
+    position:relative; overflow:hidden;
+  }
+
+  .ledger-perf{
+    height:16px;
+    background-image:radial-gradient(circle, var(--paper) 3.2px, transparent 3.2px);
+    background-size:18px 18px; background-position:6px center;
+    background-color:var(--card);
+  }
+
+  .ledger-head{
+    padding:22px 22px 16px;
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap:14px; border-bottom:1px dashed var(--gold-line);
+  }
+  @media (min-width:640px){ .ledger-head{ padding:26px 30px 18px; } }
+
+  .ledger-head .eyebrow{
+    font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--gold); font-weight:600;
+  }
+  .ledger-head h3{
+    font-family:'Fraunces', serif; font-size:21px; margin:3px 0 4px; color:var(--ink);
+  }
+  .ledger-head .refline{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft); }
+
+  .seal{
+    width:76px; height:76px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold) 65%, #8f6829 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:#2a1c05; box-shadow:0 6px 16px -6px rgba(184,134,59,0.6), inset 0 0 0 3px rgba(255,255,255,0.25);
+    rotate:-6deg; flex-shrink:0;
+    border:2px solid rgba(255,255,255,0.35);
+  }
+  .seal .rate{ font-family:'Fraunces', serif; font-weight:700; font-size:16px; line-height:1; }
+  .seal .lbl{ font-size:7.5px; letter-spacing:.08em; text-transform:uppercase; margin-top:3px; font-weight:600; }
+
+  .ledger-body{ padding:18px 22px 8px; }
+  @media (min-width:640px){ .ledger-body{ padding:20px 30px 8px; } }
+
+  .lg-section{ margin-bottom:18px; }
+  .lg-section-title{
+    font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--gold); font-weight:700; margin-bottom:10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .lg-section-title::after{ content:""; flex:1; height:1px; background:var(--gold-line); }
+
+  .lg-row{
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding:7px 0; font-size:13.5px; color:var(--ink-soft);
+    border-bottom:1px solid rgba(21,34,56,0.05);
+  }
+  .lg-row:last-child{ border-bottom:none; }
+  .lg-row .v{ font-family:'IBM Plex Mono', monospace; font-weight:600; color:var(--ink); transition:color .25s ease; }
+  .lg-row.strong{ font-weight:700; color:var(--ink); }
+  .lg-row.strong .v{ font-size:14.5px; }
+  .lg-row.gold .v{ color:var(--gold); }
+  .lg-row.emerald .v{ color:var(--emerald); }
+
+  .flash{ animation:flashNum .7s ease; }
+  @keyframes flashNum{
+    0%{ color:var(--gold); transform:translateY(-1px); }
+    100%{ color:inherit; transform:translateY(0); }
+  }
+
+  .hero-emi{
+    background:linear-gradient(150deg, var(--ink) 0%, #223252 100%);
+    border-radius:16px; padding:20px 22px; color:#F3EEE0;
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    margin:4px 0 20px; box-shadow:var(--shadow-sm);
+  }
+  .hero-emi .lbl{
+    font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--gold-bright); font-weight:600; margin-bottom:6px;
+  }
+  .hero-emi .amt{ font-family:'Fraunces', serif; font-weight:600; font-size:30px; letter-spacing:.01em; }
+  @media (min-width:640px){ .hero-emi .amt{ font-size:34px; } }
+  .hero-emi .amt sup{ font-size:15px; font-weight:500; opacity:.8; }
+  .hero-emi .sub{ font-size:11.5px; color:#c9d0dd; margin-top:4px; }
+  .hero-emi .tenure-tag{
+    text-align:right; font-family:'IBM Plex Mono', monospace; font-size:12px; color:#dfe4ee;
+    border-left:1px solid rgba(255,255,255,0.18); padding-left:14px;
+  }
+  .hero-emi .tenure-tag b{ display:block; font-size:18px; color:#fff; }
+
+  .rounding-note{
+    display:flex; gap:10px; align-items:flex-start;
+    background:var(--emerald-soft); border:1px solid rgba(27,94,72,0.18);
+    border-radius:12px; padding:11px 13px; font-size:12px; color:#1c4536;
+    margin-bottom:18px; line-height:1.5;
+  }
+  .rounding-note b{ color:var(--emerald); }
+
+  .ledger-footer{
+    padding:16px 22px 22px;
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;
+    border-top:1px dashed var(--gold-line);
+  }
+  @media (min-width:640px){ .ledger-footer{ padding:18px 30px 26px; } }
+
+  .disclaimer{ font-size:10.5px; color:#9aa2b3; max-width:340px; line-height:1.5; }
+
+  .btn{
+    font-size:13px; font-weight:600; padding:10px 16px; border-radius:10px;
+    border:1px solid transparent; cursor:pointer;
+    display:inline-flex; align-items:center; gap:7px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn-gold{
+    background:linear-gradient(150deg, var(--gold-bright), var(--gold));
+    color:#2a1c05; box-shadow:0 8px 18px -8px rgba(184,134,59,.6);
+  }
+  .btn-gold:hover{ filter:brightness(1.04); }
+  .btn-ghost{ background:transparent; border-color:#E4DCC8; color:var(--ink-soft); }
+  .btn-ghost:hover{ border-color:var(--gold); color:var(--ink); }
+
+  /* ---------- mobile sticky summary ---------- */
+  .sticky-bar{
+    position:fixed; left:12px; right:12px; bottom:12px;
+    background:rgba(21,34,56,0.94); backdrop-filter:blur(10px);
+    color:#fff; border-radius:16px; padding:12px 14px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    box-shadow:0 16px 34px -12px rgba(21,34,56,.55);
+    z-index:40; border:1px solid rgba(217,174,92,0.25);
+  }
+  @media (min-width:1024px){ .sticky-bar{ display:none; } }
+  .sticky-bar .lbl{ font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--gold-bright); }
+  .sticky-bar .amt{ font-family:'Fraunces', serif; font-size:19px; font-weight:600; }
+  .sticky-bar button{
+    background:var(--gold); color:#2a1c05; border:none; border-radius:10px;
+    padding:9px 13px; font-size:12px; font-weight:700; white-space:nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+
+  @media print{
+    body{ background:#fff !important; }
+    .no-print, .sticky-bar, .brandbar, .card{ display:none !important; }
+    .grid-wrap{ display:block !important; }
+    .ledger{ box-shadow:none; border:1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ NAVIGATION (shared with index.html / finance.html) ══════════ -->
+<header class="nav-blur fixed top-0 left-0 right-0 z-50">
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Brand -->
+      <a href="index.html" class="flex items-center gap-2.5" aria-label="Samriddhi Auto Home">
+        <div class="w-9 h-9 rounded-lg bg-bajaj-blue flex items-center justify-center shadow-sm flex-shrink-0">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M4 16 Q7 8 11 7 Q15 6 18 10" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            <circle cx="5" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+            <circle cx="17" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+            <path d="M5 17 L17 17" stroke="#fff" stroke-width="1.4" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="leading-tight">
+          <div class="text-sm font-bold text-slate-900 tracking-tight leading-none">Samriddhi And Brothers</div>
+          <div class="text-[10px] font-medium text-bajaj-blue leading-none tracking-wide uppercase mt-0.5">Bajaj Authorized Dealer</div>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <div class="hidden lg:flex items-center gap-7">
+        <a href="index.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </a>
+        <a href="index.html#prices" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Price List
+        </a>
+        <a href="finance.html" class="nav-link active">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Finance
+        </a>
+        <a href="form.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Allocations
+        </a>
+        <a href="#" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          KYC
+        </a>
+        <a href="https://yonghangishak.com.np/" target="_blank" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          About
+        </a>
+      </div>
+
+      <!-- Desktop CTA -->
+      <div class="hidden lg:flex items-center gap-3">
+        <a href="tel:+9779802315425" class="text-sm font-semibold text-bajaj-blue flex items-center gap-1.5 hover:text-bajaj-blueDark transition-colors">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+          Call Showroom
+        </a>
+        <a href="https://wa.me/9779802315425" target="_blank" class="cta-primary text-sm py-2.5 px-5">
+          <i class="fa-brands fa-whatsapp"></i> WhatsApp
+        </a>
+      </div>
+
+      <!-- Hamburger -->
+      <button id="hamburger-btn" class="lg:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors" aria-label="Toggle menu" aria-expanded="false">
+        <svg id="icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg id="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hidden"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="lg:hidden">
+      <div class="py-4 border-t border-slate-100 space-y-1">
+        <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Home</a>
+        <a href="index.html#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Price List</a>
+        <a href="finance.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Finance</a>
+        <a href="form.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Allocations</a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">KYC</a>
+        <a href="https://yonghangishak.com.np/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">About</a>
+        <div class="pt-2 grid grid-cols-2 gap-2">
+          <a href="tel:+9779802315425" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-bajaj-blue text-bajaj-blue text-sm font-semibold">Call Us</a>
+          <a href="https://wa.me/9779802315425" target="_blank" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-bajaj-blue text-white text-sm font-semibold">WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<div class="shell">
+
+  <div class="brandbar">
+    <div class="brand-mark">
+      <div class="brand-crest">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 15l1.6-5.2A2 2 0 0 1 7.5 8.4h9a2 2 0 0 1 1.9 1.4L20 15" stroke="#D9AE5C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="6.5" cy="16.5" r="2.2" stroke="#D9AE5C" stroke-width="1.6"/>
+          <circle cx="17.5" cy="16.5" r="2.2" stroke="#D9AE5C" stroke-width="1.6"/>
+          <path d="M9 12h6" stroke="#D9AE5C" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <div class="eyebrow">Finance Studio</div>
+        <h1>Two-Wheeler EMI Ledger</h1>
+      </div>
+    </div>
+    <div class="badge-live no-print"><span class="dot"></span>Live · Firestore</div>
+  </div>
+
+  <div class="banner-warning no-print" id="loadWarning">
+    ⚠️ Couldn't load bike models from Firestore. Check your connection, the "bikes" collection, and its read rules.
+  </div>
+
+  <div class="grid-wrap">
+
+    <!-- ============ INPUT COLUMN ============ -->
+    <div class="input-col">
+
+      <!-- Card 1: Vehicle & Pricing -->
+      <div class="card">
+        <div class="card-head">
+          <span class="idx">01</span>
+          <div>
+            <h2>Vehicle &amp; Pricing</h2>
+            <p>Model, MRP and insurance are pulled live from your catalogue.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="modelSelect">Bike model</label>
+          <div class="select-wrap">
+            <select id="modelSelect" class="input"><option>Loading models…</option></select>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label>MRP (from catalogue)</label>
+            <div class="chip-live"><span class="lbl">MRP</span><span id="mrp">Rs. 0</span></div>
+          </div>
+          <div class="field">
+            <label for="discountInput">Discount (Rs.)</label>
+            <input type="number" id="discountInput" class="input" min="0" step="500" value="0">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Amount after discount</label>
+          <div class="chip-live"><span class="lbl">Net price</span><span id="afterDiscount">Rs. 0</span></div>
+        </div>
+      </div>
+
+      <!-- Card 2: Finance Terms -->
+      <div class="card">
+        <div class="card-head">
+          <span class="idx">02</span>
+          <div>
+            <h2>Finance Terms</h2>
+            <p>Downpayment tier sets your interest rate automatically.</p>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="dpPercent">Downpayment</label>
+            <div class="select-wrap">
+              <select id="dpPercent" class="input">
+                <option value="20">20%</option>
+                <option value="30">30%</option>
+                <option value="40">40%</option>
+                <option value="50">50%</option>
+                <option value="60" selected>60%</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="tenure">Tenure</label>
+            <div class="select-wrap">
+              <select id="tenure" class="input">
+                <option value="12">12 months</option>
+                <option value="18">18 months</option>
+                <option value="24" selected>24 months</option>
+                <option value="36">36 months</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="slab-ladder" id="slabLadder"></div>
+      </div>
+
+      <!-- Card 3: Charges & Accessories -->
+      <div class="card">
+        <div class="card-head">
+          <span class="idx">03</span>
+          <div>
+            <h2>Charges &amp; Accessories</h2>
+            <p>Insurance comes from the selected model; the rest is editable.</p>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label>Insurance (from catalogue)</label>
+            <div class="chip-live"><span class="lbl">Insurance</span><span id="displayIns">Rs. 0</span></div>
+          </div>
+          <div class="field">
+            <label for="namsariInput">Ownership transfer / Namsari (Rs.)</label>
+            <input type="number" id="namsariInput" class="input" min="0" step="100" value="3000">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="advEmiInput">Customer extra advance (Rs.)</label>
+          <input type="number" id="advEmiInput" class="input" min="0" step="100" value="0">
+          <p class="hint">Any additional amount the customer chooses to pay upfront, beyond the required downpayment.</p>
+        </div>
+
+        <div class="row3">
+          <div class="field">
+            <label for="helmetInput">Helmet (Rs.)</label>
+            <input type="number" id="helmetInput" class="input" min="0" step="50" value="1500">
+          </div>
+          <div class="field">
+            <label for="legguardInput">Legguard (Rs.)</label>
+            <input type="number" id="legguardInput" class="input" min="0" step="50" value="2000">
+          </div>
+          <div class="field">
+            <label for="seatcoverInput">Seat cover (Rs.)</label>
+            <input type="number" id="seatcoverInput" class="input" min="0" step="50" value="800">
+          </div>
+          <div class="field">
+            <label for="othersInput">Others (Rs.)</label>
+            <input type="number" id="othersInput" class="input" min="0" step="50" value="0">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============ LEDGER / DASHBOARD COLUMN ============ -->
+    <div class="ledger-col" id="ledgerAnchor">
+      <div class="ledger">
+        <div class="ledger-head">
+          <div>
+            <div class="eyebrow">Sanction Ledger</div>
+            <h3 id="ledgerModelName">Bike model</h3>
+            <div class="refline" id="refLine">REF —</div>
+          </div>
+          <div class="seal">
+            <span class="rate"><span id="displayRate">--</span>%</span>
+            <span class="lbl">Rate p.a.</span>
+          </div>
+        </div>
+        <div class="ledger-perf"></div>
+
+        <div class="ledger-body">
+
+          <div class="hero-emi">
+            <div>
+              <div class="lbl">Monthly EMI</div>
+              <div class="amt"><sup>Rs.</sup> <span id="heroEmiNum">0</span></div>
+              <div class="sub" id="heroSub">Reducing balance</div>
+            </div>
+            <div class="tenure-tag">Tenure<b id="tenureTag">24 mo</b></div>
+          </div>
+
+          <!-- Hidden mirror node: the calculation script writes its full "RS. x,xxx" string here;
+               a small companion script splits it into the styled hero figure above. -->
+          <span id="displayEMI" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);"></span>
+
+          <div class="lg-section">
+            <div class="lg-section-title">Pricing</div>
+            <div class="lg-row"><span>Downpayment (<span id="dpPercentLabel">60</span>%)</span><span class="v" id="displayDpAmt">Rs. 0</span></div>
+            <div class="lg-row strong gold"><span>Loan amount</span><span class="v" id="displayLoanAmt">Rs. 0</span></div>
+          </div>
+
+          <div class="lg-section">
+            <div class="lg-section-title">Upfront charges</div>
+            <div class="lg-row"><span>Insurance</span><span class="v" id="displayIns2">Rs. 0</span></div>
+            <div class="lg-row"><span>Accessories (helmet, legguard, seat cover, others)</span><span class="v" id="accSubtotal">Rs. 0</span></div>
+          </div>
+
+          <div class="lg-section">
+            <div class="lg-section-title">Downpayment total</div>
+            <div class="lg-row strong gold"><span>Total downpayment (payable now)</span><span class="v" id="displayTotalDP">Rs. 0</span></div>
+            <div class="lg-row emerald"><span>Auto-rounding buffer</span><span class="v" id="displayAutoAdEmi">Rs. 0</span></div>
+          </div>
+
+          <div class="rounding-note">
+            <span>🪙</span>
+            <div>
+              <b>Total advance EMI</b> covers the 1st installment plus the rounding buffer and extra advance —
+              <span id="displayTotalAdvEmi">Rs. 0</span> is settled before the remaining schedule begins.
+            </div>
+          </div>
+
+          <div class="lg-section">
+            <div class="lg-section-title">Remaining schedule</div>
+            <div class="lg-row"><span>Due amount remaining</span><span class="v" id="displayDueEmi">Rs. 0</span></div>
+            <div class="lg-row strong"><span>Total interest (full tenure)</span><span class="v" id="displayTotalInterest">Rs. 0</span></div>
+          </div>
+
+        </div>
+
+        <div class="ledger-footer">
+          <div class="disclaimer">Figures are illustrative estimates for planning purposes only. Final sanction, rate and charges are subject to the financing bank's verification and approval.</div>
+          <div class="no-print" style="display:flex; gap:8px;">
+            <button class="btn btn-ghost" id="resetBtn" type="button">Reset</button>
+            <button class="btn btn-gold" id="printBtn" type="button">Print / Save PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Mobile sticky quick-summary -->
+<div class="sticky-bar no-print">
+  <div>
+    <div class="lbl">Monthly EMI</div>
+    <div class="amt">Rs. <span id="stickyEmi">0</span></div>
+  </div>
+  <button type="button" id="stickyScrollBtn">View ledger</button>
+</div>
+
+<!-- Nav bar hamburger toggle (shared with index.html / finance.html) -->
+<script>
+  const btn      = document.getElementById("hamburger-btn");
+  const mMenu    = document.getElementById("mobile-menu");
+  const icoOpen  = document.getElementById("icon-open");
+  const icoClose = document.getElementById("icon-close");
+
+  btn?.addEventListener("click", () => {
+    const open = mMenu.classList.toggle("open");
+    btn.setAttribute("aria-expanded", open);
+    icoOpen.classList.toggle("hidden", open);
+    icoClose.classList.toggle("hidden", !open);
+  });
+
+  mMenu?.querySelectorAll("a").forEach(a => {
+    a.addEventListener("click", () => {
+      mMenu.classList.remove("open");
+      btn.setAttribute("aria-expanded", "false");
+      icoOpen.classList.remove("hidden");
+      icoClose.classList.add("hidden");
+    });
+  });
+</script>
+
+<!-- =====================================================================
+     CORE FINANCE ENGINE — Firestore-backed, kept exactly as supplied.
+     Do not rename its variables/ids; the layout above is built to match.
+     ===================================================================== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+// Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
+  authDomain: "first-project-2082-12-26.firebaseapp.com",
+  projectId: "first-project-2082-12-26",
+  storageBucket: "first-project-2082-12-26.firebasestorage.app",
+  messagingSenderId: "545170954251",
+  appId: "1:545170954251:web:0d2f7905834af3b0be8f0e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const bikesCol = collection(db, "bikes");
+
+let allBikes = [];
+
+// Sort by sn field ascending; no-sn entries go to end
+function sortBySn(bikes) {
+  return [...bikes].sort((a, b) => {
+    const snA = (a.sn !== undefined && a.sn !== null && a.sn !== '') ? Number(a.sn) : 9999;
+    const snB = (b.sn !== undefined && b.sn !== null && b.sn !== '') ? Number(b.sn) : 9999;
+    return snA - snB;
+  });
+}
+
+async function fetchBikes() {
+  try {
+    const snapshot = await getDocs(bikesCol);
+    allBikes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Sort by sn before populating dropdown
+    const sorted = sortBySn(allBikes);
+
+    const select = document.getElementById('modelSelect');
+    if (select) {
+      select.innerHTML = sorted.map(bike =>
+        `<option value="${bike.id}" ${bike.name.includes("Pulsar 150 SD BS VI") ? "selected" : ""}>${bike.name}</option>`
+      ).join('');
+      calculateFinance();
+
+      // Dispatch a real, bubbling 'input' event on the now-populated select so
+      // the cosmetic layer (which listens for document-level 'input' events)
+      // also runs on initial load. Without this, the ledger header — model
+      // name, reference number, tenure tag, slab-ladder highlight, accessory
+      // subtotal, etc. — stays stuck on its placeholder values until the
+      // visitor manually touches a field, even though the raw EMI numbers
+      // are already correct underneath.
+      select.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  } catch (e) {
+    console.error("Error fetching bikes:", e);
+    const warning = document.getElementById('loadWarning');
+    if (warning) warning.classList.add('show');
+  }
+}
+
+window.calculateFinance = function() {
+  const selectedId = document.getElementById('modelSelect').value;
+  const bike = allBikes.find(b => b.id === selectedId);
+  if (!bike) return;
+
+  const mrp               = parseFloat(bike.price) || 0;
+  const insurance         = parseFloat(bike.Insurance) || 0;
+  const discount          = parseFloat(document.getElementById('discountInput').value) || 0;
+  const customerExtraAdv  = parseFloat(document.getElementById('advEmiInput').value) || 0;
+  const namsari           = parseFloat(document.getElementById('namsariInput').value) || 3000;
+
+  const accCost = (parseFloat(document.getElementById('helmetInput').value)    || 0) +
+                  (parseFloat(document.getElementById('legguardInput').value)  || 0) +
+                  (parseFloat(document.getElementById('seatcoverInput').value) || 0) +
+                  (parseFloat(document.getElementById('othersInput').value)    || 0);
+
+  const dpPercentVal = parseFloat(document.getElementById('dpPercent').value);
+  const tenure       = parseFloat(document.getElementById('tenure').value);
+
+  const afterDiscount = mrp - discount;
+  const dpAmountOnly  = afterDiscount * (dpPercentVal / 100);
+  const loanAmount    = afterDiscount - dpAmountOnly;
+
+  let rate = 13.99;
+  if      (dpPercentVal >= 60) rate = 8.99;
+  else if (dpPercentVal >= 50) rate = 11.99;
+  else if (dpPercentVal >= 40) rate = 12.99;
+
+  const monthlyRate = (rate / 12) / 100;
+  const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) /
+              (Math.pow(1 + monthlyRate, tenure) - 1);
+
+  const rawTotalDownpayment = dpAmountOnly + namsari + insurance + emi + accCost + customerExtraAdv;
+  const lastThreeDigits     = rawTotalDownpayment % 1000;
+  const autoRounding        = lastThreeDigits > 0 ? (1000 - lastThreeDigits) : 0;
+  const finalTotalDP        = rawTotalDownpayment + autoRounding;
+
+  const totalAdvEmi  = emi + autoRounding + customerExtraAdv;
+  const dueEmi       = (emi * tenure) - totalAdvEmi;
+  const totalInterest = (emi * tenure) - loanAmount;
+
+  document.getElementById('displayTotalDP').innerText        = `RS. ${Math.round(finalTotalDP).toLocaleString()}`;
+  document.getElementById('mrp').innerText                   = `RS. ${mrp.toLocaleString()}`;
+  document.getElementById('afterDiscount').innerText         = `RS. ${afterDiscount.toLocaleString()}`;
+  document.getElementById('displayIns').innerText            = `RS. ${insurance.toLocaleString()}`;
+  document.getElementById('displayRate').innerText           = `${rate}`;
+  document.getElementById('displayDpAmt').innerText          = `RS. ${dpAmountOnly.toLocaleString()}`;
+  document.getElementById('displayLoanAmt').innerText        = `RS. ${loanAmount.toLocaleString()}`;
+  document.getElementById('displayEMI').innerText            = `RS. ${emi.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+  document.getElementById('displayAutoAdEmi').innerText      = `RS. ${autoRounding.toFixed(2)}`;
+  document.getElementById('displayTotalAdvEmi').innerText    = `RS. ${totalAdvEmi.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+  document.getElementById('displayDueEmi').innerText         = `RS. ${dueEmi.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+  document.getElementById('displayTotalInterest').innerText  = `RS. ${totalInterest.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+};
+
+document.addEventListener('input', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+    calculateFinance();
+  }
+});
+
+fetchBikes();
+</script>
+
+<!-- =====================================================================
+     COSMETIC LAYER — purely presentational. Reads the same inputs/outputs
+     but never touches the finance engine above: model name in the ledger
+     header, reference number, slab ladder highlight, hero EMI split,
+     sticky mobile bar, reset, and print. Safe to edit freely.
+     ===================================================================== -->
+<script>
+(function(){
+  const el = (id) => document.getElementById(id);
+
+  const RATE_SLABS = [
+    { label: '60% or more', minDp: 60, rate: 8.99 },
+    { label: '50% – 59%',   minDp: 50, rate: 11.99 },
+    { label: '40% – 49%',   minDp: 40, rate: 12.99 },
+    { label: 'Below 40%',   minDp: 0,  rate: 13.99 }
+  ];
+  function rateForDp(dp){
+    for (const slab of RATE_SLABS) if (dp >= slab.minDp) return slab.rate;
+    return RATE_SLABS[RATE_SLABS.length - 1].rate;
+  }
+
+  function renderSlabLadder(){
+    const dp = parseFloat(el('dpPercent').value) || 0;
+    const active = rateForDp(dp);
+    const container = el('slabLadder');
+    container.innerHTML = '';
+    RATE_SLABS.forEach(row => {
+      const div = document.createElement('div');
+      div.className = 'slab-row' + (row.rate === active ? ' active' : '');
+      div.innerHTML = `<span>${row.label} downpayment</span><span class="slab-rate">${row.rate}%</span>`;
+      container.appendChild(div);
+    });
+  }
+
+  function buildReference(modelName, tenure){
+    const initials = (modelName || 'GEN').replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase() || 'GEN';
+    const stamp = new Date();
+    const y = stamp.getFullYear();
+    const m = String(stamp.getMonth() + 1).padStart(2, '0');
+    const d = String(stamp.getDate()).padStart(2, '0');
+    return `${initials}-${y}${m}${d}-${tenure}M`;
+  }
+
+  function refreshCosmetics(){
+    const modelSelect = el('modelSelect');
+    const modelName = modelSelect.options[modelSelect.selectedIndex]
+      ? modelSelect.options[modelSelect.selectedIndex].textContent
+      : 'Bike model';
+    const tenure = el('tenure').value;
+    const dp = el('dpPercent').value;
+
+    el('ledgerModelName').textContent = modelName;
+    el('refLine').textContent = 'REF ' + buildReference(modelName, tenure);
+    el('tenureTag').textContent = tenure + ' mo';
+    el('dpPercentLabel').textContent = dp;
+    el('heroSub').textContent = 'Reducing balance · ' + tenure + ' months at ' + (el('displayRate').textContent || '--') + '% p.a.';
+    renderSlabLadder();
+
+    // Mirror accessory + insurance + rate figures that the engine writes
+    // into single-purpose spans, onto the extra display slots in the ledger.
+    el('displayIns2').textContent = el('displayIns').textContent;
+
+    const helmet    = parseFloat(el('helmetInput').value)    || 0;
+    const legguard  = parseFloat(el('legguardInput').value)  || 0;
+    const seatcover = parseFloat(el('seatcoverInput').value) || 0;
+    const others    = parseFloat(el('othersInput').value)    || 0;
+    const accTotal  = helmet + legguard + seatcover + others;
+    el('accSubtotal').textContent = 'Rs. ' + Math.round(accTotal).toLocaleString('en-IN');
+  }
+
+  // Split the hidden "RS. x,xxx.xx" string from the finance engine into
+  // the styled hero figure, and mirror it to the mobile sticky bar.
+  const heroObserver = new MutationObserver(() => {
+    const raw = el('displayEMI').textContent || '';
+    const num = raw.replace(/^RS\.\s*/i, '');
+    el('heroEmiNum').textContent = num || '0';
+    el('stickyEmi').textContent = num || '0';
+  });
+  heroObserver.observe(el('displayEMI'), { childList: true, characterData: true, subtree: true });
+
+  // Recompute cosmetics on every input/select change, after the engine runs.
+  document.addEventListener('input', refreshCosmetics);
+  el('modelSelect').addEventListener('change', refreshCosmetics);
+
+  el('printBtn').addEventListener('click', () => window.print());
+
+  el('resetBtn').addEventListener('click', () => {
+    el('discountInput').value = 0;
+    el('dpPercent').value = 60;
+    el('tenure').value = 24;
+    el('namsariInput').value = 3000;
+    el('advEmiInput').value = 0;
+    el('helmetInput').value = 1500;
+    el('legguardInput').value = 2000;
+    el('seatcoverInput').value = 800;
+    el('othersInput').value = 0;
+    if (typeof window.calculateFinance === 'function') window.calculateFinance();
+    refreshCosmetics();
+  });
+
+  el('stickyScrollBtn').addEventListener('click', () => {
+    el('ledgerAnchor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  renderSlabLadder();
+})();
+</script>
+</body>
+</html>
