@@ -88,7 +88,14 @@
       font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.75rem;
       letter-spacing: 0.08em; text-transform: uppercase;
       padding: 6px 14px; border-radius: 999px; box-shadow: 0 4px 14px rgba(0,94,166,0.28);
+      position: relative; overflow: hidden;
     }
+    .price-badge::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.55) 50%, transparent 80%);
+      transform: translateX(-140%); animation: badgeShine 3.4s ease-in-out infinite;
+    }
+    @keyframes badgeShine { 0%,55%{transform:translateX(-140%)} 80%{transform:translateX(140%)} 100%{transform:translateX(140%)} }
     .cta-primary {
       background: #005EA6; color: #fff;
       font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.925rem;
@@ -96,7 +103,14 @@
       display: inline-flex; align-items: center; gap: 8px;
       transition: all 0.22s ease; box-shadow: 0 4px 18px rgba(0,94,166,0.3);
       text-decoration: none; border: 2px solid #005EA6;
+      position: relative; overflow: hidden;
     }
+    .cta-primary::before {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%);
+      transform: translateX(-160%); transition: transform 0.55s ease;
+    }
+    .cta-primary:hover::before { transform: translateX(160%); }
     .cta-primary:hover { background: #004A85; border-color: #004A85; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(0,94,166,0.38); }
     .cta-secondary {
       background: transparent; color: #005EA6;
@@ -127,6 +141,12 @@
       background: #fff; border: 1px solid rgba(0,94,166,0.12); border-radius: 12px;
       padding: 14px 20px; display: flex; flex-direction: column; align-items: center;
       gap: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+    .stat-chip:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0,94,166,0.16);
+      border-color: rgba(0,94,166,0.3);
     }
 
     /* ── PRICE SECTION ── */
@@ -194,6 +214,14 @@
       background: radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 70%);
       border-radius: 50%;
     }
+    .fin-stat {
+      transition: transform 0.22s ease, background 0.22s ease, border-color 0.22s ease;
+    }
+    .fin-stat:hover {
+      transform: translateY(-4px);
+      background: rgba(255,255,255,0.16) !important;
+      border-color: rgba(255,255,255,0.3) !important;
+    }
 
     /* ── WHY US feature icon ── */
     .feature-icon-wrap {
@@ -226,7 +254,7 @@
     .fade-up-2 { animation: fadeUp 0.55s 0.1s ease both; }
     .fade-up-3 { animation: fadeUp 0.55s 0.2s ease both; }
 
-    @media (prefers-reduced-motion: reduce) { .float-anim,.fade-up,.fade-up-2,.fade-up-3,.yng-card { animation: none !important; } }
+    @media (prefers-reduced-motion: reduce) { .float-anim,.fade-up,.fade-up-2,.fade-up-3,.yng-card,.price-badge::before,.cta-primary::before { animation: none !important; } }
 
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -270,10 +298,6 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           Finance
         </a>
-        <a href="form.html" class="nav-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          Allocations
-        </a>
         <a href="#" class="nav-link">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           KYC
@@ -306,7 +330,6 @@
         <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Home</a>
         <a href="#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Price List</a>
         <a href="finance.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Finance</a>
-        <a href="form.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Allocations</a>
         <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">KYC</a>
         <a href="https://yonghangishak.com.np/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">About</a>
         <div class="pt-2 grid grid-cols-2 gap-2">
@@ -359,7 +382,7 @@
             <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide text-center">Models<br/>Available</span>
           </div>
           <div class="stat-chip">
-            <span style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:#005EA6;line-height:1;">9.99%</span>
+            <span style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:#005EA6;line-height:1;">8.99%</span>
             <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide text-center">Interest<br/>Schemes</span>
           </div>
           <div class="stat-chip">
@@ -548,26 +571,26 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
               Calculate My EMI
             </a>
-            <a href="https://wa.me/9779802315425" class="inline-flex items-center gap-2 bg-white/10 border border-white/25 text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">Apply for Finance</a>
+            <a href="https://wa.me/9779802315425" target="_blank" class="inline-flex items-center gap-2 bg-white/10 border border-white/25 text-white font-semibold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">Apply for Finance</a>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
-          <div class="bg-white/10 border border-white/15 rounded-2xl p-5 space-y-2">
+          <div class="fin-stat bg-white/10 border border-white/15 rounded-2xl p-5 space-y-2">
             <div class="text-bajaj-amber font-bold" style="font-family:'Bebas Neue',cursive;font-size:2rem;line-height:1;">40%</div>
             <div class="text-white font-semibold text-sm">Minimum Down Payment</div>
             <div class="text-blue-200 text-xs">On select models with valid KYC</div>
           </div>
-          <div class="bg-white/10 border border-white/15 rounded-2xl p-5 space-y-2">
+          <div class="fin-stat bg-white/10 border border-white/15 rounded-2xl p-5 space-y-2">
             <div class="text-bajaj-amber font-bold" style="font-family:'Bebas Neue',cursive;font-size:2rem;line-height:1;">36</div>
             <div class="text-white font-semibold text-sm">Months Max Tenure</div>
             <div class="text-blue-200 text-xs">Flexible repayment plans</div>
           </div>
-          <div class="bg-white/10 border border-white/15 rounded-2xl p-5 space-y-2">
+          <div class="fin-stat bg-white/10 border border-white/15 rounded-2xl p-5 space-y-2">
             <div class="text-bajaj-amber font-bold" style="font-family:'Bebas Neue',cursive;font-size:2rem;line-height:1;">0%</div>
             <div class="text-white font-semibold text-sm">Processing Fee</div>
             <div class="text-blue-200 text-xs">On festival season offers</div>
           </div>
-          <div class="bg-white/10 border border-white/15 rounded-2xl p-5 space-y-2">
+          <div class="fin-stat bg-white/10 border border-white/15 rounded-2xl p-5 space-y-2">
             <div class="text-bajaj-amber font-bold" style="font-family:'Bebas Neue',cursive;font-size:2rem;line-height:1;">1 Hr</div>
             <div class="text-white font-semibold text-sm">Approval Time</div>
             <div class="text-blue-200 text-xs">Quick KYC + loan disbursal</div>
@@ -708,7 +731,7 @@
         </div>
         <p class="text-slate-400 text-sm leading-relaxed">Panchthar's premier destination for Bajaj motorcycles, genuine parts, and trusted after-sales service.</p>
         <div class="flex gap-3">
-          <a href="https://www.facebook.com/sambridhi.brothers" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-bajaj-blue transition-all" aria-label="Facebook">
+          <a href="https://www.facebook.com/sambridhi.brothers" target="_blank" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-bajaj-blue transition-all" aria-label="Facebook">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
           </a>
           <a href="tel:+9779802315425" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-bajaj-blue transition-all" aria-label="Phone">
@@ -722,7 +745,6 @@
           <li><a href="#" class="footer-link">Home</a></li>
           <li><a href="#prices" class="footer-link">Price List</a></li>
           <li><a href="#finance" class="footer-link">Finance / EMI</a></li>
-          <li><a href="#" class="footer-link">Allocations</a></li>
           <li><a href="#" class="footer-link">KYC Form</a></li>
           <li><a href="#about" class="footer-link">About Us</a></li>
         </ul>
