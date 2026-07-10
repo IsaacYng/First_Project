@@ -10,6 +10,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <link rel="icon" type="image/png" href="favicon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'bajaj-blue': '#005EA6',
+          'bajaj-blueDark': '#004A85',
+          'bajaj-blueLight': '#E8F2FB'
+        }
+      }
+    }
+  }
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;overflow-x:hidden;width:100%}
@@ -26,16 +40,54 @@ a{text-decoration:none;color:inherit}
   --mono:'JetBrains Mono',monospace;
 }
 
-/* ═══ NAV ═══ */
-.nav-blur{background:rgba(255,255,255,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,94,166,.08);box-shadow:0 2px 24px rgba(0,0,0,.06)}
-.nav-link{position:relative;font-size:.875rem;font-weight:500;color:#374151;display:flex;align-items:center;gap:5px;transition:color .2s;padding:4px 2px}
-.nav-link::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:var(--blue);border-radius:2px;transition:width .25s ease}
-.nav-link:hover,.nav-link.active{color:var(--blue)}
-.nav-link:hover::after,.nav-link.active::after{width:100%}
-#mobile-menu{max-height:0;overflow:hidden;transition:max-height .38s cubic-bezier(.4,0,.2,1),opacity .28s ease;opacity:0}
-#mobile-menu.open{max-height:560px;opacity:1}
-.cta-primary{background:var(--blue);color:#fff;font-weight:600;font-size:.925rem;letter-spacing:.02em;padding:12px 24px;border-radius:10px;display:inline-flex;align-items:center;gap:8px;transition:all .22s ease;box-shadow:0 4px 18px rgba(0,94,166,.3);border:2px solid var(--blue);cursor:pointer}
-.cta-primary:hover{background:var(--blueDark);border-color:var(--blueDark);transform:translateY(-2px);box-shadow:0 8px 26px rgba(0,94,166,.38)}
+ /* ── NAV ── */
+    .nav-blur {
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(0,94,166,0.08);
+      box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+    }
+    .nav-link {
+      position: relative; font-size: 0.875rem; font-weight: 500; color: #374151;
+      display: flex; align-items: center; gap: 5px; transition: color 0.2s;
+      padding: 4px 2px;
+    }
+    .nav-link::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 2px; background: #005EA6; border-radius: 2px; transition: width 0.25s ease;
+    }
+    .nav-link:hover { color: #005EA6; }
+    .nav-link:hover::after { width: 100%; }
+    .nav-link.active { color: #005EA6; }
+    .nav-link.active::after { width: 100%; }
+
+    /* Mobile menu */
+    #mobile-menu { max-height: 0; overflow: hidden; transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease; opacity: 0; }
+    #mobile-menu.open { max-height: 560px; opacity: 1; }
+
+/* ═══ CTA BUTTON ═══ */
+.cta-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;border-radius:10px;padding:10px 20px;border:none;cursor:pointer;transition:background .2s,transform .15s;box-shadow:0 4px 14px rgba(0,94,166,.22)}
+.cta-primary:hover{background:var(--blueDark)}
+
+/* ═══ CUSTOM MODEL DROPDOWN ═══ */
+.custom-select{position:relative}
+.sr-only-select{position:absolute;opacity:0;pointer-events:none;height:46px;width:100%;left:0;top:0}
+.custom-select-trigger{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);padding:0 16px;font-size:14px;color:var(--ink);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif;text-align:left}
+.custom-select-trigger:hover{border-color:#C9D6E3}
+.custom-select-trigger.open{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1)}
+.cst-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.cst-chevron{color:var(--ink3);font-size:12px;transition:transform .22s ease;margin-left:8px;flex-shrink:0}
+.custom-select-trigger.open .cst-chevron{transform:rotate(180deg);color:var(--blue)}
+.custom-select-panel{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:320px;overflow-y:auto;z-index:40;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);transform-origin:top center;transition:opacity .18s ease,transform .18s ease,visibility .18s;padding:6px}
+.custom-select-panel.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.cst-option{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:background .15s;font-size:14px;color:var(--ink2);font-weight:500}
+.cst-option:hover{background:var(--blueLt)}
+.cst-option .cst-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .18s,background .18s}
+.cst-option .cst-dot::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);opacity:0;transform:scale(.4);transition:opacity .15s,transform .15s}
+.cst-option.selected{color:var(--ink);font-weight:700;background:var(--blueLt)}
+.cst-option.selected .cst-dot{border-color:var(--blue)}
+.cst-option.selected .cst-dot::after{opacity:1;transform:scale(1)}
 
 /* ═══ HERO ═══ */
 .fin-hero{background:linear-gradient(135deg,#F0F7FF 0%,#EBF4FF 55%,#DCEEFB 100%);position:relative;overflow:hidden}
@@ -241,54 +293,82 @@ footer{background:#0F172A}
 <body>
 
 <!-- ══════════ NAV ══════════ -->
-<header class="nav-blur fixed top-0 left-0 right-0 z-50" style="position:fixed;top:0;left:0;right:0;z-index:50">
-  <nav style="max-width:1280px;margin:0 auto;padding:0 20px">
-    <div style="display:flex;align-items:center;justify-content:space-between;height:64px">
-      <a href="index.html" style="display:flex;align-items:center;gap:10px">
-        <div style="width:36px;height:36px;border-radius:10px;background:var(--blue);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.1);flex-shrink:0">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 16 Q7 8 11 7 Q15 6 18 10" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none"/><circle cx="5" cy="17" r="2.2" fill="#fff" opacity=".9"/><circle cx="17" cy="17" r="2.2" fill="#fff" opacity=".9"/><path d="M5 17 L17 17" stroke="#fff" stroke-width="1.4" opacity=".5"/></svg>
+<header class="nav-blur fixed top-0 left-0 right-0 z-50">
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Brand -->
+      <a href="#" class="flex items-center gap-2.5" aria-label="Samriddhi Auto Home">
+        <div class="w-9 h-9 rounded-lg bg-bajaj-blue flex items-center justify-center shadow-sm flex-shrink-0">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M4 16 Q7 8 11 7 Q15 6 18 10" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            <circle cx="5" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+            <circle cx="17" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+            <path d="M5 17 L17 17" stroke="#fff" stroke-width="1.4" opacity="0.5"/>
+          </svg>
         </div>
-        <div style="line-height:1.1">
-          <div style="font-size:14px;font-weight:700;color:#0F172A">Samriddhi And Brothers</div>
-          <div style="font-size:10px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;margin-top:2px">Bajaj Authorized Dealer</div>
+        <div class="leading-tight">
+          <div class="text-sm font-bold text-slate-900 tracking-tight leading-none">Samriddhi And Brothers</div>
+          <div class="text-[10px] font-medium text-bajaj-blue leading-none tracking-wide uppercase mt-0.5">Bajaj Authorized Dealer</div>
         </div>
       </a>
 
-      <div class="hidden-mobile" style="display:flex;align-items:center;gap:28px">
-        <a href="index.html" class="nav-link">Home</a>
-        <a href="index.html#prices" class="nav-link">Price List</a>
-        <a href="finance.html" class="nav-link active">Finance</a>
-        <a href="#" class="nav-link">KYC</a>
-        <a href="https://yonghangishak.com.np/" target="_blank" class="nav-link">About</a>
+      <!-- Desktop Nav -->
+      <div class="hidden lg:flex items-center gap-7">
+        <a href="#" class="nav-link active">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </a>
+        <a href="#prices" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Price List
+        </a>
+        <a href="finance.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Finance
+        </a>
+        <a href="#" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          KYC
+        </a>
+        <a href="https://yonghangishak.com.np/" target="_blank" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          About
+        </a>
       </div>
 
-      <div class="hidden-mobile" style="display:flex;align-items:center;gap:12px">
-        <a href="https://wa.me/9779802315425" target="_blank" class="cta-primary" style="font-size:13px;padding:10px 18px"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+      <!-- Desktop CTA -->
+      <div class="hidden lg:flex items-center gap-3">
+        <a href="tel:+9779820907795" class="text-sm font-semibold text-bajaj-blue flex items-center gap-1.5 hover:text-bajaj-blueDark transition-colors">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+          Call Showroom
+        </a>
+        <a href="#prices" class="cta-primary text-sm py-2.5 px-5">Book a Test Ride</a>
       </div>
 
-      <button id="hamburger-btn" style="display:none;background:none;border:none;padding:8px;border-radius:8px;color:#334155" aria-label="Toggle menu">
+      <!-- Hamburger -->
+      <button id="hamburger-btn" class="lg:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors" aria-label="Toggle menu" aria-expanded="false">
         <svg id="icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        <svg id="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <svg id="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hidden"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
 
-    <div id="mobile-menu">
-      <div style="padding:16px 0;border-top:1px solid #F1F5F9;display:flex;flex-direction:column;gap:4px">
-        <a href="index.html" style="padding:10px 4px;font-size:14px;font-weight:500;color:#374151">Home</a>
-        <a href="index.html#prices" style="padding:10px 4px;font-size:14px;font-weight:500;color:#374151">Price List</a>
-        <a href="finance.html" style="padding:10px 4px;font-size:14px;font-weight:600;color:var(--blue)">Finance</a>
-        <a href="#" style="padding:10px 4px;font-size:14px;font-weight:500;color:#374151">KYC</a>
-        <a href="https://yonghangishak.com.np/" target="_blank" style="padding:10px 4px;font-size:14px;font-weight:500;color:#374151">About</a>
-        <a href="https://wa.me/9779802315425" target="_blank" style="margin-top:8px;text-align:center;background:var(--blue);color:#fff;padding:11px;border-radius:9px;font-size:14px;font-weight:600">WhatsApp Us</a>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="lg:hidden">
+      <div class="py-4 border-t border-slate-100 space-y-1">
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Home</a>
+        <a href="#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Price List</a>
+        <a href="finance.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Finance</a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">KYC</a>
+        <a href="https://yonghangishak.com.np/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">About</a>
+        <div class="pt-2 grid grid-cols-2 gap-2">
+          <a href="tel:+9779802315425" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-bajaj-blue text-bajaj-blue text-sm font-semibold">Call Us</a>
+          <a href="#prices" class="flex items-center justify-center py-2.5 rounded-xl bg-bajaj-blue text-white text-sm font-semibold">Ride</a>
+        </div>
       </div>
     </div>
   </nav>
 </header>
-
-<style>
-@media (min-width:1024px){.hidden-mobile{display:flex !important}#hamburger-btn{display:none !important}}
-@media (max-width:1023px){.hidden-mobile{display:none !important}#hamburger-btn{display:block !important}}
-</style>
 
 <!-- ══════════ HERO ══════════ -->
 <section class="fin-hero" style="padding-top:64px">
@@ -327,7 +407,14 @@ footer{background:#0F172A}
         <div class="calc-card">
           <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-motorcycle"></i></span>Select Model &amp; Pricing</div>
           <label class="field-label">Bike Model</label>
-          <select id="modelSelect" class="styled"><option>Loading bikes…</option></select>
+          <div class="custom-select" id="modelSelectWrap">
+            <select id="modelSelect" class="styled sr-only-select" tabindex="-1" aria-hidden="true"><option>Loading bikes…</option></select>
+            <button type="button" class="custom-select-trigger" id="modelSelectTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="cst-text" id="modelSelectTriggerText">Loading bikes…</span>
+              <i class="fa-solid fa-chevron-down cst-chevron"></i>
+            </button>
+            <div class="custom-select-panel" id="modelSelectPanel" role="listbox"></div>
+          </div>
 
           <div class="metrics-row">
             <div class="metric-box"><span class="metric-lbl">MRP Price</span><span class="metric-val" id="mrp">0</span></div>
@@ -339,17 +426,31 @@ footer{background:#0F172A}
           <div class="config-row">
             <div>
               <label class="field-label">Downpayment %</label>
-              <select id="dpPercent" class="styled">
-                <option value="30">30%</option><option value="40">40%</option>
-                <option value="50" selected>50%</option><option value="60">60%</option>
-              </select>
+              <div class="custom-select" id="dpPercentWrap">
+                <select id="dpPercent" class="styled sr-only-select" tabindex="-1" aria-hidden="true">
+                  <option value="30">30%</option><option value="40">40%</option>
+                  <option value="50" selected>50%</option><option value="60">60%</option>
+                </select>
+                <button type="button" class="custom-select-trigger" id="dpPercentTrigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="cst-text" id="dpPercentTriggerText">50%</span>
+                  <i class="fa-solid fa-chevron-down cst-chevron"></i>
+                </button>
+                <div class="custom-select-panel" id="dpPercentPanel" role="listbox"></div>
+              </div>
             </div>
             <div>
               <label class="field-label">Loan Tenure</label>
-              <select id="tenure" class="styled">
-                <option value="12" selected>12 Months</option><option value="18">18 Months</option>
-                <option value="24">24 Months</option><option value="36">36 Months</option>
-              </select>
+              <div class="custom-select" id="tenureWrap">
+                <select id="tenure" class="styled sr-only-select" tabindex="-1" aria-hidden="true">
+                  <option value="12" selected>12 Months</option><option value="18">18 Months</option>
+                  <option value="24">24 Months</option><option value="36">36 Months</option>
+                </select>
+                <button type="button" class="custom-select-trigger" id="tenureTrigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="cst-text" id="tenureTriggerText">12 Months</span>
+                  <i class="fa-solid fa-chevron-down cst-chevron"></i>
+                </button>
+                <div class="custom-select-panel" id="tenurePanel" role="listbox"></div>
+              </div>
             </div>
           </div>
 
@@ -717,11 +818,82 @@ footer{background:#0F172A}
 const btn=document.getElementById('hamburger-btn'),mMenu=document.getElementById('mobile-menu'),icoOpen=document.getElementById('icon-open'),icoClose=document.getElementById('icon-close');
 btn?.addEventListener('click',()=>{const open=mMenu.classList.toggle('open');icoOpen.style.display=open?'none':'block';icoClose.style.display=open?'block':'none';});
 
+/* ── Custom dropdowns (replaces native <select> popup for ALL selects) ── */
+const CUSTOM_SELECT_IDS=['modelSelect','dpPercent','tenure'];
+function buildCustomSelect(selectId){
+  const real=document.getElementById(selectId);
+  const panel=document.getElementById(selectId+'Panel');
+  if(!real||!panel) return;
+  panel.innerHTML='';
+  Array.from(real.options).forEach((opt,i)=>{
+    const item=document.createElement('div');
+    item.className='cst-option'+(opt.selected?' selected':'');
+    item.setAttribute('role','option');
+    item.dataset.index=i;
+    item.innerHTML=`<span class="cst-dot"></span><span>${opt.text}</span>`;
+    item.addEventListener('click',()=>{
+      real.selectedIndex=i;
+      real.dispatchEvent(new Event('input',{bubbles:true}));
+      syncCustomSelectUI(selectId);
+      closeCustomSelect(selectId);
+    });
+    panel.appendChild(item);
+  });
+  syncCustomSelectUI(selectId);
+}
+function syncCustomSelectUI(selectId){
+  const real=document.getElementById(selectId);
+  const triggerText=document.getElementById(selectId+'TriggerText');
+  const panel=document.getElementById(selectId+'Panel');
+  if(!real||!triggerText) return;
+  const opt=real.options[real.selectedIndex];
+  triggerText.textContent=opt?opt.text:'Select';
+  if(panel){
+    panel.querySelectorAll('.cst-option').forEach(el=>{
+      el.classList.toggle('selected',Number(el.dataset.index)===real.selectedIndex);
+    });
+  }
+}
+function openCustomSelect(selectId){
+  document.getElementById(selectId+'Panel')?.classList.add('open');
+  document.getElementById(selectId+'Trigger')?.classList.add('open');
+  document.getElementById(selectId+'Trigger')?.setAttribute('aria-expanded','true');
+}
+function closeCustomSelect(selectId){
+  document.getElementById(selectId+'Panel')?.classList.remove('open');
+  document.getElementById(selectId+'Trigger')?.classList.remove('open');
+  document.getElementById(selectId+'Trigger')?.setAttribute('aria-expanded','false');
+}
+function closeAllCustomSelects(exceptId){
+  CUSTOM_SELECT_IDS.forEach(id=>{ if(id!==exceptId) closeCustomSelect(id); });
+}
+CUSTOM_SELECT_IDS.forEach(selectId=>{
+  document.getElementById(selectId+'Trigger')?.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    const panel=document.getElementById(selectId+'Panel');
+    const wasOpen=panel?.classList.contains('open');
+    closeAllCustomSelects();
+    if(!wasOpen) openCustomSelect(selectId);
+  });
+});
+document.addEventListener('click',(e)=>{
+  CUSTOM_SELECT_IDS.forEach(selectId=>{
+    const wrap=document.getElementById(selectId+'Wrap');
+    if(wrap && !wrap.contains(e.target)) closeCustomSelect(selectId);
+  });
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeAllCustomSelects();
+});
+/* DP% and Tenure options are static in the HTML, so build them right away */
+buildCustomSelect('dpPercent');
+buildCustomSelect('tenure');
+
 /* ── Rate chip click sets DP% ── */
 document.querySelectorAll('.rate-chip').forEach(chip=>{
   chip.addEventListener('click',()=>{
     const sel=document.getElementById('dpPercent');
-    if(sel){sel.value=chip.dataset.dp;sel.dispatchEvent(new Event('input',{bubbles:true}));}
+    if(sel){sel.value=chip.dataset.dp;sel.dispatchEvent(new Event('input',{bubbles:true}));syncCustomSelectUI('dpPercent');}
   });
 });
 
@@ -793,6 +965,7 @@ async function fetchBikes(){
     const select=document.getElementById('modelSelect');
     if(select){
       select.innerHTML=sorted.map(bike=>`<option value="${bike.id}" ${bike.name&&bike.name.includes("Pulsar 150 SD BS VI")?"selected":""}>${bike.name}</option>`).join('');
+      buildCustomSelect('modelSelect');
       calculateFinance();
     }
   }catch(e){
@@ -809,6 +982,7 @@ async function fetchBikes(){
     const select=document.getElementById('modelSelect');
     if(select){
       select.innerHTML=allBikes.map(b=>`<option value="${b.id}">${b.name}</option>`).join('');
+      buildCustomSelect('modelSelect');
       calculateFinance();
     }
   }
@@ -831,7 +1005,7 @@ window.findChassis=async function(){
       if(data.model){
         const sel=document.getElementById('modelSelect');
         for(let i=0;i<sel.options.length;i++){
-          if(sel.options[i].text===data.model){sel.selectedIndex=i;calculateFinance();break;}
+          if(sel.options[i].text===data.model){sel.selectedIndex=i;syncCustomSelectUI('modelSelect');calculateFinance();break;}
         }
       }
       statusEl.innerText="Vehicle data loaded."; statusEl.style.color="#16A34A";
