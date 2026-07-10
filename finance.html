@@ -500,7 +500,7 @@ footer{background:#0F172A}
             <button onclick="findChassis()" class="cta-primary" style="height:46px;font-size:13px;padding:0 18px"><i class="fa-solid fa-magnifying-glass"></i> Find</button>
             <div style="width:120px">
               <label class="field-label">Make Year</label>
-              <input type="text" id="makeYearInput" class="styled" value="2026">
+              <input type="text" id="makeYearInput" class="styled" value="">
             </div>
           </div>
           <p id="searchStatus" style="font-size:11px;color:var(--ink4);font-style:italic;margin-top:8px"></p>
@@ -818,6 +818,10 @@ footer{background:#0F172A}
 const btn=document.getElementById('hamburger-btn'),mMenu=document.getElementById('mobile-menu'),icoOpen=document.getElementById('icon-open'),icoClose=document.getElementById('icon-close');
 btn?.addEventListener('click',()=>{const open=mMenu.classList.toggle('open');icoOpen.style.display=open?'none':'block';icoClose.style.display=open?'block':'none';});
 
+/* Make Year defaults to the current year automatically, still manually editable */
+const makeYearEl=document.getElementById('makeYearInput');
+if(makeYearEl && !makeYearEl.value) makeYearEl.value=new Date().getFullYear();
+
 /* ── Custom dropdowns (replaces native <select> popup for ALL selects) ── */
 const CUSTOM_SELECT_IDS=['modelSelect','dpPercent','tenure'];
 function buildCustomSelect(selectId){
@@ -1113,7 +1117,7 @@ window.syncAllToA4=function(){
     if(el) el.innerText=document.getElementById(id)?.value||"---";
   });
   const myEl=document.getElementById('a4MakeYear');
-  if(myEl) myEl.innerText=document.getElementById('makeYearInput')?.value||"2026";
+  if(myEl) myEl.innerText=document.getElementById('makeYearInput')?.value||String(new Date().getFullYear());
 
   const a4Row=document.getElementById('a4DiscountRow');
   if(c.discount>0){
