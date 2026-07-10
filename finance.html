@@ -190,6 +190,14 @@ select.styled:focus,input.styled:focus{border-color:var(--blue);box-shadow:0 0 0
 .btn-whatsapp{width:100%;justify-content:center;background:var(--amber);border-color:var(--amber);margin-top:.6rem}
 .btn-whatsapp:hover{background:var(--amberDark);border-color:var(--amberDark)}
 
+/* ═══ VALIDATION ═══ */
+.field-error{border-color:var(--red) !important;box-shadow:0 0 0 3px rgba(220,38,38,.1) !important}
+.field-error-msg{font-size:11px;color:var(--red);margin-top:5px;display:none;align-items:center;gap:5px}
+.field-error-msg.show{display:flex}
+.validation-toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-12px);background:#0F172A;color:#fff;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 12px 32px rgba(0,0,0,.28);z-index:120;display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+.validation-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.validation-toast i{color:#F87171}
+
 /* ═══ MOBILE STICKY BAR ═══ */
 .mobile-bar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#0F172A;color:#fff;padding:10px 14px;display:none;align-items:center;gap:10px;box-shadow:0 -8px 28px rgba(0,0,0,.18);border-top:1px solid rgba(255,255,255,.08)}
 .mobile-bar .emi-chunk{flex:1}
@@ -298,7 +306,7 @@ footer{background:#0F172A}
     <div class="flex items-center justify-between h-16">
 
       <!-- Brand -->
-      <a href="#" class="flex items-center gap-2.5" aria-label="Samriddhi Auto Home">
+      <a href="index.html" class="flex items-center gap-2.5" aria-label="Samriddhi Auto Home">
         <div class="w-9 h-9 rounded-lg bg-bajaj-blue flex items-center justify-center shadow-sm flex-shrink-0">
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
             <path d="M4 16 Q7 8 11 7 Q15 6 18 10" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none"/>
@@ -315,15 +323,15 @@ footer{background:#0F172A}
 
       <!-- Desktop Nav -->
       <div class="hidden lg:flex items-center gap-7">
-        <a href="#" class="nav-link active">
+        <a href="index.html" class="nav-link">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           Home
         </a>
-        <a href="#prices" class="nav-link">
+        <a href="index.html#prices" class="nav-link">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
           Price List
         </a>
-        <a href="finance.html" class="nav-link">
+        <a href="finance.html" class="nav-link active">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           Finance
         </a>
@@ -343,7 +351,7 @@ footer{background:#0F172A}
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
           Call Showroom
         </a>
-        <a href="#prices" class="cta-primary text-sm py-2.5 px-5">Book a Test Ride</a>
+        <a href="index.html#prices" class="cta-primary text-sm py-2.5 px-5">Book a Test Ride</a>
       </div>
 
       <!-- Hamburger -->
@@ -356,14 +364,14 @@ footer{background:#0F172A}
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="lg:hidden">
       <div class="py-4 border-t border-slate-100 space-y-1">
-        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Home</a>
-        <a href="#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Price List</a>
-        <a href="finance.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Finance</a>
+        <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Home</a>
+        <a href="index.html#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Price List</a>
+        <a href="finance.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Finance</a>
         <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">KYC</a>
         <a href="https://yonghangishak.com.np/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">About</a>
         <div class="pt-2 grid grid-cols-2 gap-2">
           <a href="tel:+9779802315425" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-bajaj-blue text-bajaj-blue text-sm font-semibold">Call Us</a>
-          <a href="#prices" class="flex items-center justify-center py-2.5 rounded-xl bg-bajaj-blue text-white text-sm font-semibold">Ride</a>
+          <a href="index.html#prices" class="flex items-center justify-center py-2.5 rounded-xl bg-bajaj-blue text-white text-sm font-semibold">Ride</a>
         </div>
       </div>
     </div>
@@ -483,14 +491,38 @@ footer{background:#0F172A}
         <div class="calc-card">
           <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-user-tag"></i></span>Customer &amp; Vehicle Details <span style="font-weight:400;font-size:11px;color:var(--ink4);margin-left:auto">for the printed form</span></div>
           <div class="customer-grid" style="margin-bottom:14px">
-            <div><label class="field-label">Customer Full Name</label><input type="text" id="custNameInput" class="styled" placeholder="e.g. Ram Bahadur Rai"></div>
-            <div><label class="field-label">Contact Number</label><input type="tel" id="custPhoneInput" class="styled" placeholder="98XXXXXXXX"></div>
+            <div>
+              <label class="field-label">Customer Full Name <span style="color:var(--red)">*</span></label>
+              <input type="text" id="custNameInput" class="styled" placeholder="e.g. Ram Bahadur Rai">
+              <div class="field-error-msg" id="custNameError"><i class="fa-solid fa-circle-exclamation"></i> Customer name is required</div>
+            </div>
+            <div>
+              <label class="field-label">Contact Number <span style="color:var(--red)">*</span></label>
+              <input type="tel" id="custPhoneInput" class="styled" placeholder="98XXXXXXXX" maxlength="10" inputmode="numeric">
+              <div class="field-error-msg" id="custPhoneError"><i class="fa-solid fa-circle-exclamation"></i> Enter a valid 10-digit phone number</div>
+            </div>
           </div>
           <div class="customer-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:.75rem">
-            <div class="acc-field"><label>Chassis No.</label><input type="text" id="manualChassis" placeholder="Chassis"></div>
-            <div class="acc-field"><label>Engine No.</label><input type="text" id="manualEngine" placeholder="Engine"></div>
-            <div class="acc-field"><label>Regd. No.</label><input type="text" id="manualReg" placeholder="Reg No"></div>
-            <div class="acc-field"><label>Color</label><input type="text" id="manualColor" placeholder="Color"></div>
+            <div class="acc-field">
+              <label>Chassis No. <span style="color:var(--red)">*</span></label>
+              <input type="text" id="manualChassis" placeholder="Chassis">
+              <div class="field-error-msg" id="manualChassisError"><i class="fa-solid fa-circle-exclamation"></i> Chassis number is required</div>
+            </div>
+            <div class="acc-field">
+              <label>Engine No. <span style="color:var(--red)">*</span></label>
+              <input type="text" id="manualEngine" placeholder="Engine">
+              <div class="field-error-msg" id="manualEngineError"><i class="fa-solid fa-circle-exclamation"></i> Engine number is required</div>
+            </div>
+            <div class="acc-field">
+              <label>Regd. No. <span style="color:var(--red)">*</span></label>
+              <input type="text" id="manualReg" placeholder="Reg No">
+              <div class="field-error-msg" id="manualRegError"><i class="fa-solid fa-circle-exclamation"></i> Registration number is required</div>
+            </div>
+            <div class="acc-field">
+              <label>Color <span style="color:var(--red)">*</span></label>
+              <input type="text" id="manualColor" placeholder="Color">
+              <div class="field-error-msg" id="manualColorError"><i class="fa-solid fa-circle-exclamation"></i> Color is required</div>
+            </div>
           </div>
           <div style="display:flex;gap:10px;margin-top:14px;align-items:flex-end;flex-wrap:wrap">
             <div style="flex:1;min-width:140px">
@@ -577,6 +609,9 @@ footer{background:#0F172A}
   <button class="mbtn" onclick="openPreview()"><i class="fa-solid fa-file-lines"></i> Preview</button>
   <a href="https://wa.me/9779802315425" target="_blank" class="mbtn amber"><i class="fa-brands fa-whatsapp"></i></a>
 </div>
+
+<!-- ══════════ VALIDATION TOAST ══════════ -->
+<div class="validation-toast" id="validationToast"><i class="fa-solid fa-triangle-exclamation"></i><span id="validationToastMsg">Please fill required fields</span></div>
 
 <!-- ══════════ FOOTER ══════════ -->
 <footer style="padding:48px 0">
@@ -901,8 +936,64 @@ document.querySelectorAll('.rate-chip').forEach(chip=>{
   });
 });
 
+/* ── Required-field validation before Preview / Print ──
+   Rules: Customer Name required, Phone must be exactly 10 digits,
+   Chassis No. and Engine No. required. */
+function showFieldError(inputId,errorId,show){
+  const input=document.getElementById(inputId);
+  const err=document.getElementById(errorId);
+  if(input) input.classList.toggle('field-error',show);
+  if(err) err.classList.toggle('show',show);
+}
+function showValidationToast(msg){
+  const toast=document.getElementById('validationToast');
+  const msgEl=document.getElementById('validationToastMsg');
+  if(!toast) return;
+  if(msgEl) msgEl.textContent=msg;
+  toast.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>toast.classList.remove('show'),3200);
+}
+function validateRequiredFields(){
+  const name=document.getElementById('custNameInput')?.value.trim()||'';
+  const phone=document.getElementById('custPhoneInput')?.value.trim()||'';
+  const chassis=document.getElementById('manualChassis')?.value.trim()||'';
+  const engine=document.getElementById('manualEngine')?.value.trim()||'';
+  const reg=document.getElementById('manualReg')?.value.trim()||'';
+  const color=document.getElementById('manualColor')?.value.trim()||'';
+  const phoneValid=/^[0-9]{10}$/.test(phone);
+
+  showFieldError('custNameInput','custNameError',name.length===0);
+  showFieldError('custPhoneInput','custPhoneError',!phoneValid);
+  showFieldError('manualChassis','manualChassisError',chassis.length===0);
+  showFieldError('manualEngine','manualEngineError',engine.length===0);
+  showFieldError('manualReg','manualRegError',reg.length===0);
+  showFieldError('manualColor','manualColorError',color.length===0);
+
+  if(name.length===0) return {ok:false,msg:'Please enter the customer name.',focus:'custNameInput'};
+  if(!phoneValid) return {ok:false,msg:'Please enter a valid 10-digit phone number.',focus:'custPhoneInput'};
+  if(chassis.length===0) return {ok:false,msg:'Please enter the chassis number.',focus:'manualChassis'};
+  if(engine.length===0) return {ok:false,msg:'Please enter the engine number.',focus:'manualEngine'};
+  if(reg.length===0) return {ok:false,msg:'Please enter the registration number.',focus:'manualReg'};
+  if(color.length===0) return {ok:false,msg:'Please enter the vehicle color.',focus:'manualColor'};
+  return {ok:true};
+}
+/* Clear the red error state as soon as the person starts fixing a field */
+['custNameInput','custPhoneInput','manualChassis','manualEngine','manualReg','manualColor'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input',()=>{
+    showFieldError(id,id+'Error',false);
+  });
+});
+
 /* ── Preview overlay controls (Advanced idea #1: modal-only, never rendered on load) ── */
 function openPreview(){
+  const result=validateRequiredFields();
+  if(!result.ok){
+    showValidationToast(result.msg);
+    document.getElementById(result.focus)?.scrollIntoView({behavior:'smooth',block:'center'});
+    document.getElementById(result.focus)?.focus();
+    return;
+  }
   syncAllToA4();
   document.getElementById('previewOverlay').classList.add('open');
   document.body.style.overflow='hidden';
@@ -1012,6 +1103,10 @@ window.findChassis=async function(){
           if(sel.options[i].text===data.model){sel.selectedIndex=i;syncCustomSelectUI('modelSelect');calculateFinance();break;}
         }
       }
+      showFieldError('manualChassis','manualChassisError',false);
+      showFieldError('manualEngine','manualEngineError',false);
+      showFieldError('manualReg','manualRegError',false);
+      showFieldError('manualColor','manualColorError',false);
       statusEl.innerText="Vehicle data loaded."; statusEl.style.color="#16A34A";
     }else{
       document.getElementById('manualChassis').value=searchVal;
@@ -1132,6 +1227,13 @@ function syncField(srcId,dstId){
   if(src&&dst) dst.innerHTML=src.innerHTML;
 }
 window.printBothPages=function(){
+  const result=validateRequiredFields();
+  if(!result.ok){
+    showValidationToast(result.msg);
+    document.getElementById(result.focus)?.scrollIntoView({behavior:'smooth',block:'center'});
+    document.getElementById(result.focus)?.focus();
+    return;
+  }
   syncAllToA4();
   ['Date','Dealer','CustName','CustPhone','Model','MRP','DP','Loan','Rate','Tenure','Namsari','Ins'].forEach(k=>syncField('a4'+k,'p1'+k));
   syncField('a4AdvEmiAmt','p1AdvEmi'); syncField('a4TotalDP','p1TotalDP');
