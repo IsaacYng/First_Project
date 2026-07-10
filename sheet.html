@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Finance Sheet | Samriddhi And Brothers — Bajaj Phidim</title>
+<meta name="description" content="Full model-wise EMI sheet — every Bajaj bike, downpayment %, loan amount, EMI and total, in one printable table." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="icon" type="image/png" href="favicon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  if (typeof tailwind !== 'undefined') {
+    tailwind.config = { theme: { extend: { colors: { 'bajaj-blue': '#005EA6', 'bajaj-blueDark': '#004A85', 'bajaj-blueLight': '#E8F2FB' } } } }
+  }
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;overflow-x:hidden;width:100%}
+body{font-family:'DM Sans',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-font-smoothing:antialiased;overflow-x:hidden;width:100%;max-width:100vw}
+a{text-decoration:none;color:inherit}
+
+:root{
+  --blue:#005EA6; --blueDark:#004A85; --blueLt:#E8F2FB;
+  --amber:#F59E0B; --amberDark:#D97706;
+  --green:#16A34A; --red:#DC2626;
+  --line:#E2E8F0; --bgSoft:#F8FAFC;
+  --ink:#0F172A; --ink2:#334155; --ink3:#64748B; --ink4:#94A3B8;
+  --mono:'JetBrains Mono',monospace;
+}
+
+/* ── NAV (identical to finance.html) ── */
+.nav-blur{background:rgba(255,255,255,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,94,166,0.08);box-shadow:0 2px 24px rgba(0,0,0,0.06)}
+.nav-link{position:relative;font-size:0.875rem;font-weight:500;color:#374151;display:flex;align-items:center;gap:5px;transition:color 0.2s;padding:4px 2px}
+.nav-link::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:#005EA6;border-radius:2px;transition:width 0.25s ease}
+.nav-link:hover{color:#005EA6}.nav-link:hover::after{width:100%}
+.nav-link.active{color:#005EA6}.nav-link.active::after{width:100%}
+#mobile-menu{max-height:0;overflow:hidden;transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.28s ease;opacity:0}
+#mobile-menu.open{max-height:640px;opacity:1}
+
+.cta-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;border-radius:10px;padding:10px 20px;border:none;cursor:pointer;transition:background .2s,transform .15s;box-shadow:0 4px 14px rgba(0,94,166,.22)}
+.cta-primary:hover{background:var(--blueDark)}
+
+/* ── custom dropdown (same component as finance.html) ── */
+.custom-select{position:relative}
+.sr-only-select{position:absolute;opacity:0;pointer-events:none;height:46px;width:100%;left:0;top:0}
+.custom-select-trigger{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);padding:0 16px;font-size:14px;color:var(--ink);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif;text-align:left}
+.custom-select-trigger:hover{border-color:#C9D6E3}
+.custom-select-trigger.open{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1)}
+.cst-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.cst-chevron{color:var(--ink3);font-size:12px;transition:transform .22s ease;margin-left:8px;flex-shrink:0}
+.custom-select-trigger.open .cst-chevron{transform:rotate(180deg);color:var(--blue)}
+.custom-select-panel{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:320px;overflow-y:auto;z-index:40;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);transform-origin:top center;transition:opacity .18s ease,transform .18s ease,visibility .18s;padding:6px}
+.custom-select-panel.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.cst-option{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:background .15s;font-size:14px;color:var(--ink2);font-weight:500}
+.cst-option:hover{background:var(--blueLt)}
+.cst-option .cst-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .18s,background .18s}
+.cst-option .cst-dot::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);opacity:0;transform:scale(.4);transition:opacity .15s,transform .15s}
+.cst-option.selected{color:var(--ink);font-weight:700;background:var(--blueLt)}
+.cst-option.selected .cst-dot{border-color:var(--blue)}
+.cst-option.selected .cst-dot::after{opacity:1;transform:scale(1)}
+
+.field-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;display:block}
+input.styled{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);padding:0 14px;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
+input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1)}
+
+/* ── hero ── */
+.fin-hero{background:linear-gradient(135deg,#F0F7FF 0%,#EBF4FF 55%,#DCEEFB 100%);position:relative;overflow:hidden}
+.fin-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:420px;height:420px;background:radial-gradient(circle,rgba(0,94,166,.1) 0%,transparent 70%);border-radius:50%}
+.fin-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(245,158,11,.08) 0%,transparent 70%);border-radius:50%}
+.headline{font-family:'Bebas Neue',cursive;line-height:.95;letter-spacing:.01em}
+.price-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,94,166,.28)}
+.stat-chip{background:#fff;border:1px solid rgba(0,94,166,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+
+.calc-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:1.4rem;box-shadow:0 2px 14px rgba(0,0,0,.04)}
+.calc-card-title{display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:700;color:var(--ink);letter-spacing:.01em;margin-bottom:1.2rem;flex-wrap:wrap}
+.calc-card-title .icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--blueLt);color:var(--blue);flex-shrink:0}
+
+.acc-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:12px}
+@media (max-width:680px){.acc-grid-4{grid-template-columns:1fr 1fr}}
+@media (max-width:380px){.acc-grid-4{grid-template-columns:1fr}}
+.acc-field{display:flex;flex-direction:column;gap:6px}
+.acc-field label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:6px}
+.acc-field label i{color:var(--blue);font-size:12px}
+.acc-field input{border:none;border-bottom:1.5px solid var(--line);background:transparent;outline:none;font-size:15px;font-weight:700;color:var(--ink);padding:5px 2px;transition:border-color .18s;font-family:'DM Sans',sans-serif}
+.acc-field input:focus{border-color:var(--blue)}
+
+.acc-row-custom{display:flex;align-items:center;gap:8px;background:var(--bgSoft);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.acc-row-custom input.name{flex:1;border:none;background:transparent;font-size:13px;font-weight:600;color:var(--ink);outline:none}
+.acc-row-custom input.amt{width:90px;border:none;background:transparent;font-size:13px;font-weight:700;color:var(--ink);outline:none;text-align:right}
+.acc-remove{width:26px;height:26px;border-radius:8px;border:none;background:rgba(220,38,38,.08);color:var(--red);cursor:pointer;flex-shrink:0;font-size:12px;transition:background .15s}
+.acc-remove:hover{background:rgba(220,38,38,.16)}
+.acc-add-btn{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--blue);background:var(--blueLt);border:1px dashed rgba(0,94,166,.35);border-radius:10px;padding:8px 14px;cursor:pointer;transition:background .15s}
+.acc-add-btn:hover{background:#DCEEFB}
+
+.acc-total-chip{margin-left:auto;background:var(--blueLt);color:var(--blue);font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:.02em;padding:4px 14px;border-radius:999px}
+
+/* ── summary strip ── */
+.summary-strip{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.1rem}
+.sum-pill{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 16px;display:flex;flex-direction:column;gap:2px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.sum-pill .k{font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3)}
+.sum-pill .v{font-family:'Bebas Neue',cursive;font-size:1.15rem;color:var(--blue);letter-spacing:.02em}
+
+/* ── SHEET TABLE ── */
+.sheet-wrap{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 2px 14px rgba(0,0,0,.04);overflow:hidden}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative}
+.table-scroll::-webkit-scrollbar{height:8px}
+.table-scroll::-webkit-scrollbar-thumb{background:rgba(0,94,166,.3);border-radius:99px}
+.sheet-table{border-collapse:collapse;width:100%;min-width:1180px;font-size:12.5px}
+.sheet-table thead th{background:var(--blueDark);color:#fff;font-weight:700;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:12px 10px;text-align:right;white-space:nowrap;position:sticky;top:0;z-index:2}
+.sheet-table thead th:first-child,.sheet-table tbody td:first-child{text-align:center}
+.sheet-table thead th:nth-child(2),.sheet-table tbody td:nth-child(2){text-align:left}
+.sheet-table thead th .badge{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--amber);margin-top:2px;text-transform:none;letter-spacing:0}
+.sheet-table tbody td{padding:10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap;color:var(--ink2)}
+.sheet-table tbody tr:nth-child(even){background:var(--bgSoft)}
+.sheet-table tbody tr:hover{background:var(--blueLt)}
+.sheet-table tbody td.model-cell{font-weight:700;color:var(--ink)}
+.sheet-table tbody td.total-cell{font-weight:800;color:var(--blue);font-family:'JetBrains Mono',monospace}
+.sheet-table tbody td:first-child{color:var(--ink4);font-weight:600}
+
+.scroll-hint{display:none;align-items:center;justify-content:center;gap:8px;font-size:11.5px;font-weight:600;color:var(--ink3);padding:9px;background:var(--bgSoft);border-top:1px solid var(--line)}
+.scroll-hint i{color:var(--blue)}
+
+/* ── preview modal ── */
+#previewOverlay{position:fixed;inset:0;z-index:100;background:rgba(8,15,26,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+#previewOverlay.open{display:flex;animation:overlayIn .25s ease both}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+.preview-shell{width:100%;max-width:1100px;background:#F1F5F9;border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.4);animation:shellIn .32s cubic-bezier(.16,1,.3,1) both}
+@keyframes shellIn{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.preview-toolbar{background:#0F172A;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+.preview-toolbar .ptitle{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:.04em}
+.preview-toolbar .ptitle i{color:var(--amber)}
+.ptabs{display:flex;gap:6px;background:rgba(255,255,255,.06);padding:4px;border-radius:10px;flex-wrap:wrap}
+.ptab{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;transition:all .18s;border:none;background:transparent}
+.ptab.active{background:var(--blue);color:#fff}
+.pactions{display:flex;gap:8px}
+.pbtn{border:none;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .18s}
+.pbtn.print{background:var(--amber);color:#0F172A}
+.pbtn.print:hover{background:#FBBF24}
+.pbtn.close{background:rgba(255,255,255,.08);color:#fff}
+.pbtn.close:hover{background:rgba(255,255,255,.16)}
+.preview-body{padding:20px;overflow-x:auto}
+.pv-page{display:none}
+.pv-page.active{display:block;animation:pageIn .28s ease both}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.a4l-paper{font-family:'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;background:#fff !important;width:297mm;min-height:210mm;height:210mm;padding:9mm 10mm;box-sizing:border-box;margin:0 auto;box-shadow:0 6px 40px rgba(0,0,0,.22);border:1px solid #ddd;display:flex;flex-direction:column;justify-content:center}
+.pv-titlebar{flex:0 0 auto;text-align:center;color:#000;font-size:11pt;font-weight:700;margin-bottom:4mm}
+.pv-tablewrap{flex:0 0 auto}
+.pv-datebar{flex:0 0 auto;text-align:center;color:#000;font-size:8.5pt;margin-top:4mm}
+.pv-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:7.8pt;color:#000;border:1px solid #000}
+.pv-table th{background:#4C7A2A;color:#fff;padding:6px 4px;text-align:right;font-size:7pt;letter-spacing:.01em;word-wrap:break-word;border:0.75px solid #000}
+.pv-table th:nth-child(1),.pv-table td:nth-child(1){text-align:center;width:4%}
+.pv-table th:nth-child(2),.pv-table td:nth-child(2){text-align:left;width:17%}
+.pv-table th:nth-child(n+3),.pv-table td:nth-child(n+3){width:8.6%}
+.pv-table td{padding:4px;border:0.5px solid #000;text-align:right;word-wrap:break-word;overflow-wrap:break-word}
+.pv-table tr:nth-child(even){background:#D9D9D9}
+.pv-table td.total-cell{font-weight:bold}
+
+@media print{
+  body>*:not(#print-wrapper){display:none !important}
+  #print-wrapper{display:block !important}
+  html,body{margin:0 !important;padding:0 !important;background:#fff !important;width:297mm !important;overflow:visible !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .print-page{width:297mm !important;min-height:210mm !important;height:210mm !important;padding:9mm 10mm !important;margin:0 auto !important;box-sizing:border-box !important;overflow:visible !important;page-break-after:always !important;break-after:page !important;page-break-inside:avoid !important;display:flex !important;flex-direction:column !important;justify-content:center !important;align-items:stretch !important}
+  .print-page:last-child{page-break-after:avoid !important;break-after:avoid !important}
+  @page{size:A4 landscape;margin:0}
+}
+#print-wrapper{display:none}
+
+@media (max-width:1024px){.controls-grid{grid-template-columns:1fr !important}}
+@media (max-width:768px){.scroll-hint{display:flex}.preview-body{padding:12px}}
+@media (max-width:480px){.summary-strip{gap:.4rem}.sum-pill{padding:7px 12px}}
+
+/* ── desktop / large-screen polish ── */
+@media (min-width:1024px){
+  main > div{padding-left:32px;padding-right:32px}
+  .calc-card{padding:1.7rem 1.9rem;border-radius:20px;transition:box-shadow .25s,border-color .25s}
+  .calc-card:hover{box-shadow:0 8px 28px rgba(0,94,166,.08);border-color:rgba(0,94,166,.16)}
+  .calc-card-title{font-size:1.02rem;margin-bottom:1.5rem}
+  .controls-grid{gap:1.4rem}
+  .custom-select-trigger,input.styled{height:48px}
+  .acc-grid-4{gap:1.3rem}
+  .summary-strip{gap:.85rem;margin-bottom:1.4rem}
+  .sum-pill{padding:12px 20px;border-radius:14px}
+  .sum-pill .v{font-size:1.3rem}
+  .sheet-wrap{border-radius:22px}
+  .sheet-table{font-size:13.5px}
+  .sheet-table thead th{padding:15px 12px;font-size:11px}
+  .sheet-table tbody td{padding:13px 10px}
+  .sheet-table tbody tr{transition:background .15s}
+  .fin-hero{padding-top:0}
+}
+@media (min-width:1440px){
+  main > div{max-width:1500px}
+  .sheet-table{font-size:14.5px}
+}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#f1f5f9}
+::-webkit-scrollbar-thumb{background:rgba(0,94,166,.3);border-radius:99px}
+</style>
+</head>
+<body>
+
+<!-- ══════════ NAV ══════════ -->
+<header class="nav-blur fixed top-0 left-0 right-0 z-50">
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <a href="index.html" class="flex items-center gap-2.5" aria-label="Samriddhi Auto Home">
+        <div class="w-9 h-9 rounded-lg bg-bajaj-blue flex items-center justify-center shadow-sm flex-shrink-0">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M4 16 Q7 8 11 7 Q15 6 18 10" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            <circle cx="5" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+            <circle cx="17" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+            <path d="M5 17 L17 17" stroke="#fff" stroke-width="1.4" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="leading-tight">
+          <div class="text-sm font-bold text-slate-900 tracking-tight leading-none">Samriddhi And Brothers</div>
+          <div class="text-[10px] font-medium text-bajaj-blue leading-none tracking-wide uppercase mt-0.5">Bajaj Authorized Dealer</div>
+        </div>
+      </a>
+
+      <div class="hidden lg:flex items-center gap-7">
+        <a href="index.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </a>
+        <a href="index.html#prices" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Price List
+        </a>
+        <a href="finance.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Finance
+        </a>
+        <a href="sheet.html" class="nav-link active">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          Sheet
+        </a>
+        <a href="#" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          KYC
+        </a>
+      </div>
+
+      <div class="hidden lg:flex items-center gap-3">
+        <a href="tel:+9779820907795" class="text-sm font-semibold text-bajaj-blue flex items-center gap-1.5 hover:text-bajaj-blueDark transition-colors">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+          Call Showroom
+        </a>
+        <a href="finance.html" class="cta-primary text-sm py-2.5 px-5">Open Calculator</a>
+      </div>
+
+      <button id="hamburger-btn" class="lg:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors" aria-label="Toggle menu" aria-expanded="false">
+        <svg id="icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg id="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hidden"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div id="mobile-menu" class="lg:hidden">
+      <div class="py-4 border-t border-slate-100 space-y-1">
+        <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Home</a>
+        <a href="index.html#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Price List</a>
+        <a href="finance.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Finance</a>
+        <a href="sheet.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Sheet</a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">KYC</a>
+        <div class="pt-2 grid grid-cols-2 gap-2">
+          <a href="tel:+9779802315425" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-bajaj-blue text-bajaj-blue text-sm font-semibold">Call Us</a>
+          <a href="finance.html" class="flex items-center justify-center py-2.5 rounded-xl bg-bajaj-blue text-white text-sm font-semibold">Calculator</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="fin-hero" style="padding-top:64px">
+  <div style="max-width:1280px;margin:0 auto;padding:44px 20px 28px">
+    <div style="text-align:center;max-width:680px;margin:0 auto">
+      <span class="price-badge"><i class="fa-solid fa-table-list" style="font-size:11px"></i> Full Model Finance Sheet</span>
+      <h1 class="headline" style="font-size:clamp(2.2rem,6vw,3.8rem);color:#0F172A;margin-top:16px">Every Model, <span style="color:var(--blue)">One Sheet.</span></h1>
+      <p style="color:#64748B;font-size:15px;line-height:1.6;margin-top:14px;max-width:480px;margin-left:auto;margin-right:auto">Pick a downpayment % and tenure below — the whole line-up recalculates instantly. Swipe the table sideways on mobile, or print all four tenures at once.</p>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div style="max-width:1400px;margin:0 auto;padding:0 20px 56px">
+
+    <!-- ══════════ CONTROLS ══════════ -->
+    <div class="calc-card" style="margin-bottom:20px">
+      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-sliders"></i></span>Sheet Settings
+        <button class="acc-add-btn" style="margin-left:auto" onclick="openPreview()"><i class="fa-solid fa-print"></i> Print Preview</button>
+      </div>
+
+      <div class="controls-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1.6fr;gap:1rem;align-items:start">
+
+        <div>
+          <label class="field-label">Downpayment %</label>
+          <div class="custom-select" id="dpPercentWrap">
+            <select id="dpPercent" class="sr-only-select" tabindex="-1" aria-hidden="true">
+              <option value="30">30%</option><option value="40">40%</option>
+              <option value="50" selected>50%</option><option value="60">60%</option>
+            </select>
+            <button type="button" class="custom-select-trigger" id="dpPercentTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="cst-text" id="dpPercentTriggerText">50%</span>
+              <i class="fa-solid fa-chevron-down cst-chevron"></i>
+            </button>
+            <div class="custom-select-panel" id="dpPercentPanel" role="listbox"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label">Loan Tenure</label>
+          <div class="custom-select" id="tenureWrap">
+            <select id="tenure" class="sr-only-select" tabindex="-1" aria-hidden="true">
+              <option value="12" selected>12 Months</option><option value="18">18 Months</option>
+              <option value="24">24 Months</option><option value="36">36 Months</option>
+            </select>
+            <button type="button" class="custom-select-trigger" id="tenureTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="cst-text" id="tenureTriggerText">12 Months</span>
+              <i class="fa-solid fa-chevron-down cst-chevron"></i>
+            </button>
+            <div class="custom-select-panel" id="tenurePanel" role="listbox"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label">Registration / Namsari</label>
+          <input type="number" id="namsariInput" class="styled" value="3000">
+        </div>
+
+        <div style="grid-column:span 1">
+          <label class="field-label">Interest Rate (auto, by DP%)</label>
+          <div style="height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);display:flex;align-items:center;padding:0 14px;font-family:'Bebas Neue',cursive;font-size:1.2rem;color:var(--blue);letter-spacing:.02em">
+            <span id="rateDisplay">11.99</span>%&nbsp;<span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--ink4);margin-left:8px">fixed for this DP tier</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ ACCESSORIES ══════════ -->
+    <div class="calc-card" style="margin-bottom:20px">
+      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-helmet-safety"></i></span>Accessories Bundle
+        <span class="acc-total-chip" id="accTotalChip">Rs. 4,950</span>
+      </div>
+      <div class="acc-grid-4">
+        <div class="acc-field"><label><i class="fa-solid fa-helmet-safety"></i> Helmet</label><input type="number" id="accHelmet" value="2500" inputmode="numeric"></div>
+        <div class="acc-field"><label><i class="fa-solid fa-shield"></i> Leg Guard</label><input type="number" id="accLegguard" value="1800" inputmode="numeric"></div>
+        <div class="acc-field"><label><i class="fa-solid fa-chair"></i> Seat Cover</label><input type="number" id="accSeatcover" value="650" inputmode="numeric"></div>
+        <div class="acc-field"><label><i class="fa-solid fa-plus"></i> Others</label><input type="number" id="accOthers" value="0" inputmode="numeric" placeholder="Manual amount"></div>
+      </div>
+      <div id="customAccList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
+      <button class="acc-add-btn" onclick="addCustomAccessory()"><i class="fa-solid fa-plus"></i> Add Item</button>
+      <p style="font-size:11px;color:var(--ink4);font-style:italic;margin-top:8px">Increase, reduce, or remove items — the Total column on the sheet updates for every model at once.</p>
+    </div>
+
+    <!-- ══════════ SUMMARY STRIP ══════════ -->
+    <div class="summary-strip">
+      <div class="sum-pill"><span class="k">Downpayment</span><span class="v" id="sumDp">50%</span></div>
+      <div class="sum-pill"><span class="k">Interest Rate</span><span class="v" id="sumRate">11.99%</span></div>
+      <div class="sum-pill"><span class="k">Tenure</span><span class="v" id="sumTenure">12 mo</span></div>
+      <div class="sum-pill"><span class="k">Accessories</span><span class="v" id="sumAcc">Rs. 4,950</span></div>
+      <div class="sum-pill"><span class="k">Namsari</span><span class="v" id="sumNamsari">Rs. 3,000</span></div>
+      <div class="sum-pill"><span class="k">Models Listed</span><span class="v" id="sumCount">0</span></div>
+    </div>
+
+    <!-- ══════════ SHEET TABLE ══════════ -->
+    <div class="sheet-wrap">
+      <div class="table-scroll">
+        <table class="sheet-table" id="mainSheetTable">
+          <thead>
+            <tr>
+              <th>S.N</th>
+              <th>Model</th>
+              <th>Price</th>
+              <th>DP Amount <span class="badge" id="thDp">50%</span></th>
+              <th>Loan Amount</th>
+              <th>Insurance</th>
+              <th>Monthly EMI <span class="badge" id="thRate">11.99%</span></th>
+              <th>Advance EMI <span class="badge" id="thTenure">12 mo</span></th>
+              <th>Accessories</th>
+              <th>Namsari</th>
+              <th>Total Downpayment</th>
+            </tr>
+          </thead>
+          <tbody id="sheetBody"></tbody>
+        </table>
+      </div>
+      <div class="scroll-hint"><i class="fa-solid fa-arrows-left-right"></i> Scroll sideways to see all columns</div>
+    </div>
+
+  </div>
+</main>
+
+<footer style="padding:48px 0;background:#0F172A">
+  <div style="max-width:1280px;margin:0 auto;padding:0 20px">
+    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:24px;display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center">
+      <p style="color:#64748B;font-size:12px">© Samriddhi And Brothers Auto Pvt. Ltd. All prices are indicative and subject to change without notice.</p>
+      <p style="color:#475569;font-size:12px">Powered by <span style="color:var(--blue);font-weight:600">Go! YNG</span></p>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════ PRINT PREVIEW MODAL ══════════ -->
+<div id="previewOverlay" onclick="if(event.target===this) closePreview()">
+  <div class="preview-shell">
+    <div class="preview-toolbar">
+      <div class="ptitle"><i class="fa-solid fa-file-lines"></i> Sheet Preview — <span id="pvSubtitle">50% Downpayment</span></div>
+      <div class="ptabs" id="pvTabs"></div>
+      <div class="pactions">
+        <button class="pbtn print" onclick="printAllTenures()"><i class="fa-solid fa-print"></i> Print All 4 Tenures</button>
+        <button class="pbtn close" onclick="closePreview()"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+    <div class="preview-body" id="pvBody"></div>
+  </div>
+</div>
+
+<div id="print-wrapper"></div>
+
+<script>
+/* ══════════ Hamburger ══════════ */
+const btn=document.getElementById('hamburger-btn'),mMenu=document.getElementById('mobile-menu'),icoOpen=document.getElementById('icon-open'),icoClose=document.getElementById('icon-close');
+btn?.addEventListener('click',()=>{const open=mMenu.classList.toggle('open');icoOpen.style.display=open?'none':'block';icoClose.style.display=open?'block':'none';});
+
+/* ══════════ Bike catalogue — loaded live from Firebase only. No hardcoded fallback:
+   if the connection fails, the sheet stays blank rather than showing stale prices. ══════════ */
+let BIKES=[];
+const TENURES=[12,18,24,36];
+
+function rateForDp(dp){
+  if(dp>=60) return 8.99;
+  if(dp>=50) return 11.99;
+  if(dp>=40) return 12.99;
+  return 13.99;
+}
+
+/* ══════════ Custom dropdowns ══════════ */
+const CUSTOM_SELECT_IDS=['dpPercent','tenure'];
+function buildCustomSelect(selectId){
+  const real=document.getElementById(selectId);
+  const panel=document.getElementById(selectId+'Panel');
+  if(!real||!panel) return;
+  panel.innerHTML='';
+  Array.from(real.options).forEach((opt,i)=>{
+    const item=document.createElement('div');
+    item.className='cst-option'+(opt.selected?' selected':'');
+    item.setAttribute('role','option'); item.dataset.index=i;
+    item.innerHTML=`<span class="cst-dot"></span><span>${opt.text}</span>`;
+    item.addEventListener('click',()=>{
+      real.selectedIndex=i;
+      real.dispatchEvent(new Event('input',{bubbles:true}));
+      syncCustomSelectUI(selectId); closeCustomSelect(selectId);
+    });
+    panel.appendChild(item);
+  });
+  syncCustomSelectUI(selectId);
+}
+function syncCustomSelectUI(selectId){
+  const real=document.getElementById(selectId);
+  const triggerText=document.getElementById(selectId+'TriggerText');
+  const panel=document.getElementById(selectId+'Panel');
+  if(!real||!triggerText) return;
+  const opt=real.options[real.selectedIndex];
+  triggerText.textContent=opt?opt.text:'Select';
+  panel?.querySelectorAll('.cst-option').forEach(el=>el.classList.toggle('selected',Number(el.dataset.index)===real.selectedIndex));
+}
+function openCustomSelect(id){document.getElementById(id+'Panel')?.classList.add('open');document.getElementById(id+'Trigger')?.classList.add('open');document.getElementById(id+'Trigger')?.setAttribute('aria-expanded','true');}
+function closeCustomSelect(id){document.getElementById(id+'Panel')?.classList.remove('open');document.getElementById(id+'Trigger')?.classList.remove('open');document.getElementById(id+'Trigger')?.setAttribute('aria-expanded','false');}
+function closeAllCustomSelects(except){CUSTOM_SELECT_IDS.forEach(id=>{if(id!==except) closeCustomSelect(id);});}
+CUSTOM_SELECT_IDS.forEach(id=>{
+  document.getElementById(id+'Trigger')?.addEventListener('click',e=>{
+    e.stopPropagation();
+    const panel=document.getElementById(id+'Panel');
+    const wasOpen=panel?.classList.contains('open');
+    closeAllCustomSelects();
+    if(!wasOpen) openCustomSelect(id);
+  });
+});
+document.addEventListener('click',e=>{
+  CUSTOM_SELECT_IDS.forEach(id=>{const wrap=document.getElementById(id+'Wrap'); if(wrap&&!wrap.contains(e.target)) closeCustomSelect(id);});
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAllCustomSelects();closePreview();}});
+buildCustomSelect('dpPercent');
+buildCustomSelect('tenure');
+
+/* ══════════ Accessories: custom add/remove rows ══════════ */
+let customAccessories=[]; // {id,name,amount}
+let customAccSeq=0;
+function addCustomAccessory(name,amount){
+  const id='ca'+(++customAccSeq);
+  customAccessories.push({id,name:name||'',amount:amount||0});
+  renderCustomAccessories();
+  recalcAll();
+}
+function removeCustomAccessory(id){
+  customAccessories=customAccessories.filter(a=>a.id!==id);
+  renderCustomAccessories();
+  recalcAll();
+}
+function renderCustomAccessories(){
+  const box=document.getElementById('customAccList');
+  box.innerHTML='';
+  customAccessories.forEach(item=>{
+    const row=document.createElement('div');
+    row.className='acc-row-custom';
+    row.innerHTML=`
+      <input class="name" type="text" placeholder="Item name" value="${item.name}">
+      <input class="amt" type="number" placeholder="0" value="${item.amount}">
+      <button class="acc-remove" title="Remove"><i class="fa-solid fa-xmark"></i></button>`;
+    row.querySelector('.name').addEventListener('input',e=>{item.name=e.target.value;});
+    row.querySelector('.amt').addEventListener('input',e=>{item.amount=parseFloat(e.target.value)||0;recalcAll();});
+    row.querySelector('.acc-remove').addEventListener('click',()=>removeCustomAccessory(item.id));
+    box.appendChild(row);
+  });
+}
+function accessoriesTotal(){
+  const g=id=>parseFloat(document.getElementById(id)?.value)||0;
+  const base=g('accHelmet')+g('accLegguard')+g('accSeatcover')+g('accOthers');
+  const custom=customAccessories.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
+  return base+custom;
+}
+
+/* ══════════ Core row calculation (mirrors finance.html EMI/rounding logic) ══════════ */
+function computeRow(bike,dpPct,tenure,namsari,accTotal){
+  const dpAmt=bike.price*(dpPct/100);
+  const loanAmt=bike.price-dpAmt;
+  const rate=rateForDp(dpPct);
+  const monthlyRate=(rate/12)/100;
+  const emi=loanAmt>0 ? (loanAmt*monthlyRate*Math.pow(1+monthlyRate,tenure))/(Math.pow(1+monthlyRate,tenure)-1) : 0;
+  const rawTotal=dpAmt+namsari+bike.insurance+emi+accTotal;
+  const lastThree=rawTotal%1000;
+  const autoRounding=lastThree>0 ? (1000-lastThree) : 0;
+  const advanceEmi=emi+autoRounding;
+  const total=rawTotal+autoRounding;
+  return {dpAmt,loanAmt,insurance:bike.insurance,emi,advanceEmi,total,rate};
+}
+const fmt=n=>Math.round(n).toLocaleString('en-IN');
+const fmtDec=n=>Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+/* ══════════ Render main sheet ══════════ */
+function currentSettings(){
+  const dp=parseFloat(document.getElementById('dpPercent').value)||50;
+  const tenure=parseFloat(document.getElementById('tenure').value)||12;
+  const namsari=parseFloat(document.getElementById('namsariInput').value)||0;
+  const acc=accessoriesTotal();
+  const rate=rateForDp(dp);
+  return {dp,tenure,namsari,acc,rate};
+}
+function recalcAll(){
+  const s=currentSettings();
+
+  document.getElementById('rateDisplay').textContent=s.rate.toFixed(2);
+  document.getElementById('thDp').textContent=s.dp+'%';
+  document.getElementById('thRate').textContent=s.rate.toFixed(2)+'%';
+  document.getElementById('thTenure').textContent=s.tenure+' mo';
+  document.getElementById('accTotalChip').textContent='Rs. '+fmt(s.acc);
+
+  document.getElementById('sumDp').textContent=s.dp+'%';
+  document.getElementById('sumRate').textContent=s.rate.toFixed(2)+'%';
+  document.getElementById('sumTenure').textContent=s.tenure+' mo';
+  document.getElementById('sumAcc').textContent='Rs. '+fmt(s.acc);
+  document.getElementById('sumNamsari').textContent='Rs. '+fmt(s.namsari);
+  document.getElementById('sumCount').textContent=BIKES.length;
+
+  const body=document.getElementById('sheetBody');
+  body.innerHTML='';
+  BIKES.forEach((bike,i)=>{
+    const r=computeRow(bike,s.dp,s.tenure,s.namsari,s.acc);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td class="model-cell">${bike.name}</td>
+      <td>${fmt(bike.price)}</td>
+      <td>${fmt(r.dpAmt)}</td>
+      <td>${fmt(r.loanAmt)}</td>
+      <td>${fmt(r.insurance)}</td>
+      <td>${fmtDec(r.emi)}</td>
+      <td>${fmtDec(r.advanceEmi)}</td>
+      <td>${fmt(s.acc)}</td>
+      <td>${fmt(s.namsari)}</td>
+      <td class="total-cell">${fmt(r.total)}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+/* ══════════ Print-preview modal: one A4-landscape page per tenure ══════════ */
+function buildTenurePage(dp,tenure,namsari,acc){
+  const rate=rateForDp(dp);
+  let rows='';
+  BIKES.forEach((bike,i)=>{
+    const r=computeRow(bike,dp,tenure,namsari,acc);
+    rows+=`<tr>
+      <td>${i+1}</td><td>${bike.name}</td><td>${fmt(bike.price)}</td>
+      <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td><td>${fmt(r.insurance)}</td>
+      <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>
+      <td>${fmt(acc)}</td><td>${fmt(namsari)}</td>
+      <td class="total-cell">${fmt(r.total)}</td></tr>`;
+  });
+  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  return `
+    <div class="pv-titlebar">Samriddhi And Brothers — Bajaj Finance Sheet &nbsp;|&nbsp; DP ${dp}% &nbsp;|&nbsp; Interest ${rate}% &nbsp;|&nbsp; Tenure ${tenure} Months</div>
+    <div class="pv-tablewrap">
+      <table class="pv-table">
+        <thead><tr>
+          <th>S.N</th><th>Model</th><th>Price</th><th>DP Amt</th><th>Loan Amt</th><th>Insurance</th>
+          <th>Monthly EMI</th><th>Advance EMI</th><th>Accessories</th><th>Namsari</th><th>Total</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="pv-datebar">${today}</div>`;
+}
+
+function openPreview(){
+  const s=currentSettings();
+  document.getElementById('pvSubtitle').textContent=s.dp+'% Downpayment · '+s.rate.toFixed(2)+'% Interest';
+
+  const tabs=document.getElementById('pvTabs');
+  const body=document.getElementById('pvBody');
+  tabs.innerHTML=''; body.innerHTML='';
+  TENURES.forEach((t,idx)=>{
+    const tabBtn=document.createElement('button');
+    tabBtn.className='ptab'+(t===s.tenure?' active':'');
+    tabBtn.textContent=t+' Months';
+    tabBtn.onclick=()=>switchPvTab(t);
+    tabBtn.dataset.tenure=t;
+    tabs.appendChild(tabBtn);
+
+    const page=document.createElement('div');
+    page.className='pv-page'+(t===s.tenure?' active':'');
+    page.id='pvPage'+t;
+    page.innerHTML=`<div class="a4l-paper">${buildTenurePage(s.dp,t,s.namsari,s.acc)}</div>`;
+    body.appendChild(page);
+  });
+
+  document.getElementById('previewOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  fitPreviewPages();
+}
+/* Scales the A4-landscape preview page down to fit the screen so it is fully
+   visible and centered — never overflows sideways on a phone. Print output is
+   untouched since @media print bypasses this and uses #print-wrapper instead. */
+function fitPreviewPages(){
+  const body=document.getElementById('pvBody');
+  if(!body) return;
+  const naturalWidthPx=1122; // 297mm at 96dpi
+  const available=body.clientWidth-4;
+  const scale=Math.min(1,available/naturalWidthPx);
+  document.querySelectorAll('.a4l-paper').forEach(el=>{
+    el.style.zoom=scale;
+  });
+}
+window.addEventListener('resize',()=>{ if(document.getElementById('previewOverlay').classList.contains('open')) fitPreviewPages(); });
+function switchPvTab(t){
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.toggle('active',Number(b.dataset.tenure)===t));
+  document.querySelectorAll('.pv-page').forEach(p=>p.classList.toggle('active',p.id==='pvPage'+t));
+  fitPreviewPages();
+}
+function closePreview(){
+  document.getElementById('previewOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+/* ══════════ Print all 4 tenures at once ══════════ */
+function printAllTenures(){
+  const s=currentSettings();
+  const wrapper=document.getElementById('print-wrapper');
+  wrapper.innerHTML=TENURES.map(t=>`<div class="print-page a4l-paper">${buildTenurePage(s.dp,t,s.namsari,s.acc)}</div>`).join('');
+  window.print();
+}
+
+/* ══════════ Wire up recalculation ══════════ */
+document.addEventListener('input',e=>{
+  if(e.target.id==='dpPercent'||e.target.id==='tenure'||e.target.tagName==='INPUT'){
+    if(['accHelmet','accLegguard','accSeatcover','accOthers','namsariInput'].includes(e.target.id) || e.target.id==='dpPercent' || e.target.id==='tenure'){
+      recalcAll();
+    }
+  }
+});
+document.getElementById('dpPercent').addEventListener('input',()=>{syncCustomSelectUI('dpPercent');recalcAll();});
+document.getElementById('tenure').addEventListener('input',()=>{syncCustomSelectUI('tenure');recalcAll();});
+
+recalcAll();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
+  authDomain: "first-project-2082-12-26.firebaseapp.com",
+  projectId: "first-project-2082-12-26",
+  storageBucket: "first-project-2082-12-26.firebasestorage.app",
+  messagingSenderId: "545170954251",
+  appId: "1:545170954251:web:0d2f7905834af3b0be8f0e"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+function sortBySn(bikes){
+  return [...bikes].sort((a,b)=>{
+    const snA=(a.sn!==undefined&&a.sn!==null&&a.sn!=='')?Number(a.sn):9999;
+    const snB=(b.sn!==undefined&&b.sn!==null&&b.sn!=='')?Number(b.sn):9999;
+    return snA-snB;
+  });
+}
+
+async function fetchBikesFromFirebase(){
+  const timeoutMs=6000;
+  try{
+    const fetchPromise=getDocs(collection(db,"bikes"));
+    const timeoutPromise=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Firebase request timed out')),timeoutMs));
+    const snapshot=await Promise.race([fetchPromise,timeoutPromise]);
+    const docs=snapshot.docs.map(d=>({id:d.id,...d.data()}));
+    const sorted=sortBySn(docs);
+    const mapped=sorted
+      .filter(b=>b.name && b.price!==undefined)
+      .map(b=>({
+        name:b.name,
+        price:parseFloat(b.price)||0,
+        insurance:parseFloat(b.Insurance!==undefined?b.Insurance:b.insurance)||0
+      }));
+    BIKES=mapped; // empty array if nothing came back — sheet stays blank, no error text
+  }catch(e){
+    console.error("Sheet: Firebase fetch failed or timed out.",e);
+    BIKES=[]; // stay blank rather than showing stale/hardcoded prices
+  }
+  recalcAll();
+}
+
+fetchBikesFromFirebase();
+</script>
+</body>
+</html>
