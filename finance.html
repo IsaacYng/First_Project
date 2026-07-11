@@ -198,6 +198,21 @@ select.styled:focus,input.styled:focus{border-color:var(--blue);box-shadow:0 0 0
 .validation-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .validation-toast i{color:#F87171}
 
+/* ═══ CHASSIS LIVE SEARCH DROPDOWN ═══ */
+#chassisSearchWrap{position:relative}
+#chassisSearchDropdown{
+  display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:280px;overflow-y:auto;z-index:55;padding:6px;
+}
+.csd-item{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:10px 12px;border-radius:10px;border:none;background:transparent;cursor:pointer;transition:background .15s}
+.csd-item:hover{background:var(--blueLt)}
+.csd-item .csd-main{min-width:0}
+.csd-item .csd-chassis{font-size:13px;font-weight:700;color:var(--ink);font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+.csd-item .csd-sub{font-size:11px;color:var(--ink4);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.csd-item .csd-color-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.12)}
+.csd-empty{padding:14px 12px;font-size:12px;color:var(--ink4);text-align:center}
+
 /* ═══ MOBILE STICKY BAR ═══ */
 .mobile-bar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#0F172A;color:#fff;padding:10px 14px;display:none;align-items:center;gap:10px;box-shadow:0 -8px 28px rgba(0,0,0,.18);border-top:1px solid rgba(255,255,255,.08)}
 .mobile-bar .emi-chunk{flex:1}
@@ -335,7 +350,7 @@ footer{background:#0F172A}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           Finance
         </a>
-        <a href="sheet.html" class="nav-link active">
+        <a href="sheet.html" class="nav-link">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
           Sheet
         </a>
@@ -371,7 +386,7 @@ footer{background:#0F172A}
         <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Home</a>
         <a href="index.html#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Price List</a>
         <a href="finance.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Finance</a>
-        <a href="sheet.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Sheet</a>
+        <a href="sheet.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Sheet</a>
         <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">KYC</a>
         <a href="https://yonghangishak.com.np/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">About</a>
         <div class="pt-2 grid grid-cols-2 gap-2">
@@ -530,9 +545,10 @@ footer{background:#0F172A}
             </div>
           </div>
           <div style="display:flex;gap:10px;margin-top:14px;align-items:flex-end;flex-wrap:wrap">
-            <div style="flex:1;min-width:140px">
+            <div style="flex:1;min-width:140px" id="chassisSearchWrap">
               <label class="field-label">Search Inventory by Chassis</label>
-              <input type="text" id="chassisSearch" class="styled" placeholder="Type chassis no. to auto-fill">
+              <input type="text" id="chassisSearch" class="styled" placeholder="Type chassis no. to auto-fill" autocomplete="off">
+              <div id="chassisSearchDropdown"></div>
             </div>
             <button onclick="findChassis()" class="cta-primary" style="height:46px;font-size:13px;padding:0 18px"><i class="fa-solid fa-magnifying-glass"></i> Find</button>
             <div style="width:120px">
@@ -1020,7 +1036,7 @@ document.addEventListener('keydown',e=>{
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
@@ -1033,6 +1049,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 let allBikes = [];
+
+/* ── Live inventory mirror, used for the chassis auto-suggest dropdown ── */
+let invList = [];
+onSnapshot(collection(db,"inventory"), snap=>{
+  invList = snap.docs.map(d=>({id:d.id,...d.data()}));
+  /* if the dropdown is currently open, refresh its results with the latest data */
+  const activeInput=document.getElementById('chassisSearch');
+  if(activeInput && document.activeElement===activeInput && activeInput.value.trim()){
+    renderChassisDropdown(searchChassisSuggestions(activeInput.value));
+  }
+});
 
 function sortBySn(bikes){
   return [...bikes].sort((a,b)=>{
@@ -1098,20 +1125,7 @@ window.findChassis=async function(){
     const qs=await getDocs(q);
     if(!qs.empty){
       const data=qs.docs[0].data();
-      document.getElementById('manualChassis').value=data.chassis||searchVal;
-      document.getElementById('manualEngine').value=data.engine||"";
-      document.getElementById('manualReg').value=data.regNo||"";
-      document.getElementById('manualColor').value=data.color||"";
-      if(data.model){
-        const sel=document.getElementById('modelSelect');
-        for(let i=0;i<sel.options.length;i++){
-          if(sel.options[i].text===data.model){sel.selectedIndex=i;syncCustomSelectUI('modelSelect');calculateFinance();break;}
-        }
-      }
-      showFieldError('manualChassis','manualChassisError',false);
-      showFieldError('manualEngine','manualEngineError',false);
-      showFieldError('manualReg','manualRegError',false);
-      showFieldError('manualColor','manualColorError',false);
+      applyChassisData(data,searchVal);
       statusEl.innerText="Vehicle data loaded."; statusEl.style.color="#16A34A";
     }else{
       document.getElementById('manualChassis').value=searchVal;
@@ -1121,6 +1135,104 @@ window.findChassis=async function(){
     statusEl.innerText="Connection error."; statusEl.style.color="#DC2626";
   }
 };
+
+/* ── Fill customer/vehicle fields from an inventory record ── */
+function applyChassisData(data,fallbackChassis){
+  document.getElementById('manualChassis').value=data.chassis||fallbackChassis||"";
+  document.getElementById('manualEngine').value=data.engine||"";
+  document.getElementById('manualReg').value=data.regNo||"";
+  document.getElementById('manualColor').value=data.color||"";
+  if(data.model){
+    const sel=document.getElementById('modelSelect');
+    for(let i=0;i<sel.options.length;i++){
+      if(sel.options[i].text===data.model){sel.selectedIndex=i;syncCustomSelectUI('modelSelect');calculateFinance();break;}
+    }
+  }
+  showFieldError('manualChassis','manualChassisError',false);
+  showFieldError('manualEngine','manualEngineError',false);
+  showFieldError('manualReg','manualRegError',false);
+  showFieldError('manualColor','manualColorError',false);
+}
+
+/* ── Chassis-only live search dropdown (mirrors the admin panel's inventory search) ──
+   Matches on the chassis field only (so typing the last digits works too); the
+   dropdown itself still shows model/engine/color as read-only context. */
+function normChassis(v){ return (v||'').toString().trim().toUpperCase().replace(/\s+/g,''); }
+function chassisMatchScore(chassis,q){
+  chassis=normChassis(chassis); q=normChassis(q);
+  if(!chassis||!q) return -1;
+  if(chassis===q) return 100;
+  if(chassis.endsWith(q)) return 80;   // last digits lookup — most common
+  if(chassis.startsWith(q)) return 60;
+  if(chassis.includes(q)) return 40;
+  return -1;
+}
+function searchChassisSuggestions(q){
+  if(!q||!q.trim()) return [];
+  return invList
+    .map(s=>({s,score:chassisMatchScore(s.chassis,q)}))
+    .filter(x=>x.score>=0)
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,8)
+    .map(x=>x.s);
+}
+function colourDotHex(col=''){
+  const map={red:'#ef4444',blue:'#3b82f6',black:'#374151',white:'#e2e8f0',orange:'#f97316',green:'#22c55e',yellow:'#eab308',silver:'#94a3b8',grey:'#64748b',gray:'#64748b',maroon:'#be123c',brown:'#92400e',purple:'#7c3aed',pink:'#ec4899'};
+  const k=(col||'').toLowerCase().split(/\s+/).find(w=>map[w]);
+  return k?map[k]:'#005EA6';
+}
+function renderChassisDropdown(list){
+  const dd=document.getElementById('chassisSearchDropdown');
+  if(!dd) return;
+  if(!list.length){
+    dd.innerHTML='<div class="csd-empty">No matching chassis found.</div>';
+    dd.style.display='block';
+    return;
+  }
+  dd.innerHTML=list.map(s=>`
+    <button type="button" class="csd-item" data-id="${s.id}">
+      <span class="csd-main">
+        <span class="csd-chassis">${(s.chassis||'—').toUpperCase()}</span>
+        <span class="csd-sub">${s.model||'—'} · Engine ${s.engine||'—'}${s.regNo?(' · '+s.regNo):''}</span>
+      </span>
+      <span class="csd-color-dot" style="background:${colourDotHex(s.color||'')}"></span>
+    </button>`).join('');
+  dd.style.display='block';
+  dd.querySelectorAll('.csd-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      const rec=invList.find(x=>x.id===item.dataset.id);
+      if(rec){
+        document.getElementById('chassisSearch').value=rec.chassis||'';
+        applyChassisData(rec,rec.chassis);
+        const statusEl=document.getElementById('searchStatus');
+        if(statusEl){statusEl.innerText="Vehicle data loaded."; statusEl.style.color="#16A34A";}
+      }
+      dd.style.display='none';
+    });
+  });
+}
+const chassisSearchInput=document.getElementById('chassisSearch');
+chassisSearchInput?.addEventListener('input',(e)=>{
+  const val=e.target.value;
+  if(!val.trim()){ document.getElementById('chassisSearchDropdown').style.display='none'; return; }
+  renderChassisDropdown(searchChassisSuggestions(val));
+});
+chassisSearchInput?.addEventListener('focus',(e)=>{
+  if(e.target.value.trim()) renderChassisDropdown(searchChassisSuggestions(e.target.value));
+});
+document.addEventListener('click',(e)=>{
+  const wrap=document.getElementById('chassisSearchWrap');
+  if(wrap && !wrap.contains(e.target)){
+    const dd=document.getElementById('chassisSearchDropdown');
+    if(dd) dd.style.display='none';
+  }
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    const dd=document.getElementById('chassisSearchDropdown');
+    if(dd) dd.style.display='none';
+  }
+});
 
 window.calculateFinance=function(){
   const selectedId=document.getElementById('modelSelect')?.value;
