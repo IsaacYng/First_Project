@@ -175,6 +175,29 @@
     .search-wrap input:focus { border-color: #005EA6; box-shadow: 0 0 0 3px rgba(0,94,166,0.1); }
     .search-wrap svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); pointer-events: none; }
 
+    /* ── Live search suggestions dropdown ── */
+    #search-dropdown {
+      display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+      background: #fff; border: 1px solid #E2E8F0; border-radius: 14px;
+      box-shadow: 0 20px 48px rgba(15,23,42,0.16); max-height: 320px; overflow-y: auto;
+      z-index: 55; padding: 6px;
+    }
+    .sgd-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      width: 100%; text-align: left; padding: 9px 11px; border-radius: 10px;
+      border: none; background: transparent; cursor: pointer; transition: background .15s;
+    }
+    .sgd-item:hover { background: #E8F2FB; }
+    .sgd-item .sgd-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .sgd-item .sgd-thumb {
+      width: 38px; height: 30px; border-radius: 7px; object-fit: cover; flex-shrink: 0;
+      background: #EBF4FF; border: 1px solid #E2E8F0;
+    }
+    .sgd-item .sgd-name { font-size: 13px; font-weight: 700; color: #0F172A; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sgd-item .sgd-series { font-size: 10.5px; color: #94A3B8; margin-top: 1px; }
+    .sgd-item .sgd-price { font-size: 12px; font-weight: 700; color: #005EA6; flex-shrink: 0; white-space: nowrap; }
+    .sgd-empty { padding: 14px 12px; font-size: 12px; color: #94A3B8; text-align: center; }
+
     /* ── BIKE CARDS (Firebase-powered) ── */
     #bike-grid {
       display: grid;
@@ -202,6 +225,12 @@
     .yng-img  { transition: transform .38s cubic-bezier(.25,.46,.45,.94); }
     .yng-arr  { transition: background .18s, border-color .18s, color .18s; }
     .yng-arr i { transition: transform .18s; }
+    .yng-card.flash-highlight { animation: fadeUp 0.45s ease both, flashRing 1.1s ease; }
+    @keyframes flashRing {
+      0%   { box-shadow: 0 0 0 0 rgba(0,94,166,0.45); }
+      60%  { box-shadow: 0 0 0 8px rgba(0,94,166,0); }
+      100% { box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+    }
 
     /* ── FINANCE BANNER ── */
     .finance-banner {
@@ -298,7 +327,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           Finance
         </a>
-        <a href="sheet.html" class="nav-link active">
+        <a href="sheet.html" class="nav-link">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
           Sheet
         </a>
@@ -334,7 +363,7 @@
         <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Home</a>
         <a href="#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Price List</a>
         <a href="finance.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Finance</a>
-        <a href="sheet.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Sheet</a>
+        <a href="sheet.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Sheet</a>
         <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">KYC</a>
         <a href="https://yonghangishak.com.np/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">About</a>
         <div class="pt-2 grid grid-cols-2 gap-2">
@@ -528,9 +557,10 @@
       </div>
 
       <!-- Search -->
-      <div class="search-wrap">
+      <div class="search-wrap" id="search-wrap">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input id="search-input" type="search" placeholder="Search model…" autocomplete="off" />
+        <div id="search-dropdown"></div>
       </div>
     </div>
 
@@ -943,9 +973,10 @@
     const priceBorder   = isChetak ? "rgba(16,185,129,0.18)" : "rgba(0,94,166,0.14)";
 
     const delay = `${Math.min(idx, 9) * 55}ms`;
+    const bikeId = bike.id || "";
 
     return `
-      <div class="yng-card" style="animation-delay:${delay};">
+      <div class="yng-card" data-bike-id="${bikeId}" style="animation-delay:${delay};">
         <!-- Image -->
         <div style="position:relative;height:200px;background:${imgBg};overflow:hidden;display:flex;align-items:center;justify-content:center;">
           <img class="yng-img"
@@ -1020,13 +1051,9 @@
   }
 
   /* ── Render ── */
-  function render(bikes) {
-    const grid = document.getElementById("bike-grid");
-    if (!grid) return;
-
+  function getVisibleBikes(bikes) {
     const q = (document.getElementById("search-input")?.value || "").toLowerCase().trim();
-
-    const list = sortBySn(
+    return sortBySn(
       bikes.filter(b => {
         const n   = (b.name || "").toLowerCase();
         const cat = getCategory(b.name);
@@ -1035,6 +1062,14 @@
                (activeFilter === "all" || cat === activeFilter);
       })
     );
+  }
+
+  function render(bikes) {
+    const grid = document.getElementById("bike-grid");
+    if (!grid) return;
+
+    const q = (document.getElementById("search-input")?.value || "").toLowerCase().trim();
+    const list = getVisibleBikes(bikes);
 
     if (!list.length) {
       grid.innerHTML = emptyState(
@@ -1046,6 +1081,95 @@
 
     grid.innerHTML = list.map((b, i) => buildCard(b, i)).join("");
   }
+
+  /* ── Live search-suggestions dropdown (under the search box) ── */
+  function renderSearchDropdown(list) {
+    const dd = document.getElementById("search-dropdown");
+    if (!dd) return;
+    if (!list.length) {
+      dd.innerHTML = '<div class="sgd-empty">No matching models found.</div>';
+      dd.style.display = "block";
+      return;
+    }
+    dd.innerHTML = list.slice(0, 8).map(b => {
+      const name  = b.name || "Bajaj";
+      const price = fmtPrice(b.price);
+      const series = getSeries(b.name);
+      const thumb = b.img || `https://placehold.co/80x60/EBF4FF/005EA6?text=%20`;
+      return `
+        <button type="button" class="sgd-item" data-bike-id="${b.id || ''}">
+          <span class="sgd-main">
+            <img class="sgd-thumb" src="${thumb}" alt="" onerror="this.style.visibility='hidden'">
+            <span style="min-width:0;">
+              <div class="sgd-name">${name}</div>
+              <div class="sgd-series">${series}</div>
+            </span>
+          </span>
+          <span class="sgd-price">${price}</span>
+        </button>`;
+    }).join("");
+    dd.style.display = "block";
+    dd.querySelectorAll(".sgd-item").forEach(item => {
+      item.addEventListener("click", () => {
+        const bike = allBikes.find(b => b.id === item.dataset.bikeId);
+        if (bike) {
+          document.getElementById("search-input").value = bike.name || "";
+          activeFilter = "all";
+          document.querySelectorAll(".tab-btn").forEach(t => t.classList.remove("active"));
+          document.querySelector('.tab-btn[data-filter="all"]')?.classList.add("active");
+          render(allBikes);
+          dd.style.display = "none";
+          // scroll to and briefly highlight the matching card
+          requestAnimationFrame(() => {
+            const card = document.querySelector(`.yng-card[data-bike-id="${bike.id}"]`);
+            if (card) {
+              card.scrollIntoView({ behavior: "smooth", block: "center" });
+              card.classList.add("flash-highlight");
+              setTimeout(() => card.classList.remove("flash-highlight"), 1200);
+            }
+          });
+        }
+      });
+    });
+  }
+
+  function searchSuggestions(q) {
+    if (!q || !q.trim()) return [];
+    const query = q.toLowerCase().trim();
+    return allBikes
+      .filter(b => getCategory(b.name) !== "other")
+      .map(b => {
+        const n = (b.name || "").toLowerCase();
+        let score = -1;
+        if (n === query) score = 100;
+        else if (n.startsWith(query)) score = 80;
+        else if (n.includes(query)) score = 50;
+        return { b, score };
+      })
+      .filter(x => x.score >= 0)
+      .sort((a, b) => b.score - a.score)
+      .map(x => x.b);
+  }
+
+  const searchInputEl = document.getElementById("search-input");
+  const searchDropdownEl = document.getElementById("search-dropdown");
+
+  searchInputEl?.addEventListener("input", () => {
+    render(allBikes);
+    const val = searchInputEl.value;
+    if (!val.trim()) { searchDropdownEl.style.display = "none"; return; }
+    renderSearchDropdown(searchSuggestions(val));
+  });
+  searchInputEl?.addEventListener("focus", () => {
+    if (searchInputEl.value.trim()) renderSearchDropdown(searchSuggestions(searchInputEl.value));
+  });
+  document.addEventListener("click", (e) => {
+    const wrap = document.getElementById("search-wrap");
+    if (wrap && !wrap.contains(e.target)) searchDropdownEl.style.display = "none";
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") searchDropdownEl.style.display = "none";
+  });
 
   /* ── Firebase real-time listener ── */
   onSnapshot(bikesCol, snap => {
@@ -1077,8 +1201,6 @@
       render(allBikes);
     });
   });
-
-  document.getElementById("search-input")?.addEventListener("input", () => render(allBikes));
 
 
   /* ── Hamburger ── */
