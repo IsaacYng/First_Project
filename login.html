@@ -535,6 +535,7 @@
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
           <div class="flex items-center gap-2 font-display text-2xl text-slate-900 tracking-wide"><i class="fas fa-warehouse text-amber-500"></i> Stock Register</div>
           <span id="invCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+          <span id="invDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-0.5 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
           <div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="invSearch" autocomplete="off" placeholder="Search chassis, engine, model, reg no…"
@@ -626,11 +627,11 @@
 <div id="confirmModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style="animation:slideIn .2s ease;">
     <div class="p-5 flex items-start gap-3.5">
-      <div class="w-11 h-11 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
-        <i class="fas fa-trash-can text-red-500 text-base"></i>
+      <div id="confirmModalIconWrap" class="w-11 h-11 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+        <i id="confirmModalIcon" class="fas fa-trash-can text-red-500 text-base"></i>
       </div>
       <div class="min-w-0 pt-1">
-        <div class="font-bold text-slate-900 text-[15px] mb-1">Delete this entry?</div>
+        <div id="confirmModalTitle" class="font-bold text-slate-900 text-[15px] mb-1">Delete this entry?</div>
         <div id="confirmModalMsg" class="text-slate-500 text-[13px] leading-relaxed">This action can't be undone. The record will be permanently removed.</div>
       </div>
     </div>
@@ -677,13 +678,36 @@ let invData = [];
 let invSearchTerm = '';
 
 /* ─── Custom confirm modal (replaces native browser confirm) ─── */
-function showConfirm(message){
+function showConfirm(opts){
+  // Back-compat: showConfirm("some message") still works as a plain delete-style confirm
+  if(typeof opts === 'string') opts = { message: opts };
+  const {
+    title = 'Delete this entry?',
+    message = "This action can't be undone.",
+    okText = 'Delete',
+    okColorClass = 'text-red-500 hover:bg-red-50',
+    iconClass = 'fa-trash-can',
+    iconColor = '#ef4444',
+    iconBg = '#FEF2F2'
+  } = opts;
+
   return new Promise((resolve)=>{
     const modal = document.getElementById('confirmModal');
+    const titleEl = document.getElementById('confirmModalTitle');
     const msgEl = document.getElementById('confirmModalMsg');
     const okBtn = document.getElementById('confirmModalOk');
     const cancelBtn = document.getElementById('confirmModalCancel');
-    if(message) msgEl.textContent = message;
+    const iconEl = document.getElementById('confirmModalIcon');
+    const iconWrap = document.getElementById('confirmModalIconWrap');
+
+    titleEl.textContent = title;
+    msgEl.innerHTML = message;
+    okBtn.textContent = okText;
+    okBtn.className = 'flex-1 py-3.5 text-sm font-bold transition-colors ' + okColorClass;
+    iconEl.className = 'fas ' + iconClass + ' text-base';
+    iconEl.style.color = iconColor;
+    iconWrap.style.background = iconBg;
+
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     function cleanup(result){
@@ -701,6 +725,30 @@ function showConfirm(message){
     cancelBtn.addEventListener('click', onCancel);
     modal.addEventListener('click', onBackdrop);
   });
+}
+
+/* ─── Duplicate detection (chassis / engine no. must be unique per unit) ─── */
+function normId(v){ return (v||'').toString().trim().toUpperCase().replace(/\s+/g,''); }
+
+function findDuplicateUnit(chassis, engine, excludeId=null){
+  const c = normId(chassis), e = normId(engine);
+  return invData.find(s => s.id!==excludeId && (
+    (c && normId(s.chassis)===c) || (e && normId(s.engine)===e)
+  ));
+}
+
+// Returns a Set of invData ids that share a chassis or engine no. with at least one other entry
+function computeDuplicateIdSet(){
+  const byChassis = {}, byEngine = {};
+  invData.forEach(s=>{
+    const c = normId(s.chassis), e = normId(s.engine);
+    if(c){ (byChassis[c] = byChassis[c]||[]).push(s.id); }
+    if(e){ (byEngine[e] = byEngine[e]||[]).push(s.id); }
+  });
+  const dupIds = new Set();
+  Object.values(byChassis).forEach(ids=>{ if(ids.length>1) ids.forEach(id=>dupIds.add(id)); });
+  Object.values(byEngine).forEach(ids=>{ if(ids.length>1) ids.forEach(id=>dupIds.add(id)); });
+  return dupIds;
 }
 
 /* ─── Helpers ─── */
@@ -944,6 +992,20 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
   const color=document.getElementById('sColor').value.trim();
   if(!modelName||!bikeInfo){toast('Select a valid model!','err');return;}
   if(!chassis||!engine||!color){toast('Fill all required fields!','err');return;}
+
+  const dup = findDuplicateUnit(chassis, engine);
+  if(dup){
+    const whichField = normId(dup.chassis)===normId(chassis) ? 'Chassis No' : 'Engine No';
+    const proceed = await showConfirm({
+      title: 'Possible duplicate unit',
+      message: `${whichField} already exists in inventory — S.N <b>${dup.sn||'—'}</b>, <b>${dup.model}</b>, ${dup.color||'—'}, Chassis <b>${dup.chassis||'—'}</b>, Engine <b>${dup.engine||'—'}</b>.<br><br>Add this unit anyway?`,
+      okText: 'Add Anyway',
+      okColorClass: 'text-amber-600 hover:bg-amber-50',
+      iconClass: 'fa-triangle-exclamation', iconColor:'#f59e0b', iconBg:'#FFFBEB'
+    });
+    if(!proceed) return;
+  }
+
   // Auto S.N — always one more than the current highest S.N in inventory
   const nextSn = invData.length ? Math.max(...invData.map(x=>Number(x.sn)||0)) + 1 : 1;
   try {
@@ -982,15 +1044,27 @@ function renderInvTable(list){
     tbody.innerHTML=`<tr><td colspan="7"><div class="py-12 text-center text-slate-400"><i class="fas fa-warehouse text-3xl opacity-25 block mb-2"></i><p class="text-sm">${invSearchTerm?'No units match your search.':'No inventory yet. Add a unit using the form above.'}</p></div></td></tr>`;
     return;
   }
+  const dupIds = computeDuplicateIdSet();
+  const dupChip = document.getElementById('invDupChip');
+  if(dupIds.size>0){
+    dupChip.classList.remove('hidden'); dupChip.classList.add('flex');
+    dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${dupIds.size} duplicate${dupIds.size!==1?'s':''} found`;
+  } else {
+    dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
+  }
   const sorted=[...list].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
   tbody.innerHTML=sorted.map(s=>{
-    return`<tr class="border-b border-slate-100">
+    const isDup = dupIds.has(s.id);
+    return`<tr class="border-b ${isDup?'border-red-100 bg-red-50/40':'border-slate-100'}">
       <td class="px-4 py-3">
         <span class="inline-flex items-center justify-center min-w-[36px] px-2 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-xs font-mono font-bold">${s.sn||'—'}</span>
       </td>
-      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap">${s.model}</td>
-      <td class="px-4 py-3"><code class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-md border border-blue-100 font-mono">${s.chassis||'—'}</code></td>
-      <td class="px-4 py-3"><code class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-md border border-blue-100 font-mono">${s.engine||'—'}</code></td>
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap">
+        ${s.model}
+        ${isDup ? `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 text-red-600 text-[9px] font-extrabold uppercase tracking-wide align-middle"><i class="fas fa-triangle-exclamation text-[8px]"></i> Duplicate</span>` : ''}
+      </td>
+      <td class="px-4 py-3"><code class="${isDup?'bg-red-100 text-red-700 border-red-200 underline decoration-red-400 decoration-2':'bg-blue-50 text-blue-700 border-blue-100'} text-xs px-2 py-0.5 rounded-md border font-mono">${s.chassis||'—'}</code></td>
+      <td class="px-4 py-3"><code class="${isDup?'bg-red-100 text-red-700 border-red-200 underline decoration-red-400 decoration-2':'bg-blue-50 text-blue-700 border-blue-100'} text-xs px-2 py-0.5 rounded-md border font-mono">${s.engine||'—'}</code></td>
       <td class="px-4 py-3">${s.regNo
         ? `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200">${s.regNo}</span>`
         : `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 text-xs font-bold border border-slate-200">Pending</span>`}
@@ -1139,7 +1213,13 @@ window._saveSn=async(col,id,val)=>{
 };
 
 window._deleteEntry=async(col,id)=>{
-  const ok = await showConfirm(col==='bikes' ? "This will permanently remove the model from your price list." : "This will permanently remove the unit from inventory.");
+  const ok = await showConfirm({
+    title: 'Delete this entry?',
+    message: col==='bikes' ? "This will permanently remove the model from your price list." : "This will permanently remove the unit from inventory.",
+    okText: 'Delete',
+    okColorClass: 'text-red-500 hover:bg-red-50',
+    iconClass: 'fa-trash-can', iconColor: '#ef4444', iconBg: '#FEF2F2'
+  });
   if(!ok) return;
   try{
     await deleteDoc(doc(db,col,id));
@@ -1235,10 +1315,17 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
   let nextSn = invData.length ? Math.max(...invData.map(x=>Number(x.sn)||0)) + 1 : 1;
 
   const results = { success:[], failed:[] };
+  const seenInBatch = []; // track chassis/engine already added within this same import run
 
   for(const row of excelParsedRows){
     if(!row.model || !row.chassis || !row.engine || !row.color){
       results.failed.push({row, reason:'Missing required field (Model/Chassis/Engine/Color)'});
+      continue;
+    }
+    const dupExisting = findDuplicateUnit(row.chassis, row.engine);
+    const dupBatch = seenInBatch.find(r=>normId(r.chassis)===normId(row.chassis) || normId(r.engine)===normId(row.engine));
+    if(dupExisting || dupBatch){
+      results.failed.push({row, reason:'Duplicate — chassis/engine already exists'+(dupExisting?` (S.N ${dupExisting.sn||'—'})`:' (within this file)')});
       continue;
     }
     try{
@@ -1251,6 +1338,7 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
         color: row.color,
         addedAt: new Date()
       });
+      seenInBatch.push(row);
       results.success.push(row);
       nextSn++;
     }catch(e){
