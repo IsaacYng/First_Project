@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
   tailwind.config = {
     theme: {
@@ -81,7 +82,17 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Toast */
-  @keyframes slideIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+  @keyframes slideIn { from{opacity:0;transform:translateY(16px) scale(.96);} to{opacity:1;transform:translateY(0) scale(1);} }
+  @keyframes toastOut { from{opacity:1;transform:translateY(0) scale(1);} to{opacity:0;transform:translateY(10px) scale(.97);} }
+  @keyframes toastBarShrink { from{width:100%;} to{width:0%;} }
+  #toast{
+    backdrop-filter:blur(10px);
+    background:rgba(255,255,255,.97);
+    box-shadow:0 10px 15px -3px rgba(15,23,42,.08),0 4px 6px -4px rgba(15,23,42,.08),0 0 0 1px rgba(15,23,42,.04);
+  }
+  #toast.leaving{ animation:toastOut .25s ease forwards; }
+  #toastProgress{ animation:toastBarShrink 3.2s linear forwards; }
+  #toastIconWrap{ display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;flex-shrink:0; }
 
   /* Table row hover */
   tbody tr { transition: background 0.12s; }
@@ -107,53 +118,77 @@
     .sn-input { width: 40px; }
     .hide-mobile { display: none !important; }
   }
+
+  /* ═══ LOGIN REDESIGN — matches sheet.html / finance.html design system ═══ */
+  :root{
+    --lblue:#005EA6; --lblueDark:#004A85; --lblueLt:#E8F2FB;
+    --lamber:#F59E0B; --lamberDark:#D97706; --lline:#E2E8F0; --lbg:#F8FAFC;
+  }
+  .login-hero{background:linear-gradient(135deg,#0B1220 0%,#0F1E33 55%,#0A1830 100%);position:relative;overflow:hidden}
+  .login-hero::before{content:'';position:absolute;top:-100px;right:-80px;width:420px;height:420px;background:radial-gradient(circle,rgba(0,94,166,.28) 0%,transparent 70%);border-radius:50%}
+  .login-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(245,158,11,.16) 0%,transparent 70%);border-radius:50%}
+  .login-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,94,166,.18);border:1px solid rgba(0,94,166,.4);color:#7DC4FF;font-weight:700;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;padding:6px 14px;border-radius:999px}
+  .login-stat{border-left:2px solid rgba(255,255,255,.12);padding-left:16px}
+  .login-panel{background:#fff;position:relative}
+  .login-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--lblue),var(--lamber))}
+  .lfield-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#64748B;margin-bottom:6px;display:block}
+  .lfield{width:100%;height:48px;border:1.5px solid var(--lline);border-radius:12px;background:var(--lbg);padding:0 14px 0 42px;font-size:14px;color:#0F172A;outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
+  .lfield:focus{border-color:var(--lblue);box-shadow:0 0 0 3px rgba(0,94,166,.1);background:#fff}
+  .lfield-wrap{position:relative}
+  .lfield-wrap i{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:14px}
+  .login-cta{width:100%;padding:14px 20px;background:var(--lblue);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:14px;letter-spacing:.02em;box-shadow:0 6px 20px rgba(0,94,166,.28);transition:background .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+  .login-cta:hover{background:var(--lblueDark);transform:translateY(-1px)}
+  .login-cta:disabled{opacity:.6;cursor:not-allowed;transform:none}
+  .login-support-btn{display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:700;transition:all .18s;text-decoration:none}
+
+  /* ═══ NAVBAR — professional polish ═══ */
+  #adminNav{position:relative;box-shadow:0 1px 0 rgba(15,23,42,.04), 0 4px 20px rgba(15,23,42,.05)}
+  #adminNav::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,#2563eb 0%,#60a5fa 35%,#f59e0b 70%,#ef4444 100%);opacity:.55}
+  .nav-tab{position:relative;border-radius:999px !important}
+  .nav-tab.bg-blue-50{box-shadow:0 1px 3px rgba(37,99,235,.12)}
+  #navAvatar{box-shadow:0 0 0 2px #fff, 0 0 0 3.5px rgba(37,99,235,.25)}
+  #navDateChip{border-radius:999px}
+  #logoutBtn{border-radius:999px}
 </style>
 </head>
 <body class="bg-slate-50 text-slate-700 min-h-screen">
 
-<!-- ══════════════════ LOGIN ══════════════════ -->
+<!-- ══════════════════ LOGIN (redesigned) ══════════════════ -->
 <div id="login-section" class="min-h-screen flex">
 
   <!-- Left hero — hidden on mobile -->
-  <div class="hidden lg:flex flex-1 flex-col justify-end p-14 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 relative overflow-hidden">
-    <!-- Grid bg -->
-    <div class="absolute inset-0" style="background-image:linear-gradient(rgba(96,165,250,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(96,165,250,.07) 1px,transparent 1px);background-size:40px 40px;"></div>
-    <!-- Glow -->
-    <div class="absolute -top-24 -left-20 w-96 h-96 rounded-full" style="background:radial-gradient(circle,rgba(37,99,235,.22) 0%,transparent 70%);"></div>
-    <div class="absolute -bottom-16 right-20 w-72 h-72 rounded-full" style="background:radial-gradient(circle,rgba(245,158,11,.14) 0%,transparent 70%);"></div>
-    <i class="fas fa-motorcycle absolute right-[-20px] bottom-24 text-blue-900 opacity-20" style="font-size:16rem;transform:scaleX(-1);"></i>
+  <div class="hidden lg:flex flex-1 flex-col justify-end p-14 login-hero relative">
+    <div class="absolute inset-0" style="background-image:linear-gradient(rgba(96,165,250,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(96,165,250,.06) 1px,transparent 1px);background-size:40px 40px;"></div>
+    <i class="fas fa-motorcycle absolute right-[-10px] bottom-16 text-white opacity-[0.05]" style="font-size:17rem;transform:scaleX(-1);"></i>
 
     <div class="relative z-10">
-      <div class="inline-flex items-center gap-2 bg-blue-500/15 border border-blue-400/30 rounded-full px-4 py-1.5 text-xs font-bold tracking-widest text-blue-300 uppercase mb-6">
-        <i class="fas fa-circle-dot text-amber-400 text-xs"></i> Authorized Personnel Only
+      <span class="login-badge"><i class="fa-solid fa-circle-dot" style="color:#F59E0B;font-size:9px"></i> Authorized Dealer Console</span>
+      <div class="font-display text-8xl text-white leading-none tracking-wide mt-6">SAMRIDDHI<br><span style="color:#F59E0B">ADMIN</span></div>
+      <p class="mt-4 text-slate-400 text-sm leading-relaxed max-w-xs">Manage your Bajaj price list, live inventory, and dealership operations — all from one secure dashboard.</p>
+      <div class="flex gap-8 mt-7">
+        <div class="login-stat"><div class="font-display text-3xl text-white">Live</div><div class="text-xs text-slate-500 uppercase tracking-wide mt-0.5">Firestore Sync</div></div>
+        <div class="login-stat"><div class="font-display text-3xl text-white">12+</div><div class="text-xs text-slate-500 uppercase tracking-wide mt-0.5">Models Listed</div></div>
+        <div class="login-stat"><div class="font-display text-3xl text-white">24/7</div><div class="text-xs text-slate-500 uppercase tracking-wide mt-0.5">Access</div></div>
       </div>
-      <div class="font-display text-8xl text-white leading-none tracking-wide">BAJAJ<br><span class="text-amber-400">BIKES</span></div>
-      <p class="mt-4 text-slate-400 text-sm leading-relaxed max-w-xs">Command your entire dealership — pricing, inventory, and operations — from one powerful dashboard.</p>
-      <div class="flex gap-8 mt-6">
-        <div class="border-l-2 border-slate-600 pl-4"><div class="font-display text-3xl text-white">500+</div><div class="text-xs text-slate-500 uppercase tracking-wide mt-0.5">Bikes in Stock</div></div>
-        <div class="border-l-2 border-slate-600 pl-4"><div class="font-display text-3xl text-white">₹2.1Cr</div><div class="text-xs text-slate-500 uppercase tracking-wide mt-0.5">Monthly Rev.</div></div>
-        <div class="border-l-2 border-slate-600 pl-4"><div class="font-display text-3xl text-white">12+</div><div class="text-xs text-slate-500 uppercase tracking-wide mt-0.5">Models Listed</div></div>
-      </div>
-      <div class="flex flex-wrap gap-3 mt-6">
-        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400"><i class="fas fa-shield-halved text-emerald-400"></i> Secure Login</div>
-        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400"><i class="fas fa-bolt text-amber-400"></i> Real-time Sync</div>
-        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400"><i class="fas fa-mobile-screen-button text-blue-400"></i> Mobile Ready</div>
+      <div class="flex flex-wrap gap-3 mt-7">
+        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400"><i class="fas fa-shield-halved" style="color:#10B981"></i> Secure Login</div>
+        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400"><i class="fas fa-bolt" style="color:#F59E0B"></i> Real-time Sync</div>
+        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-400"><i class="fas fa-mobile-screen-button" style="color:#7DC4FF"></i> Mobile Ready</div>
       </div>
     </div>
   </div>
 
   <!-- Right form -->
-  <div class="w-full lg:w-[440px] flex-shrink-0 bg-white flex flex-col justify-center px-8 py-10 relative border-l border-slate-200">
-    <div class="top-bar-grad absolute top-0 left-0 right-0 h-1 rounded-t-none"></div>
+  <div class="w-full lg:w-[440px] flex-shrink-0 login-panel flex flex-col justify-center px-8 py-10">
 
     <!-- Logo -->
     <div class="flex items-center gap-3 mb-8">
-      <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white shadow-btn">
+      <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0" style="background:#005EA6">
         <i class="fas fa-motorcycle text-lg"></i>
       </div>
       <div>
-        <div class="font-display text-2xl text-slate-900 tracking-widest leading-none">BAJAJ <span class="text-amber-500">ADMIN</span></div>
-        <div class="text-[10px] text-slate-400 tracking-widest uppercase mt-0.5">Dealer Control Panel</div>
+        <div class="font-display text-2xl text-slate-900 tracking-widest leading-none">SAMRIDDHI <span style="color:#F59E0B">ADMIN</span></div>
+        <div class="text-[10px] text-slate-400 tracking-widest uppercase mt-0.5">Bajaj Authorized Dealer Panel</div>
       </div>
     </div>
 
@@ -162,21 +197,19 @@
 
     <!-- Email -->
     <div class="flex flex-col gap-1.5 mb-4">
-      <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Email Address</label>
-      <div class="relative">
-        <i class="fas fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-        <input type="email" id="email" placeholder="admin@bajaj.com" autocomplete="email"
-          class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+      <label class="lfield-label">Email Address</label>
+      <div class="lfield-wrap">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="email" placeholder="admin@samriddhibajaj.com" autocomplete="email" class="lfield"/>
       </div>
     </div>
 
     <!-- Password -->
     <div class="flex flex-col gap-1.5 mb-2">
-      <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Password</label>
-      <div class="relative">
-        <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-        <input type="password" id="pass" placeholder="••••••••••" autocomplete="current-password"
-          class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+      <label class="lfield-label">Password</label>
+      <div class="lfield-wrap">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="pass" placeholder="••••••••••" autocomplete="current-password" class="lfield"/>
       </div>
     </div>
 
@@ -191,34 +224,18 @@
     </div>
 
     <!-- Login btn -->
-    <button id="loginBtn" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-bold text-base tracking-wider shadow-btn transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+    <button id="loginBtn" class="login-cta">
       <span id="loginBtnText" class="flex items-center gap-2"><i class="fas fa-right-to-bracket"></i> Sign In to Panel</span>
       <div class="spin" id="loginSpin"></div>
     </button>
 
-    <div class="flex items-center gap-3 my-5 text-xs text-slate-400 uppercase tracking-wider">
-      <div class="flex-1 h-px bg-slate-200"></div>Or continue with<div class="flex-1 h-px bg-slate-200"></div>
-    </div>
-
-    <div class="flex gap-2 mb-6">
-      <button class="flex-1 flex items-center justify-center gap-2 border-2 border-slate-200 rounded-xl py-2.5 text-xs font-bold text-slate-500 hover:border-blue-400 hover:bg-blue-50 transition-all">
-        <img src="https://www.google.com/favicon.ico" width="13" class="rounded-sm"/> Google
-      </button>
-      <button class="flex-1 flex items-center justify-center gap-2 border-2 border-slate-200 rounded-xl py-2.5 text-xs font-bold text-slate-500 hover:border-blue-400 hover:bg-blue-50 transition-all">
-        <i class="fab fa-facebook text-blue-600"></i> Facebook
-      </button>
-      <button class="flex-1 flex items-center justify-center gap-2 border-2 border-slate-200 rounded-xl py-2.5 text-xs font-bold text-slate-500 hover:border-blue-400 hover:bg-blue-50 transition-all">
-        <i class="fab fa-apple"></i> Apple
-      </button>
-    </div>
-
-    <div class="border-t border-slate-100 pt-5">
-      <p class="flex items-center gap-2 text-xs text-slate-400 mb-3"><i class="fas fa-headset text-amber-500"></i> Need a new admin ID? Contact support</p>
-      <a class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 hover:bg-emerald-500 hover:text-white transition-all mb-2"
-         href="https://wa.me/9820907795?text=Hi%2C%20I%20need%20a%20new%20admin%20ID%20for%20Bajaj%20panel" target="_blank">
+    <div class="border-t border-slate-100 pt-5 mt-6">
+      <p class="flex items-center gap-2 text-xs text-slate-400 mb-3"><i class="fas fa-headset" style="color:#F59E0B"></i> Need a new admin ID? Contact support</p>
+      <a class="login-support-btn text-emerald-600 bg-emerald-50 border border-emerald-200 hover:bg-emerald-500 hover:text-white mb-2"
+         href="https://wa.me/9779820907795?text=Hi%2C%20I%20need%20a%20new%20admin%20ID%20for%20Bajaj%20panel" target="_blank">
         <i class="fab fa-whatsapp text-lg"></i> WhatsApp Support
       </a>
-      <a class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-500 hover:text-white transition-all"
+      <a class="login-support-btn text-red-600 bg-red-50 border border-red-200 hover:bg-red-500 hover:text-white"
          href="mailto:yonghangissac@gmail.com?subject=New%20Admin%20ID%20Request&body=Hello%2C%20I%20need%20a%20new%20admin%20ID." target="_blank">
         <i class="fas fa-envelope text-lg"></i> Email via Gmail
       </a>
@@ -230,10 +247,10 @@
 <div id="admin-section" class="hidden flex-col min-h-screen">
 
   <!-- NAVBAR -->
-  <nav class="sticky top-0 z-50 h-16 bg-white/95 backdrop-blur border-b border-slate-200 flex items-center px-4 gap-3 shadow-sm">
+  <nav id="adminNav" class="sticky top-0 z-50 h-16 bg-white/95 backdrop-blur border-b border-slate-200/70 flex items-center px-4 sm:px-6 gap-3">
     <!-- Brand -->
     <div class="flex items-center gap-2.5 flex-shrink-0">
-      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white shadow-btn flex-shrink-0">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white shadow-btn flex-shrink-0 ring-1 ring-blue-900/10">
         <i class="fas fa-motorcycle text-sm"></i>
       </div>
       <div class="hidden sm:block">
@@ -245,32 +262,32 @@
     <div class="w-px h-7 bg-slate-200 hidden md:block flex-shrink-0"></div>
 
     <!-- Desktop Tabs -->
-    <div class="hidden md:flex gap-1.5">
+    <div class="hidden md:flex gap-1.5 bg-slate-50 border border-slate-200/80 rounded-full p-1">
       <button id="navPrice" onclick="switchSec('price')"
-        class="nav-tab flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide text-slate-500 border border-transparent hover:bg-slate-100 transition-all active-tab">
+        class="nav-tab flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-500 border border-transparent hover:bg-white transition-all active-tab">
         <i class="fas fa-tags text-xs"></i> Price List
       </button>
       <button id="navInv" onclick="switchSec('inv')"
-        class="nav-tab flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide text-slate-500 border border-transparent hover:bg-slate-100 transition-all">
+        class="nav-tab flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-500 border border-transparent hover:bg-white transition-all">
         <i class="fas fa-warehouse text-xs"></i> Inventory
       </button>
     </div>
 
     <!-- Right -->
     <div class="ml-auto flex items-center gap-2 flex-shrink-0">
-      <div class="hidden sm:flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-500 font-mono">
+      <div id="navDateChip" class="hidden sm:flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 px-3 py-1.5 text-xs text-slate-500 font-mono">
         <i class="fas fa-calendar text-amber-500 text-xs"></i>
         <span id="currentDate"></span>
       </div>
-      <div class="flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1.5">
+      <div class="flex items-center gap-2 bg-slate-50 border border-slate-200/80 rounded-full pl-1.5 pr-3 py-1.5">
         <div id="navAvatar" class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">A</div>
         <span id="headerUserName" class="text-xs font-semibold text-slate-700 hidden sm:block">Admin</span>
       </div>
-      <button id="logoutBtn" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-red-200 text-red-500 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white hover:border-red-500 transition-all">
+      <button id="logoutBtn" class="flex items-center gap-1.5 px-3.5 py-1.5 border-2 border-red-200 text-red-500 text-xs font-bold hover:bg-red-500 hover:text-white hover:border-red-500 transition-all">
         <i class="fas fa-right-from-bracket"></i> <span class="hidden sm:inline">Logout</span>
       </button>
       <!-- Hamburger -->
-      <button id="hamburger" onclick="toggleMobileMenu()" class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200 transition-all">
+      <button id="hamburger" onclick="toggleMobileMenu()" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full bg-slate-50 border border-slate-200/80 text-slate-600 hover:bg-slate-100 transition-all">
         <i class="fas fa-bars text-sm"></i>
       </button>
     </div>
@@ -431,46 +448,17 @@
         </div>
       </div>
 
-      <!-- Stats -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all relative overflow-hidden">
-          <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-400"></div>
-          <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0"><i class="fas fa-warehouse text-sm"></i></div>
-            <div class="min-w-0">
-              <div id="statInvTotal" class="font-display text-3xl text-slate-900 leading-none">0</div>
-              <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Total Units</div>
-            </div>
+      <!-- Model x Colour Breakdown -->
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-card p-5 mb-5">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center gap-2 font-display text-2xl text-slate-900 tracking-wide">
+            <i class="fas fa-chart-simple text-amber-500 text-lg"></i> Stock by Model &amp; Colour
           </div>
+          <span id="invTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1 text-xs font-mono text-slate-500">0 units total</span>
         </div>
-        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all relative overflow-hidden">
-          <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-400"></div>
-          <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0"><i class="fas fa-circle-check text-sm"></i></div>
-            <div class="min-w-0">
-              <div id="statInvReg" class="font-display text-3xl text-slate-900 leading-none">0</div>
-              <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Registered</div>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all relative overflow-hidden">
-          <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-500 to-amber-400"></div>
-          <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0"><i class="fas fa-hourglass-half text-sm"></i></div>
-            <div class="min-w-0">
-              <div id="statInvPend" class="font-display text-3xl text-slate-900 leading-none">0</div>
-              <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Pending Reg.</div>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-card hover:-translate-y-1 hover:shadow-card-hover transition-all relative overflow-hidden">
-          <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-400"></div>
-          <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0"><i class="fas fa-palette text-sm"></i></div>
-            <div class="min-w-0">
-              <div id="statInvCol" class="font-display text-3xl text-slate-900 leading-none">0</div>
-              <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Colours</div>
-            </div>
+        <div id="modelBreakdown" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div class="col-span-full py-8 text-center text-slate-400 text-sm">
+            <i class="fas fa-circle-notch animate-spin text-amber-400 text-lg block mb-2"></i>Loading breakdown…
           </div>
         </div>
       </div>
@@ -481,21 +469,11 @@
           <i class="fas fa-plus-circle text-amber-500 text-lg"></i> Add Inventory Unit
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
-          <div class="flex flex-col gap-1.5" style="max-width:100px;">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">S.N <span class="text-red-400">*</span></label>
-            <input type="number" id="sSn" placeholder="1" min="1"
-              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
-          </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Model <span class="text-red-400">*</span></label>
             <select id="stockModelSelect" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
               <option value="">— Select Model —</option>
             </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price (₹) <span class="text-red-400">*</span></label>
-            <input type="number" id="sPrice" placeholder="Auto-fills"
-              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Chassis No <span class="text-red-400">*</span></label>
@@ -525,11 +503,45 @@
         </div>
       </div>
 
+      <!-- Excel Bulk Import -->
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-card p-5 mb-5">
+        <div class="flex items-center gap-2 font-display text-2xl text-slate-900 tracking-wide mb-1">
+          <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
+        </div>
+        <p class="text-xs text-slate-500 mb-4">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, Chassis, Engine, RegNo, Color</b>. S.N fills in automatically.</p>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all">
+            <i class="fas fa-cloud-arrow-up text-emerald-500 text-lg flex-shrink-0"></i>
+            <span id="excelFileLabel" class="text-sm text-slate-600 font-medium truncate">Click to choose Excel / CSV file…</span>
+            <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" class="hidden"/>
+          </label>
+          <button id="downloadTemplateBtn" class="flex items-center justify-center gap-2 px-4 py-3 border-2 border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-blue-300 hover:text-blue-600 transition-all whitespace-nowrap">
+            <i class="fas fa-download"></i> Sample Template
+          </button>
+          <button id="importExcelBtn" disabled class="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 whitespace-nowrap">
+            <i class="fas fa-upload"></i> <span id="importExcelBtnText">Import Rows</span>
+          </button>
+        </div>
+        <div id="importSummary" class="hidden mt-4 rounded-xl border border-slate-200 overflow-hidden">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-wrap">
+            <span id="importSummaryHead" class="text-xs font-bold text-slate-600"></span>
+          </div>
+          <div id="importSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
+        </div>
+      </div>
+
       <!-- Inv Table -->
       <div class="bg-white border border-slate-200 rounded-2xl shadow-card overflow-hidden">
-        <div class="flex items-center gap-2 px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
           <div class="flex items-center gap-2 font-display text-2xl text-slate-900 tracking-wide"><i class="fas fa-warehouse text-amber-500"></i> Stock Register</div>
           <span id="invCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+          <div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
+            <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="invSearch" autocomplete="off" placeholder="Search chassis, engine, model, reg no…"
+              class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-8 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+            <button id="invSearchClear" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 text-xs"><i class="fas fa-circle-xmark"></i></button>
+            <div id="invSearchDropdown" class="hidden absolute z-40 top-[calc(100%+6px)] left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto"></div>
+          </div>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full border-collapse">
@@ -537,7 +549,6 @@
               <tr class="bg-slate-50">
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
-                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Price</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Chassis No</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Engine No</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Reg. No</th>
@@ -546,7 +557,7 @@
               </tr>
             </thead>
             <tbody id="stockTableBody">
-              <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">
+              <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
                 <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading inventory…
               </td></tr>
             </tbody>
@@ -611,11 +622,37 @@
   </footer>
 </div>
 
+<!-- CONFIRM MODAL -->
+<div id="confirmModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style="animation:slideIn .2s ease;">
+    <div class="p-5 flex items-start gap-3.5">
+      <div class="w-11 h-11 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-trash-can text-red-500 text-base"></i>
+      </div>
+      <div class="min-w-0 pt-1">
+        <div class="font-bold text-slate-900 text-[15px] mb-1">Delete this entry?</div>
+        <div id="confirmModalMsg" class="text-slate-500 text-[13px] leading-relaxed">This action can't be undone. The record will be permanently removed.</div>
+      </div>
+    </div>
+    <div class="flex border-t border-slate-100">
+      <button id="confirmModalCancel" class="flex-1 py-3.5 text-sm font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
+      <div class="w-px bg-slate-100"></div>
+      <button id="confirmModalOk" class="flex-1 py-3.5 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors">Delete</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
-<div id="toast" class="hidden fixed bottom-5 right-5 z-[500] bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-700 flex items-center gap-2.5 shadow-xl min-w-[200px] max-w-xs" style="animation:slideIn .3s ease;">
-  <div id="toastBar" class="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"></div>
-  <i id="toastIcon" class="fas fa-circle-check text-base flex-shrink-0"></i>
-  <span id="toastMsg"></span>
+<div id="toast" class="hidden fixed bottom-5 right-5 z-[500] border border-slate-200/80 rounded-2xl pl-3.5 pr-4 py-3.5 text-sm text-slate-700 items-start gap-3 min-w-[260px] max-w-sm overflow-hidden">
+  <div id="toastIconWrap"><i id="toastIcon" class="fas fa-circle-check text-sm"></i></div>
+  <div class="min-w-0 pt-0.5">
+    <div id="toastTitle" class="font-bold text-slate-800 text-[13px] leading-tight mb-0.5">Success</div>
+    <span id="toastMsg" class="text-slate-500 text-[12.5px] leading-snug block"></span>
+  </div>
+  <button id="toastClose" class="ml-auto flex-shrink-0 text-slate-300 hover:text-slate-500 transition-colors mt-0.5"><i class="fas fa-xmark text-xs"></i></button>
+  <div class="absolute left-0 right-0 bottom-0 h-[3px] bg-slate-100">
+    <div id="toastProgress" class="h-full"></div>
+  </div>
 </div>
 
 <!-- FIREBASE -->
@@ -637,19 +674,77 @@ const db = getFirestore(app);
 let currentEditId = null;
 let allMasterBikes = [];
 let invData = [];
+let invSearchTerm = '';
+
+/* ─── Custom confirm modal (replaces native browser confirm) ─── */
+function showConfirm(message){
+  return new Promise((resolve)=>{
+    const modal = document.getElementById('confirmModal');
+    const msgEl = document.getElementById('confirmModalMsg');
+    const okBtn = document.getElementById('confirmModalOk');
+    const cancelBtn = document.getElementById('confirmModalCancel');
+    if(message) msgEl.textContent = message;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    function cleanup(result){
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      modal.removeEventListener('click', onBackdrop);
+      resolve(result);
+    }
+    function onOk(){ cleanup(true); }
+    function onCancel(){ cleanup(false); }
+    function onBackdrop(e){ if(e.target===modal) cleanup(false); }
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    modal.addEventListener('click', onBackdrop);
+  });
+}
 
 /* ─── Helpers ─── */
+let toastTimer = null;
 function toast(msg, type='ok') {
   const t = document.getElementById('toast');
   const ic = document.getElementById('toastIcon');
-  const bar = document.getElementById('toastBar');
-  ic.className = type==='err' ? 'fas fa-circle-xmark text-base flex-shrink-0' : 'fas fa-circle-check text-base flex-shrink-0';
-  ic.style.color = type==='err' ? '#ef4444' : '#10b981';
-  bar.style.background = type==='err' ? '#ef4444' : '#f59e0b';
+  const iconWrap = document.getElementById('toastIconWrap');
+  const title = document.getElementById('toastTitle');
+  const progress = document.getElementById('toastProgress');
+
+  const cfg = {
+    ok:   { icon:'fa-circle-check',   color:'#10b981', bg:'#ECFDF5', title:'Success' },
+    err:  { icon:'fa-circle-xmark',   color:'#ef4444', bg:'#FEF2F2', title:'Something went wrong' },
+    warn: { icon:'fa-triangle-exclamation', color:'#f59e0b', bg:'#FFFBEB', title:'Heads up' }
+  }[type] || { icon:'fa-circle-check', color:'#10b981', bg:'#ECFDF5', title:'Success' };
+
+  ic.className = 'fas ' + cfg.icon + ' text-sm';
+  ic.style.color = cfg.color;
+  iconWrap.style.background = cfg.bg;
+  title.textContent = cfg.title;
+  title.style.color = cfg.color === '#f59e0b' ? '#B45309' : (type==='err' ? '#B91C1C' : '#065F46');
+  progress.style.background = cfg.color;
   document.getElementById('toastMsg').textContent = msg;
+
+  // reset progress-bar animation
+  progress.style.animation = 'none';
+  void progress.offsetWidth;
+  progress.style.animation = 'toastBarShrink 3.2s linear forwards';
+
+  t.classList.remove('hidden','leaving');
   t.style.display = 'flex';
-  setTimeout(()=>{ t.style.display='none'; }, 3200);
+  t.style.animation = 'slideIn .3s ease';
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>hideToast(), 3200);
 }
+function hideToast(){
+  const t = document.getElementById('toast');
+  if(t.style.display==='none') return;
+  t.classList.add('leaving');
+  setTimeout(()=>{ t.style.display='none'; t.classList.remove('leaving'); }, 250);
+}
+document.getElementById('toastClose').addEventListener('click', ()=>{ clearTimeout(toastTimer); hideToast(); });
 
 function colourHex(col='') {
   const map={red:'#ef4444',blue:'#3b82f6',black:'#374151',white:'#e2e8f0',orange:'#f97316',green:'#22c55e',yellow:'#eab308',silver:'#94a3b8',grey:'#64748b',gray:'#64748b',maroon:'#be123c',brown:'#92400e',purple:'#7c3aed',pink:'#ec4899'};
@@ -791,11 +886,6 @@ function populateModelDropdown() {
   if(cur) sel.value=cur;
 }
 
-document.getElementById('stockModelSelect').addEventListener('change',function(){
-  const opt=this.selectedOptions[0];
-  document.getElementById('sPrice').value=opt&&opt.dataset.price?opt.dataset.price:'';
-});
-
 window._editMaster=(id)=>{
   const b=allMasterBikes.find(x=>x.id===id); if(!b)return;
   document.getElementById('mSn').value=b.sn||'';
@@ -846,51 +936,59 @@ function clearMasterForm(){['mSn','mName','mPrice','mNormalIns','mFinanceIns','m
 
 /* ─── Inventory ─── */
 document.getElementById('saveStockBtn').addEventListener('click',async()=>{
-  const sn=document.getElementById('sSn').value.trim();
   const modelName=document.getElementById('stockModelSelect').value;
   const bikeInfo=allMasterBikes.find(b=>b.name===modelName);
-  const price=document.getElementById('sPrice').value.trim();
   const chassis=document.getElementById('sChassis').value.trim();
   const engine=document.getElementById('sEngine').value.trim();
   const regNo=document.getElementById('sRegNo').value.trim();
   const color=document.getElementById('sColor').value.trim();
-  if(!sn){toast('S.N is required!','err');return;}
   if(!modelName||!bikeInfo){toast('Select a valid model!','err');return;}
-  if(!price||!chassis||!engine||!color){toast('Fill all required fields!','err');return;}
+  if(!chassis||!engine||!color){toast('Fill all required fields!','err');return;}
+  // Auto S.N — always one more than the current highest S.N in inventory
+  const nextSn = invData.length ? Math.max(...invData.map(x=>Number(x.sn)||0)) + 1 : 1;
   try {
-    await addDoc(collection(db,"inventory"),{sn:Number(sn),model:modelName,price:Number(price),chassis,engine,regNo,color,addedAt:new Date()});
-    ['sSn','sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
+    await addDoc(collection(db,"inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,addedAt:new Date()});
+    ['sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('stockModelSelect').value='';
-    document.getElementById('sPrice').value='';
-    toast('Unit added to inventory!');
+    toast('Unit added — S.N '+nextSn+' assigned automatically.');
   }catch(e){toast('Error: '+e.message,'err');}
 });
 
 function loadLiveStock(){
   onSnapshot(collection(db,"inventory"),snap=>{
     invData=snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderInvTable(snap.docs); updateInvStats();
+    renderInvTable(getFilteredInv());
+    updateInvStats();
+    renderModelBreakdown();
   });
 }
 
-function renderInvTable(docs){
+function getFilteredInv(){
+  if(!invSearchTerm) return invData;
+  const q = invSearchTerm.toLowerCase().trim();
+  return invData.filter(s=>{
+    return (s.model||'').toLowerCase().includes(q)
+        || (s.chassis||'').toLowerCase().includes(q)
+        || (s.engine||'').toLowerCase().includes(q)
+        || (s.regNo||'').toLowerCase().includes(q)
+        || (s.color||'').toLowerCase().includes(q);
+  });
+}
+
+function renderInvTable(list){
   const tbody=document.getElementById('stockTableBody');
-  document.getElementById('invCount').textContent=docs.length+' unit'+(docs.length!==1?'s':'');
-  if(!docs.length){
-    tbody.innerHTML=`<tr><td colspan="8"><div class="py-12 text-center text-slate-400"><i class="fas fa-warehouse text-3xl opacity-25 block mb-2"></i><p class="text-sm">No inventory yet. Add a unit using the form above.</p></div></td></tr>`;
+  document.getElementById('invCount').textContent=list.length+' unit'+(list.length!==1?'s':'')+(invSearchTerm?' found':'');
+  if(!list.length){
+    tbody.innerHTML=`<tr><td colspan="7"><div class="py-12 text-center text-slate-400"><i class="fas fa-warehouse text-3xl opacity-25 block mb-2"></i><p class="text-sm">${invSearchTerm?'No units match your search.':'No inventory yet. Add a unit using the form above.'}</p></div></td></tr>`;
     return;
   }
-  const sorted=[...docs].sort((a,b)=>(Number(a.data().sn)||9999)-(Number(b.data().sn)||9999));
-  tbody.innerHTML=sorted.map(d=>{
-    const s=d.data();
+  const sorted=[...list].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
+  tbody.innerHTML=sorted.map(s=>{
     return`<tr class="border-b border-slate-100">
       <td class="px-4 py-3">
-        <input class="sn-input" type="number" value="${s.sn||''}" min="1" placeholder="—"
-          onblur="window._saveSn('inventory','${d.id}',this.value)"
-          onkeydown="if(event.key==='Enter')this.blur()"/>
+        <span class="inline-flex items-center justify-center min-w-[36px] px-2 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-xs font-mono font-bold">${s.sn||'—'}</span>
       </td>
       <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap">${s.model}</td>
-      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-mono font-bold border border-blue-200">₹${Number(s.price).toLocaleString('en-IN')}</span></td>
       <td class="px-4 py-3"><code class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-md border border-blue-100 font-mono">${s.chassis||'—'}</code></td>
       <td class="px-4 py-3"><code class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-md border border-blue-100 font-mono">${s.engine||'—'}</code></td>
       <td class="px-4 py-3">${s.regNo
@@ -903,18 +1001,135 @@ function renderInvTable(docs){
         </span>
       </td>
       <td class="px-4 py-3">
-        <button onclick="window._deleteEntry('inventory','${d.id}')" class="flex items-center gap-1 px-2.5 py-1 border border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"><i class="fas fa-trash text-[10px]"></i> Del</button>
+        <button onclick="window._deleteEntry('inventory','${s.id}')" class="flex items-center gap-1 px-2.5 py-1 border border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"><i class="fas fa-trash text-[10px]"></i> Del</button>
       </td>
     </tr>`;
   }).join('');
 }
 
 function updateInvStats(){
-  document.getElementById('statInvTotal').textContent=invData.length;
-  document.getElementById('statInvReg').textContent=invData.filter(x=>x.regNo&&x.regNo.trim()).length;
-  document.getElementById('statInvPend').textContent=invData.filter(x=>!x.regNo||!x.regNo.trim()).length;
-  document.getElementById('statInvCol').textContent=new Set(invData.map(x=>(x.color||'').toLowerCase())).size;
+  document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total';
 }
+
+function renderModelBreakdown(){
+  const wrap = document.getElementById('modelBreakdown');
+  if(!invData.length){
+    wrap.innerHTML = `<div class="col-span-full py-8 text-center text-slate-400 text-sm"><i class="fas fa-warehouse text-2xl opacity-25 block mb-2"></i>No inventory yet.</div>`;
+    return;
+  }
+  // group by model -> colour -> count
+  const byModel = {};
+  invData.forEach(s=>{
+    const m = s.model || 'Unassigned';
+    const c = (s.color||'Unspecified').trim() || 'Unspecified';
+    byModel[m] = byModel[m] || { total:0, colours:{} };
+    byModel[m].total++;
+    byModel[m].colours[c] = (byModel[m].colours[c]||0) + 1;
+  });
+  const modelsSorted = Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total);
+  wrap.innerHTML = modelsSorted.map(m=>{
+    const info = byModel[m];
+    const colourChips = Object.entries(info.colours)
+      .sort((a,b)=>b[1]-a[1])
+      .map(([c,n])=>`<span class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-600">
+          <span class="colour-dot" style="background:${colourHex(c)}"></span>${c}
+          <span class="text-slate-400 font-mono">×${n}</span>
+        </span>`).join('');
+    return `<div class="border border-slate-200 rounded-xl p-3.5 hover:border-blue-200 hover:shadow-card transition-all">
+      <div class="flex items-center justify-between mb-2.5">
+        <span class="font-bold text-slate-800 text-sm truncate pr-2">${m}</span>
+        <span class="flex-shrink-0 inline-flex items-center justify-center min-w-[26px] h-6 px-1.5 rounded-full bg-blue-600 text-white text-[11px] font-bold">${info.total}</span>
+      </div>
+      <div class="flex flex-wrap gap-1.5">${colourChips}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── Inventory Search (last-digits friendly, live dropdown) ─── */
+const invSearchInput = document.getElementById('invSearch');
+const invSearchDropdown = document.getElementById('invSearchDropdown');
+const invSearchClear = document.getElementById('invSearchClear');
+
+function matchScore(field, q){
+  field = (field||'').toLowerCase();
+  if(!field) return -1;
+  if(field === q) return 100;
+  if(field.endsWith(q)) return 80;      // matches by trailing/last digits — most common lookup
+  if(field.startsWith(q)) return 60;
+  if(field.includes(q)) return 40;
+  return -1;
+}
+
+function searchInvSuggestions(q){
+  q = q.toLowerCase().trim();
+  if(!q) return [];
+  const scored = invData.map(s=>{
+    const scores = [
+      matchScore(s.chassis, q),
+      matchScore(s.engine, q),
+      matchScore(s.regNo, q),
+      matchScore(s.model, q),
+      matchScore(s.color, q)
+    ];
+    return { s, score: Math.max(...scores) };
+  }).filter(x=>x.score>=0);
+  scored.sort((a,b)=>b.score-a.score);
+  return scored.slice(0,8).map(x=>x.s);
+}
+
+function renderInvDropdown(list){
+  if(!list.length){
+    invSearchDropdown.innerHTML = `<div class="px-4 py-3 text-xs text-slate-400">No matching units found.</div>`;
+    invSearchDropdown.classList.remove('hidden');
+    return;
+  }
+  invSearchDropdown.innerHTML = list.map(s=>`
+    <button type="button" data-id="${s.id}" class="invSuggestBtn w-full text-left px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-blue-50 border-b border-slate-50 last:border-b-0 transition-colors">
+      <div class="min-w-0">
+        <div class="text-sm font-bold text-slate-800 truncate">${s.model}</div>
+        <div class="text-[11px] text-slate-400 font-mono truncate">Chassis ${s.chassis||'—'} · Engine ${s.engine||'—'}</div>
+      </div>
+      <span class="flex items-center gap-1.5 text-[11px] text-slate-500 flex-shrink-0">
+        <span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}
+      </span>
+    </button>`).join('');
+  invSearchDropdown.classList.remove('hidden');
+  invSearchDropdown.querySelectorAll('.invSuggestBtn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const s = invData.find(x=>x.id===btn.dataset.id);
+      if(s){
+        invSearchInput.value = s.chassis || s.model;
+        invSearchTerm = invSearchInput.value;
+        invSearchClear.classList.remove('hidden');
+      }
+      invSearchDropdown.classList.add('hidden');
+      renderInvTable(getFilteredInv());
+    });
+  });
+}
+
+invSearchInput.addEventListener('input', ()=>{
+  const val = invSearchInput.value;
+  invSearchTerm = val;
+  invSearchClear.classList.toggle('hidden', !val);
+  renderInvTable(getFilteredInv());
+  const suggestions = searchInvSuggestions(val);
+  if(val.trim()) renderInvDropdown(suggestions);
+  else invSearchDropdown.classList.add('hidden');
+});
+invSearchInput.addEventListener('focus', ()=>{
+  if(invSearchInput.value.trim()) renderInvDropdown(searchInvSuggestions(invSearchInput.value));
+});
+invSearchClear.addEventListener('click', ()=>{
+  invSearchInput.value=''; invSearchTerm='';
+  invSearchClear.classList.add('hidden');
+  invSearchDropdown.classList.add('hidden');
+  renderInvTable(getFilteredInv());
+});
+document.addEventListener('click', (e)=>{
+  const wrap = document.getElementById('invSearchWrap');
+  if(wrap && !wrap.contains(e.target)) invSearchDropdown.classList.add('hidden');
+});
 
 window._saveSn=async(col,id,val)=>{
   const num=Number(val);
@@ -924,12 +1139,146 @@ window._saveSn=async(col,id,val)=>{
 };
 
 window._deleteEntry=async(col,id)=>{
-  if(!confirm('Delete this entry?'))return;
+  const ok = await showConfirm(col==='bikes' ? "This will permanently remove the model from your price list." : "This will permanently remove the unit from inventory.");
+  if(!ok) return;
   try{
     await deleteDoc(doc(db,col,id));
     toast(col==='bikes'?'Model deleted.':'Unit removed.');
   }catch(e){toast('Delete failed: '+e.message,'err');}
 };
+
+/* ─── Excel Bulk Import ─── */
+let excelParsedRows = [];
+
+document.getElementById('excelFileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const importBtn = document.getElementById('importExcelBtn');
+  const label = document.getElementById('excelFileLabel');
+  const summary = document.getElementById('importSummary');
+  summary.classList.add('hidden');
+  excelParsedRows = [];
+  importBtn.disabled = true;
+
+  if(!file){ label.textContent='Click to choose Excel / CSV file…'; return; }
+  label.textContent = file.name;
+
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      // Read as raw array-of-arrays so we can fuzzy-match header names ourselves
+      // (real-world files use headers like "model_name", "vin_chassis", "engine_number", "registration_number")
+      const aoa = XLSX.utils.sheet_to_json(sheet, {header:1, defval:'', blankrows:false});
+      if(!aoa.length){ toast('File appears empty.','err'); return; }
+
+      const rawHeaders = aoa[0].map(h=>h.toString().trim().toLowerCase().replace(/[^a-z]/g,''));
+      // Find the FIRST column index whose cleaned header contains one of the given keywords
+      function findCol(keywords){
+        for(let i=0;i<rawHeaders.length;i++){
+          if(keywords.some(kw=>rawHeaders[i].includes(kw))) return i;
+        }
+        return -1;
+      }
+      const colIdx = {
+        model:   findCol(['modelname','model']),
+        chassis: findCol(['chassis','vin']),
+        engine:  findCol(['enginenumber','engine']),
+        regNo:   findCol(['registrationnumber','regno','regd','registration']),
+        color:   findCol(['color','colour'])
+      };
+
+      if(colIdx.model===-1 || colIdx.chassis===-1){
+        toast('Could not find Model / Chassis columns in the header row.','err');
+        return;
+      }
+
+      excelParsedRows = aoa.slice(1).map(r=>({
+        model:   colIdx.model!==-1   ? (r[colIdx.model]||'').toString().trim()   : '',
+        chassis: colIdx.chassis!==-1 ? (r[colIdx.chassis]||'').toString().trim() : '',
+        engine:  colIdx.engine!==-1  ? (r[colIdx.engine]||'').toString().trim()  : '',
+        regNo:   colIdx.regNo!==-1   ? (r[colIdx.regNo]||'').toString().trim()   : '',
+        color:   colIdx.color!==-1   ? (r[colIdx.color]||'').toString().trim()   : ''
+      })).filter(r=>r.model || r.chassis || r.engine); // drop fully blank rows
+
+      if(!excelParsedRows.length){ toast('No data rows found in file.','err'); return; }
+      importBtn.disabled = false;
+      toast(excelParsedRows.length+' row(s) detected. Review & click Import.');
+    }catch(err){
+      toast('Could not read file: '+err.message,'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('downloadTemplateBtn').addEventListener('click', ()=>{
+  const wsData = [
+    ['Model','Chassis','Engine','RegNo','Color'],
+    ['Pulsar N150','MD2A12EY000001','BSVI2024000001','BA2PA1234','Fiery Orange'],
+    ['Pulsar NS200','MD2A12EY000002','BSVI2024000002','','Racing Red']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
+  XLSX.writeFile(wb, 'inventory_import_template.xlsx');
+});
+
+document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
+  if(!excelParsedRows.length) return;
+  const btn = document.getElementById('importExcelBtn');
+  const btnText = document.getElementById('importExcelBtnText');
+  btn.disabled = true;
+  btnText.textContent = 'Importing…';
+
+  // Start SN after current max SN in inventory
+  let nextSn = invData.length ? Math.max(...invData.map(x=>Number(x.sn)||0)) + 1 : 1;
+
+  const results = { success:[], failed:[] };
+
+  for(const row of excelParsedRows){
+    if(!row.model || !row.chassis || !row.engine || !row.color){
+      results.failed.push({row, reason:'Missing required field (Model/Chassis/Engine/Color)'});
+      continue;
+    }
+    try{
+      await addDoc(collection(db,"inventory"),{
+        sn: nextSn,
+        model: row.model,
+        chassis: row.chassis,
+        engine: row.engine,
+        regNo: row.regNo || '',
+        color: row.color,
+        addedAt: new Date()
+      });
+      results.success.push(row);
+      nextSn++;
+    }catch(e){
+      results.failed.push({row, reason:e.message});
+    }
+  }
+
+  // Render summary
+  const summary = document.getElementById('importSummary');
+  const head = document.getElementById('importSummaryHead');
+  const body = document.getElementById('importSummaryBody');
+  head.innerHTML = `<span class="text-emerald-600"><i class="fas fa-circle-check"></i> ${results.success.length} imported</span>` +
+    (results.failed.length ? ` &nbsp;·&nbsp; <span class="text-red-500"><i class="fas fa-circle-xmark"></i> ${results.failed.length} failed</span>` : '');
+  body.innerHTML = results.failed.map(f=>`
+    <div class="px-4 py-2 flex items-center justify-between gap-3">
+      <span class="text-slate-600 truncate">${f.row.model || '(no model)'} — ${f.row.chassis || '(no chassis)'}</span>
+      <span class="text-red-500 font-medium whitespace-nowrap">${f.reason}</span>
+    </div>`).join('') || `<div class="px-4 py-3 text-slate-400">All rows imported successfully.</div>`;
+  summary.classList.remove('hidden');
+
+  toast(`Import done: ${results.success.length} added, ${results.failed.length} failed`, results.failed.length ? 'err' : 'ok');
+
+  btn.disabled = true;
+  btnText.textContent = 'Import Rows';
+  excelParsedRows = [];
+  document.getElementById('excelFileInput').value = '';
+  document.getElementById('excelFileLabel').textContent = 'Click to choose Excel / CSV file…';
+});
 
 /* ─── Nav ─── */
 window.switchSec=(sec)=>{
