@@ -221,7 +221,7 @@ table.a4-form-table th{font-weight:700;background:#fff;text-align:left}
 .a4-thumbprint-split{width:50%;height:100%;border-right:1px solid #000;display:flex;align-items:flex-end;justify-content:center;font-size:7.5pt;padding-bottom:4px}
 .a4-thumbprint-split:last-child{border-right:none}
 
-.a4-compass-arrow{display:inline-block;width:0;height:0;border-left:4.5px solid transparent;border-right:4.5px solid transparent;border-bottom:13pt solid #1a73e8;position:relative;vertical-align:middle;margin-left:4px}
+.a4-compass-arrow{display:inline-block;color:#1a73e8;font-size:16pt;font-weight:700;line-height:1;vertical-align:middle;margin-left:4px}
 
 table.a4-legaltbl th{text-align:center}
 
@@ -242,7 +242,7 @@ table.a4-yn th{background:#fff;font-size:7.3pt;font-weight:700;text-align:left}
 .a4-landmark-line{font-size:8.8pt;margin-top:14px;padding:2px 0}
 .a4-landmark-line .dots{border-bottom:1px dotted #777;padding:0 2px}
 
-.a4-declaration{font-size:6.7pt;line-height:1.35;margin-top:8px;text-align:justify;border:1px solid #000;padding:6px}
+.a4-declaration{font-size:6.7pt;line-height:1.35;margin-top:8px;text-align:justify}
 .a4-sign-row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px;gap:10px}
 .a4-sign-line{flex:1}
 .a4-sign-line .rule{border-top:1px solid #000;padding-top:3px;font-size:8.5pt;font-weight:700;text-align:center}
@@ -800,11 +800,13 @@ function buildPage1(){
         ${famRow('spouse','Spouse (पति पत्नी)')}
         ${famRow('mother','Mother (आमा)')}
         ${famRow('father','Father (बुबा)')}
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
         ${famRow('gf','Grandfather (बाजे)')}
         ${famRow('son','Son (छोरा)')}
         ${famRow('daughter','Daughter (छोरी)')}
         ${famRow('dil','Daughter-in-Law – Law (बुहारी)')}
         ${famRow('lc','Legal Custodian (कानूनीसंरक्षक)')}
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
       </tbody>
     </table>
 
@@ -857,8 +859,8 @@ function buildPage2(){
   const qRows=qLabels.map((lab,i)=>{
     const val=radioValue('q'+(i+1));
     if(i===1){
-      /* Row 2 mirrors the exact HFL-CLONE source quirk: first box unlabeled, second labeled "below" */
-      const tick=`<span class="a4-yn-opts"><span>${chk(val==='Yes')}</span><span>${chk(val==='No')} <b>below</b></span></span>`;
+      /* Row 2 mirrors the real scanned HFL form: two plain checkboxes, no label text */
+      const tick=`<span class="a4-yn-opts"><span>${chk(val==='Yes')}</span><span>${chk(val==='No')}</span></span>`;
       return `<tr><td class="snc"><b>2.</b></td><td><b>${lab}</b></td><td style="text-align:center">${tick}</td></tr>`;
     }
     const tick=`<span class="a4-yn-opts"><span>${chk(val==='Yes')} <b>Yes</b></span><span>${chk(val==='No')} <b>No</b></span></span>`;
@@ -887,7 +889,7 @@ function buildPage2(){
       <span class="a4-check">${chk(turns.includes('25 Lakh to 50 Lakh'))} 25 Lakh to 50 Lakh</span>
       <span class="a4-check">${chk(turns.includes('50 Lakh to 2 crore'))} 50 Lakh to 2 crore</span>
       <span class="a4-check">${chk(turns.includes('2 crore to 5 Crore'))} 2 crore to 5 Crore</span>
-      <span class="a4-check">${chk(turns.includes('5 Crore to'))} 5 Crore to ${v('f_turn5crValue')||'............'}</span>
+      <span class="a4-check">${chk(turns.includes('5 Crore to'))} 5 Crore to ${v('f_turn5crValue')||'............'} Crore</span>
       <div style="width:100%;display:flex;align-items:center;margin-top:5px">
         <span class="a4-field-label">Total assets</span>
         <span class="a4-clean-input" style="border-bottom:1px dotted #777;padding-left:6px">${v('f_totalAssets')||'&nbsp;'}</span>
@@ -900,7 +902,7 @@ function buildPage2(){
         <tr>
           <th class="snc">S.N.</th>
           <th style="width:52%">Parameter (सिमा)</th>
-          <th style="width:22%;text-align:center">Please Tick (&#10003;) the appropriate one</th>
+          <th style="width:22%;text-align:center">Please Tick ( ) the appropriate one</th>
           <th class="submitcell">Submit the details below if the answer is Yes</th>
         </tr>
       </thead>
@@ -936,7 +938,7 @@ function buildPage2(){
 
     <div class="a4-block-section-title">Location Map of Customer's Present Residence:(जमानीकर्ताको हालको वासस्थानको नक्सा)</div>
     <div class="a4-mapbox">
-      <div><b>Google plus code</b> <table class="gp-box"><tr><td>${v('f_googlePlusCode')||'&nbsp;'}</td></tr></table> <span style="float:right;font-weight:bold;font-size:11pt;padding-right:10px">N <span class="a4-compass-arrow"></span></span></div>
+      <div><b>Google plus code</b> <table class="gp-box"><tr><td>${v('f_googlePlusCode')||'&nbsp;'}</td></tr></table> <span style="float:right;font-weight:bold;font-size:11pt;padding-right:10px">N <span class="a4-compass-arrow">&#8593;</span></span></div>
       <div class="a4-landmark-line">Nearest landmark <span class="dots">${v('f_landmark')||'.....................'}</span> is <span class="dots">${v('f_landmarkDist')||'.................'}</span> m/km from my residence.</div>
     </div>
 
