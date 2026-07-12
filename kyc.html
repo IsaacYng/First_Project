@@ -132,6 +132,34 @@ table.mini-grid td input:focus{background:var(--blueLt)}
 .photo-slot{width:100px;height:118px;border:2px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;color:var(--ink4);font-size:10.5px;text-align:center;flex-shrink:0}
 .photo-slot i{font-size:20px;color:var(--ink4)}
 
+/* ═══ ADDRESS: type-and-pick combo fields ═══ */
+.addr-block{display:flex;flex-direction:column;gap:14px}
+.addr-group{border:1.5px solid var(--line);border-radius:14px;padding:14px}
+.addr-group-title{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:12px}
+.addr-group-title i{color:var(--blue);font-size:12px}
+.same-as-row{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:11.5px;font-weight:600;color:var(--ink3)}
+.same-as-row input{width:15px;height:15px;accent-color:var(--blue);cursor:pointer}
+.addr-fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.addr-fgrid .fi{display:flex;flex-direction:column;gap:5px;min-width:0}
+.addr-fgrid label{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4)}
+.addr-fgrid input{width:100%;height:42px;border:1.5px solid var(--line);border-radius:10px;background:var(--bgSoft);padding:0 12px;font-size:13.5px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
+.addr-fgrid input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1)}
+.addr-fgrid input:disabled{background:#EEF2F6;color:var(--ink4);cursor:not-allowed}
+.combo-hint{font-size:10px;color:var(--ink4);margin-top:6px;display:flex;align-items:center;gap:5px}
+@media (max-width:640px){.addr-fgrid{grid-template-columns:1fr 1fr}}
+
+/* ═══ FAMILY DETAILS: card layout ═══ */
+.fam-cards{display:flex;flex-direction:column;gap:10px}
+.fam-card{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--bgSoft)}
+.fam-card-label{font-size:11.5px;font-weight:700;color:var(--blue);margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.fam-card-label i{font-size:10px;color:var(--ink4)}
+.fam-fgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.fam-fgrid .fi{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fam-fgrid label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4)}
+.fam-fgrid input{width:100%;height:40px;border:1.5px solid var(--line);border-radius:9px;background:#fff;padding:0 11px;font-size:13px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
+.fam-fgrid input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1)}
+@media (max-width:480px){.fam-fgrid{grid-template-columns:1fr 1fr}}
+
 /* validation */
 .field-error{border-color:var(--red) !important;box-shadow:0 0 0 3px rgba(220,38,38,.1) !important}
 .field-error-msg{font-size:11px;color:var(--red);margin-top:4px;display:none;align-items:center;gap:5px}
@@ -182,9 +210,6 @@ table.mini-grid td input:focus{background:var(--blueLt)}
 .a4-paper *{font-family:Arial,Helvetica,sans-serif !important;color:#000 !important;box-sizing:border-box}
 
 /* ══════════════ HFL-CLONE FAITHFUL PRINT LAYOUT ══════════════ */
-/* Mirrors header-block / data-row / data-cell / form-table / checkbox-container
-   from the reference "KYC FORM (GUARANTOR) - HFL CLONE" markup, scaled to A4 pt units. */
-
 .a4-header-block{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
 .a4-brand-logo{flex:0 0 auto}
 .a4-brand-logo img{width:34mm;height:auto;display:block}
@@ -254,8 +279,16 @@ table.a4-office td{border:1px solid #000;padding:4px 5px}
   body>*:not(#print-wrapper){display:none !important}
   #print-wrapper{display:block !important}
   html,body{margin:0 !important;padding:0 !important;background:#fff !important;width:210mm !important;overflow:visible !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .print-page{width:210mm !important;min-height:297mm !important;padding:12mm 13mm !important;margin:0 !important;box-sizing:border-box !important;box-shadow:none !important;border:none !important;page-break-after:always !important;break-after:page !important}
+  /* Narrower margins + slightly smaller type so page 2 content never spills onto a 3rd sheet */
+  .print-page{width:210mm !important;min-height:297mm !important;max-height:297mm !important;padding:7mm 8mm !important;margin:0 !important;box-sizing:border-box !important;box-shadow:none !important;border:none !important;page-break-after:always !important;break-after:page !important;font-size:8.6pt !important;overflow:hidden !important}
   .print-page:last-child{page-break-after:avoid !important;break-after:avoid !important}
+  .print-page .a4-declaration{font-size:6.2pt !important;margin-top:5px !important}
+  .print-page .a4-sign-row{margin-top:8px !important}
+  .print-page .a4-block-section-title{padding:2.5px !important}
+  .print-page table.a4-office{margin-top:3px !important}
+  .print-page table.a4-office td{padding:2.5px 5px !important}
+  .print-page .a4-mapbox{min-height:14mm !important;padding:4px !important}
+  .print-page .a4-landmark-line{margin-top:8px !important}
   @page{size:A4 portrait;margin:0}
 }
 #print-wrapper{display:none}
@@ -436,48 +469,36 @@ table.a4-office td{border:1px solid #000;padding:4px 5px}
     <!-- Family Details -->
     <div class="calc-card">
       <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-people-roof"></i></span>Family Details</div>
-      <div class="table-scroll">
-        <table class="mini-grid">
-          <thead><tr><th style="width:16%">Relation</th><th style="width:26%">Full Name</th><th style="width:18%">ID Type</th><th style="width:20%">ID No.</th><th style="width:20%">Dealer/Customer No.</th></tr></thead>
-          <tbody id="familyBody">
-            <tr><td style="padding:8px;font-weight:600;background:var(--bgSoft)">Spouse</td><td><input id="fam_spouse_name"></td><td><input id="fam_spouse_idtype"></td><td><input id="fam_spouse_idno"></td><td><input id="fam_spouse_dealer"></td></tr>
-            <tr><td style="padding:8px;font-weight:600;background:var(--bgSoft)">Mother</td><td><input id="fam_mother_name"></td><td><input id="fam_mother_idtype"></td><td><input id="fam_mother_idno"></td><td><input id="fam_mother_dealer"></td></tr>
-            <tr><td style="padding:8px;font-weight:600;background:var(--bgSoft)">Father</td><td><input id="fam_father_name"></td><td><input id="fam_father_idtype"></td><td><input id="fam_father_idno"></td><td><input id="fam_father_dealer"></td></tr>
-            <tr><td style="padding:8px;font-weight:600;background:var(--bgSoft)">Grandfather</td><td><input id="fam_gf_name"></td><td><input id="fam_gf_idtype"></td><td><input id="fam_gf_idno"></td><td><input id="fam_gf_dealer"></td></tr>
-            <tr><td style="padding:8px;font-weight:600;background:var(--bgSoft)">Son</td><td><input id="fam_son_name"></td><td><input id="fam_son_idtype"></td><td><input id="fam_son_idno"></td><td><input id="fam_son_dealer"></td></tr>
-            <tr><td style="padding:8px;font-weight:600;background:var(--bgSoft)">Daughter</td><td><input id="fam_daughter_name"></td><td><input id="fam_daughter_idtype"></td><td><input id="fam_daughter_idno"></td><td><input id="fam_daughter_dealer"></td></tr>
-            <tr><td style="padding:8px;font-weight:600;background:var(--bgSoft)">Daughter-in-Law</td><td><input id="fam_dil_name"></td><td><input id="fam_dil_idtype"></td><td><input id="fam_dil_idno"></td><td><input id="fam_dil_dealer"></td></tr>
-            <tr><td style="padding:8px;font-weight:600;background:var(--bgSoft)">Legal Custodian</td><td><input id="fam_lc_name"></td><td><input id="fam_lc_idtype"></td><td><input id="fam_lc_idno"></td><td><input id="fam_lc_dealer"></td></tr>
-          </tbody>
-        </table>
+      <div class="fam-cards" id="familyBody">
+        <!-- Each relation gets its own touch-friendly card instead of a cramped table row -->
       </div>
     </div>
 
     <!-- Fund / Occupation -->
     <div class="calc-card">
       <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-sack-dollar"></i></span>Source of Fund &amp; Occupation</div>
-      <label class="field-label">Source of Fund</label>
+      <label class="field-label">Source of Fund <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink4)">— choose one</span></label>
       <div class="chk-grid" id="fundGrid" style="margin-bottom:1.1rem">
-        <label class="chk-pill"><input type="checkbox" value="Business"> Business</label>
-        <label class="chk-pill"><input type="checkbox" value="Income"> Income</label>
-        <label class="chk-pill"><input type="checkbox" value="Agriculture"> Agriculture</label>
-        <label class="chk-pill"><input type="checkbox" value="Salary"> Salary</label>
-        <label class="chk-pill"><input type="checkbox" value="Disposal of Asset"> Disposal of Asset</label>
-        <label class="chk-pill"><input type="checkbox" value="Investment"> Investment</label>
-        <label class="chk-pill"><input type="checkbox" value="Inheritance/Gift"> Inheritance/Gift</label>
-        <label class="chk-pill"><input type="checkbox" value="Saving or Remittance"> Saving or Remittance</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Business"> Business</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Income"> Income</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Agriculture"> Agriculture</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Salary"> Salary</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Disposal of Asset"> Disposal of Asset</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Investment"> Investment</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Inheritance/Gift"> Inheritance/Gift</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Saving or Remittance"> Saving or Remittance</label>
       </div>
       <div class="field-item" style="margin-bottom:1.1rem"><label class="field-label">Other Fund Source</label><input class="styled" id="f_fundOthers"></div>
 
-      <label class="field-label">Nature of Occupation</label>
+      <label class="field-label">Nature of Occupation <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink4)">— choose one</span></label>
       <div class="chk-grid" id="occGrid" style="margin-bottom:1rem">
-        <label class="chk-pill"><input type="checkbox" value="Home Maker"> Home Maker</label>
-        <label class="chk-pill"><input type="checkbox" value="Business"> Business</label>
-        <label class="chk-pill"><input type="checkbox" value="Student"> Student</label>
-        <label class="chk-pill"><input type="checkbox" value="Agriculture"> Agriculture</label>
-        <label class="chk-pill"><input type="checkbox" value="Salaried person"> Salaried person</label>
-        <label class="chk-pill"><input type="checkbox" value="Politician/PEP"> Politician/PEP</label>
-        <label class="chk-pill"><input type="checkbox" value="Retired"> Retired</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Home Maker"> Home Maker</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Business"> Business</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Student"> Student</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Agriculture"> Agriculture</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Salaried person"> Salaried person</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Politician/PEP"> Politician/PEP</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Retired"> Retired</label>
       </div>
       <div class="field-grid section-sep">
         <div class="field-item"><label class="field-label">Details of Associated Organization</label><input class="styled" id="f_orgDetails"></div>
@@ -493,14 +514,14 @@ table.a4-office td{border:1px solid #000;padding:4px 5px}
         <div class="field-item"><label class="field-label">Expected Yearly Gross Income</label><input class="styled" id="f_yearlyIncome"></div>
         <div class="field-item"><label class="field-label">Total Assets</label><input class="styled" id="f_totalAssets"></div>
       </div>
-      <label class="field-label">Expected Turnover Details</label>
+      <label class="field-label">Expected Turnover Details <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink4)">— choose one</span></label>
       <div class="chk-grid" id="turnGrid" style="margin-top:6px">
-        <label class="chk-pill"><input type="checkbox" name="turn" value="Up to 1 Lakh"> Up to 1 Lakh</label>
-        <label class="chk-pill"><input type="checkbox" name="turn" value="1 Lakh to 25 Lakh"> 1 Lakh to 25 Lakh</label>
-        <label class="chk-pill"><input type="checkbox" name="turn" value="25 Lakh to 50 Lakh"> 25 Lakh to 50 Lakh</label>
-        <label class="chk-pill"><input type="checkbox" name="turn" value="50 Lakh to 2 crore"> 50 Lakh to 2 crore</label>
-        <label class="chk-pill"><input type="checkbox" name="turn" value="2 crore to 5 Crore"> 2 crore to 5 Crore</label>
-        <label class="chk-pill"><input type="checkbox" name="turn" value="5 Crore to"> 5 Crore to <input class="styled" id="f_turn5crValue" style="width:70px;height:30px;padding:0 8px;margin-left:6px" onclick="event.stopPropagation()"> Crore</label>
+        <label class="chk-pill"><input type="radio" name="turnover" value="Up to 1 Lakh"> Up to 1 Lakh</label>
+        <label class="chk-pill"><input type="radio" name="turnover" value="1 Lakh to 25 Lakh"> 1 Lakh to 25 Lakh</label>
+        <label class="chk-pill"><input type="radio" name="turnover" value="25 Lakh to 50 Lakh"> 25 Lakh to 50 Lakh</label>
+        <label class="chk-pill"><input type="radio" name="turnover" value="50 Lakh to 2 crore"> 50 Lakh to 2 crore</label>
+        <label class="chk-pill"><input type="radio" name="turnover" value="2 crore to 5 Crore"> 2 crore to 5 Crore</label>
+        <label class="chk-pill"><input type="radio" name="turnover" value="5 Crore to"> 5 Crore to <input class="styled" id="f_turn5crValue" style="width:70px;height:30px;padding:0 8px;margin-left:6px" onclick="event.stopPropagation()"> Crore</label>
       </div>
     </div>
 
@@ -524,14 +545,41 @@ table.a4-office td{border:1px solid #000;padding:4px 5px}
     <!-- Address -->
     <div class="calc-card">
       <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-location-dot"></i></span>Address Details</div>
-      <div class="table-scroll">
-        <table class="mini-grid">
-          <thead><tr><th style="width:11%">Address</th><th>Country</th><th>Province</th><th>District</th><th>Muni./Rural Muni.</th><th style="width:8%">Ward</th><th>Tole/Street</th><th style="width:8%">House No.</th></tr></thead>
-          <tbody>
-            <tr><td style="padding:8px;font-weight:600;background:var(--bgSoft)">Permanent</td><td><input id="addr_perm_country"></td><td><input id="addr_perm_province"></td><td><input id="addr_perm_district"></td><td><input id="addr_perm_muni"></td><td><input id="addr_perm_ward"></td><td><input id="addr_perm_tole"></td><td><input id="addr_perm_house"></td></tr>
-            <tr><td style="padding:8px;font-weight:600;background:var(--bgSoft)">Temporary</td><td><input id="addr_temp_country"></td><td><input id="addr_temp_province"></td><td><input id="addr_temp_district"></td><td><input id="addr_temp_muni"></td><td><input id="addr_temp_ward"></td><td><input id="addr_temp_tole"></td><td><input id="addr_temp_house"></td></tr>
-          </tbody>
-        </table>
+      <div class="addr-block">
+        <div class="addr-group">
+          <div class="addr-group-title"><i class="fa-solid fa-house"></i> Permanent Address</div>
+          <div class="addr-fgrid">
+            <div class="fi"><label>Country</label><input list="dl_country" id="addr_perm_country" placeholder="Type or pick"></div>
+            <div class="fi"><label>Province</label><input list="dl_province" id="addr_perm_province" placeholder="Type or pick"></div>
+            <div class="fi"><label>District</label><input list="dl_district_perm" id="addr_perm_district" placeholder="Type or pick"></div>
+            <div class="fi"><label>Muni./Rural Muni.</label><input id="addr_perm_muni" placeholder="e.g. Phidim Municipality"></div>
+            <div class="fi"><label>Ward No.</label><input id="addr_perm_ward"></div>
+            <div class="fi"><label>Tole/Street</label><input id="addr_perm_tole"></div>
+            <div class="fi" style="grid-column:span 2"><label>House No.</label><input id="addr_perm_house"></div>
+          </div>
+          <div class="combo-hint"><i class="fa-solid fa-circle-info"></i> Country/Province/District can be picked from the dropdown or typed manually.</div>
+        </div>
+
+        <div class="addr-group">
+          <div class="addr-group-title">
+            <i class="fa-solid fa-map-location-dot"></i> Temporary Address
+            <label class="same-as-row"><input type="checkbox" id="sameAsAddress"> Same as Permanent Address</label>
+          </div>
+          <div class="addr-fgrid">
+            <div class="fi"><label>Country</label><input list="dl_country" id="addr_temp_country" placeholder="Type or pick"></div>
+            <div class="fi"><label>Province</label><input list="dl_province" id="addr_temp_province" placeholder="Type or pick"></div>
+            <div class="fi"><label>District</label><input list="dl_district_temp" id="addr_temp_district" placeholder="Type or pick"></div>
+            <div class="fi"><label>Muni./Rural Muni.</label><input id="addr_temp_muni" placeholder="e.g. Phidim Municipality"></div>
+            <div class="fi"><label>Ward No.</label><input id="addr_temp_ward"></div>
+            <div class="fi"><label>Tole/Street</label><input id="addr_temp_tole"></div>
+            <div class="fi" style="grid-column:span 2"><label>House No.</label><input id="addr_temp_house"></div>
+          </div>
+        </div>
+
+        <datalist id="dl_country"><option value="Nepal"><option value="India"><option value="China"><option value="Others"></datalist>
+        <datalist id="dl_province"></datalist>
+        <datalist id="dl_district_perm"></datalist>
+        <datalist id="dl_district_temp"></datalist>
       </div>
       <div class="field-grid section-sep">
         <div class="field-item">
@@ -669,16 +717,95 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeAllCustomSelects();});
 CUSTOM_SELECT_IDS.forEach(buildCustomSelect);
 
-/* ── checkbox pill visual state ── */
+/* ── checkbox / radio pill visual state (radio groups auto-clear siblings) ── */
 document.querySelectorAll('.chk-pill').forEach(pill=>{
   const input=pill.querySelector('input');
-  input?.addEventListener('change',()=>pill.classList.toggle('checked',input.checked));
+  const syncGroup=()=>{
+    if(input.type==='radio' && input.name){
+      document.querySelectorAll(`input[name="${input.name}"]`).forEach(sib=>sib.closest('.chk-pill')?.classList.toggle('checked',sib.checked));
+    } else {
+      pill.classList.toggle('checked',input.checked);
+    }
+  };
+  input?.addEventListener('change',syncGroup);
   pill.addEventListener('click',e=>{
-    if(e.target.tagName!=='INPUT'){
-      setTimeout(()=>pill.classList.toggle('checked',input.checked),0);
+    if(e.target.tagName!=='INPUT') setTimeout(syncGroup,0);
+  });
+});
+
+/* ── Nepal Country / Province / District cascading combo data ── */
+const NEPAL_PROVINCES=['Koshi Province','Madhesh Province','Bagmati Province','Gandaki Province','Lumbini Province','Karnali Province','Sudurpashchim Province'];
+const NEPAL_DISTRICTS={
+  'Koshi Province':['Bhojpur','Dhankuta','Ilam','Jhapa','Khotang','Morang','Okhaldhunga','Panchthar','Sankhuwasabha','Solukhumbu','Sunsari','Taplejung','Terhathum','Udayapur'],
+  'Madhesh Province':['Bara','Dhanusha','Mahottari','Parsa','Rautahat','Saptari','Sarlahi','Siraha'],
+  'Bagmati Province':['Bhaktapur','Chitwan','Dhading','Dolakha','Kathmandu','Kavrepalanchok','Lalitpur','Makwanpur','Nuwakot','Ramechhap','Rasuwa','Sindhuli','Sindhupalchok'],
+  'Gandaki Province':['Baglung','Gorkha','Kaski','Lamjung','Manang','Mustang','Myagdi','Nawalpur','Parbat','Syangja','Tanahun'],
+  'Lumbini Province':['Arghakhanchi','Banke','Bardiya','Dang','Eastern Rukum','Gulmi','Kapilvastu','Palpa','Parasi','Pyuthan','Rolpa','Rupandehi'],
+  'Karnali Province':['Dailekh','Dolpa','Humla','Jajarkot','Jumla','Kalikot','Mugu','Salyan','Surkhet','Western Rukum'],
+  'Sudurpashchim Province':['Achham','Baitadi','Bajhang','Bajura','Dadeldhura','Darchula','Doti','Kailali','Kanchanpur']
+};
+const ALL_DISTRICTS=Object.values(NEPAL_DISTRICTS).flat();
+
+function fillDatalist(listId,values){
+  const dl=document.getElementById(listId);
+  if(!dl) return;
+  dl.innerHTML=values.map(v=>`<option value="${v}">`).join('');
+}
+fillDatalist('dl_province',NEPAL_PROVINCES);
+fillDatalist('dl_district_perm',ALL_DISTRICTS);
+fillDatalist('dl_district_temp',ALL_DISTRICTS);
+
+function wireProvinceDistrictCascade(provinceId,districtListId){
+  const provinceInput=document.getElementById(provinceId);
+  provinceInput?.addEventListener('input',()=>{
+    const match=NEPAL_PROVINCES.find(p=>p.toLowerCase()===provinceInput.value.trim().toLowerCase());
+    fillDatalist(districtListId, match ? NEPAL_DISTRICTS[match] : ALL_DISTRICTS);
+  });
+}
+wireProvinceDistrictCascade('addr_perm_province','dl_district_perm');
+wireProvinceDistrictCascade('addr_temp_province','dl_district_temp');
+
+/* ── "Same as Permanent Address" ── */
+const ADDR_FIELDS=['country','province','district','muni','ward','tole','house'];
+document.getElementById('sameAsAddress')?.addEventListener('change',function(){
+  const on=this.checked;
+  ADDR_FIELDS.forEach(f=>{
+    const from=document.getElementById('addr_perm_'+f), to=document.getElementById('addr_temp_'+f);
+    if(!from||!to) return;
+    if(on){ to.value=from.value; to.disabled=true; } else { to.disabled=false; }
+  });
+});
+ADDR_FIELDS.forEach(f=>{
+  document.getElementById('addr_perm_'+f)?.addEventListener('input',function(){
+    if(document.getElementById('sameAsAddress')?.checked){
+      const to=document.getElementById('addr_temp_'+f);
+      if(to) to.value=this.value;
     }
   });
 });
+
+/* ── Family Details: build touch-friendly cards ── */
+const FAMILY_RELATIONS=[
+  ['spouse','Spouse (पति/पत्नी)'],['mother','Mother (आमा)'],['father','Father (बुबा)'],
+  ['gf','Grandfather (हजुरबुबा)'],['son','Son (छोरा)'],['daughter','Daughter (छोरी)'],
+  ['dil','Daughter-in-Law (बुहारी)'],['lc','Legal Custodian (कानूनी संरक्षक)']
+];
+function buildFamilyCards(){
+  const wrap=document.getElementById('familyBody');
+  if(!wrap) return;
+  wrap.innerHTML=FAMILY_RELATIONS.map(([id,label])=>`
+    <div class="fam-card">
+      <div class="fam-card-label"><i class="fa-solid fa-user"></i> ${label}</div>
+      <div class="fam-fgrid">
+        <div class="fi" style="grid-column:span 2"><label>Full Name</label><input id="fam_${id}_name"></div>
+        <div class="fi"><label>ID Type</label><input id="fam_${id}_idtype"></div>
+        <div class="fi"><label>ID No.</label><input id="fam_${id}_idno"></div>
+        <div class="fi" style="grid-column:span 2"><label>Dealer/Customer No.</label><input id="fam_${id}_dealer"></div>
+      </div>
+    </div>
+  `).join('');
+}
+buildFamilyCards();
 
 /* ── validation ── */
 function showFieldError(inputId,errorId,show){
@@ -812,26 +939,26 @@ function buildPage1(){
 
     <div class="a4-data-row a4-fund-row">
       <span class="a4-field-label">Source of Fund (कोषको स्रोत):</span>
-      <span class="a4-check">${chk(checkedValues('fundGrid').includes('Business'))} Business</span>
-      <span class="a4-check">${chk(checkedValues('fundGrid').includes('Income'))} Income</span>
-      <span class="a4-check">${chk(checkedValues('fundGrid').includes('Agriculture'))} Agriculture</span>
-      <span class="a4-check">${chk(checkedValues('fundGrid').includes('Salary'))} Salary</span>
-      <span class="a4-check">${chk(checkedValues('fundGrid').includes('Disposal of Asset'))} Disposal of Asset</span>
-      <span class="a4-check">${chk(checkedValues('fundGrid').includes('Investment'))} Investment</span>
-      <span class="a4-check">${chk(checkedValues('fundGrid').includes('Inheritance/Gift'))} Inheritance/Gift</span>
-      <span class="a4-check">${chk(checkedValues('fundGrid').includes('Saving or Remittance'))} Saving or Remittance</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Business')} Business</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Income')} Income</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Agriculture')} Agriculture</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Salary')} Salary</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Disposal of Asset')} Disposal of Asset</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Investment')} Investment</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Inheritance/Gift')} Inheritance/Gift</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Saving or Remittance')} Saving or Remittance</span>
       <span>Others: ${v('f_fundOthers')||'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}</span>
     </div>
 
     <div class="a4-data-row a4-fund-row">
       <span class="a4-field-label">Nature of Occupation: (पेशा)</span>
-      <span class="a4-check">${chk(checkedValues('occGrid').includes('Home Maker'))} Home Maker</span>
-      <span class="a4-check">${chk(checkedValues('occGrid').includes('Business'))} Business</span>
-      <span class="a4-check">${chk(checkedValues('occGrid').includes('Student'))} Student</span>
-      <span class="a4-check">${chk(checkedValues('occGrid').includes('Agriculture'))} Agriculture</span>
-      <span class="a4-check">${chk(checkedValues('occGrid').includes('Salaried person'))} Salaried person</span>
-      <span class="a4-check">${chk(checkedValues('occGrid').includes('Politician/PEP'))} Politician/PEP</span>
-      <span class="a4-check">${chk(checkedValues('occGrid').includes('Retired'))} Retired</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Home Maker')} Home Maker</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Business')} Business</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Student')} Student</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Agriculture')} Agriculture</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Salaried person')} Salaried person</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Politician/PEP')} Politician/PEP</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Retired')} Retired</span>
       <span>Others ${v('f_occOthers')||'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}</span>
     </div>
 
@@ -846,7 +973,7 @@ function buildPage2(){
   const titleEn = isG ? 'KYC FORM (GUARANTOR)' : 'KYC FORM (INDIVIDUAL)';
   const titleNp = isG ? 'जमानीकर्ता पहिचान फारम (व्यक्तिगत)' : 'ग्राहक पहिचान फारम (व्यक्तिगत)';
   const signLabel = isG ? "Signature of the Guarantor(जमानीकर्ताको सही)" : "Signature of the customer(ग्राहकको सही)";
-  const turns=checkedValues('turnGrid');
+  const turnoverVal=radioValue('turnover');
   const qLabels=[
     'US person/Other Person/NRN (अमेरिकन / विदेशी / अन्य)',
     'Do you have a beneficial owner? (हितग्राही हुनुहुन्छ?)',
@@ -884,12 +1011,12 @@ function buildPage2(){
 
     <div class="a4-data-row a4-fund-row">
       <span class="a4-field-label">Expected Turnover Details: (वार्षिक अनुमानित कारोबार विवरण)</span>
-      <span class="a4-check">${chk(turns.includes('Up to 1 Lakh'))} Up to 1 Lakh</span>
-      <span class="a4-check">${chk(turns.includes('1 Lakh to 25 Lakh'))} 1 Lakh to 25 Lakh</span>
-      <span class="a4-check">${chk(turns.includes('25 Lakh to 50 Lakh'))} 25 Lakh to 50 Lakh</span>
-      <span class="a4-check">${chk(turns.includes('50 Lakh to 2 crore'))} 50 Lakh to 2 crore</span>
-      <span class="a4-check">${chk(turns.includes('2 crore to 5 Crore'))} 2 crore to 5 Crore</span>
-      <span class="a4-check">${chk(turns.includes('5 Crore to'))} 5 Crore to ${v('f_turn5crValue')||'............'} Crore</span>
+      <span class="a4-check">${chk(turnoverVal==='Up to 1 Lakh')} Up to 1 Lakh</span>
+      <span class="a4-check">${chk(turnoverVal==='1 Lakh to 25 Lakh')} 1 Lakh to 25 Lakh</span>
+      <span class="a4-check">${chk(turnoverVal==='25 Lakh to 50 Lakh')} 25 Lakh to 50 Lakh</span>
+      <span class="a4-check">${chk(turnoverVal==='50 Lakh to 2 crore')} 50 Lakh to 2 crore</span>
+      <span class="a4-check">${chk(turnoverVal==='2 crore to 5 Crore')} 2 crore to 5 Crore</span>
+      <span class="a4-check">${chk(turnoverVal==='5 Crore to')} 5 Crore to ${v('f_turn5crValue')||'............'} Crore</span>
       <div style="width:100%;display:flex;align-items:center;margin-top:5px">
         <span class="a4-field-label">Total assets</span>
         <span class="a4-clean-input" style="border-bottom:1px dotted #777;padding-left:6px">${v('f_totalAssets')||'&nbsp;'}</span>
@@ -1052,9 +1179,12 @@ function resetForm(){
   if(!confirm('Clear all entered data?')) return;
   document.querySelectorAll('main input[type=text], main input:not([type])').forEach(el=>el.value='');
   document.querySelectorAll('main input[id^="f_"]').forEach(el=>{ if(el.type==='checkbox'){el.checked=false;} else if(el.tagName==='INPUT'){el.value='';} });
-  document.querySelectorAll('main input[id^="fam_"], main input[id^="addr_"]').forEach(el=>el.value='');
-  document.querySelectorAll('.chk-pill input[type=checkbox]').forEach(el=>{el.checked=false;el.closest('.chk-pill')?.classList.remove('checked');});
+  document.querySelectorAll('main input[id^="fam_"], main input[id^="addr_"]').forEach(el=>{el.value='';el.disabled=false;});
+  document.querySelectorAll('.chk-pill input').forEach(el=>{el.checked=false;el.closest('.chk-pill')?.classList.remove('checked');});
   document.querySelectorAll('.yn-opts input[type=radio][value="No"]').forEach(el=>el.checked=true);
+  const sameAsAddr=document.getElementById('sameAsAddress'); if(sameAsAddr) sameAsAddr.checked=false;
+  fillDatalist('dl_district_perm',ALL_DISTRICTS);
+  fillDatalist('dl_district_temp',ALL_DISTRICTS);
   document.getElementById('f_gender').selectedIndex=0; syncCustomSelectUI('f_gender');
   document.getElementById('f_idType').selectedIndex=0; syncCustomSelectUI('f_idType');
   document.querySelectorAll('.field-error').forEach(el=>el.classList.remove('field-error'));
