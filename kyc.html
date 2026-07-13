@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KYC Form | Samriddhi And Brothers — Bajaj Phidim</title>
+<meta name="description" content="Fill and print the HFL KYC Form (Individual / Guarantor) for Samriddhi And Brothers Auto Pvt. Ltd." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="icon" type="image/png" href="favicon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'bajaj-blue': '#005EA6',
+          'bajaj-blueDark': '#004A85',
+          'bajaj-blueLight': '#E8F2FB'
+        }
+      }
+    }
+  }
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;overflow-x:hidden;width:100%}
+body{font-family:'DM Sans',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-font-smoothing:antialiased;overflow-x:hidden;width:100%;max-width:100vw}
+a{text-decoration:none;color:inherit}
+
+:root{
+  --blue:#005EA6; --blueDark:#004A85; --blueLt:#E8F2FB;
+  --amber:#F59E0B; --amberDark:#D97706;
+  --green:#16A34A; --red:#DC2626;
+  --line:#E2E8F0; --bgSoft:#F8FAFC;
+  --ink:#0F172A; --ink2:#334155; --ink3:#64748B; --ink4:#94A3B8;
+}
+
+/* ── NAV ── */
+.nav-blur{background:rgba(255,255,255,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,94,166,.08);box-shadow:0 2px 24px rgba(0,0,0,.06)}
+.nav-link{position:relative;font-size:.875rem;font-weight:500;color:#374151;display:flex;align-items:center;gap:5px;transition:color .2s;padding:4px 2px}
+.nav-link::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:#005EA6;border-radius:2px;transition:width .25s ease}
+.nav-link:hover{color:#005EA6}
+.nav-link:hover::after{width:100%}
+.nav-link.active{color:#005EA6}
+.nav-link.active::after{width:100%}
+#mobile-menu{max-height:0;overflow:hidden;transition:max-height .38s cubic-bezier(.4,0,.2,1),opacity .28s ease;opacity:0}
+#mobile-menu.open{max-height:560px;opacity:1}
+
+.cta-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;border-radius:10px;padding:10px 20px;border:none;cursor:pointer;transition:background .2s,transform .15s;box-shadow:0 4px 14px rgba(0,94,166,.22)}
+.cta-primary:hover{background:var(--blueDark)}
+
+/* ═══ CUSTOM SELECT ═══ */
+.custom-select{position:relative}
+.sr-only-select{position:absolute;opacity:0;pointer-events:none;height:46px;width:100%;left:0;top:0}
+.custom-select-trigger{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);padding:0 16px;font-size:14px;color:var(--ink);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif;text-align:left}
+.custom-select-trigger:hover{border-color:#C9D6E3}
+.custom-select-trigger.open{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1)}
+.cst-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.cst-chevron{color:var(--ink3);font-size:12px;transition:transform .22s ease;margin-left:8px;flex-shrink:0}
+.custom-select-trigger.open .cst-chevron{transform:rotate(180deg);color:var(--blue)}
+.custom-select-panel{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:280px;overflow-y:auto;z-index:40;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);transform-origin:top center;transition:opacity .18s ease,transform .18s ease,visibility .18s;padding:6px}
+.custom-select-panel.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.cst-option{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:background .15s;font-size:14px;color:var(--ink2);font-weight:500}
+.cst-option:hover{background:var(--blueLt)}
+.cst-option .cst-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .18s,background .18s}
+.cst-option .cst-dot::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);opacity:0;transform:scale(.4);transition:opacity .15s,transform .15s}
+.cst-option.selected{color:var(--ink);font-weight:700;background:var(--blueLt)}
+.cst-option.selected .cst-dot{border-color:var(--blue)}
+.cst-option.selected .cst-dot::after{opacity:1;transform:scale(1)}
+
+/* ═══ HERO ═══ */
+.fin-hero{background:linear-gradient(135deg,#F0F7FF 0%,#EBF4FF 55%,#DCEEFB 100%);position:relative;overflow:hidden}
+.fin-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:420px;height:420px;background:radial-gradient(circle,rgba(0,94,166,.1) 0%,transparent 70%);border-radius:50%;pointer-events:none;z-index:0}
+.fin-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(245,158,11,.08) 0%,transparent 70%);border-radius:50%;pointer-events:none;z-index:0}
+.headline{font-family:'Bebas Neue',cursive;line-height:.95;letter-spacing:.01em}
+.price-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,94,166,.28)}
+.stat-chip{background:#fff;border:1px solid rgba(0,94,166,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+
+/* ═══ TYPE TOGGLE ═══ */
+.type-toggle{display:inline-flex;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:5px;box-shadow:0 2px 12px rgba(0,0,0,.05);position:relative;z-index:2}
+.type-toggle button{touch-action:manipulation}
+.type-toggle button{border:none;background:transparent;padding:11px 26px;border-radius:10px;font-size:13.5px;font-weight:700;color:var(--ink3);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px}
+.type-toggle button.active{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(0,94,166,.25)}
+
+/* ═══ CARDS ═══ */
+.calc-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:1.4rem;box-shadow:0 2px 14px rgba(0,0,0,.04)}
+.calc-card-title{display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:700;color:var(--ink);letter-spacing:.01em;margin-bottom:1.2rem}
+.calc-card-title .icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--blueLt);color:var(--blue);flex-shrink:0}
+.calc-card-title .sub{font-weight:400;font-size:11px;color:var(--ink4);margin-left:auto}
+
+.field-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;display:block}
+input.styled,select.styled{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);padding:0 14px;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
+input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1)}
+
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.field-grid.cols-3{grid-template-columns:1fr 1fr 1fr}
+.field-grid.cols-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.field-item{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field-item.span-2{grid-column:span 2}
+
+.section-sep{border-top:1px solid var(--line);margin:1.25rem 0;padding-top:1.25rem}
+
+/* checkbox / radio pill options — clean aligned grid, not ragged flex-wrap */
+.chk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chk-pill{display:flex;align-items:center;gap:8px;background:var(--bgSoft);border:1.5px solid var(--line);border-radius:10px;padding:9px 14px;cursor:pointer;transition:all .18s;font-size:13px;font-weight:500;color:var(--ink2);width:100%}
+.chk-pill:hover{border-color:#C9D6E3}
+.chk-pill.checked{background:var(--blueLt);border-color:var(--blue);color:var(--blue);font-weight:700}
+.chk-pill input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
+.chk-pill.wide{grid-column:1/-1}
+@media (max-width:420px){.chk-grid{grid-template-columns:1fr}}
+
+/* yes/no rows */
+.yn-table{width:100%;border-collapse:separate;border-spacing:0 8px}
+.yn-table tr{background:var(--bgSoft)}
+.yn-table td{padding:12px 14px;font-size:13px;color:var(--ink2);vertical-align:middle}
+.yn-table td:first-child{border-radius:10px 0 0 10px;width:6%;font-weight:700;color:var(--ink4)}
+.yn-table td:nth-child(2){border-radius:0}
+.yn-table td:last-child{border-radius:0 10px 10px 0;width:170px}
+.yn-opts{display:flex;gap:18px}
+.yn-opts label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer}
+.yn-opts input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+
+/* family / address mini table */
+table.mini-grid{width:100%;border-collapse:collapse;font-size:12.5px}
+table.mini-grid th{background:var(--blueLt);color:var(--blueDark);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:9px 8px;text-align:left;border:1px solid var(--line)}
+table.mini-grid td{border:1px solid var(--line);padding:2px}
+table.mini-grid td input{width:100%;border:none;background:transparent;padding:8px;font-size:12.5px;outline:none;border-radius:0}
+table.mini-grid td input:focus{background:var(--blueLt)}
+.table-scroll{overflow-x:auto}
+
+.photo-slot{width:100px;height:118px;border:2px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;color:var(--ink4);font-size:10.5px;text-align:center;flex-shrink:0}
+.photo-slot i{font-size:20px;color:var(--ink4)}
+
+/* ═══ ADDRESS: type-and-pick combo fields ═══ */
+.addr-block{display:flex;flex-direction:column;gap:14px}
+.addr-group{border:1.5px solid var(--line);border-radius:14px;padding:14px}
+.addr-group-title{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:12px}
+.addr-group-title i{color:var(--blue);font-size:12px}
+.same-as-row{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:11.5px;font-weight:600;color:var(--ink3)}
+.same-as-row input{width:15px;height:15px;accent-color:var(--blue);cursor:pointer}
+.addr-fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.addr-fgrid .fi{display:flex;flex-direction:column;gap:5px;min-width:0}
+.addr-fgrid label{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4)}
+.addr-fgrid input{width:100%;height:42px;border:1.5px solid var(--line);border-radius:10px;background:var(--bgSoft);padding:0 12px;font-size:13.5px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
+.addr-fgrid input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1)}
+.addr-fgrid input:disabled{background:#EEF2F6;color:var(--ink4);cursor:not-allowed}
+.combo-hint{font-size:10px;color:var(--ink4);margin-top:6px;display:flex;align-items:center;gap:5px}
+@media (max-width:640px){.addr-fgrid{grid-template-columns:1fr 1fr}}
+
+/* combo-select: styled type-and-pick dropdown (matches Gender/ID Type custom-select) */
+.combo-select{position:relative}
+.combo-input{width:100%;height:42px;border:1.5px solid var(--line);border-radius:10px;background:var(--bgSoft);padding:0 32px 0 12px;font-size:13.5px;font-weight:600;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
+.combo-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1)}
+.combo-input:disabled{background:#EEF2F6;color:var(--ink4);cursor:not-allowed}
+.combo-chevron{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink3);pointer-events:none;transition:transform .22s ease}
+.combo-select.open .combo-chevron{transform:translateY(-50%) rotate(180deg);color:var(--blue)}
+.combo-panel{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:240px;overflow-y:auto;z-index:35;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);transform-origin:top center;transition:opacity .18s ease,transform .18s ease,visibility .18s;padding:6px}
+.combo-panel.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.combo-option{padding:10px 12px;border-radius:10px;font-size:13.5px;font-weight:500;color:var(--ink2);cursor:pointer;transition:background .15s}
+.combo-option:hover{background:var(--blueLt);color:var(--blue)}
+.combo-option.selected{background:var(--blueLt);color:var(--ink);font-weight:700}
+.combo-empty{padding:10px 12px;font-size:12px;color:var(--ink4)}
+
+/* ═══ FAMILY DETAILS: card layout ═══ */
+.fam-cards{display:flex;flex-direction:column;gap:10px}
+.fam-card{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--bgSoft)}
+.fam-card-label{font-size:11.5px;font-weight:700;color:var(--blue);margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.fam-card-label i{font-size:10px;color:var(--ink4)}
+.fam-fgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.fam-fgrid .fi{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fam-fgrid label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4)}
+.fam-fgrid input{width:100%;height:40px;border:1.5px solid var(--line);border-radius:9px;background:#fff;padding:0 11px;font-size:13px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
+.fam-fgrid input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1)}
+@media (max-width:480px){.fam-fgrid{grid-template-columns:1fr 1fr}}
+
+/* validation */
+.field-error{border-color:var(--red) !important;box-shadow:0 0 0 3px rgba(220,38,38,.1) !important}
+.field-error-msg{font-size:11px;color:var(--red);margin-top:4px;display:none;align-items:center;gap:5px}
+.field-error-msg.show{display:flex}
+.validation-toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-12px);background:#0F172A;color:#fff;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 12px 32px rgba(0,0,0,.28);z-index:120;display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+.validation-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.validation-toast i{color:#F87171}
+
+/* ═══ STICKY ACTION BAR ═══ */
+.action-bar{background:#0F172A;border-radius:18px;padding:1.1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.action-bar .info{color:rgba(255,255,255,.6);font-size:12.5px;display:flex;align-items:center;gap:8px}
+.action-bar .info i{color:var(--amber)}
+.action-bar .btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn-ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.16);color:#fff;font-weight:600;font-size:13px;padding:11px 18px;border-radius:10px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .18s}
+.btn-ghost:hover{background:rgba(255,255,255,.16)}
+.btn-amber{background:var(--amber);color:#0F172A;font-weight:700;font-size:13px;padding:11px 20px;border:none;border-radius:10px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .18s}
+.btn-amber:hover{background:#FBBF24}
+
+/* ═══ PREVIEW OVERLAY ═══ */
+#previewOverlay{position:fixed;inset:0;z-index:100;background:rgba(8,15,26,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+#previewOverlay.open{display:flex;animation:overlayIn .25s ease both}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+.preview-shell{width:100%;max-width:900px;background:#F1F5F9;border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.4);animation:shellIn .32s cubic-bezier(.16,1,.3,1) both}
+@keyframes shellIn{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.preview-toolbar{background:#0F172A;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+.preview-toolbar .ptitle{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:.04em}
+.preview-toolbar .ptitle i{color:var(--amber)}
+.ptab{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;transition:all .18s;border:none;background:transparent}
+.ptab.active{background:var(--blue);color:#fff}
+.pactions{display:flex;gap:8px}
+.pbtn{border:none;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .18s}
+.pbtn.print{background:var(--amber);color:#0F172A}
+.pbtn.print:hover{background:#FBBF24}
+.pbtn.close{background:rgba(255,255,255,.08);color:#fff}
+.pbtn.close:hover{background:rgba(255,255,255,.16)}
+.preview-body{padding:20px;overflow-x:auto}
+.a4-page{display:block;margin-bottom:24px}
+.a4-page:last-child{margin-bottom:0}
+.a4-page-label{color:#fff;font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:8px;opacity:.7;text-transform:uppercase}
+
+.a4-paper{
+  font-family:Arial,Helvetica,sans-serif !important;
+  font-size:9.5pt !important;color:#000 !important;background:#fff !important;line-height:1.3 !important;
+  width:210mm;min-height:297mm;padding:10mm 11mm;box-sizing:border-box;margin:0 auto;
+  box-shadow:0 6px 40px rgba(0,0,0,.22);border:1px solid #ddd;
+}
+.a4-paper *{font-family:Arial,Helvetica,sans-serif !important;color:#000 !important;box-sizing:border-box}
+
+/* ══════════════ HFL-CLONE FAITHFUL PRINT LAYOUT ══════════════ */
+.a4-header-block{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.a4-brand-logo{flex:0 0 auto}
+.a4-brand-logo img{width:34mm;height:auto;display:block}
+.a4-heading-panel{text-align:center;flex-grow:1}
+.a4-annex{font-size:9.5pt;font-weight:700;margin-bottom:3px}
+.a4-title{font-size:13.5pt;font-weight:800;letter-spacing:.3px;margin:0}
+.a4-titlenp{font-size:11pt;font-weight:400;margin-top:2px}
+.a4-photo-frame{width:26mm;height:31mm;border:1px solid #000;font-size:7pt;display:flex;align-items:center;justify-content:center;text-align:center;color:#444;padding:3px;line-height:1.3;flex-shrink:0}
+
+.a4-topline{font-size:9pt;margin-bottom:6px;line-height:1.9}
+.a4-topline .a4-dotted{border-bottom:1px dotted #000;display:inline-block;min-width:60mm;padding-left:4px}
+
+.a4-data-row{display:flex;border:1px solid #000;margin-top:-1px}
+.a4-data-cell{flex:1;padding:3.5px 6px;border-right:1px solid #000;display:flex;align-items:center;font-size:9.3pt;min-height:14pt}
+.a4-data-cell:last-child{border-right:none}
+.a4-field-label{font-weight:700;margin-right:4px;white-space:nowrap}
+.a4-clean-input{flex-grow:1;font-weight:600;overflow-wrap:anywhere}
+
+.a4-block-section-title{background:#fff;font-weight:700;text-align:center;padding:4px;font-size:9pt;border:1px solid #000;margin-top:-1px}
+
+table.a4-form-table{width:100%;border-collapse:collapse;margin-top:-1px;font-size:8.2pt;table-layout:fixed}
+table.a4-form-table th,table.a4-form-table td{border:1px solid #000;padding:4px 6px;vertical-align:middle;word-wrap:break-word}
+table.a4-form-table th{font-weight:700;background:#fff;text-align:left}
+
+.a4-checkbox-matrix{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;width:100%}
+.a4-checkbox-container{display:flex;align-items:center;font-size:8pt;white-space:nowrap;gap:3px}
+
+.a4-box{display:inline-flex;align-items:center;justify-content:center;width:9pt;height:9pt;border:1.1px solid #000;font-size:7.5pt;font-weight:700;flex-shrink:0;margin-right:2px}
+.a4-check{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;font-size:8.3pt;margin-right:10px}
+
+.a4-fund-row{padding:5px 6px;font-size:8.3pt;flex-wrap:wrap;line-height:2;row-gap:4px}
+
+.a4-thumbprint-box{width:45mm;height:28mm;border:1px solid #000;display:flex}
+.a4-thumbprint-split{width:50%;height:100%;border-right:1px solid #000;display:flex;align-items:flex-end;justify-content:center;font-size:7.5pt;padding-bottom:4px}
+.a4-thumbprint-split:last-child{border-right:none}
+
+.a4-compass-arrow{display:inline-block;color:#1a73e8;font-size:16pt;font-weight:700;line-height:1;vertical-align:middle;margin-left:4px}
+
+table.a4-legaltbl th{text-align:center}
+
+table.a4-yn{width:100%;border-collapse:collapse;font-size:7.8pt;margin-top:-1px}
+table.a4-yn th,table.a4-yn td{border:1px solid #000;padding:3.5px 5px;vertical-align:middle}
+table.a4-yn th{background:#fff;font-size:7.3pt;font-weight:700;text-align:left}
+.a4-yn .snc{width:5%;text-align:center}
+.a4-yn .submitcell{width:14%;font-size:6.8pt;text-align:center;vertical-align:middle;font-weight:700}
+.a4-yn-opts{display:flex;justify-content:center;gap:14px;white-space:nowrap}
+
+.a4-topbox-row{border:1px solid #000;margin-top:-1px;padding:4px 6px;font-size:8.8pt;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.a4-topbox-row .tsub{font-weight:400;font-size:8pt}
+.a4-topbox-row .tval{flex:1;border-bottom:1px dotted #777;min-width:60px;padding-left:4px;font-weight:600}
+
+.a4-mapbox{border:1px solid #000;margin-top:-1px;padding:6px;font-size:8.8pt;position:relative;min-height:18mm}
+.a4-mapbox .gp-box{display:inline-table;width:38mm;border:1px solid #000;margin-left:8px;vertical-align:middle}
+.a4-mapbox .gp-box td{height:16pt}
+.a4-landmark-line{font-size:8.8pt;margin-top:14px;padding:2px 0}
+.a4-landmark-line .dots{border-bottom:1px dotted #777;padding:0 2px}
+
+.a4-declaration{font-size:6.7pt;line-height:1.35;margin-top:8px;text-align:justify}
+.a4-sign-row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px;gap:10px}
+.a4-sign-line{flex:1}
+.a4-sign-line .rule{border-top:1px solid #000;padding-top:3px;font-size:8.5pt;font-weight:700;text-align:center}
+
+table.a4-office{width:100%;border-collapse:collapse;font-size:7.6pt;margin-top:6px}
+table.a4-office td{border:1px solid #000;padding:4px 5px}
+
+@media print{
+  body>*:not(#print-wrapper){display:none !important}
+  #print-wrapper{display:block !important}
+  html,body{margin:0 !important;padding:0 !important;background:#fff !important;width:210mm !important;overflow:visible !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  /* Narrower margins + slightly smaller type so page 2 content never spills onto a 3rd sheet */
+  .print-page{width:210mm !important;min-height:297mm !important;max-height:297mm !important;padding:7mm 8mm !important;margin:0 !important;box-sizing:border-box !important;box-shadow:none !important;border:none !important;page-break-after:always !important;break-after:page !important;font-size:8.6pt !important;overflow:hidden !important}
+  .print-page:last-child{page-break-after:avoid !important;break-after:avoid !important}
+  .print-page .a4-declaration{font-size:6.2pt !important;margin-top:5px !important}
+  .print-page .a4-sign-row{margin-top:8px !important}
+  .print-page .a4-block-section-title{padding:2.5px !important}
+  .print-page table.a4-office{margin-top:3px !important}
+  .print-page table.a4-office td{padding:2.5px 5px !important}
+  .print-page .a4-mapbox{min-height:14mm !important;padding:4px !important}
+  .print-page .a4-landmark-line{margin-top:8px !important}
+  @page{size:210mm 297mm;margin:0}
+}
+#print-wrapper{display:none}
+
+@media (max-width:1024px){.field-grid.cols-3,.field-grid.cols-4{grid-template-columns:1fr 1fr}}
+@media (max-width:768px){.field-grid,.field-grid.cols-3,.field-grid.cols-4{grid-template-columns:1fr}.field-item.span-2{grid-column:span 1}.preview-body{padding:12px}}
+
+#formShell{max-width:900px;margin:0 auto;padding:36px 20px 56px;display:flex;flex-direction:column;gap:24px}
+
+/* ═══ DESKTOP / LARGE-SCREEN LAYOUT ═══
+   Real two-column dashboard, not a stretched single centered column.
+   Left column (wider — needs room for 3-col field grids): Personal Info,
+   Legal ID, Family Details. Right column (narrower, financial/risk info):
+   Source of Fund, Income & Turnover, Screening Questions. Each column flows
+   independently in document order (CSS grid auto-placement), so the two
+   sides don't need to be the same height. Address and the action bar always
+   span the full width underneath. Matched by explicit class, not nth-child
+   position, so this can't silently break if a card is reordered later. */
+@media (min-width:1024px){
+  #formShell{
+    max-width:1180px;
+    display:grid;
+    grid-template-columns:1.55fr 1fr;
+    gap:24px;
+    align-items:start;
+  }
+  #formShell>.card-personal,
+  #formShell>.card-legalid,
+  #formShell>.card-family{ grid-column:1; }
+  #formShell>.card-fund,
+  #formShell>.card-income,
+  #formShell>.card-screening{ grid-column:2; }
+  #formShell>.card-address,
+  #formShell>.action-bar{ grid-column:1/-1; }
+
+  /* Personal Info: a touch more room for the photo slot now the card is wide */
+  .card-personal .photo-slot{width:112px;height:132px}
+
+  /* Family Details now lives in the narrower left column — one relation per
+     row keeps every field readable instead of squeezing 4 columns twice */
+  .fam-cards{display:flex;flex-direction:column;gap:10px}
+  .fam-fgrid{grid-template-columns:repeat(4,1fr)}
+  .fam-fgrid .fi:first-child{grid-column:span 2}
+  .fam-fgrid .fi:last-child{grid-column:span 2}
+}
+
+/* Larger desktops: let the dashboard breathe instead of staying pinned to 1180px */
+@media (min-width:1440px){ #formShell{max-width:1320px} }
+@media (min-width:1920px){ #formShell{max-width:1480px} }
+
+/* Address groups sit side-by-side once there is enough width per group (≥1280px);
+   below that they stack full-width. */
+@media (min-width:1280px){
+  .addr-block{flex-direction:row;align-items:flex-start}
+  .addr-group{flex:1;min-width:0}
+}
+
+/* Narrow desktop (1024–1279px): address groups stack full-width, so 3 field
+   columns fit comfortably. */
+@media (min-width:1024px) and (max-width:1279px){
+  .addr-fgrid{grid-template-columns:1fr 1fr 1fr}
+}
+/* Wide desktop (1280–1599px): groups are side-by-side (~narrower each) —
+   2 field columns keeps labels/dropdown text from getting squeezed. */
+@media (min-width:1280px) and (max-width:1599px){
+  .addr-fgrid{grid-template-columns:1fr 1fr}
+}
+/* Ultra-wide (≥1600px): each group has room again for 3 columns. */
+@media (min-width:1600px){
+  .addr-fgrid{grid-template-columns:1fr 1fr 1fr}
+}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#f1f5f9}
+::-webkit-scrollbar-thumb{background:rgba(0,94,166,.3);border-radius:99px}
+</style>
+</head>
+<body>
+
+<!-- ══════════ NAV ══════════ -->
+<header class="nav-blur fixed top-0 left-0 right-0 z-50">
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <a href="index.html" class="flex items-center gap-2.5" aria-label="Samriddhi Auto Home">
+        <div class="w-9 h-9 rounded-lg bg-bajaj-blue flex items-center justify-center shadow-sm flex-shrink-0">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M4 16 Q7 8 11 7 Q15 6 18 10" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            <circle cx="5" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+            <circle cx="17" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+            <path d="M5 17 L17 17" stroke="#fff" stroke-width="1.4" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="leading-tight">
+          <div class="text-sm font-bold text-slate-900 tracking-tight leading-none">Samriddhi And Brothers</div>
+          <div class="text-[10px] font-medium text-bajaj-blue leading-none tracking-wide uppercase mt-0.5">Bajaj Authorized Dealer</div>
+        </div>
+      </a>
+
+      <div class="hidden lg:flex items-center gap-7">
+        <a href="index.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </a>
+        <a href="index.html#prices" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Price List
+        </a>
+        <a href="finance.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Finance
+        </a>
+        <a href="sheet.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          Sheet
+        </a>
+        <a href="kyc.html" class="nav-link active">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          KYC
+        </a>
+        <a href="https://yonghangishak.com.np/" target="_blank" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          About
+        </a>
+      </div>
+
+      <div class="hidden lg:flex items-center gap-3">
+        <a href="tel:+9779820907795" class="text-sm font-semibold text-bajaj-blue flex items-center gap-1.5 hover:text-bajaj-blueDark transition-colors">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+          Call Showroom
+        </a>
+        <a href="index.html#prices" class="cta-primary text-sm py-2.5 px-5">Book a Test Ride</a>
+      </div>
+
+      <button id="hamburger-btn" class="lg:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors" aria-label="Toggle menu" aria-expanded="false">
+        <svg id="icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg id="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hidden"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div id="mobile-menu" class="lg:hidden">
+      <div class="py-4 border-t border-slate-100 space-y-1">
+        <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Home</a>
+        <a href="index.html#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Price List</a>
+        <a href="finance.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Finance</a>
+        <a href="sheet.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Sheet</a>
+        <a href="kyc.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">KYC</a>
+        <a href="https://yonghangishak.com.np/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">About</a>
+        <div class="pt-2 grid grid-cols-2 gap-2">
+          <a href="tel:+9779802315425" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-bajaj-blue text-bajaj-blue text-sm font-semibold">Call Us</a>
+          <a href="index.html#prices" class="flex items-center justify-center py-2.5 rounded-xl bg-bajaj-blue text-white text-sm font-semibold">Ride</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="fin-hero" style="padding-top:64px">
+  <div style="max-width:1280px;margin:0 auto;padding:48px 20px">
+    <div style="text-align:center;max-width:640px;margin:0 auto">
+      <span class="price-badge"><i class="fa-solid fa-user-shield" style="font-size:11px"></i> HFL KYC Form</span>
+      <h1 class="headline" style="font-size:clamp(2.6rem,7vw,4.6rem);color:#0F172A;margin-top:16px">Know Your <span style="color:var(--blue)">Customer.</span></h1>
+      <p style="color:#64748B;font-size:16px;line-height:1.6;margin-top:16px;max-width:460px;margin-left:auto;margin-right:auto">Fill the details once, choose Individual or Guarantor, then preview and print the official Hulas Finserv KYC form ready for signature.</p>
+      <div style="margin-top:28px">
+        <div class="type-toggle" id="typeToggle">
+          <button type="button" class="active" data-type="individual" onclick="setFormType('individual')"><i class="fa-solid fa-user"></i> Individual</button>
+          <button type="button" data-type="guarantor" onclick="setFormType('guarantor')"><i class="fa-solid fa-people-arrows"></i> Guarantor</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ DATA ENTRY ══════════ -->
+<main>
+  <div id="formShell">
+
+    <!-- Personal Info -->
+    <div class="calc-card card-personal">
+      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-id-card"></i></span>Personal Information <span class="sub" id="typeHintTop">Individual</span></div>
+      <div style="display:flex;gap:1.25rem;align-items:flex-start;margin-bottom:1rem">
+        <div class="photo-slot"><i class="fa-solid fa-camera"></i>Photo<br>(printed blank)</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:1rem">
+          <div class="field-grid">
+            <div class="field-item"><label class="field-label">Branch (शाखा)</label><input class="styled" id="f_branch"></div>
+            <div class="field-item"><label class="field-label">Date (मिति B.S.)</label><input class="styled" id="f_date" placeholder="YYYY/MM/DD" inputmode="numeric" maxlength="10"></div>
+          </div>
+          <div class="field-grid">
+            <div class="field-item"><label class="field-label">पूरा नाम देवनागरीमा</label><input class="styled" id="f_nameNp"></div>
+            <div class="field-item"><label class="field-label">Full Name (Block Letters)</label><input class="styled" id="f_nameEn" style="text-transform:uppercase"></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-grid cols-3">
+        <div class="field-item">
+          <label class="field-label">Gender</label>
+          <div class="custom-select" id="genderWrap">
+            <select id="f_gender" class="sr-only-select" tabindex="-1" aria-hidden="true">
+              <option value="M">Male</option><option value="F">Female</option><option value="O">Other</option>
+            </select>
+            <button type="button" class="custom-select-trigger" id="f_genderTrigger"><span class="cst-text" id="f_genderTriggerText">Male</span><i class="fa-solid fa-chevron-down cst-chevron"></i></button>
+            <div class="custom-select-panel" id="f_genderPanel" role="listbox"></div>
+          </div>
+        </div>
+        <div class="field-item">
+          <label class="field-label">Date of Birth (जन्म मिति B.S.)</label>
+          <input class="styled" id="f_dob" placeholder="YYYY-MM-DD" inputmode="numeric" maxlength="10">
+          <div id="f_dobAgeHint" style="font-size:11px;margin-top:4px;min-height:14px;font-weight:600"></div>
+        </div>
+        <div class="field-item"><label class="field-label">Education (शिक्षा)</label><input class="styled" id="f_education"></div>
+      </div>
+    </div>
+
+    <!-- Legal ID -->
+    <div class="calc-card card-legalid">
+      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-fingerprint"></i></span>Legal ID (कानूनी परिचय पत्र)</div>
+      <div class="field-grid cols-3" style="margin-bottom:1rem">
+        <div class="field-item">
+          <label class="field-label">ID Type</label>
+          <div class="custom-select" id="idTypeWrap">
+            <select id="f_idType" class="sr-only-select" tabindex="-1" aria-hidden="true">
+              <option value="Citizenship">Citizenship</option><option value="Driving License">Driving License</option>
+              <option value="Passport">Passport</option><option value="Voter ID">Voter ID</option>
+              <option value="NID">NID</option><option value="Others">Others</option>
+            </select>
+            <button type="button" class="custom-select-trigger" id="f_idTypeTrigger"><span class="cst-text" id="f_idTypeTriggerText">Citizenship</span><i class="fa-solid fa-chevron-down cst-chevron"></i></button>
+            <div class="custom-select-panel" id="f_idTypePanel" role="listbox"></div>
+          </div>
+        </div>
+        <div class="field-item"><label class="field-label">Number (नम्बर)</label><input class="styled" id="f_idNumber"></div>
+        <div class="field-item"><label class="field-label">Issue Authority</label><input class="styled" id="f_idAuthority"></div>
+      </div>
+      <div class="field-grid cols-3">
+        <div class="field-item"><label class="field-label">Date of Issue (B.S.)</label><input class="styled" id="f_idDate" placeholder="YYYY/MM/DD" inputmode="numeric" maxlength="10"></div>
+        <div class="field-item"><label class="field-label">Customer Dealer No.</label><input class="styled" id="f_dealerNo"></div>
+        <div class="field-item"><label class="field-label">NID No.</label><input class="styled" id="f_nidNo"></div>
+      </div>
+      <div class="section-sep field-grid cols-3">
+        <div class="field-item"><label class="field-label">Residence Contact No.</label><input class="styled" id="f_residPhone"></div>
+        <div class="field-item"><label class="field-label">Mobile No. <span style="color:var(--red)">*</span></label><input class="styled" id="f_mobile" maxlength="10" inputmode="numeric">
+          <div class="field-error-msg" id="f_mobileError"><i class="fa-solid fa-circle-exclamation"></i> Enter a valid 10-digit mobile number</div>
+        </div>
+        <div class="field-item"><label class="field-label">Email ID</label><input class="styled" id="f_email"></div>
+      </div>
+    </div>
+
+    <!-- Family Details -->
+    <div class="calc-card card-family">
+      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-people-roof"></i></span>Family Details</div>
+      <div class="fam-cards" id="familyBody">
+        <!-- Each relation gets its own touch-friendly card instead of a cramped table row -->
+      </div>
+    </div>
+
+    <!-- Fund / Occupation -->
+    <div class="calc-card card-fund">
+      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-sack-dollar"></i></span>Source of Fund &amp; Occupation</div>
+      <label class="field-label">Source of Fund <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink4)">— choose one</span></label>
+      <div class="chk-grid" id="fundGrid" style="margin-bottom:1.1rem">
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Business"> Business</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Income"> Income</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Agriculture"> Agriculture</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Salary"> Salary</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Disposal of Asset"> Disposal of Asset</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Investment"> Investment</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Inheritance/Gift"> Inheritance/Gift</label>
+        <label class="chk-pill"><input type="radio" name="fundSource" value="Saving or Remittance"> Saving or Remittance</label>
+      </div>
+      <div class="field-item" style="margin-bottom:1.1rem"><label class="field-label">Other Fund Source</label><input class="styled" id="f_fundOthers"></div>
+
+      <label class="field-label">Nature of Occupation <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink4)">— choose one</span></label>
+      <div class="chk-grid" id="occGrid" style="margin-bottom:1rem">
+        <label class="chk-pill"><input type="radio" name="occupation" value="Home Maker"> Home Maker</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Business"> Business</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Student"> Student</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Agriculture"> Agriculture</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Salaried person"> Salaried person</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Politician/PEP"> Politician/PEP</label>
+        <label class="chk-pill"><input type="radio" name="occupation" value="Retired"> Retired</label>
+      </div>
+      <div class="field-grid section-sep">
+        <div class="field-item"><label class="field-label">Details of Associated Organization</label><input class="styled" id="f_orgDetails"></div>
+        <div class="field-item"><label class="field-label">Designation (पद)</label><input class="styled" id="f_designation"></div>
+      </div>
+      <div class="field-item" style="margin-top:1rem"><label class="field-label">Other Occupation</label><input class="styled" id="f_occOthers"></div>
+    </div>
+
+    <!-- Income & Turnover -->
+    <div class="calc-card card-income">
+      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-coins"></i></span>Income &amp; Turnover</div>
+      <div class="field-grid" style="margin-bottom:1.1rem">
+        <div class="field-item"><label class="field-label">Expected Yearly Gross Income</label><input class="styled" id="f_yearlyIncome"></div>
+        <div class="field-item"><label class="field-label">Total Assets</label><input class="styled" id="f_totalAssets"></div>
+      </div>
+      <label class="field-label">Expected Turnover Details <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink4)">— choose one</span></label>
+      <div class="chk-grid" id="turnGrid" style="margin-top:6px">
+        <label class="chk-pill"><input type="radio" name="turnover" value="Up to 1 Lakh"> Up to 1 Lakh</label>
+        <label class="chk-pill"><input type="radio" name="turnover" value="1 Lakh to 25 Lakh"> 1 Lakh to 25 Lakh</label>
+        <label class="chk-pill"><input type="radio" name="turnover" value="25 Lakh to 50 Lakh"> 25 Lakh to 50 Lakh</label>
+        <label class="chk-pill"><input type="radio" name="turnover" value="50 Lakh to 2 crore"> 50 Lakh to 2 crore</label>
+        <label class="chk-pill"><input type="radio" name="turnover" value="2 crore to 5 Crore"> 2 crore to 5 Crore</label>
+        <label class="chk-pill wide"><input type="radio" name="turnover" value="5 Crore to"> 5 Crore to <input class="styled" id="f_turn5crValue" style="width:70px;height:30px;padding:0 8px;margin-left:6px" onclick="event.stopPropagation()"> Crore</label>
+      </div>
+    </div>
+
+    <!-- Yes/No Questions -->
+    <div class="calc-card card-screening">
+      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-circle-question"></i></span>Screening Questions</div>
+      <table class="yn-table" id="ynTable">
+        <tbody>
+          <tr><td>1</td><td>US person/Other Person/NRN</td><td class="yn-opts"><label><input type="radio" name="q1" value="Yes">Yes</label><label><input type="radio" name="q1" value="No" checked>No</label></td></tr>
+          <tr><td>2</td><td>Do you have a beneficial owner?</td><td class="yn-opts"><label><input type="radio" name="q2" value="Yes">Yes</label><label><input type="radio" name="q2" value="No" checked>No</label></td></tr>
+          <tr><td>3</td><td>High profile / involved in politics?</td><td class="yn-opts"><label><input type="radio" name="q3" value="Yes">Yes</label><label><input type="radio" name="q3" value="No" checked>No</label></td></tr>
+          <tr><td>4</td><td>Other accounts with other banks?</td><td class="yn-opts"><label><input type="radio" name="q4" value="Yes">Yes</label><label><input type="radio" name="q4" value="No" checked>No</label></td></tr>
+          <tr><td>5</td><td>Conviction for any crime in the past?</td><td class="yn-opts"><label><input type="radio" name="q5" value="Yes">Yes</label><label><input type="radio" name="q5" value="No" checked>No</label></td></tr>
+          <tr><td>6</td><td>Blacklisted by CIB Nepal?</td><td class="yn-opts"><label><input type="radio" name="q6" value="Yes">Yes</label><label><input type="radio" name="q6" value="No" checked>No</label></td></tr>
+          <tr><td>7</td><td>Existing customer accounts in HFL?</td><td class="yn-opts"><label><input type="radio" name="q7" value="Yes">Yes</label><label><input type="radio" name="q7" value="No" checked>No</label></td></tr>
+        </tbody>
+      </table>
+      <div class="field-item" style="margin-top:.75rem"><label class="field-label">Remarks (if any answer is Yes)</label><input class="styled" id="f_remarks"></div>
+    </div>
+
+    <!-- Address -->
+    <div class="calc-card card-address">
+      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-location-dot"></i></span>Address Details</div>
+      <div class="addr-block">
+        <div class="addr-group">
+          <div class="addr-group-title"><i class="fa-solid fa-house"></i> Permanent Address</div>
+          <div class="addr-fgrid">
+            <div class="fi">
+              <label>Country</label>
+              <div class="combo-select" id="addr_perm_countryWrap">
+                <input class="combo-input" id="addr_perm_country" placeholder="Nepal" autocomplete="off" value="Nepal">
+                <i class="fa-solid fa-chevron-down combo-chevron"></i>
+                <div class="combo-panel" id="addr_perm_countryPanel"></div>
+              </div>
+            </div>
+            <div class="fi">
+              <label>Province</label>
+              <div class="combo-select" id="addr_perm_provinceWrap">
+                <input class="combo-input" id="addr_perm_province" placeholder="Select province" autocomplete="off">
+                <i class="fa-solid fa-chevron-down combo-chevron"></i>
+                <div class="combo-panel" id="addr_perm_provincePanel"></div>
+              </div>
+            </div>
+            <div class="fi">
+              <label>District</label>
+              <div class="combo-select" id="addr_perm_districtWrap">
+                <input class="combo-input" id="addr_perm_district" placeholder="Select province first" autocomplete="off" disabled>
+                <i class="fa-solid fa-chevron-down combo-chevron"></i>
+                <div class="combo-panel" id="addr_perm_districtPanel"></div>
+              </div>
+            </div>
+            <div class="fi">
+              <label>Muni./Rural Muni.</label>
+              <div class="combo-select" id="addr_perm_muniWrap">
+                <input class="combo-input" id="addr_perm_muni" placeholder="Select district first" autocomplete="off" disabled>
+                <i class="fa-solid fa-chevron-down combo-chevron"></i>
+                <div class="combo-panel" id="addr_perm_muniPanel"></div>
+              </div>
+            </div>
+            <div class="fi"><label>Ward No.</label><input id="addr_perm_ward"></div>
+            <div class="fi"><label>Tole/Street</label><input id="addr_perm_tole"></div>
+            <div class="fi" style="grid-column:span 2"><label>House No.</label><input id="addr_perm_house"></div>
+          </div>
+          <div class="combo-hint"><i class="fa-solid fa-circle-info"></i> Pick Province first, then District, then Muni./Rural Muni. — or just type to enter your own.</div>
+        </div>
+
+        <div class="addr-group">
+          <div class="addr-group-title">
+            <i class="fa-solid fa-map-location-dot"></i> Temporary Address
+            <label class="same-as-row"><input type="checkbox" id="sameAsAddress"> Same as Permanent Address</label>
+          </div>
+          <div class="addr-fgrid">
+            <div class="fi">
+              <label>Country</label>
+              <div class="combo-select" id="addr_temp_countryWrap">
+                <input class="combo-input" id="addr_temp_country" placeholder="Nepal" autocomplete="off">
+                <i class="fa-solid fa-chevron-down combo-chevron"></i>
+                <div class="combo-panel" id="addr_temp_countryPanel"></div>
+              </div>
+            </div>
+            <div class="fi">
+              <label>Province</label>
+              <div class="combo-select" id="addr_temp_provinceWrap">
+                <input class="combo-input" id="addr_temp_province" placeholder="Select province" autocomplete="off">
+                <i class="fa-solid fa-chevron-down combo-chevron"></i>
+                <div class="combo-panel" id="addr_temp_provincePanel"></div>
+              </div>
+            </div>
+            <div class="fi">
+              <label>District</label>
+              <div class="combo-select" id="addr_temp_districtWrap">
+                <input class="combo-input" id="addr_temp_district" placeholder="Select province first" autocomplete="off" disabled>
+                <i class="fa-solid fa-chevron-down combo-chevron"></i>
+                <div class="combo-panel" id="addr_temp_districtPanel"></div>
+              </div>
+            </div>
+            <div class="fi">
+              <label>Muni./Rural Muni.</label>
+              <div class="combo-select" id="addr_temp_muniWrap">
+                <input class="combo-input" id="addr_temp_muni" placeholder="Select district first" autocomplete="off" disabled>
+                <i class="fa-solid fa-chevron-down combo-chevron"></i>
+                <div class="combo-panel" id="addr_temp_muniPanel"></div>
+              </div>
+            </div>
+            <div class="fi"><label>Ward No.</label><input id="addr_temp_ward"></div>
+            <div class="fi"><label>Tole/Street</label><input id="addr_temp_tole"></div>
+            <div class="fi" style="grid-column:span 2"><label>House No.</label><input id="addr_temp_house"></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-grid section-sep">
+        <div class="field-item">
+          <label class="field-label">Type of Residence</label>
+          <div class="chk-grid">
+            <label class="chk-pill"><input type="checkbox" id="f_residOwn"> In own House</label>
+          </div>
+        </div>
+        <div class="field-item"><label class="field-label">Others, Specify</label><input class="styled" id="f_residOthers"></div>
+      </div>
+      <div class="field-grid">
+        <div class="field-item"><label class="field-label">Google Plus Code</label><input class="styled" id="f_googlePlusCode"></div>
+        <div class="field-item"><label class="field-label">Nearest Landmark</label><input class="styled" id="f_landmark" placeholder="e.g. XYZ Chowk"></div>
+        <div class="field-item"><label class="field-label">Distance (m/km)</label><input class="styled" id="f_landmarkDist" placeholder="e.g. 500 m"></div>
+      </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <div class="info"><i class="fa-solid fa-circle-info"></i> Signature &amp; fingerprint boxes print blank for manual signing.</div>
+      <div class="btns">
+        <button class="btn-ghost" onclick="resetForm()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+        <button class="btn-amber" onclick="openPreview()"><i class="fa-solid fa-file-lines"></i> Preview &amp; Print KYC Form</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="validation-toast" id="validationToast"><i class="fa-solid fa-triangle-exclamation"></i><span id="validationToastMsg">Please fill required fields</span></div>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer style="padding:48px 0;background:#0F172A">
+  <div style="max-width:1280px;margin:0 auto;padding:0 20px">
+    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:24px;display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center">
+      <p style="color:#64748B;font-size:12px">© Samriddhi And Brothers Auto Pvt. Ltd. KYC data stays in this browser tab only.</p>
+      <p style="color:#475569;font-size:12px">Powered by <span style="color:var(--blue);font-weight:600">Go! YNG</span></p>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════ PREVIEW OVERLAY ══════════ -->
+<div id="previewOverlay" onclick="if(event.target===this) closePreview()">
+  <div class="preview-shell">
+    <div class="preview-toolbar">
+      <div class="ptitle"><i class="fa-solid fa-file-signature"></i> <span id="previewTitleTag">KYC Form (Individual)</span> Preview</div>
+      <div class="pactions">
+        <button class="pbtn print" onclick="printKyc()"><i class="fa-solid fa-print"></i> Print Page</button>
+        <button class="pbtn close" onclick="closePreview()"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+    <div class="preview-body">
+      <div class="a4-page" id="pageP1">
+        <div class="a4-page-label">Page 1 of 2</div>
+        <div class="a4-paper" id="a4Page1"></div>
+      </div>
+      <div class="a4-page" id="pageP2">
+        <div class="a4-page-label">Page 2 of 2</div>
+        <div class="a4-paper" id="a4Page2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ HIDDEN PRINT WRAPPER ══════════ -->
+<div id="print-wrapper">
+  <div class="print-page a4-paper" id="printPage1"></div>
+  <div class="print-page a4-paper" id="printPage2"></div>
+</div>
+
+<!-- BS ⇄ AD date conversion / age calculation library (loaded as ESM, exposed on window) -->
+<script type="module">
+  import { adToBs, bsToAd, calculateAge } from 'https://cdn.jsdelivr.net/npm/@sbmdkl/nepali-date-converter/+esm';
+  window.NepaliDateConverter = { adToBs, bsToAd, calculateAge };
+  window.dispatchEvent(new Event('ndc-ready'));
+</script>
+
+<script>
+/* ── Hamburger ── */
+const hbtn=document.getElementById('hamburger-btn'),mMenu=document.getElementById('mobile-menu'),icoOpen=document.getElementById('icon-open'),icoClose=document.getElementById('icon-close');
+hbtn?.addEventListener('click',()=>{const open=mMenu.classList.toggle('open');icoOpen.style.display=open?'none':'block';icoClose.style.display=open?'block':'none';});
+
+/* ── Applicant type toggle ── */
+let formType='individual';
+function setFormType(type){
+  formType=type;
+  document.querySelectorAll('#typeToggle button').forEach(b=>b.classList.toggle('active',b.dataset.type===type));
+  document.getElementById('typeHintTop').textContent = type==='individual' ? 'Individual' : 'Guarantor';
+}
+
+/* ── Generic custom-select builder ── */
+const CUSTOM_SELECT_IDS=['f_gender','f_idType'];
+function buildCustomSelect(selectId){
+  const real=document.getElementById(selectId);
+  const panel=document.getElementById(selectId+'Panel');
+  if(!real||!panel) return;
+  panel.innerHTML='';
+  Array.from(real.options).forEach((opt,i)=>{
+    const item=document.createElement('div');
+    item.className='cst-option'+(opt.selected?' selected':'');
+    item.dataset.index=i;
+    item.innerHTML=`<span class="cst-dot"></span><span>${opt.text}</span>`;
+    item.addEventListener('click',()=>{
+      real.selectedIndex=i;
+      syncCustomSelectUI(selectId);
+      closeCustomSelect(selectId);
+    });
+    panel.appendChild(item);
+  });
+  syncCustomSelectUI(selectId);
+}
+function syncCustomSelectUI(selectId){
+  const real=document.getElementById(selectId);
+  const triggerText=document.getElementById(selectId+'TriggerText');
+  const panel=document.getElementById(selectId+'Panel');
+  if(!real||!triggerText) return;
+  const opt=real.options[real.selectedIndex];
+  triggerText.textContent=opt?opt.text:'Select';
+  panel?.querySelectorAll('.cst-option').forEach(el=>el.classList.toggle('selected',Number(el.dataset.index)===real.selectedIndex));
+}
+function openCustomSelect(id){document.getElementById(id+'Panel')?.classList.add('open');document.getElementById(id+'Trigger')?.classList.add('open');}
+function closeCustomSelect(id){document.getElementById(id+'Panel')?.classList.remove('open');document.getElementById(id+'Trigger')?.classList.remove('open');}
+function closeAllCustomSelects(except){CUSTOM_SELECT_IDS.forEach(id=>{if(id!==except) closeCustomSelect(id);});}
+CUSTOM_SELECT_IDS.forEach(id=>{
+  document.getElementById(id+'Trigger')?.addEventListener('click',e=>{
+    e.stopPropagation();
+    const open=document.getElementById(id+'Panel')?.classList.contains('open');
+    closeAllCustomSelects();
+    if(typeof closeAllCombosExcept==='function') closeAllCombosExcept();
+    if(!open) openCustomSelect(id);
+  });
+});
+document.addEventListener('click',e=>{
+  CUSTOM_SELECT_IDS.forEach(id=>{
+    const wrap=document.getElementById(id+'Wrap');
+    if(wrap && !wrap.contains(e.target)) closeCustomSelect(id);
+  });
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeAllCustomSelects();});
+CUSTOM_SELECT_IDS.forEach(buildCustomSelect);
+
+/* ── checkbox / radio pill visual state (radio groups auto-clear siblings) ── */
+document.querySelectorAll('.chk-pill').forEach(pill=>{
+  const input=pill.querySelector('input');
+  const syncGroup=()=>{
+    if(input.type==='radio' && input.name){
+      document.querySelectorAll(`input[name="${input.name}"]`).forEach(sib=>sib.closest('.chk-pill')?.classList.toggle('checked',sib.checked));
+    } else {
+      pill.classList.toggle('checked',input.checked);
+    }
+  };
+  input?.addEventListener('change',syncGroup);
+  pill.addEventListener('click',e=>{
+    if(e.target.tagName!=='INPUT') setTimeout(syncGroup,0);
+  });
+});
+
+/* ── Date-only input masking (digits + auto separator) for B.S. date fields ── */
+function attachDateMask(inputId, sep){
+  const el=document.getElementById(inputId);
+  if(!el) return;
+  el.setAttribute('inputmode','numeric');
+  el.addEventListener('input', ()=>{
+    let digits = el.value.replace(/\D/g,'').slice(0,8);
+    let out = digits;
+    if(digits.length>4) out = digits.slice(0,4)+sep+digits.slice(4,6);
+    if(digits.length>6) out = digits.slice(0,4)+sep+digits.slice(4,6)+sep+digits.slice(6,8);
+    el.value = out;
+  });
+  el.addEventListener('keypress', e=>{
+    if(!/[0-9]/.test(e.key)) e.preventDefault();
+  });
+}
+attachDateMask('f_date','/');
+attachDateMask('f_dob','-');
+attachDateMask('f_idDate','/');
+
+/* ── Default "Date (मिति B.S.)" to today's date, converted AD → BS ── */
+function setDefaultDateBS(){
+  const f=document.getElementById('f_date');
+  if(!f || f.value) return; // don't override a restored/typed value
+  if(!window.NepaliDateConverter){ window.addEventListener('ndc-ready',setDefaultDateBS,{once:true}); return; }
+  try{
+    const todayIso = new Date().toISOString().slice(0,10);
+    const bs = window.NepaliDateConverter.adToBs(todayIso);
+    let text;
+    if(typeof bs==='string') text = bs.replace(/-/g,'/');
+    else {
+      const y=bs.year ?? bs.bsYear, m=bs.month ?? bs.bsMonth, d=bs.day ?? bs.date ?? bs.bsDate;
+      text = `${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
+    }
+    f.value=text;
+    saveDraft();
+  }catch(e){ /* leave field blank if conversion fails */ }
+}
+
+/* ── Date of Birth → live age (from B.S. date), red if under 25 ── */
+function updateDobAge(){
+  const input=document.getElementById('f_dob');
+  const hint=document.getElementById('f_dobAgeHint');
+  if(!input||!hint) return;
+  const val=input.value.trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(val)){ hint.textContent=''; input.classList.remove('field-error'); return; }
+  if(!window.NepaliDateConverter){ window.addEventListener('ndc-ready',updateDobAge,{once:true}); return; }
+  try{
+    const ageRaw = window.NepaliDateConverter.calculateAge(val);
+    const ageNum = typeof ageRaw==='object' ? (ageRaw.years ?? ageRaw.year ?? parseInt(ageRaw,10)) : parseInt(ageRaw,10);
+    if(isNaN(ageNum)){ hint.textContent=''; input.classList.remove('field-error'); return; }
+    const under25 = ageNum<25;
+    hint.textContent = 'Age: '+ageNum+' yrs'+(under25?' — below minimum (25)':'');
+    hint.style.color = under25 ? 'var(--red)' : 'var(--ink4)';
+    input.classList.toggle('field-error', under25);
+  }catch(e){ hint.textContent=''; input.classList.remove('field-error'); }
+}
+document.getElementById('f_dob')?.addEventListener('input', updateDobAge);
+
+/* ── Nepal Country / Province / District data ── */
+const NEPAL_COUNTRY=['Nepal'];
+const NEPAL_PROVINCES=['Koshi Province','Madhesh Province','Bagmati Province','Gandaki Province','Lumbini Province','Karnali Province','Sudurpashchim Province'];
+const NEPAL_DISTRICTS={
+  'Koshi Province':['Bhojpur','Dhankuta','Ilam','Jhapa','Khotang','Morang','Okhaldhunga','Panchthar','Sankhuwasabha','Solukhumbu','Sunsari','Taplejung','Terhathum','Udayapur'],
+  'Madhesh Province':['Bara','Dhanusha','Mahottari','Parsa','Rautahat','Saptari','Sarlahi','Siraha'],
+  'Bagmati Province':['Bhaktapur','Chitwan','Dhading','Dolakha','Kathmandu','Kavrepalanchok','Lalitpur','Makwanpur','Nuwakot','Ramechhap','Rasuwa','Sindhuli','Sindhupalchok'],
+  'Gandaki Province':['Baglung','Gorkha','Kaski','Lamjung','Manang','Mustang','Myagdi','Nawalpur','Parbat','Syangja','Tanahun'],
+  'Lumbini Province':['Arghakhanchi','Banke','Bardiya','Dang','Eastern Rukum','Gulmi','Kapilvastu','Palpa','Parasi','Pyuthan','Rolpa','Rupandehi'],
+  'Karnali Province':['Dailekh','Dolpa','Humla','Jajarkot','Jumla','Kalikot','Mugu','Salyan','Surkhet','Western Rukum'],
+  'Sudurpashchim Province':['Achham','Baitadi','Bajhang','Bajura','Dadeldhura','Darchula','Doti','Kailali','Kanchanpur']
+};
+const ALL_DISTRICTS=Object.values(NEPAL_DISTRICTS).flat();
+
+/* ── Nepal District → Municipality / Rural Municipality (all 77 districts, 753 local levels) ── */
+const NEPAL_MUNICIPALITIES={
+  'Taplejung':['Taplejung (Phungling)','Sirijangha','Aathrai Triveni','Pathibhara Yangwarak','Meringden','Sidingwa','Phaktanglung','Maiwa Khola','Mikwa Khola'],
+  'Panchthar':['Phidim','Miklajung','Phalgunanda','Hilihang','Phalelung','Yangwarak','Kummayak'],
+  'Ilam':['Suryodaya','Ilam','Deumai','Mai','Phakphokthum','Mai Jogmai','Chulachuli','Rong','Mangsebung','Sandakpur'],
+  'Jhapa':['Mechinagar','Birtamod','Damak','Bhadrapur','Shivasatakshi','Arjundhara','Gauradaha','Kankai','Kamal','Buddha Shanti','Kachankawal','Jhapa','Barhadashi','Gaurigunj','Haldibari'],
+  'Morang':['Biratnagar','Sundar Haraincha','Belbari','Pathari-Shanischare','Ratuwamai','Urlabari','Rangeli','Sunawarshi','Letang Bhogateni','Jahada','Budi Ganga','Katahari','Dhanpalthan','Kanepokhari','Gramthan','Kerabari','Miklajung'],
+  'Sunsari':['Itahari','Dharan','Barahachhetra','Inaruwa','Duhabi','Ramdhuni','Koshi','Harinagara','Bhokraha Narsingh','Dewanganj','Gadhi','Barju'],
+  'Dhankuta':['Dhankuta','Mahalaxmi','Pakhribas','Sangurigadhi','Chaubise','Sahidbhumi','Chhathar Jorpati'],
+  'Terhathum':['Myanglung','Aathrai','Phedap','Chhathar','Menchayayem'],
+  'Sankhuwasabha':['Khandbari','Chainpur','Dharmadevi','Panchkhapan','Madi','Makalu','Silichong','Sabhapokhari','Chichila','Bhot Khola'],
+  'Bhojpur':['Shadanand','Bhojpur','Hatuwagadhi','Ramprasad Rai','Aamchok','Tyamke Maiyum','Arun','Pauwadungma','Salpasilichho'],
+  'Solukhumbu':['Solu Dudhkunda','Dudhakaushika','Necha Salyan','Dudhkoshi','Maha Kulung','Sotang','Khumbu Pasang Lhamu','Likhu Pike'],
+  'Okhaldhunga':['Siddhicharan','Manebhanjyang','Champadevi','Sunkoshi','Molung','Chisankhugadhi','Khiji Demba','Likhu'],
+  'Khotang':['Rupakot Majhuwagadhi','Halesi Tuwachung','Khotehang','Diprung','Aiselukharka','Jantedhunga','Kepilasgadhi','Barahpokhari','Rawabesi','Sakela'],
+  'Udayapur':['Triyuga','Katari','Chaudandigadhi','Belaka','Udayapurgadhi','Rautamai','Tapli','Limchungbung'],
+
+  'Saptari':['Rajbiraj','Hanumannagar Kankalini','Khadak','Dakneshwari','Surunga','Bodebarsain','Shambhunath','Kanchanrup','Saptakoshi','Tilathi Koiladi','Rajgadh','Chhinnamasta','Mahadeva','Agnisaira Krishnasavaran','Rupani','Balan-Bihul','Bishnupur','Tirhut'],
+  'Siraha':['Lahan','Siraha','Golbazar','Mirchaiya','Kalyanpur','Dhangadimai','Sukhipur','Karjanha','Laksmipur Patari','Bariyarpatti','Aurahi','Arnama','Bhagwanpur','Naraha','Navarajpur','Sakhuwanankarkatti','Bishnupur'],
+  'Dhanusha':['Janakpurdham','Chhireshwarnath','Ganeshman Charnath','Nagarain','Dhanushadham','Bideha','Mithila','Mithila Bihari','Kamala','Hansapur','Sabaila','Sahidnagar','Bateshwar','Lakshminiya','Mukhiyapatti Musaharniya','Janaknandani','Aurahi'],
+  'Mahottari':['Gaushala','Bardibas','Jaleshwar','Manara Shiswa','Bhangaha','Balawa','Loharpatti','Aurahi','Matihani','Ramgopalpur','Sonama','Pipra','Samsi','Ekdara','Mahottari'],
+  'Sarlahi':['Barahathwa','Ishwarpur','Lalbandi','Godaita','Malangwa','Balara','Hariwan','Kabilasi','Bagmati','Haripur','Haripurwa','Chandranagar','Brahampuri','Ramnagar','Chakraghatta','Kaudena','Dhankaul','Bishnu','Basbariya','Parsa'],
+  'Bara':['Kalaiya','Jitpursimara','Mahagadhimai','Simraungadh','Kolhabi','Nijgadh','Pacharauta','Suwarna','Adarsha Kotwal','Baragadhi','Pheta','Karaiyamai','Prasauni','Bishrampur','Devtal','Parwanipur'],
+  'Parsa':['Birgunj','Bahudarmai','Parsagadhi','Pokhariya','Sakhuwa Prasauni','Jagarnathpur','Chhipahrmai','Bindabasini','Paterwa Sugauli','Jirabhawani','Kalikamai','Pakaha Mainpur','Thori','Dhobini'],
+  'Rautahat':['Chandrapur','Garuda','Gujara','Brindaban','Ishnath','Rajpur','Gadhimai','Katahariya','Paroha','Phatuwa Bijayapur','Baudhimai','Madhav Narayan','Gaur','Dewahi Gonahi','Rajdevi','Maulapur','Durga Bhagawati','Yamunamai'],
+
+  'Sindhuli':['Dudhauli','Kamalamai','Tinpatan','Marin','Hariharpurgadhi','Sunkoshi','Golanjor','Phikkal','Ghyanglekh'],
+  'Ramechhap':['Manthali','Ramechhap','Khandadevi','Likhu Tamakoshi','Doramba','Gokulganga','Sunapati','Umakunda'],
+  'Dolakha':['Bhimeshwar','Jiri','Kalinchok','Melung','Shailung','Baiteshwar','Tamakoshi','Bigu','Gaurishankar'],
+  'Sindhupalchok':['Chautara Sangachokgadhi','Melamchi','Barhabise','Indrawati','Panchpokhari Thangpal','Jugal','Balephi','Helambu','Bhotekoshi','Sunkoshi','Lisankhu Pakhar','Tripurasundari'],
+  'Kavrepalanchok':['Banepa','Panauti','Panchkhal','Mandandeupur','Dhulikhel','Namobuddha','Roshi','Temal','Chaunri Deurali','Bhumlu','Mahabharat','Bethanchok','Khanikhola'],
+  'Lalitpur':['Lalitpur','Mahalaxmi','Godawari','Bagmati','Konjyosom','Mahankal'],
+  'Bhaktapur':['Suryabinayak','Madhyapur Thimi','Bhaktapur','Changunarayan'],
+  'Kathmandu':['Kathmandu','Budhanilkantha','Tarakeshwar','Gokarneshwar','Chandragiri','Tokha','Kageshwari-Manohara','Nagarjun','Kirtipur','Shankharapur','Dakshinkali'],
+  'Nuwakot':['Bidur','Belkotgadhi','Kakani','Dupcheshwar','Shivapuri','Tadi','Likhu','Suryagadhi','Panchakanya','Tarkeshwar','Kispang','Myagang'],
+  'Rasuwa':['Naukunda','Kalika','Uttargaya','Gosaikund','Aamachodingmo'],
+  'Dhading':['Nilkantha','Dhunibeshi','Thakre','Benighat Rorang','Galchhi','Gajuri','Jwalamukhi','Siddhalekh','Tripurasundari','Gangajamuna','Netrawati Dabjong','Khaniyabas','Ruby Valley'],
+  'Makwanpur':['Hetauda','Bakaiya','Manahari','Bagmati','Raksirang','Makawanpurgadhi','Kailash','Bhimphedi','Indrasarowar'],
+  'Chitwan':['Bharatpur','Ratnanagar','Rapti','Khairhani','Kalika','Madi','Ichchhakamana'],
+
+  'Gorkha':['Gorkha','Palungtar','Shahid Lakhan','Barpak Sulikot','Aarughat','Siranchowk','Gandaki','Bhimsen Thapa','Ajirkot','Dharche','Tsum Nubri'],
+  'Lamjung':['Besisahar','Sundarbazar','Madhya Nepal','Rainas','Marsyangdi','Dordi','Dudhpokhari','Kwaholasothar'],
+  'Tanahun':['Vyas','Shuklagandaki','Bhanu','Bhimad','Rishing','Myagde','Aanbu Khaireni','Bandipur','Ghiring','Devghat'],
+  'Syangja':['Waling','Putalibazar','Galyang','Chapakot','Bhirkot','Kaligandaki','Biruwa','Harinas','Aandhikhola','Arjun Chaupari','Phedikhola'],
+  'Kaski':['Pokhara','Annapurna','Machhapuchhre','Madi','Rupa'],
+  'Manang':['Chame','Manang Disyang','Nason','Narpa Bhumi'],
+  'Mustang':['Gharapjhong','Thasang','Baragung Muktichhetra','Lomanthang','Lo-Ghekar Damodarkunda'],
+  'Myagdi':['Beni','Malika','Mangala','Raghuganga','Dhaulagiri','Annapurna'],
+  'Nawalpur':['Kawasoti','Gaindakot','Madhyabindu','Devchuli','Hupsekot','Binayi Triveni','Bulingtar','Baudikali'],
+  'Parbat':['Kushma','Phalewas','Jaljala','Modi','Paiyun','Bihadi','Mahashila'],
+  'Baglung':['Baglung','Galkot','Jaimini','Dhorpatan','Badigad','Kathekhola','Nisikhola','Bareng','Tarakhola','Tamankhola'],
+
+  'Gulmi':['Musikot','Resunga','Satyawati','Dhurkot','Gulmi Darbar','Madane','Chandrakot','Malika','Chhatrakot','Isma','Kaligandaki','Ruru'],
+  'Palpa':['Tansen','Rampur','Rainadevi Chhahara','Mathagadhi','Nisdi','Bagnaskali','Rambha','Purbakhola','Tinau','Ribdikot'],
+  'Parasi':['Ramgram','Sunwal','Bardghat','Susta','Pratappur','Sarawal','Palhinandan'],
+  'Rupandehi':['Butwal','Tilottama','Lumbini Sanskritik','Siddharthanagar','Sainamaina','Devdaha','Gaidhawa','Mayadevi','Kotahimai','Marchawarimai','Siyari','Sammarimai','Rohini','Shuddhodhan','Omsatiya','Kanchan'],
+  'Kapilvastu':['Kapilvastu','Banganga','Shivaraj','Buddhabhumi','Krishnanagar','Maharajganj','Mayadevi','Suddhodhan','Yasodhara','Bijaynagar'],
+  'Arghakhanchi':['Sitganga','Sandhikharka','Bhumikasthan','Malarani','Panini','Chhatradev'],
+  'Pyuthan':['Pyuthan','Swargadwari','Naubahini','Jhimruk','Gaumukhi','Airawati','Sarumarani','Mallarani','Mandavi'],
+  'Rolpa':['Rolpa','Sunilsmriti','Runtigadhi','Lungri','Triveni','Paribartan','Gangadev','Madi','Sunchhahari','Thabang'],
+  'Eastern Rukum':['Rukumkot','Sisne','Bhume'],
+  'Banke':['Nepalgunj','Kohalpur','Raptisonari','Baijanath','Khajura','Janaki','Duduwa','Narainapur'],
+  'Bardiya':['Gulariya','Rajapur','Madhuwan','Thakurbaba','Barbardiya','Geruwa','Badhaiyatal'],
+  'Dang':['Ghorahi','Tulsipur','Lamahi','Gadhawa','Rapti','Banglachuli','Dangisharan','Rajpur','Shantinagar'],
+
+  'Dailekh':['Narayan','Dullu','Aathbis','Chamunda Bindrasaini','Bhairabi','Naumule','Dungeshwar','Gurans','Mahabu','Thantikandh','Bhagawatimai'],
+  'Jajarkot':['Bheri','Chhedagad','Junichande','Kuse','Barekot','Nalgad','Shivalaya'],
+  'Dolpa':['Thuli Bheri','Tripurasundari','Dolpo Buddha','She Phoksundo','Jagadulla','Mudkechula','Kaike'],
+  'Jumla':['Chandannath','Kanaka Sundari','Sinja','Hima','Guthichaur','Tatopani','Patarasi','Tila'],
+  'Kalikot':['Khandachakra','Raskot','Tilagupha','Pachaljharana','Naraharinath','Sanni Tribeni','Palata','Mahawai'],
+  'Mugu':['Chhayanath Rara','Mugum Karmarong','Soru','Khatyad'],
+  'Humla':['Simkot','Namkha','Kharpunath','Sarkegad','Adanchuli','Chankheli','Tanjakot'],
+  'Salyan':['Bangad Kupinde','Sharada','Bagchaur','Kapurkot','Kalimati','Chhatreshwari','Kumakh','Triveni','Dharna'],
+  'Surkhet':['Birendranagar','Gurbhakot','Bheriganga','Panchapuri','Lekbeshi','Chaukune','Simta','Barahatal','Chingad'],
+  'Western Rukum':['Musikot','Chaurjahari','Aathbiskot','Sani Bheri','Banphikot','Triveni'],
+
+  'Kailali':['Dhangadhi','Tikapur','Ghodaghodi','Lamki Chuha','Bhajani','Godawari','Gauriganga','Janaki','Bardagoriya','Krishnapur','Mohanyal','Kailari','Joshipur','Chure','Kailashkeshari'],
+  'Kanchanpur':['Bhimdatta','Punarbas','Bedkot','Belauri','Krishnapur','Shuklaphanta','Laljhadi','Beldandi'],
+  'Doti':['Dipayal Silgadhi','Shikhar','Purbichauki','Aadarsha','Jorayal','Sayal','Badikedar','Bogtan','K.I. Singh'],
+  'Achham':['Mangalsen','Kamalbazar','Sanphebagar','Panchadewal Binayak','Bannigadhi Jayagadh','Chaurpati','Ramaroshan','Turmakhand','Mellekh','Dhakari'],
+  'Bajhang':['Jaya Prithvi','Bungal','Talkot','Masta','Khaptad Chhededaha','Thalara','Surma','Chhabis Pathibhera','Durgathali','Kedarsyu','Bitthadchir'],
+  'Bajura':['Badimalika','Budhiganga','Tribeni','Budhinanda','Gaumul','Swami Kartik Khapar','Chhededaha','Jagannath'],
+  'Dadeldhura':['Amargadhi','Parshuram','Aalital','Ajayameru','Bhageshwar','Ganyapadhura','Nawadurga'],
+  'Baitadi':['Dasharathchand','Patan','Melauli','Purchaudi','Dilasaini','Shivanath','Pancheshwar','Surnaya','Dogadakedar'],
+  'Darchula':['Mahakali','Shailyashikhar','Marma','Naugad','Malikarjun','Duhun','Apihimal','Lekam']
+};
+
+/* ── Styled type-and-pick combo dropdown (matches the Gender/ID Type look) ── */
+const comboInstances={};
+const comboClosers=[]; // every combo's close() fn, so opening one can close the rest
+function closeAllCombosExcept(exceptCloseFn){
+  comboClosers.forEach(fn=>{ if(fn!==exceptCloseFn) fn(); });
+}
+function buildComboSelect(inputId, initialOptions){
+  const input=document.getElementById(inputId);
+  const wrap=document.getElementById(inputId+'Wrap');
+  const panel=document.getElementById(inputId+'Panel');
+  if(!input||!wrap||!panel) return null;
+  let options=initialOptions.slice();
+  function render(){
+    const q=input.value.trim().toLowerCase();
+    const list = q ? options.filter(o=>o.toLowerCase().includes(q)) : options;
+    panel.innerHTML = list.length
+      ? list.map(o=>`<div class="combo-option${o.toLowerCase()===input.value.trim().toLowerCase()?' selected':''}" data-val="${o.replace(/"/g,'&quot;')}">${o}</div>`).join('')
+      : `<div class="combo-empty">No match — your typed value will be used</div>`;
+    panel.querySelectorAll('.combo-option').forEach(opt=>{
+      opt.addEventListener('mousedown', e=>{
+        e.preventDefault();
+        input.value=opt.dataset.val;
+        input.dispatchEvent(new Event('input',{bubbles:true}));
+        close();
+      });
+    });
+  }
+  function open(){ if(input.disabled) return; closeAllCombosExcept(close); closeAllCustomSelects(); render(); panel.classList.add('open'); wrap.classList.add('open'); }
+  function close(){ panel.classList.remove('open'); wrap.classList.remove('open'); }
+  comboClosers.push(close);
+  input.addEventListener('focus', open);
+  input.addEventListener('click', open);
+  input.addEventListener('input', ()=>{ closeAllCombosExcept(close); render(); if(!panel.classList.contains('open')){ panel.classList.add('open'); wrap.classList.add('open'); } });
+  document.addEventListener('click', e=>{ if(!wrap.contains(e.target)) close(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+  const inst={ setOptions(o){ options=o.slice(); if(panel.classList.contains('open')) render(); } };
+  comboInstances[inputId]=inst;
+  return inst;
+}
+buildComboSelect('addr_perm_country', NEPAL_COUNTRY);
+buildComboSelect('addr_temp_country', NEPAL_COUNTRY);
+buildComboSelect('addr_perm_province', NEPAL_PROVINCES);
+buildComboSelect('addr_temp_province', NEPAL_PROVINCES);
+buildComboSelect('addr_perm_district', []);
+buildComboSelect('addr_temp_district', []);
+buildComboSelect('addr_perm_muni', []);
+buildComboSelect('addr_temp_muni', []);
+
+/* Province → District: district field stays disabled/empty until a valid province is picked */
+function wireProvinceDistrictCascade(provinceId,districtId){
+  const provinceInput=document.getElementById(provinceId);
+  const districtInput=document.getElementById(districtId);
+  provinceInput?.addEventListener('input',()=>{
+    const match=NEPAL_PROVINCES.find(p=>p.toLowerCase()===provinceInput.value.trim().toLowerCase());
+    if(match){
+      comboInstances[districtId]?.setOptions(NEPAL_DISTRICTS[match]);
+      if(districtInput){ districtInput.disabled=false; districtInput.placeholder='Select district'; }
+    } else {
+      comboInstances[districtId]?.setOptions([]);
+      if(districtInput){
+        districtInput.disabled=true;
+        districtInput.placeholder='Select province first';
+        if(districtInput.value){ districtInput.value=''; districtInput.dispatchEvent(new Event('input',{bubbles:true})); }
+      }
+    }
+  });
+}
+wireProvinceDistrictCascade('addr_perm_province','addr_perm_district');
+wireProvinceDistrictCascade('addr_temp_province','addr_temp_district');
+
+/* ── District → Municipality/Rural Municipality cascade ── */
+function wireDistrictMuniCascade(districtId,muniId){
+  const districtInput=document.getElementById(districtId);
+  const muniInput=document.getElementById(muniId);
+  districtInput?.addEventListener('input',()=>{
+    const match=ALL_DISTRICTS.find(d=>d.toLowerCase()===districtInput.value.trim().toLowerCase());
+    const list = match ? (NEPAL_MUNICIPALITIES[match]||[]) : [];
+    comboInstances[muniId]?.setOptions(list);
+    if(muniInput){
+      if(match && list.length){
+        muniInput.disabled=false;
+        muniInput.placeholder='Select Muni./Rural Muni.';
+      } else {
+        muniInput.disabled=true;
+        muniInput.placeholder = match ? 'Select Muni./Rural Muni.' : 'Select district first';
+      }
+      // clear a stale muni pick that no longer belongs to the newly chosen district
+      if(match && list.length && !list.some(m=>m.toLowerCase()===muniInput.value.trim().toLowerCase())){
+        muniInput.value='';
+      } else if(!match){
+        muniInput.value='';
+      }
+    }
+  });
+}
+wireDistrictMuniCascade('addr_perm_district','addr_perm_muni');
+wireDistrictMuniCascade('addr_temp_district','addr_temp_muni');
+
+/* ── "Same as Permanent Address" ── */
+const ADDR_FIELDS=['country','province','district','muni','ward','tole','house'];
+document.getElementById('sameAsAddress')?.addEventListener('change',function(){
+  const on=this.checked;
+  ADDR_FIELDS.forEach(f=>{
+    const from=document.getElementById('addr_perm_'+f), to=document.getElementById('addr_temp_'+f);
+    if(!from||!to) return;
+    if(on){ to.value=from.value; to.disabled=true; }
+    else {
+      to.disabled=false;
+      // re-apply the province→district / district→muni gating now that fields are editable again
+      if(f==='province') to.dispatchEvent(new Event('input',{bubbles:true}));
+      if(f==='district') to.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+  });
+});
+ADDR_FIELDS.forEach(f=>{
+  document.getElementById('addr_perm_'+f)?.addEventListener('input',function(){
+    if(document.getElementById('sameAsAddress')?.checked){
+      const to=document.getElementById('addr_temp_'+f);
+      if(to) to.value=this.value;
+    }
+  });
+});
+
+/* ── Family Details: build touch-friendly cards ── */
+const FAMILY_RELATIONS=[
+  ['spouse','Spouse (पति/पत्नी)'],['mother','Mother (आमा)'],['father','Father (बुबा)'],
+  ['gf','Grandfather (हजुरबुबा)'],['son','Son (छोरा)'],['daughter','Daughter (छोरी)'],
+  ['dil','Daughter-in-Law (बुहारी)'],['lc','Legal Custodian (कानूनी संरक्षक)']
+];
+function buildFamilyCards(){
+  const wrap=document.getElementById('familyBody');
+  if(!wrap) return;
+  wrap.innerHTML=FAMILY_RELATIONS.map(([id,label])=>`
+    <div class="fam-card">
+      <div class="fam-card-label"><i class="fa-solid fa-user"></i> ${label}</div>
+      <div class="fam-fgrid">
+        <div class="fi" style="grid-column:span 2"><label>Full Name</label><input id="fam_${id}_name"></div>
+        <div class="fi"><label>ID Type</label><input id="fam_${id}_idtype"></div>
+        <div class="fi"><label>ID No.</label><input id="fam_${id}_idno"></div>
+        <div class="fi" style="grid-column:span 2"><label>Dealer/Customer No.</label><input id="fam_${id}_dealer"></div>
+      </div>
+    </div>
+  `).join('');
+}
+buildFamilyCards();
+
+/* ── validation ── */
+function showFieldError(inputId,errorId,show){
+  document.getElementById(inputId)?.classList.toggle('field-error',show);
+  document.getElementById(errorId)?.classList.toggle('show',show);
+}
+function showValidationToast(msg){
+  const toast=document.getElementById('validationToast');
+  document.getElementById('validationToastMsg').textContent=msg;
+  toast.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>toast.classList.remove('show'),3200);
+}
+function validateRequired(){
+  const name=document.getElementById('f_nameEn').value.trim();
+  const mobile=document.getElementById('f_mobile').value.trim();
+  const mobileValid=/^[0-9]{10}$/.test(mobile);
+  showFieldError('f_mobile','f_mobileError',!mobileValid);
+  if(!name) return {ok:false,msg:'Please enter the full name.',focus:'f_nameEn'};
+  if(!mobileValid) return {ok:false,msg:'Please enter a valid 10-digit mobile number.',focus:'f_mobile'};
+  return {ok:true};
+}
+document.getElementById('f_mobile')?.addEventListener('input',()=>showFieldError('f_mobile','f_mobileError',false));
+
+/* ── helpers ── */
+const v=id=>document.getElementById(id)?.value.trim()||'';
+function checkedValues(gridId){
+  return Array.from(document.querySelectorAll('#'+gridId+' input[type=checkbox]:checked')).map(i=>i.value);
+}
+function radioValue(name){
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || 'No';
+}
+function chk(condition){ return `<span class="a4-box">${condition?'&#10003;':''}</span>`; }
+function famRow(prefix,label){
+  return `<tr><td><b>${label}</b></td><td>${v('fam_'+prefix+'_name')||'&nbsp;'}</td><td>${v('fam_'+prefix+'_idtype')||'&nbsp;'}</td><td>${v('fam_'+prefix+'_idno')||'&nbsp;'}</td><td>${v('fam_'+prefix+'_dealer')||'&nbsp;'}</td></tr>`;
+}
+function dataRow(labelEn,labelNp,val){
+  return `<div class="a4-data-row"><div class="a4-data-cell"><span class="a4-field-label">${labelEn}${labelNp?` (${labelNp})`:''}:</span><span class="a4-clean-input">${val||'&nbsp;'}</span></div></div>`;
+}
+
+/* ── Build Page 1 (mirrors "KYC FORM (GUARANTOR) - HFL CLONE" markup) ── */
+function buildPage1(){
+  const isG=formType==='guarantor';
+  const annex = isG ? 'Annexure-1 (ka) (1)' : 'Annexure-1 (ka)';
+  const titleEn = isG ? 'KYC FORM (GUARANTOR)' : 'KYC FORM (INDIVIDUAL)';
+  const titleNp = isG ? 'जमानीकर्ता पहिचान फारम (व्यक्तिगत)' : 'ग्राहक पहिचान फारम (व्यक्तिगत)';
+  const idType=document.getElementById('f_idType').value;
+
+  return `
+    <div class="a4-header-block">
+      <div class="a4-brand-logo"><img src="hfllogo.png" alt="HFL Logo"></div>
+      <div class="a4-heading-panel">
+        <div class="a4-annex">${annex}</div>
+        <div class="a4-title">${titleEn}</div>
+        <div class="a4-titlenp">${titleNp}</div>
+      </div>
+      <div class="a4-photo-frame">PP-sized<br>photo</div>
+    </div>
+
+    <div class="a4-topline">
+      <div>Branch (शाखा): <span class="a4-dotted">${v('f_branch')}</span></div>
+      <div>Date (मिति): <span class="a4-dotted">${v('f_date')}</span></div>
+    </div>
+
+    ${dataRow('पूरा नाम देवनागरीमा','', v('f_nameNp'))}
+    ${dataRow('Full Name (IN BLOCK LETTER)','', v('f_nameEn').toUpperCase())}
+    ${dataRow('Gender','लिङ्ग', document.getElementById('f_genderTriggerText').textContent)}
+    ${dataRow('Date of Birth','जन्म मिति', v('f_dob'))}
+    ${dataRow('Education','शिक्षा', v('f_education'))}
+
+    <table class="a4-form-table a4-legaltbl">
+      <thead>
+        <tr>
+          <th style="width:38%">Legal ID (कानूनी परिचय पत्र)</th>
+          <th>Number (नम्बर)</th>
+          <th>Issue Authority (जारी गर्ने निकाय)</th>
+          <th>Date of Issue (जारी मिति)</th>
+          <th>Customer Dealer No. for HFL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:6px">
+            <div class="a4-checkbox-matrix">
+              <div class="a4-checkbox-container">${chk(idType==='Citizenship')} Citizenship</div>
+              <div class="a4-checkbox-container">${chk(idType==='Driving License')} Driving License</div>
+              <div class="a4-checkbox-container">${chk(idType==='Passport')} Passport</div>
+              <div class="a4-checkbox-container">${chk(idType==='Voter ID')} Voter ID</div>
+              <div class="a4-checkbox-container" style="grid-column:span 2">${chk(idType==='NID')} NID &nbsp;&nbsp; Others ${chk(idType==='Others')}</div>
+            </div>
+          </td>
+          <td>${v('f_idNumber')||'&nbsp;'}</td>
+          <td>${v('f_idAuthority')||'&nbsp;'}</td>
+          <td>${v('f_idDate')||'&nbsp;'}</td>
+          <td>${v('f_dealerNo')||'&nbsp;'}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="a4-data-row">
+      <div class="a4-data-cell"><span class="a4-field-label">Residence Contact No.</span><span class="a4-clean-input">${v('f_residPhone')||'&nbsp;'}</span></div>
+      <div class="a4-data-cell"><span class="a4-field-label">Mobile No.</span><span class="a4-clean-input">${v('f_mobile')||'&nbsp;'}</span></div>
+      <div class="a4-data-cell"><span class="a4-field-label">NID No. :</span><span class="a4-clean-input">${v('f_nidNo')||'&nbsp;'}</span></div>
+    </div>
+    ${dataRow('Email ID','', v('f_email'))}
+
+    <div class="a4-block-section-title">Family Details:</div>
+    <table class="a4-form-table">
+      <thead>
+        <tr>
+          <th style="width:22%">Relation (सम्बन्ध)</th>
+          <th style="width:24%">Full Name (पूरा नाम)</th>
+          <th style="width:17%">ID Type (परिचय पत्रको प्रकार)</th>
+          <th style="width:18%">ID No. (परिचय पत्रको नं.)</th>
+          <th style="width:19%">Dealer/Customer No. (ग्राहक नं.)</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${famRow('spouse','Spouse (पति पत्नी)')}
+        ${famRow('mother','Mother (आमा)')}
+        ${famRow('father','Father (बुबा)')}
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        ${famRow('gf','Grandfather (बाजे)')}
+        ${famRow('son','Son (छोरा)')}
+        ${famRow('daughter','Daughter (छोरी)')}
+        ${famRow('dil','Daughter-in-Law – Law (बुहारी)')}
+        ${famRow('lc','Legal Custodian (कानूनीसंरक्षक)')}
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      </tbody>
+    </table>
+
+    <div class="a4-data-row a4-fund-row">
+      <span class="a4-field-label">Source of Fund (कोषको स्रोत):</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Business')} Business</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Income')} Income</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Agriculture')} Agriculture</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Salary')} Salary</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Disposal of Asset')} Disposal of Asset</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Investment')} Investment</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Inheritance/Gift')} Inheritance/Gift</span>
+      <span class="a4-check">${chk(radioValue('fundSource')==='Saving or Remittance')} Saving or Remittance</span>
+      <span>Others: ${v('f_fundOthers')||'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}</span>
+    </div>
+
+    <div class="a4-data-row a4-fund-row">
+      <span class="a4-field-label">Nature of Occupation: (पेशा)</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Home Maker')} Home Maker</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Business')} Business</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Student')} Student</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Agriculture')} Agriculture</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Salaried person')} Salaried person</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Politician/PEP')} Politician/PEP</span>
+      <span class="a4-check">${chk(radioValue('occupation')==='Retired')} Retired</span>
+      <span>Others ${v('f_occOthers')||'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}</span>
+    </div>
+
+    ${dataRow('Details of Associated Organization','सम्बद्ध संस्थाको विवरण', v('f_orgDetails'))}
+    ${dataRow('Designation','पद', v('f_designation'))}
+  `;
+}
+
+/* ── Build Page 2 (mirrors "KYC FORM (GUARANTOR) - HFL CLONE" markup) ── */
+function buildPage2(){
+  const isG=formType==='guarantor';
+  const titleEn = isG ? 'KYC FORM (GUARANTOR)' : 'KYC FORM (INDIVIDUAL)';
+  const titleNp = isG ? 'जमानीकर्ता पहिचान फारम (व्यक्तिगत)' : 'ग्राहक पहिचान फारम (व्यक्तिगत)';
+  const signLabel = isG ? "Signature of the Guarantor(जमानीकर्ताको सही)" : "Signature of the customer(ग्राहकको सही)";
+  const turnoverVal=radioValue('turnover');
+  const qLabels=[
+    'US person/Other Person/NRN (अमेरिकन / विदेशी / अन्य)',
+    'Do you have a beneficial owner? (हितग्राही हुनुहुन्छ?)',
+    'Do you or any member of your family have a high profile or involved in politics? (उच्चपदस्थ राजनीतिज्ञ हो?)',
+    'Do you have other accounts with other banks:',
+    'Declaration of Conviction for any crime in the past:',
+    'Have you been blacklisted by Credit Information Bureau Nepal? (कालोसूचिमा पर्नुभएको छ?)',
+    'Do you have any customer accounts in the HFL?'
+  ];
+  const qRows=qLabels.map((lab,i)=>{
+    const val=radioValue('q'+(i+1));
+    if(i===1){
+      /* Row 2 mirrors the real scanned HFL form: two plain checkboxes, no label text */
+      const tick=`<span class="a4-yn-opts"><span>${chk(val==='Yes')}</span><span>${chk(val==='No')}</span></span>`;
+      return `<tr><td class="snc"><b>2.</b></td><td><b>${lab}</b></td><td style="text-align:center">${tick}</td></tr>`;
+    }
+    const tick=`<span class="a4-yn-opts"><span>${chk(val==='Yes')} <b>Yes</b></span><span>${chk(val==='No')} <b>No</b></span></span>`;
+    if(i===0){
+      return `<tr><td class="snc"><b>1.</b></td><td><b>${lab}</b></td><td style="text-align:center">${tick}</td><td class="submitcell" rowspan="7">Submit the details below if the answer is Yes</td></tr>`;
+    }
+    return `<tr><td class="snc"><b>${i+1}.</b></td><td><b>${lab}</b></td><td style="text-align:center">${tick}</td></tr>`;
+  }).join('');
+
+  return `
+    <div class="a4-header-block">
+      <div class="a4-brand-logo"><img src="hfllogo.png" alt="HFL Logo"></div>
+      <div class="a4-heading-panel">
+        <div class="a4-title">${titleEn}</div>
+        <div class="a4-titlenp">${titleNp}</div>
+      </div>
+      <div style="width:26mm"></div>
+    </div>
+
+    ${dataRow('Expected Yearly Gross Income','अनुमानित वार्षिक आम्दानी', v('f_yearlyIncome'))}
+
+    <div class="a4-data-row a4-fund-row">
+      <span class="a4-field-label">Expected Turnover Details: (वार्षिक अनुमानित कारोबार विवरण)</span>
+      <span class="a4-check">${chk(turnoverVal==='Up to 1 Lakh')} Up to 1 Lakh</span>
+      <span class="a4-check">${chk(turnoverVal==='1 Lakh to 25 Lakh')} 1 Lakh to 25 Lakh</span>
+      <span class="a4-check">${chk(turnoverVal==='25 Lakh to 50 Lakh')} 25 Lakh to 50 Lakh</span>
+      <span class="a4-check">${chk(turnoverVal==='50 Lakh to 2 crore')} 50 Lakh to 2 crore</span>
+      <span class="a4-check">${chk(turnoverVal==='2 crore to 5 Crore')} 2 crore to 5 Crore</span>
+      <span class="a4-check">${chk(turnoverVal==='5 Crore to')} 5 Crore to ${v('f_turn5crValue')||'............'} Crore</span>
+      <div style="width:100%;display:flex;align-items:center;margin-top:5px">
+        <span class="a4-field-label">Total assets</span>
+        <span class="a4-clean-input" style="border-bottom:1px dotted #777;padding-left:6px">${v('f_totalAssets')||'&nbsp;'}</span>
+      </div>
+    </div>
+
+    <div class="a4-block-section-title">Answer the Following Questions with Yes or No.:</div>
+    <table class="a4-form-table a4-yn">
+      <thead>
+        <tr>
+          <th class="snc">S.N.</th>
+          <th style="width:52%">Parameter (सिमा)</th>
+          <th style="width:22%;text-align:center">Please Tick ( ) the appropriate one</th>
+          <th class="submitcell">Submit the details below if the answer is Yes</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${qRows}
+        <tr><td class="snc"><b>8.</b></td><td colspan="3"><b>If yes, Remarks on S.No.:</b> (यदि छ भने थप विवरण भर्नुहोला) ${v('f_remarks')||'............................................................'}</td></tr>
+      </tbody>
+    </table>
+
+    <div class="a4-block-section-title" style="margin-top:15px">Address Details:</div>
+    <table class="a4-form-table">
+      <thead>
+        <tr>
+          <th style="width:10%">Address (ठेगाना)</th>
+          <th>Country (देश)</th>
+          <th>Province (प्रदेश)</th>
+          <th>District (जिल्ला)</th>
+          <th style="width:17%">Muni./Sub.Metro/Metro. Rural Municipality (न.पा.+व)</th>
+          <th style="width:9%">Ward No. (वडा नं.)</th>
+          <th>Tole/Street (टोल/सडक)</th>
+          <th style="width:9%">House No. (घर नं.)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Permanent (स्थायी)</b></td><td>${v('addr_perm_country')||'&nbsp;'}</td><td>${v('addr_perm_province')||'&nbsp;'}</td><td>${v('addr_perm_district')||'&nbsp;'}</td><td>${v('addr_perm_muni')||'&nbsp;'}</td><td>${v('addr_perm_ward')||'&nbsp;'}</td><td>${v('addr_perm_tole')||'&nbsp;'}</td><td>${v('addr_perm_house')||'&nbsp;'}</td></tr>
+        <tr><td><b>Temporary (अस्थायी)</b></td><td>${v('addr_temp_country')||'&nbsp;'}</td><td>${v('addr_temp_province')||'&nbsp;'}</td><td>${v('addr_temp_district')||'&nbsp;'}</td><td>${v('addr_temp_muni')||'&nbsp;'}</td><td>${v('addr_temp_ward')||'&nbsp;'}</td><td>${v('addr_temp_tole')||'&nbsp;'}</td><td>${v('addr_temp_house')||'&nbsp;'}</td></tr>
+      </tbody>
+    </table>
+
+    <div class="a4-data-row" style="padding:6px">
+      <span class="a4-check"><span class="a4-field-label">Type of Residence :</span> ${chk(document.getElementById('f_residOwn').checked)} In own House (आफ्नै घर) &nbsp;&nbsp; ${chk(!!v('f_residOthers'))} Others, Specify ${v('f_residOthers')||'............................................................'}</span>
+    </div>
+
+    <div class="a4-block-section-title">Location Map of Customer's Present Residence:(जमानीकर्ताको हालको वासस्थानको नक्सा)</div>
+    <div class="a4-mapbox">
+      <div><b>Google plus code</b> <table class="gp-box"><tr><td>${v('f_googlePlusCode')||'&nbsp;'}</td></tr></table> <span style="float:right;font-weight:bold;font-size:11pt;padding-right:10px">N <span class="a4-compass-arrow">&#8593;</span></span></div>
+      <div class="a4-landmark-line">Nearest landmark <span class="dots">${v('f_landmark')||'.....................'}</span> is <span class="dots">${v('f_landmarkDist')||'.................'}</span> m/km from my residence.</div>
+    </div>
+
+    <div class="a4-declaration">
+      Asset (Money) Laundering Declaration: I/We hereby affirm that the loan/repayment was made with funds obtained through legal means. All transactions related to the loan account will remain legitimate, and this account will not be used for purposes of money laundering or financing terrorism. Should the company become aware of or suspect that the account is being used to process illegal proceeds, we fully understand and accept that the company may report the account to the appropriate authorities. I/We declare that all the information provided is accurate and true. If any information is not available to me or does not apply, it has been clearly noted in the relevant section of this form.
+      <div class="a4-sign-row">
+        <div class="a4-sign-line">
+          <div class="rule">&nbsp;</div>
+          <div style="text-align:center;font-weight:700;font-size:7.8pt;margin-top:3px">${signLabel}</div>
+        </div>
+        <div class="a4-thumbprint-box">
+          <div class="a4-thumbprint-split">Right</div>
+          <div class="a4-thumbprint-split">Left</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="a4-block-section-title" style="margin-top:15px;text-align:left;padding-left:10px">For company Use Only: (कम्पनी प्रयोजनको लागि मात्र)</div>
+    <table class="a4-form-table a4-office">
+      <tbody>
+        <tr>
+          <td style="width:22%"><span class="a4-field-label">Updated on:</span></td>
+          <td style="width:18%"><span class="a4-field-label">CID:</span></td>
+          <td style="width:25%"><span class="a4-field-label">Customer Status:</span></td>
+          <td style="width:35%">
+            <span class="a4-field-label" style="margin-right:2px">Screening Risk:</span>
+            <span class="a4-check">${chk(false)} High</span>
+            <span class="a4-check">${chk(false)} Medium</span>
+            <span class="a4-check">${chk(false)} Low</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table class="a4-form-table a4-office">
+      <tbody>
+        <tr>
+          <td style="width:20%"><span class="a4-field-label">AML ID:</span></td>
+          <td style="width:22%"><span class="a4-field-label">KYC officer:</span></td>
+          <td style="width:16%"><span class="a4-field-label">ID No.</span></td>
+          <td style="width:26%"><span class="a4-field-label">Verified by:</span></td>
+          <td style="width:16%"><span class="a4-field-label">ID:</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <table class="a4-form-table a4-office">
+      <tbody>
+        <tr>
+          <td style="width:50%;height:34pt;vertical-align:top"><span class="a4-field-label">Sign of KYC officer:</span></td>
+          <td style="width:50%;height:34pt;vertical-align:top"><span class="a4-field-label">Sign of Verifier Officer:</span></td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+}
+
+/* ── Preview ── */
+function openPreview(){
+  const result=validateRequired();
+  if(!result.ok){
+    showValidationToast(result.msg);
+    document.getElementById(result.focus)?.scrollIntoView({behavior:'smooth',block:'center'});
+    document.getElementById(result.focus)?.focus();
+    return;
+  }
+  document.getElementById('previewTitleTag').textContent = formType==='guarantor' ? 'KYC Form (Guarantor)' : 'KYC Form (Individual)';
+  document.getElementById('a4Page1').innerHTML=buildPage1();
+  document.getElementById('a4Page2').innerHTML=buildPage2();
+  document.getElementById('previewOverlay').classList.add('open');
+  document.querySelector('.preview-body').scrollTop=0;
+  document.body.style.overflow='hidden';
+}
+function closePreview(){
+  document.getElementById('previewOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closePreview();});
+
+/* ── Print ── */
+function printKyc(){
+  const result=validateRequired();
+  if(!result.ok){
+    showValidationToast(result.msg);
+    return;
+  }
+  document.getElementById('printPage1').innerHTML=buildPage1();
+  document.getElementById('printPage2').innerHTML=buildPage2();
+  window.print();
+}
+
+/* ── Reset ── */
+function resetForm(){
+  if(!confirm('Clear all entered data?')) return;
+  document.querySelectorAll('main input[type=text], main input:not([type])').forEach(el=>el.value='');
+  document.querySelectorAll('main input[id^="f_"]').forEach(el=>{ if(el.type==='checkbox'){el.checked=false;} else if(el.tagName==='INPUT'){el.value='';} });
+  document.querySelectorAll('main input[id^="fam_"], main input[id^="addr_"]').forEach(el=>{el.value='';el.disabled=false;});
+  document.querySelectorAll('.chk-pill input').forEach(el=>{el.checked=false;el.closest('.chk-pill')?.classList.remove('checked');});
+  document.querySelectorAll('.yn-opts input[type=radio][value="No"]').forEach(el=>el.checked=true);
+  const sameAsAddr=document.getElementById('sameAsAddress'); if(sameAsAddr) sameAsAddr.checked=false;
+  comboInstances['addr_perm_district']?.setOptions([]);
+  comboInstances['addr_temp_district']?.setOptions([]);
+  comboInstances['addr_perm_muni']?.setOptions([]);
+  comboInstances['addr_temp_muni']?.setOptions([]);
+  ['addr_perm_district','addr_temp_district'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.disabled=true; el.placeholder='Select province first'; }
+  });
+  ['addr_perm_muni','addr_temp_muni'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.disabled=true; el.placeholder='Select district first'; }
+  });
+  document.getElementById('addr_perm_country').value='Nepal';
+  document.getElementById('addr_temp_country').value='';
+  document.getElementById('f_gender').selectedIndex=0; syncCustomSelectUI('f_gender');
+  document.getElementById('f_idType').selectedIndex=0; syncCustomSelectUI('f_idType');
+  document.querySelectorAll('.field-error').forEach(el=>el.classList.remove('field-error'));
+  document.querySelectorAll('.field-error-msg').forEach(el=>el.classList.remove('show'));
+  const dobHint=document.getElementById('f_dobAgeHint'); if(dobHint) dobHint.textContent='';
+  setDefaultDateBS();
+}
+
+/* ── Session autosave ── */
+const STORAGE_KEY='hfl_kyc_merged_draft';
+function saveDraft(){
+  const data={formType};
+  document.querySelectorAll('main input, main select').forEach(el=>{
+    if(!el.id) return;
+    if(el.type==='checkbox'||el.type==='radio') data[el.id + (el.type==='radio'?('__'+el.name):'')] = el.checked;
+    else data[el.id]=el.value;
+  });
+  try{ sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+}
+document.addEventListener('input',saveDraft);
+document.addEventListener('change',saveDraft);
+window.addEventListener('load',()=>{
+  let data; try{ data=JSON.parse(sessionStorage.getItem(STORAGE_KEY)||'{}'); }catch(e){ data={}; }
+  if(data.formType) setFormType(data.formType);
+  document.querySelectorAll('main input, main select').forEach(el=>{
+    if(!el.id || !(el.id in data)) return;
+    if(el.type==='checkbox') { el.checked=!!data[el.id]; el.closest('.chk-pill')?.classList.toggle('checked',el.checked); }
+    else if(el.type!=='radio') el.value=data[el.id];
+  });
+  syncCustomSelectUI('f_gender'); syncCustomSelectUI('f_idType');
+  // re-run address cascades so restored province/district values re-enable the right dropdowns
+  ['addr_perm_province','addr_temp_province'].forEach(id=>document.getElementById(id)?.dispatchEvent(new Event('input',{bubbles:true})));
+  ['addr_perm_district','addr_temp_district'].forEach(id=>document.getElementById(id)?.dispatchEvent(new Event('input',{bubbles:true})));
+  setDefaultDateBS();
+  updateDobAge();
+});
+</script>
+</body>
+</html>
