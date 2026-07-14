@@ -136,6 +136,11 @@ select.styled:focus,input.styled:focus{border-color:var(--blue);box-shadow:0 0 0
 .charge-row input{text-align:right;border:none;border-bottom:1.5px solid var(--line);background:transparent;outline:none;font-size:14px;font-weight:700;color:var(--ink);width:110px;padding:5px 4px;transition:border-color .18s;font-family:'DM Sans',sans-serif}
 .charge-row input:focus{border-color:var(--blue)}
 
+/* ═══ INDOOR/OUTDOOR INSURANCE TOGGLE ═══ */
+.itoggle{display:flex;gap:6px}
+.itoggle-btn{flex:1;text-align:center;background:var(--bgSoft);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;font-size:12px;font-weight:700;color:var(--ink3);cursor:pointer;transition:all .18s;user-select:none}
+.itoggle-btn.active{background:var(--blueLt);border-color:var(--blue);color:var(--blue)}
+
 .acc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .acc-field{display:flex;flex-direction:column;gap:6px}
 .acc-field label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:6px}
@@ -354,7 +359,7 @@ footer{background:#0F172A}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
           Sheet
         </a>
-        <a href1fkyc.html" class="nav-link">
+        <a href="kyc.html" class="nav-link">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           KYC
         </a>
@@ -431,6 +436,14 @@ footer{background:#0F172A}
 
       <!-- LEFT COLUMN -->
       <div style="display:flex;flex-direction:column;gap:24px">
+
+        <div class="calc-card">
+          <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-location-dot"></i></span>Location</div>
+          <div class="itoggle" id="insuranceTypeToggle">
+            <div class="itoggle-btn active" data-itype="indoor"><i class="fa-solid fa-house" style="margin-right:5px"></i>Indoor</div>
+            <div class="itoggle-btn" data-itype="outdoor"><i class="fa-solid fa-cloud-sun" style="margin-right:5px"></i>Outdoor</div>
+          </div>
+        </div>
 
         <div class="calc-card">
           <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-motorcycle"></i></span>Select Model &amp; Pricing</div>
@@ -710,14 +723,6 @@ footer{background:#0F172A}
           <hr style="border:none;border-top:1px solid #000;margin-top:2px">
         </div>
 
-        <div class="sign-panel">
-          <h4>Ready to Hand Over?</h4>
-          <div class="sign-checks">
-            <label class="sign-check"><input type="checkbox" id="chkAmounts"> Amounts verified with customer</label>
-            <label class="sign-check"><input type="checkbox" id="chkDocs"> KYC documents collected</label>
-            <label class="sign-check"><input type="checkbox" id="chkVehicle"> Chassis / Engine confirmed against unit</label>
-          </div>
-        </div>
       </div>
 
       <!-- PAGE 2 — QUOTATION -->
@@ -954,6 +959,29 @@ document.querySelectorAll('.rate-chip').forEach(chip=>{
   chip.addEventListener('click',()=>{
     const sel=document.getElementById('dpPercent');
     if(sel){sel.value=chip.dataset.dp;sel.dispatchEvent(new Event('input',{bubbles:true}));syncCustomSelectUI('dpPercent');}
+  });
+});
+
+/* ── Insurance Type toggle: Indoor (default, uses normal Insurance)
+   vs Outdoor (uses financeInsurance for both display + calculation).
+   Outdoor also resets accessories to 0 by default (Indoor keeps the
+   usual helmet/leg-guard/seat-cover defaults). User can still edit
+   any accessory field manually after the toggle. ── */
+let insuranceType = 'indoor';
+const ACC_DEFAULTS_INDOOR = { helmetInput:2500, legguardInput:1800, seatcoverInput:650, othersInput:0 };
+function applyAccessoryDefaults(type){
+  Object.keys(ACC_DEFAULTS_INDOOR).forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.value = type==='outdoor' ? 0 : ACC_DEFAULTS_INDOOR[id];
+  });
+}
+document.querySelectorAll('#insuranceTypeToggle .itoggle-btn').forEach(btnEl=>{
+  btnEl.addEventListener('click',()=>{
+    insuranceType = btnEl.dataset.itype;
+    document.querySelectorAll('#insuranceTypeToggle .itoggle-btn').forEach(b=>b.classList.toggle('active', b===btnEl));
+    applyAccessoryDefaults(insuranceType);
+    if(typeof calculateFinance==='function') calculateFinance();
   });
 });
 
@@ -1244,6 +1272,9 @@ window.calculateFinance=function(){
   const mrp=parseFloat(bike.price)||0;
   const cashInsurance=parseFloat(bike.Insurance)||0;
   const financeInsurance=parseFloat(bike.financeInsurance)||cashInsurance;
+  /* Indoor (default) uses the normal Insurance amount everywhere it was used before.
+     Outdoor switches the calculation + display to financeInsurance instead. */
+  const activeInsurance=(typeof insuranceType!=='undefined' && insuranceType==='outdoor') ? financeInsurance : cashInsurance;
   const discount=getVal('discountInput');
   const customerExtraAdv=getVal('advEmiInput');
   const namsari=getVal('namsariInput',3000);
@@ -1265,7 +1296,7 @@ window.calculateFinance=function(){
     ? (loanAmount*monthlyRate*Math.pow(1+monthlyRate,tenure))/(Math.pow(1+monthlyRate,tenure)-1)
     : 0;
 
-  const rawTotalDownpayment=dpAmountOnly+namsari+cashInsurance+emi+accCost+customerExtraAdv;
+  const rawTotalDownpayment=dpAmountOnly+namsari+activeInsurance+emi+accCost+customerExtraAdv;
   const lastThreeDigits=rawTotalDownpayment%1000;
   const autoRounding=lastThreeDigits>0?(1000-lastThreeDigits):0;
   const finalTotalDP=rawTotalDownpayment+autoRounding;
@@ -1273,13 +1304,16 @@ window.calculateFinance=function(){
   const totalAdvEmi=emi+autoRounding+customerExtraAdv;
   const dueEmi=(emi*tenure)-totalAdvEmi;
   const totalInterest=(emi*tenure)-loanAmount;
-  const finalTotalDP_A4=dpAmountOnly+namsari+financeInsurance+totalAdvEmi;
+  /* Allocation form's printed total now equals the live "Total Downpayment"
+     banner exactly — same activeInsurance, same accessories, same rounding —
+     so the calculator and the printed form never disagree. */
+  const finalTotalDP_A4=finalTotalDP;
 
   const set=(id,val)=>{const el=document.getElementById(id); if(el) el.innerText=val;};
   set('displayTotalDP',`RS. ${Math.round(finalTotalDP).toLocaleString()}`);
   set('mrp',`RS. ${mrp.toLocaleString()}`);
   set('afterDiscount',`RS. ${afterDiscount.toLocaleString()}`);
-  set('displayIns',`RS. ${cashInsurance.toLocaleString()}`);
+  set('displayIns',`RS. ${activeInsurance.toLocaleString()}`);
   set('displayRate',`${rate}`);
   set('displayDpAmt',`RS. ${dpAmountOnly.toLocaleString()}`);
   set('displayLoanAmt',`RS. ${loanAmount.toLocaleString()}`);
@@ -1296,7 +1330,7 @@ window.calculateFinance=function(){
   const dpBar=document.getElementById('splitDpBar'), loanBar=document.getElementById('splitLoanBar');
   if(dpBar&&loanBar){dpBar.style.width=dpPercentVal+'%';loanBar.style.width=(100-dpPercentVal)+'%';}
 
-  window._lastCalc={bike,mrp,discount,afterDiscount,cashInsurance,financeInsurance,rate,dpAmountOnly,loanAmount,emi,autoRounding,totalAdvEmi,tenure,namsari,finalTotalDP,finalTotalDP_A4};
+  window._lastCalc={bike,mrp,discount,afterDiscount,cashInsurance,financeInsurance,activeInsurance,insuranceType,rate,dpAmountOnly,loanAmount,emi,autoRounding,totalAdvEmi,tenure,namsari,finalTotalDP,finalTotalDP_A4};
 };
 
 /* ── Fill the A4 document only when Preview is opened ── */
@@ -1315,7 +1349,7 @@ window.syncAllToA4=function(){
   set('a4Date',dateStr); set('a4CustName',custName); set('a4CustPhone',custPhone);
   set('a4Dealer','Samriddhi And Brothers Auto Pvt. Ltd.'); set('a4Model',c.bike.name);
   set('a4MRP',fmtDec(c.afterDiscount)); set('a4DP',fmtDec(c.dpAmountOnly)); set('a4Loan',fmtDec(c.loanAmount));
-  set('a4Rate',c.rate.toFixed(2)); set('a4Tenure',c.tenure); set('a4Ins',fmtDec(c.financeInsurance));
+  set('a4Rate',c.rate.toFixed(2)); set('a4Tenure',c.tenure); set('a4Ins',fmtDec(c.activeInsurance));
   set('a4AdvEmiAmt',fmtDec(c.totalAdvEmi)); set('a4TotalDP',fmtDec(c.finalTotalDP_A4)); set('a4Namsari',fmtDec(c.namsari));
 
   set('a4Date2',dateStr); set('a4CustName2',custName); set('a4Model2',c.bike.name);
