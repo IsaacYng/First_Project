@@ -1304,10 +1304,10 @@ window.calculateFinance=function(){
   const totalAdvEmi=emi+autoRounding+customerExtraAdv;
   const dueEmi=(emi*tenure)-totalAdvEmi;
   const totalInterest=(emi*tenure)-loanAmount;
-  /* Allocation form's printed total now equals the live "Total Downpayment"
-     banner exactly — same activeInsurance, same accessories, same rounding —
-     so the calculator and the printed form never disagree. */
-  const finalTotalDP_A4=finalTotalDP;
+  /* Allocation form (official Hulas Finserv paperwork) always uses financeInsurance
+     and never includes accessories — this must NOT change with the Indoor/Outdoor
+     toggle, since that toggle only affects what the dealer collects internally. */
+  const finalTotalDP_A4=dpAmountOnly+namsari+financeInsurance+totalAdvEmi;
 
   const set=(id,val)=>{const el=document.getElementById(id); if(el) el.innerText=val;};
   set('displayTotalDP',`RS. ${Math.round(finalTotalDP).toLocaleString()}`);
@@ -1349,7 +1349,7 @@ window.syncAllToA4=function(){
   set('a4Date',dateStr); set('a4CustName',custName); set('a4CustPhone',custPhone);
   set('a4Dealer','Samriddhi And Brothers Auto Pvt. Ltd.'); set('a4Model',c.bike.name);
   set('a4MRP',fmtDec(c.afterDiscount)); set('a4DP',fmtDec(c.dpAmountOnly)); set('a4Loan',fmtDec(c.loanAmount));
-  set('a4Rate',c.rate.toFixed(2)); set('a4Tenure',c.tenure); set('a4Ins',fmtDec(c.activeInsurance));
+  set('a4Rate',c.rate.toFixed(2)); set('a4Tenure',c.tenure); set('a4Ins',fmtDec(c.financeInsurance));
   set('a4AdvEmiAmt',fmtDec(c.totalAdvEmi)); set('a4TotalDP',fmtDec(c.finalTotalDP_A4)); set('a4Namsari',fmtDec(c.namsari));
 
   set('a4Date2',dateStr); set('a4CustName2',custName); set('a4Model2',c.bike.name);
