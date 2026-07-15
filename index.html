@@ -37,6 +37,177 @@
     html { scroll-behavior: smooth; }
     body { font-family: 'DM Sans', sans-serif; background: #FFFFFF; color: #0F172A; -webkit-font-smoothing: antialiased; }
 
+    /* ══════════ INTRO / PRELOADER ══════════ */
+    #intro-overlay {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      background: radial-gradient(ellipse at 30% 20%, #0A6BB8 0%, #004A85 45%, #002E56 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 9999; overflow: hidden;
+      transition: opacity 0.7s cubic-bezier(.4,0,.2,1), visibility 0.7s;
+    }
+    #intro-overlay::before {
+      content: ''; position: absolute; top: -120px; right: -100px;
+      width: 460px; height: 460px;
+      background: radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 70%);
+      border-radius: 50%; animation: introGlowPulse 3.2s ease-in-out infinite;
+    }
+    #intro-overlay::after {
+      content: ''; position: absolute; bottom: -140px; left: -100px;
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    @keyframes introGlowPulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.6; transform:scale(1.08); } }
+    #intro-overlay.intro-hidden { opacity: 0; visibility: hidden; }
+
+    /* subtle moving grid so the backdrop doesn't feel static */
+    .intro-grid {
+      position: absolute; inset: 0; opacity: 0.07;
+      background-image: linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px),
+                         linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px);
+      background-size: 42px 42px;
+      animation: introGridDrift 9s linear infinite;
+    }
+    @keyframes introGridDrift { from { background-position: 0 0; } to { background-position: -84px -84px; } }
+
+    .intro-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; }
+
+    /* Logo mark */
+    .intro-logo-mark {
+      width: 58px; height: 58px; border-radius: 16px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.22);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transform: translateY(-10px) scale(0.85);
+      animation: introLogoIn 0.6s cubic-bezier(.34,1.56,.64,1) 0.05s forwards;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      margin-bottom: 18px;
+    }
+    @keyframes introLogoIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .intro-road {
+      position: relative; width: min(340px, 74vw); height: 96px;
+      display: flex; align-items: flex-end; justify-content: center;
+    }
+    .intro-road-line {
+      position: absolute; bottom: 24px; left: 0; right: 0; height: 2px;
+      background: repeating-linear-gradient(90deg, rgba(255,255,255,0.4) 0 18px, transparent 18px 34px);
+      overflow: hidden;
+    }
+    .intro-road-line::after {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(90deg, rgba(255,255,255,0.4) 0 18px, transparent 18px 34px);
+      transform: translateX(-34px); animation: introRoadScroll 0.55s linear infinite;
+    }
+    @keyframes introRoadScroll { to { transform: translateX(0); } }
+
+    /* speed / motion lines — only flick in once the bike starts riding off (not during assembly) */
+    .intro-speed-lines {
+      position: absolute; bottom: 30px; left: 50%; margin-left: -30px; width: 60px; height: 34px;
+      opacity: 0; animation: introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards, introSpeedShow 2.3s ease forwards;
+    }
+    .intro-speed-lines span {
+      position: absolute; height: 2px; border-radius: 2px; background: rgba(255,255,255,0.55);
+      right: 100%; opacity: 0; animation: introSpeedFlick 0.5s ease-in-out infinite;
+    }
+    .intro-speed-lines span:nth-child(1) { top: 4px;  width: 22px; animation-delay: 0.05s; }
+    .intro-speed-lines span:nth-child(2) { top: 15px; width: 32px; animation-delay: 0.12s; }
+    .intro-speed-lines span:nth-child(3) { top: 26px; width: 18px; animation-delay: 0.19s; }
+    @keyframes introSpeedFlick {
+      0%   { opacity: 0; transform: translateX(0); }
+      45%  { opacity: 0.9; }
+      100% { opacity: 0; transform: translateX(-14px); }
+    }
+    @keyframes introSpeedShow {
+      0%, 68% { opacity: 0; }
+      74%     { opacity: 1; }
+      100%    { opacity: 0; }
+    }
+
+    .intro-bike-wrap {
+      position: absolute; bottom: 14px; left: 50%; margin-left: -39px;
+      animation: introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+    }
+    .intro-bike-wrap svg { filter: drop-shadow(0 8px 14px rgba(0,0,0,0.3)); }
+
+    /* bike parts assemble one after another before the ride-off */
+    .bike-part { opacity: 0; transform: scale(0.55); transform-box: fill-box; transform-origin: center; animation: introPartIn 0.42s cubic-bezier(.34,1.56,.64,1) forwards; }
+    .bike-part.bp-wheels  { animation-delay: 0.05s; }
+    .bike-part.bp-frame   { animation-delay: 0.28s; }
+    .bike-part.bp-panel   { animation-delay: 0.5s; }
+    .bike-part.bp-light   { animation-delay: 0.72s; }
+    @keyframes introPartIn { to { opacity: 1; transform: scale(1); } }
+
+    .intro-headlight {
+      animation: introHeadlightPulse 0.5s ease-in-out 0.9s infinite;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+    @keyframes introHeadlightPulse { 0%{ opacity:0; } 20%,100%{ opacity: 1; } 60%{ opacity: 0.55; } }
+    .intro-bike-shadow {
+      position: absolute; bottom: 8px; left: 50%; margin-left: -38px; width: 76px; height: 11px;
+      background: radial-gradient(ellipse, rgba(0,0,0,0.32) 0%, transparent 75%);
+      border-radius: 50%; opacity: 0;
+      animation: introShadowFade 0.5s ease 0.05s forwards, introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+    }
+    @keyframes introShadowFade { to { opacity: 0.9; } }
+    @keyframes introRide {
+      0%   { left: 50%; margin-left: -39px; }
+      68%  { left: 50%; margin-left: -39px; }
+      80%  { left: 50%; margin-left: -39px; }
+      100% { left: 118%; margin-left: -39px; }
+    }
+    @keyframes introShadow {
+      0%   { left: -70px; opacity: 0.9; }
+      62%  { left: calc(50% - 34px); opacity: 0.9; }
+      80%  { left: calc(50% - 34px); opacity: 0.9; }
+      100% { left: 118%; opacity: 0; }
+    }
+
+    .intro-brand {
+      margin-top: 22px; text-align: center; opacity: 0; transform: translateY(14px);
+      animation: introTextIn 0.7s ease 1.55s forwards;
+    }
+    .intro-brand .intro-name {
+      font-family: 'Bebas Neue', cursive; font-size: clamp(1.9rem, 6vw, 2.6rem);
+      letter-spacing: 0.04em; color: #fff; line-height: 1;
+    }
+    .intro-brand .intro-name span { color: #F59E0B; }
+    .intro-brand .intro-tag {
+      margin-top: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.22em;
+      text-transform: uppercase; color: rgba(255,255,255,0.65);
+    }
+    @keyframes introTextIn { to { opacity: 1; transform: translateY(0); } }
+
+    .intro-progress {
+      margin-top: 24px; display: flex; align-items: center; gap: 10px;
+      opacity: 0; animation: introFade 0.5s ease 1.7s forwards;
+    }
+    .intro-bar {
+      width: 130px; height: 3px; border-radius: 99px;
+      background: rgba(255,255,255,0.18); overflow: hidden;
+    }
+    .intro-bar-fill {
+      width: 0%; height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, #F59E0B, #FBBF24);
+      animation: introFill 1.9s cubic-bezier(.4,0,.2,1) 0.15s forwards;
+    }
+    .intro-percent {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
+      color: rgba(255,255,255,0.8); min-width: 30px; font-variant-numeric: tabular-nums;
+    }
+    @keyframes introFade { to { opacity: 1; } }
+    @keyframes introFill { to { width: 100%; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .intro-grid, .intro-bike-wrap, .intro-bike-shadow, .intro-speed-lines span, .intro-headlight,
+      .intro-logo-mark, .intro-brand, .intro-progress, .intro-bar-fill, .intro-road-line::after,
+      #intro-overlay::before { animation-duration: 0.01s !important; animation-delay: 0s !important; }
+    }
+
+    /* Main content reveal */
+    .main-content { opacity: 0; transition: opacity 0.25s ease; }
+    .site-loaded .main-content { opacity: 1; }
+
     /* ── NAV ── */
     .nav-blur {
       background: rgba(255,255,255,0.88);
@@ -212,7 +383,11 @@
                   box-shadow .24s cubic-bezier(.25,.46,.45,.94),
                   border-color .24s;
       box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-      animation: fadeUp 0.45s ease both;
+      animation: cardSettle 0.5s cubic-bezier(.25,.46,.45,.94) both;
+    }
+    @keyframes cardSettle {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
     }
     .yng-card:hover {
       transform: translateY(-6px);
@@ -231,6 +406,35 @@
       60%  { box-shadow: 0 0 0 8px rgba(0,94,166,0); }
       100% { box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
     }
+
+    /* ── SKELETON LOADING CARDS ── */
+    .yng-skel {
+      background: #fff; border-radius: 18px; border: 1px solid #E8E6E1;
+      overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      opacity: 0; animation: fadeUp 0.45s ease forwards;
+    }
+    .skel-block {
+      position: relative; overflow: hidden; background: #EEF1F4; border-radius: 8px;
+    }
+    .skel-block::after {
+      content: ''; position: absolute; inset: 0; transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.75), transparent);
+      animation: skelShimmer 1.4s ease-in-out infinite;
+    }
+    @keyframes skelShimmer { 100% { transform: translateX(100%); } }
+    .skel-img { height: 200px; border-radius: 0; }
+    .skel-body { padding: 1.1rem; display: flex; flex-direction: column; gap: .85rem; flex: 1; }
+    .skel-row { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; }
+    .skel-title { height: 21px; width: 62%; border-radius: 6px; }
+    .skel-sub   { height: 10px; width: 40%; border-radius: 5px; margin-top: 8px; }
+    .skel-price { height: 40px; width: 78px; border-radius: 8px; }
+    .skel-line  { height: 12px; border-radius: 5px; }
+    .skel-foot  { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: .15rem; }
+    .skel-pill  { height: 12px; width: 45%; border-radius: 5px; }
+    .skel-arr   { width: 30px; height: 30px; border-radius: 7px; }
+
+    /* card-by-card reveal timing handled inline via animation-delay */
 
     /* ── FINANCE BANNER ── */
     .finance-banner {
@@ -263,27 +467,23 @@
     .footer-link { color: #94A3B8; font-size: 0.875rem; transition: color 0.18s; text-decoration: none; }
     .footer-link:hover { color: #fff; }
 
-    /* Loading & empty states */
-    #loading-state {
-      grid-column: 1/-1; display: flex; flex-direction: column;
-      align-items: center; gap: 16px; padding: 4rem 1rem; text-align: center;
-    }
-    .loader-ring {
-      width: 48px; height: 48px; border: 3px solid #E8F2FB;
-      border-top-color: #005EA6; border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-    }
-
     /* Animations */
     @keyframes spin  { to { transform: rotate(360deg); } }
     @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
     .float-anim { animation: float 4s ease-in-out infinite; }
     @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-    .fade-up  { animation: fadeUp 0.55s ease both; }
-    .fade-up-2 { animation: fadeUp 0.55s 0.1s ease both; }
-    .fade-up-3 { animation: fadeUp 0.55s 0.2s ease both; }
+    @keyframes fadeDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up, .fade-up-2, .fade-up-3, .fade-down { opacity: 0; }
+    .fade-up   { transform: translateY(20px); }
+    .fade-up-2 { transform: translateY(20px); }
+    .fade-up-3 { transform: translateY(20px); }
+    .fade-down { transform: translateY(-16px); }
+    body.site-loaded .fade-up   { animation: fadeUp 0.6s ease forwards; }
+    body.site-loaded .fade-up-2 { animation: fadeUp 0.6s 0.15s ease forwards; }
+    body.site-loaded .fade-up-3 { animation: fadeUp 0.6s 0.3s ease forwards; }
+    body.site-loaded .fade-down { animation: fadeDown 0.5s ease forwards; }
 
-    @media (prefers-reduced-motion: reduce) { .float-anim,.fade-up,.fade-up-2,.fade-up-3,.yng-card,.price-badge::before,.cta-primary::before { animation: none !important; } }
+    @media (prefers-reduced-motion: reduce) { .float-anim,.fade-up,.fade-up-2,.fade-up-3,.fade-down,.yng-card,.yng-skel,.skel-block::after,.price-badge::before,.cta-primary::before { animation: none !important; opacity: 1 !important; transform: none !important; } }
 
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -292,8 +492,61 @@
 </head>
 <body>
 
+<!-- ══════════ INTRO / PRELOADER ══════════ -->
+<div id="intro-overlay">
+  <div class="intro-grid"></div>
+  <div class="intro-content">
+    <div class="intro-logo-mark">
+      <svg width="26" height="26" viewBox="0 0 22 22" fill="none">
+        <path d="M4 16 Q7 8 11 7 Q15 6 18 10" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <circle cx="5" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+        <circle cx="17" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+        <path d="M5 17 L17 17" stroke="#fff" stroke-width="1.4" opacity="0.5"/>
+      </svg>
+    </div>
+    <div class="intro-road">
+      <div class="intro-road-line"></div>
+      <div class="intro-speed-lines"><span></span><span></span><span></span></div>
+      <div class="intro-bike-shadow"></div>
+      <div class="intro-bike-wrap">
+        <svg width="78" height="48" viewBox="0 0 78 48" fill="none">
+          <g class="bike-part bp-wheels">
+            <circle cx="17" cy="35" r="9.5" stroke="#fff" stroke-width="2.6" fill="none"/>
+            <circle cx="17" cy="35" r="2.4" fill="#fff"/>
+            <circle cx="59" cy="35" r="9.5" stroke="#fff" stroke-width="2.6" fill="none"/>
+            <circle cx="59" cy="35" r="2.4" fill="#fff"/>
+          </g>
+          <g class="bike-part bp-frame">
+            <path d="M17 32 Q32 21 41 20 L47 12 L62 10 L65 17" stroke="#F59E0B" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M41 20 L37 31 L17 32" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M37 31 Q48 34 59 32" stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+          </g>
+          <g class="bike-part bp-panel">
+            <rect x="45" y="16" width="16" height="9" rx="3" fill="#F59E0B" opacity="0.92"/>
+          </g>
+          <g class="bike-part bp-light">
+            <circle class="intro-headlight" cx="65" cy="16" r="3.6" fill="#FFF3C4"/>
+            <path class="intro-headlight" d="M67 16 L76 16" stroke="#FFF3C4" stroke-width="2.2" stroke-linecap="round" opacity="0.5"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="intro-brand">
+      <div class="intro-name">SAMRIDDHI <span>AUTO</span></div>
+      <div class="intro-tag">Authorized Bajaj Dealer</div>
+    </div>
+    <div class="intro-progress">
+      <div class="intro-bar"><div class="intro-bar-fill"></div></div>
+      <span class="intro-percent" id="intro-percent">0%</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Website Content -->
+<div class="main-content">
+
 <!-- ══════════ NAVIGATION ══════════ -->
-<header class="nav-blur fixed top-0 left-0 right-0 z-50">
+<header class="nav-blur fixed top-0 left-0 right-0 z-50 fade-down">
   <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
 
@@ -566,12 +819,7 @@
 
     <!-- Bike Cards Grid (Firebase-powered) -->
     <div id="bike-grid">
-      <!-- Loading state -->
-      <div id="loading-state">
-        <div class="loader-ring"></div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:#0F172A;letter-spacing:.04em;">Loading Models…</div>
-        <p style="font-size:13px;color:#64748B;">Fetching live prices from our database</p>
-      </div>
+      <!-- Skeleton cards inserted by JS on first load -->
     </div>
 
     <!-- View all -->
@@ -820,6 +1068,7 @@
   </div>
 </footer>
 
+</div><!-- /.main-content -->
 
 <!-- ══════════ SCRIPTS ══════════ -->
 <script type="module">
@@ -841,8 +1090,9 @@
   const bikesCol = collection(db, "bikes");
 
   /* ── State ── */
-  let allBikes     = [];
-  let activeFilter = "all";
+  let allBikes      = [];
+  let activeFilter   = "all";
+  let firstLoadDone  = false;   // becomes true once we've done the staggered reveal once
 
   /* ── Helpers ── */
   function sortBySn(bikes) {
@@ -972,7 +1222,9 @@
     const priceBgAccent = isChetak ? "rgba(16,185,129,0.08)" : "#EBF4FF";
     const priceBorder   = isChetak ? "rgba(16,185,129,0.18)" : "rgba(0,94,166,0.14)";
 
-    const delay = `${Math.min(idx, 9) * 55}ms`;
+    /* Stagger delay: only on the first paint of a card set, so it feels like
+       items are "loading in" one after another (Facebook-feed style) */
+    const delay = firstLoadDone ? "0ms" : `${Math.min(idx, 11) * 90}ms`;
     const bikeId = bike.id || "";
 
     return `
@@ -1034,6 +1286,36 @@
       </div>`;
   }
 
+  /* ── Skeleton card (shimmer placeholder) ── */
+  function buildSkeleton(idx) {
+    const delay = `${idx * 70}ms`;
+    return `
+      <div class="yng-skel" style="animation-delay:${delay};">
+        <div class="skel-block skel-img"></div>
+        <div class="skel-body">
+          <div class="skel-row">
+            <div style="flex:1;">
+              <div class="skel-block skel-title"></div>
+              <div class="skel-block skel-sub"></div>
+            </div>
+            <div class="skel-block skel-price"></div>
+          </div>
+          <div class="skel-block skel-line" style="width:100%;"></div>
+          <div class="skel-block skel-line" style="width:70%;"></div>
+          <div class="skel-foot">
+            <div class="skel-block skel-pill"></div>
+            <div class="skel-block skel-arr"></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderSkeletons(count = 6) {
+    const grid = document.getElementById("bike-grid");
+    if (!grid) return;
+    grid.innerHTML = Array.from({ length: count }).map((_, i) => buildSkeleton(i)).join("");
+  }
+
   /* ── Empty state ── */
   function emptyState(msg) {
     return `
@@ -1076,10 +1358,12 @@
         q ? `No bikes found for "${q}". Try a different name.`
           : "No bikes listed in this category yet."
       );
+      firstLoadDone = true;
       return;
     }
 
     grid.innerHTML = list.map((b, i) => buildCard(b, i)).join("");
+    firstLoadDone = true; // subsequent re-renders (filter/search) pop in instantly, no re-stagger
   }
 
   /* ── Live search-suggestions dropdown (under the search box) ── */
@@ -1171,6 +1455,9 @@
     if (e.key === "Escape") searchDropdownEl.style.display = "none";
   });
 
+  /* ── Kick off skeletons immediately so the grid never looks empty ── */
+  renderSkeletons(6);
+
   /* ── Firebase real-time listener ── */
   onSnapshot(bikesCol, snap => {
     allBikes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1242,6 +1529,27 @@
     el.style.transform = "translateY(16px)";
     el.style.transition = "opacity 0.5s ease, transform 0.5s ease";
     revealObs.observe(el);
+  });
+
+  /* ── Intro preloader: animated percent counter + dismissal ── */
+  window.addEventListener("DOMContentLoaded", () => {
+    const overlay    = document.getElementById("intro-overlay");
+    const percentEl  = document.getElementById("intro-percent");
+    const totalMs    = 2300;
+    const startMs    = performance.now();
+
+    function tickPercent(now) {
+      const elapsed = now - startMs;
+      const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
+      if (percentEl) percentEl.textContent = pct + "%";
+      if (elapsed < totalMs) requestAnimationFrame(tickPercent);
+    }
+    requestAnimationFrame(tickPercent);
+
+    setTimeout(() => {
+      overlay?.classList.add("intro-hidden");
+      document.body.classList.add("site-loaded");
+    }, totalMs);
   });
 </script>
 
