@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Finance Calculator | Samriddhi And Brothers — Bajaj Phidim</title>
+<meta name="description" content="Calculate your Bajaj bike EMI, generate the Hulas Finserv allocation form and dealer quotation — all in one place at Go! YNG, Phidim." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="icon" type="image/png" href="favicon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'bajaj-blue': '#005EA6',
+          'bajaj-blueDark': '#004A85',
+          'bajaj-blueLight': '#E8F2FB'
+        }
+      }
+    }
+  }
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;overflow-x:hidden;width:100%}
+body{font-family:'DM Sans',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-font-smoothing:antialiased;overflow-x:hidden;width:100%;max-width:100vw}
+a{text-decoration:none;color:inherit}
+
+/* ═══ TOKENS ═══ */
+:root{
+  --blue:#005EA6; --blueDark:#004A85; --blueLt:#E8F2FB;
+  --amber:#F59E0B; --amberDark:#D97706;
+  --green:#16A34A; --red:#DC2626;
+  --line:#E2E8F0; --bgSoft:#F8FAFC;
+  --ink:#0F172A; --ink2:#334155; --ink3:#64748B; --ink4:#94A3B8;
+  --mono:'JetBrains Mono',monospace;
+}
+
+/* ═══ INTRO LOADER (INDEX-STYLE) ═══ */
+#financeLoader{
+  position:fixed;inset:0;width:100%;height:100%;
+  background:radial-gradient(ellipse at 30% 20%,#0A6BB8 0%,#004A85 45%,#002E56 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;overflow:hidden;
+  transition:opacity .7s cubic-bezier(.4,0,.2,1),visibility .7s;
+  visibility:visible;opacity:1;
+}
+#financeLoader::before{
+  content:'';position:absolute;top:-120px;right:-100px;
+  width:460px;height:460px;
+  background:radial-gradient(circle,rgba(245,158,11,.18) 0%,transparent 70%);
+  border-radius:50%;animation:introGlowPulse 3.2s ease-in-out infinite;
+}
+#financeLoader::after{
+  content:'';position:absolute;bottom:-140px;left:-100px;
+  width:380px;height:380px;
+  background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);
+  border-radius:50%;
+}
+@keyframes introGlowPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.08)}}
+#financeLoader.fade-out{opacity:0;visibility:hidden}
+
+.intro-grid{
+  position:absolute;inset:0;opacity:.07;
+  background-image:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),
+                    linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);
+  background-size:42px 42px;
+  animation:introGridDrift 9s linear infinite;
+}
+@keyframes introGridDrift{from{background-position:0 0}to{background-position:-84px -84px}}
+
+.intro-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;}
+
+.intro-logo-mark{
+  width:58px;height:58px;border-radius:16px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(-10px) scale(.85);
+  animation:introLogoIn .6s cubic-bezier(.34,1.56,.64,1) .05s forwards;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+  margin-bottom:18px;
+  color:#F59E0B;
+}
+@keyframes introLogoIn{to{opacity:1;transform:translateY(0) scale(1)}}
+
+.intro-road{
+  position:relative;width:min(340px,74vw);height:96px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.intro-road-line{
+  position:absolute;bottom:24px;left:0;right:0;height:2px;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 18px,transparent 18px 34px);
+  overflow:hidden;
+}
+.intro-road-line::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 18px,transparent 18px 34px);
+  transform:translateX(-34px);animation:introRoadScroll .55s linear infinite;
+}
+@keyframes introRoadScroll{to{transform:translateX(0)}}
+
+.intro-speed-lines{
+  position:absolute;bottom:30px;left:50%;margin-left:-30px;width:60px;height:34px;
+  opacity:0;animation:introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards,introSpeedShow 2.3s ease forwards;
+}
+.intro-speed-lines span{
+  position:absolute;height:2px;border-radius:2px;background:rgba(255,255,255,.55);
+  right:100%;opacity:0;animation:introSpeedFlick .5s ease-in-out infinite;
+}
+.intro-speed-lines span:nth-child(1){top:4px;width:22px;animation-delay:.05s}
+.intro-speed-lines span:nth-child(2){top:15px;width:32px;animation-delay:.12s}
+.intro-speed-lines span:nth-child(3){top:26px;width:18px;animation-delay:.19s}
+@keyframes introSpeedFlick{0%{opacity:0;transform:translateX(0)}45%{opacity:.9}100%{opacity:0;transform:translateX(-14px)}}
+@keyframes introSpeedShow{0%,68%{opacity:0}74%{opacity:1}100%{opacity:0}}
+
+.intro-bike-wrap{
+  position:absolute;bottom:14px;left:50%;margin-left:-39px;
+  animation:introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+}
+.intro-bike-wrap svg{filter:drop-shadow(0 8px 14px rgba(0,0,0,.3))}
+
+.bike-part{opacity:0;transform:scale(.55);transform-box:fill-box;transform-origin:center;animation:introPartIn .42s cubic-bezier(.34,1.56,.64,1) forwards}
+.bike-part.bp-wheels{animation-delay:.05s}
+.bike-part.bp-frame{animation-delay:.28s}
+.bike-part.bp-panel{animation-delay:.5s}
+.bike-part.bp-light{animation-delay:.72s}
+@keyframes introPartIn{to{opacity:1;transform:scale(1)}}
+
+.intro-headlight{
+  animation:introHeadlightPulse .5s ease-in-out .9s infinite;
+  opacity:0;animation-fill-mode:forwards;
+}
+@keyframes introHeadlightPulse{0%{opacity:0}20%,100%{opacity:1}60%{opacity:.55}}
+.intro-bike-shadow{
+  position:absolute;bottom:8px;left:50%;margin-left:-38px;width:76px;height:11px;
+  background:radial-gradient(ellipse,rgba(0,0,0,.32) 0%,transparent 75%);
+  border-radius:50%;opacity:0;
+  animation:introShadowFade .5s ease .05s forwards,introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+}
+@keyframes introShadowFade{to{opacity:.9}}
+@keyframes introRide{
+  0%{left:50%;margin-left:-39px}
+  68%{left:50%;margin-left:-39px}
+  80%{left:50%;margin-left:-39px}
+  100%{left:118%;margin-left:-39px}
+}
+
+.intro-brand{
+  margin-top:22px;text-align:center;opacity:0;transform:translateY(14px);
+  animation:introTextIn .7s ease 1.55s forwards;
+}
+.intro-brand .intro-name{
+  font-family:'Bebas Neue',cursive;font-size:clamp(1.9rem,6vw,2.6rem);
+  letter-spacing:.04em;color:#fff;line-height:1;
+}
+.intro-brand .intro-name span{color:#F59E0B}
+.intro-brand .intro-tag{
+  margin-top:6px;font-size:11px;font-weight:600;letter-spacing:.22em;
+  text-transform:uppercase;color:rgba(255,255,255,.65);
+}
+@keyframes introTextIn{to{opacity:1;transform:translateY(0)}}
+
+.intro-progress{
+  margin-top:24px;display:flex;align-items:center;gap:10px;
+  opacity:0;animation:introFade .5s ease 1.7s forwards;
+}
+.intro-bar{
+  width:130px;height:3px;border-radius:99px;
+  background:rgba(255,255,255,.18);overflow:hidden;
+}
+.intro-bar-fill{
+  width:0%;height:100%;border-radius:99px;
+  background:linear-gradient(90deg,#F59E0B,#FBBF24);
+  animation:introFill 1.9s cubic-bezier(.4,0,.2,1) .15s forwards;
+}
+.intro-percent{
+  font-size:11px;font-weight:700;letter-spacing:.03em;
+  color:rgba(255,255,255,.8);min-width:30px;font-variant-numeric:tabular-nums;
+}
+@keyframes introFade{to{opacity:1}}
+@keyframes introFill{to{width:100%}}
+
+/* ═══ MAIN CONTENT STAGGER ANIMATIONS (INDEX-STYLE) ═══ */
+header{animation:slideDownFade .6s ease-out .2s both}
+.fin-hero{animation:fadeInUp .7s ease-out .4s both}
+main{animation:fadeInUp .8s ease-out .6s both}
+
+.calc-card{
+  animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both;
+  opacity:0;
+}
+.calc-card:nth-child(1){animation-delay:.8s}
+.calc-card:nth-child(2){animation-delay:.95s}
+.calc-card:nth-child(3){animation-delay:1.1s}
+
+.results-panel{animation:slideInRight .7s cubic-bezier(.34,1.56,.64,1) .9s both}
+footer{animation:fadeInUp .6s ease-out 1.3s both}
+
+@keyframes slideDownFade{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{0%{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+
+/* Stagger delays for two-up cards */
+.two-up > .calc-card:nth-child(1){animation-delay:1.05s}
+.two-up > .calc-card:nth-child(2){animation-delay:1.15s}
+
+body.site-loaded .calc-card{animation-delay:inherit}
+@media(prefers-reduced-motion:reduce){.calc-card,.results-panel,header,.fin-hero,main,footer{animation:none!important;opacity:1;transform:none!important}}
+
+/* ── NAV ── */
+.nav-blur {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0,94,166,0.08);
+  box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+}
+.nav-link {
+  position: relative; font-size: 0.875rem; font-weight: 500; color: #374151;
+  display: flex; align-items: center; gap: 5px; transition: color 0.2s;
+  padding: 4px 2px;
+}
+.nav-link::after {
+  content: ''; position: absolute; bottom: -2px; left: 0;
+  width: 0; height: 2px; background: #005EA6; border-radius: 2px; transition: width 0.25s ease;
+}
+.nav-link:hover { color: #005EA6; }
+.nav-link:hover::after { width: 100%; }
+.nav-link.active { color: #005EA6; }
+.nav-link.active::after { width: 100%; }
+
+#mobile-menu { max-height: 0; overflow: hidden; transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease; opacity: 0; }
+#mobile-menu.open { max-height: 560px; opacity: 1; }
+
+/* ═══ CTA BUTTON ═══ */
+.cta-primary{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--blue);color:#fff;font-weight:600;border-radius:10px;
+  padding:10px 20px;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,.0,.2,1);
+  box-shadow:0 4px 14px rgba(0,94,166,.22);
+}
+.cta-primary:hover{
+  background:var(--blueDark);transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(0,94,166,.35);
+}
+.cta-primary:active{transform:translateY(0)}
+
+/* ═══ CUSTOM MODEL DROPDOWN ═══ */
+.custom-select{position:relative}
+.sr-only-select{position:absolute;opacity:0;pointer-events:none;height:46px;width:100%;left:0;top:0}
+.custom-select-trigger{
+  width:100%;height:46px;border:1.5px solid var(--line);
+  border-radius:12px;background:var(--bgSoft);padding:0 16px;
+  font-size:14px;color:var(--ink);display:flex;align-items:center;
+  justify-content:space-between;cursor:pointer;
+  transition:all .22s cubic-bezier(.4,.0,.2,1);font-family:'DM Sans',sans-serif;text-align:left;
+}
+.custom-select-trigger:hover{
+  border-color:#C9D6E3;transform:translateY(-1px);
+  background:linear-gradient(135deg,var(--bgSoft) 0%,rgba(0,94,166,.02) 100%);
+}
+.custom-select-trigger.open{
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1);
+}
+.cst-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.cst-chevron{color:var(--ink3);font-size:12px;transition:transform .22s ease;margin-left:8px;flex-shrink:0}
+.custom-select-trigger.open .cst-chevron{transform:rotate(180deg);color:var(--blue)}
+.custom-select-panel{
+  position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;
+  border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:320px;overflow-y:auto;
+  z-index:40;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);
+  transform-origin:top center;transition:opacity .18s ease,transform .18s ease,visibility .18s;
+  padding:6px;animation:dropdownOpen .22s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+.custom-select-panel.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+@keyframes dropdownOpen{from{opacity:0;transform:translateY(-8px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.cst-option{
+  display:flex;align-items:center;gap:12px;padding:11px 12px;
+  border-radius:10px;cursor:pointer;transition:all .15s;
+  font-size:14px;color:var(--ink2);font-weight:500;
+}
+.cst-option:hover{background:var(--blueLt);transform:translateX(4px)}
+.cst-option .cst-dot{
+  width:18px;height:18px;border-radius:50%;border:2px solid var(--line);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:border-color .18s,background .18s;
+}
+.cst-option .cst-dot::after{
+  content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);
+  opacity:0;transform:scale(.4);transition:opacity .15s,transform .15s;
+}
+.cst-option.selected{color:var(--ink);font-weight:700;background:var(--blueLt)}
+.cst-option.selected .cst-dot{border-color:var(--blue)}
+.cst-option.selected .cst-dot::after{opacity:1;transform:scale(1)}
+
+/* ═══ HERO ═══ */
+.fin-hero{background:linear-gradient(135deg,#F0F7FF 0%,#EBF4FF 55%,#DCEEFB 100%);position:relative;overflow:hidden}
+.fin-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:420px;height:420px;background:radial-gradient(circle,rgba(0,94,166,.1) 0%,transparent 70%);border-radius:50%}
+.fin-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(245,158,11,.08) 0%,transparent 70%);border-radius:50%}
+.headline{font-family:'Bebas Neue',cursive;line-height:.95;letter-spacing:.01em}
+.price-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,94,166,.28)}
+.stat-chip{background:#fff;border:1px solid rgba(0,94,166,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+
+/* ═══ TOTAL DP BANNER ═══ */
+.total-dp-banner{
+  background:linear-gradient(120deg,var(--blue) 0%,var(--blueDark) 70%,#003B6E 100%);
+  border-radius:20px;padding:1.5rem 1.75rem;display:flex;align-items:center;
+  justify-content:space-between;gap:1rem;flex-wrap:wrap;position:relative;overflow:hidden;
+  box-shadow:0 12px 32px rgba(0,94,166,.22);
+  transition:all .3s ease;
+}
+.total-dp-banner:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(0,94,166,.28)}
+.total-dp-banner::before{
+  content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;
+  background:radial-gradient(circle,rgba(245,158,11,.18) 0%,transparent 70%);border-radius:50%;
+}
+.tdp-left{display:flex;flex-direction:column;gap:3px;position:relative;z-index:1}
+.tdp-label{font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#BFDBFE}
+.tdp-title{font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:.03em;color:#fff}
+.tdp-value{
+  font-family:'Bebas Neue',cursive;font-size:clamp(2.2rem,6vw,3rem);
+  letter-spacing:.02em;line-height:1;color:#fff;position:relative;z-index:1;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.tdp-badge{
+  display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.22);padding:8px 16px;border-radius:10px;
+  font-size:12px;font-weight:600;color:#fff;position:relative;z-index:1;
+  animation:badgePulse 2s ease-in-out infinite;
+}
+@keyframes badgePulse{
+  0%,100%{transform:scale(1);opacity:.95}
+  50%{transform:scale(1.05);opacity:1}
+}
+
+/* ═══ CARDS ═══ */
+.calc-card{
+  background:#fff;border:1px solid var(--line);border-radius:18px;
+  padding:1.4rem;box-shadow:0 2px 14px rgba(0,0,0,.04);
+  transition:all .25s cubic-bezier(.4,.0,.2,1);cursor:default;
+  min-width:0;
+}
+/* An open dropdown must float above every other card, not just its own.
+   The entrance animation leaves a lingering transform on .calc-card which
+   creates a separate stacking context per card, so without this the next
+   card in the DOM paints over an open dropdown that overflows below it. */
+.calc-card:has(.custom-select-panel.open){z-index:60}
+.calc-card.dropdown-open{z-index:60}
+.calc-card:hover{
+  border-color:rgba(0,94,166,.15);box-shadow:0 8px 28px rgba(0,94,166,.12);
+  transform:translateY(-2px);
+}
+.calc-card-title{
+  display:flex;align-items:center;gap:10px;font-size:.95rem;
+  font-weight:700;color:var(--ink);letter-spacing:.01em;margin-bottom:1.2rem;
+}
+.calc-card-title .icon{
+  width:36px;height:36px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:15px;background:var(--blueLt);color:var(--blue);
+  flex-shrink:0;animation:iconBounce 2s ease-in-out infinite;
+}
+@keyframes iconBounce{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-4px)}
+}
+
+.field-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;display:block}
+select.styled,input.styled{
+  width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;
+  background:var(--bgSoft);padding:0 14px;font-size:14px;color:var(--ink);
+  outline:none;transition:all .2s cubic-bezier(.4,.0,.2,1);
+  appearance:none;-webkit-appearance:none;font-family:'DM Sans',sans-serif;
+}
+select.styled{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;
+}
+select.styled:focus,input.styled:focus{
+  border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,94,166,.15);
+  animation:inputFocus .3s ease forwards;background:linear-gradient(135deg,var(--bgSoft) 0%,rgba(0,94,166,.06) 100%);
+}
+@keyframes inputFocus{
+  0%{box-shadow:0 0 0 0 rgba(0,94,166,.1)}
+  100%{box-shadow:0 0 0 4px rgba(0,94,166,.15)}
+}
+
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:1.25rem}
+.metric-box{
+  background:var(--bgSoft);border:1px solid var(--line);border-radius:12px;
+  padding:.85rem;display:flex;flex-direction:column;gap:5px;
+  transition:all .18s cubic-bezier(.4,.0,.2,1);
+}
+.metric-box.has-input:focus-within{
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.08);
+  transform:translateY(-2px);background:linear-gradient(135deg,#F8FAFC 0%,rgba(0,94,166,.04) 100%);
+}
+.metric-lbl{font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3)}
+.metric-val{
+  font-family:'Bebas Neue',cursive;font-size:1.25rem;letter-spacing:.02em;color:var(--ink);
+  line-height:1.1;transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+.metric-val.green{color:var(--green)}
+.metric-val.updated{
+  animation:metricPop .45s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes metricPop{
+  0%{transform:scale(.75) translateY(8px);opacity:0}
+  50%{transform:scale(1.12);color:#16A34A}
+  100%{transform:scale(1) translateY(0);opacity:1;color:inherit}
+}
+.metric-val.updating{
+  animation:metricShimmer .5s ease-in-out infinite;
+}
+@keyframes metricShimmer{
+  0%,100%{opacity:1}
+  50%{opacity:.65}
+}
+.metric-box input{
+  border:none;background:transparent;padding:0;font-family:'Bebas Neue',cursive;
+  font-size:1.25rem;color:var(--ink);outline:none;width:100%;
+  letter-spacing:.02em;line-height:1.1;
+}
+.metric-box input::-webkit-outer-spin-button,.metric-box input::-webkit-inner-spin-button{-webkit-appearance:none}
+
+.config-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding-top:1.25rem;border-top:1px solid var(--line);margin-top:1.25rem}
+.two-up{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+
+.charge-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);transition:all .2s ease}
+.charge-row:hover{background:rgba(0,94,166,.02);padding:11px 8px;border-radius:6px;margin:0 -8px;padding:11px 8px}
+.charge-row:last-child{border-bottom:none;padding-bottom:0}
+.charge-row label{font-size:13.5px;color:var(--ink2);font-weight:500;display:flex;align-items:center;gap:8px}
+.charge-row label i{color:var(--blue);font-size:13px;transition:transform .2s ease}
+.charge-row:hover label i{transform:scale(1.1)}
+.charge-row .val{font-size:14px;font-weight:700;color:var(--ink)}
+.charge-row input{
+  text-align:right;border:none;border-bottom:1.5px solid var(--line);
+  background:transparent;outline:none;font-size:14px;font-weight:700;
+  color:var(--ink);width:110px;padding:5px 4px;
+  transition:all .18s cubic-bezier(.4,.0,.2,1);font-family:'DM Sans',sans-serif;
+}
+.charge-row input:focus{border-color:var(--blue)}
+
+/* ═══ INDOOR/OUTDOOR INSURANCE TOGGLE ═══ */
+.itoggle{display:flex;gap:6px;transition:all .2s ease}
+.itoggle-btn{
+  flex:1;text-align:center;background:var(--bgSoft);border:1.5px solid var(--line);
+  border-radius:8px;padding:9px 10px;font-size:12px;font-weight:700;
+  color:var(--ink3);cursor:pointer;transition:all .18s cubic-bezier(.4,.0,.2,1);
+  user-select:none;
+}
+.itoggle-btn:hover{transform:translateY(-1px)}
+.itoggle-btn.active{
+  background:var(--blueLt);border-color:var(--blue);color:var(--blue);
+  transform:scale(1.02);box-shadow:0 4px 12px rgba(0,94,166,.15);
+}
+
+.acc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.acc-field{display:flex;flex-direction:column;gap:6px}
+.acc-field label{
+  font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink3);display:flex;align-items:center;gap:6px;
+}
+.acc-field label i{color:var(--blue);font-size:12px}
+.acc-field input{
+  border:none;border-bottom:1.5px solid var(--line);background:transparent;
+  outline:none;font-size:15px;font-weight:700;color:var(--ink);padding:5px 2px;
+  transition:all .18s cubic-bezier(.4,.0,.2,1);font-family:'DM Sans',sans-serif;
+}
+.acc-field input:focus{border-color:var(--blue);background:rgba(0,94,166,.02)}
+
+.chassis-tools-row{display:flex;gap:12px;margin-top:14px;align-items:flex-end;flex-wrap:wrap}
+.chassis-tools-row .ct-search{flex:1 1 220px;min-width:200px}
+.chassis-tools-row .ct-find{flex:0 0 auto}
+.chassis-tools-row .ct-year{flex:0 0 120px;min-width:110px}
+.model-mismatch-warning{
+  display:none;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;
+  background:rgba(245,158,11,.1);border:1.5px solid rgba(245,158,11,.35);border-radius:10px;
+  font-size:12px;line-height:1.5;color:#92400E;animation:slideDown .2s ease-out;
+}
+.model-mismatch-warning i{color:var(--amber);margin-top:2px;flex-shrink:0}
+.model-mismatch-warning strong{color:#78350F}
+@media (max-width:520px){
+  .chassis-tools-row{flex-direction:column;align-items:stretch}
+  .chassis-tools-row .ct-search,.chassis-tools-row .ct-find,.chassis-tools-row .ct-year{flex:1 1 auto;min-width:0;width:100%}
+  .chassis-tools-row .ct-find{order:2}
+  .chassis-tools-row .ct-year{order:3}
+}
+
+.customer-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;min-width:0}
+.customer-grid>*{min-width:0}
+.calc-grid,.metrics-row,.config-row,.two-up,.acc-grid{min-width:0}
+.metrics-row>*,.acc-grid>*{min-width:0}
+
+/* ═══ RESULTS PANEL ═══ */
+.calc-grid{min-width:0}
+.calc-grid>div{min-width:0}
+.results-panel{
+  background:#0F172A;border-radius:18px;padding:1.4rem;color:#fff;
+  position:sticky;top:calc(64px + 1rem);overflow:hidden;min-width:0;
+  border:1px solid rgba(255,255,255,.1);transition:all .3s ease;
+}
+.results-panel::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+  opacity:0;pointer-events:none;border-radius:18px;
+  animation:shimmerPulse 2.5s ease-in-out infinite;
+}
+@keyframes shimmerPulse{
+  0%,100%{opacity:0;transform:translateX(-100%)}
+  50%{opacity:1;transform:translateX(100%)}
+}
+.res-title{
+  display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);
+  margin-bottom:1.4rem;animation:titleSlide .5s ease-out;
+}
+@keyframes titleSlide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.res-title i{color:var(--amber)}
+.res-row{
+  display:flex;align-items:center;justify-content:space-between;padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,.07);transition:all .2s ease;
+}
+.res-row:hover{background:rgba(255,255,255,.02);padding:10px 8px;margin:0 -8px;border-radius:6px}
+.res-row:last-child{border-bottom:none}
+.res-lbl{font-size:12.5px;color:rgba(255,255,255,.45);font-weight:400}
+.res-val{
+  font-size:13.5px;font-weight:600;color:rgba(255,255,255,.9);
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+.res-val.indigo{color:#7DC4FF}
+.res-val.red{color:#F87171}
+.res-val.amber{color:#FBBF24;font-style:italic;font-size:12.5px}
+.res-val.updating{
+  animation:valueShimmer .5s ease-in-out infinite;
+}
+@keyframes valueShimmer{
+  0%,100%{opacity:1;transform:translateX(0)}
+  50%{opacity:.6;transform:translateX(2px)}
+}
+
+.res-val.updated{
+  animation:valuePopIn .5s cubic-bezier(.34,1.56,.64,1) !important;
+}
+@keyframes valuePopIn{
+  0%{transform:scale(.7) translateY(6px);opacity:0}
+  50%{transform:scale(1.15);color:#FBBF24}
+  85%{transform:scale(.98)}
+  100%{transform:scale(1) translateY(0);opacity:1;color:inherit}
+}
+
+.split-bar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin:.9rem 0;background:rgba(255,255,255,.08)}
+.split-bar .seg-dp{background:var(--amber);transition:width .4s cubic-bezier(.34,1.56,.64,1)}
+.split-bar .seg-loan{background:var(--blue);transition:width .4s cubic-bezier(.34,1.56,.64,1)}
+.split-legend{display:flex;justify-content:space-between;font-size:10.5px;color:rgba(255,255,255,.5);margin-bottom:.4rem}
+.split-legend span{display:flex;align-items:center;gap:5px}
+.split-legend .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.split-legend .dot.dp{background:var(--amber)}
+.split-legend .dot.loan{background:var(--blue)}
+
+.emi-box{
+  background:linear-gradient(120deg,var(--blue),#0070C7);border-radius:14px;
+  padding:1.25rem;margin:1.1rem 0;text-align:center;position:relative;overflow:hidden;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);cursor:default;
+}
+.emi-box:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,94,166,.3)}
+.emi-box::before{
+  content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;
+  background:radial-gradient(circle,rgba(245,158,11,.22) 0%,transparent 70%);border-radius:50%;
+}
+.emi-box-lbl{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-bottom:4px;position:relative;z-index:1}
+.emi-box-val{
+  font-family:'Bebas Neue',cursive;font-size:clamp(2rem,6vw,2.6rem);
+  letter-spacing:.02em;line-height:1;color:#fff;position:relative;z-index:1;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+.emi-box-val.updated{
+  animation:emiPulse .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes emiPulse{
+  0%{transform:scale(.85) rotateZ(-2deg);opacity:.8}
+  50%{transform:scale(1.15) rotateZ(1deg)}
+  100%{transform:scale(1) rotateZ(0);opacity:1}
+}
+.emi-box-val.updating{
+  animation:emiShimmer .4s ease-in-out infinite;
+}
+@keyframes emiShimmer{
+  0%,100%{opacity:1}
+  50%{opacity:.6}
+}
+.emi-box:hover .emi-box-val{font-size:clamp(2.1rem,6.2vw,2.7rem)}
+.emi-box-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;position:relative;z-index:1}
+
+.adv-box{
+  background:rgba(255,255,255,.06);border-radius:12px;padding:12px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  border:1px solid rgba(255,255,255,.08);transition:all .2s ease;
+}
+.adv-box:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.15)}
+.adv-box-lbl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.adv-box-val{
+  font-family:'Bebas Neue',cursive;font-size:1.45rem;letter-spacing:.02em;color:#7DC4FF;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+.adv-box-val.updated{
+  animation:advPop .48s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes advPop{
+  0%{transform:scale(.65) rotate(-12deg) translateY(8px);opacity:0}
+  50%{transform:scale(1.18) rotate(3deg);color:#FFD700}
+  85%{transform:scale(.95) rotate(-1deg)}
+  100%{transform:scale(1) rotate(0) translateY(0);opacity:1;color:inherit}
+}
+.adv-box-val.updating{
+  animation:advShimmer .5s ease-in-out infinite;
+}
+@keyframes advShimmer{
+  0%,100%{opacity:1;transform:translateY(0)}
+  50%{opacity:.5;transform:translateY(2px)}
+}
+
+.rate-chips{display:flex;gap:6px;margin-top:.9rem;flex-wrap:wrap}
+.rate-chip{
+  flex:1;min-width:70px;text-align:center;background:var(--bgSoft);border:1.5px solid var(--line);
+  border-radius:10px;padding:7px 4px;font-size:11px;font-weight:600;color:var(--ink3);
+  transition:all .2s cubic-bezier(.4,.0,.2,1);cursor:pointer;user-select:none;
+}
+.rate-chip:hover{transform:translateY(-3px);box-shadow:0 4px 14px rgba(0,94,166,.2)}
+.rate-chip.active{
+  background:var(--blueLt);border-color:var(--blue);color:var(--blue);
+  transform:scale(1.02);box-shadow:0 6px 18px rgba(0,94,166,.25);
+}
+.rate-chip .pct{font-family:'Bebas Neue',cursive;font-size:1.1rem;display:block}
+
+.btn-preview{
+  width:100%;justify-content:center;background:transparent;border:2px solid rgba(255,255,255,.18);
+  color:#fff;margin-top:.9rem;font-weight:600;font-size:.85rem;
+  letter-spacing:.02em;padding:12px 20px;border-radius:10px;display:flex;align-items:center;
+  gap:8px;cursor:pointer;transition:all .2s cubic-bezier(.4,.0,.2,1);
+}
+.btn-preview:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);transform:translateY(-2px)}
+.btn-preview:active{transform:translateY(0)}
+.btn-whatsapp{width:100%;justify-content:center;background:var(--amber);border-color:var(--amber);margin-top:.6rem}
+.btn-whatsapp:hover{background:var(--amberDark);border-color:var(--amberDark)}
+
+/* ═══ VALIDATION ═══ */
+.field-error{border-color:var(--red) !important;box-shadow:0 0 0 3px rgba(220,38,38,.1) !important}
+.field-error-msg{font-size:11px;color:var(--red);margin-top:5px;display:none;align-items:center;gap:5px;animation:slideDown .2s ease-out}
+.field-error-msg.show{display:flex}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.validation-toast{
+  position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-12px);
+  background:#0F172A;color:#fff;padding:12px 18px;border-radius:12px;
+  font-size:13px;font-weight:600;box-shadow:0 12px 32px rgba(0,0,0,.28);
+  z-index:120;display:flex;align-items:center;gap:10px;opacity:0;
+  pointer-events:none;transition:opacity .22s ease,transform .22s ease;
+}
+.validation-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.validation-toast i{color:#F87171}
+
+/* ═══ CHASSIS LIVE SEARCH DROPDOWN ═══ */
+#chassisSearchWrap{position:relative}
+#chassisSearchDropdown{
+  display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:280px;overflow-y:auto;
+  z-index:55;padding:6px;animation:dropdownOpen .22s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+.csd-item{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  text-align:left;padding:10px 12px;border-radius:10px;border:none;background:transparent;
+  cursor:pointer;transition:all .15s cubic-bezier(.4,.0,.2,1);
+}
+.csd-item:hover{background:var(--blueLt);transform:translateX(4px)}
+.csd-item .csd-main{min-width:0}
+.csd-item .csd-chassis{font-size:13px;font-weight:700;color:var(--ink);font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+.csd-item .csd-sub{font-size:11px;color:var(--ink4);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.csd-item .csd-color-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.12);transition:all .2s ease;transform:scale(1)}
+.csd-item:hover .csd-color-dot{transform:scale(1.2)}
+.csd-empty{padding:14px 12px;font-size:12px;color:var(--ink4);text-align:center;animation:fadeIn .2s ease}
+
+/* ═══ MOBILE STICKY BAR ═══ */
+.mobile-bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;background:#0F172A;
+  color:#fff;padding:10px 14px;display:none;align-items:center;gap:10px;
+  box-shadow:0 -8px 28px rgba(0,0,0,.18);border-top:1px solid rgba(255,255,255,.08);
+  animation:slideUpMobile .3s ease-out;
+}
+@keyframes slideUpMobile{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mobile-bar .emi-chunk{flex:1}
+.mobile-bar .lbl{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.mobile-bar .val{font-family:'Bebas Neue',cursive;font-size:1.5rem;letter-spacing:.02em;color:#fff}
+.mobile-bar .mbtn{background:var(--blue);padding:9px 14px;border-radius:9px;font-size:12px;font-weight:700;border:none;color:#fff;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .2s ease}
+.mobile-bar .mbtn:hover{transform:translateY(-2px)}
+.mobile-bar .mbtn.amber{background:var(--amber)}
+
+/* ═══ FOOTER ═══ */
+footer{background:#0F172A}
+.footer-link{color:#94A3B8;font-size:.875rem;transition:color .18s}
+.footer-link:hover{color:#fff}
+
+/* ═══ PREVIEW OVERLAY ═══ */
+#previewOverlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(8,15,26,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:none;align-items:flex-start;justify-content:center;
+  padding:24px 16px;overflow-y:auto;animation:fadeIn .2s ease;
+}
+#previewOverlay.open{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.preview-shell{
+  width:100%;max-width:900px;background:#F1F5F9;border-radius:20px;
+  overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.4);
+  animation:shellSlide .32s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes shellSlide{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.preview-toolbar{
+  background:#0F172A;color:#fff;padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:5;
+}
+.preview-toolbar .ptitle{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:.04em}
+.preview-toolbar .ptitle i{color:var(--amber)}
+.ptabs{display:flex;gap:6px;background:rgba(255,255,255,.06);padding:4px;border-radius:10px}
+.ptab{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;transition:all .18s;border:none;background:transparent}
+.ptab:hover{background:rgba(255,255,255,.08)}
+.ptab.active{background:var(--blue);color:#fff}
+.pactions{display:flex;gap:8px}
+.pbtn{border:none;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .18s}
+.pbtn.print{background:var(--amber);color:#0F172A}
+.pbtn.print:hover{background:#FBBF24;transform:translateY(-1px)}
+.pbtn.close{background:rgba(255,255,255,.08);color:#fff}
+.pbtn.close:hover{background:rgba(255,255,255,.16)}
+
+.preview-body{padding:20px;overflow-x:auto}
+.a4-page{display:none}
+.a4-page.active{display:block;animation:pageSlide .28s ease both}
+@keyframes pageSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.a4-paper{
+  font-family:'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;
+  font-size:12.5pt !important;color:#000 !important;background:#fff !important;
+  line-height:1.45 !important;width:210mm;min-height:297mm;padding:14mm 16mm 12mm 16mm;
+  box-sizing:border-box;margin:0 auto;box-shadow:0 6px 40px rgba(0,0,0,.22);border:1px solid #ddd;
+}
+.a4-paper *{font-family:'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;color:#000 !important}
+.doc-list{list-style:none}
+.doc-list li{display:grid;grid-template-columns:140px 16px 1fr;align-items:baseline;margin-bottom:3px;font-size:12.5pt}
+.doc-list.fin li{grid-template-columns:195px 16px 1fr}
+.doc-list li .lbl{display:flex;align-items:baseline;gap:6px}
+.sig-row{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;white-space:nowrap}
+.sig-box{flex:1;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:11pt !important;min-width:0}
+
+.sign-panel{background:#fff;border-radius:14px;padding:16px 18px;margin-top:14px;box-shadow:0 2px 14px rgba(0,0,0,.05)}
+.sign-panel h4{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px}
+.sign-checks{display:flex;flex-wrap:wrap;gap:16px}
+.sign-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2)}
+.sign-check input{width:16px;height:16px;accent-color:var(--blue)}
+
+@media print{
+  #financeLoader{display:none !important}
+  body>*:not(#print-wrapper){display:none !important}
+  #print-wrapper{display:block !important}
+  html,body{margin:0 !important;padding:0 !important;background:#fff !important;width:210mm !important;overflow:visible !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .print-page{width:210mm !important;height:297mm !important;padding:12mm 14mm 10mm 14mm !important;margin:0 !important;box-sizing:border-box !important;overflow:hidden !important;page-break-after:always !important;break-after:page !important}
+  .print-page:last-child{page-break-after:avoid !important;break-after:avoid !important}
+  @page{size:A4 portrait;margin:0}
+}
+#print-wrapper{display:none}
+
+@media (max-width:1024px){.calc-grid{grid-template-columns:1fr !important}.results-panel{position:static}}
+@media (max-width:768px){.metrics-row{grid-template-columns:1fr 1fr}.two-up,.customer-grid{grid-template-columns:1fr}.mobile-bar{display:flex}body{padding-bottom:76px}.preview-body{padding:12px}}
+@media (max-width:480px){.acc-grid{grid-template-columns:1fr}.config-row{grid-template-columns:1fr}.total-dp-banner{flex-direction:column;align-items:flex-start}}
+@media (max-width:640px){div[style*="grid-template-columns:1fr 1fr 1fr 1fr"]{grid-template-columns:1fr 1fr !important}}
+@media (max-width:400px){div[style*="grid-template-columns:1fr 1fr 1fr 1fr"]{grid-template-columns:1fr !important}}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#f1f5f9}
+::-webkit-scrollbar-thumb{background:rgba(0,94,166,.3);border-radius:99px}
+</style>
+</head>
+<body>
+
+<!-- ══════════ INTRO LOADER (INDEX-STYLE) ══════════ -->
+<div id="financeLoader">
+  <div class="intro-grid"></div>
+  <div class="intro-content">
+    
+    <!-- Icon mark -->
+    <div class="intro-logo-mark">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line>
+      </svg>
+    </div>
+
+    <!-- Road animation concept: calculator moving across screen -->
+    <div class="intro-road">
+      <div class="intro-road-line"></div>
+      <div class="intro-speed-lines"><span></span><span></span><span></span></div>
+      <div class="intro-bike-shadow"></div>
+      <div class="intro-bike-wrap">
+        <svg width="74" height="46" viewBox="0 0 74 46" fill="none">
+          <!-- Wheels -->
+          <g class="bike-part bp-wheels">
+            <circle cx="16" cy="32" r="9" stroke="#fff" stroke-width="2.4" fill="none"/>
+            <circle cx="16" cy="32" r="2.2" fill="#fff"/>
+            <circle cx="58" cy="32" r="9" stroke="#fff" stroke-width="2.4" fill="none"/>
+            <circle cx="58" cy="32" r="2.2" fill="#fff"/>
+          </g>
+          <!-- Frame/Body -->
+          <g class="bike-part bp-frame">
+            <path d="M16 29 Q28 18 37 17 L42 10 L54 8 L57 14" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M37 17 L34 28 L16 29" stroke="#F59E0B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M34 28 Q45 31 58 29" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          </g>
+          <!-- Panel/Dashboard -->
+          <g class="bike-part bp-panel">
+            <rect x="40" y="12" width="14" height="8" rx="2.5" fill="#F59E0B" opacity="0.9"/>
+            <line x1="44" y1="14" x2="44" y2="18" stroke="#fff" stroke-width="1.2" opacity="0.5"/>
+            <line x1="49" y1="14" x2="49" y2="18" stroke="#fff" stroke-width="1.2" opacity="0.5"/>
+          </g>
+          <!-- Light -->
+          <g class="bike-part bp-light">
+            <circle class="intro-headlight" cx="62" cy="13" r="3.2" fill="#FFF3C4"/>
+            <path class="intro-headlight" d="M64 13 L71 13" stroke="#FFF3C4" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Brand text -->
+    <div class="intro-brand">
+      <div class="intro-name">EASY <span>EMI</span></div>
+      <div class="intro-tag">Finance Calculator</div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="intro-progress">
+      <div class="intro-bar"><div class="intro-bar-fill"></div></div>
+      <span class="intro-percent" id="intro-percent">0%</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ NAV ══════════ -->
+<header class="nav-blur fixed top-0 left-0 right-0 z-50">
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <a href="index.html" class="flex items-center gap-2.5" aria-label="Samriddhi Auto Home">
+        <div class="w-9 h-9 rounded-lg bg-bajaj-blue flex items-center justify-center shadow-sm flex-shrink-0">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M4 16 Q7 8 11 7 Q15 6 18 10" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            <circle cx="5" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+            <circle cx="17" cy="17" r="2.2" fill="#fff" opacity="0.9"/>
+            <path d="M5 17 L17 17" stroke="#fff" stroke-width="1.4" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="leading-tight">
+          <div class="text-sm font-bold text-slate-900 tracking-tight leading-none">Samriddhi And Brothers</div>
+          <div class="text-[10px] font-medium text-bajaj-blue leading-none tracking-wide uppercase mt-0.5">Bajaj Authorized Dealer</div>
+        </div>
+      </a>
+
+      <div class="hidden lg:flex items-center gap-7">
+        <a href="index.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </a>
+        <a href="index.html#prices" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Price List
+        </a>
+        <a href="finance.html" class="nav-link active">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Finance
+        </a>
+        <a href="sheet.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          Sheet
+        </a>
+        <a href="kyc.html" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          KYC
+        </a>
+        <a href="https://yonghangishak.com.np/" target="_blank" class="nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          About
+        </a>
+      </div>
+
+      <div class="hidden lg:flex items-center gap-3">
+        <a href="tel:+9779820907795" class="text-sm font-semibold text-bajaj-blue flex items-center gap-1.5 hover:text-bajaj-blueDark transition-colors">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+          Call Showroom
+        </a>
+        <a href="index.html#prices" class="cta-primary text-sm py-2.5 px-5">Book a Test Ride</a>
+      </div>
+
+      <button id="hamburger-btn" class="lg:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors" aria-label="Toggle menu" aria-expanded="false">
+        <svg id="icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg id="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hidden"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div id="mobile-menu" class="lg:hidden">
+      <div class="py-4 border-t border-slate-100 space-y-1">
+        <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Home</a>
+        <a href="index.html#prices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Price List</a>
+        <a href="finance.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-bajaj-blue bg-bajaj-blueLight">Finance</a>
+        <a href="sheet.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">Sheet</a>
+        <a href="kyc.html" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">KYC</a>
+        <a href="https://yonghangishak.com.np/" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50">About</a>
+        <div class="pt-2 grid grid-cols-2 gap-2">
+          <a href="tel:+9779802315425" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-bajaj-blue text-bajaj-blue text-sm font-semibold">Call Us</a>
+          <a href="index.html#prices" class="flex items-center justify-center py-2.5 rounded-xl bg-bajaj-blue text-white text-sm font-semibold">Ride</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="fin-hero" style="padding-top:64px">
+  <div style="max-width:1280px;margin:0 auto;padding:48px 20px" >
+    <div style="text-align:center;max-width:640px;margin:0 auto">
+      <span class="price-badge"><i class="fa-solid fa-calculator" style="font-size:11px"></i> EMI Finance Calculator</span>
+      <h1 class="headline" style="font-size:clamp(2.6rem,7vw,4.6rem);color:#0F172A;margin-top:16px">Ride Now, <span style="color:var(--blue)">Pay Smart.</span></h1>
+      <p style="color:#64748B;font-size:16px;line-height:1.6;margin-top:16px;max-width:420px;margin-left:auto;margin-right:auto">Pick your model, adjust the numbers, and see your EMI live. When you're ready, generate the official allocation form and quotation in one tap.</p>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:24px">
+        <span class="stat-chip"><i class="fa-solid fa-percent" style="color:var(--blue);font-size:13px"></i><span style="font-size:14px;font-weight:600;color:#334155">From 8.99% Interest</span></span>
+        <span class="stat-chip"><i class="fa-solid fa-calendar-days" style="color:var(--blue);font-size:13px"></i><span style="font-size:14px;font-weight:600;color:#334155">Up to 36 Months</span></span>
+        <span class="stat-chip"><i class="fa-solid fa-file-signature" style="color:var(--amber);font-size:13px"></i><span style="font-size:14px;font-weight:600;color:#334155">Instant Quotation</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CALCULATOR ══════════ -->
+<main>
+  <div style="max-width:1280px;margin:0 auto;padding:36px 20px 56px">
+
+    <div class="total-dp-banner" style="margin-bottom:24px">
+      <div class="tdp-left">
+        <span class="tdp-label">Total Amount Due Today</span>
+        <span class="tdp-title">Total Downpayment</span>
+      </div>
+      <div id="displayTotalDP" class="tdp-value">Rs. 0</div>
+      <div class="tdp-badge"><i class="fa-solid fa-circle-check"></i> Live Calculation</div>
+    </div>
+
+    <div class="calc-grid" style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start">
+
+      <!-- LEFT COLUMN -->
+      <div style="display:flex;flex-direction:column;gap:24px">
+
+        <div class="calc-card">
+          <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-location-dot"></i></span>Location</div>
+          <div class="itoggle" id="insuranceTypeToggle">
+            <div class="itoggle-btn active" data-itype="indoor"><i class="fa-solid fa-house" style="margin-right:5px"></i>Indoor</div>
+            <div class="itoggle-btn" data-itype="outdoor"><i class="fa-solid fa-cloud-sun" style="margin-right:5px"></i>Outdoor</div>
+          </div>
+        </div>
+
+        <div class="calc-card">
+          <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-motorcycle"></i></span>Select Model &amp; Pricing</div>
+          <label class="field-label">Bike Model</label>
+          <div class="custom-select" id="modelSelectWrap">
+            <select id="modelSelect" class="styled sr-only-select" tabindex="-1" aria-hidden="true"><option>Loading bikes…</option></select>
+            <button type="button" class="custom-select-trigger" id="modelSelectTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="cst-text" id="modelSelectTriggerText">Loading bikes…</span>
+              <i class="fa-solid fa-chevron-down cst-chevron"></i>
+            </button>
+            <div class="custom-select-panel" id="modelSelectPanel" role="listbox"></div>
+          </div>
+
+          <div class="metrics-row">
+            <div class="metric-box"><span class="metric-lbl">MRP Price</span><span class="metric-val" id="mrp">0</span></div>
+            <div class="metric-box has-input"><span class="metric-lbl">Discount</span><input type="number" id="discountInput" value="0" placeholder="0"></div>
+            <div class="metric-box"><span class="metric-lbl">After Discount</span><span class="metric-val green" id="afterDiscount">0</span></div>
+            <div class="metric-box has-input"><span class="metric-lbl">Advance EMI</span><input type="number" id="advEmiInput" value="0" placeholder="0"></div>
+          </div>
+
+          <div class="config-row">
+            <div>
+              <label class="field-label">Downpayment %</label>
+              <div class="custom-select" id="dpPercentWrap">
+                <select id="dpPercent" class="styled sr-only-select" tabindex="-1" aria-hidden="true">
+                  <option value="30">30%</option><option value="40">40%</option>
+                  <option value="50" selected>50%</option><option value="60">60%</option>
+                </select>
+                <button type="button" class="custom-select-trigger" id="dpPercentTrigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="cst-text" id="dpPercentTriggerText">50%</span>
+                  <i class="fa-solid fa-chevron-down cst-chevron"></i>
+                </button>
+                <div class="custom-select-panel" id="dpPercentPanel" role="listbox"></div>
+              </div>
+            </div>
+            <div>
+              <label class="field-label">Loan Tenure</label>
+              <div class="custom-select" id="tenureWrap">
+                <select id="tenure" class="styled sr-only-select" tabindex="-1" aria-hidden="true">
+                  <option value="12" selected>12 Months</option><option value="18">18 Months</option>
+                  <option value="24">24 Months</option><option value="36">36 Months</option>
+                </select>
+                <button type="button" class="custom-select-trigger" id="tenureTrigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="cst-text" id="tenureTriggerText">12 Months</span>
+                  <i class="fa-solid fa-chevron-down cst-chevron"></i>
+                </button>
+                <div class="custom-select-panel" id="tenurePanel" role="listbox"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rate-chips">
+            <div class="rate-chip" data-dp="30"><span class="pct">13.99%</span>30% DP</div>
+            <div class="rate-chip" data-dp="40"><span class="pct">12.99%</span>40% DP</div>
+            <div class="rate-chip" data-dp="50"><span class="pct">11.99%</span>50% DP</div>
+            <div class="rate-chip" data-dp="60"><span class="pct">8.99%</span>60% DP</div>
+          </div>
+        </div>
+
+        <div class="two-up">
+          <div class="calc-card">
+            <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>Additional Charges</div>
+            <div class="charge-row"><label><i class="fa-solid fa-shield-halved"></i> Insurance</label><span class="val" id="displayIns">Rs. 0</span></div>
+            <div class="charge-row"><label><i class="fa-solid fa-stamp"></i> Registration / Namsari</label><input type="number" id="namsariInput" value="3000"></div>
+          </div>
+          <div class="calc-card">
+            <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-helmet-safety"></i></span>Accessories</div>
+            <div class="acc-grid">
+              <div class="acc-field"><label><i class="fa-solid fa-helmet-safety"></i> Helmet</label><input type="number" id="helmetInput" value="2500"></div>
+              <div class="acc-field"><label><i class="fa-solid fa-shield"></i> Leg Guard</label><input type="number" id="legguardInput" value="1800"></div>
+              <div class="acc-field"><label><i class="fa-solid fa-chair"></i> Seat Cover</label><input type="number" id="seatcoverInput" value="650"></div>
+              <div class="acc-field"><label><i class="fa-solid fa-plus"></i> Others</label><input type="number" id="othersInput" value="0"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-card">
+          <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-user-tag"></i></span>Customer &amp; Vehicle Details <span style="font-weight:400;font-size:11px;color:var(--ink4);margin-left:auto">for the printed form</span></div>
+          <div class="customer-grid" style="margin-bottom:14px">
+            <div>
+              <label class="field-label">Customer Full Name <span style="color:var(--red)">*</span></label>
+              <input type="text" id="custNameInput" class="styled" placeholder="e.g. Ram Bahadur Rai">
+              <div class="field-error-msg" id="custNameError"><i class="fa-solid fa-circle-exclamation"></i> Customer name is required</div>
+            </div>
+            <div>
+              <label class="field-label">Contact Number <span style="color:var(--red)">*</span></label>
+              <input type="tel" id="custPhoneInput" class="styled" placeholder="98XXXXXXXX" maxlength="10" inputmode="numeric">
+              <div class="field-error-msg" id="custPhoneError"><i class="fa-solid fa-circle-exclamation"></i> Enter a valid 10-digit phone number</div>
+            </div>
+          </div>
+          <div class="customer-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:.75rem">
+            <div class="acc-field">
+              <label>Chassis No. <span style="color:var(--red)">*</span></label>
+              <input type="text" id="manualChassis" placeholder="Chassis">
+              <div class="field-error-msg" id="manualChassisError"><i class="fa-solid fa-circle-exclamation"></i> Chassis number is required</div>
+            </div>
+            <div class="acc-field">
+              <label>Engine No. <span style="color:var(--red)">*</span></label>
+              <input type="text" id="manualEngine" placeholder="Engine">
+              <div class="field-error-msg" id="manualEngineError"><i class="fa-solid fa-circle-exclamation"></i> Engine number is required</div>
+            </div>
+            <div class="acc-field">
+              <label>Regd. No. <span style="color:var(--red)">*</span></label>
+              <input type="text" id="manualReg" placeholder="Reg No">
+              <div class="field-error-msg" id="manualRegError"><i class="fa-solid fa-circle-exclamation"></i> Registration number is required</div>
+            </div>
+            <div class="acc-field">
+              <label>Color <span style="color:var(--red)">*</span></label>
+              <input type="text" id="manualColor" placeholder="Color">
+              <div class="field-error-msg" id="manualColorError"><i class="fa-solid fa-circle-exclamation"></i> Color is required</div>
+            </div>
+          </div>
+          <div class="chassis-tools-row">
+            <div class="ct-search" id="chassisSearchWrap">
+              <label class="field-label">Search Inventory by Chassis</label>
+              <input type="text" id="chassisSearch" class="styled" placeholder="Type chassis no. to auto-fill" autocomplete="off">
+              <div id="chassisSearchDropdown"></div>
+            </div>
+            <button onclick="findChassis()" class="cta-primary ct-find" style="height:46px;font-size:13px;padding:0 18px;white-space:nowrap"><i class="fa-solid fa-magnifying-glass"></i> Find</button>
+            <div class="ct-year">
+              <label class="field-label">Make Year</label>
+              <input type="text" id="makeYearInput" class="styled" value="">
+            </div>
+          </div>
+          <p id="searchStatus" style="font-size:11px;color:var(--ink4);font-style:italic;margin-top:8px"></p>
+          <div id="modelMismatchWarning" class="model-mismatch-warning"><i class="fa-solid fa-triangle-exclamation"></i><span></span></div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+      <div class="results-panel">
+        <div class="res-title"><i class="fa-solid fa-chart-pie"></i> Results Summary</div>
+
+        <div class="res-row"><span class="res-lbl">Interest Rate</span><span class="res-val indigo"><span id="displayRate">0</span>%</span></div>
+        <div class="res-row"><span class="res-lbl">Downpayment Amount</span><span class="res-val" id="displayDpAmt">Rs. 0</span></div>
+        <div class="res-row"><span class="res-lbl">Loan Amount</span><span class="res-val" id="displayLoanAmt">Rs. 0</span></div>
+
+        <div class="split-legend"><span><span class="dot dp"></span> Downpayment</span><span><span class="dot loan"></span> Loan</span></div>
+        <div class="split-bar" aria-hidden="true"><div class="seg-dp" id="splitDpBar" style="width:50%"></div><div class="seg-loan" id="splitLoanBar" style="width:50%"></div></div>
+
+        <div class="emi-box">
+          <div class="emi-box-lbl">Monthly EMI</div>
+          <div class="emi-box-val" id="displayEMI">Rs. 0</div>
+          <div class="emi-box-sub" id="emiTenureLabel">for 12 months</div>
+        </div>
+
+        <div class="res-row"><span class="res-lbl">Auto Rounding Adj.</span><span class="res-val amber" id="displayAutoAdEmi">Rs. 0</span></div>
+
+        <div class="adv-box" style="margin:.75rem 0 .25rem">
+          <span class="adv-box-lbl">Total Advance EMI</span>
+          <span class="adv-box-val" id="displayTotalAdvEmi">Rs. 0</span>
+        </div>
+
+        <div class="res-row"><span class="res-lbl">Due EMI (Remaining)</span><span class="res-val" id="displayDueEmi">Rs. 0</span></div>
+        <div class="res-row"><span class="res-lbl">Total Interest Payable</span><span class="res-val red" id="displayTotalInterest">Rs. 0</span></div>
+
+        <button class="btn-preview" onclick="openPreview()"><i class="fa-solid fa-file-lines"></i> Preview Allocation Form &amp; Quotation</button>
+        <a href="https://wa.me/9779802315425" target="_blank" class="cta-primary btn-preview btn-whatsapp" style="border:none"><i class="fa-brands fa-whatsapp"></i> Apply via WhatsApp</a>
+      </div>
+
+      <div class="calc-card" style="background:linear-gradient(150deg,#fff 0%,var(--blueLt) 130%)">
+        <div class="calc-card-title" style="margin-bottom:.9rem"><span class="icon"><i class="fa-solid fa-shield-heart"></i></span>Why Finance With Us</div>
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-circle-check" style="color:var(--green);font-size:14px;margin-top:2px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">7 free services included with every finance booking</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-circle-check" style="color:var(--green);font-size:14px;margin-top:2px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">No hidden charges — every rupee shown before you sign</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-circle-check" style="color:var(--green);font-size:14px;margin-top:2px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">Documents ready in about 1 hour with Hulas Finserv</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="calc-card-title" style="margin-bottom:.9rem"><span class="icon"><i class="fa-solid fa-file-circle-check"></i></span>Documents Required — Applicant</div>
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-id-card" style="color:var(--blue);font-size:14px;margin-top:2px;width:14px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">Citizenship — original + 2 photocopies</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-id-badge" style="color:var(--blue);font-size:14px;margin-top:2px;width:14px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">Driving license (renewed) — original + 1 photocopy</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-camera-retro" style="color:var(--blue);font-size:14px;margin-top:2px;width:14px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">Passport-size photos — 3 recent copies</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-mobile-screen" style="color:var(--blue);font-size:14px;margin-top:2px;width:14px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">Mobile number registered in your own name</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-file-invoice-dollar" style="color:var(--blue);font-size:14px;margin-top:2px;width:14px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">Income proof — optional, but required (+1 photocopy) if down payment is 40% or more</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+          <p style="font-size:11.5px;color:var(--ink3);line-height:1.6"><i class="fa-solid fa-circle-info" style="color:var(--amber);margin-right:5px"></i>Under 25? Guarantor must be your father or mother (with relation proof), or another family member aged 25+ with relation proof, plus an appointment letter showing employment/business.</p>
+        </div>
+        <div style="margin-top:8px">
+          <p style="font-size:11.5px;color:var(--red);line-height:1.6;font-weight:600"><i class="fa-solid fa-triangle-exclamation" style="margin-right:5px"></i>Photocopies alone are not accepted — please bring all original documents.</p>
+        </div>
+      </div>
+
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ══════════ MOBILE STICKY BAR ══════════ -->
+<div class="mobile-bar" id="mobileBar">
+  <div class="emi-chunk">
+    <div class="lbl">Monthly EMI</div>
+    <div class="val" id="mobileEmiVal">Rs. 0</div>
+  </div>
+  <button class="mbtn" onclick="openPreview()"><i class="fa-solid fa-file-lines"></i> Preview</button>
+  <a href="https://wa.me/9779802315425" target="_blank" class="mbtn amber"><i class="fa-brands fa-whatsapp"></i></a>
+</div>
+
+<!-- ══════════ VALIDATION TOAST ══════════ -->
+<div class="validation-toast" id="validationToast"><i class="fa-solid fa-triangle-exclamation"></i><span id="validationToastMsg">Please fill required fields</span></div>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer style="padding:48px 0">
+  <div style="max-width:1280px;margin:0 auto;padding:0 20px">
+    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:24px;display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center">
+      <p style="color:#64748B;font-size:12px">© Samriddhi And Brothers Auto Pvt. Ltd. All prices are indicative and subject to change without notice.</p>
+      <p style="color:#475569;font-size:12px">Powered by <span style="color:var(--blue);font-weight:600">Go! YNG</span></p>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════ PREVIEW OVERLAY ══════════ -->
+<div id="previewOverlay" onclick="if(event.target===this) closePreview()">
+  <div class="preview-shell">
+    <div class="preview-toolbar">
+      <div class="ptitle"><i class="fa-solid fa-file-signature"></i> Document Preview</div>
+      <div class="ptabs">
+        <button class="ptab active" id="tabAlloc" onclick="switchTab('alloc')">Allocation Form</button>
+        <button class="ptab" id="tabQuote" onclick="switchTab('quote')">Quotation</button>
+      </div>
+      <div class="pactions">
+        <button class="pbtn print" onclick="printBothPages()"><i class="fa-solid fa-print"></i> Print Both</button>
+        <button class="pbtn close" onclick="closePreview()"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+
+    <div id="previewModelWarning" class="model-mismatch-warning" style="margin:12px 20px 0"></div>
+
+    <div class="preview-body">
+
+      <!-- PAGE 1 — ALLOCATION FORM -->
+      <div class="a4-page active" id="pageAlloc">
+        <div id="print-area" class="a4-paper">
+          <div style="text-align:center;margin-bottom:5mm">
+            <p style="font-size:15pt;font-weight:bold">HULAS FINSERV HIRE PURCHASE LIMITED</p>
+            <p style="font-size:15pt;font-weight:bold;margin-top:4px">DOWNPAYMENT ALLOCATION FORM</p>
+          </div>
+          <hr style="border:none;border-top:2px solid #000;margin:0 0 5mm 0">
+
+          <p style="font-size:13pt;font-weight:bold;margin-bottom:3px">Customer &amp; Vehicle Information</p>
+          <ul class="doc-list" style="margin-bottom:5mm">
+            <li><span class="lbl"><span>•</span><span>Date</span></span><span>:</span><span id="a4Date">--</span></li>
+            <li><span class="lbl"><span>•</span><span>Dealer Name</span></span><span>:</span><span id="a4Dealer">Samriddhi And Brothers Auto Pvt. Ltd.</span></li>
+            <li><span class="lbl"><span>•</span><span>Customer Name</span></span><span>:</span><strong id="a4CustName">--</strong></li>
+            <li><span class="lbl"><span>•</span><span>Contact Number</span></span><span>:</span><span id="a4CustPhone">--</span></li>
+            <li><span class="lbl"><span>•</span><span>Vehicle Model</span></span><span>:</span><strong id="a4Model">--</strong></li>
+          </ul>
+
+          <p style="font-size:13pt;font-weight:bold;margin-bottom:3px">Financial Details</p>
+          <ul class="doc-list fin" style="margin-bottom:5mm">
+            <li><span class="lbl"><span>•</span><span>Retail Price</span></span><span>:</span><span id="a4MRP">0.00</span></li>
+            <li><span class="lbl"><span>•</span><span>Down Payment</span></span><span>:</span><span id="a4DP">0.00</span></li>
+            <li><span class="lbl"><span>•</span><span>Loan Amount</span></span><span>:</span><span id="a4Loan">0.00</span></li>
+            <li><span class="lbl"><span>•</span><span>Interest Rate (%)</span></span><span>:</span><span id="a4Rate">--</span></li>
+            <li><span class="lbl"><span>•</span><span>Tenure (Months)</span></span><span>:</span><span id="a4Tenure">--</span></li>
+            <li style="display:block;margin-bottom:3px">• &nbsp;Registration Charge / Yatayat Expenses: &nbsp;<span id="a4Namsari">3,000.00</span>&nbsp;<em style="font-size:11pt">(suggested by HH)</em></li>
+            <li style="display:block;margin-bottom:3px">• &nbsp;Insurance Premium : &nbsp;<span id="a4Ins">0.00</span></li>
+            <li style="display:block;margin-bottom:3px">• &nbsp;Advance EMI (If Any) : &nbsp;<span id="a4AdvEmiAmt">0.00</span></li>
+            <li style="display:block;margin-bottom:3px">• &nbsp;Total Down-payment Amount paid by Customer : &nbsp;<strong id="a4TotalDP">0.00</strong></li>
+          </ul>
+
+          <p style="font-size:13pt;font-weight:bold;margin-top:4mm">Declaration</p>
+          <hr style="border:none;border-top:1px solid #000;margin:3px 0 3mm 0">
+          <p style="font-size:12.5pt;margin-bottom:2mm;line-height:1.55">We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.</p>
+          <p style="font-size:12.5pt">Signatures &amp; Authorization</p>
+
+          <div class="sig-row" style="margin-top:28mm">
+            <div class="sig-box">Customer's Signature</div>
+            <div class="sig-box">Dealer's Signature &amp; Stamp</div>
+            <div class="sig-box">LO's Signature &amp; Stamp</div>
+          </div>
+          <hr style="border:none;border-top:1px solid #000;margin-top:4mm">
+          <hr style="border:none;border-top:1px solid #000;margin-top:2px">
+        </div>
+
+      </div>
+
+      <!-- PAGE 2 — QUOTATION -->
+      <div class="a4-page" id="pageQuote">
+        <div id="quotation-print-area" class="a4-paper">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:3mm">
+            <div style="flex-shrink:0"><img src="logo.jpg" alt="Bajaj Logo" style="height:100px;width:auto;object-fit:contain" onerror="this.style.display='none'"></div>
+            <div style="flex:1;text-align:center">
+              <p style="font-size:15pt;font-weight:bold;margin-bottom:1px">Samriddhi &amp; Brothers Auto Pvt. Ltd.</p>
+              <p style="font-size:13pt;font-weight:bold;margin-bottom:2px">Authorized Dealer of Bajaj Motorcycle</p>
+              <p style="font-size:10.5pt;text-decoration:underline">Phidim-04, Panchthar, Nepal &nbsp; Tel: 024-523144, 9802315425 &nbsp; Email: Sambriddhi.bajaj@gmail.com</p>
+            </div>
+          </div>
+          <hr style="border:none;border-top:1.5px solid #000;margin:0 0 3mm 0">
+
+          <div style="text-align:right;font-size:12pt;margin-bottom:2mm">Date: &nbsp;<span id="a4Date2">--/--/----</span></div>
+          <div style="text-align:center;margin-bottom:4mm"><strong style="font-size:13pt;text-decoration:underline;letter-spacing:.5px">QUOTATION</strong></div>
+
+          <p style="font-size:12pt;margin-bottom:1mm">To Hulas Finserv Hire Purchase Limited</p>
+          <p style="font-size:12pt;font-weight:bold;margin-bottom:1mm">C/O &nbsp;<span id="a4CustName2">--</span></p>
+          <p style="font-size:12pt;margin-bottom:1mm">Dear Sir/Madam,</p>
+          <p style="font-size:12pt;margin-bottom:2mm">We are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
+
+          <p style="font-size:12pt;margin-bottom:1mm">Details :</p>
+          <p style="font-size:12pt;font-weight:bold;margin-bottom:1mm">Model: <span id="a4Model2">---</span></p>
+          <p style="font-size:12pt;font-weight:bold;margin-bottom:2mm">Price: <span id="a4MRP2">0</span>/- &nbsp;&nbsp;&nbsp; In Words: <span id="a4PriceWords">---</span></p>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;row-gap:2px;font-size:12pt;margin-bottom:2mm">
+            <p>Color: <span id="a4Color2">---</span></p>
+            <p>Regd No: <span id="a4Reg2">---</span></p>
+            <p>Engine No: <span id="a4Engine2">---</span></p>
+            <p>Chassis No: <span id="a4Chassis2" style="text-transform:uppercase">---</span></p>
+            <p>Make Year: &nbsp;<span id="a4MakeYear">2026</span></p>
+          </div>
+
+          <div id="a4DiscountRow" style="display:none;font-size:12pt;margin-bottom:2mm">
+            <p style="margin-bottom:1mm">Discount: Rs. <span id="a4DiscountAmt">0</span>/- &nbsp;&nbsp; In Words: <em id="a4DiscountWords">---</em></p>
+            <p style="margin-bottom:1mm">Net Price: Rs. <span id="a4NetPrice">0</span>/- &nbsp;&nbsp; In Words: <em id="a4NetPriceWords">---</em></p>
+          </div>
+
+          <div style="font-size:12pt;line-height:1.55;margin-top:1mm">
+            <p style="margin-bottom:1mm">Terms and Conditions :-</p>
+            <p style="margin-bottom:1mm">- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
+            <p style="margin-bottom:1mm">- Delivery :- Subject to availability</p>
+            <p style="margin-bottom:1mm">- Price Validity:- Subject to change without prior notice unless booked in advance at prevailing price.</p>
+            <p style="margin-bottom:1mm">- Taxes and Duties:- The price quoted above is inclusive of 13% VAT. However, other local taxes like – Road Tax, Registration Fees, Municipality Tax etc. will be on the account of purchaser.</p>
+            <p style="margin-bottom:1mm">- Insurance:- On account of purchaser.</p>
+            <p style="margin-bottom:1mm">- Warranty:- Warranty is not applicable on wear and tear and the items like Battery, Tyre, Tube, Brake Shoe, Clutch, Plate Cable, Chain Spocket and Bulb. Warranty Policy is detailed in the Owner's manual which will be provided at the time of the delivery of motorcycle.</p>
+            <p>- Servicing – 7 Free Servicing.</p>
+          </div>
+
+          <div style="text-align:right;font-size:12pt;margin-top:3mm"><p>Sincerely Your's</p></div>
+          <div style="text-align:right;font-size:12pt;margin-top:15mm"><p>Authorized Signature</p></div>
+          <hr style="border:none;border-top:1px solid #000;margin-top:4mm">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ HIDDEN PRINT WRAPPER ══════════ -->
+<div id="print-wrapper">
+  <div class="print-page a4-paper">
+    <div style="text-align:center;margin-bottom:5mm">
+      <p style="font-size:15pt;font-weight:bold">HULAS FINSERV HIRE PURCHASE LIMITED</p>
+      <p style="font-size:15pt;font-weight:bold;margin-top:4px">DOWNPAYMENT ALLOCATION FORM</p>
+    </div>
+    <hr style="border:none;border-top:2px solid #000;margin:0 0 5mm 0">
+    <p style="font-size:13pt;font-weight:bold;margin-bottom:3px">Customer &amp; Vehicle Information</p>
+    <ul class="doc-list" style="margin-bottom:5mm">
+      <li><span class="lbl"><span>•</span><span>Date</span></span><span>:</span><span id="p1Date">--</span></li>
+      <li><span class="lbl"><span>•</span><span>Dealer Name</span></span><span>:</span><span id="p1Dealer">Samriddhi And Brothers Auto Pvt. Ltd.</span></li>
+      <li><span class="lbl"><span>•</span><span>Customer Name</span></span><span>:</span><strong id="p1CustName">--</strong></li>
+      <li><span class="lbl"><span>•</span><span>Contact Number</span></span><span>:</span><span id="p1CustPhone">--</span></li>
+      <li><span class="lbl"><span>•</span><span>Vehicle Model</span></span><span>:</span><strong id="p1Model">--</strong></li>
+    </ul>
+    <p style="font-size:13pt;font-weight:bold;margin-bottom:3px">Financial Details</p>
+    <ul class="doc-list fin" style="margin-bottom:5mm">
+      <li><span class="lbl"><span>•</span><span>Retail Price</span></span><span>:</span><span id="p1MRP">0.00</span></li>
+      <li><span class="lbl"><span>•</span><span>Down Payment</span></span><span>:</span><span id="p1DP">0.00</span></li>
+      <li><span class="lbl"><span>•</span><span>Loan Amount</span></span><span>:</span><span id="p1Loan">0.00</span></li>
+      <li><span class="lbl"><span>•</span><span>Interest Rate (%)</span></span><span>:</span><span id="p1Rate">--</span></li>
+      <li><span class="lbl"><span>•</span><span>Tenure (Months)</span></span><span>:</span><span id="p1Tenure">--</span></li>
+      <li style="display:block;margin-bottom:3px">• &nbsp;Registration Charge / Yatayat Expenses: &nbsp;<span id="p1Namsari">3,000.00</span>&nbsp;<em style="font-size:11pt">(suggested by HH)</em></li>
+      <li style="display:block;margin-bottom:3px">• &nbsp;Insurance Premium : &nbsp;<span id="p1Ins">0.00</span></li>
+      <li style="display:block;margin-bottom:3px">• &nbsp;Advance EMI (If Any) : &nbsp;<span id="p1AdvEmi">0.00</span></li>
+      <li style="display:block;margin-bottom:3px">• &nbsp;Total Down-payment Amount paid by Customer : &nbsp;<strong id="p1TotalDP">0.00</strong></li>
+    </ul>
+    <p style="font-size:13pt;font-weight:bold;margin-top:4mm">Declaration</p>
+    <hr style="border:none;border-top:1px solid #000;margin:3px 0 3mm 0">
+    <p style="font-size:11.5pt;margin-bottom:2mm;line-height:1.55">We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.</p>
+    <p style="font-size:11.5pt">Signatures &amp; Authorization</p>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:6px;white-space:nowrap;margin-top:24mm">
+      <div style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:10.5pt">Customer's Signature</div>
+      <div style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:10.5pt">Dealer's Signature &amp; Stamp</div>
+      <div style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:10.5pt">LO's Signature &amp; Stamp</div>
+    </div>
+    <hr style="border:none;border-top:1px solid #000;margin-top:4mm">
+    <hr style="border:none;border-top:1px solid #000;margin-top:2px">
+  </div>
+
+  <div class="print-page a4-paper">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:3mm">
+      <div style="flex-shrink:0"><img src="logo.jpg" alt="Bajaj Logo" style="height:100px;width:auto;object-fit:contain" onerror="this.style.display='none'"></div>
+      <div style="flex:1;text-align:center">
+        <p style="font-size:15pt;font-weight:bold;margin-bottom:1px">Samriddhi &amp; Brothers Auto Pvt. Ltd.</p>
+        <p style="font-size:13pt;font-weight:bold;margin-bottom:2px">Authorized Dealer of Bajaj Motorcycle</p>
+        <p style="font-size:10.5pt;text-decoration:underline">Phidim-04, Panchthar, Nepal &nbsp; Tel: 024-523144, 9802315425 &nbsp; Email: Sambriddhi.bajaj@gmail.com</p>
+      </div>
+    </div>
+    <hr style="border:none;border-top:1.5px solid #000;margin:0 0 3mm 0">
+    <div style="text-align:right;font-size:12pt;margin-bottom:2mm">Date: &nbsp;<span id="p2Date">--/--/----</span></div>
+    <div style="text-align:center;margin-bottom:4mm"><strong style="font-size:13pt;text-decoration:underline;letter-spacing:.5px">QUOTATION</strong></div>
+    <p style="font-size:12pt;margin-bottom:1mm">To Hulas Finserv Hire Purchase Limited</p>
+    <p style="font-size:12pt;font-weight:bold;margin-bottom:1mm">C/O &nbsp;<span id="p2CustName">--</span></p>
+    <p style="font-size:12pt;margin-bottom:1mm">Dear Sir/Madam,</p>
+    <p style="font-size:12pt;margin-bottom:1mm">We are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
+    <p style="font-size:12pt;margin-bottom:1mm">Details :</p>
+    <p style="font-size:12pt;font-weight:bold;margin-bottom:1mm">Model: <span id="p2Model">---</span></p>
+    <p style="font-size:12pt;font-weight:bold;margin-bottom:2mm">Price: <span id="p2MRP">0</span>/- In Words: <span id="p2PriceWords">---</span></p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;row-gap:2px;font-size:12pt;margin-bottom:2mm">
+      <p>Color: <span id="p2Color">---</span></p>
+      <p>Regd No: <span id="p2Reg">---</span></p>
+      <p>Engine No: <span id="p2Engine">---</span></p>
+      <p>Chassis No: <span id="p2Chassis" style="text-transform:uppercase">---</span></p>
+      <p>Make Year: &nbsp;<span id="p2MakeYear">2026</span></p>
+    </div>
+    <div id="p2DiscountRow" style="display:none;font-size:12pt;margin-bottom:2mm">
+      <p style="margin-bottom:1mm">Discount: Rs. <span id="p2DiscountAmt">0</span>/- In Words: <em id="p2DiscountWords">---</em></p>
+      <p style="margin-bottom:1mm">Net Price: Rs. <span id="p2NetPrice">0</span>/- In Words: <em id="p2NetPriceWords">---</em></p>
+    </div>
+    <div style="font-size:12pt;line-height:1.5">
+      <p style="margin-bottom:1mm">Terms and Conditions :-</p>
+      <p style="margin-bottom:1mm">- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
+      <p style="margin-bottom:1mm">- Delivery :- Subject to availability</p>
+      <p style="margin-bottom:1mm">- Price Validity:- Subject to change without prior notice unless booked in advance at prevailing price.</p>
+      <p style="margin-bottom:1mm">- Taxes and Duties:- The price quoted above is inclusive of 13% VAT. However, other local taxes like – Road Tax, Registration Fees, Municipality Tax etc. will be on the account of purchaser.</p>
+      <p style="margin-bottom:1mm">- Insurance:- On account of purchaser.</p>
+      <p style="margin-bottom:1mm">- Warranty:- Warranty is not applicable on wear and tear and the items like Battery, Tyre, Tube, Brake Shoe, Clutch, Plate Cable, Chain Spocket and Bulb. Warranty Policy is detailed in the Owner's manual which will be provided at the time of the delivery of motorcycle.</p>
+      <p>- Servicing – 7 Free Servicing.</p>
+    </div>
+    <div style="text-align:right;font-size:12pt;margin-top:3mm"><p>Sincerely Your's</p></div>
+    <div style="text-align:right;font-size:12pt;margin-top:14mm"><p>Authorized Signature</p></div>
+    <hr style="border:none;border-top:1px solid #000;margin-top:4mm">
+  </div>
+</div>
+
+<!-- ══════════ SCRIPTS ══════════ -->
+<script>
+/* Intro loader: animated percent counter + dismissal (index-style) */
+window.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('financeLoader');
+  const percentEl = document.getElementById('intro-percent');
+  const totalMs = 2300;
+  const startMs = performance.now();
+
+  function tickPercent(now) {
+    const elapsed = now - startMs;
+    const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
+    if(percentEl) percentEl.textContent = pct + '%';
+    if(elapsed < totalMs) requestAnimationFrame(tickPercent);
+  }
+  requestAnimationFrame(tickPercent);
+
+  setTimeout(() => {
+    overlay?.classList.add('fade-out');
+    document.body.classList.add('site-loaded');
+  }, totalMs);
+});
+
+/* Hamburger */
+const btn=document.getElementById('hamburger-btn'),mMenu=document.getElementById('mobile-menu'),icoOpen=document.getElementById('icon-open'),icoClose=document.getElementById('icon-close');
+btn?.addEventListener('click',()=>{const open=mMenu.classList.toggle('open');icoOpen.style.display=open?'none':'block';icoClose.style.display=open?'block':'none';});
+
+const makeYearEl=document.getElementById('makeYearInput');
+if(makeYearEl && !makeYearEl.value) makeYearEl.value=new Date().getFullYear();
+
+const CUSTOM_SELECT_IDS=['modelSelect','dpPercent','tenure'];
+function buildCustomSelect(selectId){
+  const real=document.getElementById(selectId);
+  const panel=document.getElementById(selectId+'Panel');
+  if(!real||!panel) return;
+  panel.innerHTML='';
+  Array.from(real.options).forEach((opt,i)=>{
+    const item=document.createElement('div');
+    item.className='cst-option'+(opt.selected?' selected':'');
+    item.setAttribute('role','option');
+    item.dataset.index=i;
+    item.innerHTML=`<span class="cst-dot"></span><span>${opt.text}</span>`;
+    item.addEventListener('click',()=>{
+      real.selectedIndex=i;
+      real.dispatchEvent(new Event('input',{bubbles:true}));
+      syncCustomSelectUI(selectId);
+      closeCustomSelect(selectId);
+    });
+    panel.appendChild(item);
+  });
+  syncCustomSelectUI(selectId);
+}
+function syncCustomSelectUI(selectId){
+  const real=document.getElementById(selectId);
+  const triggerText=document.getElementById(selectId+'TriggerText');
+  const panel=document.getElementById(selectId+'Panel');
+  if(!real||!triggerText) return;
+  const opt=real.options[real.selectedIndex];
+  triggerText.textContent=opt?opt.text:'Select';
+  if(panel){
+    panel.querySelectorAll('.cst-option').forEach(el=>{
+      el.classList.toggle('selected',Number(el.dataset.index)===real.selectedIndex);
+    });
+  }
+}
+function openCustomSelect(selectId){
+  document.getElementById(selectId+'Panel')?.classList.add('open');
+  document.getElementById(selectId+'Trigger')?.classList.add('open');
+  document.getElementById(selectId+'Trigger')?.setAttribute('aria-expanded','true');
+  document.getElementById(selectId+'Wrap')?.closest('.calc-card')?.classList.add('dropdown-open');
+}
+function closeCustomSelect(selectId){
+  document.getElementById(selectId+'Panel')?.classList.remove('open');
+  document.getElementById(selectId+'Trigger')?.classList.remove('open');
+  document.getElementById(selectId+'Trigger')?.setAttribute('aria-expanded','false');
+  document.getElementById(selectId+'Wrap')?.closest('.calc-card')?.classList.remove('dropdown-open');
+}
+function closeAllCustomSelects(exceptId){
+  CUSTOM_SELECT_IDS.forEach(id=>{ if(id!==exceptId) closeCustomSelect(id); });
+}
+CUSTOM_SELECT_IDS.forEach(selectId=>{
+  document.getElementById(selectId+'Trigger')?.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    const panel=document.getElementById(selectId+'Panel');
+    const wasOpen=panel?.classList.contains('open');
+    closeAllCustomSelects();
+    if(!wasOpen) openCustomSelect(selectId);
+  });
+});
+document.addEventListener('click',(e)=>{
+  CUSTOM_SELECT_IDS.forEach(selectId=>{
+    const wrap=document.getElementById(selectId+'Wrap');
+    if(wrap && !wrap.contains(e.target)) closeCustomSelect(selectId);
+  });
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeAllCustomSelects();
+});
+
+buildCustomSelect('dpPercent');
+buildCustomSelect('tenure');
+
+document.querySelectorAll('.rate-chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    const sel=document.getElementById('dpPercent');
+    if(sel){sel.value=chip.dataset.dp;sel.dispatchEvent(new Event('input',{bubbles:true}));syncCustomSelectUI('dpPercent');}
+  });
+});
+
+let insuranceType = 'indoor';
+const ACC_DEFAULTS_INDOOR = { helmetInput:2500, legguardInput:1800, seatcoverInput:650, othersInput:0 };
+function applyAccessoryDefaults(type){
+  Object.keys(ACC_DEFAULTS_INDOOR).forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.value = type==='outdoor' ? 0 : ACC_DEFAULTS_INDOOR[id];
+  });
+}
+document.querySelectorAll('#insuranceTypeToggle .itoggle-btn').forEach(btnEl=>{
+  btnEl.addEventListener('click',()=>{
+    insuranceType = btnEl.dataset.itype;
+    document.querySelectorAll('#insuranceTypeToggle .itoggle-btn').forEach(b=>b.classList.toggle('active', b===btnEl));
+    applyAccessoryDefaults(insuranceType);
+    if(typeof calculateFinance==='function') calculateFinance();
+  });
+});
+
+function showFieldError(inputId,errorId,show){
+  const input=document.getElementById(inputId);
+  const err=document.getElementById(errorId);
+  if(input) input.classList.toggle('field-error',show);
+  if(err) err.classList.toggle('show',show);
+}
+function showValidationToast(msg){
+  const toast=document.getElementById('validationToast');
+  const msgEl=document.getElementById('validationToastMsg');
+  if(!toast) return;
+  if(msgEl) msgEl.textContent=msg;
+  toast.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>toast.classList.remove('show'),3200);
+}
+function validateRequiredFields(){
+  const name=document.getElementById('custNameInput')?.value.trim()||'';
+  const phone=document.getElementById('custPhoneInput')?.value.trim()||'';
+  const chassis=document.getElementById('manualChassis')?.value.trim()||'';
+  const engine=document.getElementById('manualEngine')?.value.trim()||'';
+  const reg=document.getElementById('manualReg')?.value.trim()||'';
+  const color=document.getElementById('manualColor')?.value.trim()||'';
+  const phoneValid=/^[0-9]{10}$/.test(phone);
+
+  showFieldError('custNameInput','custNameError',name.length===0);
+  showFieldError('custPhoneInput','custPhoneError',!phoneValid);
+  showFieldError('manualChassis','manualChassisError',chassis.length===0);
+  showFieldError('manualEngine','manualEngineError',engine.length===0);
+  showFieldError('manualReg','manualRegError',reg.length===0);
+  showFieldError('manualColor','manualColorError',color.length===0);
+
+  if(name.length===0) return {ok:false,msg:'Please enter the customer name.',focus:'custNameInput'};
+  if(!phoneValid) return {ok:false,msg:'Please enter a valid 10-digit phone number.',focus:'custPhoneInput'};
+  if(chassis.length===0) return {ok:false,msg:'Please enter the chassis number.',focus:'manualChassis'};
+  if(engine.length===0) return {ok:false,msg:'Please enter the engine number.',focus:'manualEngine'};
+  if(reg.length===0) return {ok:false,msg:'Please enter the registration number.',focus:'manualReg'};
+  if(color.length===0) return {ok:false,msg:'Please enter the vehicle color.',focus:'manualColor'};
+  return {ok:true};
+}
+['custNameInput','custPhoneInput','manualChassis','manualEngine','manualReg','manualColor'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input',()=>{
+    showFieldError(id,id+'Error',false);
+  });
+});
+
+function openPreview(){
+  const result=validateRequiredFields();
+  if(!result.ok){
+    showValidationToast(result.msg);
+    document.getElementById(result.focus)?.scrollIntoView({behavior:'smooth',block:'center'});
+    document.getElementById(result.focus)?.focus();
+    return;
+  }
+  syncAllToA4();
+  const sel=document.getElementById('modelSelect');
+  const currentModelText=sel?.options[sel.selectedIndex]?.text||'';
+  showModelMismatchWarning(currentModelText,window._lastChassisModel||'','previewModelWarning');
+  document.getElementById('previewOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closePreview(){
+  document.getElementById('previewOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function switchTab(which){
+  document.getElementById('pageAlloc').classList.toggle('active',which==='alloc');
+  document.getElementById('pageQuote').classList.toggle('active',which==='quote');
+  document.getElementById('tabAlloc').classList.toggle('active',which==='alloc');
+  document.getElementById('tabQuote').classList.toggle('active',which==='quote');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closePreview();
+});
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
+  authDomain: "first-project-2082-12-26.firebaseapp.com",
+  projectId: "first-project-2082-12-26",
+  storageBucket: "first-project-2082-12-26.firebasestorage.app",
+  messagingSenderId: "545170954251",
+  appId: "1:545170954251:web:0d2f7905834af3b0be8f0e"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+let allBikes = [];
+
+let invList = [];
+onSnapshot(collection(db,"inventory"), snap=>{
+  invList = snap.docs.map(d=>({id:d.id,...d.data()}));
+  const activeInput=document.getElementById('chassisSearch');
+  if(activeInput && document.activeElement===activeInput && activeInput.value.trim()){
+    renderChassisDropdown(searchChassisSuggestions(activeInput.value));
+  }
+});
+
+function sortBySn(bikes){
+  return [...bikes].sort((a,b)=>{
+    const snA=(a.sn!==undefined&&a.sn!==null&&a.sn!=='')?Number(a.sn):9999;
+    const snB=(b.sn!==undefined&&b.sn!==null&&b.sn!=='')?Number(b.sn):9999;
+    return snA-snB;
+  });
+}
+
+function numberToWords(num){
+  if(num===0) return "Zero";
+  const a=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+  const b=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  function inWords(n){
+    if(n<20) return a[n];
+    if(n<100) return b[Math.floor(n/10)]+" "+a[n%10];
+    if(n<1000) return a[Math.floor(n/100)]+" Hundred "+inWords(n%100);
+    if(n<100000) return inWords(Math.floor(n/1000))+" Thousand "+inWords(n%1000);
+    if(n<10000000) return inWords(Math.floor(n/100000))+" Lakh "+inWords(n%100000);
+    return inWords(Math.floor(n/10000000))+" Crore "+inWords(n%10000000);
+  }
+  return inWords(num).replace(/\s+/g,' ').trim();
+}
+
+function findDefaultBikeIndex(list){
+  const idx=list.findIndex(b=>modelsLikelyMatch(b.name,'Pulsar 150 SD'));
+  return idx>=0?idx:0;
+}
+
+async function fetchBikes(){
+  try{
+    const snapshot=await getDocs(collection(db,"bikes"));
+    allBikes=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+    const sorted=sortBySn(allBikes);
+    const select=document.getElementById('modelSelect');
+    if(select){
+      const defaultIdx=findDefaultBikeIndex(sorted);
+      select.innerHTML=sorted.map((bike,idx)=>`<option value="${bike.id}" ${idx===defaultIdx?"selected":""}>${bike.name}</option>`).join('');
+      setTimeout(()=>{
+        buildCustomSelect('modelSelect');
+        setTimeout(calculateFinance,100);
+      },50);
+    }
+  }catch(e){
+    console.error("Error fetching bikes:",e);
+    allBikes=[
+      {id:"d1",name:"Pulsar N150",price:339900,Insurance:8500,financeInsurance:7890},
+      {id:"d2",name:"Pulsar N160",price:379900,Insurance:9200,financeInsurance:8400},
+      {id:"d3",name:"Pulsar NS200",price:449900,Insurance:10500,financeInsurance:9800},
+      {id:"d4",name:"Dominar 250",price:489900,Insurance:11500,financeInsurance:10500},
+      {id:"d5",name:"Avenger Street 160",price:349900,Insurance:8800,financeInsurance:8100},
+      {id:"d6",name:"Platina 100",price:219900,Insurance:6200,financeInsurance:5800},
+      {id:"d7",name:"Chetak Electric",price:389900,Insurance:7500,financeInsurance:6900},
+    ];
+    const select=document.getElementById('modelSelect');
+    if(select){
+      const defaultIdx=findDefaultBikeIndex(allBikes);
+      select.innerHTML=allBikes.map((b,idx)=>`<option value="${b.id}" ${idx===defaultIdx?"selected":""}>${b.name}</option>`).join('');
+      setTimeout(()=>{
+        buildCustomSelect('modelSelect');
+        setTimeout(calculateFinance,100);
+      },50);
+    }
+  }
+}
+
+window.findChassis=async function(){
+  const searchVal=document.getElementById('chassisSearch').value.trim();
+  const statusEl=document.getElementById('searchStatus');
+  if(!statusEl||!searchVal) return;
+  statusEl.innerText="Searching Inventory…"; statusEl.style.color="#005EA6";
+  try{
+    const q=query(collection(db,"inventory"),where("chassis","==",searchVal));
+    const qs=await getDocs(q);
+    if(!qs.empty){
+      const data=qs.docs[0].data();
+      applyChassisData(data,searchVal);
+      statusEl.innerText="Vehicle data loaded."; statusEl.style.color="#16A34A";
+    }else{
+      document.getElementById('manualChassis').value=searchVal;
+      statusEl.innerText="Not found in inventory — enter manually."; statusEl.style.color="#F59E0B";
+    }
+  }catch(err){
+    statusEl.innerText="Connection error."; statusEl.style.color="#DC2626";
+  }
+};
+
+// ═══ Model name/CC/series parsing for chassis↔model mismatch warnings ═══
+function parseModelInfo(str){
+  const s=(str||'').toString().toUpperCase().replace(/^BAJAJ\s+/,'');
+  const brandMatch=s.match(/[A-Z]+/);
+  const brand=brandMatch?brandMatch[0]:'';
+  const ccMatch=s.match(/\d{2,4}/);
+  const cc=ccMatch?ccMatch[0]:'';
+  // series token that sits directly against the cc number, e.g. "N160", "NS200", "160 DD"
+  // NS must be checked before N, and longer tokens before their prefixes.
+  const SERIES_TOKENS=['NS','RS','AS','DD','SD','N'];
+  let series='';
+  const tokenAlt=SERIES_TOKENS.join('|');
+  const preSeries=s.match(new RegExp('(?:'+tokenAlt+')\\s*\\d{2,4}'));
+  if(preSeries){
+    const m=preSeries[0].match(new RegExp('^(?:'+tokenAlt+')'));
+    if(m) series=m[0];
+  }
+  if(!series){
+    const postSeries=s.match(new RegExp('\\d{2,4}\\s*(?:'+tokenAlt+'|ES|FI|ABS|DTSI)'));
+    if(postSeries){
+      const m=postSeries[0].match(new RegExp('(?:'+tokenAlt+'|ES|FI|ABS|DTSI)$'));
+      if(m) series=m[0];
+    }
+  }
+  // "Single Disc" / "Double Disc" spelled out instead of SD/DD abbreviations
+  if(!series){
+    if(/SINGLE\s*DISC/.test(s)) series='SD';
+    else if(/DOUBLE\s*DISC|DUAL\s*DISC/.test(s)) series='DD';
+  }
+  if(!series) series='SD'; // unspecified series is treated as the base/SD variant
+  return {brand,cc,series,raw:s};
+}
+function brandsLikelyMatch(brandA,brandB){
+  if(!brandA||!brandB) return true;
+  if(brandA===brandB) return true;
+  // tolerate a "Bajaj" prefix or similar extra wording on one side only
+  return brandA.includes(brandB)||brandB.includes(brandA);
+}
+function modelsLikelyMatch(modelA,modelB){
+  const A=parseModelInfo(modelA), B=parseModelInfo(modelB);
+  if(!A.cc||!B.cc) return true; // not enough info to compare safely — don't warn
+  if(!brandsLikelyMatch(A.brand,B.brand)) return false;
+  if(A.cc!==B.cc) return false;
+  if(A.series!==B.series) return false;
+  return true;
+}
+function showModelMismatchWarning(selectedModelText,chassisModelText,targetId='modelMismatchWarning'){
+  const el=document.getElementById(targetId);
+  if(!el) return;
+  if(!chassisModelText || modelsLikelyMatch(selectedModelText,chassisModelText)){
+    el.style.display='none';
+    el.textContent='';
+    return;
+  }
+  el.innerHTML=`<i class="fa-solid fa-triangle-exclamation"></i> This chassis belongs to <strong>${chassisModelText}</strong>, not <strong>${selectedModelText||'the selected model'}</strong>. Model has been switched — please confirm before proceeding.`;
+  el.style.display='flex';
+}
+
+function applyChassisData(data,fallbackChassis){
+  document.getElementById('manualChassis').value=data.chassis||fallbackChassis||"";
+  document.getElementById('manualEngine').value=data.engine||"";
+  document.getElementById('manualReg').value=data.regNo||"";
+  document.getElementById('manualColor').value=data.color||"";
+  window._lastChassisModel=data.model||'';
+  if(data.model){
+    const sel=document.getElementById('modelSelect');
+    const previouslySelectedText=sel.options[sel.selectedIndex]?.text||'';
+    showModelMismatchWarning(previouslySelectedText,data.model);
+    for(let i=0;i<sel.options.length;i++){
+      if(sel.options[i].text===data.model){sel.selectedIndex=i;syncCustomSelectUI('modelSelect');calculateFinance();break;}
+    }
+  }else{
+    showModelMismatchWarning('','');
+  }
+  showFieldError('manualChassis','manualChassisError',false);
+  showFieldError('manualEngine','manualEngineError',false);
+  showFieldError('manualReg','manualRegError',false);
+  showFieldError('manualColor','manualColorError',false);
+}
+// If the chassis number is hand-edited after a lookup, the stored model no
+// longer reliably applies to it, so stop comparing against it.
+document.getElementById('manualChassis')?.addEventListener('input',()=>{
+  window._lastChassisModel='';
+  showModelMismatchWarning('','');
+});
+
+function normChassis(v){ return (v||'').toString().trim().toUpperCase().replace(/\s+/g,''); }
+function chassisMatchScore(chassis,q){
+  chassis=normChassis(chassis); q=normChassis(q);
+  if(!chassis||!q) return -1;
+  if(chassis===q) return 100;
+  if(chassis.endsWith(q)) return 80;
+  if(chassis.startsWith(q)) return 60;
+  if(chassis.includes(q)) return 40;
+  return -1;
+}
+function searchChassisSuggestions(q){
+  if(!q||!q.trim()) return [];
+  return invList
+    .map(s=>({s,score:chassisMatchScore(s.chassis,q)}))
+    .filter(x=>x.score>=0)
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,8)
+    .map(x=>x.s);
+}
+function colourDotHex(col=''){
+  const map={red:'#ef4444',blue:'#3b82f6',black:'#374151',white:'#e2e8f0',orange:'#f97316',green:'#22c55e',yellow:'#eab308',silver:'#94a3b8',grey:'#64748b',gray:'#64748b',maroon:'#be123c',brown:'#92400e',purple:'#7c3aed',pink:'#ec4899'};
+  const k=(col||'').toLowerCase().split(/\s+/).find(w=>map[w]);
+  return k?map[k]:'#005EA6';
+}
+function renderChassisDropdown(list){
+  const dd=document.getElementById('chassisSearchDropdown');
+  if(!dd) return;
+  if(!list.length){
+    dd.innerHTML='<div class="csd-empty">No matching chassis found.</div>';
+    dd.style.display='block';
+    return;
+  }
+  dd.innerHTML=list.map(s=>`
+    <button type="button" class="csd-item" data-id="${s.id}">
+      <span class="csd-main">
+        <span class="csd-chassis">${(s.chassis||'—').toUpperCase()}</span>
+        <span class="csd-sub">${s.model||'—'} · Engine ${s.engine||'—'}${s.regNo?(' · '+s.regNo):''}</span>
+      </span>
+      <span class="csd-color-dot" style="background:${colourDotHex(s.color||'')}"></span>
+    </button>`).join('');
+  dd.style.display='block';
+  dd.querySelectorAll('.csd-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      const rec=invList.find(x=>x.id===item.dataset.id);
+      if(rec){
+        document.getElementById('chassisSearch').value=rec.chassis||'';
+        applyChassisData(rec,rec.chassis);
+        const statusEl=document.getElementById('searchStatus');
+        if(statusEl){statusEl.innerText="Vehicle data loaded."; statusEl.style.color="#16A34A";}
+      }
+      dd.style.display='none';
+    });
+  });
+}
+const chassisSearchInput=document.getElementById('chassisSearch');
+chassisSearchInput?.addEventListener('input',(e)=>{
+  const val=e.target.value;
+  if(!val.trim()){ document.getElementById('chassisSearchDropdown').style.display='none'; return; }
+  renderChassisDropdown(searchChassisSuggestions(val));
+});
+chassisSearchInput?.addEventListener('focus',(e)=>{
+  if(e.target.value.trim()) renderChassisDropdown(searchChassisSuggestions(e.target.value));
+});
+document.addEventListener('click',(e)=>{
+  const wrap=document.getElementById('chassisSearchWrap');
+  if(wrap && !wrap.contains(e.target)){
+    const dd=document.getElementById('chassisSearchDropdown');
+    if(dd) dd.style.display='none';
+  }
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    const dd=document.getElementById('chassisSearchDropdown');
+    if(dd) dd.style.display='none';
+  }
+});
+
+window.calculateFinance=function(){
+  let selectedId=document.getElementById('modelSelect')?.value;
+  let bike=allBikes.find(b=>b.id===selectedId);
+  if(!bike && allBikes.length>0){
+    console.warn('Selected bike not found, using first bike');
+    bike=allBikes[0];
+    const select=document.getElementById('modelSelect');
+    if(select) select.value=bike.id;
+  }
+  if(!bike) return;
+
+  // Re-check model vs the chassis on record every time the model changes,
+  // not just at the moment the chassis was first looked up.
+  if(window._lastChassisModel) showModelMismatchWarning(bike.name,window._lastChassisModel);
+
+  const getVal=(id,fb=0)=>parseFloat(document.getElementById(id)?.value)||fb;
+
+  const mrp=parseFloat(bike.price)||0;
+  const cashInsurance=parseFloat(bike.Insurance)||0;
+  const financeInsurance=parseFloat(bike.financeInsurance)||cashInsurance;
+  const activeInsurance=(typeof insuranceType!=='undefined' && insuranceType==='outdoor') ? financeInsurance : cashInsurance;
+  const discount=getVal('discountInput');
+  const customerExtraAdv=getVal('advEmiInput');
+  const namsari=getVal('namsariInput',3000);
+  const accCost=getVal('helmetInput')+getVal('legguardInput')+getVal('seatcoverInput')+getVal('othersInput');
+  const dpPercentVal=getVal('dpPercent',50);
+  const tenure=getVal('tenure',12);
+
+  const afterDiscount=mrp-discount;
+  const dpAmountOnly=afterDiscount*(dpPercentVal/100);
+  const loanAmount=afterDiscount-dpAmountOnly;
+
+  let rate=13.99;
+  if(dpPercentVal>=60) rate=8.99;
+  else if(dpPercentVal>=50) rate=11.99;
+  else if(dpPercentVal>=40) rate=12.99;
+
+  const monthlyRate=(rate/12)/100;
+  const emi=loanAmount>0
+    ? (loanAmount*monthlyRate*Math.pow(1+monthlyRate,tenure))/(Math.pow(1+monthlyRate,tenure)-1)
+    : 0;
+
+  const rawTotalDownpayment=dpAmountOnly+namsari+activeInsurance+emi+accCost+customerExtraAdv;
+  const lastThreeDigits=rawTotalDownpayment%1000;
+  const autoRounding=lastThreeDigits>0?(1000-lastThreeDigits):0;
+  const finalTotalDP=rawTotalDownpayment+autoRounding;
+
+  const totalAdvEmi=emi+autoRounding+customerExtraAdv;
+  const dueEmi=(emi*tenure)-totalAdvEmi;
+  const totalInterest=(emi*tenure)-loanAmount;
+  const finalTotalDP_A4=dpAmountOnly+namsari+financeInsurance+totalAdvEmi;
+
+  const animateValue=(id,targetNum,format='default')=>{
+    const el=document.getElementById(id);
+    if(!el){
+      console.warn('Element not found:', id);
+      return;
+    }
+    
+    if(!Number.isFinite(targetNum)) targetNum=0;
+    
+    const getText=(val)=>{
+      const num=Number.isFinite(val)?val:0;
+      if(format==='default') return `RS. ${Math.round(num).toLocaleString()}`;
+      if(format==='pct') return `${Math.round(num)}%`;
+      if(format==='dec') return `RS. ${num.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+      return String(Math.round(num));
+    };
+
+    // Directly set the final value — no count-up stepping.
+    el.classList.remove('updating');
+    el.textContent=getText(targetNum);
+    el.dataset.value=targetNum;
+    el.classList.add('updated');
+    setTimeout(()=>el.classList.remove('updated'),600);
+  };
+
+  animateValue('displayTotalDP',Math.round(finalTotalDP),'default');
+  animateValue('mrp',mrp,'default');
+  animateValue('afterDiscount',afterDiscount,'default');
+  animateValue('displayIns',activeInsurance,'default');
+  animateValue('displayRate',rate,'pct');
+  animateValue('displayDpAmt',dpAmountOnly,'default');
+  animateValue('displayLoanAmt',loanAmount,'default');
+  animateValue('displayEMI',emi,'dec');
+  animateValue('displayAutoAdEmi',autoRounding,'dec');
+  animateValue('displayTotalAdvEmi',totalAdvEmi,'dec');
+  animateValue('displayDueEmi',dueEmi,'dec');
+  animateValue('displayTotalInterest',totalInterest,'dec');
+  animateValue('mobileEmiVal',Math.round(emi),'default');
+  
+  const tenureLbl=document.getElementById('emiTenureLabel');
+  if(tenureLbl) tenureLbl.textContent=`for ${tenure} months`;
+
+  document.querySelectorAll('.rate-chip').forEach(chip=>chip.classList.toggle('active',parseFloat(chip.dataset.dp)===dpPercentVal));
+  
+  const dpBar=document.getElementById('splitDpBar'), loanBar=document.getElementById('splitLoanBar');
+  if(dpBar&&loanBar){
+    const targetDpWidth=dpPercentVal;
+    const targetLoanWidth=100-dpPercentVal;
+    const currentDpWidth=parseFloat(dpBar.style.width)||50;
+    const currentLoanWidth=parseFloat(loanBar.style.width)||50;
+    
+    const animateBar=(bar,from,to)=>{
+      let step=0;
+      const steps=20;
+      const tick=()=>{
+        step++;
+        const progress=step/steps;
+        const easeProgress=progress<.5?2*progress*progress:1-Math.pow(-2*progress+2,2)/2;
+        const current=from+((to-from)*easeProgress);
+        bar.style.width=current+'%';
+        if(step<steps) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+    animateBar(dpBar,currentDpWidth,targetDpWidth);
+    animateBar(loanBar,currentLoanWidth,targetLoanWidth);
+  }
+
+  window._lastCalc={bike,mrp,discount,afterDiscount,cashInsurance,financeInsurance,activeInsurance,insuranceType,rate,dpAmountOnly,loanAmount,emi,autoRounding,totalAdvEmi,tenure,namsari,finalTotalDP,finalTotalDP_A4};
+};
+
+window.syncAllToA4=function(){
+  const c=window._lastCalc;
+  if(!c) return;
+  const fmt=n=>Math.round(n).toLocaleString('en-IN');
+  const fmtDec=n=>Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const set=(id,val)=>{const el=document.getElementById(id); if(el) el.innerText=val;};
+  const today=new Date();
+  const dateStr=today.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  const custName=document.getElementById('custNameInput')?.value||"--";
+  const custPhone=document.getElementById('custPhoneInput')?.value||"--";
+
+  set('a4Date',dateStr); set('a4CustName',custName); set('a4CustPhone',custPhone);
+  set('a4Dealer','Samriddhi And Brothers Auto Pvt. Ltd.'); set('a4Model',c.bike.name);
+  set('a4MRP',fmtDec(c.afterDiscount)); set('a4DP',fmtDec(c.dpAmountOnly)); set('a4Loan',fmtDec(c.loanAmount));
+  set('a4Rate',c.rate.toFixed(2)); set('a4Tenure',c.tenure); set('a4Ins',fmtDec(c.financeInsurance));
+  set('a4AdvEmiAmt',fmtDec(c.totalAdvEmi)); set('a4TotalDP',fmtDec(c.finalTotalDP_A4)); set('a4Namsari',fmtDec(c.namsari));
+
+  set('a4Date2',dateStr); set('a4CustName2',custName); set('a4Model2',c.bike.name);
+  set('a4MRP2',fmt(c.mrp)); set('a4PriceWords',numberToWords(Math.round(c.mrp))+" rupees only.");
+  set('a4NetPriceWords',numberToWords(Math.round(c.afterDiscount))+" rupees only.");
+  set('a4DiscountWords',numberToWords(Math.round(c.discount))+" rupees only.");
+
+  ['manualChassis','manualEngine','manualReg','manualColor'].forEach((id,i)=>{
+    const map=['a4Chassis2','a4Engine2','a4Reg2','a4Color2'];
+    const el=document.getElementById(map[i]);
+    if(el) el.innerText=document.getElementById(id)?.value||"---";
+  });
+  const myEl=document.getElementById('a4MakeYear');
+  if(myEl) myEl.innerText=document.getElementById('makeYearInput')?.value||String(new Date().getFullYear());
+
+  const a4Row=document.getElementById('a4DiscountRow');
+  if(c.discount>0){
+    if(a4Row) a4Row.style.display='block';
+    set('a4DiscountAmt',fmt(c.discount)); set('a4NetPrice',fmt(c.afterDiscount));
+  }else if(a4Row) a4Row.style.display='none';
+};
+
+function syncField(srcId,dstId){
+  const src=document.getElementById(srcId), dst=document.getElementById(dstId);
+  if(src&&dst) dst.innerHTML=src.innerHTML;
+}
+window.printBothPages=function(){
+  const result=validateRequiredFields();
+  if(!result.ok){
+    showValidationToast(result.msg);
+    document.getElementById(result.focus)?.scrollIntoView({behavior:'smooth',block:'center'});
+    document.getElementById(result.focus)?.focus();
+    return;
+  }
+  syncAllToA4();
+  ['Date','Dealer','CustName','CustPhone','Model','MRP','DP','Loan','Rate','Tenure','Namsari','Ins'].forEach(k=>syncField('a4'+k,'p1'+k));
+  syncField('a4AdvEmiAmt','p1AdvEmi'); syncField('a4TotalDP','p1TotalDP');
+  ['Date2','CustName2','Model2','MRP2','PriceWords','Color2','Reg2','Engine2','Chassis2','MakeYear','DiscountAmt','DiscountWords','NetPrice','NetPriceWords'].forEach(k=>{
+    const dst='p2'+k.replace('2','');
+    syncField('a4'+k,dst);
+  });
+  const discSrc=document.getElementById('a4DiscountRow'), discDst=document.getElementById('p2DiscountRow');
+  if(discSrc&&discDst) discDst.style.display=discSrc.style.display;
+  window.print();
+};
+
+document.addEventListener('input',(e)=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'){
+    calculateFinance();
+  }
+});
+
+fetchBikes();
+</script>
+</body>
+</html>
