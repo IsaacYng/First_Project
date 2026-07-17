@@ -322,11 +322,10 @@ input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.
           <label class="field-label">Downpayment %</label>
           <div class="custom-select" id="dpPercentWrap">
             <select id="dpPercent" class="sr-only-select" tabindex="-1" aria-hidden="true">
-              <option value="30">30%</option><option value="40">40%</option>
-              <option value="50" selected>50%</option><option value="60">60%</option>
+              <option value="">Loading…</option>
             </select>
             <button type="button" class="custom-select-trigger" id="dpPercentTrigger" aria-haspopup="listbox" aria-expanded="false">
-              <span class="cst-text" id="dpPercentTriggerText">50%</span>
+              <span class="cst-text" id="dpPercentTriggerText">Loading…</span>
               <i class="fa-solid fa-chevron-down cst-chevron"></i>
             </button>
             <div class="custom-select-panel" id="dpPercentPanel" role="listbox"></div>
@@ -337,11 +336,10 @@ input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.
           <label class="field-label">Loan Tenure</label>
           <div class="custom-select" id="tenureWrap">
             <select id="tenure" class="sr-only-select" tabindex="-1" aria-hidden="true">
-              <option value="12" selected>12 Months</option><option value="18">18 Months</option>
-              <option value="24">24 Months</option><option value="36">36 Months</option>
+              <option value="">Loading…</option>
             </select>
             <button type="button" class="custom-select-trigger" id="tenureTrigger" aria-haspopup="listbox" aria-expanded="false">
-              <span class="cst-text" id="tenureTriggerText">12 Months</span>
+              <span class="cst-text" id="tenureTriggerText">Loading…</span>
               <i class="fa-solid fa-chevron-down cst-chevron"></i>
             </button>
             <div class="custom-select-panel" id="tenurePanel" role="listbox"></div>
@@ -356,7 +354,7 @@ input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.
         <div style="grid-column:span 1">
           <label class="field-label">Interest Rate (auto, by DP%)</label>
           <div style="height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);display:flex;align-items:center;padding:0 14px;font-family:'Bebas Neue',cursive;font-size:1.2rem;color:var(--blue);letter-spacing:.02em">
-            <span id="rateDisplay">11.99</span>%&nbsp;<span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--ink4);margin-left:8px">fixed for this DP tier</span>
+            <span id="rateDisplay">--</span>%&nbsp;<span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--ink4);margin-left:8px">fixed for this DP tier</span>
           </div>
         </div>
 
@@ -383,9 +381,9 @@ input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.
     <!-- ══════════ SUMMARY STRIP ══════════ -->
     <div class="summary-strip">
       <div class="sum-pill"><span class="k">Mode</span><span class="v" id="sumMode">Indoor</span></div>
-      <div class="sum-pill"><span class="k">Downpayment</span><span class="v" id="sumDp">50%</span></div>
-      <div class="sum-pill"><span class="k">Interest Rate</span><span class="v" id="sumRate">11.99%</span></div>
-      <div class="sum-pill"><span class="k">Tenure</span><span class="v" id="sumTenure">12 mo</span></div>
+      <div class="sum-pill"><span class="k">Downpayment</span><span class="v" id="sumDp">--</span></div>
+      <div class="sum-pill"><span class="k">Interest Rate</span><span class="v" id="sumRate">--</span></div>
+      <div class="sum-pill"><span class="k">Tenure</span><span class="v" id="sumTenure">--</span></div>
       <div class="sum-pill" id="sumAccPill"><span class="k">Accessories</span><span class="v" id="sumAcc">Rs. 4,950</span></div>
       <div class="sum-pill"><span class="k">Namsari</span><span class="v" id="sumNamsari">Rs. 3,000</span></div>
       <div class="sum-pill"><span class="k">Models Listed</span><span class="v" id="sumCount">0</span></div>
@@ -418,10 +416,10 @@ input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.
 <div id="previewOverlay" onclick="if(event.target===this) closePreview()">
   <div class="preview-shell">
     <div class="preview-toolbar">
-      <div class="ptitle"><i class="fa-solid fa-file-lines"></i> Sheet Preview — <span id="pvSubtitle">50% Downpayment</span></div>
+      <div class="ptitle"><i class="fa-solid fa-file-lines"></i> Sheet Preview — <span id="pvSubtitle">Downpayment</span></div>
       <div class="ptabs" id="pvTabs"></div>
       <div class="pactions">
-        <button class="pbtn print" onclick="printAllTenures()"><i class="fa-solid fa-print"></i> Print All 4 Tenures</button>
+        <button class="pbtn print" onclick="printAllTenures()"><i class="fa-solid fa-print"></i> Print All Tenures</button>
         <button class="pbtn close" onclick="closePreview()"><i class="fa-solid fa-xmark"></i> Close</button>
       </div>
     </div>
@@ -439,20 +437,81 @@ btn?.addEventListener('click',()=>{const open=mMenu.classList.toggle('open');ico
 /* ══════════ Bike catalogue — loaded live from Firebase only. No hardcoded fallback:
    if the connection fails, the sheet stays blank rather than showing stale prices. ══════════ */
 let BIKES=[];
-const TENURES=[12,18,24,36];
+
+/* ══════════ Finance schemes (admin-controlled: Down Payment % / Interest Rate / Tenure)
+   Mirrors the same finance_schemes collection & lookup logic used in finance.html,
+   so both pages always agree with what's set in the Admin Panel. ══════════ */
+let financeSchemes=[];
+
+function buildFinanceSchemeMap(){
+  // Later docs (by createdAt) win on duplicate downPay values; tenures are unioned.
+  const sorted=[...financeSchemes].sort((a,b)=>{
+    const ta=a.createdAt?.toMillis?a.createdAt.toMillis():0;
+    const tb=b.createdAt?.toMillis?b.createdAt.toMillis():0;
+    return ta-tb;
+  });
+  const map=new Map();
+  sorted.forEach(f=>{
+    const dp=Number(f.downPay);
+    if(!Number.isFinite(dp)) return;
+    const tenures=Array.isArray(f.tenures)?f.tenures.map(Number).filter(t=>t>0):[];
+    map.set(dp,{ rate:Number(f.rate)||0, tenures:[...new Set(tenures)].sort((a,b)=>a-b) });
+  });
+  return map;
+}
+
+function rateForDp(dp){
+  const map=buildFinanceSchemeMap();
+  const dpNum=Number(dp);
+  if(map.has(dpNum)) return map.get(dpNum).rate;
+  if(map.size){
+    const dps=[...map.keys()].sort((a,b)=>a-b);
+    let nearest=dps.filter(d=>d<=dpNum).pop();
+    if(nearest===undefined) nearest=dps[0];
+    return map.get(nearest).rate;
+  }
+  return 0; // no schemes configured yet in Admin Panel
+}
+
+function renderTenureOptionsForDp(dp,mapOverride){
+  const map=mapOverride||buildFinanceSchemeMap();
+  const tenureSelect=document.getElementById('tenure');
+  if(!tenureSelect) return;
+  const scheme=map.get(Number(dp));
+  const tenures=(scheme&&scheme.tenures.length)?scheme.tenures:[12];
+  const prevTenure=Number(tenureSelect.value)||null;
+  tenureSelect.innerHTML=tenures.map(t=>`<option value="${t}">${t} Months</option>`).join('');
+  const targetTenure=tenures.includes(prevTenure)?prevTenure:tenures[0];
+  tenureSelect.value=String(targetTenure);
+  buildCustomSelect('tenure');
+}
+
+function currentSchemeTenures(dp){
+  const scheme=buildFinanceSchemeMap().get(Number(dp));
+  return (scheme&&scheme.tenures.length)?scheme.tenures:[12];
+}
+
+function renderFinanceSchemeUI(){
+  const map=buildFinanceSchemeMap();
+  const dpValues=[...map.keys()].sort((a,b)=>a-b);
+  const dpSelect=document.getElementById('dpPercent');
+  if(!dpSelect||!dpValues.length) return; // no schemes yet in Firestore — keep "Loading…" state
+
+  const prevSelectedDp=Number(dpSelect.value)||null;
+  dpSelect.innerHTML=dpValues.map(dp=>`<option value="${dp}">${dp}%</option>`).join('');
+  const targetDp=dpValues.includes(prevSelectedDp)?prevSelectedDp:(dpValues.includes(50)?50:dpValues[0]);
+  dpSelect.value=String(targetDp);
+  buildCustomSelect('dpPercent');
+
+  renderTenureOptionsForDp(targetDp,map);
+  recalcAll();
+}
 
 /* ══════════ Indoor / Outdoor mode ══════════
    Indoor  = current default sheet: Insurance + Accessories + Namsari, unchanged.
    Outdoor = matches the printed office sheet format: Insurance + Finance Insurance
              columns, no Accessories column/amount at all. */
 let sheetMode='indoor';
-
-function rateForDp(dp){
-  if(dp>=60) return 8.99;
-  if(dp>=50) return 11.99;
-  if(dp>=40) return 12.99;
-  return 13.99;
-}
 
 function setMode(mode){
   sheetMode=mode;
@@ -515,8 +574,6 @@ document.addEventListener('click',e=>{
   CUSTOM_SELECT_IDS.forEach(id=>{const wrap=document.getElementById(id+'Wrap'); if(wrap&&!wrap.contains(e.target)) closeCustomSelect(id);});
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAllCustomSelects();closePreview();}});
-buildCustomSelect('dpPercent');
-buildCustomSelect('tenure');
 
 /* ══════════ Accessories: custom add/remove rows (Indoor only) ══════════ */
 let customAccessories=[]; // {id,name,amount}
@@ -565,7 +622,9 @@ function computeRow(bike,dpPct,tenure,namsari,accTotal,mode){
   const loanAmt=bike.price-dpAmt;
   const rate=rateForDp(dpPct);
   const monthlyRate=(rate/12)/100;
-  const emi=loanAmt>0 ? (loanAmt*monthlyRate*Math.pow(1+monthlyRate,tenure))/(Math.pow(1+monthlyRate,tenure)-1) : 0;
+  const emi=(loanAmt>0 && monthlyRate>0)
+    ? (loanAmt*monthlyRate*Math.pow(1+monthlyRate,tenure))/(Math.pow(1+monthlyRate,tenure)-1)
+    : (loanAmt>0 ? loanAmt/tenure : 0);
   const financeInsurance=parseFloat(bike.financeInsurance)||0;
   const rawTotal=mode==='indoor'
     ? dpAmt+namsari+bike.insurance+emi+accTotal
@@ -605,7 +664,7 @@ function renderSheetHead(s){
 
 /* ══════════ Render main sheet ══════════ */
 function currentSettings(){
-  const dp=parseFloat(document.getElementById('dpPercent').value)||50;
+  const dp=parseFloat(document.getElementById('dpPercent').value)||0;
   const tenure=parseFloat(document.getElementById('tenure').value)||12;
   const namsari=parseFloat(document.getElementById('namsariInput').value)||0;
   const acc=accessoriesTotal();
@@ -615,20 +674,29 @@ function currentSettings(){
 }
 function recalcAll(){
   const s=currentSettings();
+  const schemesReady=financeSchemes.length>0 && s.dp>0;
 
-  document.getElementById('rateDisplay').textContent=s.rate.toFixed(2);
+  document.getElementById('rateDisplay').textContent=schemesReady?s.rate.toFixed(2):'--';
   document.getElementById('accTotalChip').textContent='Rs. '+fmt(s.acc);
 
-  document.getElementById('sumDp').textContent=s.dp+'%';
-  document.getElementById('sumRate').textContent=s.rate.toFixed(2)+'%';
-  document.getElementById('sumTenure').textContent=s.tenure+' mo';
+  document.getElementById('sumDp').textContent=schemesReady?(s.dp+'%'):'--';
+  document.getElementById('sumRate').textContent=schemesReady?(s.rate.toFixed(2)+'%'):'--';
+  document.getElementById('sumTenure').textContent=schemesReady?(s.tenure+' mo'):'--';
   document.getElementById('sumAcc').textContent='Rs. '+fmt(s.acc);
   document.getElementById('sumNamsari').textContent='Rs. '+fmt(s.namsari);
   document.getElementById('sumCount').textContent=BIKES.length;
 
-  renderSheetHead(s);
-
   const body=document.getElementById('sheetBody');
+
+  if(!schemesReady){
+    document.getElementById('sheetHead').innerHTML='';
+    body.innerHTML=`<tr><td colspan="11" style="text-align:center;padding:24px;color:var(--ink4)">
+      <i class="fa-solid fa-circle-notch fa-spin"></i> Waiting for finance schemes from Admin Panel…
+    </td></tr>`;
+    return;
+  }
+
+  renderSheetHead(s);
   body.innerHTML='';
   BIKES.forEach((bike,i)=>{
     const r=computeRow(bike,s.dp,s.tenure,s.namsari,s.acc,s.mode);
@@ -663,7 +731,7 @@ function recalcAll(){
   });
 }
 
-/* ══════════ Print-preview modal: one A4-landscape page per tenure ══════════ */
+/* ══════════ Print-preview modal: one A4-landscape page per tenure (of the current DP's scheme) ══════════ */
 function buildTenurePage(dp,tenure,namsari,acc,mode){
   const rate=rateForDp(dp);
   let rows='';
@@ -706,12 +774,14 @@ function buildTenurePage(dp,tenure,namsari,acc,mode){
 
 function openPreview(){
   const s=currentSettings();
+  if(!financeSchemes.length || !s.dp){ return; } // nothing to preview until schemes load
   document.getElementById('pvSubtitle').textContent=(s.mode==='indoor'?'Indoor · ':'Outdoor · ')+s.dp+'% Downpayment · '+s.rate.toFixed(2)+'% Interest';
 
+  const tenures=currentSchemeTenures(s.dp);
   const tabs=document.getElementById('pvTabs');
   const body=document.getElementById('pvBody');
   tabs.innerHTML=''; body.innerHTML='';
-  TENURES.forEach((t,idx)=>{
+  tenures.forEach(t=>{
     const tabBtn=document.createElement('button');
     tabBtn.className='ptab'+(t===s.tenure?' active':'');
     tabBtn.textContent=t+' Months';
@@ -725,6 +795,9 @@ function openPreview(){
     page.innerHTML=`<div class="a4l-paper">${buildTenurePage(s.dp,t,s.namsari,s.acc,s.mode)}</div>`;
     body.appendChild(page);
   });
+  if(!tenures.includes(s.tenure) && tenures.length){
+    switchPvTab(tenures[0]);
+  }
 
   document.getElementById('previewOverlay').classList.add('open');
   document.body.style.overflow='hidden';
@@ -754,23 +827,30 @@ function closePreview(){
   document.body.style.overflow='';
 }
 
-/* ══════════ Print all 4 tenures at once ══════════ */
+/* ══════════ Print all tenures (of the current DP's scheme) at once ══════════ */
 function printAllTenures(){
   const s=currentSettings();
+  if(!financeSchemes.length || !s.dp) return;
+  const tenures=currentSchemeTenures(s.dp);
   const wrapper=document.getElementById('print-wrapper');
-  wrapper.innerHTML=TENURES.map(t=>`<div class="print-page a4l-paper">${buildTenurePage(s.dp,t,s.namsari,s.acc,s.mode)}</div>`).join('');
+  wrapper.innerHTML=tenures.map(t=>`<div class="print-page a4l-paper">${buildTenurePage(s.dp,t,s.namsari,s.acc,s.mode)}</div>`).join('');
   window.print();
 }
 
 /* ══════════ Wire up recalculation ══════════ */
 document.addEventListener('input',e=>{
-  if(e.target.id==='dpPercent'||e.target.id==='tenure'||e.target.tagName==='INPUT'){
-    if(['accHelmet','accLegguard','accSeatcover','accOthers','namsariInput'].includes(e.target.id) || e.target.id==='dpPercent' || e.target.id==='tenure'){
-      recalcAll();
-    }
+  if(['accHelmet','accLegguard','accSeatcover','accOthers','namsariInput'].includes(e.target.id)){
+    recalcAll();
   }
 });
-document.getElementById('dpPercent').addEventListener('input',()=>{syncCustomSelectUI('dpPercent');recalcAll();});
+// DP change must rebuild the tenure list for that scheme BEFORE recalculating —
+// a listener bound directly on the element runs before the document's bubbled
+// listener above, so this ordering is safe.
+document.getElementById('dpPercent').addEventListener('input',()=>{
+  syncCustomSelectUI('dpPercent');
+  renderTenureOptionsForDp(document.getElementById('dpPercent').value);
+  recalcAll();
+});
 document.getElementById('tenure').addEventListener('input',()=>{syncCustomSelectUI('tenure');recalcAll();});
 
 recalcAll();
@@ -778,7 +858,7 @@ recalcAll();
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
@@ -822,6 +902,16 @@ async function fetchBikesFromFirebase(){
   }
   recalcAll();
 }
+
+/* Finance schemes: live listener (same collection & shape as Admin Panel /
+   finance.html) so DP%, Interest Rate, and Tenure options always match what
+   the admin configured — no more hardcoded ladder in this file. */
+onSnapshot(collection(db,"finance_schemes"), snap=>{
+  financeSchemes=snap.docs.map(d=>({id:d.id,...d.data()}));
+  renderFinanceSchemeUI();
+}, err=>{
+  console.error("Sheet: finance_schemes listener failed.",err);
+});
 
 fetchBikesFromFirebase();
 </script>
