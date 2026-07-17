@@ -1020,7 +1020,7 @@ footer{background:#0F172A}
             </div>
           </div>
 
-          <div class="rate-chips">
+          <div class="rate-chips" id="rateChipsWrap">
             <div class="rate-chip" data-dp="30"><span class="pct">13.99%</span>30% DP</div>
             <div class="rate-chip" data-dp="40"><span class="pct">12.99%</span>40% DP</div>
             <div class="rate-chip" data-dp="50"><span class="pct">11.99%</span>50% DP</div>
@@ -1646,6 +1646,84 @@ onSnapshot(collection(db,"inventory"), snap=>{
   }
 });
 
+/* ═══ FINANCE SCHEMES (admin-controlled: Down Payment % / Interest Rate / Tenure) ═══ */
+let financeSchemes = [];
+
+function buildFinanceSchemeMap(){
+  // Later docs (by createdAt) win on duplicate downPay values; tenures are unioned.
+  const sorted=[...financeSchemes].sort((a,b)=>{
+    const ta=a.createdAt?.toMillis?a.createdAt.toMillis():0;
+    const tb=b.createdAt?.toMillis?b.createdAt.toMillis():0;
+    return ta-tb;
+  });
+  const map=new Map();
+  sorted.forEach(f=>{
+    const dp=Number(f.downPay);
+    if(!Number.isFinite(dp)) return;
+    const tenures=Array.isArray(f.tenures)?f.tenures.map(Number).filter(t=>t>0):[];
+    map.set(dp,{ rate:Number(f.rate)||0, tenures:[...new Set(tenures)].sort((a,b)=>a-b) });
+  });
+  return map;
+}
+
+function bindRateChipClicks(){
+  document.querySelectorAll('.rate-chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      const sel=document.getElementById('dpPercent');
+      if(sel){sel.value=chip.dataset.dp;sel.dispatchEvent(new Event('input',{bubbles:true}));syncCustomSelectUI('dpPercent');}
+    });
+  });
+}
+
+function renderTenureOptionsForDp(dp,mapOverride){
+  const map=mapOverride||buildFinanceSchemeMap();
+  const tenureSelect=document.getElementById('tenure');
+  if(!tenureSelect) return;
+  const scheme=map.get(Number(dp));
+  const tenures=(scheme&&scheme.tenures.length)?scheme.tenures:[12];
+  const prevTenure=Number(tenureSelect.value)||null;
+  tenureSelect.innerHTML=tenures.map(t=>`<option value="${t}">${t} Months</option>`).join('');
+  const targetTenure=tenures.includes(prevTenure)?prevTenure:tenures[0];
+  tenureSelect.value=String(targetTenure);
+  if(typeof buildCustomSelect==='function') buildCustomSelect('tenure');
+}
+
+function renderFinanceSchemeUI(){
+  const map=buildFinanceSchemeMap();
+  const dpValues=[...map.keys()].sort((a,b)=>a-b);
+  const dpSelect=document.getElementById('dpPercent');
+  if(!dpSelect||!dpValues.length) return; // no schemes yet — keep the built-in fallback options
+
+  const prevSelectedDp=Number(dpSelect.value)||null;
+  dpSelect.innerHTML=dpValues.map(dp=>`<option value="${dp}">${dp}%</option>`).join('');
+  const targetDp=dpValues.includes(prevSelectedDp)?prevSelectedDp:(dpValues.includes(50)?50:dpValues[0]);
+  dpSelect.value=String(targetDp);
+  if(typeof buildCustomSelect==='function') buildCustomSelect('dpPercent');
+
+  const chipsWrap=document.getElementById('rateChipsWrap');
+  if(chipsWrap){
+    chipsWrap.innerHTML=dpValues.map(dp=>`<div class="rate-chip" data-dp="${dp}"><span class="pct">${map.get(dp).rate}%</span>${dp}% DP</div>`).join('');
+    bindRateChipClicks();
+  }
+
+  renderTenureOptionsForDp(targetDp,map);
+}
+
+// When DP% changes (dropdown click or rate-chip click), refresh the tenure
+// list for that scheme BEFORE the global input-listener recalculates —
+// listeners bound directly on the element run before the document's
+// bubbled listener, so this ordering is safe.
+document.getElementById('dpPercent')?.addEventListener('input',()=>{
+  const dp=document.getElementById('dpPercent')?.value;
+  renderTenureOptionsForDp(dp);
+});
+
+onSnapshot(collection(db,"finance_schemes"), snap=>{
+  financeSchemes=snap.docs.map(d=>({id:d.id,...d.data()}));
+  renderFinanceSchemeUI();
+  if(typeof calculateFinance==='function') calculateFinance();
+});
+
 function sortBySn(bikes){
   return [...bikes].sort((a,b)=>{
     const snA=(a.sn!==undefined&&a.sn!==null&&a.sn!=='')?Number(a.sn):9999;
@@ -1927,10 +2005,25 @@ window.calculateFinance=function(){
   const dpAmountOnly=afterDiscount*(dpPercentVal/100);
   const loanAmount=afterDiscount-dpAmountOnly;
 
-  let rate=13.99;
-  if(dpPercentVal>=60) rate=8.99;
-  else if(dpPercentVal>=50) rate=11.99;
-  else if(dpPercentVal>=40) rate=12.99;
+  // Interest rate comes from the admin-managed finance_schemes collection.
+  // Exact downPay% match wins; otherwise fall back to the closest scheme at
+  // or below the selected DP%, and only use the old hardcoded ladder if no
+  // schemes have been configured in Firestore yet.
+  const schemeMap=buildFinanceSchemeMap();
+  let rate;
+  if(schemeMap.has(dpPercentVal)){
+    rate=schemeMap.get(dpPercentVal).rate;
+  }else if(schemeMap.size){
+    const dps=[...schemeMap.keys()].sort((a,b)=>a-b);
+    let nearest=dps.filter(d=>d<=dpPercentVal).pop();
+    if(nearest===undefined) nearest=dps[0];
+    rate=schemeMap.get(nearest).rate;
+  }else{
+    rate=13.99;
+    if(dpPercentVal>=60) rate=8.99;
+    else if(dpPercentVal>=50) rate=11.99;
+    else if(dpPercentVal>=40) rate=12.99;
+  }
 
   const monthlyRate=(rate/12)/100;
   const emi=loanAmount>0
