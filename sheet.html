@@ -97,6 +97,13 @@ input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.
 
 .acc-total-chip{margin-left:auto;background:var(--blueLt);color:var(--blue);font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:.02em;padding:4px 14px;border-radius:999px}
 
+/* ── indoor / outdoor mode toggle ── */
+.mode-toggle{display:inline-flex;background:var(--bgSoft);border:1.5px solid var(--line);border-radius:999px;padding:4px;gap:2px}
+.mode-btn{border:none;background:transparent;color:var(--ink3);font-size:12.5px;font-weight:700;letter-spacing:.02em;padding:8px 18px;border-radius:999px;cursor:pointer;transition:background .2s,color .2s;display:flex;align-items:center;gap:7px}
+.mode-btn i{font-size:11px}
+.mode-btn.active{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(0,94,166,.28)}
+.mode-btn:not(.active):hover{color:var(--blue)}
+
 /* ── summary strip ── */
 .summary-strip{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.1rem}
 .sum-pill{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 16px;display:flex;flex-direction:column;gap:2px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
@@ -296,7 +303,16 @@ input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.
 
     <!-- ══════════ CONTROLS ══════════ -->
     <div class="calc-card" style="margin-bottom:20px">
-      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-sliders"></i></span>Sheet Settings
+      <div class="calc-card-title">
+        <span class="icon"><i class="fa-solid fa-sliders"></i></span>Sheet Settings
+        <div class="mode-toggle" id="modeToggle" role="tablist" aria-label="Sheet mode">
+          <button type="button" class="mode-btn active" id="modeIndoorBtn" data-mode="indoor" role="tab" aria-selected="true">
+            <i class="fa-solid fa-house"></i> Indoor
+          </button>
+          <button type="button" class="mode-btn" id="modeOutdoorBtn" data-mode="outdoor" role="tab" aria-selected="false">
+            <i class="fa-solid fa-sun"></i> Outdoor
+          </button>
+        </div>
         <button class="acc-add-btn" style="margin-left:auto" onclick="openPreview()"><i class="fa-solid fa-print"></i> Print Preview</button>
       </div>
 
@@ -343,11 +359,13 @@ input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.
             <span id="rateDisplay">11.99</span>%&nbsp;<span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--ink4);margin-left:8px">fixed for this DP tier</span>
           </div>
         </div>
+
       </div>
+      <p id="outdoorHint" style="display:none;font-size:11px;color:var(--ink4);font-style:italic;margin-top:10px">Finance Insurance is pulled per model from the price list (Admin Panel) — not manual here.</p>
     </div>
 
     <!-- ══════════ ACCESSORIES ══════════ -->
-    <div class="calc-card" style="margin-bottom:20px">
+    <div class="calc-card" style="margin-bottom:20px" id="accessoriesCard">
       <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-helmet-safety"></i></span>Accessories Bundle
         <span class="acc-total-chip" id="accTotalChip">Rs. 4,950</span>
       </div>
@@ -364,10 +382,11 @@ input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.
 
     <!-- ══════════ SUMMARY STRIP ══════════ -->
     <div class="summary-strip">
+      <div class="sum-pill"><span class="k">Mode</span><span class="v" id="sumMode">Indoor</span></div>
       <div class="sum-pill"><span class="k">Downpayment</span><span class="v" id="sumDp">50%</span></div>
       <div class="sum-pill"><span class="k">Interest Rate</span><span class="v" id="sumRate">11.99%</span></div>
       <div class="sum-pill"><span class="k">Tenure</span><span class="v" id="sumTenure">12 mo</span></div>
-      <div class="sum-pill"><span class="k">Accessories</span><span class="v" id="sumAcc">Rs. 4,950</span></div>
+      <div class="sum-pill" id="sumAccPill"><span class="k">Accessories</span><span class="v" id="sumAcc">Rs. 4,950</span></div>
       <div class="sum-pill"><span class="k">Namsari</span><span class="v" id="sumNamsari">Rs. 3,000</span></div>
       <div class="sum-pill"><span class="k">Models Listed</span><span class="v" id="sumCount">0</span></div>
     </div>
@@ -376,21 +395,7 @@ input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.
     <div class="sheet-wrap">
       <div class="table-scroll">
         <table class="sheet-table" id="mainSheetTable">
-          <thead>
-            <tr>
-              <th>S.N</th>
-              <th>Model</th>
-              <th>Price</th>
-              <th>DP Amount <span class="badge" id="thDp">50%</span></th>
-              <th>Loan Amount</th>
-              <th>Insurance</th>
-              <th>Monthly EMI <span class="badge" id="thRate">11.99%</span></th>
-              <th>Advance EMI <span class="badge" id="thTenure">12 mo</span></th>
-              <th>Accessories</th>
-              <th>Namsari</th>
-              <th>Total Downpayment</th>
-            </tr>
-          </thead>
+          <thead id="sheetHead"></thead>
           <tbody id="sheetBody"></tbody>
         </table>
       </div>
@@ -436,12 +441,33 @@ btn?.addEventListener('click',()=>{const open=mMenu.classList.toggle('open');ico
 let BIKES=[];
 const TENURES=[12,18,24,36];
 
+/* ══════════ Indoor / Outdoor mode ══════════
+   Indoor  = current default sheet: Insurance + Accessories + Namsari, unchanged.
+   Outdoor = matches the printed office sheet format: Insurance + Finance Insurance
+             columns, no Accessories column/amount at all. */
+let sheetMode='indoor';
+
 function rateForDp(dp){
   if(dp>=60) return 8.99;
   if(dp>=50) return 11.99;
   if(dp>=40) return 12.99;
   return 13.99;
 }
+
+function setMode(mode){
+  sheetMode=mode;
+  document.getElementById('modeIndoorBtn').classList.toggle('active',mode==='indoor');
+  document.getElementById('modeOutdoorBtn').classList.toggle('active',mode==='outdoor');
+  document.getElementById('modeIndoorBtn').setAttribute('aria-selected',mode==='indoor');
+  document.getElementById('modeOutdoorBtn').setAttribute('aria-selected',mode==='outdoor');
+  document.getElementById('accessoriesCard').style.display=mode==='indoor'?'block':'none';
+  document.getElementById('outdoorHint').style.display=mode==='outdoor'?'block':'none';
+  document.getElementById('sumAccPill').style.display=mode==='indoor'?'flex':'none';
+  document.getElementById('sumMode').textContent=mode==='indoor'?'Indoor':'Outdoor';
+  recalcAll();
+}
+document.getElementById('modeIndoorBtn').addEventListener('click',()=>setMode('indoor'));
+document.getElementById('modeOutdoorBtn').addEventListener('click',()=>setMode('outdoor'));
 
 /* ══════════ Custom dropdowns ══════════ */
 const CUSTOM_SELECT_IDS=['dpPercent','tenure'];
@@ -492,7 +518,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAllCustomSelec
 buildCustomSelect('dpPercent');
 buildCustomSelect('tenure');
 
-/* ══════════ Accessories: custom add/remove rows ══════════ */
+/* ══════════ Accessories: custom add/remove rows (Indoor only) ══════════ */
 let customAccessories=[]; // {id,name,amount}
 let customAccSeq=0;
 function addCustomAccessory(name,amount){
@@ -529,22 +555,53 @@ function accessoriesTotal(){
   return base+custom;
 }
 
-/* ══════════ Core row calculation (mirrors finance.html EMI/rounding logic) ══════════ */
-function computeRow(bike,dpPct,tenure,namsari,accTotal){
+/* ══════════ Core row calculation (mirrors finance.html EMI/rounding logic) ══════════
+   mode='indoor'  -> insurance-like cost = bike.insurance + accessories total
+   mode='outdoor' -> insurance-like cost = this bike's own financeInsurance ONLY
+                     (displayed as the "Insurance" column; raw Insurance is not shown
+                     or added here — avoids double counting) */
+function computeRow(bike,dpPct,tenure,namsari,accTotal,mode){
   const dpAmt=bike.price*(dpPct/100);
   const loanAmt=bike.price-dpAmt;
   const rate=rateForDp(dpPct);
   const monthlyRate=(rate/12)/100;
   const emi=loanAmt>0 ? (loanAmt*monthlyRate*Math.pow(1+monthlyRate,tenure))/(Math.pow(1+monthlyRate,tenure)-1) : 0;
-  const rawTotal=dpAmt+namsari+bike.insurance+emi+accTotal;
+  const financeInsurance=parseFloat(bike.financeInsurance)||0;
+  const rawTotal=mode==='indoor'
+    ? dpAmt+namsari+bike.insurance+emi+accTotal
+    : dpAmt+namsari+financeInsurance+emi;
   const lastThree=rawTotal%1000;
   const autoRounding=lastThree>0 ? (1000-lastThree) : 0;
   const advanceEmi=emi+autoRounding;
   const total=rawTotal+autoRounding;
-  return {dpAmt,loanAmt,insurance:bike.insurance,emi,advanceEmi,total,rate};
+  return {dpAmt,loanAmt,insurance:bike.insurance,financeInsurance,emi,advanceEmi,total,rate};
 }
 const fmt=n=>Math.round(n).toLocaleString('en-IN');
 const fmtDec=n=>Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+/* ══════════ Table headers per mode ══════════ */
+function renderSheetHead(s){
+  const head=document.getElementById('sheetHead');
+  if(s.mode==='indoor'){
+    head.innerHTML=`<tr>
+      <th>S.N</th><th>Model</th><th>Price</th>
+      <th>DP Amount <span class="badge" id="thDp">${s.dp}%</span></th>
+      <th>Loan Amount</th><th>Insurance</th>
+      <th>Monthly EMI <span class="badge" id="thRate">${s.rate.toFixed(2)}%</span></th>
+      <th>Advance EMI <span class="badge" id="thTenure">${s.tenure} mo</span></th>
+      <th>Accessories</th><th>Namsari</th><th>Total Downpayment</th>
+    </tr>`;
+  }else{
+    head.innerHTML=`<tr>
+      <th>S.N</th><th>Model</th><th>Price</th>
+      <th>DP Amount <span class="badge" id="thDp">${s.dp}%</span></th>
+      <th>Loan Amount</th><th>Insurance</th>
+      <th>Monthly EMI <span class="badge" id="thRate">${s.rate.toFixed(2)}%</span></th>
+      <th>Advance EMI <span class="badge" id="thTenure">${s.tenure} mo</span></th>
+      <th>Namsari</th><th>Total Downpayment</th>
+    </tr>`;
+  }
+}
 
 /* ══════════ Render main sheet ══════════ */
 function currentSettings(){
@@ -553,15 +610,13 @@ function currentSettings(){
   const namsari=parseFloat(document.getElementById('namsariInput').value)||0;
   const acc=accessoriesTotal();
   const rate=rateForDp(dp);
-  return {dp,tenure,namsari,acc,rate};
+  const mode=sheetMode;
+  return {dp,tenure,namsari,acc,rate,mode};
 }
 function recalcAll(){
   const s=currentSettings();
 
   document.getElementById('rateDisplay').textContent=s.rate.toFixed(2);
-  document.getElementById('thDp').textContent=s.dp+'%';
-  document.getElementById('thRate').textContent=s.rate.toFixed(2)+'%';
-  document.getElementById('thTenure').textContent=s.tenure+' mo';
   document.getElementById('accTotalChip').textContent='Rs. '+fmt(s.acc);
 
   document.getElementById('sumDp').textContent=s.dp+'%';
@@ -571,49 +626,78 @@ function recalcAll(){
   document.getElementById('sumNamsari').textContent='Rs. '+fmt(s.namsari);
   document.getElementById('sumCount').textContent=BIKES.length;
 
+  renderSheetHead(s);
+
   const body=document.getElementById('sheetBody');
   body.innerHTML='';
   BIKES.forEach((bike,i)=>{
-    const r=computeRow(bike,s.dp,s.tenure,s.namsari,s.acc);
+    const r=computeRow(bike,s.dp,s.tenure,s.namsari,s.acc,s.mode);
     const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td>${i+1}</td>
-      <td class="model-cell">${bike.name}</td>
-      <td>${fmt(bike.price)}</td>
-      <td>${fmt(r.dpAmt)}</td>
-      <td>${fmt(r.loanAmt)}</td>
-      <td>${fmt(r.insurance)}</td>
-      <td>${fmtDec(r.emi)}</td>
-      <td>${fmtDec(r.advanceEmi)}</td>
-      <td>${fmt(s.acc)}</td>
-      <td>${fmt(s.namsari)}</td>
-      <td class="total-cell">${fmt(r.total)}</td>`;
+    if(s.mode==='indoor'){
+      tr.innerHTML=`
+        <td>${i+1}</td>
+        <td class="model-cell">${bike.name}</td>
+        <td>${fmt(bike.price)}</td>
+        <td>${fmt(r.dpAmt)}</td>
+        <td>${fmt(r.loanAmt)}</td>
+        <td>${fmt(r.insurance)}</td>
+        <td>${fmtDec(r.emi)}</td>
+        <td>${fmtDec(r.advanceEmi)}</td>
+        <td>${fmt(s.acc)}</td>
+        <td>${fmt(s.namsari)}</td>
+        <td class="total-cell">${fmt(r.total)}</td>`;
+    }else{
+      tr.innerHTML=`
+        <td>${i+1}</td>
+        <td class="model-cell">${bike.name}</td>
+        <td>${fmt(bike.price)}</td>
+        <td>${fmt(r.dpAmt)}</td>
+        <td>${fmt(r.loanAmt)}</td>
+        <td>${fmt(r.financeInsurance)}</td>
+        <td>${fmtDec(r.emi)}</td>
+        <td>${fmtDec(r.advanceEmi)}</td>
+        <td>${fmt(s.namsari)}</td>
+        <td class="total-cell">${fmt(r.total)}</td>`;
+    }
     body.appendChild(tr);
   });
 }
 
 /* ══════════ Print-preview modal: one A4-landscape page per tenure ══════════ */
-function buildTenurePage(dp,tenure,namsari,acc){
+function buildTenurePage(dp,tenure,namsari,acc,mode){
   const rate=rateForDp(dp);
   let rows='';
   BIKES.forEach((bike,i)=>{
-    const r=computeRow(bike,dp,tenure,namsari,acc);
-    rows+=`<tr>
-      <td>${i+1}</td><td>${bike.name}</td><td>${fmt(bike.price)}</td>
-      <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td><td>${fmt(r.insurance)}</td>
-      <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>
-      <td>${fmt(acc)}</td><td>${fmt(namsari)}</td>
-      <td class="total-cell">${fmt(r.total)}</td></tr>`;
+    const r=computeRow(bike,dp,tenure,namsari,acc,mode);
+    if(mode==='indoor'){
+      rows+=`<tr>
+        <td>${i+1}</td><td>${bike.name}</td><td>${fmt(bike.price)}</td>
+        <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td><td>${fmt(r.insurance)}</td>
+        <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>
+        <td>${fmt(acc)}</td><td>${fmt(namsari)}</td>
+        <td class="total-cell">${fmt(r.total)}</td></tr>`;
+    }else{
+      rows+=`<tr>
+        <td>${i+1}</td><td>${bike.name}</td><td>${fmt(bike.price)}</td>
+        <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td>
+        <td>${fmt(r.financeInsurance)}</td>
+        <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>
+        <td>${fmt(namsari)}</td>
+        <td class="total-cell">${fmt(r.total)}</td></tr>`;
+    }
   });
   const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const headCells=mode==='indoor'
+    ? `<th>S.N</th><th>Model</th><th>Price</th><th>DP Amt</th><th>Loan Amt</th><th>Insurance</th>
+       <th>Monthly EMI</th><th>Advance EMI</th><th>Accessories</th><th>Namsari</th><th>Total</th>`
+    : `<th>S.N</th><th>Model</th><th>Price</th><th>DP Amt</th><th>Loan Amt</th><th>Insurance</th>
+       <th>Monthly EMI</th><th>Advance EMI</th><th>Namsari</th><th>Total</th>`;
+  const modeLabel=mode==='indoor'?'Indoor':'Outdoor';
   return `
-    <div class="pv-titlebar">Samriddhi And Brothers — Bajaj Finance Sheet &nbsp;|&nbsp; DP ${dp}% &nbsp;|&nbsp; Interest ${rate}% &nbsp;|&nbsp; Tenure ${tenure} Months</div>
+    <div class="pv-titlebar">Samriddhi And Brothers — Bajaj Finance Sheet (${modeLabel}) &nbsp;|&nbsp; DP ${dp}% &nbsp;|&nbsp; Interest ${rate}% &nbsp;|&nbsp; Tenure ${tenure} Months</div>
     <div class="pv-tablewrap">
       <table class="pv-table">
-        <thead><tr>
-          <th>S.N</th><th>Model</th><th>Price</th><th>DP Amt</th><th>Loan Amt</th><th>Insurance</th>
-          <th>Monthly EMI</th><th>Advance EMI</th><th>Accessories</th><th>Namsari</th><th>Total</th>
-        </tr></thead>
+        <thead><tr>${headCells}</tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
@@ -622,7 +706,7 @@ function buildTenurePage(dp,tenure,namsari,acc){
 
 function openPreview(){
   const s=currentSettings();
-  document.getElementById('pvSubtitle').textContent=s.dp+'% Downpayment · '+s.rate.toFixed(2)+'% Interest';
+  document.getElementById('pvSubtitle').textContent=(s.mode==='indoor'?'Indoor · ':'Outdoor · ')+s.dp+'% Downpayment · '+s.rate.toFixed(2)+'% Interest';
 
   const tabs=document.getElementById('pvTabs');
   const body=document.getElementById('pvBody');
@@ -638,7 +722,7 @@ function openPreview(){
     const page=document.createElement('div');
     page.className='pv-page'+(t===s.tenure?' active':'');
     page.id='pvPage'+t;
-    page.innerHTML=`<div class="a4l-paper">${buildTenurePage(s.dp,t,s.namsari,s.acc)}</div>`;
+    page.innerHTML=`<div class="a4l-paper">${buildTenurePage(s.dp,t,s.namsari,s.acc,s.mode)}</div>`;
     body.appendChild(page);
   });
 
@@ -674,7 +758,7 @@ function closePreview(){
 function printAllTenures(){
   const s=currentSettings();
   const wrapper=document.getElementById('print-wrapper');
-  wrapper.innerHTML=TENURES.map(t=>`<div class="print-page a4l-paper">${buildTenurePage(s.dp,t,s.namsari,s.acc)}</div>`).join('');
+  wrapper.innerHTML=TENURES.map(t=>`<div class="print-page a4l-paper">${buildTenurePage(s.dp,t,s.namsari,s.acc,s.mode)}</div>`).join('');
   window.print();
 }
 
@@ -728,7 +812,8 @@ async function fetchBikesFromFirebase(){
       .map(b=>({
         name:b.name,
         price:parseFloat(b.price)||0,
-        insurance:parseFloat(b.Insurance!==undefined?b.Insurance:b.insurance)||0
+        insurance:parseFloat(b.Insurance!==undefined?b.Insurance:b.insurance)||0,
+        financeInsurance:parseFloat(b.financeInsurance)||0
       }));
     BIKES=mapped; // empty array if nothing came back — sheet stays blank, no error text
   }catch(e){
