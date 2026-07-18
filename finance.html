@@ -364,11 +364,7 @@ body.site-loaded .calc-card{animation-delay:inherit}
 .calc-card-title .icon{
   width:36px;height:36px;border-radius:10px;display:flex;align-items:center;
   justify-content:center;font-size:15px;background:var(--blueLt);color:var(--blue);
-  flex-shrink:0;animation:iconBounce 2s ease-in-out infinite;
-}
-@keyframes iconBounce{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-4px)}
+  flex-shrink:0;
 }
 
 .field-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;display:block}
@@ -1132,20 +1128,6 @@ footer{background:#0F172A}
         <a href="https://wa.me/9779802315425" target="_blank" class="cta-primary btn-preview btn-whatsapp" style="border:none"><i class="fa-brands fa-whatsapp"></i> Apply via WhatsApp</a>
       </div>
 
-      <div class="calc-card" style="background:linear-gradient(150deg,#fff 0%,var(--blueLt) 130%)">
-        <div class="calc-card-title" style="margin-bottom:.9rem"><span class="icon"><i class="fa-solid fa-shield-heart"></i></span>Why Finance With Us</div>
-        <div style="display:flex;flex-direction:column;gap:11px">
-          <div style="display:flex;align-items:flex-start;gap:10px">
-            <i class="fa-solid fa-circle-check" style="color:var(--green);font-size:14px;margin-top:2px"></i>
-            <span style="font-size:13px;color:var(--ink2);line-height:1.5">No hidden charges — every rupee shown before you sign</span>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:10px">
-            <i class="fa-solid fa-circle-check" style="color:var(--green);font-size:14px;margin-top:2px"></i>
-            <span style="font-size:13px;color:var(--ink2);line-height:1.5">Documents ready in about 1 hour with Hulas Finserv</span>
-          </div>
-        </div>
-      </div>
-
       <div class="calc-card">
         <div class="calc-card-title" style="margin-bottom:.9rem"><span class="icon"><i class="fa-solid fa-file-circle-check"></i></span>Documents Required — Applicant</div>
         <div style="display:flex;flex-direction:column;gap:11px">
@@ -1529,7 +1511,7 @@ document.querySelectorAll('.rate-chip').forEach(chip=>{
 });
 
 let insuranceType = 'indoor';
-const ACC_DEFAULTS_INDOOR = { helmetInput:2500, legguardInput:1800, seatcoverInput:650, othersInput:0 };
+let ACC_DEFAULTS_INDOOR = { helmetInput:2500, legguardInput:1800, seatcoverInput:650, othersInput:0 };
 function applyAccessoryDefaults(type){
   Object.keys(ACC_DEFAULTS_INDOOR).forEach(id=>{
     const el=document.getElementById(id);
@@ -1537,6 +1519,19 @@ function applyAccessoryDefaults(type){
     el.value = type==='outdoor' ? 0 : ACC_DEFAULTS_INDOOR[id];
   });
 }
+// Admin-controlled accessory prices (Helmet / Leg Guard / Seat Cover) come from the
+// Firestore "accessories" collection managed in admin.html — no more hardcoded prices
+// here. See the onSnapshot(collection(db,"accessories")...) listener further below.
+window.updateAccessoryDefaults = function(priceMap){
+  Object.assign(ACC_DEFAULTS_INDOOR, priceMap);
+  if(insuranceType==='indoor') applyAccessoryDefaults('indoor');
+};
+// Namsari/Registration is a flat govt fee, unrelated to the indoor/outdoor accessory
+// toggle, so it gets its own direct hook instead of going through ACC_DEFAULTS_INDOOR.
+window.updateNamsariDefault = function(price){
+  const el = document.getElementById('namsariInput');
+  if(el && Number.isFinite(price)) el.value = price;
+};
 document.querySelectorAll('#insuranceTypeToggle .itoggle-btn').forEach(btnEl=>{
   btnEl.addEventListener('click',()=>{
     insuranceType = btnEl.dataset.itype;
@@ -1721,6 +1716,24 @@ document.getElementById('dpPercent')?.addEventListener('input',()=>{
 onSnapshot(collection(db,"finance_schemes"), snap=>{
   financeSchemes=snap.docs.map(d=>({id:d.id,...d.data()}));
   renderFinanceSchemeUI();
+  if(typeof calculateFinance==='function') calculateFinance();
+});
+
+/* ═══ ACCESSORIES (admin-controlled default prices: Helmet / Leg Guard / Seat Cover / Namsari) ═══ */
+onSnapshot(collection(db,"accessories"), snap=>{
+  const list = snap.docs.map(d=>({id:d.id,...d.data()}));
+  const priceMap = {};
+  let namsariPrice = null;
+  list.forEach(a=>{
+    const n=(a.name||'').toLowerCase().replace(/[^a-z]/g,'');
+    if(!Number.isFinite(Number(a.price))) return;
+    if(n.includes('helmet')) priceMap.helmetInput = Number(a.price);
+    else if(n.includes('legguard')) priceMap.legguardInput = Number(a.price);
+    else if(n.includes('seatcover')) priceMap.seatcoverInput = Number(a.price);
+    else if(n.includes('namsari')||n.includes('registration')) namsariPrice = Number(a.price);
+  });
+  if(typeof window.updateAccessoryDefaults==='function') window.updateAccessoryDefaults(priceMap);
+  if(namsariPrice!==null && typeof window.updateNamsariDefault==='function') window.updateNamsariDefault(namsariPrice);
   if(typeof calculateFinance==='function') calculateFinance();
 });
 
