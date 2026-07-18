@@ -244,8 +244,8 @@ input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.
    The entrance animation leaves a lingering transform on .calc-card which
    creates a separate stacking context per card, so without this the next
    card in the DOM paints over an open dropdown that overflows below it. */
-.calc-card:has(.custom-select-panel.open){z-index:60}
-.calc-card.dropdown-open{z-index:60}
+.calc-card:has(.custom-select-panel.open){position:relative;z-index:60}
+.calc-card.dropdown-open{position:relative;z-index:60}
 .calc-card-title{display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:700;color:var(--ink);letter-spacing:.01em;margin-bottom:1.2rem;flex-wrap:wrap}
 .calc-card-title .icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--blueLt);color:var(--blue);flex-shrink:0}
 
