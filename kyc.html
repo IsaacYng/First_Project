@@ -1067,7 +1067,7 @@ function buildComboSelect(inputId, initialOptions){
   input.addEventListener('input', ()=>{ closeAllCombosExcept(close); render(); if(!panel.classList.contains('open')){ panel.classList.add('open'); wrap.classList.add('open'); } });
   document.addEventListener('click', e=>{ if(!wrap.contains(e.target)) close(); });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
-  const inst={ setOptions(o){ options=o.slice(); if(panel.classList.contains('open')) render(); } };
+  const inst={ setOptions(o){ options=o.slice(); if(panel.classList.contains('open')) render(); }, close(){ close(); } };
   comboInstances[inputId]=inst;
   return inst;
 }
@@ -1096,6 +1096,7 @@ function wireProvinceDistrictCascade(provinceId,districtId){
         districtInput.placeholder='Select province first';
         if(districtInput.value){ districtInput.value=''; districtInput.dispatchEvent(new Event('input',{bubbles:true})); }
       }
+      comboInstances[districtId]?.close();
     }
   });
 }
@@ -1117,6 +1118,7 @@ function wireDistrictMuniCascade(districtId,muniId){
       } else {
         muniInput.disabled=true;
         muniInput.placeholder = match ? 'Select Muni./Rural Muni.' : 'Select district first';
+        comboInstances[muniId]?.close();
       }
       // clear a stale muni pick that no longer belongs to the newly chosen district
       if(match && list.length && !list.some(m=>m.toLowerCase()===muniInput.value.trim().toLowerCase())){
