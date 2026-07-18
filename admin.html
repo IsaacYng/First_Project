@@ -285,9 +285,213 @@
   .kebab-menu button.kebab-del{ color:#ef4444; }
   .kebab-menu button.kebab-del:hover{ background:#FEF2F2; }
   .kebab-menu button.kebab-edit:hover{ background:#E8F2FB; color:#005EA6; }
+
+  /* ═══ INTRO LOADER (index/finance-style) ═══ */
+  #adminLoader{
+    position:fixed;inset:0;width:100%;height:100%;
+    background:radial-gradient(ellipse at 30% 20%,#0A6BB8 0%,#004A85 45%,#002E56 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    z-index:9999;overflow:hidden;
+    transition:opacity .7s cubic-bezier(.4,0,.2,1),visibility .7s;
+    visibility:visible;opacity:1;
+  }
+  #adminLoader::before{
+    content:'';position:absolute;top:-120px;right:-100px;
+    width:460px;height:460px;
+    background:radial-gradient(circle,rgba(245,158,11,.18) 0%,transparent 70%);
+    border-radius:50%;animation:introGlowPulse 3.2s ease-in-out infinite;
+  }
+  #adminLoader::after{
+    content:'';position:absolute;bottom:-140px;left:-100px;
+    width:380px;height:380px;
+    background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);
+    border-radius:50%;
+  }
+  @keyframes introGlowPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.08)}}
+  #adminLoader.fade-out{opacity:0;visibility:hidden}
+
+  .intro-grid{
+    position:absolute;inset:0;opacity:.07;
+    background-image:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),
+                      linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);
+    background-size:42px 42px;
+    animation:introGridDrift 9s linear infinite;
+  }
+  @keyframes introGridDrift{from{background-position:0 0}to{background-position:-84px -84px}}
+
+  .intro-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;}
+
+  .intro-logo-mark{
+    width:58px;height:58px;border-radius:16px;
+    background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;transform:translateY(-10px) scale(.85);
+    animation:introLogoIn .6s cubic-bezier(.34,1.56,.64,1) .05s forwards;
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+    margin-bottom:18px;
+    color:#F59E0B;
+  }
+  @keyframes introLogoIn{to{opacity:1;transform:translateY(0) scale(1)}}
+
+  .intro-road{
+    position:relative;width:min(340px,74vw);height:96px;
+    display:flex;align-items:flex-end;justify-content:center;
+  }
+  .intro-road-line{
+    position:absolute;bottom:24px;left:0;right:0;height:2px;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 18px,transparent 18px 34px);
+    overflow:hidden;
+  }
+  .intro-road-line::after{
+    content:'';position:absolute;inset:0;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 18px,transparent 18px 34px);
+    transform:translateX(-34px);animation:introRoadScroll .55s linear infinite;
+  }
+  @keyframes introRoadScroll{to{transform:translateX(0)}}
+
+  .intro-speed-lines{
+    position:absolute;bottom:30px;left:50%;margin-left:-30px;width:60px;height:34px;
+    opacity:0;animation:introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards,introSpeedShow 2.3s ease forwards;
+  }
+  .intro-speed-lines span{
+    position:absolute;height:2px;border-radius:2px;background:rgba(255,255,255,.55);
+    right:100%;opacity:0;animation:introSpeedFlick .5s ease-in-out infinite;
+  }
+  .intro-speed-lines span:nth-child(1){top:4px;width:22px;animation-delay:.05s}
+  .intro-speed-lines span:nth-child(2){top:15px;width:32px;animation-delay:.12s}
+  .intro-speed-lines span:nth-child(3){top:26px;width:18px;animation-delay:.19s}
+  @keyframes introSpeedFlick{0%{opacity:0;transform:translateX(0)}45%{opacity:.9}100%{opacity:0;transform:translateX(-14px)}}
+  @keyframes introSpeedShow{0%,68%{opacity:0}74%{opacity:1}100%{opacity:0}}
+
+  .intro-bike-wrap{
+    position:absolute;bottom:14px;left:50%;margin-left:-39px;
+    animation:introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+  }
+  .intro-bike-wrap svg{filter:drop-shadow(0 8px 14px rgba(0,0,0,.3))}
+
+  .bike-part{opacity:0;transform:scale(.55);transform-box:fill-box;transform-origin:center;animation:introPartIn .42s cubic-bezier(.34,1.56,.64,1) forwards}
+  .bike-part.bp-wheels{animation-delay:.05s}
+  .bike-part.bp-frame{animation-delay:.28s}
+  .bike-part.bp-panel{animation-delay:.5s}
+  .bike-part.bp-light{animation-delay:.72s}
+  @keyframes introPartIn{to{opacity:1;transform:scale(1)}}
+
+  .intro-headlight{
+    animation:introHeadlightPulse .5s ease-in-out .9s infinite;
+    opacity:0;animation-fill-mode:forwards;
+  }
+  @keyframes introHeadlightPulse{0%{opacity:0}20%,100%{opacity:1}60%{opacity:.55}}
+  .intro-bike-shadow{
+    position:absolute;bottom:8px;left:50%;margin-left:-38px;width:76px;height:11px;
+    background:radial-gradient(ellipse,rgba(0,0,0,.32) 0%,transparent 75%);
+    border-radius:50%;opacity:0;
+    animation:introShadowFade .5s ease .05s forwards,introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+  }
+  @keyframes introShadowFade{to{opacity:.9}}
+  @keyframes introRide{
+    0%{left:50%;margin-left:-39px}
+    68%{left:50%;margin-left:-39px}
+    80%{left:50%;margin-left:-39px}
+    100%{left:118%;margin-left:-39px}
+  }
+
+  .intro-brand{
+    margin-top:22px;text-align:center;opacity:0;transform:translateY(14px);
+    animation:introTextIn .7s ease 1.55s forwards;
+  }
+  .intro-brand .intro-name{
+    font-family:'Bebas Neue',cursive;font-size:clamp(1.9rem,6vw,2.6rem);
+    letter-spacing:.04em;color:#fff;line-height:1;
+  }
+  .intro-brand .intro-name span{color:#F59E0B}
+  .intro-brand .intro-tag{
+    margin-top:6px;font-size:11px;font-weight:600;letter-spacing:.22em;
+    text-transform:uppercase;color:rgba(255,255,255,.65);
+  }
+  @keyframes introTextIn{to{opacity:1;transform:translateY(0)}}
+
+  .intro-progress{
+    margin-top:24px;display:flex;align-items:center;gap:10px;
+    opacity:0;animation:introFade .5s ease 1.7s forwards;
+  }
+  .intro-bar{
+    width:130px;height:3px;border-radius:99px;
+    background:rgba(255,255,255,.18);overflow:hidden;
+  }
+  .intro-bar-fill{
+    width:0%;height:100%;border-radius:99px;
+    background:linear-gradient(90deg,#F59E0B,#FBBF24);
+    animation:introFill 1.9s cubic-bezier(.4,0,.2,1) .15s forwards;
+  }
+  .intro-percent{
+    font-size:11px;font-weight:700;letter-spacing:.03em;
+    color:rgba(255,255,255,.8);min-width:30px;font-variant-numeric:tabular-nums;
+  }
+  @keyframes introFade{to{opacity:1}}
+  @keyframes introFill{to{width:100%}}
+  @media(prefers-reduced-motion:reduce){#adminLoader *{animation:none!important}}
 </style>
 </head>
 <body class="bg-slate-50 text-slate-700 min-h-screen">
+
+<!-- ══════════ INTRO LOADER ══════════ -->
+<div id="adminLoader">
+  <div class="intro-grid"></div>
+  <div class="intro-content">
+
+    <!-- Icon mark -->
+    <div class="intro-logo-mark">
+      <i class="fas fa-motorcycle" style="font-size:22px;"></i>
+    </div>
+
+    <!-- Road animation: bike riding across screen -->
+    <div class="intro-road">
+      <div class="intro-road-line"></div>
+      <div class="intro-speed-lines"><span></span><span></span><span></span></div>
+      <div class="intro-bike-shadow"></div>
+      <div class="intro-bike-wrap">
+        <svg width="74" height="46" viewBox="0 0 74 46" fill="none">
+          <!-- Wheels -->
+          <g class="bike-part bp-wheels">
+            <circle cx="16" cy="32" r="9" stroke="#fff" stroke-width="2.4" fill="none"/>
+            <circle cx="16" cy="32" r="2.2" fill="#fff"/>
+            <circle cx="58" cy="32" r="9" stroke="#fff" stroke-width="2.4" fill="none"/>
+            <circle cx="58" cy="32" r="2.2" fill="#fff"/>
+          </g>
+          <!-- Frame/Body -->
+          <g class="bike-part bp-frame">
+            <path d="M16 29 Q28 18 37 17 L42 10 L54 8 L57 14" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M37 17 L34 28 L16 29" stroke="#F59E0B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M34 28 Q45 31 58 29" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          </g>
+          <!-- Panel/Dashboard -->
+          <g class="bike-part bp-panel">
+            <rect x="40" y="12" width="14" height="8" rx="2.5" fill="#F59E0B" opacity="0.9"/>
+            <line x1="44" y1="14" x2="44" y2="18" stroke="#fff" stroke-width="1.2" opacity="0.5"/>
+            <line x1="49" y1="14" x2="49" y2="18" stroke="#fff" stroke-width="1.2" opacity="0.5"/>
+          </g>
+          <!-- Light -->
+          <g class="bike-part bp-light">
+            <circle class="intro-headlight" cx="62" cy="13" r="3.2" fill="#FFF3C4"/>
+            <path class="intro-headlight" d="M64 13 L71 13" stroke="#FFF3C4" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Brand text -->
+    <div class="intro-brand">
+      <div class="intro-name">SAMRIDDHI <span>ADMIN</span></div>
+      <div class="intro-tag">Dealer Management System</div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="intro-progress">
+      <div class="intro-bar"><div class="intro-bar-fill"></div></div>
+      <span class="intro-percent" id="intro-percent">0%</span>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════ LOGIN (redesigned — index.html hero language) ══════════════════ -->
 <div id="login-section" class="min-h-screen flex">
@@ -435,6 +639,10 @@
         class="nav-tab flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-500 border border-transparent hover:bg-white transition-all">
         <i class="fas fa-percent text-xs"></i> HFL Finance
       </button>
+      <button id="navAcc" onclick="switchSec('acc')"
+        class="nav-tab flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-500 border border-transparent hover:bg-white transition-all">
+        <i class="fas fa-helmet-safety text-xs"></i> Accessories
+      </button>
     </div>
 
     <!-- Right -->
@@ -467,6 +675,9 @@
     </button>
     <button id="mNavFin" onclick="switchSec('fin');closeMobileMenu()" class="mobile-tab flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 border border-transparent hover:bg-slate-100 transition-all">
       <i class="fas fa-percent text-bajaj-blue"></i> HFL Finance
+    </button>
+    <button id="mNavAcc" onclick="switchSec('acc');closeMobileMenu()" class="mobile-tab flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 border border-transparent hover:bg-slate-100 transition-all">
+      <i class="fas fa-helmet-safety text-bajaj-blue"></i> Accessories
     </button>
   </div>
 
@@ -801,6 +1012,73 @@
       </div>
     </div>
 
+    <!-- ═══ ACCESSORIES INVENTORY ═══ -->
+    <div class="sec-panel" id="secAcc">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Accessories ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Accessories <span class="text-amber-500">Inventory</span></div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
+            <span id="accFormTitle">Add Accessory</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Accessory Name <span class="text-red-400">*</span></label>
+            <input type="text" id="aName" placeholder="e.g. Helmet"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Default Price (Rs.) <span class="text-red-400">*</span></label>
+            <input type="number" id="aPrice" placeholder="2500" min="0"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-4"><i class="fas fa-circle-info mr-1"></i>Yaha update gareko price finance.html ko Accessories card ma default value ko rup ma automatically dekhincha — code chhunu pardaina.</p>
+        <div class="flex gap-2 flex-wrap">
+          <button id="saveAccBtn" class="cta-primary">
+            <i class="fas fa-floppy-disk"></i> Save Accessory
+          </button>
+          <button id="cancelAccBtn" onclick="cancelAccEdit()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
+            <i class="fas fa-xmark"></i> Cancel Edit
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-helmet-safety text-amber-500"></i> Accessories</div>
+            <span id="accCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 items</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Accessory</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Default Price</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="accTableBody">
+              <tr><td colspan="3" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading accessories…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /main content -->
 
   <!-- FOOTER -->
@@ -825,6 +1103,7 @@
           <li onclick="switchSec('price')" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-600"></i> Price List</li>
           <li onclick="switchSec('inv')" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-600"></i> Inventory</li>
           <li onclick="switchSec('fin')" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-600"></i> HFL Finance</li>
+          <li onclick="switchSec('acc')" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-600"></i> Accessories</li>
         </ul>
       </div>
       <div>
@@ -910,10 +1189,12 @@ const db = getFirestore(app);
 let currentEditId = null;
 let currentEditInvId = null;
 let currentEditFinId = null;
+let currentEditAccId = null;
 let allMasterBikes = [];
 let invData = [];
 let invSearchTerm = '';
 let financeSchemes = [];
+let accessories = [];
 
 /* ─── Custom confirm modal (replaces native browser confirm) ─── */
 function showConfirm(opts){
@@ -1038,6 +1319,11 @@ window._toggleKebab = (btn, type, id) => {
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editFinance(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('finance_schemes', id) }
     ]);
+  } else if(type === 'accessories'){
+    openKebabMenuFor(btn, [
+      { label:'Edit', icon:'fa-pen', onClick:()=>window._editAccessory(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('accessories', id) }
+    ]);
   }
 };
 
@@ -1124,8 +1410,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const tid = sec==='price' ? 'navPrice' : (sec==='inv' ? 'navInv' : 'navFin');
-  const mtid = sec==='price' ? 'mNavPrice' : (sec==='inv' ? 'mNavInv' : 'mNavFin');
+  const tid = sec==='price' ? 'navPrice' : (sec==='inv' ? 'navInv' : (sec==='fin' ? 'navFin' : 'navAcc'));
+  const mtid = sec==='price' ? 'mNavPrice' : (sec==='inv' ? 'mNavInv' : (sec==='fin' ? 'mNavFin' : 'mNavAcc'));
   const tab = document.getElementById(tid);
   const mtab = document.getElementById(mtid);
   if(tab) { tab.classList.add('bg-blue-50','border-blue-200','text-blue-700'); tab.classList.remove('text-slate-500','border-transparent'); }
@@ -1146,6 +1432,7 @@ onAuthStateChanged(auth, async (user) => {
     loadMasterPriceList();
     loadLiveStock();
     loadFinanceSchemes();
+    loadAccessories();
     setBtnState(false);
   } else {
     document.getElementById('login-section').style.display = 'flex';
@@ -1682,6 +1969,94 @@ window.cancelFinEdit=()=>{
   cancel.classList.add('hidden'); cancel.classList.remove('flex');
 };
 
+/* ─── Accessories Inventory ─── */
+function loadAccessories(){
+  onSnapshot(collection(db,"accessories"), snap => {
+    accessories = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderAccTable();
+  });
+}
+
+function renderAccTable(){
+  const tbody = document.getElementById('accTableBody');
+  document.getElementById('accCount').textContent = accessories.length+' item'+(accessories.length!==1?'s':'');
+  if(!accessories.length){
+    tbody.innerHTML=`<tr><td colspan="3"><div class="py-12 text-center text-slate-400"><i class="fas fa-helmet-safety text-3xl opacity-25 block mb-2"></i><p class="text-sm">No accessories yet. Add one above.</p></div></td></tr>`;
+    return;
+  }
+  const sorted=[...accessories].sort((a,b)=>{
+    const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+    const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+    return ta-tb;
+  });
+  tbody.innerHTML = sorted.map(a=>`
+    <tr class="border-b border-slate-100">
+      <td class="px-4 py-3 text-sm font-semibold text-slate-700">${a.name}</td>
+      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200">Rs. ${Number(a.price).toLocaleString('en-IN')}</span></td>
+      <td class="px-4 py-3">
+        <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'accessories','${a.id}')" aria-label="Row actions">
+          <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+document.getElementById('saveAccBtn').addEventListener('click', async()=>{
+  const name = document.getElementById('aName').value.trim();
+  const price = document.getElementById('aPrice').value.trim();
+
+  if(!name || !price){
+    toast('Fill all required fields!','err');
+    return;
+  }
+
+  try{
+    if(currentEditAccId){
+      await updateDoc(doc(db,"accessories",currentEditAccId), {
+        name,
+        price: Number(price)
+      });
+      toast('Accessory updated!');
+      window.cancelAccEdit();
+    } else {
+      await addDoc(collection(db,"accessories"), {
+        name,
+        price: Number(price),
+        createdAt: serverTimestamp()
+      });
+      document.getElementById('aName').value='';
+      document.getElementById('aPrice').value='';
+      toast('Accessory added!');
+    }
+  }catch(e){
+    toast('Error: '+e.message,'err');
+  }
+});
+
+window._editAccessory=(id)=>{
+  const a=accessories.find(x=>x.id===id); if(!a)return;
+  document.getElementById('aName').value=a.name??'';
+  document.getElementById('aPrice').value=a.price??'';
+  currentEditAccId=id;
+  const btn=document.getElementById('saveAccBtn');
+  btn.innerHTML='<i class="fas fa-rotate"></i> Update Accessory';
+  document.getElementById('accFormTitle').textContent='Edit Accessory';
+  const cancel = document.getElementById('cancelAccBtn');
+  cancel.classList.remove('hidden'); cancel.classList.add('flex');
+  window.scrollTo({top:0,behavior:'smooth'});
+  toast('Accessory loaded for editing');
+};
+
+window.cancelAccEdit=()=>{
+  currentEditAccId=null;
+  ['aName','aPrice'].forEach(id=>document.getElementById(id).value='');
+  const btn=document.getElementById('saveAccBtn');
+  btn.innerHTML='<i class="fas fa-floppy-disk"></i> Save Accessory';
+  document.getElementById('accFormTitle').textContent='Add Accessory';
+  const cancel = document.getElementById('cancelAccBtn');
+  cancel.classList.add('hidden'); cancel.classList.remove('flex');
+};
+
 window._saveSn=async(col,id,val)=>{
   const num=Number(val);
   if(!val||isNaN(num)||num<1){toast('S.N must be a positive number','err');return;}
@@ -1692,7 +2067,7 @@ window._saveSn=async(col,id,val)=>{
 window._deleteEntry=async(col,id)=>{
   const ok = await showConfirm({
     title: 'Delete this entry?',
-    message: col==='bikes' ? "This will permanently remove the model from your price list." : (col==='finance_schemes' ? "This will permanently remove the finance scheme." : "This will permanently remove the unit from inventory. Remaining S.N numbers will shift up to close the gap."),
+    message: col==='bikes' ? "This will permanently remove the model from your price list." : (col==='finance_schemes' ? "This will permanently remove the finance scheme." : (col==='accessories' ? "This will permanently remove the accessory from the price list." : "This will permanently remove the unit from inventory. Remaining S.N numbers will shift up to close the gap.")),
     okText: 'Delete',
     okColorClass: 'text-red-500 hover:bg-red-50',
     iconClass: 'fa-trash-can', iconColor: '#ef4444', iconBg: '#FEF2F2'
@@ -1865,7 +2240,8 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
 /* ─── Nav ─── */
 window.switchSec=(sec)=>{
   document.querySelectorAll('.sec-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById(sec==='price'?'secPrice':(sec==='inv'?'secInv':'secFin')).classList.add('active');
+  const secId = sec==='price'?'secPrice':(sec==='inv'?'secInv':(sec==='fin'?'secFin':'secAcc'));
+  document.getElementById(secId).classList.add('active');
   setActiveTab(sec);
   if(sec==='inv') populateModelDropdown();
 };
@@ -1884,6 +2260,28 @@ document.addEventListener('click',function(e){
   if(menu&&!menu.contains(e.target)&&hamburger&&!hamburger.contains(e.target)){
     menu.classList.remove('open');
   }
+});
+</script>
+
+<script>
+/* Intro loader: animated percent counter + dismissal */
+window.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('adminLoader');
+  const percentEl = document.getElementById('intro-percent');
+  const totalMs = 2300;
+  const startMs = performance.now();
+
+  function tickPercent(now) {
+    const elapsed = now - startMs;
+    const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
+    if(percentEl) percentEl.textContent = pct + '%';
+    if(elapsed < totalMs) requestAnimationFrame(tickPercent);
+  }
+  requestAnimationFrame(tickPercent);
+
+  setTimeout(() => {
+    overlay?.classList.add('fade-out');
+  }, totalMs);
 });
 </script>
 </body>
