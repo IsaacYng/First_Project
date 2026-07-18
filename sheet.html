@@ -1161,6 +1161,29 @@ onSnapshot(collection(db,"finance_schemes"), snap=>{
   console.error("Sheet: finance_schemes listener failed.",err);
 });
 
+/* Accessories: same admin-controlled default prices (Helmet / Leg Guard / Seat
+   Cover / Namsari) as finance.html — no more hardcoded ladder here either. Only
+   sets values on load/update, same as admin panel behaviour; "Others" stays a
+   manual free-entry field since it isn't a catalog item. */
+onSnapshot(collection(db,"accessories"), snap=>{
+  snap.docs.map(d=>d.data()).forEach(a=>{
+    const n=(a.name||'').toLowerCase().replace(/[^a-z]/g,'');
+    if(!Number.isFinite(Number(a.price))) return;
+    let targetId=null;
+    if(n.includes('helmet')) targetId='accHelmet';
+    else if(n.includes('legguard')) targetId='accLegguard';
+    else if(n.includes('seatcover')) targetId='accSeatcover';
+    else if(n.includes('namsari')||n.includes('registration')) targetId='namsariInput';
+    if(targetId){
+      const el=document.getElementById(targetId);
+      if(el) el.value=Number(a.price);
+    }
+  });
+  recalcAll();
+}, err=>{
+  console.error("Sheet: accessories listener failed.",err);
+});
+
 fetchBikesFromFirebase();
 </script>
 </body>
