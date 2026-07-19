@@ -314,50 +314,62 @@ table.a4-office td{border:1px solid #000;padding:4px 5px}
 #formShell{max-width:900px;margin:0 auto;padding:36px 20px 56px;display:flex;flex-direction:column;gap:24px}
 
 /* ═══ DESKTOP / LARGE-SCREEN LAYOUT ═══
-   Real two-column dashboard, not a stretched single centered column.
-   Left column (wider — needs room for 3-col field grids): Personal Info,
-   Legal ID, Family Details. Right column (narrower, financial/risk info):
-   Source of Fund, Income & Turnover, Screening Questions. Each column flows
-   independently in document order (CSS grid auto-placement), so the two
-   sides don't need to be the same height. Address and the action bar always
-   span the full width underneath. Matched by explicit class, not nth-child
-   position, so this can't silently break if a card is reordered later. */
+   Two real, independently-flowing columns: .col-left and .col-right each
+   stack their own cards and size to their own content, so one column's
+   height never depends on matching the other row-for-row (which is what
+   caused the previous CSS-grid auto-placement version to look uneven).
+   Family Details and Address always sit full width beneath both columns —
+   both want horizontal room (a wide relation grid / side-by-side address
+   groups) rather than being squeezed into a single column. */
 @media (min-width:1024px){
-  #formShell{
-    max-width:1180px;
-    display:grid;
-    grid-template-columns:1.55fr 1fr;
-    gap:24px;
-    align-items:start;
-  }
-  #formShell>.card-personal,
-  #formShell>.card-legalid,
-  #formShell>.card-family{ grid-column:1; }
-  #formShell>.card-fund,
-  #formShell>.card-income,
-  #formShell>.card-screening{ grid-column:2; }
-  #formShell>.card-address,
-  #formShell>.action-bar{ grid-column:1/-1; }
+  #formShell{max-width:1180px}
+  .form-cols{display:grid;grid-template-columns:1.55fr 1fr;gap:24px;align-items:start}
+  .col-left,.col-right{display:flex;flex-direction:column;gap:24px;min-width:0}
 
   /* Personal Info: a touch more room for the photo slot now the card is wide */
   .card-personal .photo-slot{width:112px;height:132px}
 
-  /* Family Details now lives in the narrower left column — one relation per
-     row keeps every field readable instead of squeezing 4 columns twice */
-  .fam-cards{display:flex;flex-direction:column;gap:10px}
+  /* Family Details is full width now — let relation cards sit 2-up instead
+     of stacking into one long column */
+  .fam-cards{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:10px}
+  .fam-card{display:flex;flex-direction:column}
   .fam-fgrid{grid-template-columns:repeat(4,1fr)}
   .fam-fgrid .fi:first-child{grid-column:span 2}
   .fam-fgrid .fi:last-child{grid-column:span 2}
 }
 
+/* Income & Turnover + Screening Questions: always sit side by side (left/right)
+   as their own row once there's room, instead of stacking inside a column.
+   No max-width/margin:auto of its own — #formShell already centers the whole
+   page, so this just fills 100% of that same content width, matching the
+   columns above and Family Details/Address below exactly. */
+.income-screening-row{display:flex;flex-direction:column;gap:24px}
+@media (min-width:768px){
+  .income-screening-row{flex-direction:row;align-items:stretch}
+  .income-screening-row>.card-income,.income-screening-row>.card-screening{flex:1;min-width:0;display:flex;flex-direction:column}
+}
+
 /* Larger desktops: let the dashboard breathe instead of staying pinned to 1180px */
 @media (min-width:1440px){ #formShell{max-width:1320px} }
 @media (min-width:1920px){ #formShell{max-width:1480px} }
+@media (min-width:2200px){ #formShell{max-width:1700px} }
+@media (min-width:2560px){ #formShell{max-width:1900px} }
+
+/* Hero + footer inner width scales alongside the form so the whole page
+   feels consistent instead of a wide form under a narrow, small-looking hero */
+.hero-inner{max-width:1280px;margin:0 auto}
+@media (min-width:1920px){ .hero-inner{max-width:1480px} }
+@media (min-width:2200px){ .hero-inner{max-width:1700px} }
+@media (min-width:2560px){ .hero-inner{max-width:1900px} }
+
+/* Family Details: 3-up on very wide screens since it has the full width to itself */
+@media (min-width:1600px){ .fam-cards{grid-template-columns:1fr 1fr 1fr} }
 
 /* Address groups sit side-by-side once there is enough width per group (≥1280px);
    below that they stack full-width. */
 @media (min-width:1280px){
-  .addr-block{flex-direction:row;align-items:flex-start}
+  .addr-block{flex-direction:row;align-items:stretch}
+  .addr-group{display:flex;flex-direction:column}
   .addr-group{flex:1;min-width:0}
 }
 
@@ -462,7 +474,7 @@ table.a4-office td{border:1px solid #000;padding:4px 5px}
 
 <!-- ══════════ HERO ══════════ -->
 <section class="fin-hero" style="padding-top:64px">
-  <div style="max-width:1280px;margin:0 auto;padding:48px 20px">
+  <div class="hero-inner" style="padding:48px 20px">
     <div style="text-align:center;max-width:640px;margin:0 auto">
       <span class="price-badge"><i class="fa-solid fa-user-shield" style="font-size:11px"></i> HFL KYC Form</span>
       <h1 class="headline" style="font-size:clamp(2.6rem,7vw,4.6rem);color:#0F172A;margin-top:16px">Know Your <span style="color:var(--blue)">Customer.</span></h1>
@@ -480,6 +492,9 @@ table.a4-office td{border:1px solid #000;padding:4px 5px}
 <!-- ══════════ DATA ENTRY ══════════ -->
 <main>
   <div id="formShell">
+
+  <div class="form-cols">
+    <div class="col-left">
 
     <!-- Personal Info -->
     <div class="calc-card card-personal">
@@ -550,13 +565,8 @@ table.a4-office td{border:1px solid #000;padding:4px 5px}
       </div>
     </div>
 
-    <!-- Family Details -->
-    <div class="calc-card card-family">
-      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-people-roof"></i></span>Family Details</div>
-      <div class="fam-cards" id="familyBody">
-        <!-- Each relation gets its own touch-friendly card instead of a cramped table row -->
-      </div>
     </div>
+    <div class="col-right">
 
     <!-- Fund / Occupation -->
     <div class="calc-card card-fund">
@@ -591,6 +601,10 @@ table.a4-office td{border:1px solid #000;padding:4px 5px}
       <div class="field-item" style="margin-top:1rem"><label class="field-label">Other Occupation</label><input class="styled" id="f_occOthers"></div>
     </div>
 
+    </div>
+  </div>
+
+  <div class="income-screening-row">
     <!-- Income & Turnover -->
     <div class="calc-card card-income">
       <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-coins"></i></span>Income &amp; Turnover</div>
@@ -624,6 +638,15 @@ table.a4-office td{border:1px solid #000;padding:4px 5px}
         </tbody>
       </table>
       <div class="field-item" style="margin-top:.75rem"><label class="field-label">Remarks (if any answer is Yes)</label><input class="styled" id="f_remarks"></div>
+    </div>
+  </div>
+
+    <!-- Family Details -->
+    <div class="calc-card card-family">
+      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-people-roof"></i></span>Family Details</div>
+      <div class="fam-cards" id="familyBody">
+        <!-- Each relation gets its own touch-friendly card instead of a cramped table row -->
+      </div>
     </div>
 
     <!-- Address -->
@@ -748,7 +771,7 @@ table.a4-office td{border:1px solid #000;padding:4px 5px}
 
 <!-- ══════════ FOOTER ══════════ -->
 <footer style="padding:48px 0;background:#0F172A">
-  <div style="max-width:1280px;margin:0 auto;padding:0 20px">
+  <div class="hero-inner" style="padding:0 20px">
     <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:24px;display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center">
       <p style="color:#64748B;font-size:12px">© Samriddhi And Brothers Auto Pvt. Ltd. KYC data stays in this browser tab only.</p>
       <p style="color:#475569;font-size:12px">Powered by <span style="color:var(--blue);font-weight:600">Go! YNG</span></p>
@@ -1064,7 +1087,7 @@ function buildComboSelect(inputId, initialOptions){
   comboClosers.push(close);
   input.addEventListener('focus', open);
   input.addEventListener('click', open);
-  input.addEventListener('input', ()=>{ closeAllCombosExcept(close); render(); if(!panel.classList.contains('open')){ panel.classList.add('open'); wrap.classList.add('open'); } });
+  input.addEventListener('input', ()=>{ closeAllCombosExcept(close); render(); if(document.activeElement===input && !panel.classList.contains('open')){ panel.classList.add('open'); wrap.classList.add('open'); } });
   document.addEventListener('click', e=>{ if(!wrap.contains(e.target)) close(); });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
   const inst={ setOptions(o){ options=o.slice(); if(panel.classList.contains('open')) render(); }, close(){ close(); } };
@@ -1584,6 +1607,7 @@ window.addEventListener('load',()=>{
   // re-run address cascades so restored province/district values re-enable the right dropdowns
   ['addr_perm_province','addr_temp_province'].forEach(id=>document.getElementById(id)?.dispatchEvent(new Event('input',{bubbles:true})));
   ['addr_perm_district','addr_temp_district'].forEach(id=>document.getElementById(id)?.dispatchEvent(new Event('input',{bubbles:true})));
+  comboClosers.forEach(fn=>fn()); // the dispatches above are programmatic, not real typing — make sure nothing was left open
   setDefaultDateBS();
   updateDobAge();
 });
