@@ -774,9 +774,10 @@
           <div id="mLegguardWrap" class="flex flex-col gap-1.5 col-span-2 sm:col-span-3 lg:col-span-4 hidden">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Leg Guard &amp; Seat Cover</label>
             <label class="inline-flex items-center gap-2 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 cursor-pointer w-full select-none">
-              <input type="checkbox" id="mLegguardFit" checked class="w-4 h-4 accent-amber-500">
+              <input type="checkbox" id="mLegguardFit" class="w-4 h-4 accent-amber-500">
               Fits this scooter — include Leg Guard + Seat Cover in the finance sheet
             </label>
+            <span class="text-[10px] text-slate-400">Unticked by default for scooters — tick only if this scooter actually takes a leg guard/seat cover.</span>
           </div>
         </div>
         <div class="flex gap-2 flex-wrap">
@@ -1596,7 +1597,14 @@ function updateLegguardVisibility(){
   const isScooter=document.getElementById('mCategory').value==='Scooter';
   document.getElementById('mLegguardWrap').classList.toggle('hidden',!isScooter);
 }
-document.getElementById('mCategory').addEventListener('change',updateLegguardVisibility);
+document.getElementById('mCategory').addEventListener('change',()=>{
+  // A fresh switch to Scooter defaults to "doesn't fit" — matches the common
+  // case (electric scooters like Chetak). Admin can tick it back on if needed.
+  if(document.getElementById('mCategory').value==='Scooter'){
+    document.getElementById('mLegguardFit').checked=false;
+  }
+  updateLegguardVisibility();
+});
 updateLegguardVisibility();
 
 document.getElementById('saveModelBtn').addEventListener('click',async()=>{
@@ -1619,7 +1627,7 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
 function clearMasterForm(){
   ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mImg'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('mCategory').value='Bike';
-  document.getElementById('mLegguardFit').checked=true;
+  document.getElementById('mLegguardFit').checked=false;
   updateLegguardVisibility();
 }
 
