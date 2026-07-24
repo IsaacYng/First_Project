@@ -1148,31 +1148,28 @@ function sortBySn(bikes){
   });
 }
 
-async function fetchBikesFromFirebase(){
-  const timeoutMs=6000;
-  try{
-    const fetchPromise=getDocs(collection(db,"bikes"));
-    const timeoutPromise=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Firebase request timed out')),timeoutMs));
-    const snapshot=await Promise.race([fetchPromise,timeoutPromise]);
-    const docs=snapshot.docs.map(d=>({id:d.id,...d.data()}));
-    const sorted=sortBySn(docs);
-    const mapped=sorted
-      .filter(b=>b.name && b.price!==undefined)
-      .map(b=>({
-        name:b.name,
-        price:parseFloat(b.price)||0,
-        insurance:parseFloat(b.Insurance!==undefined?b.Insurance:b.insurance)||0,
-        financeInsurance:parseFloat(b.financeInsurance)||0,
-        category:b.category||'Bike',
-        applyLegguardSeatcover:b.applyLegguardSeatcover!==false
-      }));
-    BIKES=mapped; // empty array if nothing came back — sheet stays blank, no error text
-  }catch(e){
-    console.error("Sheet: Firebase fetch failed or timed out.",e);
-    BIKES=[]; // stay blank rather than showing stale/hardcoded prices
-  }
+/* Bikes: live listener (same as finance_schemes/accessories below) so a category
+   or "fits legguard/seatcover" change saved in Admin Panel shows up here right
+   away, without needing to reload this page. */
+onSnapshot(collection(db,"bikes"), snap=>{
+  const docs=snap.docs.map(d=>({id:d.id,...d.data()}));
+  const sorted=sortBySn(docs);
+  BIKES=sorted
+    .filter(b=>b.name && b.price!==undefined)
+    .map(b=>({
+      name:b.name,
+      price:parseFloat(b.price)||0,
+      insurance:parseFloat(b.Insurance!==undefined?b.Insurance:b.insurance)||0,
+      financeInsurance:parseFloat(b.financeInsurance)||0,
+      category:b.category||'Bike',
+      applyLegguardSeatcover:b.applyLegguardSeatcover!==false
+    }));
   recalcAll();
-}
+}, err=>{
+  console.error("Sheet: bikes listener failed.",err);
+  BIKES=[]; // stay blank rather than showing stale/hardcoded prices
+  recalcAll();
+});
 
 /* Finance schemes: live listener (same collection & shape as Admin Panel /
    finance.html) so DP%, Interest Rate, and Tenure options always match what
@@ -1207,7 +1204,7 @@ onSnapshot(collection(db,"accessories"), snap=>{
   console.error("Sheet: accessories listener failed.",err);
 });
 
-fetchBikesFromFirebase();
+/* Bikes listener is registered above with finance_schemes/accessories. */
 </script>
 </body>
 </html>
