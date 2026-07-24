@@ -1812,13 +1812,13 @@ async function fetchBikes(){
   }catch(e){
     console.error("Error fetching bikes:",e);
     allBikes=[
-      {id:"d1",name:"Pulsar N150",price:339900,Insurance:8500,financeInsurance:7890},
-      {id:"d2",name:"Pulsar N160",price:379900,Insurance:9200,financeInsurance:8400},
-      {id:"d3",name:"Pulsar NS200",price:449900,Insurance:10500,financeInsurance:9800},
-      {id:"d4",name:"Dominar 250",price:489900,Insurance:11500,financeInsurance:10500},
-      {id:"d5",name:"Avenger Street 160",price:349900,Insurance:8800,financeInsurance:8100},
-      {id:"d6",name:"Platina 100",price:219900,Insurance:6200,financeInsurance:5800},
-      {id:"d7",name:"Chetak Electric",price:389900,Insurance:7500,financeInsurance:6900},
+      {id:"d1",name:"Pulsar N150",price:339900,Insurance:8500,financeInsurance:7890,category:"Bike",applyLegguardSeatcover:true},
+      {id:"d2",name:"Pulsar N160",price:379900,Insurance:9200,financeInsurance:8400,category:"Bike",applyLegguardSeatcover:true},
+      {id:"d3",name:"Pulsar NS200",price:449900,Insurance:10500,financeInsurance:9800,category:"Bike",applyLegguardSeatcover:true},
+      {id:"d4",name:"Dominar 250",price:489900,Insurance:11500,financeInsurance:10500,category:"Bike",applyLegguardSeatcover:true},
+      {id:"d5",name:"Avenger Street 160",price:349900,Insurance:8800,financeInsurance:8100,category:"Bike",applyLegguardSeatcover:true},
+      {id:"d6",name:"Platina 100",price:219900,Insurance:6200,financeInsurance:5800,category:"Bike",applyLegguardSeatcover:true},
+      {id:"d7",name:"Chetak Electric",price:389900,Insurance:7500,financeInsurance:6900,category:"Scooter",applyLegguardSeatcover:false},
     ];
     const select=document.getElementById('modelSelect');
     if(select){
@@ -2040,7 +2040,10 @@ window.calculateFinance=function(){
   const discount=getVal('discountInput');
   const customerExtraAdv=getVal('advEmiInput');
   const namsari=getVal('namsariInput',3000);
-  const accCost=getVal('helmetInput')+getVal('legguardInput')+getVal('seatcoverInput')+getVal('othersInput');
+  // Admin-controlled per-scooter toggle: if this bike's applyLegguardSeatcover
+  // is explicitly false, leg guard + seat cover don't fit it, so exclude them.
+  const fitsLegguardSeatcover=bike.applyLegguardSeatcover!==false;
+  const accCost=getVal('helmetInput')+(fitsLegguardSeatcover?getVal('legguardInput'):0)+(fitsLegguardSeatcover?getVal('seatcoverInput'):0)+getVal('othersInput');
   const dpPercentVal=getVal('dpPercent',50);
   const tenure=getVal('tenure',12);
 
