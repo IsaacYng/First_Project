@@ -744,6 +744,14 @@
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Category <span class="text-red-400">*</span></label>
+            <select id="mCategory"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="Bike">Bike</option>
+              <option value="Scooter">Scooter</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price (₹) <span class="text-red-400">*</span></label>
             <input type="number" id="mPrice" placeholder="145000"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
@@ -762,6 +770,13 @@
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Image URL <span class="text-slate-400 font-normal normal-case">(opt.)</span></label>
             <input type="text" id="mImg" placeholder="https://...image.jpg"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div id="mLegguardWrap" class="flex flex-col gap-1.5 col-span-2 sm:col-span-3 lg:col-span-4 hidden">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Leg Guard &amp; Seat Cover</label>
+            <label class="inline-flex items-center gap-2 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 cursor-pointer w-full select-none">
+              <input type="checkbox" id="mLegguardFit" checked class="w-4 h-4 accent-amber-500">
+              Fits this scooter — include Leg Guard + Seat Cover in the finance sheet
+            </label>
           </div>
         </div>
         <div class="flex gap-2 flex-wrap">
@@ -789,6 +804,7 @@
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Image</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model Name</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Category</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Price</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Insurance</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Finance Ins.</th>
@@ -796,7 +812,7 @@
               </tr>
             </thead>
             <tbody id="masterTableBody">
-              <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
+              <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">
                 <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Connecting to database…
               </td></tr>
             </tbody>
@@ -1492,11 +1508,20 @@ function renderMasterTable() {
   const tbody = document.getElementById('masterTableBody');
   document.getElementById('priceCount').textContent = allMasterBikes.length+' model'+(allMasterBikes.length!==1?'s':'');
   if (!allMasterBikes.length) {
-    tbody.innerHTML=`<tr><td colspan="7"><div class="py-12 text-center text-slate-400"><i class="fas fa-motorcycle text-3xl opacity-25 block mb-2"></i><p class="text-sm">No models yet. Add your first bike above.</p></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="8"><div class="py-12 text-center text-slate-400"><i class="fas fa-motorcycle text-3xl opacity-25 block mb-2"></i><p class="text-sm">No models yet. Add your first bike above.</p></div></td></tr>`;
     return;
   }
   const sorted=[...allMasterBikes].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
-  tbody.innerHTML = sorted.map(b=>`
+  tbody.innerHTML = sorted.map(b=>{
+    const category=b.category||'Bike';
+    const fitsLegguard=b.applyLegguardSeatcover!==false;
+    const catBadge=category==='Scooter'
+      ? `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-purple-100 text-purple-700 text-xs font-bold border border-purple-200">Scooter</span>
+         <span class="block mt-1 text-[10px] font-semibold ${fitsLegguard?'text-emerald-600':'text-red-500'}">
+           <i class="fas ${fitsLegguard?'fa-check':'fa-xmark'}"></i> Leg Guard/Seat Cover ${fitsLegguard?'fits':"doesn't fit"}
+         </span>`
+      : `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200">Bike</span>`;
+    return `
     <tr class="border-b border-slate-100">
       <td class="px-4 py-3">
         <input class="sn-input" type="number" value="${b.sn||''}" min="1" placeholder="—"
@@ -1509,6 +1534,7 @@ function renderMasterTable() {
           : `<div class="w-11 h-8 rounded-lg bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs"><i class="fas fa-image"></i></div>`}
       </td>
       <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap">${b.name}</td>
+      <td class="px-4 py-3 whitespace-nowrap">${catBadge}</td>
       <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-mono font-bold border border-blue-200">₹${Number(b.price).toLocaleString('en-IN')}</span></td>
       <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-mono font-bold border border-emerald-200">₹${Number(b.Insurance||0).toLocaleString('en-IN')}</span></td>
       <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 text-xs font-mono font-bold border border-amber-200">₹${Number(b.financeInsurance||0).toLocaleString('en-IN')}</span></td>
@@ -1517,7 +1543,8 @@ function renderMasterTable() {
           <i class="fas fa-ellipsis-vertical"></i>
         </button>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 function updatePriceStats() {
@@ -1539,10 +1566,13 @@ window._editMaster=(id)=>{
   const b=allMasterBikes.find(x=>x.id===id); if(!b)return;
   document.getElementById('mSn').value=b.sn||'';
   document.getElementById('mName').value=b.name;
+  document.getElementById('mCategory').value=b.category||'Bike';
   document.getElementById('mPrice').value=b.price;
   document.getElementById('mNormalIns').value=b.Insurance||0;
   document.getElementById('mFinanceIns').value=b.financeInsurance||0;
   document.getElementById('mImg').value=b.img||'';
+  document.getElementById('mLegguardFit').checked=b.applyLegguardSeatcover!==false;
+  updateLegguardVisibility();
   currentEditId=id;
   const btn=document.getElementById('saveModelBtn');
   btn.innerHTML='<i class="fas fa-rotate"></i> Update Model Info';
@@ -1562,14 +1592,23 @@ window.cancelMasterEdit=()=>{
   cancel.classList.add('hidden'); cancel.classList.remove('flex');
 };
 
+function updateLegguardVisibility(){
+  const isScooter=document.getElementById('mCategory').value==='Scooter';
+  document.getElementById('mLegguardWrap').classList.toggle('hidden',!isScooter);
+}
+document.getElementById('mCategory').addEventListener('change',updateLegguardVisibility);
+updateLegguardVisibility();
+
 document.getElementById('saveModelBtn').addEventListener('click',async()=>{
   const sn=document.getElementById('mSn').value.trim();
   const name=document.getElementById('mName').value.trim();
+  const category=document.getElementById('mCategory').value;
   const price=document.getElementById('mPrice').value.trim();
   const ins=document.getElementById('mNormalIns').value.trim();
   const fin=document.getElementById('mFinanceIns').value.trim();
   if(!sn||!name||!price||!ins||!fin){toast('Fill all required fields!','err');return;}
-  const data={sn:Number(sn),name,price:Number(price),Insurance:Number(ins)||0,financeInsurance:Number(fin)||0,img:document.getElementById('mImg').value.trim()};
+  const applyLegguardSeatcover=category==='Scooter' ? document.getElementById('mLegguardFit').checked : true;
+  const data={sn:Number(sn),name,category,price:Number(price),Insurance:Number(ins)||0,financeInsurance:Number(fin)||0,img:document.getElementById('mImg').value.trim(),applyLegguardSeatcover};
   try {
     if(currentEditId){await updateDoc(doc(db,"bikes",currentEditId),data);toast('Model updated!');}
     else{await addDoc(collection(db,"bikes"),data);toast('Model added!');}
@@ -1577,7 +1616,12 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
   }catch(e){toast('Error: '+e.message,'err');}
 });
 
-function clearMasterForm(){['mSn','mName','mPrice','mNormalIns','mFinanceIns','mImg'].forEach(id=>document.getElementById(id).value='');}
+function clearMasterForm(){
+  ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mImg'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mCategory').value='Bike';
+  document.getElementById('mLegguardFit').checked=true;
+  updateLegguardVisibility();
+}
 
 /* ─── Inventory ─── */
 document.getElementById('saveStockBtn').addEventListener('click',async()=>{
