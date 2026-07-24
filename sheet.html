@@ -871,10 +871,10 @@ function renderCustomAccessories(){
 }
 function accessoriesTotal(bike){
   const g=id=>parseFloat(document.getElementById(id)?.value)||0;
-  // Chetak is an electric scooter — leg guard and seat cover don't fit it,
-  // so those two amounts are excluded from its accessories total.
-  const isChetak=bike && /chetak/i.test(bike.name||'');
-  const base=g('accHelmet')+(isChetak?0:g('accLegguard'))+(isChetak?0:g('accSeatcover'))+g('accOthers');
+  // Driven by the admin panel's per-scooter "Leg Guard & Seat Cover" toggle —
+  // defaults to true (applicable) when the field isn't set, e.g. for Bikes.
+  const excludeLegguardSeatcover=bike && bike.applyLegguardSeatcover===false;
+  const base=g('accHelmet')+(excludeLegguardSeatcover?0:g('accLegguard'))+(excludeLegguardSeatcover?0:g('accSeatcover'))+g('accOthers');
   const custom=customAccessories.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
   return base+custom;
 }
@@ -1162,7 +1162,9 @@ async function fetchBikesFromFirebase(){
         name:b.name,
         price:parseFloat(b.price)||0,
         insurance:parseFloat(b.Insurance!==undefined?b.Insurance:b.insurance)||0,
-        financeInsurance:parseFloat(b.financeInsurance)||0
+        financeInsurance:parseFloat(b.financeInsurance)||0,
+        category:b.category||'Bike',
+        applyLegguardSeatcover:b.applyLegguardSeatcover!==false
       }));
     BIKES=mapped; // empty array if nothing came back — sheet stays blank, no error text
   }catch(e){
