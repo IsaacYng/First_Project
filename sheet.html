@@ -871,10 +871,11 @@ function renderCustomAccessories(){
 }
 function accessoriesTotal(bike){
   const g=id=>parseFloat(document.getElementById(id)?.value)||0;
-  // Driven by the admin panel's per-scooter "Leg Guard & Seat Cover" toggle —
-  // defaults to true (applicable) when the field isn't set, e.g. for Bikes.
-  const excludeLegguardSeatcover=bike && bike.applyLegguardSeatcover===false;
-  const base=g('accHelmet')+(excludeLegguardSeatcover?0:g('accLegguard'))+(excludeLegguardSeatcover?0:g('accSeatcover'))+g('accOthers');
+  // Driven by the admin panel's per-scooter Leg Guard / Seat Cover toggles —
+  // each defaults to true (applicable) when unset, e.g. for Bikes.
+  const excludeLegguard=bike && bike.applyLegguard===false;
+  const excludeSeatcover=bike && bike.applySeatcover===false;
+  const base=g('accHelmet')+(excludeLegguard?0:g('accLegguard'))+(excludeSeatcover?0:g('accSeatcover'))+g('accOthers');
   const custom=customAccessories.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
   return base+custom;
 }
@@ -1162,7 +1163,8 @@ onSnapshot(collection(db,"bikes"), snap=>{
       insurance:parseFloat(b.Insurance!==undefined?b.Insurance:b.insurance)||0,
       financeInsurance:parseFloat(b.financeInsurance)||0,
       category:b.category||'Bike',
-      applyLegguardSeatcover:b.applyLegguardSeatcover!==false
+      applyLegguard:b.applyLegguard!==undefined?b.applyLegguard!==false:b.applyLegguardSeatcover!==false,
+      applySeatcover:b.applySeatcover!==undefined?b.applySeatcover!==false:b.applyLegguardSeatcover!==false
     }));
   recalcAll();
 }, err=>{

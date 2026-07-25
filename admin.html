@@ -257,6 +257,15 @@
   #navAvatar{box-shadow:0 0 0 2px #fff, 0 0 0 3.5px rgba(0,94,166,.25)}
   #navDateChip{border-radius:999px}
   #logoutBtn{border-radius:999px}
+  .fit-toggle-card{display:flex;align-items:center;gap:10px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:9px 12px;cursor:pointer;transition:all .15s ease;user-select:none}
+  .fit-toggle-card:hover{border-color:#cbd5e1}
+  .fit-toggle-icon{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#e2e8f0;color:#94a3b8;font-size:13px;transition:all .15s ease}
+  .fit-toggle-switch{width:36px;height:20px;border-radius:999px;background:#cbd5e1;position:relative;flex-shrink:0;transition:background .15s ease}
+  .fit-toggle-switch::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s ease;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+  .fit-toggle-card input:checked ~ .fit-toggle-switch{background:#f59e0b}
+  .fit-toggle-card input:checked ~ .fit-toggle-switch::after{transform:translateX(16px)}
+  .fit-toggle-card input:checked ~ .fit-toggle-icon{background:#fef3c7;color:#f59e0b}
+  .fit-toggle-card:has(input:checked){border-color:#f59e0b;background:#fffbeb}
 
   @media (prefers-reduced-motion: reduce){
     .price-badge::before, .cta-primary::before { animation:none !important; }
@@ -651,7 +660,7 @@
         <i class="fas fa-calendar text-amber-500 text-xs"></i>
         <span id="currentDate"></span>
       </div>
-      <div class="flex items-center gap-2 bg-slate-50 border border-slate-200/80 rounded-full pl-1.5 pr-3 py-1.5">
+      <div class="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200/80 rounded-full pl-1.5 pr-3 py-1.5">
         <div id="navAvatar" class="w-6 h-6 rounded-full bg-bajaj-blue flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">A</div>
         <span id="headerUserName" class="text-xs font-semibold text-slate-700 hidden sm:block">Admin</span>
       </div>
@@ -745,11 +754,15 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Category <span class="text-red-400">*</span></label>
-            <select id="mCategory"
-              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
-              <option value="Bike">Bike</option>
-              <option value="Scooter">Scooter</option>
-            </select>
+            <div class="relative">
+              <i class="fas fa-layer-group absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+              <select id="mCategory"
+                class="appearance-none bg-slate-50 border-2 border-slate-200 rounded-lg pl-8 pr-8 py-2 text-sm font-semibold text-slate-800 transition-all w-full cursor-pointer hover:border-slate-300 focus:border-bajaj-blue focus:outline-none">
+                <option value="Bike">Bike</option>
+                <option value="Scooter">Scooter</option>
+              </select>
+              <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+            </div>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price (₹) <span class="text-red-400">*</span></label>
@@ -772,12 +785,27 @@
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div id="mLegguardWrap" class="flex flex-col gap-1.5 col-span-2 sm:col-span-3 lg:col-span-4 hidden">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Leg Guard &amp; Seat Cover</label>
-            <label class="inline-flex items-center gap-2 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 cursor-pointer w-full select-none">
-              <input type="checkbox" id="mLegguardFit" class="w-4 h-4 accent-amber-500">
-              Fits this scooter — include Leg Guard + Seat Cover in the finance sheet
-            </label>
-            <span class="text-[10px] text-slate-400">Unticked by default for scooters — tick only if this scooter actually takes a leg guard/seat cover.</span>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Scooter Fitment</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <label class="fit-toggle-card">
+                <input type="checkbox" id="mFitLegguard" class="peer sr-only">
+                <div class="fit-toggle-icon"><i class="fas fa-shield"></i></div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-bold text-slate-700">Leg Guard</div>
+                  <div class="text-[11px] text-slate-400">Adds cost to finance sheet</div>
+                </div>
+                <div class="fit-toggle-switch"></div>
+              </label>
+              <label class="fit-toggle-card">
+                <input type="checkbox" id="mFitSeatcover" class="peer sr-only">
+                <div class="fit-toggle-icon"><i class="fas fa-chair"></i></div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-bold text-slate-700">Seat Cover</div>
+                  <div class="text-[11px] text-slate-400">Adds cost to finance sheet</div>
+                </div>
+                <div class="fit-toggle-switch"></div>
+              </label>
+            </div>
           </div>
         </div>
         <div class="flex gap-2 flex-wrap">
@@ -1515,12 +1543,13 @@ function renderMasterTable() {
   const sorted=[...allMasterBikes].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
   tbody.innerHTML = sorted.map(b=>{
     const category=b.category||'Bike';
-    const fitsLegguard=b.applyLegguardSeatcover!==false;
+    const legacyFit=b.applyLegguardSeatcover!==false;
+    const fitsLegguard=b.applyLegguard!==undefined?b.applyLegguard:legacyFit;
+    const fitsSeatcover=b.applySeatcover!==undefined?b.applySeatcover:legacyFit;
+    const fitLine=(label,fits)=>`<span class="inline-flex items-center gap-1 text-[10px] font-semibold ${fits?'text-emerald-600':'text-red-500'}"><i class="fas ${fits?'fa-check':'fa-xmark'}"></i> ${label}</span>`;
     const catBadge=category==='Scooter'
       ? `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-purple-100 text-purple-700 text-xs font-bold border border-purple-200">Scooter</span>
-         <span class="block mt-1 text-[10px] font-semibold ${fitsLegguard?'text-emerald-600':'text-red-500'}">
-           <i class="fas ${fitsLegguard?'fa-check':'fa-xmark'}"></i> Leg Guard/Seat Cover ${fitsLegguard?'fits':"doesn't fit"}
-         </span>`
+         <div class="flex flex-col gap-0.5 mt-1">${fitLine('Leg Guard',fitsLegguard)}${fitLine('Seat Cover',fitsSeatcover)}</div>`
       : `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200">Bike</span>`;
     return `
     <tr class="border-b border-slate-100">
@@ -1572,7 +1601,10 @@ window._editMaster=(id)=>{
   document.getElementById('mNormalIns').value=b.Insurance||0;
   document.getElementById('mFinanceIns').value=b.financeInsurance||0;
   document.getElementById('mImg').value=b.img||'';
-  document.getElementById('mLegguardFit').checked=b.applyLegguardSeatcover!==false;
+  // Falls back to the old combined applyLegguardSeatcover field for bikes saved before Leg Guard/Seat Cover were split.
+  const legacyFit=b.applyLegguardSeatcover!==false;
+  document.getElementById('mFitLegguard').checked=b.applyLegguard!==undefined?b.applyLegguard:legacyFit;
+  document.getElementById('mFitSeatcover').checked=b.applySeatcover!==undefined?b.applySeatcover:legacyFit;
   updateLegguardVisibility();
   currentEditId=id;
   const btn=document.getElementById('saveModelBtn');
@@ -1598,10 +1630,11 @@ function updateLegguardVisibility(){
   document.getElementById('mLegguardWrap').classList.toggle('hidden',!isScooter);
 }
 document.getElementById('mCategory').addEventListener('change',()=>{
-  // A fresh switch to Scooter defaults to "doesn't fit" — matches the common
-  // case (electric scooters like Chetak). Admin can tick it back on if needed.
+  // A fresh switch to Scooter defaults both toggles to "doesn't fit" — matches
+  // the common case (electric scooters like Chetak). Admin can tick either on.
   if(document.getElementById('mCategory').value==='Scooter'){
-    document.getElementById('mLegguardFit').checked=false;
+    document.getElementById('mFitLegguard').checked=false;
+    document.getElementById('mFitSeatcover').checked=false;
   }
   updateLegguardVisibility();
 });
@@ -1615,8 +1648,9 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
   const ins=document.getElementById('mNormalIns').value.trim();
   const fin=document.getElementById('mFinanceIns').value.trim();
   if(!sn||!name||!price||!ins||!fin){toast('Fill all required fields!','err');return;}
-  const applyLegguardSeatcover=category==='Scooter' ? document.getElementById('mLegguardFit').checked : true;
-  const data={sn:Number(sn),name,category,price:Number(price),Insurance:Number(ins)||0,financeInsurance:Number(fin)||0,img:document.getElementById('mImg').value.trim(),applyLegguardSeatcover};
+  const applyLegguard=category==='Scooter' ? document.getElementById('mFitLegguard').checked : true;
+  const applySeatcover=category==='Scooter' ? document.getElementById('mFitSeatcover').checked : true;
+  const data={sn:Number(sn),name,category,price:Number(price),Insurance:Number(ins)||0,financeInsurance:Number(fin)||0,img:document.getElementById('mImg').value.trim(),applyLegguard,applySeatcover};
   try {
     if(currentEditId){await updateDoc(doc(db,"bikes",currentEditId),data);toast('Model updated!');}
     else{await addDoc(collection(db,"bikes"),data);toast('Model added!');}
@@ -1627,7 +1661,8 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
 function clearMasterForm(){
   ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mImg'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('mCategory').value='Bike';
-  document.getElementById('mLegguardFit').checked=false;
+  document.getElementById('mFitLegguard').checked=false;
+  document.getElementById('mFitSeatcover').checked=false;
   updateLegguardVisibility();
 }
 
