@@ -258,19 +258,8 @@
   .login-cta:disabled{opacity:.6;cursor:not-allowed;transform:none}
   .login-support-btn{display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:700;transition:all .18s;text-decoration:none}
 
-  /* ═══ NAVBAR — matches index.html .nav-blur ═══ */
-  #adminNav{
-    position:relative;
-    background: rgba(255,255,255,0.88);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(0,94,166,0.08);
-    box-shadow: 0 2px 24px rgba(0,0,0,0.06);
-  }
-  .nav-tab{position:relative;border-radius:999px !important}
-  .nav-tab.bg-blue-50{box-shadow:0 1px 3px rgba(0,94,166,.14)}
+  /* ═══ Sidebar nav-tab state (structural rules live in the shell block below) ═══ */
   #navAvatar{box-shadow:0 0 0 2px #fff, 0 0 0 3.5px rgba(0,94,166,.25)}
-  #navDateChip{border-radius:999px}
-  #logoutBtn{border-radius:999px}
   .fit-toggle-card{display:flex;align-items:center;gap:10px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:9px 12px;cursor:pointer;transition:all .15s ease;user-select:none}
   .fit-toggle-card:hover{border-color:#cbd5e1}
   .fit-toggle-icon{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#e2e8f0;color:#94a3b8;font-size:13px;transition:all .15s ease}
@@ -453,6 +442,141 @@
   @keyframes introFade{to{opacity:1}}
   @keyframes introFill{to{width:100%}}
   @media(prefers-reduced-motion:reduce){#adminLoader *{animation:none!important}}
+
+  /* ═══════════════════════════════════════════════════════════════════
+     ELITE DASHBOARD SHELL — sidebar + topbar (Stripe/Vercel-style)
+     ═══════════════════════════════════════════════════════════════════ */
+  body.app-active{ background:#F6F7F9; }
+  .app-shell{ display:flex; min-height:100vh; width:100%; }
+
+  /* ── Sidebar ── */
+  .sidebar{
+    width:250px; flex-shrink:0; background:#fff; border-right:1px solid #E7E9EE;
+    display:flex; flex-direction:column; height:100vh; position:sticky; top:0;
+    z-index:60; transition:transform .25s ease;
+  }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:18px 18px 16px; border-bottom:1px solid #F0F1F4; flex-shrink:0; }
+  .sidebar-nav{ flex:1; overflow-y:auto; padding:14px 12px; display:flex; flex-direction:column; gap:2px; }
+  .sidebar-section-label{ font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#A6ACB9; padding:10px 10px 6px; }
+  .sidebar-link{
+    display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:10px;
+    font-size:13.5px; font-weight:600; color:#4B5262; text-decoration:none; cursor:pointer;
+    border:1px solid transparent; transition:background .15s ease, color .15s ease; position:relative;
+  }
+  .sidebar-link i{ width:16px; text-align:center; font-size:14px; color:#9AA1AF; transition:color .15s ease; flex-shrink:0; }
+  .sidebar-link:hover{ background:#F5F6F8; color:#1F2430; }
+  .sidebar-link:hover i{ color:#5B6270; }
+  /* Active state driven by existing bg-blue-50/border-blue-200/text-blue-700 utility classes */
+  .sidebar-link.bg-blue-50{ background:#EEF5FC !important; color:#005EA6 !important; font-weight:700; border-color:transparent !important; }
+  .sidebar-link.bg-blue-50 i{ color:#005EA6 !important; }
+  .sidebar-link.bg-blue-50::before{
+    content:''; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+    width:3px; height:18px; border-radius:0 4px 4px 0; background:#005EA6;
+  }
+  .sidebar-foot{ padding:14px; border-top:1px solid #F0F1F4; flex-shrink:0; }
+  .sidebar-overlay{ display:none; }
+
+  @media (max-width: 900px){
+    .sidebar{ position:fixed; left:0; top:0; transform:translateX(-100%); box-shadow:0 20px 60px rgba(15,23,42,.25); }
+    .sidebar.open{ transform:translateX(0); }
+    .sidebar-overlay{
+      display:none; position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:59;
+      backdrop-filter:blur(2px); opacity:0; transition:opacity .2s ease;
+    }
+    .sidebar-overlay.open{ display:block; opacity:1; }
+  }
+
+  .main-col{ flex:1; min-width:0; display:flex; flex-direction:column; }
+
+  /* ── Topbar ── */
+  .topbar{
+    position:sticky; top:0; z-index:40; height:64px; flex-shrink:0;
+    background:rgba(255,255,255,.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid #E7E9EE; display:flex; align-items:center; gap:14px; padding:0 18px;
+  }
+  .topbar-menu-btn{
+    width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    color:#5B6270; background:#F5F6F8; border:1px solid #E7E9EE; cursor:pointer; flex-shrink:0; transition:all .15s;
+  }
+  .topbar-menu-btn:hover{ background:#EEF0F3; }
+  .topbar-title{ min-width:0; }
+  .topbar-title .eyebrow{ font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#9AA1AF; }
+  .topbar-title .heading{ font-size:15px; font-weight:800; color:#1F2430; line-height:1.1; margin-top:1px; }
+  .topbar-search{
+    display:flex; align-items:center; gap:8px; background:#F5F6F8; border:1px solid #E7E9EE; border-radius:10px;
+    padding:8px 12px; width:230px; color:#9AA1AF; font-size:13px; cursor:pointer; transition:all .15s ease; flex-shrink:0;
+  }
+  .topbar-search:hover{ border-color:#D7DBE3; background:#F0F1F4; }
+  .topbar-search kbd{ margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px; background:#fff; border:1px solid #E2E5EB; border-radius:4px; padding:1px 5px; color:#A6ACB9; }
+  .topbar-icon-btn{
+    width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    color:#5B6270; background:#fff; border:1px solid #E7E9EE; cursor:pointer; transition:all .15s ease; position:relative; flex-shrink:0;
+  }
+  .topbar-icon-btn:hover{ background:#F5F6F8; border-color:#D7DBE3; color:#1F2430; }
+  .topbar-dot{ position:absolute; top:7px; right:7px; width:7px; height:7px; border-radius:50%; background:#F59E0B; box-shadow:0 0 0 2px #fff; }
+  .topbar-profile{
+    display:flex; align-items:center; gap:8px; padding:5px 10px 5px 5px; border-radius:999px;
+    background:#fff; border:1px solid #E7E9EE; cursor:pointer; transition:all .15s ease; flex-shrink:0;
+  }
+  .topbar-profile:hover{ background:#F5F6F8; border-color:#D7DBE3; }
+  .profile-menu{
+    position:absolute; top:calc(100% + 8px); right:0; min-width:190px; background:#fff; border:1px solid #E7E9EE;
+    border-radius:12px; box-shadow:0 14px 34px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.06);
+    padding:6px; z-index:70; display:none; animation:slideIn .14s ease both;
+  }
+  .profile-menu.open{ display:block; }
+  .profile-menu-user{ padding:9px 10px 10px; border-bottom:1px solid #F0F1F4; margin-bottom:6px; }
+  .profile-menu-user .nm{ font-size:13px; font-weight:700; color:#1F2430; }
+  .profile-menu-user .em{ font-size:11px; color:#9AA1AF; margin-top:1px; }
+
+  /* ═══ Muted status badges (design tokens: neutral / blue / amber / red / green) ═══ */
+  .badge{ display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:7px; font-size:11px; font-weight:700; letter-spacing:.01em; border:1px solid transparent; line-height:1.5; }
+  .badge-neutral{ background:#F1F2F5; color:#565D6B; border-color:#E7E9EE; }
+  .badge-blue{ background:#EAF3FB; color:#005EA6; border-color:#D6E9F9; }
+  .badge-amber{ background:#FEF6E7; color:#B4740E; border-color:#FBEACB; }
+  .badge-red{ background:#FDEDED; color:#C6382E; border-color:#F9D9D6; }
+  .badge-green{ background:#EAF7F0; color:#137A4B; border-color:#D3EFDF; }
+
+  /* Refined card / table chrome (elite, low-contrast) */
+  .yng-card-shell{ border-color:#E7E9EE !important; box-shadow:0 1px 2px rgba(15,23,42,.03) !important; }
+  .yng-card-shell:hover{ box-shadow:0 1px 2px rgba(15,23,42,.03) !important; transform:none !important; border-color:#E7E9EE !important; }
+  table thead tr{ background:#FAFAFB !important; }
+  table th{ color:#8B93A3 !important; font-weight:700 !important; }
+  tbody tr:hover{ background:#FAFBFD !important; }
+  tbody tr{ border-color:#F0F1F4 !important; }
+
+  /* ═══ Custom Select (progressively enhances hidden native <select>) ═══ */
+  .cs-wrap{ position:relative; width:100%; }
+  .cs-wrap select{ position:absolute; inset:0; width:100%; height:100%; opacity:0; pointer-events:none; }
+  .cs-trigger{
+    display:flex; align-items:center; gap:8px; width:100%; background:#F8FAFC; border:2px solid #E2E8F0;
+    border-radius:8px; padding:8px 10px; font-size:13.5px; font-weight:600; color:#1F2430; cursor:pointer;
+    transition:border-color .15s ease, box-shadow .15s ease; text-align:left;
+  }
+  .cs-trigger:hover{ border-color:#CBD5E1; }
+  .cs-trigger.open, .cs-trigger:focus-visible{ border-color:#005EA6; box-shadow:0 0 0 3px rgba(0,94,166,.12); outline:none; }
+  .cs-trigger .cs-label{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cs-trigger .cs-label.placeholder{ color:#94A3B8; font-weight:500; }
+  .cs-trigger .cs-chev{ color:#94A3B8; font-size:11px; transition:transform .15s ease; flex-shrink:0; }
+  .cs-trigger.open .cs-chev{ transform:rotate(180deg); }
+  .cs-menu{
+    position:absolute; z-index:65; top:calc(100% + 6px); left:0; right:0; background:#fff; border:1px solid #E2E8F0;
+    border-radius:12px; box-shadow:0 16px 36px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.06);
+    padding:6px; max-height:280px; display:flex; flex-direction:column; animation:slideIn .14s ease both;
+  }
+  .cs-search{ display:flex; align-items:center; gap:7px; padding:7px 9px; margin-bottom:4px; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:8px; flex-shrink:0; }
+  .cs-search input{ border:none; background:transparent; outline:none; font-size:13px; width:100%; color:#1F2430; }
+  .cs-search i{ color:#94A3B8; font-size:12px; }
+  .cs-options{ overflow-y:auto; }
+  .cs-option{
+    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:8px; font-size:13.5px; font-weight:600;
+    color:#334155; cursor:pointer; transition:background .12s ease;
+  }
+  .cs-option:hover, .cs-option.hl{ background:#F1F5F9; }
+  .cs-option.selected{ background:#EAF3FB; color:#005EA6; }
+  .cs-option .cs-check{ margin-left:auto; color:#005EA6; font-size:11px; opacity:0; }
+  .cs-option.selected .cs-check{ opacity:1; }
+  .cs-empty{ padding:14px 10px; text-align:center; color:#94A3B8; font-size:12.5px; }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-700 min-h-screen">
@@ -611,78 +735,91 @@
 <!-- ══════════════════ ADMIN PANEL ══════════════════ -->
 <div id="admin-section" class="hidden flex-col min-h-screen">
 
-  <!-- NAVBAR -->
-  <nav id="adminNav" class="sticky top-0 z-50 h-16 flex items-center px-4 sm:px-6 gap-3">
-    <!-- Brand -->
-    <div class="flex items-center gap-2.5 flex-shrink-0">
-      <div class="w-9 h-9 rounded-xl bg-bajaj-blue flex items-center justify-center text-white shadow-btn flex-shrink-0">
-        <i class="fas fa-motorcycle text-sm"></i>
+  <div class="app-shell">
+    <!-- Mobile overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeMobileMenu()"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-brand">
+        <div class="w-9 h-9 rounded-xl bg-bajaj-blue flex items-center justify-center text-white shadow-btn flex-shrink-0">
+          <i class="fas fa-motorcycle text-sm"></i>
+        </div>
+        <div class="min-w-0">
+          <div class="font-display text-lg text-slate-900 tracking-widest leading-none truncate">BAJAJ <span class="text-amber-500">ADMIN</span></div>
+          <div class="text-[9px] text-slate-400 tracking-widest uppercase">Dealer Panel</div>
+        </div>
+        <button id="hamburger" onclick="closeMobileMenu()" class="md:hidden ml-auto w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 flex-shrink-0">
+          <i class="fas fa-xmark text-sm"></i>
+        </button>
       </div>
-      <div class="hidden sm:block">
-        <div class="font-display text-xl text-slate-900 tracking-widest leading-none">BAJAJ <span class="text-amber-500">ADMIN</span></div>
-        <div class="text-[9px] text-slate-400 tracking-widest uppercase">Dealer Panel</div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Dealership</div>
+        <button id="navPrice" onclick="switchSec('price');closeMobileMenu()" class="nav-tab sidebar-link active-tab">
+          <i class="fas fa-tags"></i> Price List
+        </button>
+        <button id="navInv" onclick="switchSec('inv');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-warehouse"></i> Inventory
+        </button>
+        <button id="navFin" onclick="switchSec('fin');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-percent"></i> HFL Finance
+        </button>
+        <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-helmet-safety"></i> Accessories
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div id="navDateChip" class="flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 rounded-lg px-3 py-2 text-[11px] text-slate-500 font-mono justify-center">
+          <i class="fas fa-calendar text-amber-500 text-xs"></i>
+          <span id="currentDate"></span>
+        </div>
       </div>
-    </div>
+    </aside>
 
-    <div class="w-px h-7 bg-slate-200 hidden md:block flex-shrink-0"></div>
+    <div class="main-col">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <button id="hamburgerOpen" onclick="toggleMobileMenu()" class="topbar-menu-btn md:hidden">
+          <i class="fas fa-bars text-sm"></i>
+        </button>
 
-    <!-- Desktop Tabs -->
-    <div class="hidden md:flex gap-1.5 bg-slate-50 border border-slate-200/80 rounded-full p-1">
-      <button id="navPrice" onclick="switchSec('price')"
-        class="nav-tab flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-500 border border-transparent hover:bg-white transition-all active-tab">
-        <i class="fas fa-tags text-xs"></i> Price List
-      </button>
-      <button id="navInv" onclick="switchSec('inv')"
-        class="nav-tab flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-500 border border-transparent hover:bg-white transition-all">
-        <i class="fas fa-warehouse text-xs"></i> Inventory
-      </button>
-      <button id="navFin" onclick="switchSec('fin')"
-        class="nav-tab flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-500 border border-transparent hover:bg-white transition-all">
-        <i class="fas fa-percent text-xs"></i> HFL Finance
-      </button>
-      <button id="navAcc" onclick="switchSec('acc')"
-        class="nav-tab flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-slate-500 border border-transparent hover:bg-white transition-all">
-        <i class="fas fa-helmet-safety text-xs"></i> Accessories
-      </button>
-    </div>
+        <div class="topbar-title hidden sm:block">
+          <div class="eyebrow">Samriddhi Admin</div>
+          <div class="heading" id="topbarHeading">Master Price List</div>
+        </div>
 
-    <!-- Right -->
-    <div class="ml-auto flex items-center gap-2 flex-shrink-0">
-      <div id="navDateChip" class="hidden sm:flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 px-3 py-1.5 text-xs text-slate-500 font-mono">
-        <i class="fas fa-calendar text-amber-500 text-xs"></i>
-        <span id="currentDate"></span>
-      </div>
-      <div class="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200/80 rounded-full pl-1.5 pr-3 py-1.5">
-        <div id="navAvatar" class="w-6 h-6 rounded-full bg-bajaj-blue flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">A</div>
-        <span id="headerUserName" class="text-xs font-semibold text-slate-700 hidden sm:block">Admin</span>
-      </div>
-      <button id="logoutBtn" class="flex items-center gap-1.5 px-3.5 py-1.5 border-2 border-red-200 text-red-500 text-xs font-bold hover:bg-red-500 hover:text-white hover:border-red-500 transition-all">
-        <i class="fas fa-right-from-bracket"></i> <span class="hidden sm:inline">Logout</span>
-      </button>
-      <!-- Hamburger -->
-      <button id="hamburger" onclick="toggleMobileMenu()" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full bg-slate-50 border border-slate-200/80 text-slate-600 hover:bg-slate-100 transition-all">
-        <i class="fas fa-bars text-sm"></i>
-      </button>
-    </div>
-  </nav>
+        <div class="ml-auto flex items-center gap-2.5 flex-shrink-0">
+          <div class="topbar-search hidden lg:flex" id="topbarSearch" onclick="focusPageSearch()">
+            <i class="fas fa-magnifying-glass text-xs"></i>
+            <span>Search records…</span>
+            <kbd>/</kbd>
+          </div>
+          <button class="topbar-icon-btn" aria-label="Notifications">
+            <i class="fas fa-bell text-sm"></i>
+            <span class="topbar-dot"></span>
+          </button>
+          <div class="relative">
+            <button id="profileTrigger" class="topbar-profile" onclick="toggleProfileMenu(event)">
+              <div id="navAvatar" class="w-7 h-7 rounded-full bg-bajaj-blue flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">A</div>
+              <span id="headerUserName" class="text-xs font-semibold text-slate-700 hidden sm:block">Admin</span>
+              <i class="fas fa-chevron-down text-[9px] text-slate-400 hidden sm:block"></i>
+            </button>
+            <div id="profileMenu" class="profile-menu">
+              <div class="profile-menu-user">
+                <div class="nm" id="profileMenuName">Admin</div>
+                <div class="em">Samriddhi And Brothers</div>
+              </div>
+              <button id="logoutBtn" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold text-red-500 hover:bg-red-50 transition-colors">
+                <i class="fas fa-right-from-bracket text-xs"></i> Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
 
-  <!-- Mobile Menu -->
-  <div id="mobileMenu" class="mobile-menu md:hidden flex-col gap-1 bg-white border-b border-slate-200 px-4 py-3 shadow-lg">
-    <button id="mNavPrice" onclick="switchSec('price');closeMobileMenu()" class="mobile-tab flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 border border-transparent hover:bg-slate-100 transition-all active-mob">
-      <i class="fas fa-tags text-bajaj-blue"></i> Price List
-    </button>
-    <button id="mNavInv" onclick="switchSec('inv');closeMobileMenu()" class="mobile-tab flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 border border-transparent hover:bg-slate-100 transition-all">
-      <i class="fas fa-warehouse text-bajaj-blue"></i> Inventory
-    </button>
-    <button id="mNavFin" onclick="switchSec('fin');closeMobileMenu()" class="mobile-tab flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 border border-transparent hover:bg-slate-100 transition-all">
-      <i class="fas fa-percent text-bajaj-blue"></i> HFL Finance
-    </button>
-    <button id="mNavAcc" onclick="switchSec('acc');closeMobileMenu()" class="mobile-tab flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 border border-transparent hover:bg-slate-100 transition-all">
-      <i class="fas fa-helmet-safety text-bajaj-blue"></i> Accessories
-    </button>
-  </div>
-
-  <div class="flex-1 px-4 py-6 max-w-7xl mx-auto w-full">
+      <div class="flex-1 px-4 sm:px-6 py-6 max-w-7xl mx-auto w-full">
 
     <!-- ═══ PRICE LIST ═══ -->
     <div class="sec-panel active" id="secPrice">
@@ -746,15 +883,10 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Category <span class="text-red-400">*</span></label>
-            <div class="relative">
-              <i class="fas fa-layer-group absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-              <select id="mCategory"
-                class="appearance-none bg-slate-50 border-2 border-slate-200 rounded-lg pl-8 pr-8 py-2 text-sm font-semibold text-slate-800 transition-all w-full cursor-pointer hover:border-slate-300 focus:border-bajaj-blue focus:outline-none">
-                <option value="Bike">Bike</option>
-                <option value="Scooter">Scooter</option>
-              </select>
-              <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
-            </div>
+            <select id="mCategory">
+              <option value="Bike">Bike</option>
+              <option value="Scooter">Scooter</option>
+            </select>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price (₹) <span class="text-red-400">*</span></label>
@@ -1172,6 +1304,8 @@
       </div>
     </div>
   </footer>
+      </div><!-- /main-col -->
+    </div><!-- /app-shell -->
 </div>
 
 <!-- CONFIRM MODAL -->
@@ -1534,6 +1668,7 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('admin-section').style.display = 'flex';
+    document.body.classList.add('app-active');
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     await loadProfile(user.uid);
     loadMasterPriceList();
@@ -1544,6 +1679,7 @@ onAuthStateChanged(auth, async (user) => {
   } else {
     document.getElementById('login-section').style.display = 'flex';
     document.getElementById('admin-section').style.display = 'none';
+    document.body.classList.remove('app-active');
     setBtnState(false);
   }
 });
@@ -1584,6 +1720,7 @@ async function loadProfile(uid) {
     const name = snap.exists() ? (snap.data().name||'Admin') : 'Administrator';
     document.getElementById('headerUserName').textContent = name;
     document.getElementById('navAvatar').textContent = name.charAt(0).toUpperCase();
+    const pmName = document.getElementById('profileMenuName'); if(pmName) pmName.textContent = name;
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
 }
 
@@ -2493,29 +2630,180 @@ window.loadFinanceSchemes = loadFinanceSchemes;
 window.loadAccessories = loadAccessories;
 
 /* ─── Nav ─── */
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', fin:'HFL Finance Options', acc:'Accessories Inventory' };
 window.switchSec=(sec)=>{
   document.querySelectorAll('.sec-panel').forEach(p=>p.classList.remove('active'));
   const secId = sec==='price'?'secPrice':(sec==='inv'?'secInv':(sec==='fin'?'secFin':'secAcc'));
   document.getElementById(secId).classList.add('active');
   setActiveTab(sec);
+  const heading = document.getElementById('topbarHeading');
+  if(heading) heading.textContent = SEC_TITLES[sec] || '';
   if(sec==='inv') populateModelDropdown();
 };
 </script>
 
 <script>
+/* ─── Sidebar drawer (mobile) ─── */
 function toggleMobileMenu(){
-  document.getElementById('mobileMenu').classList.toggle('open');
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
 }
 function closeMobileMenu(){
-  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
 }
-document.addEventListener('click',function(e){
-  const menu=document.getElementById('mobileMenu');
-  const hamburger=document.getElementById('hamburger');
-  if(menu&&!menu.contains(e.target)&&hamburger&&!hamburger.contains(e.target)){
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeMobileMenu(); });
+
+/* ─── Topbar search: jumps to the current page's own search field, if any ─── */
+function focusPageSearch(){
+  const inv = document.getElementById('invSearch');
+  if(inv && document.getElementById('secInv').classList.contains('active')){ inv.focus(); return; }
+  window.switchSec('inv');
+  setTimeout(()=>document.getElementById('invSearch')?.focus(), 60);
+}
+
+/* ─── Profile dropdown ─── */
+function toggleProfileMenu(e){
+  e.stopPropagation();
+  document.getElementById('profileMenu').classList.toggle('open');
+}
+document.addEventListener('click', (e)=>{
+  const menu = document.getElementById('profileMenu');
+  const trigger = document.getElementById('profileTrigger');
+  if(menu && menu.classList.contains('open') && !menu.contains(e.target) && !trigger.contains(e.target)){
     menu.classList.remove('open');
   }
 });
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   CUSTOM SELECT ENGINE — progressively enhances native <select> elements
+   into a styled dropdown (search-filterable, keyboard-friendly), while the
+   original <select> stays live in the DOM as the single source of truth.
+   All existing app code that reads/sets `.value` or listens for 'change'
+   on these selects keeps working unmodified.
+   ═══════════════════════════════════════════════════════════════════════ */
+function enhanceNativeSelect(select, opts={}){
+  if(!select || select._csEnhanced) return;
+  select._csEnhanced = true;
+  const searchable = !!opts.searchable;
+  const placeholder = opts.placeholder || 'Select…';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'cs-wrap';
+  select.parentNode.insertBefore(wrap, select);
+  wrap.appendChild(select);
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'cs-trigger';
+  trigger.setAttribute('aria-haspopup','listbox');
+  trigger.innerHTML = `<span class="cs-label placeholder">${placeholder}</span><i class="fas fa-chevron-down cs-chev"></i>`;
+  wrap.appendChild(trigger);
+
+  let menu = null;
+
+  function currentLabel(){
+    const opt = select.options[select.selectedIndex];
+    return (opt && opt.value) ? opt.textContent : '';
+  }
+  function syncLabel(){
+    const labelEl = trigger.querySelector('.cs-label');
+    const lbl = currentLabel();
+    if(lbl){ labelEl.textContent = lbl; labelEl.classList.remove('placeholder'); }
+    else { labelEl.textContent = placeholder; labelEl.classList.add('placeholder'); }
+  }
+
+  // Shadow the native `.value` accessor so any existing JS (`select.value = x`)
+  // keeps working exactly as before, and also keeps the custom label in sync.
+  const nativeDesc = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value');
+  Object.defineProperty(select, 'value', {
+    get(){ return nativeDesc.get.call(select); },
+    set(v){ nativeDesc.set.call(select, v); syncLabel(); },
+    configurable:true
+  });
+
+  function closeMenu(){
+    if(menu){ menu.remove(); menu=null; }
+    trigger.classList.remove('open');
+    document.removeEventListener('click', onDocClick, true);
+  }
+  function onDocClick(e){ if(!wrap.contains(e.target)) closeMenu(); }
+
+  function openMenu(){
+    if(menu) return;
+    trigger.classList.add('open');
+    menu = document.createElement('div');
+    menu.className = 'cs-menu';
+
+    let searchInput = null;
+    if(searchable){
+      const sw = document.createElement('div'); sw.className = 'cs-search';
+      sw.innerHTML = `<i class="fas fa-magnifying-glass"></i>`;
+      searchInput = document.createElement('input');
+      searchInput.type = 'text'; searchInput.placeholder = 'Type to filter…';
+      sw.appendChild(searchInput);
+      menu.appendChild(sw);
+    }
+
+    const optWrap = document.createElement('div');
+    optWrap.className = 'cs-options';
+    menu.appendChild(optWrap);
+    wrap.appendChild(menu);
+
+    function renderOptions(filter=''){
+      optWrap.innerHTML = '';
+      const f = filter.trim().toLowerCase();
+      let shown = 0;
+      Array.from(select.options).forEach(opt=>{
+        if(opt.value==='' && opt.textContent.trim().startsWith('—')){
+          if(f) return; // hide placeholder row while filtering
+        }
+        if(f && !opt.textContent.toLowerCase().includes(f)) return;
+        shown++;
+        const row = document.createElement('div');
+        row.className = 'cs-option' + (opt.value===select.value ? ' selected':'');
+        row.setAttribute('role','option');
+        row.innerHTML = `<span>${opt.textContent}</span><i class="fas fa-check cs-check"></i>`;
+        row.addEventListener('click', ()=>{
+          select.value = opt.value; // goes through the defineProperty setter above
+          select.dispatchEvent(new Event('change', {bubbles:true}));
+          closeMenu();
+        });
+        optWrap.appendChild(row);
+      });
+      if(!shown){
+        const empty = document.createElement('div');
+        empty.className = 'cs-empty';
+        empty.textContent = 'No matches found';
+        optWrap.appendChild(empty);
+      }
+    }
+    renderOptions();
+
+    if(searchInput){
+      searchInput.addEventListener('input', ()=>renderOptions(searchInput.value));
+      requestAnimationFrame(()=>searchInput.focus());
+    }
+    setTimeout(()=>document.addEventListener('click', onDocClick, true), 0);
+  }
+
+  trigger.addEventListener('click', ()=>{ menu ? closeMenu() : openMenu(); });
+  trigger.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter' || e.key===' '){ e.preventDefault(); menu ? closeMenu() : openMenu(); }
+    if(e.key==='Escape') closeMenu();
+  });
+
+  syncLabel();
+  select._csSync = syncLabel;
+}
+
+function initCustomSelects(){
+  enhanceNativeSelect(document.getElementById('mCategory'), { placeholder:'Category' });
+  enhanceNativeSelect(document.getElementById('stockModelSelect'), { placeholder:'— Select Model —', searchable:true });
+}
+document.addEventListener('DOMContentLoaded', initCustomSelects);
 </script>
 
 <script>
