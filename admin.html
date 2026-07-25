@@ -840,7 +840,7 @@
           </div>
         </div>
         <div class="stat-chip !items-start !flex-row !gap-3 !py-4">
-          <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0"><i class="fas fa-indian-rupee-sign text-sm"></i></div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0"><i class="fas fa-money-bill-wave text-sm"></i></div>
           <div class="min-w-0">
             <div id="statAvg" class="font-display text-3xl text-slate-900 leading-none truncate">—</div>
             <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Avg Price</div>
@@ -889,17 +889,17 @@
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price (₹) <span class="text-red-400">*</span></label>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price (Rs.) <span class="text-red-400">*</span></label>
             <input type="number" id="mPrice" placeholder="145000"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Insurance (₹) <span class="text-red-400">*</span></label>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Insurance (Rs.) <span class="text-red-400">*</span></label>
             <input type="number" id="mNormalIns" placeholder="8500"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Finance Ins. (₹) <span class="text-red-400">*</span></label>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Finance Ins. (Rs.) <span class="text-red-400">*</span></label>
             <input type="number" id="mFinanceIns" placeholder="3200"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
@@ -1387,6 +1387,7 @@ let currentEditFinId = null;
 let currentEditAccId = null;
 let allMasterBikes = [];
 let invData = [];
+let invUnsub = null;
 let invSearchTerm = '';
 let financeSchemes = [];
 let accessories = [];
@@ -1772,9 +1773,9 @@ function renderMasterTable() {
       </td>
       <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">${b.name}</td>
       <td class="px-4 py-3 whitespace-nowrap" data-th="Category">${catBadge}</td>
-      <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Price">₹${Number(b.price).toLocaleString('en-IN')}</td>
-      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Insurance">₹${Number(b.Insurance||0).toLocaleString('en-IN')}</td>
-      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Finance Ins.">₹${Number(b.financeInsurance||0).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Price">Rs ${Number(b.price).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Insurance">Rs ${Number(b.Insurance||0).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Finance Ins.">Rs ${Number(b.financeInsurance||0).toLocaleString('en-IN')}</td>
       <td class="px-4 py-3" data-th="Actions">
         <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'bikes','${b.id}')" aria-label="Row actions">
           <i class="fas fa-ellipsis-vertical"></i>
@@ -1787,7 +1788,7 @@ function renderMasterTable() {
 function updatePriceStats() {
   const n=allMasterBikes.length;
   document.getElementById('statModels').textContent=n;
-  document.getElementById('statAvg').textContent=n?'₹'+Math.round(allMasterBikes.reduce((s,x)=>s+Number(x.price),0)/n).toLocaleString('en-IN'):'—';
+  document.getElementById('statAvg').textContent=n?'Rs '+Math.round(allMasterBikes.reduce((s,x)=>s+Number(x.price),0)/n).toLocaleString('en-IN'):'—';
   document.getElementById('statIns').textContent=allMasterBikes.filter(x=>Number(x.Insurance||0)>0).length;
   document.getElementById('statFin').textContent=allMasterBikes.filter(x=>Number(x.financeInsurance||0)>0).length;
 }
