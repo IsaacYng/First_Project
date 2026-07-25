@@ -38,20 +38,13 @@
             800: '#003B6E',
             900: '#002E56',
           },
-          brand: {
-            50:  '#E8F2FB',
-            100: '#D4E9F7',
-            200: '#A8D3EF',
-            400: '#3D96D1',
-            500: '#0070C7',
-            600: '#005EA6',
-            700: '#004A85',
-          },
-          gold: {
-            400: '#fbbf24',
-            500: '#f59e0b',
-            600: '#d97706',
-          },
+          /* NOTE: a `brand` and `gold` palette used to be defined here,
+             duplicating `blue`/`bajaj` and `amber` respectively with zero
+             actual class usage in this file — removed to cut config bloat.
+             `blue.*` is kept (still used for nav/active-state classes) and
+             intentionally shares its 600 value with `bajaj.blue`; treat
+             `bajaj.*` as the canonical brand token going forward and avoid
+             introducing further one-off palettes. */
           danger: '#ef4444',
           success: '#10b981',
         },
@@ -139,6 +132,27 @@
   @media (max-width: 640px) {
     .sn-input { width: 40px; }
     .hide-mobile { display: none !important; }
+
+    /* Tables collapse into stacked "cards" on phones — each <td> becomes a
+       labelled row instead of forcing horizontal scroll across 6-8 columns. */
+    .responsive-table thead { display: none; }
+    .responsive-table, .responsive-table tbody { display: block; width: 100%; }
+    .responsive-table tbody tr {
+      display: block; border: 1px solid #E2E8F0; border-radius: 14px;
+      margin: 0 4px 10px; background: #fff; overflow: hidden;
+    }
+    .responsive-table tbody tr:last-child { margin-bottom: 4px; }
+    .responsive-table tbody td {
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      padding: 9px 14px !important; border-bottom: 1px solid #F1F5F9 !important;
+      text-align: right; white-space: normal !important;
+    }
+    .responsive-table tbody td:last-child { border-bottom: none !important; }
+    .responsive-table tbody td::before {
+      content: attr(data-th); font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .06em; color: #94A3B8; text-align: left; flex-shrink: 0;
+    }
+    .responsive-table tbody td[data-th="Actions"] { justify-content: flex-end; }
   }
 
   /* ═══════════ INDEX.HTML DESIGN SYSTEM — CTAs, badges, cards ═══════════ */
@@ -512,41 +526,19 @@
     <div class="login-ring w-[320px] h-[320px]" style="top:50%;right:-60px;transform:translateY(-50%);opacity:.6;"></div>
     <i class="fas fa-motorcycle absolute right-[-10px] bottom-10 text-bajaj-blue opacity-[0.06]" style="font-size:16rem;transform:scaleX(-1);"></i>
 
-    <div class="relative z-10 max-w-lg">
+    <div class="relative z-10 max-w-md">
       <span class="price-badge">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <i class="fas fa-shield-halved" style="font-size:11px;"></i>
         Authorized Dealer Console
       </span>
-      <h1 class="section-title text-[clamp(3rem,6vw,4.6rem)] mt-5">
-        Dealer Operations,<br/><span style="color:#005EA6;">Made</span>
-        <span class="relative inline-block">
-          Simple.
-          <svg class="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 12" fill="none" aria-hidden="true">
-            <path d="M4 8 Q50 2 100 6 Q150 10 196 4" stroke="#F59E0B" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-          </svg>
-        </span>
-      </h1>
-      <p class="text-slate-500 text-base leading-relaxed mt-5 max-w-md">
-        Manage the Bajaj price list, live inventory, and dealership records for Samriddhi And Brothers — all synced in real time.
+      <h1 class="section-title text-[clamp(2.2rem,4.4vw,3rem)] mt-5">Restricted Access</h1>
+      <p class="text-slate-500 text-sm leading-relaxed mt-3 max-w-sm">
+        This panel controls live pricing, inventory, and finance data for Samriddhi And Brothers. Sign-in is restricted to authorized dealership staff only — all changes are logged.
       </p>
-      <div class="grid grid-cols-3 gap-3 mt-8 max-w-sm">
-        <div class="stat-chip">
-          <span style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:#005EA6;line-height:1;">Live</span>
-          <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide text-center">Firestore<br/>Sync</span>
-        </div>
-        <div class="stat-chip">
-          <span style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:#005EA6;line-height:1;">12+</span>
-          <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide text-center">Models<br/>Listed</span>
-        </div>
-        <div class="stat-chip">
-          <span style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:#005EA6;line-height:1;">24/7</span>
-          <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide text-center">Panel<br/>Access</span>
-        </div>
-      </div>
-      <div class="flex flex-wrap gap-3 mt-7">
-        <div class="flex items-center gap-2 bg-white border border-bajaj-blueLight rounded-lg px-3 py-2 text-xs text-slate-500"><i class="fas fa-shield-halved" style="color:#10B981"></i> Secure Login</div>
-        <div class="flex items-center gap-2 bg-white border border-bajaj-blueLight rounded-lg px-3 py-2 text-xs text-slate-500"><i class="fas fa-bolt" style="color:#F59E0B"></i> Real-time Sync</div>
-        <div class="flex items-center gap-2 bg-white border border-bajaj-blueLight rounded-lg px-3 py-2 text-xs text-slate-500"><i class="fas fa-mobile-screen-button" style="color:#005EA6"></i> Mobile Ready</div>
+      <div class="flex flex-col gap-2.5 mt-7 max-w-xs">
+        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-lock text-bajaj-blue w-4 text-center"></i> Encrypted sign-in via Firebase Auth</div>
+        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-user-shield text-bajaj-blue w-4 text-center"></i> Access limited to approved admin accounts</div>
+        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-clock-rotate-left text-bajaj-blue w-4 text-center"></i> Every change syncs and is timestamped in real time</div>
       </div>
     </div>
   </div>
@@ -827,7 +819,7 @@
           </div>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse">
+          <table class="w-full border-collapse responsive-table">
             <thead>
               <tr class="bg-slate-50">
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
@@ -962,7 +954,7 @@
           </div>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse">
+          <table class="w-full border-collapse responsive-table">
             <thead>
               <tr class="bg-slate-50">
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
@@ -1038,7 +1030,7 @@
           </div>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse">
+          <table class="w-full border-collapse responsive-table">
             <thead>
               <tr class="bg-slate-50">
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Down Payment</th>
@@ -1106,7 +1098,7 @@
           </div>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse">
+          <table class="w-full border-collapse responsive-table">
             <thead>
               <tr class="bg-slate-50">
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Accessory</th>
@@ -1219,8 +1211,32 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import {
+  getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, updateDoc,
+  serverTimestamp, query, orderBy, limit, runTransaction, writeBatch
+} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
+/* ═══════════════════════════════════════════════════════════════════════
+   SECURITY NOTE (read before deploying)
+   ───────────────────────────────────────────────────────────────────────
+   The Firebase Web config below (apiKey/authDomain/projectId/appId) is NOT
+   a secret — Google's own docs confirm client apps always ship it in the
+   bundle, and it is not what protects your data. Anyone can read it from
+   devtools regardless of how it's obfuscated here. Real protection comes
+   from two places that live OUTSIDE this file, on the Firebase Console:
+     1. Firestore Security Rules — lock every collection to
+        `allow read, write: if request.auth != null` at minimum, and
+        ideally check a custom-claim/role on the authenticated user
+        (e.g. `request.auth.token.admin == true`) so a signed-in
+        non-admin account still can't write. Rules are the only real
+        gatekeeper for direct REST/SDK calls that bypass this UI.
+     2. Firebase App Check — attaches a per-app attestation token so
+        requests from outside this exact deployed origin are rejected
+        before they even reach your rules.
+   This refactor adds defense-in-depth on the client (input validation,
+   transactional writes, capped reads) but none of it is a substitute for
+   Security Rules — treat that as the actual launch blocker.
+   ═══════════════════════════════════════════════════════════════════════ */
 const firebaseConfig = {
   apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
   authDomain: "first-project-2082-12-26.firebaseapp.com",
@@ -1240,6 +1256,44 @@ let invData = [];
 let invSearchTerm = '';
 let financeSchemes = [];
 let accessories = [];
+
+/* ─── Pagination (bounded reads for the fast-growing inventory collection) ─── */
+const INV_PAGE_SIZE = 200;
+let invPageLimit = INV_PAGE_SIZE;
+let invHasMore = false;
+
+/* ═══════════════════════════════════════════════════════════════════════
+   INPUT VALIDATION — frontend-side defense-in-depth. This does NOT replace
+   Firestore Security Rules (see note above) but stops accidental bad data
+   (NaN, empty strings, script injection via text fields) before it's ever
+   written, and gives staff immediate, specific feedback.
+   ═══════════════════════════════════════════════════════════════════════ */
+const Validate = {
+  // Strips angle brackets (basic XSS-in-render guard, since values are
+  // interpolated into innerHTML elsewhere) and collapses whitespace.
+  text(v, { min = 1, max = 120, label = 'This field' } = {}) {
+    const clean = (v ?? '').toString().trim().replace(/[<>]/g, '').replace(/\s+/g, ' ');
+    if (clean.length < min) return { ok: false, error: `${label} is required.` };
+    if (clean.length > max) return { ok: false, error: `${label} must be under ${max} characters.` };
+    return { ok: true, value: clean };
+  },
+  positiveNumber(v, { label = 'This value', allowZero = false, max = 100000000 } = {}) {
+    const n = Number(v);
+    if (v === '' || v === null || v === undefined || Number.isNaN(n)) return { ok: false, error: `${label} must be a number.` };
+    if (allowZero ? n < 0 : n <= 0) return { ok: false, error: `${label} must be a positive number.` };
+    if (n > max) return { ok: false, error: `${label} is too large.` };
+    return { ok: true, value: n };
+  },
+  // Chassis / Engine numbers: real-world formats vary by manufacturer, so
+  // this stays permissive — alphanumeric plus hyphens, 5–25 chars — while
+  // still rejecting empty values, whitespace-only junk, or obvious garbage.
+  identifierCode(v, { label = 'This field' } = {}) {
+    const clean = (v ?? '').toString().trim().toUpperCase().replace(/\s+/g, '');
+    if (!clean) return { ok: false, error: `${label} is required.` };
+    if (!/^[A-Z0-9\-]{5,25}$/.test(clean)) return { ok: false, error: `${label} looks invalid — use 5–25 letters/numbers only.` };
+    return { ok: true, value: clean };
+  }
+};
 
 /* ─── Custom confirm modal (replaces native browser confirm) ─── */
 function showConfirm(opts){
@@ -1439,6 +1493,14 @@ function hideToast(){
 }
 document.getElementById('toastClose').addEventListener('click', ()=>{ clearTimeout(toastTimer); hideToast(); });
 
+function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function highlightMatch(text, q){
+  text = (text ?? '').toString();
+  if(!q || !q.trim()) return text || '—';
+  const re = new RegExp('('+escapeRegExp(q.trim())+')', 'ig');
+  return (text || '—').replace(re, '<mark class="bg-amber-200 text-slate-900 rounded-sm px-0.5">$1</mark>');
+}
+
 function colourHex(col='') {
   const map={red:'#ef4444',blue:'#3b82f6',black:'#374151',white:'#e2e8f0',orange:'#f97316',green:'#22c55e',yellow:'#eab308',silver:'#94a3b8',grey:'#64748b',gray:'#64748b',maroon:'#be123c',brown:'#92400e',purple:'#7c3aed',pink:'#ec4899'};
   const k = col.toLowerCase().split(/\s+/).find(w=>map[w]);
@@ -1530,6 +1592,14 @@ function loadMasterPriceList() {
   onSnapshot(collection(db,"bikes"), snap => {
     allMasterBikes = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderMasterTable(); updatePriceStats(); populateModelDropdown();
+  }, err => {
+    console.error('bikes listener failed', err);
+    document.getElementById('masterTableBody').innerHTML = `<tr><td colspan="8"><div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load the price list — check your connection.</p>
+      <button onclick="loadMasterPriceList()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div></td></tr>`;
+    toast('Price list sync failed: '+err.message,'err');
   });
 }
 
@@ -1548,27 +1618,27 @@ function renderMasterTable() {
     const fitsSeatcover=b.applySeatcover!==undefined?b.applySeatcover:legacyFit;
     const fitLine=(label,fits)=>`<span class="inline-flex items-center gap-1 text-[10px] font-semibold ${fits?'text-emerald-600':'text-red-500'}"><i class="fas ${fits?'fa-check':'fa-xmark'}"></i> ${label}</span>`;
     const catBadge=category==='Scooter'
-      ? `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-purple-100 text-purple-700 text-xs font-bold border border-purple-200">Scooter</span>
+      ? `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200"><i class="fas fa-motor-cycle text-[10px] text-bajaj-blue"></i>Scooter</span>
          <div class="flex flex-col gap-0.5 mt-1">${fitLine('Leg Guard',fitsLegguard)}${fitLine('Seat Cover',fitsSeatcover)}</div>`
-      : `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200">Bike</span>`;
+      : `<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">Bike</span>`;
     return `
-    <tr class="border-b border-slate-100">
-      <td class="px-4 py-3">
+    <tr class="border-b border-slate-100" data-label="${b.name}">
+      <td class="px-4 py-3" data-th="S.N">
         <input class="sn-input" type="number" value="${b.sn||''}" min="1" placeholder="—"
           onblur="window._saveSn('bikes','${b.id}',this.value)"
           onkeydown="if(event.key==='Enter')this.blur()"/>
       </td>
-      <td class="px-4 py-3">
+      <td class="px-4 py-3" data-th="Image">
         ${b.img
           ? `<img src="${b.img}" onerror="this.style.display='none'" alt="" class="w-11 h-8 object-cover rounded-lg border border-slate-200">`
           : `<div class="w-11 h-8 rounded-lg bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs"><i class="fas fa-image"></i></div>`}
       </td>
-      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap">${b.name}</td>
-      <td class="px-4 py-3 whitespace-nowrap">${catBadge}</td>
-      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-mono font-bold border border-blue-200">₹${Number(b.price).toLocaleString('en-IN')}</span></td>
-      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-mono font-bold border border-emerald-200">₹${Number(b.Insurance||0).toLocaleString('en-IN')}</span></td>
-      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 text-xs font-mono font-bold border border-amber-200">₹${Number(b.financeInsurance||0).toLocaleString('en-IN')}</span></td>
-      <td class="px-4 py-3">
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">${b.name}</td>
+      <td class="px-4 py-3 whitespace-nowrap" data-th="Category">${catBadge}</td>
+      <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Price">₹${Number(b.price).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Insurance">₹${Number(b.Insurance||0).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Finance Ins.">₹${Number(b.financeInsurance||0).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3" data-th="Actions">
         <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'bikes','${b.id}')" aria-label="Row actions">
           <i class="fas fa-ellipsis-vertical"></i>
         </button>
@@ -1641,16 +1711,22 @@ document.getElementById('mCategory').addEventListener('change',()=>{
 updateLegguardVisibility();
 
 document.getElementById('saveModelBtn').addEventListener('click',async()=>{
-  const sn=document.getElementById('mSn').value.trim();
-  const name=document.getElementById('mName').value.trim();
   const category=document.getElementById('mCategory').value;
-  const price=document.getElementById('mPrice').value.trim();
-  const ins=document.getElementById('mNormalIns').value.trim();
-  const fin=document.getElementById('mFinanceIns').value.trim();
-  if(!sn||!name||!price||!ins||!fin){toast('Fill all required fields!','err');return;}
+  const checks = [
+    Validate.positiveNumber(document.getElementById('mSn').value, { label:'S.N' }),
+    Validate.text(document.getElementById('mName').value, { label:'Model name', max:80 }),
+    Validate.positiveNumber(document.getElementById('mPrice').value, { label:'Price' }),
+    Validate.positiveNumber(document.getElementById('mNormalIns').value, { label:'Insurance', allowZero:true }),
+    Validate.positiveNumber(document.getElementById('mFinanceIns').value, { label:'Finance insurance', allowZero:true }),
+  ];
+  const firstError = checks.find(c=>!c.ok);
+  if(firstError){ toast(firstError.error,'err'); return; }
+  const [sn, name, price, ins, fin] = checks.map(c=>c.value);
+  const imgRaw = document.getElementById('mImg').value.trim();
+  if(imgRaw && !/^https?:\/\/.+/i.test(imgRaw)){ toast('Image URL must start with http:// or https://','err'); return; }
   const applyLegguard=category==='Scooter' ? document.getElementById('mFitLegguard').checked : true;
   const applySeatcover=category==='Scooter' ? document.getElementById('mFitSeatcover').checked : true;
-  const data={sn:Number(sn),name,category,price:Number(price),Insurance:Number(ins)||0,financeInsurance:Number(fin)||0,img:document.getElementById('mImg').value.trim(),applyLegguard,applySeatcover};
+  const data={sn,name,category,price,Insurance:ins,financeInsurance:fin,img:imgRaw,applyLegguard,applySeatcover};
   try {
     if(currentEditId){await updateDoc(doc(db,"bikes",currentEditId),data);toast('Model updated!');}
     else{await addDoc(collection(db,"bikes"),data);toast('Model added!');}
@@ -1670,12 +1746,16 @@ function clearMasterForm(){
 document.getElementById('saveStockBtn').addEventListener('click',async()=>{
   const modelName=document.getElementById('stockModelSelect').value;
   const bikeInfo=allMasterBikes.find(b=>b.name===modelName);
-  const chassis=document.getElementById('sChassis').value.trim();
-  const engine=document.getElementById('sEngine').value.trim();
-  const regNo=document.getElementById('sRegNo').value.trim();
-  const color=document.getElementById('sColor').value.trim();
   if(!modelName||!bikeInfo){toast('Select a valid model!','err');return;}
-  if(!chassis||!engine||!color){toast('Fill all required fields!','err');return;}
+
+  const chassisCheck = Validate.identifierCode(document.getElementById('sChassis').value, { label:'Chassis No' });
+  const engineCheck = Validate.identifierCode(document.getElementById('sEngine').value, { label:'Engine No' });
+  const colorCheck = Validate.text(document.getElementById('sColor').value, { label:'Colour', max:40 });
+  const regNoCheck = Validate.text(document.getElementById('sRegNo').value, { min:0, max:20, label:'Registration No' });
+  const firstErr = [chassisCheck, engineCheck, colorCheck].find(c=>!c.ok);
+  if(firstErr){ toast(firstErr.error,'err'); return; }
+  if(!regNoCheck.ok){ toast(regNoCheck.error,'err'); return; }
+  const chassis = chassisCheck.value, engine = engineCheck.value, color = colorCheck.value, regNo = regNoCheck.value;
 
   const dup = findDuplicateUnit(chassis, engine, currentEditInvId);
   if(dup){
@@ -1750,13 +1830,22 @@ document.getElementById('fixSnBtn').addEventListener('click', async ()=>{
   btn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-[11px]"></i> Renumbering…';
   try{
     const sorted = [...invData].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999) || (a.id>b.id?1:-1));
-    const updates = [];
+    // A single writeBatch commits all-or-nothing (up to Firestore's 500-op
+    // cap per batch), so a mid-renumber failure can't leave S.N numbers
+    // half-shifted — unlike the previous Promise.all of independent writes.
+    const chunks = [];
+    let batch = writeBatch(db), opsInBatch = 0, changed = 0;
     sorted.forEach((s,i)=>{
       const correctSn = i+1;
-      if(Number(s.sn) !== correctSn) updates.push(updateDoc(doc(db,'inventory',s.id),{sn:correctSn}));
+      if(Number(s.sn) !== correctSn){
+        batch.update(doc(db,'inventory',s.id), { sn: correctSn });
+        opsInBatch++; changed++;
+        if(opsInBatch===450){ chunks.push(batch); batch = writeBatch(db); opsInBatch = 0; }
+      }
     });
-    await Promise.all(updates);
-    toast(updates.length ? `Renumbered ${updates.length} unit(s) — no more gaps.` : 'Numbering was already correct.');
+    if(opsInBatch>0) chunks.push(batch);
+    for(const b of chunks) await b.commit();
+    toast(changed ? `Renumbered ${changed} unit(s) — no more gaps.` : 'Numbering was already correct.');
   }catch(e){
     toast('Renumber failed: '+e.message,'err');
   }finally{
@@ -1766,12 +1855,43 @@ document.getElementById('fixSnBtn').addEventListener('click', async ()=>{
 });
 
 function loadLiveStock(){
-  onSnapshot(collection(db,"inventory"),snap=>{
-    invData=snap.docs.map(d=>({id:d.id,...d.data()}));
+  if(invUnsub) invUnsub(); // drop the previous listener before opening a wider one
+  const tbody = document.getElementById('stockTableBody');
+  const q = query(collection(db,"inventory"), orderBy('sn','asc'), limit(invPageLimit));
+  invUnsub = onSnapshot(q, snap=>{
+    invData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    invHasMore = snap.docs.length === invPageLimit; // there may be more beyond this page
     renderInvTable(getFilteredInv());
     updateInvStats();
     renderModelBreakdown();
+    renderInvLoadMore();
+  }, err=>{
+    console.error('inventory listener failed', err);
+    tbody.innerHTML = `<tr><td colspan="7"><div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load inventory — check your connection.</p>
+      <button onclick="loadLiveStock()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div></td></tr>`;
+    toast('Inventory sync failed: '+err.message,'err');
   });
+}
+
+function renderInvLoadMore(){
+  let bar = document.getElementById('invLoadMoreBar');
+  const table = document.getElementById('stockTableBody')?.closest('.overflow-x-auto');
+  if(!table) return;
+  if(!invHasMore){ bar?.remove(); return; }
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'invLoadMoreBar';
+    bar.className = 'px-5 py-3 border-t border-slate-100 text-center';
+    bar.innerHTML = `<button id="invLoadMoreBtn" class="cta-secondary !py-2 !px-4 !text-xs">Load 200 more units</button>`;
+    table.after(bar);
+    bar.querySelector('button').addEventListener('click', ()=>{
+      invPageLimit += INV_PAGE_SIZE;
+      loadLiveStock();
+    });
+  }
 }
 
 function getFilteredInv(){
@@ -1802,28 +1922,29 @@ function renderInvTable(list){
     dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
   }
   const sorted=[...list].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
+  const q = invSearchTerm;
   tbody.innerHTML=sorted.map(s=>{
     const isDup = dupIds.has(s.id);
     return`<tr class="border-b ${isDup?'border-red-100 bg-red-50/40':'border-slate-100'}">
-      <td class="px-4 py-3">
-        <span class="inline-flex items-center justify-center min-w-[36px] px-2 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-xs font-mono font-bold">${s.sn||'—'}</span>
+      <td class="px-4 py-3" data-th="S.N">
+        <span class="inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-xs font-mono font-semibold">${s.sn||'—'}</span>
       </td>
-      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap">
-        ${s.model}
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">
+        ${highlightMatch(s.model, q)}
         ${isDup ? `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 text-red-600 text-[9px] font-extrabold uppercase tracking-wide align-middle"><i class="fas fa-triangle-exclamation text-[8px]"></i> Duplicate</span>` : ''}
       </td>
-      <td class="px-4 py-3"><code class="${isDup?'bg-red-100 text-red-700 border-red-200 underline decoration-red-400 decoration-2':'bg-blue-50 text-blue-700 border-blue-100'} text-xs px-2 py-0.5 rounded-md border font-mono">${s.chassis||'—'}</code></td>
-      <td class="px-4 py-3"><code class="${isDup?'bg-red-100 text-red-700 border-red-200 underline decoration-red-400 decoration-2':'bg-blue-50 text-blue-700 border-blue-100'} text-xs px-2 py-0.5 rounded-md border font-mono">${s.engine||'—'}</code></td>
-      <td class="px-4 py-3">${s.regNo
-        ? `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200">${s.regNo}</span>`
-        : `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 text-xs font-bold border border-slate-200">Pending</span>`}
+      <td class="px-4 py-3" data-th="Chassis No"><code class="${isDup?'bg-red-50 text-red-700 border-red-200':'bg-slate-50 text-slate-600 border-slate-200'} text-xs px-2 py-0.5 rounded-md border font-mono">${highlightMatch(s.chassis, q)}</code></td>
+      <td class="px-4 py-3" data-th="Engine No"><code class="${isDup?'bg-red-50 text-red-700 border-red-200':'bg-slate-50 text-slate-600 border-slate-200'} text-xs px-2 py-0.5 rounded-md border font-mono">${highlightMatch(s.engine, q)}</code></td>
+      <td class="px-4 py-3" data-th="Reg. No">${s.regNo
+        ? `<span class="text-sm text-slate-700 font-medium">${highlightMatch(s.regNo, q)}</span>`
+        : `<span class="text-xs text-slate-400 italic">Pending</span>`}
       </td>
-      <td class="px-4 py-3">
+      <td class="px-4 py-3" data-th="Colour">
         <span class="flex items-center gap-1.5 text-sm text-slate-600">
-          <span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}
+          <span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${highlightMatch(s.color, q)}
         </span>
       </td>
-      <td class="px-4 py-3">
+      <td class="px-4 py-3" data-th="Actions">
         <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'inventory','${s.id}')" aria-label="Row actions">
           <i class="fas fa-ellipsis-vertical"></i>
         </button>
@@ -1908,11 +2029,12 @@ function renderInvDropdown(list){
     invSearchDropdown.classList.remove('hidden');
     return;
   }
+  const q = invSearchInput.value;
   invSearchDropdown.innerHTML = list.map(s=>`
     <button type="button" data-id="${s.id}" class="invSuggestBtn w-full text-left px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-blue-50 border-b border-slate-50 last:border-b-0 transition-colors">
       <div class="min-w-0">
-        <div class="text-sm font-bold text-slate-800 truncate">${s.model}</div>
-        <div class="text-[11px] text-slate-400 font-mono truncate">Chassis ${s.chassis||'—'} · Engine ${s.engine||'—'}</div>
+        <div class="text-sm font-bold text-slate-800 truncate">${highlightMatch(s.model, q)}</div>
+        <div class="text-[11px] text-slate-400 font-mono truncate">Chassis ${highlightMatch(s.chassis, q)} · Engine ${highlightMatch(s.engine, q)}</div>
       </div>
       <span class="flex items-center gap-1.5 text-[11px] text-slate-500 flex-shrink-0">
         <span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}
@@ -1961,6 +2083,14 @@ function loadFinanceSchemes(){
   onSnapshot(collection(db,"finance_schemes"), snap => {
     financeSchemes = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderFinTable();
+  }, err => {
+    console.error('finance_schemes listener failed', err);
+    document.getElementById('finTableBody').innerHTML = `<tr><td colspan="4"><div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load finance schemes.</p>
+      <button onclick="loadFinanceSchemes()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div></td></tr>`;
+    toast('Finance sync failed: '+err.message,'err');
   });
 }
 
@@ -1978,10 +2108,10 @@ function renderFinTable(){
   });
   tbody.innerHTML = sorted.map(f=>`
     <tr class="border-b border-slate-100">
-      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200">${f.downPay}%</span></td>
-      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200">${f.rate}%</span></td>
-      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 text-xs font-bold border border-amber-200 whitespace-nowrap">${(f.tenures||[]).join(', ')} mo</span></td>
-      <td class="px-4 py-3">
+      <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Down Payment">${f.downPay}%</td>
+      <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Interest Rate">${f.rate}%</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500 whitespace-nowrap" data-th="Tenure">${(f.tenures||[]).join(', ')} mo</td>
+      <td class="px-4 py-3" data-th="Actions">
         <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'finance_schemes','${f.id}')" aria-label="Row actions">
           <i class="fas fa-ellipsis-vertical"></i>
         </button>
@@ -1990,20 +2120,20 @@ function renderFinTable(){
 }
 
 document.getElementById('saveFinBtn').addEventListener('click', async()=>{
-  const downPay = document.getElementById('fDownPay').value.trim();
-  const rate = document.getElementById('fRate').value.trim();
+  const downPayCheck = Validate.positiveNumber(document.getElementById('fDownPay').value, { label:'Down payment', allowZero:true, max:100 });
+  const rateCheck = Validate.positiveNumber(document.getElementById('fRate').value, { label:'Interest rate', allowZero:true, max:100 });
   const tenureRaw = document.getElementById('fTenure').value.trim();
 
-  if(!downPay || !rate || !tenureRaw){
-    toast('Fill all required fields!','err');
-    return;
-  }
+  if(!downPayCheck.ok){ toast(downPayCheck.error,'err'); return; }
+  if(!rateCheck.ok){ toast(rateCheck.error,'err'); return; }
+  if(!tenureRaw){ toast('Enter at least one tenure in months.','err'); return; }
 
-  const tenures = [...new Set(tenureRaw.split(',').map(t=>Number(t.trim())).filter(t=>t>0))].sort((a,b)=>a-b);
+  const tenures = [...new Set(tenureRaw.split(',').map(t=>Number(t.trim())).filter(t=>t>0 && t<=360))].sort((a,b)=>a-b);
   if(!tenures.length){
     toast('Enter valid month(s), e.g. 12, 24, 36','err');
     return;
   }
+  const downPay = downPayCheck.value, rate = rateCheck.value;
 
   try{
     if(currentEditFinId){
@@ -2061,6 +2191,14 @@ function loadAccessories(){
   onSnapshot(collection(db,"accessories"), snap => {
     accessories = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderAccTable();
+  }, err => {
+    console.error('accessories listener failed', err);
+    document.getElementById('accTableBody').innerHTML = `<tr><td colspan="3"><div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load accessories.</p>
+      <button onclick="loadAccessories()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div></td></tr>`;
+    toast('Accessories sync failed: '+err.message,'err');
   });
 }
 
@@ -2078,9 +2216,9 @@ function renderAccTable(){
   });
   tbody.innerHTML = sorted.map(a=>`
     <tr class="border-b border-slate-100">
-      <td class="px-4 py-3 text-sm font-semibold text-slate-700">${a.name}</td>
-      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200">Rs. ${Number(a.price).toLocaleString('en-IN')}</span></td>
-      <td class="px-4 py-3">
+      <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Accessory">${a.name}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-700" data-th="Default Price">Rs. ${Number(a.price).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3" data-th="Actions">
         <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'accessories','${a.id}')" aria-label="Row actions">
           <i class="fas fa-ellipsis-vertical"></i>
         </button>
@@ -2089,13 +2227,12 @@ function renderAccTable(){
 }
 
 document.getElementById('saveAccBtn').addEventListener('click', async()=>{
-  const name = document.getElementById('aName').value.trim();
-  const price = document.getElementById('aPrice').value.trim();
+  const nameCheck = Validate.text(document.getElementById('aName').value, { label:'Accessory name', max:60 });
+  const priceCheck = Validate.positiveNumber(document.getElementById('aPrice').value, { label:'Price' });
 
-  if(!name || !price){
-    toast('Fill all required fields!','err');
-    return;
-  }
+  if(!nameCheck.ok){ toast(nameCheck.error,'err'); return; }
+  if(!priceCheck.ok){ toast(priceCheck.error,'err'); return; }
+  const name = nameCheck.value, price = priceCheck.value;
 
   try{
     if(currentEditAccId){
@@ -2145,10 +2282,21 @@ window.cancelAccEdit=()=>{
 };
 
 window._saveSn=async(col,id,val)=>{
-  const num=Number(val);
-  if(!val||isNaN(num)||num<1){toast('S.N must be a positive number','err');return;}
-  try{await updateDoc(doc(db,col,id),{sn:num});toast('S.N updated to '+num);}
-  catch(e){toast('Failed: '+e.message,'err');}
+  const check = Validate.positiveNumber(val, { label:'S.N' });
+  if(!check.ok){ toast(check.error,'err'); return; }
+  const num = check.value;
+  try{
+    // Transactional write: re-reads the doc inside the transaction and
+    // Firestore automatically retries if another admin's write lands in
+    // between the read and the commit, instead of silently clobbering it.
+    await runTransaction(db, async (tx) => {
+      const ref = doc(db, col, id);
+      const snap = await tx.get(ref);
+      if(!snap.exists()) throw new Error('This record no longer exists — it may have been deleted by another user.');
+      tx.update(ref, { sn: num });
+    });
+    toast('S.N updated to '+num);
+  }catch(e){ toast('Failed: '+e.message,'err'); }
 };
 
 window._deleteEntry=async(col,id)=>{
@@ -2172,7 +2320,9 @@ window._deleteEntry=async(col,id)=>{
       if(deletedSn){
         const toShift = invData.filter(x=>x.id!==id && Number(x.sn)>deletedSn);
         if(toShift.length){
-          await Promise.all(toShift.map(x=>updateDoc(doc(db,'inventory',x.id),{sn:Number(x.sn)-1})));
+          const batch = writeBatch(db);
+          toShift.forEach(x=>batch.update(doc(db,'inventory',x.id),{sn:Number(x.sn)-1}));
+          await batch.commit();
         }
       }
       toast('Unit removed — S.N renumbered automatically.');
@@ -2278,6 +2428,17 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
       results.failed.push({row, reason:'Missing required field (Model/Chassis/Engine/Color)'});
       continue;
     }
+    const chassisCheck = Validate.identifierCode(row.chassis, { label:'Chassis' });
+    const engineCheck = Validate.identifierCode(row.engine, { label:'Engine' });
+    const modelCheck = Validate.text(row.model, { label:'Model', max:80 });
+    const colorCheck = Validate.text(row.color, { label:'Color', max:40 });
+    const badField = [chassisCheck, engineCheck, modelCheck, colorCheck].find(c=>!c.ok);
+    if(badField){ results.failed.push({row, reason: badField.error}); continue; }
+    if(!allMasterBikes.some(b=>b.name===modelCheck.value)){
+      results.failed.push({row, reason:`Model "${modelCheck.value}" isn't in the master price list — add it there first.`});
+      continue;
+    }
+    row.model = modelCheck.value; row.chassis = chassisCheck.value; row.engine = engineCheck.value; row.color = colorCheck.value;
     const dupExisting = findDuplicateUnit(row.chassis, row.engine);
     const dupBatch = seenInBatch.find(r=>normId(r.chassis)===normId(row.chassis) || normId(r.engine)===normId(row.engine));
     if(dupExisting || dupBatch){
@@ -2323,6 +2484,13 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
   document.getElementById('excelFileInput').value = '';
   document.getElementById('excelFileLabel').textContent = 'Click to choose Excel / CSV file…';
 });
+
+// Retry buttons rendered inside onSnapshot error states use inline onclick,
+// which needs these on `window` since this script runs as an ES module.
+window.loadMasterPriceList = loadMasterPriceList;
+window.loadLiveStock = loadLiveStock;
+window.loadFinanceSchemes = loadFinanceSchemes;
+window.loadAccessories = loadAccessories;
 
 /* ─── Nav ─── */
 window.switchSec=(sec)=>{
