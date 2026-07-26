@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
   tailwind.config = {
     theme: {
@@ -590,6 +591,11 @@
   .model-row:hover{ background:#FAFBFD; }
   .colour-chip{ display:inline-flex; align-items:center; gap:5px; background:#F1F2F5; border:1px solid #E7E9EE; border-radius:7px; padding:2px 8px; font-size:11px; font-weight:700; color:#4B5262; }
   .colour-chip .dot{ width:7px; height:7px; border-radius:50%; background:#005EA6; flex-shrink:0; }
+  .area-qty-input{ width:64px; text-align:center; border:1.5px solid #E2E8F0; border-radius:7px; padding:5px 4px; font-size:13px; font-weight:700; color:#1F2430; background:#F8FAFC; transition:border-color .15s; }
+  .area-qty-input:focus{ outline:none; border-color:#005EA6; box-shadow:0 0 0 3px rgba(0,94,166,.1); }
+  .area-remove-btn{ width:20px; height:20px; border-radius:6px; border:none; background:rgba(220,38,38,.08); color:#DC2626; cursor:pointer; font-size:9px; display:inline-flex; align-items:center; justify-content:center; margin-left:6px; transition:background .15s; }
+  .area-remove-btn:hover{ background:rgba(220,38,38,.18); }
+  .area-total-chip{ display:inline-flex; align-items:center; justify-content:center; min-width:34px; padding:3px 8px; border-radius:7px; background:#EAF3FB; color:#005EA6; font-weight:800; font-size:12.5px; }
   .inv-status-tab{ color:#7C8494; }
   .inv-status-tab:hover{ color:#1F2430; }
   .inv-status-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
@@ -626,6 +632,20 @@
     @page{ size:A4 landscape; margin:0; }
   }
   #stockPrintWrapper{ display:none; }
+
+  /* ── Simple, clean JPG-exportable report card (not tied to print page size) ── */
+  .jpg-report-paper{ font-family:'DM Sans',sans-serif; background:#fff; width:900px; max-width:100%; padding:34px 38px; margin:0 auto; box-sizing:border-box; color:#0F172A; }
+  .jrp-head{ text-align:center; border-bottom:3px solid #005EA6; padding-bottom:14px; }
+  .jrp-head .brand{ font-family:'Bebas Neue',cursive; font-size:2rem; letter-spacing:.03em; color:#005EA6; }
+  .jrp-head .sub{ font-size:12.5px; color:#64748B; margin-top:3px; font-weight:600; }
+  .jrp-cat-summary{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+  .jrp-cat-chip{ background:#EAF3FB; color:#005EA6; padding:8px 16px; border-radius:9px; font-weight:800; font-size:13.5px; }
+  .jrp-table{ width:100%; border-collapse:collapse; margin-top:20px; font-size:13px; }
+  .jrp-table th{ background:#005EA6; color:#fff; padding:10px 9px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .jrp-table td{ padding:9px; border-bottom:1px solid #E2E8F0; }
+  .jrp-table tr:nth-child(even) td{ background:#F8FAFC; }
+  .jrp-table tr.grand-total td{ background:#FEF6E7; font-weight:800; border-top:2px solid #F59E0B; }
+  .jrp-footer{ margin-top:18px; font-size:11.5px; color:#94A3B8; text-align:right; }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-700 min-h-screen">
@@ -1320,9 +1340,10 @@
         <div>
           <div class="section-label">Reports ·</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Stock <span class="text-amber-500">Report</span></div>
+          <p class="text-xs text-slate-400 mt-1">Sold vayeka units ma count hudaina — yaha jati dekhincha, tyati nai showroom ma "available" cha.</p>
         </div>
         <button id="genStockReportBtn" onclick="openStockPreview()" class="cta-primary">
-          <i class="fas fa-print"></i> Print Daily Stock Report
+          <i class="fas fa-image"></i> Download Report (JPG)
         </button>
       </div>
 
@@ -1335,8 +1356,20 @@
         <div class="stock-tile"><div class="k">Report Date</div><div class="v text-lg" id="stkDate">—</div></div>
       </div>
 
+      <!-- Category-wise totals: simple, big numbers, easy to read at a glance -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5" id="stkCategoryWrap">
+        <div class="stock-tile flex items-center justify-between">
+          <div><div class="k">Bike</div><div class="v" id="stkCatBike">—</div></div>
+          <i class="fas fa-motorcycle text-3xl text-blue-100"></i>
+        </div>
+        <div class="stock-tile flex items-center justify-between">
+          <div><div class="k">Scooter</div><div class="v" id="stkCatScooter">—</div></div>
+          <i class="fas fa-motorcycle text-3xl text-amber-100"></i>
+        </div>
+      </div>
+
       <!-- Model x Colour breakdown -->
-      <div class="yng-card-shell overflow-hidden">
+      <div class="yng-card-shell overflow-hidden mb-5">
         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
           <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-boxes-stacked text-amber-500"></i> Stock By Model</div>
           <button onclick="loadStockReportData(true)" class="text-xs font-bold text-bajaj-blue hover:underline flex items-center gap-1.5"><i class="fas fa-arrows-rotate"></i> Refresh</button>
@@ -1345,6 +1378,30 @@
           <div class="py-12 text-center text-slate-400">
             <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading stock…
           </div>
+        </div>
+      </div>
+
+      <!-- Area-wise stock — manually editable, colour-wise, with addable/removable locations -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div>
+            <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-map-location-dot text-amber-500"></i> Area-Wise Stock</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Yo table haath le bharne ho (auto-calculate hudaina) — jasto: Showroom ma kati, Workshop ma kati, Taplejung ma kati.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="text" id="newAreaInput" placeholder="e.g. Taplejung" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 w-32"/>
+            <button onclick="addStockArea()" class="flex items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+              <i class="fas fa-plus text-[10px]"></i> Add Area
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse responsive-table" id="areaStockTable">
+            <thead><tr class="bg-slate-50" id="areaStockHead"></tr></thead>
+            <tbody id="areaStockBody">
+              <tr><td class="px-4 py-12 text-center text-slate-400"><i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading areas…</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -1417,7 +1474,7 @@
         <div class="text-white font-bold text-sm">Daily Stock Report Preview</div>
         <div class="text-white/50 text-xs" id="spvSubtitle">—</div>
       </div>
-      <button class="spv-btn print" onclick="printStockReport()"><i class="fas fa-print"></i> Print</button>
+      <button id="spvDownloadBtn" class="spv-btn print" onclick="downloadStockReportJPG()"><i class="fas fa-download"></i> Download JPG</button>
       <button class="spv-btn close" onclick="closeStockPreview()"><i class="fas fa-xmark"></i> Close</button>
     </div>
     <div class="spv-body">
@@ -1465,7 +1522,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import {
-  getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc,
+  getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc,
   serverTimestamp, query, orderBy, limit, runTransaction, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
@@ -1509,6 +1566,8 @@ let invData = [];
 let invUnsub = null;
 let invSearchTerm = '';
 let financeSchemes = [];
+let stockAreas = [];
+let areaStockMap = {};
 let accessories = [];
 
 /* ─── Pagination (bounded reads for the fast-growing inventory collection) ─── */
@@ -1798,6 +1857,7 @@ onAuthStateChanged(auth, async (user) => {
     loadLiveStock();
     loadFinanceSchemes();
     loadAccessories();
+    loadStockAreas();
     setBtnState(false);
   } else {
     document.getElementById('login-section').style.display = 'flex';
@@ -2342,6 +2402,16 @@ function renderStockDashboard(){
   document.getElementById('stkSold').textContent = stockReportSoldUnits;
   document.getElementById('stkDate').textContent = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
 
+  let bikeTotal = 0, scooterTotal = 0;
+  models.forEach(m=>{
+    const cat = getModelCategory(m);
+    if(cat==='Scooter') scooterTotal += byModel[m].total; else bikeTotal += byModel[m].total;
+  });
+  document.getElementById('stkCatBike').textContent = bikeTotal;
+  document.getElementById('stkCatScooter').textContent = scooterTotal;
+
+  renderAreaStockTable();
+
   const listEl = document.getElementById('stockModelList');
   if(!models.length){
     listEl.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-boxes-stacked text-3xl opacity-25 block mb-2"></i><p class="text-sm">No inventory yet.</p></div>`;
@@ -2361,42 +2431,51 @@ function renderStockDashboard(){
   }).join('');
 }
 
+function getModelCategory(model){
+  const b = allMasterBikes.find(x=>x.name===model);
+  return b ? (b.category||'Bike') : 'Bike';
+}
+
 function buildStockReportPage(){
   const byModel = stockReportGrouped || {};
   const models = Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total);
   const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-  const rows = models.map((m,i)=>{
+  let sn = 0, bikeTotal = 0, scooterTotal = 0;
+  const rows = models.map(m=>{
     const info = byModel[m];
-    const colourStr = Object.entries(info.colours).sort((a,b)=>b[1]-a[1])
-      .map(([c,n])=>`${c} (${n})`).join(', ');
-    return `<tr>
-      <td>${i+1}</td>
-      <td class="left">${m}</td>
-      <td class="left">${colourStr}</td>
-      <td class="total-cell">${info.total}</td>
-    </tr>`;
+    const cat = getModelCategory(m);
+    if(cat==='Scooter') scooterTotal += info.total; else bikeTotal += info.total;
+    // Each colour gets its own row — easier to read at a glance than a combined string.
+    return Object.entries(info.colours).sort((a,b)=>b[1]-a[1]).map(([c,n])=>{
+      sn++;
+      return `<tr><td>${sn}</td><td>${m}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${n}</td></tr>`;
+    }).join('');
   }).join('');
   return `
-    <div class="pv-titlebar">Samriddhi And Brothers — Daily Stock Report (Available Units)
-      <div class="sub">Bajaj Authorized Dealer, Phidim</div>
+    <div class="jrp-head">
+      <div class="brand">SAMRIDDHI AND BROTHERS</div>
+      <div class="sub">Bajaj Authorized Dealer · Phidim, Nepal — Daily Stock Report</div>
     </div>
-    <div class="pv-tablewrap">
-      <table class="pv-table">
-        <thead><tr><th style="width:5%">S.N</th><th style="width:22%">Model</th><th>Colour-wise Breakdown</th><th style="width:12%">Total Units</th></tr></thead>
-        <tbody>
-          ${rows}
-          <tr class="grand-total"><td colspan="3" class="left">GRAND TOTAL (IN STOCK)</td><td>${stockReportTotalUnits}</td></tr>
-        </tbody>
-      </table>
+    <div class="jrp-cat-summary">
+      <div class="jrp-cat-chip">Bike: ${bikeTotal}</div>
+      <div class="jrp-cat-chip">Scooter: ${scooterTotal}</div>
+      <div class="jrp-cat-chip" style="background:#FEF6E7;color:#B4740E">Total Available: ${stockReportTotalUnits}</div>
     </div>
-    <div class="pv-datebar">Generated: ${today} &nbsp;|&nbsp; Sold units excluded (${stockReportSoldUnits} sold)</div>`;
+    <table class="jrp-table">
+      <thead><tr><th style="width:6%">S.N</th><th>Model</th><th style="width:14%">Category</th><th style="width:20%">Colour</th><th style="width:10%;text-align:center">Qty</th></tr></thead>
+      <tbody>
+        ${rows}
+        <tr class="grand-total"><td colspan="4">GRAND TOTAL (IN STOCK)</td><td style="text-align:center">${stockReportTotalUnits}</td></tr>
+      </tbody>
+    </table>
+    <div class="jrp-footer">Generated: ${today} &nbsp;|&nbsp; ${stockReportSoldUnits} sold unit(s) excluded from stock</div>`;
 }
 
 window.openStockPreview = async function(){
   if(!stockReportGrouped) await loadStockReportData();
   if(!Object.keys(stockReportGrouped||{}).length){ toast('No available inventory to report yet.','warn'); return; }
   document.getElementById('spvSubtitle').textContent = stockReportTotalUnits+' available units across '+Object.keys(stockReportGrouped).length+' models  ·  '+stockReportSoldUnits+' sold units excluded';
-  document.getElementById('spvPage').innerHTML = `<div class="a4l-paper">${buildStockReportPage()}</div>`;
+  document.getElementById('spvPage').innerHTML = `<div class="jpg-report-paper">${buildStockReportPage()}</div>`;
   document.getElementById('stockPreviewOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 };
@@ -2404,10 +2483,133 @@ window.closeStockPreview = function(){
   document.getElementById('stockPreviewOverlay').classList.remove('open');
   document.body.style.overflow = '';
 };
-window.printStockReport = function(){
-  document.getElementById('stockPrintWrapper').innerHTML = `<div class="print-page a4l-paper">${buildStockReportPage()}</div>`;
-  window.print();
+window.downloadStockReportJPG = async function(){
+  const target = document.querySelector('#spvPage .jpg-report-paper');
+  if(!target){ toast('Report not ready yet.','err'); return; }
+  const btn = document.getElementById('spvDownloadBtn');
+  const origHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Generating…';
+  btn.disabled = true;
+  try{
+    const canvas = await html2canvas(target, { scale:2, backgroundColor:'#ffffff', useCORS:true });
+    const link = document.createElement('a');
+    link.download = 'Stock-Report-'+new Date().toISOString().slice(0,10)+'.jpg';
+    link.href = canvas.toDataURL('image/jpeg', 0.95);
+    link.click();
+    toast('Stock report downloaded as JPG!');
+  }catch(e){
+    console.error('JPG export failed', e);
+    toast('Could not generate image: '+e.message,'err');
+  }finally{
+    btn.innerHTML = origHtml;
+    btn.disabled = false;
+  }
 };
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AREA-WISE STOCK — a manually-edited grid (Showroom / Workshop / Taplejung
+   etc. × Model+Colour). Areas are a live, addable/removable list; quantities
+   are typed in directly since physical distribution isn't tracked per-unit.
+   ═══════════════════════════════════════════════════════════════════════ */
+function areaStockKey(model,color){ return (model+'__'+color).replace(/[\/\.\#\$\[\]]/g,'_'); }
+
+function loadStockAreas(){
+  onSnapshot(collection(db,"stock_areas"), snap=>{
+    stockAreas = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    renderAreaStockTable();
+  }, err=>console.error('stock_areas listener failed', err));
+
+  onSnapshot(collection(db,"area_stock"), snap=>{
+    areaStockMap = {};
+    snap.docs.forEach(d=>{ areaStockMap[d.id] = d.data(); });
+    renderAreaStockTable();
+  }, err=>console.error('area_stock listener failed', err));
+}
+
+window.addStockArea = async ()=>{
+  const input = document.getElementById('newAreaInput');
+  const name = (input.value||'').trim();
+  if(!name){ toast('Area ko naam halnus.','warn'); return; }
+  if(stockAreas.some(a=>(a.name||'').toLowerCase()===name.toLowerCase())){ toast('Yo area pahile nai xa.','warn'); return; }
+  try{
+    await addDoc(collection(db,"stock_areas"),{name});
+    input.value='';
+    toast('Area added: '+name);
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
+window.removeStockArea = async (id, name)=>{
+  const proceed = await showConfirm({
+    title:'Remove this area?',
+    message:`<b>${name}</b> lai area list bata hataune? Yo column table bata haraunxa (chai number haru chai save vairahanxa, feri thapda dekhincha).`,
+    okText:'Remove', okColorClass:'text-red-600 hover:bg-red-50',
+    iconClass:'fa-trash-can', iconColor:'#dc2626', iconBg:'#FEF2F2'
+  });
+  if(!proceed) return;
+  try{
+    await deleteDoc(doc(db,"stock_areas",id));
+    toast('Area removed.');
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
+window.saveAreaQty = async (model, color, areaName, value)=>{
+  const key = areaStockKey(model,color);
+  const qty = Math.max(0, parseInt(value)||0);
+  try{
+    const existing = areaStockMap[key]?.areas || {};
+    await setDoc(doc(db,"area_stock",key), {
+      model, color, areas: { ...existing, [areaName]: qty }
+    }, { merge:true });
+  }catch(e){ toast('Error saving area stock: '+e.message,'err'); }
+};
+
+function renderAreaStockTable(){
+  const head = document.getElementById('areaStockHead');
+  const body = document.getElementById('areaStockBody');
+  if(!head || !body) return;
+
+  head.innerHTML = `<th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
+    <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Colour</th>
+    ${stockAreas.map(a=>`<th class="px-3 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">
+        ${a.name} <button class="area-remove-btn" onclick="removeStockArea('${a.id}','${(a.name||'').replace(/'/g,"\\'")}')" title="Remove area"><i class="fas fa-xmark"></i></button>
+      </th>`).join('')}
+    <th class="px-4 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Row Total</th>`;
+
+  const byModel = stockReportGrouped || {};
+  const models = Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total);
+  if(!models.length){
+    body.innerHTML = `<tr><td colspan="${stockAreas.length+3}" class="px-4 py-10 text-center text-slate-400 text-sm">No available stock yet — area grid will fill in automatically once units are in stock.</td></tr>`;
+    return;
+  }
+  if(!stockAreas.length){
+    body.innerHTML = `<tr><td colspan="3" class="px-4 py-10 text-center text-slate-400 text-sm">Kunai area thapeko xaina. Maathi "Add Area" bata Showroom, Workshop, Taplejung jasto area thapnus.</td></tr>`;
+    return;
+  }
+
+  const rows = [];
+  models.forEach(m=>{
+    Object.entries(byModel[m].colours).sort((a,b)=>b[1]-a[1]).forEach(([c])=>{
+      const key = areaStockKey(m,c);
+      const saved = areaStockMap[key]?.areas || {};
+      let rowTotal = 0;
+      const cells = stockAreas.map(a=>{
+        const v = Number(saved[a.name])||0;
+        rowTotal += v;
+        return `<td class="px-3 py-2 text-center">
+          <input type="number" min="0" class="area-qty-input" value="${v}"
+            onchange="saveAreaQty('${m.replace(/'/g,"\\'")}','${c.replace(/'/g,"\\'")}','${(a.name||'').replace(/'/g,"\\'")}', this.value);">
+        </td>`;
+      }).join('');
+      rows.push(`<tr class="border-b border-slate-100">
+        <td class="px-4 py-2.5 font-bold text-slate-800 text-sm whitespace-nowrap">${m}</td>
+        <td class="px-4 py-2.5"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(c)}"></span>${c}</span></td>
+        ${cells}
+        <td class="px-3 py-2 text-center"><span class="area-total-chip">${rowTotal}</span></td>
+      </tr>`);
+    });
+  });
+  body.innerHTML = rows.join('');
+}
 
 
 const invSearchInput = document.getElementById('invSearch');
