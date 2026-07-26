@@ -650,6 +650,12 @@
   .jrp-table tr.grand-total td{ background:#FEF6E7; font-weight:800; border-top:2px solid #F59E0B; }
   .jrp-footer{ margin-top:18px; font-size:11.5px; color:#94A3B8; text-align:right; }
   .jrp-area-title{ font-family:'Bebas Neue',cursive; font-size:1.1rem; letter-spacing:.03em; color:#1F2430; margin-top:22px; padding-top:14px; border-top:1.5px dashed #E2E8F0; }
+  .jrp-area-block{ margin-top:16px; break-inside:avoid; }
+  .jrp-area-name{ display:flex; align-items:center; justify-content:space-between; font-weight:800; font-size:13.5px; color:#1F2430; background:#F1F5F9; padding:8px 12px; border-radius:8px 8px 0 0; }
+  .jrp-area-name-total{ font-family:'JetBrains Mono',monospace; font-size:12px; color:#005EA6; }
+  .jrp-table-mini{ margin-top:0; font-size:12px; }
+  .jrp-table-mini th{ background:#64748B; padding:7px 9px; }
+  .jrp-table-mini td{ padding:6px 9px; }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-700 min-h-screen">
@@ -2449,8 +2455,9 @@ function buildStockReportPage(){
   const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
   const workshopArea = findWorkshopArea();
   let sn = 0, bikeTotal = 0, scooterTotal = 0;
-  const areaTotals = {}; // areaName -> running total, including unallocated folded into Workshop
-  stockAreas.forEach(a=>areaTotals[a.name]=0);
+  const areaTotals = {};      // areaName -> running total (workshop = computed leftover)
+  const areaBreakdown = {};   // areaName -> [{model, color, qty}]
+  stockAreas.forEach(a=>{ areaTotals[a.name]=0; areaBreakdown[a.name]=[]; });
 
   const rows = models.map(m=>{
     const info = byModel[m];
@@ -2461,12 +2468,13 @@ function buildStockReportPage(){
       sn++;
       const key = areaStockKey(m,c);
       const saved = areaStockMap[key]?.areas || {};
-      const sumEntered = stockAreas.reduce((s,a)=> s + (Number(saved[a.name])||0), 0);
-      const unallocated = Math.max(0, available - sumEntered);
+      const sumNonWorkshop = stockAreas.reduce((s,a)=> (workshopArea && a.id===workshopArea.id) ? s : s + (Number(saved[a.name])||0), 0);
+      const unallocated = Math.max(0, available - sumNonWorkshop);
       stockAreas.forEach(a=>{
-        const raw = Number(saved[a.name])||0;
         const isWorkshop = workshopArea && a.id===workshopArea.id;
-        areaTotals[a.name] += isWorkshop ? raw + unallocated : raw;
+        const qtyHere = isWorkshop ? unallocated : (Number(saved[a.name])||0);
+        areaTotals[a.name] += qtyHere;
+        if(qtyHere>0) areaBreakdown[a.name].push({model:m, color:c, qty:qtyHere});
       });
       return `<tr><td>${sn}</td><td>${m}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${available}</td></tr>`;
     }).join('');
@@ -2475,6 +2483,20 @@ function buildStockReportPage(){
   const areaChips = stockAreas.length
     ? stockAreas.map(a=>`<div class="jrp-cat-chip" style="background:#EEF5FC;color:#005EA6">${a.name}: ${areaTotals[a.name]||0}</div>`).join('')
     : '';
+
+  const areaDetailBlocks = stockAreas.map(a=>{
+    const items = areaBreakdown[a.name];
+    if(!items.length) return '';
+    const itemRows = items.map(it=>`<tr><td>${it.model}</td><td>${it.color}</td><td style="text-align:center;font-weight:800">${it.qty}</td></tr>`).join('');
+    return `
+      <div class="jrp-area-block">
+        <div class="jrp-area-name">${a.name} <span class="jrp-area-name-total">${areaTotals[a.name]} unit${areaTotals[a.name]!==1?'s':''}</span></div>
+        <table class="jrp-table jrp-table-mini">
+          <thead><tr><th>Model</th><th style="width:28%">Colour</th><th style="width:16%;text-align:center">Qty</th></tr></thead>
+          <tbody>${itemRows}</tbody>
+        </table>
+      </div>`;
+  }).join('');
 
   return `
     <div class="jrp-head">
@@ -2495,7 +2517,8 @@ function buildStockReportPage(){
     </table>
     ${areaChips ? `
     <div class="jrp-area-title">Area-Wise Distribution</div>
-    <div class="jrp-cat-summary">${areaChips}</div>` : ''}
+    <div class="jrp-cat-summary">${areaChips}</div>
+    ${areaDetailBlocks}` : ''}
     <div class="jrp-footer">Generated: ${today}</div>`;
 }
 
@@ -2592,15 +2615,26 @@ window.removeStockArea = async (id, name)=>{
 };
 
 window.saveAreaQty = async (model, color, areaName, value, inputEl)=>{
+  const workshopArea = findWorkshopArea();
+  if(workshopArea && areaName === workshopArea.name){
+    // Workshop is a computed leftover bucket, not an independently editable value — ignore.
+    return;
+  }
   const key = areaStockKey(model,color);
   let qty = Math.max(0, parseInt(value)||0);
   const available = stockReportGrouped?.[model]?.colours?.[color] || 0;
   const existing = areaStockMap[key]?.areas || {};
-  const sumOthers = Object.entries(existing).reduce((s,[a,v])=> a===areaName ? s : s+(Number(v)||0), 0);
+  // Cap against the OTHER non-Workshop areas only — Workshop always absorbs
+  // whatever is left over, so it never competes for the same units and the
+  // row total can never mismatch the real available count.
+  const sumOthers = stockAreas.reduce((s,a)=>{
+    if(a.name===areaName || (workshopArea && a.id===workshopArea.id)) return s;
+    return s + (Number(existing[a.name])||0);
+  }, 0);
   const maxAllowed = Math.max(0, available - sumOthers);
   if(qty > maxAllowed){
     qty = maxAllowed;
-    toast(`Total ${available} unit matra available cha (${model} · ${color}) — ${areaName} lai ${maxAllowed} ma adjust gareko.`,'warn');
+    toast(`${model} · ${color} — ${available} matra available cha, baki areas le ${sumOthers} lisakeko. ${areaName} lai ${maxAllowed} ma adjust gareko (baki Workshop ma dekhincha).`,'warn');
     if(inputEl) inputEl.value = qty;
   }
   try{
@@ -2656,26 +2690,29 @@ function renderAreaStockTable(){
     Object.entries(byModel[m].colours).sort((a,b)=>b[1]-a[1]).forEach(([c,available])=>{
       const key = areaStockKey(m,c);
       const saved = areaStockMap[key]?.areas || {};
-      const sumEntered = stockAreas.reduce((s,a)=> s + (Number(saved[a.name])||0), 0);
-      // Any stock not assigned to a specific area defaults to Workshop — nothing
+      const sumEnteredNonWorkshop = stockAreas.reduce((s,a)=> (workshopArea && a.id===workshopArea.id) ? s : s + (Number(saved[a.name])||0), 0);
+      // Any stock not explicitly assigned elsewhere defaults to Workshop — nothing
       // gets silently lost, and no area combo can ever exceed the real stock count.
-      const unallocated = Math.max(0, available - sumEntered);
+      const unallocated = Math.max(0, available - sumEnteredNonWorkshop);
 
       const cells = stockAreas.map(a=>{
         const raw = Number(saved[a.name])||0;
         const isWorkshop = workshopArea && a.id===workshopArea.id;
-        const display = isWorkshop ? raw + unallocated : raw;
+        if(isWorkshop){
+          // Workshop is always the computed leftover — shown, never typed into.
+          return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700">${unallocated}</td>`;
+        }
         if(areaEditMode){
+          const maxForThis = Math.max(raw, available - sumEnteredNonWorkshop + raw);
           const mEsc = m.replace(/'/g,"\\'"), cEsc = c.replace(/'/g,"\\'"), aEsc = (a.name||'').replace(/'/g,"\\'");
           return `<td class="px-3 py-2 text-center">
-            <input type="number" min="0" max="${available}" class="area-qty-input" value="${raw}"
+            <input type="number" min="0" max="${maxForThis}" class="area-qty-input" value="${raw}"
               data-model="${m.replace(/"/g,'&quot;')}" data-color="${c.replace(/"/g,'&quot;')}" data-area="${(a.name||'').replace(/"/g,'&quot;')}"
               onfocus="this.select()" onkeydown="handleAreaKey(event,this)"
               onchange="saveAreaQty('${mEsc}','${cEsc}','${aEsc}', this.value, this);">
-            ${isWorkshop && unallocated>0 ? `<div class="text-[9px] text-amber-500 font-bold mt-0.5">+${unallocated} unassigned</div>` : ''}
           </td>`;
         }
-        return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700">${display}</td>`;
+        return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700">${raw}</td>`;
       }).join('');
 
       rows.push(`<tr class="border-b border-slate-100">
