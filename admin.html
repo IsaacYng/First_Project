@@ -2541,9 +2541,20 @@ window.downloadStockReportJPG = async function(){
    ═══════════════════════════════════════════════════════════════════════ */
 function areaStockKey(model,color){ return (model+'__'+color).replace(/[\/\.\#\$\[\]]/g,'_'); }
 
+let areaSeedAttempted = false;
+async function seedDefaultAreas(){
+  if(areaSeedAttempted) return;
+  areaSeedAttempted = true;
+  try{
+    await addDoc(collection(db,"stock_areas"),{name:'Showroom'});
+    await addDoc(collection(db,"stock_areas"),{name:'Workshop'});
+  }catch(e){ console.error('seed default areas failed', e); }
+}
+
 function loadStockAreas(){
   onSnapshot(collection(db,"stock_areas"), snap=>{
     stockAreas = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    if(!stockAreas.length) seedDefaultAreas();
     renderAreaStockTable();
   }, err=>console.error('stock_areas listener failed', err));
 
@@ -2655,13 +2666,16 @@ function renderAreaStockTable(){
         const isWorkshop = workshopArea && a.id===workshopArea.id;
         const display = isWorkshop ? raw + unallocated : raw;
         if(areaEditMode){
+          const mEsc = m.replace(/'/g,"\\'"), cEsc = c.replace(/'/g,"\\'"), aEsc = (a.name||'').replace(/'/g,"\\'");
           return `<td class="px-3 py-2 text-center">
             <input type="number" min="0" max="${available}" class="area-qty-input" value="${raw}"
-              onchange="saveAreaQty('${m.replace(/'/g,"\\'")}','${c.replace(/'/g,"\\'")}','${(a.name||'').replace(/'/g,"\\'")}', this.value, this);">
+              data-model="${m.replace(/"/g,'&quot;')}" data-color="${c.replace(/"/g,'&quot;')}" data-area="${(a.name||'').replace(/"/g,'&quot;')}"
+              onfocus="this.select()" onkeydown="handleAreaKey(event,this)"
+              onchange="saveAreaQty('${mEsc}','${cEsc}','${aEsc}', this.value, this);">
             ${isWorkshop && unallocated>0 ? `<div class="text-[9px] text-amber-500 font-bold mt-0.5">+${unallocated} unassigned</div>` : ''}
           </td>`;
         }
-        return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700">${display || '—'}</td>`;
+        return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700">${display}</td>`;
       }).join('');
 
       rows.push(`<tr class="border-b border-slate-100">
@@ -2673,7 +2687,32 @@ function renderAreaStockTable(){
     });
   });
   body.innerHTML = rows.join('');
+
+  if(pendingAreaFocus){
+    try{
+      const sel = `.area-qty-input[data-model="${CSS.escape(pendingAreaFocus.model)}"][data-color="${CSS.escape(pendingAreaFocus.color)}"][data-area="${CSS.escape(pendingAreaFocus.area)}"]`;
+      const el = body.querySelector(sel);
+      if(el){ el.focus(); el.select(); }
+    }catch(e){ /* ignore selector edge cases */ }
+    pendingAreaFocus = null;
+  }
 }
+
+let pendingAreaFocus = null;
+window.handleAreaKey = function(e, el){
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  const td = el.closest('td');
+  const tr = el.closest('tr');
+  let target = null;
+  const nextTd = td && td.nextElementSibling;
+  if(nextTd) target = nextTd.querySelector('.area-qty-input');
+  if(!target && tr && tr.nextElementSibling) target = tr.nextElementSibling.querySelector('.area-qty-input');
+  if(target){
+    pendingAreaFocus = { model: target.dataset.model, color: target.dataset.color, area: target.dataset.area };
+  }
+  el.blur(); // triggers the onchange save
+};
 
 
 const invSearchInput = document.getElementById('invSearch');
