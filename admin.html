@@ -596,6 +596,9 @@
   .area-remove-btn{ width:20px; height:20px; border-radius:6px; border:none; background:rgba(220,38,38,.08); color:#DC2626; cursor:pointer; font-size:9px; display:inline-flex; align-items:center; justify-content:center; margin-left:6px; transition:background .15s; }
   .area-remove-btn:hover{ background:rgba(220,38,38,.18); }
   .area-total-chip{ display:inline-flex; align-items:center; justify-content:center; min-width:34px; padding:3px 8px; border-radius:7px; background:#EAF3FB; color:#005EA6; font-weight:800; font-size:12.5px; }
+  .area-edit-toggle{ display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:9px; font-size:11.5px; font-weight:700; border:1.5px solid #E2E8F0; background:#F8FAFC; color:#64748B; cursor:pointer; transition:all .15s ease; }
+  .area-edit-toggle:hover{ border-color:#CBD5E1; color:#334155; }
+  .area-edit-toggle.area-edit-on{ background:#FEF6E7; border-color:#FBEACB; color:#B4740E; }
   .inv-status-tab{ color:#7C8494; }
   .inv-status-tab:hover{ color:#1F2430; }
   .inv-status-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
@@ -646,6 +649,7 @@
   .jrp-table tr:nth-child(even) td{ background:#F8FAFC; }
   .jrp-table tr.grand-total td{ background:#FEF6E7; font-weight:800; border-top:2px solid #F59E0B; }
   .jrp-footer{ margin-top:18px; font-size:11.5px; color:#94A3B8; text-align:right; }
+  .jrp-area-title{ font-family:'Bebas Neue',cursive; font-size:1.1rem; letter-spacing:.03em; color:#1F2430; margin-top:22px; padding-top:14px; border-top:1.5px dashed #E2E8F0; }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-700 min-h-screen">
@@ -1388,7 +1392,10 @@
             <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-map-location-dot text-amber-500"></i> Area-Wise Stock</div>
             <p class="text-[11px] text-slate-400 mt-0.5">Yo table haath le bharne ho (auto-calculate hudaina) — jasto: Showroom ma kati, Workshop ma kati, Taplejung ma kati.</p>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="areaEditModeBtn" onclick="toggleAreaEditMode()" class="area-edit-toggle">
+              <i class="fas fa-lock"></i> View Only — Tap to Edit
+            </button>
             <input type="text" id="newAreaInput" placeholder="e.g. Taplejung" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 w-32"/>
             <button onclick="addStockArea()" class="flex items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
               <i class="fas fa-plus text-[10px]"></i> Add Area
@@ -2440,17 +2447,35 @@ function buildStockReportPage(){
   const byModel = stockReportGrouped || {};
   const models = Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total);
   const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  const workshopArea = findWorkshopArea();
   let sn = 0, bikeTotal = 0, scooterTotal = 0;
+  const areaTotals = {}; // areaName -> running total, including unallocated folded into Workshop
+  stockAreas.forEach(a=>areaTotals[a.name]=0);
+
   const rows = models.map(m=>{
     const info = byModel[m];
     const cat = getModelCategory(m);
     if(cat==='Scooter') scooterTotal += info.total; else bikeTotal += info.total;
     // Each colour gets its own row — easier to read at a glance than a combined string.
-    return Object.entries(info.colours).sort((a,b)=>b[1]-a[1]).map(([c,n])=>{
+    return Object.entries(info.colours).sort((a,b)=>b[1]-a[1]).map(([c,available])=>{
       sn++;
-      return `<tr><td>${sn}</td><td>${m}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${n}</td></tr>`;
+      const key = areaStockKey(m,c);
+      const saved = areaStockMap[key]?.areas || {};
+      const sumEntered = stockAreas.reduce((s,a)=> s + (Number(saved[a.name])||0), 0);
+      const unallocated = Math.max(0, available - sumEntered);
+      stockAreas.forEach(a=>{
+        const raw = Number(saved[a.name])||0;
+        const isWorkshop = workshopArea && a.id===workshopArea.id;
+        areaTotals[a.name] += isWorkshop ? raw + unallocated : raw;
+      });
+      return `<tr><td>${sn}</td><td>${m}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${available}</td></tr>`;
     }).join('');
   }).join('');
+
+  const areaChips = stockAreas.length
+    ? stockAreas.map(a=>`<div class="jrp-cat-chip" style="background:#EEF5FC;color:#005EA6">${a.name}: ${areaTotals[a.name]||0}</div>`).join('')
+    : '';
+
   return `
     <div class="jrp-head">
       <div class="brand">SAMRIDDHI AND BROTHERS</div>
@@ -2468,7 +2493,10 @@ function buildStockReportPage(){
         <tr class="grand-total"><td colspan="4">GRAND TOTAL (IN STOCK)</td><td style="text-align:center">${stockReportTotalUnits}</td></tr>
       </tbody>
     </table>
-    <div class="jrp-footer">Generated: ${today} &nbsp;|&nbsp; ${stockReportSoldUnits} sold unit(s) excluded from stock</div>`;
+    ${areaChips ? `
+    <div class="jrp-area-title">Area-Wise Distribution</div>
+    <div class="jrp-cat-summary">${areaChips}</div>` : ''}
+    <div class="jrp-footer">Generated: ${today}</div>`;
 }
 
 window.openStockPreview = async function(){
@@ -2552,16 +2580,41 @@ window.removeStockArea = async (id, name)=>{
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
 
-window.saveAreaQty = async (model, color, areaName, value)=>{
+window.saveAreaQty = async (model, color, areaName, value, inputEl)=>{
   const key = areaStockKey(model,color);
-  const qty = Math.max(0, parseInt(value)||0);
+  let qty = Math.max(0, parseInt(value)||0);
+  const available = stockReportGrouped?.[model]?.colours?.[color] || 0;
+  const existing = areaStockMap[key]?.areas || {};
+  const sumOthers = Object.entries(existing).reduce((s,[a,v])=> a===areaName ? s : s+(Number(v)||0), 0);
+  const maxAllowed = Math.max(0, available - sumOthers);
+  if(qty > maxAllowed){
+    qty = maxAllowed;
+    toast(`Total ${available} unit matra available cha (${model} · ${color}) — ${areaName} lai ${maxAllowed} ma adjust gareko.`,'warn');
+    if(inputEl) inputEl.value = qty;
+  }
   try{
-    const existing = areaStockMap[key]?.areas || {};
     await setDoc(doc(db,"area_stock",key), {
       model, color, areas: { ...existing, [areaName]: qty }
     }, { merge:true });
   }catch(e){ toast('Error saving area stock: '+e.message,'err'); }
 };
+
+let areaEditMode = false;
+window.toggleAreaEditMode = ()=>{
+  areaEditMode = !areaEditMode;
+  const btn = document.getElementById('areaEditModeBtn');
+  if(btn){
+    btn.innerHTML = areaEditMode
+      ? '<i class="fas fa-lock-open"></i> Editing — Tap to Lock'
+      : '<i class="fas fa-lock"></i> View Only — Tap to Edit';
+    btn.classList.toggle('area-edit-on', areaEditMode);
+  }
+  renderAreaStockTable();
+};
+
+function findWorkshopArea(){
+  return stockAreas.find(a => (a.name||'').trim().toLowerCase()==='workshop');
+}
 
 function renderAreaStockTable(){
   const head = document.getElementById('areaStockHead');
@@ -2571,7 +2624,7 @@ function renderAreaStockTable(){
   head.innerHTML = `<th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
     <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Colour</th>
     ${stockAreas.map(a=>`<th class="px-3 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">
-        ${a.name} <button class="area-remove-btn" onclick="removeStockArea('${a.id}','${(a.name||'').replace(/'/g,"\\'")}')" title="Remove area"><i class="fas fa-xmark"></i></button>
+        ${a.name}${areaEditMode ? `<button class="area-remove-btn" onclick="removeStockArea('${a.id}','${(a.name||'').replace(/'/g,"\\'")}')" title="Remove area"><i class="fas fa-xmark"></i></button>` : ''}
       </th>`).join('')}
     <th class="px-4 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Row Total</th>`;
 
@@ -2586,25 +2639,36 @@ function renderAreaStockTable(){
     return;
   }
 
+  const workshopArea = findWorkshopArea();
   const rows = [];
   models.forEach(m=>{
-    Object.entries(byModel[m].colours).sort((a,b)=>b[1]-a[1]).forEach(([c])=>{
+    Object.entries(byModel[m].colours).sort((a,b)=>b[1]-a[1]).forEach(([c,available])=>{
       const key = areaStockKey(m,c);
       const saved = areaStockMap[key]?.areas || {};
-      let rowTotal = 0;
+      const sumEntered = stockAreas.reduce((s,a)=> s + (Number(saved[a.name])||0), 0);
+      // Any stock not assigned to a specific area defaults to Workshop — nothing
+      // gets silently lost, and no area combo can ever exceed the real stock count.
+      const unallocated = Math.max(0, available - sumEntered);
+
       const cells = stockAreas.map(a=>{
-        const v = Number(saved[a.name])||0;
-        rowTotal += v;
-        return `<td class="px-3 py-2 text-center">
-          <input type="number" min="0" class="area-qty-input" value="${v}"
-            onchange="saveAreaQty('${m.replace(/'/g,"\\'")}','${c.replace(/'/g,"\\'")}','${(a.name||'').replace(/'/g,"\\'")}', this.value);">
-        </td>`;
+        const raw = Number(saved[a.name])||0;
+        const isWorkshop = workshopArea && a.id===workshopArea.id;
+        const display = isWorkshop ? raw + unallocated : raw;
+        if(areaEditMode){
+          return `<td class="px-3 py-2 text-center">
+            <input type="number" min="0" max="${available}" class="area-qty-input" value="${raw}"
+              onchange="saveAreaQty('${m.replace(/'/g,"\\'")}','${c.replace(/'/g,"\\'")}','${(a.name||'').replace(/'/g,"\\'")}', this.value, this);">
+            ${isWorkshop && unallocated>0 ? `<div class="text-[9px] text-amber-500 font-bold mt-0.5">+${unallocated} unassigned</div>` : ''}
+          </td>`;
+        }
+        return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700">${display || '—'}</td>`;
       }).join('');
+
       rows.push(`<tr class="border-b border-slate-100">
         <td class="px-4 py-2.5 font-bold text-slate-800 text-sm whitespace-nowrap">${m}</td>
         <td class="px-4 py-2.5"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(c)}"></span>${c}</span></td>
         ${cells}
-        <td class="px-3 py-2 text-center"><span class="area-total-chip">${rowTotal}</span></td>
+        <td class="px-3 py-2 text-center"><span class="area-total-chip">${available}</span></td>
       </tr>`);
     });
   });
