@@ -577,6 +577,52 @@
   .cs-option .cs-check{ margin-left:auto; color:#005EA6; font-size:11px; opacity:0; }
   .cs-option.selected .cs-check{ opacity:1; }
   .cs-empty{ padding:14px 10px; text-align:center; color:#94A3B8; font-size:12.5px; }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     STOCK REPORT — dashboard tiles + printable A4 sheet
+     (print pattern adapted from sheet.html: pv-titlebar/pv-table/pv-datebar)
+     ═══════════════════════════════════════════════════════════════════ */
+  .stock-tile{ background:#fff; border:1px solid #E7E9EE; border-radius:14px; padding:16px 18px; box-shadow:0 1px 2px rgba(15,23,42,.03); }
+  .stock-tile .k{ font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#9AA1AF; }
+  .stock-tile .v{ font-family:'Bebas Neue',cursive; font-size:1.8rem; color:#1F2430; letter-spacing:.02em; margin-top:2px; }
+  .model-row{ display:flex; align-items:center; gap:14px; padding:13px 16px; border-bottom:1px solid #F0F1F4; }
+  .model-row:last-child{ border-bottom:none; }
+  .model-row:hover{ background:#FAFBFD; }
+  .colour-chip{ display:inline-flex; align-items:center; gap:5px; background:#F1F2F5; border:1px solid #E7E9EE; border-radius:7px; padding:2px 8px; font-size:11px; font-weight:700; color:#4B5262; }
+  .colour-chip .dot{ width:7px; height:7px; border-radius:50%; background:#005EA6; flex-shrink:0; }
+
+  #stockPreviewOverlay{ position:fixed; inset:0; z-index:500; display:none; background:rgba(10,15,26,.7); backdrop-filter:blur(3px); align-items:center; justify-content:center; padding:16px; }
+  #stockPreviewOverlay.open{ display:flex; }
+  .spv-shell{ background:#161B26; border-radius:16px; width:100%; max-width:1200px; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.5); }
+  .spv-head{ display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid rgba(255,255,255,.08); flex-shrink:0; }
+  .spv-body{ padding:20px; overflow:auto; background:#0F1420; }
+  .spv-btn{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; padding:9px 16px; border-radius:9px; border:none; cursor:pointer; transition:opacity .15s; }
+  .spv-btn:hover{ opacity:.85; }
+  .spv-btn.print{ background:#F59E0B; color:#0F172A; }
+  .spv-btn.close{ background:rgba(255,255,255,.08); color:#fff; }
+
+  .a4l-paper{ font-family:'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important; background:#fff !important; width:297mm; min-height:210mm; height:210mm; padding:9mm 10mm; box-sizing:border-box; margin:0 auto; box-shadow:0 6px 40px rgba(0,0,0,.22); border:1px solid #ddd; display:flex; flex-direction:column; }
+  .pv-titlebar{ flex:0 0 auto; text-align:center; color:#000; font-size:11pt; font-weight:700; margin-bottom:4mm; }
+  .pv-titlebar .sub{ font-size:9pt; font-weight:600; color:#333; margin-top:1mm; }
+  .pv-tablewrap{ flex:1 1 auto; overflow:hidden; }
+  .pv-datebar{ flex:0 0 auto; text-align:right; color:#000; font-size:8.5pt; margin-top:4mm; }
+  .pv-table{ width:100%; table-layout:fixed; border-collapse:collapse; font-size:8.2pt; color:#000; border:1px solid #000; }
+  .pv-table th{ background:#005EA6; color:#fff; padding:6px 4px; text-align:center; font-size:7.4pt; letter-spacing:.01em; border:0.75px solid #000; }
+  .pv-table td{ padding:4px 5px; border:0.5px solid #000; text-align:center; word-wrap:break-word; }
+  .pv-table td.left{ text-align:left; }
+  .pv-table tr:nth-child(even){ background:#EEF2F7; }
+  .pv-table tr.grand-total{ background:#FEF6E7 !important; font-weight:bold; }
+  .pv-table td.total-cell{ font-weight:bold; }
+
+  @media print{
+    body>*:not(#stockPrintWrapper){ display:none !important; }
+    #stockPrintWrapper{ display:block !important; }
+    html,body{ margin:0 !important; padding:0 !important; background:#fff !important; width:297mm !important; overflow:visible !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .print-page{ width:297mm !important; min-height:210mm !important; height:210mm !important; padding:9mm 10mm !important; margin:0 auto !important; box-sizing:border-box !important; page-break-after:always !important; }
+    .print-page:last-child{ page-break-after:avoid !important; }
+    @page{ size:A4 landscape; margin:0; }
+  }
+  #stockPrintWrapper{ display:none; }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-700 min-h-screen">
@@ -767,6 +813,10 @@
         </button>
         <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-helmet-safety"></i> Accessories
+        </button>
+        <div class="sidebar-section-label">Reports</div>
+        <button id="navStock" onclick="switchSec('stock');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-file-lines"></i> Stock Report
         </button>
       </nav>
 
@@ -1248,6 +1298,40 @@
       </div>
     </div>
 
+    <!-- STOCK REPORT -->
+    <div class="sec-panel" id="secStock">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Reports ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Stock <span class="text-amber-500">Report</span></div>
+        </div>
+        <button id="genStockReportBtn" onclick="openStockPreview()" class="cta-primary">
+          <i class="fas fa-print"></i> Print Daily Stock Report
+        </button>
+      </div>
+
+      <!-- Stat tiles -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+        <div class="stock-tile"><div class="k">Total Units</div><div class="v" id="stkTotalUnits">—</div></div>
+        <div class="stock-tile"><div class="k">Models In Stock</div><div class="v" id="stkModels">—</div></div>
+        <div class="stock-tile"><div class="k">Colours</div><div class="v" id="stkColours">—</div></div>
+        <div class="stock-tile"><div class="k">Report Date</div><div class="v text-lg" id="stkDate">—</div></div>
+      </div>
+
+      <!-- Model x Colour breakdown -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-boxes-stacked text-amber-500"></i> Stock By Model</div>
+          <button onclick="loadStockReportData(true)" class="text-xs font-bold text-bajaj-blue hover:underline flex items-center gap-1.5"><i class="fas fa-arrows-rotate"></i> Refresh</button>
+        </div>
+        <div id="stockModelList">
+          <div class="py-12 text-center text-slate-400">
+            <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading stock…
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /main content -->
 
   <!-- FOOTER -->
@@ -1308,6 +1392,24 @@
     </div><!-- /app-shell -->
 </div>
 
+<!-- STOCK REPORT PREVIEW -->
+<div id="stockPreviewOverlay">
+  <div class="spv-shell">
+    <div class="spv-head">
+      <div class="flex-1 min-w-0">
+        <div class="text-white font-bold text-sm">Daily Stock Report Preview</div>
+        <div class="text-white/50 text-xs" id="spvSubtitle">—</div>
+      </div>
+      <button class="spv-btn print" onclick="printStockReport()"><i class="fas fa-print"></i> Print</button>
+      <button class="spv-btn close" onclick="closeStockPreview()"><i class="fas fa-xmark"></i> Close</button>
+    </div>
+    <div class="spv-body">
+      <div id="spvPage"></div>
+    </div>
+  </div>
+</div>
+<div id="stockPrintWrapper"></div>
+
 <!-- CONFIRM MODAL -->
 <div id="confirmModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style="animation:slideIn .2s ease;">
@@ -1346,7 +1448,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import {
-  getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, updateDoc,
+  getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc,
   serverTimestamp, query, orderBy, limit, runTransaction, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
@@ -1652,8 +1754,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const tid = sec==='price' ? 'navPrice' : (sec==='inv' ? 'navInv' : (sec==='fin' ? 'navFin' : 'navAcc'));
-  const mtid = sec==='price' ? 'mNavPrice' : (sec==='inv' ? 'mNavInv' : (sec==='fin' ? 'mNavFin' : 'mNavAcc'));
+  const tid = sec==='price' ? 'navPrice' : (sec==='inv' ? 'navInv' : (sec==='fin' ? 'navFin' : (sec==='acc' ? 'navAcc' : 'navStock')));
+  const mtid = sec==='price' ? 'mNavPrice' : (sec==='inv' ? 'mNavInv' : (sec==='fin' ? 'mNavFin' : (sec==='acc' ? 'mNavAcc' : 'mNavStock')));
   const tab = document.getElementById(tid);
   const mtab = document.getElementById(mtid);
   if(tab) { tab.classList.add('bg-blue-50','border-blue-200','text-blue-700'); tab.classList.remove('text-slate-500','border-transparent'); }
@@ -2129,7 +2231,124 @@ function renderModelBreakdown(){
   }).join('');
 }
 
-/* ─── Inventory Search (last-digits friendly, live dropdown) ─── */
+/* ═══════════════════════════════════════════════════════════════════════
+   STOCK REPORT — replaces the manual Excel daily-stock workflow.
+   Fetches the FULL inventory collection (unpaginated, unlike the Live
+   Inventory table which is capped) so counts are always accurate, groups
+   it by model → colour, renders a dashboard view, and can generate a
+   printable A4-landscape report using the same paper pattern as sheet.html.
+   ═══════════════════════════════════════════════════════════════════════ */
+let stockReportGrouped = null;
+let stockReportTotalUnits = 0;
+
+async function loadStockReportData(forceRefresh){
+  if(stockReportGrouped && !forceRefresh) { renderStockDashboard(); return; }
+  const listEl = document.getElementById('stockModelList');
+  listEl.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading stock…</div>`;
+  try{
+    const snap = await getDocs(collection(db,"inventory"));
+    const all = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const byModel = {};
+    all.forEach(s=>{
+      const m = s.model || 'Unassigned';
+      const c = (s.color||'Unspecified').trim() || 'Unspecified';
+      byModel[m] = byModel[m] || { total:0, colours:{} };
+      byModel[m].total++;
+      byModel[m].colours[c] = (byModel[m].colours[c]||0) + 1;
+    });
+    stockReportGrouped = byModel;
+    stockReportTotalUnits = all.length;
+    renderStockDashboard();
+  }catch(err){
+    console.error('stock report load failed', err);
+    listEl.innerHTML = `<div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load stock data — check your connection.</p>
+      <button onclick="loadStockReportData(true)" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div>`;
+    toast('Stock report load failed: '+err.message,'err');
+  }
+}
+
+function renderStockDashboard(){
+  const byModel = stockReportGrouped || {};
+  const models = Object.keys(byModel);
+  const allColours = new Set();
+  models.forEach(m=>Object.keys(byModel[m].colours).forEach(c=>allColours.add(c)));
+
+  document.getElementById('stkTotalUnits').textContent = stockReportTotalUnits;
+  document.getElementById('stkModels').textContent = models.length;
+  document.getElementById('stkColours').textContent = allColours.size;
+  document.getElementById('stkDate').textContent = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+  const listEl = document.getElementById('stockModelList');
+  if(!models.length){
+    listEl.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-boxes-stacked text-3xl opacity-25 block mb-2"></i><p class="text-sm">No inventory yet.</p></div>`;
+    return;
+  }
+  const sorted = models.sort((a,b)=>byModel[b].total-byModel[a].total);
+  listEl.innerHTML = sorted.map(m=>{
+    const info = byModel[m];
+    const chips = Object.entries(info.colours).sort((a,b)=>b[1]-a[1])
+      .map(([c,n])=>`<span class="colour-chip"><span class="dot" style="background:${colourHex(c)}"></span>${c} <span class="text-slate-400 font-mono">×${n}</span></span>`)
+      .join('');
+    return `<div class="model-row">
+      <div class="font-bold text-slate-800 text-sm w-44 flex-shrink-0 truncate">${m}</div>
+      <div class="flex flex-wrap gap-1.5 flex-1">${chips}</div>
+      <div class="badge badge-blue flex-shrink-0">${info.total} unit${info.total!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildStockReportPage(){
+  const byModel = stockReportGrouped || {};
+  const models = Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total);
+  const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  const rows = models.map((m,i)=>{
+    const info = byModel[m];
+    const colourStr = Object.entries(info.colours).sort((a,b)=>b[1]-a[1])
+      .map(([c,n])=>`${c} (${n})`).join(', ');
+    return `<tr>
+      <td>${i+1}</td>
+      <td class="left">${m}</td>
+      <td class="left">${colourStr}</td>
+      <td class="total-cell">${info.total}</td>
+    </tr>`;
+  }).join('');
+  return `
+    <div class="pv-titlebar">Samriddhi And Brothers — Daily Stock Report
+      <div class="sub">Bajaj Authorized Dealer, Phidim</div>
+    </div>
+    <div class="pv-tablewrap">
+      <table class="pv-table">
+        <thead><tr><th style="width:5%">S.N</th><th style="width:22%">Model</th><th>Colour-wise Breakdown</th><th style="width:12%">Total Units</th></tr></thead>
+        <tbody>
+          ${rows}
+          <tr class="grand-total"><td colspan="3" class="left">GRAND TOTAL</td><td>${stockReportTotalUnits}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pv-datebar">Generated: ${today}</div>`;
+}
+
+window.openStockPreview = async function(){
+  if(!stockReportGrouped) await loadStockReportData();
+  if(!Object.keys(stockReportGrouped||{}).length){ toast('No inventory to report yet.','warn'); return; }
+  document.getElementById('spvSubtitle').textContent = stockReportTotalUnits+' units across '+Object.keys(stockReportGrouped).length+' models';
+  document.getElementById('spvPage').innerHTML = `<div class="a4l-paper">${buildStockReportPage()}</div>`;
+  document.getElementById('stockPreviewOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+window.closeStockPreview = function(){
+  document.getElementById('stockPreviewOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+};
+window.printStockReport = function(){
+  document.getElementById('stockPrintWrapper').innerHTML = `<div class="print-page a4l-paper">${buildStockReportPage()}</div>`;
+  window.print();
+};
+
+
 const invSearchInput = document.getElementById('invSearch');
 const invSearchDropdown = document.getElementById('invSearchDropdown');
 const invSearchClear = document.getElementById('invSearchClear');
@@ -2631,15 +2850,16 @@ window.loadFinanceSchemes = loadFinanceSchemes;
 window.loadAccessories = loadAccessories;
 
 /* ─── Nav ─── */
-const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', fin:'HFL Finance Options', acc:'Accessories Inventory' };
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', fin:'HFL Finance Options', acc:'Accessories Inventory', stock:'Stock Report' };
 window.switchSec=(sec)=>{
   document.querySelectorAll('.sec-panel').forEach(p=>p.classList.remove('active'));
-  const secId = sec==='price'?'secPrice':(sec==='inv'?'secInv':(sec==='fin'?'secFin':'secAcc'));
+  const secId = sec==='price'?'secPrice':(sec==='inv'?'secInv':(sec==='fin'?'secFin':(sec==='acc'?'secAcc':'secStock')));
   document.getElementById(secId).classList.add('active');
   setActiveTab(sec);
   const heading = document.getElementById('topbarHeading');
   if(heading) heading.textContent = SEC_TITLES[sec] || '';
   if(sec==='inv') populateModelDropdown();
+  if(sec==='stock') loadStockReportData();
 };
 </script>
 
