@@ -590,6 +590,9 @@
   .model-row:hover{ background:#FAFBFD; }
   .colour-chip{ display:inline-flex; align-items:center; gap:5px; background:#F1F2F5; border:1px solid #E7E9EE; border-radius:7px; padding:2px 8px; font-size:11px; font-weight:700; color:#4B5262; }
   .colour-chip .dot{ width:7px; height:7px; border-radius:50%; background:#005EA6; flex-shrink:0; }
+  .inv-status-tab{ color:#7C8494; }
+  .inv-status-tab:hover{ color:#1F2430; }
+  .inv-status-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
 
   #stockPreviewOverlay{ position:fixed; inset:0; z-index:500; display:none; background:rgba(10,15,26,.7); backdrop-filter:blur(3px); align-items:center; justify-content:center; padding:16px; }
   #stockPreviewOverlay.open{ display:flex; }
@@ -1080,6 +1083,13 @@
             <input type="text" id="sColor" placeholder="e.g. Fiery Orange"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status</label>
+            <select id="sStatus">
+              <option value="Available">Available</option>
+              <option value="Sold">Sold</option>
+            </select>
+          </div>
         </div>
         <div class="flex gap-2 flex-wrap">
           <button id="saveStockBtn" class="cta-primary">
@@ -1127,6 +1137,11 @@
           <button id="fixSnBtn" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-bajaj-blue text-bajaj-blue text-xs font-bold rounded-lg hover:bg-bajaj-blue hover:text-white transition-all">
             <i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering
           </button>
+          <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setInvStatusFilter('all')">All</button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Available" onclick="setInvStatusFilter('Available')">Available</button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setInvStatusFilter('Sold')">Sold</button>
+          </div>
           <div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="invSearch" autocomplete="off" placeholder="Search chassis, engine, model, reg no…"
@@ -1145,6 +1160,7 @@
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Engine No</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Reg. No</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Colour</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
               </tr>
             </thead>
@@ -1311,10 +1327,11 @@
       </div>
 
       <!-- Stat tiles -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-        <div class="stock-tile"><div class="k">Total Units</div><div class="v" id="stkTotalUnits">—</div></div>
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
+        <div class="stock-tile"><div class="k">Available Stock</div><div class="v" id="stkTotalUnits">—</div></div>
         <div class="stock-tile"><div class="k">Models In Stock</div><div class="v" id="stkModels">—</div></div>
         <div class="stock-tile"><div class="k">Colours</div><div class="v" id="stkColours">—</div></div>
+        <div class="stock-tile"><div class="k">Sold (Not In Stock)</div><div class="v" id="stkSold">—</div></div>
         <div class="stock-tile"><div class="k">Report Date</div><div class="v text-lg" id="stkDate">—</div></div>
       </div>
 
@@ -1646,7 +1663,10 @@ window._toggleKebab = (btn, type, id) => {
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('bikes', id) }
     ]);
   } else if(type === 'inventory'){
+    const s = invData.find(x=>x.id===id);
+    const isSold = s && s.status === 'Sold';
     openKebabMenuFor(btn, [
+      { label: isSold?'Mark Available':'Mark Sold', icon: isSold?'fa-rotate-left':'fa-tag', onClick:()=>window._toggleUnitStatus(id) },
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editInventory(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('inventory', id) }
     ]);
@@ -1996,6 +2016,7 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
   if(firstErr){ toast(firstErr.error,'err'); return; }
   if(!regNoCheck.ok){ toast(regNoCheck.error,'err'); return; }
   const chassis = chassisCheck.value, engine = engineCheck.value, color = colorCheck.value, regNo = regNoCheck.value;
+  const status = document.getElementById('sStatus').value || 'Available';
 
   const dup = findDuplicateUnit(chassis, engine, currentEditInvId);
   if(dup){
@@ -2012,15 +2033,16 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
 
   try {
     if(currentEditInvId){
-      await updateDoc(doc(db,"inventory",currentEditInvId),{model:modelName,chassis,engine,regNo,color});
+      await updateDoc(doc(db,"inventory",currentEditInvId),{model:modelName,chassis,engine,regNo,color,status});
       toast('Unit updated!');
       window.cancelInvEdit();
     } else {
       // Auto S.N — always one more than the current highest S.N in inventory
       const nextSn = invData.length ? Math.max(...invData.map(x=>Number(x.sn)||0)) + 1 : 1;
-      await addDoc(collection(db,"inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,addedAt:new Date()});
+      await addDoc(collection(db,"inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,status,addedAt:new Date()});
       ['sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('stockModelSelect').value='';
+      document.getElementById('sStatus').value='Available';
       toast('Unit added — S.N '+nextSn+' assigned automatically.');
     }
   }catch(e){toast('Error: '+e.message,'err');}
@@ -2034,6 +2056,7 @@ window._editInventory=(id)=>{
   document.getElementById('sEngine').value=s.engine||'';
   document.getElementById('sRegNo').value=s.regNo||'';
   document.getElementById('sColor').value=s.color||'';
+  document.getElementById('sStatus').value=s.status||'Available';
   currentEditInvId=id;
   const btn=document.getElementById('saveStockBtn');
   btn.innerHTML='<i class="fas fa-rotate"></i> Update Unit';
@@ -2044,10 +2067,20 @@ window._editInventory=(id)=>{
   toast('Unit loaded for editing');
 };
 
+window._toggleUnitStatus = async (id) => {
+  const s = invData.find(x=>x.id===id); if(!s) return;
+  const next = s.status === 'Sold' ? 'Available' : 'Sold';
+  try{
+    await updateDoc(doc(db,"inventory",id),{status:next});
+    toast(next==='Sold' ? 'Unit marked as Sold.' : 'Unit marked as Available.');
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
 window.cancelInvEdit=()=>{
   currentEditInvId=null;
   ['sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('stockModelSelect').value='';
+  document.getElementById('sStatus').value='Available';
   const btn=document.getElementById('saveStockBtn');
   btn.innerHTML='<i class="fas fa-floppy-disk"></i> Save Unit';
   document.getElementById('invFormTitle').textContent='Add Inventory Unit';
@@ -2134,10 +2167,22 @@ function renderInvLoadMore(){
   }
 }
 
+let invStatusFilter = 'all';
+function setInvStatusFilter(status){
+  invStatusFilter = status;
+  document.querySelectorAll('.inv-status-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===status));
+  renderInvTable(getFilteredInv());
+}
+window.setInvStatusFilter = setInvStatusFilter;
+
 function getFilteredInv(){
-  if(!invSearchTerm) return invData;
+  let base = invData;
+  if(invStatusFilter !== 'all'){
+    base = base.filter(s => (s.status||'Available') === invStatusFilter);
+  }
+  if(!invSearchTerm) return base;
   const q = invSearchTerm.toLowerCase().trim();
-  return invData.filter(s=>{
+  return base.filter(s=>{
     return (s.model||'').toLowerCase().includes(q)
         || (s.chassis||'').toLowerCase().includes(q)
         || (s.engine||'').toLowerCase().includes(q)
@@ -2150,7 +2195,7 @@ function renderInvTable(list){
   const tbody=document.getElementById('stockTableBody');
   document.getElementById('invCount').textContent=list.length+' unit'+(list.length!==1?'s':'')+(invSearchTerm?' found':'');
   if(!list.length){
-    tbody.innerHTML=`<tr><td colspan="7"><div class="py-12 text-center text-slate-400"><i class="fas fa-warehouse text-3xl opacity-25 block mb-2"></i><p class="text-sm">${invSearchTerm?'No units match your search.':'No inventory yet. Add a unit using the form above.'}</p></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="8"><div class="py-12 text-center text-slate-400"><i class="fas fa-warehouse text-3xl opacity-25 block mb-2"></i><p class="text-sm">${invSearchTerm?'No units match your search.':'No inventory yet. Add a unit using the form above.'}</p></div></td></tr>`;
     return;
   }
   const dupIds = computeDuplicateIdSet();
@@ -2184,6 +2229,11 @@ function renderInvTable(list){
           <span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${highlightMatch(s.color, q)}
         </span>
       </td>
+      <td class="px-4 py-3" data-th="Status">
+        ${s.status==='Sold'
+          ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>`
+          : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`}
+      </td>
       <td class="px-4 py-3" data-th="Actions">
         <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'inventory','${s.id}')" aria-label="Row actions">
           <i class="fas fa-ellipsis-vertical"></i>
@@ -2194,18 +2244,21 @@ function renderInvTable(list){
 }
 
 function updateInvStats(){
-  document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total';
+  const sold = invData.filter(s=>s.status==='Sold').length;
+  const available = invData.length - sold;
+  document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+sold+' sold';
 }
 
 function renderModelBreakdown(){
   const wrap = document.getElementById('modelBreakdown');
-  if(!invData.length){
-    wrap.innerHTML = `<div class="col-span-full py-8 text-center text-slate-400 text-sm"><i class="fas fa-warehouse text-2xl opacity-25 block mb-2"></i>No inventory yet.</div>`;
+  const available = invData.filter(s => (s.status||'Available') !== 'Sold');
+  if(!available.length){
+    wrap.innerHTML = `<div class="col-span-full py-8 text-center text-slate-400 text-sm"><i class="fas fa-warehouse text-2xl opacity-25 block mb-2"></i>No available inventory.</div>`;
     return;
   }
-  // group by model -> colour -> count
+  // group by model -> colour -> count (available units only — sold units aren't "in stock")
   const byModel = {};
-  invData.forEach(s=>{
+  available.forEach(s=>{
     const m = s.model || 'Unassigned';
     const c = (s.color||'Unspecified').trim() || 'Unspecified';
     byModel[m] = byModel[m] || { total:0, colours:{} };
@@ -2241,6 +2294,8 @@ function renderModelBreakdown(){
 let stockReportGrouped = null;
 let stockReportTotalUnits = 0;
 
+let stockReportSoldUnits = 0;
+
 async function loadStockReportData(forceRefresh){
   if(stockReportGrouped && !forceRefresh) { renderStockDashboard(); return; }
   const listEl = document.getElementById('stockModelList');
@@ -2248,8 +2303,12 @@ async function loadStockReportData(forceRefresh){
   try{
     const snap = await getDocs(collection(db,"inventory"));
     const all = snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Only units still marked Available count as "in stock" — sold units are
+    // excluded from the report/breakdown but tallied separately so the total
+    // fleet size is still visible.
+    const available = all.filter(s => (s.status||'Available') !== 'Sold');
     const byModel = {};
-    all.forEach(s=>{
+    available.forEach(s=>{
       const m = s.model || 'Unassigned';
       const c = (s.color||'Unspecified').trim() || 'Unspecified';
       byModel[m] = byModel[m] || { total:0, colours:{} };
@@ -2257,7 +2316,8 @@ async function loadStockReportData(forceRefresh){
       byModel[m].colours[c] = (byModel[m].colours[c]||0) + 1;
     });
     stockReportGrouped = byModel;
-    stockReportTotalUnits = all.length;
+    stockReportTotalUnits = available.length;
+    stockReportSoldUnits = all.length - available.length;
     renderStockDashboard();
   }catch(err){
     console.error('stock report load failed', err);
@@ -2279,6 +2339,7 @@ function renderStockDashboard(){
   document.getElementById('stkTotalUnits').textContent = stockReportTotalUnits;
   document.getElementById('stkModels').textContent = models.length;
   document.getElementById('stkColours').textContent = allColours.size;
+  document.getElementById('stkSold').textContent = stockReportSoldUnits;
   document.getElementById('stkDate').textContent = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
 
   const listEl = document.getElementById('stockModelList');
@@ -2316,7 +2377,7 @@ function buildStockReportPage(){
     </tr>`;
   }).join('');
   return `
-    <div class="pv-titlebar">Samriddhi And Brothers — Daily Stock Report
+    <div class="pv-titlebar">Samriddhi And Brothers — Daily Stock Report (Available Units)
       <div class="sub">Bajaj Authorized Dealer, Phidim</div>
     </div>
     <div class="pv-tablewrap">
@@ -2324,17 +2385,17 @@ function buildStockReportPage(){
         <thead><tr><th style="width:5%">S.N</th><th style="width:22%">Model</th><th>Colour-wise Breakdown</th><th style="width:12%">Total Units</th></tr></thead>
         <tbody>
           ${rows}
-          <tr class="grand-total"><td colspan="3" class="left">GRAND TOTAL</td><td>${stockReportTotalUnits}</td></tr>
+          <tr class="grand-total"><td colspan="3" class="left">GRAND TOTAL (IN STOCK)</td><td>${stockReportTotalUnits}</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="pv-datebar">Generated: ${today}</div>`;
+    <div class="pv-datebar">Generated: ${today} &nbsp;|&nbsp; Sold units excluded (${stockReportSoldUnits} sold)</div>`;
 }
 
 window.openStockPreview = async function(){
   if(!stockReportGrouped) await loadStockReportData();
-  if(!Object.keys(stockReportGrouped||{}).length){ toast('No inventory to report yet.','warn'); return; }
-  document.getElementById('spvSubtitle').textContent = stockReportTotalUnits+' units across '+Object.keys(stockReportGrouped).length+' models';
+  if(!Object.keys(stockReportGrouped||{}).length){ toast('No available inventory to report yet.','warn'); return; }
+  document.getElementById('spvSubtitle').textContent = stockReportTotalUnits+' available units across '+Object.keys(stockReportGrouped).length+' models  ·  '+stockReportSoldUnits+' sold units excluded';
   document.getElementById('spvPage').innerHTML = `<div class="a4l-paper">${buildStockReportPage()}</div>`;
   document.getElementById('stockPreviewOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -3023,6 +3084,7 @@ function enhanceNativeSelect(select, opts={}){
 function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('mCategory'), { placeholder:'Category' });
   enhanceNativeSelect(document.getElementById('stockModelSelect'), { placeholder:'— Select Model —', searchable:true });
+  enhanceNativeSelect(document.getElementById('sStatus'), { placeholder:'Available' });
 }
 document.addEventListener('DOMContentLoaded', initCustomSelects);
 </script>
