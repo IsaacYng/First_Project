@@ -1976,7 +1976,8 @@ function updatePriceStats() {
 function populateModelDropdown() {
   const sel=document.getElementById('stockModelSelect');
   const cur=sel.value;
-  sel.innerHTML='<option value="">— Select Model —</option>'+allMasterBikes.map(b=>`<option value="${b.name}" data-price="${b.price}">${b.name}</option>`).join('');
+  const validBikes = allMasterBikes.filter(b => b.name && b.name.trim() && b.name.trim() !== '—' && b.name.trim() !== '-');
+  sel.innerHTML='<option value="">— Select Model —</option>'+validBikes.map(b=>`<option value="${b.name}" data-price="${b.price}">${b.name}</option>`).join('');
   if(cur) sel.value=cur;
 }
 
@@ -3346,9 +3347,12 @@ function enhanceNativeSelect(select, opts={}){
       optWrap.innerHTML = '';
       const f = filter.trim().toLowerCase();
       let shown = 0;
-      Array.from(select.options).forEach(opt=>{
-        if(opt.value==='' && opt.textContent.trim().startsWith('—')){
+      Array.from(select.options).forEach((opt,idx)=>{
+        const isPlaceholder = idx===0 && opt.value==='' && opt.textContent.trim().startsWith('—');
+        if(isPlaceholder){
           if(f) return; // hide placeholder row while filtering
+        } else if(!opt.textContent.trim() || /^[-—\s]+$/.test(opt.textContent)){
+          return; // skip blank / dash-only garbage entries
         }
         if(f && !opt.textContent.toLowerCase().includes(f)) return;
         shown++;
