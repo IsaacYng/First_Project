@@ -571,12 +571,12 @@
   .cs-search i{ color:#94A3B8; font-size:12px; }
   .cs-options{ overflow-y:auto; }
   .cs-option{
-    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:8px; font-size:13.5px; font-weight:600;
-    color:#334155; cursor:pointer; transition:background .12s ease;
+    display:flex; align-items:flex-start; gap:8px; padding:8px 10px; border-radius:8px; font-size:13.5px; font-weight:600;
+    color:#334155; cursor:pointer; transition:background .12s ease; line-height:1.35;
   }
   .cs-option:hover, .cs-option.hl{ background:#F1F5F9; }
   .cs-option.selected{ background:#EAF3FB; color:#005EA6; }
-  .cs-option .cs-check{ margin-left:auto; color:#005EA6; font-size:11px; opacity:0; }
+  .cs-option .cs-check{ margin-left:auto; margin-top:2px; color:#005EA6; font-size:11px; opacity:0; flex-shrink:0; }
   .cs-option.selected .cs-check{ opacity:1; }
   .cs-empty{ padding:14px 10px; text-align:center; color:#94A3B8; font-size:12.5px; }
 
@@ -1977,7 +1977,7 @@ function populateModelDropdown() {
   const sel=document.getElementById('stockModelSelect');
   const cur=sel.value;
   const validBikes = allMasterBikes.filter(b => b.name && b.name.trim() && b.name.trim() !== '—' && b.name.trim() !== '-');
-  sel.innerHTML='<option value="">— Select Model —</option>'+validBikes.map(b=>`<option value="${b.name}" data-price="${b.price}">${b.name}</option>`).join('');
+  sel.innerHTML='<option value="">Select a model</option>'+validBikes.map(b=>`<option value="${b.name}" data-price="${b.price}">${b.name}</option>`).join('');
   if(cur) sel.value=cur;
 }
 
@@ -3348,7 +3348,7 @@ function enhanceNativeSelect(select, opts={}){
       const f = filter.trim().toLowerCase();
       let shown = 0;
       Array.from(select.options).forEach((opt,idx)=>{
-        const isPlaceholder = idx===0 && opt.value==='' && opt.textContent.trim().startsWith('—');
+        const isPlaceholder = idx===0 && opt.value==='';
         if(isPlaceholder){
           if(f) return; // hide placeholder row while filtering
         } else if(!opt.textContent.trim() || /^[-—\s]+$/.test(opt.textContent)){
@@ -3395,7 +3395,7 @@ function enhanceNativeSelect(select, opts={}){
 
 function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('mCategory'), { placeholder:'Category' });
-  enhanceNativeSelect(document.getElementById('stockModelSelect'), { placeholder:'— Select Model —', searchable:true });
+  enhanceNativeSelect(document.getElementById('stockModelSelect'), { placeholder:'Select a model', searchable:true });
   enhanceNativeSelect(document.getElementById('sStatus'), { placeholder:'Available' });
 }
 document.addEventListener('DOMContentLoaded', initCustomSelects);
