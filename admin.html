@@ -69,6 +69,7 @@
 </script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { max-width:100%; overflow-x:hidden; }
   body { font-family: 'DM Sans', sans-serif; background:#fff; -webkit-font-smoothing:antialiased; }
   .font-display{ letter-spacing:0.01em; }
 
@@ -2429,8 +2430,12 @@ function buildStockReportPage(){
     }).join('');
   }).join('');
 
+  const AREA_PALETTE = [
+    {bg:'#EAF3FB',fg:'#005EA6'}, {bg:'#FEF6E7',fg:'#B4740E'}, {bg:'#EAF7F0',fg:'#137A4B'},
+    {bg:'#F3EAFB',fg:'#7C3AED'}, {bg:'#FDEDED',fg:'#C6382E'}, {bg:'#F1F2F5',fg:'#4B5262'}
+  ];
   const areaChips = stockAreas.length
-    ? stockAreas.map(a=>`<div class="jrp-cat-chip" style="background:#EEF5FC;color:#005EA6">${a.name}: ${areaTotals[a.name]||0}</div>`).join('')
+    ? stockAreas.map((a,i)=>{ const p=AREA_PALETTE[i%AREA_PALETTE.length]; return `<div class="jrp-cat-chip" style="background:${p.bg};color:${p.fg}">${a.name}: ${areaTotals[a.name]||0}</div>`; }).join('')
     : '';
 
   // Area-wise grid — same Model / Colour / [Area columns] / Total shape as the
@@ -2452,6 +2457,11 @@ function buildStockReportPage(){
           ${r.perArea.map(v=>`<td style="font-weight:${v>0?'800':'400'};color:${v>0?'#000':'#B8BEC9'}">${v}</td>`).join('')}
           <td style="font-weight:800;background:#F1F5F9">${r.total}</td>
         </tr>`).join('')}
+        <tr class="grand-total">
+          <td colspan="2">AREA TOTALS</td>
+          ${stockAreas.map(a=>`<td>${areaTotals[a.name]||0}</td>`).join('')}
+          <td>${stockReportTotalUnits}</td>
+        </tr>
       </tbody>
     </table>` : '';
 
@@ -2652,28 +2662,29 @@ function renderAreaStockTable(){
       const cells = stockAreas.map(a=>{
         const raw = Number(saved[a.name])||0;
         const isWorkshop = workshopArea && a.id===workshopArea.id;
+        const thLabel = (a.name||'').replace(/"/g,'&quot;');
         if(isWorkshop){
           // Workshop is always the computed leftover — shown, never typed into.
-          return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700">${unallocated}</td>`;
+          return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700" data-th="${thLabel}">${unallocated}</td>`;
         }
         if(areaEditMode){
           const maxForThis = Math.max(raw, available - sumEnteredNonWorkshop + raw);
           const mEsc = m.replace(/'/g,"\\'"), cEsc = c.replace(/'/g,"\\'"), aEsc = (a.name||'').replace(/'/g,"\\'");
-          return `<td class="px-3 py-2 text-center">
+          return `<td class="px-3 py-2 text-center" data-th="${thLabel}">
             <input type="number" min="0" max="${maxForThis}" class="area-qty-input" value="${raw}"
               data-model="${m.replace(/"/g,'&quot;')}" data-color="${c.replace(/"/g,'&quot;')}" data-area="${(a.name||'').replace(/"/g,'&quot;')}"
               onfocus="this.select()" onkeydown="handleAreaKey(event,this)"
               onchange="saveAreaQty('${mEsc}','${cEsc}','${aEsc}', this.value, this);">
           </td>`;
         }
-        return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700">${raw}</td>`;
+        return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700" data-th="${thLabel}">${raw}</td>`;
       }).join('');
 
       rows.push(`<tr class="border-b border-slate-100">
-        <td class="px-4 py-2.5 font-bold text-slate-800 text-sm whitespace-nowrap">${m}</td>
-        <td class="px-4 py-2.5"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(c)}"></span>${c}</span></td>
+        <td class="px-4 py-2.5 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">${m}</td>
+        <td class="px-4 py-2.5" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(c)}"></span>${c}</span></td>
         ${cells}
-        <td class="px-3 py-2 text-center"><span class="area-total-chip">${available}</span></td>
+        <td class="px-3 py-2 text-center" data-th="Row Total"><span class="area-total-chip">${available}</span></td>
       </tr>`);
     });
   });
@@ -3265,6 +3276,7 @@ document.addEventListener('click', (e)=>{
 function enhanceNativeSelect(select, opts={}){
   if(!select || select._csEnhanced) return;
   select._csEnhanced = true;
+  select.tabIndex = -1;
   const searchable = !!opts.searchable;
   const placeholder = opts.placeholder || 'Select…';
 
