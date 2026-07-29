@@ -1158,6 +1158,9 @@
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Available" onclick="setInvStatusFilter('Available')">Available</button>
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Booked" onclick="setInvStatusFilter('Booked')">Booked</button>
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setInvStatusFilter('Sold')">Sold</button>
+            <span class="w-px h-4 bg-slate-200 mx-0.5"></span>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="HHSales" onclick="setInvStatusFilter('HHSales')">HH Sales</button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="HHHide" onclick="setInvStatusFilter('HHHide')">HH Hide</button>
           </div>
           <div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -1724,7 +1727,7 @@ window._toggleKebab = (btn, type, id) => {
   } else if(type === 'inventory'){
     const s = invData.find(x=>x.id===id);
     const cur = s?.status || 'Available';
-    const flagged = s?.targetFlag === true;
+    const hh = s?.hhFlag || null; // 'Sales' | 'Hide' | null
     const statusActions = ['Available','Booked','Sold']
       .filter(st => st !== cur)
       .map(st => ({
@@ -1732,16 +1735,18 @@ window._toggleKebab = (btn, type, id) => {
         icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
         onClick: () => window._setUnitStatus(id, st)
       }));
-    // HH (Hansraj Hulaschand — the distributor) reporting flag, independent of
-    // physical stock status:
-    //  Available/Booked + flag  = "HH Sales" (reported to HH as sold now — still counts in OUR stock)
-    //  Sold + flag               = "HH Hide"  (a real sale, held back from HH's report — does NOT count in our stock)
-    const targetAction = cur==='Sold'
-      ? { label: flagged?'Undo HH Hide':'Make HH Hide', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) }
-      : { label: flagged?'Undo HH Sales':'Make HH Sales', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) };
+    // HH (Hansraj Hulaschand — the distributor) reporting flag — a standalone
+    // 3-state field (Sales / Hide / none), always offered as both options on
+    // every unit regardless of physical status:
+    //  HH Sales -> counts in OUR stock, reported to HH as sold
+    //  HH Hide  -> does NOT count in our stock, held back from HH's report
+    const hhActions = [
+      { label: hh==='Sales' ? 'Undo HH Sales' : 'Make HH Sales', icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, hh==='Sales'?null:'Sales') },
+      { label: hh==='Hide' ? 'Undo HH Hide' : 'Make HH Hide', icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, hh==='Hide'?null:'Hide') }
+    ];
     openKebabMenuFor(btn, [
       ...statusActions,
-      targetAction,
+      ...hhActions,
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editInventory(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('inventory', id) }
     ]);
@@ -2156,16 +2161,12 @@ window._setUnitStatus = async (id, status) => {
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
 
-window._toggleTargetFlag = async (id) => {
-  const s = invData.find(x=>x.id===id); if(!s) return;
-  const next = !(s.targetFlag === true);
+window._setHHFlag = async (id, hhFlag) => {
   try{
-    await updateDoc(doc(db,"inventory",id),{targetFlag:next});
-    if(s.status==='Sold'){
-      toast(next ? 'Marked as HH Hide — held back from HH\'s report, not counted in our stock.' : 'Undone — counts toward HH sales again.');
-    } else {
-      toast(next ? 'Marked as HH Sales — reported to HH, still counted in our stock.' : 'Undone — no longer counted as an HH sale.');
-    }
+    await updateDoc(doc(db,"inventory",id),{hhFlag: hhFlag || null});
+    if(hhFlag==='Sales') toast('Marked as HH Sales — counted in our stock, reported to HH.');
+    else if(hhFlag==='Hide') toast('Marked as HH Hide — NOT counted in our stock, held back from HH\'s report.');
+    else toast('HH flag cleared.');
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
 
@@ -2269,7 +2270,11 @@ window.setInvStatusFilter = setInvStatusFilter;
 
 function getFilteredInv(){
   let base = invData;
-  if(invStatusFilter !== 'all'){
+  if(invStatusFilter === 'HHSales'){
+    base = base.filter(s => s.hhFlag==='Sales');
+  } else if(invStatusFilter === 'HHHide'){
+    base = base.filter(s => s.hhFlag==='Hide');
+  } else if(invStatusFilter !== 'all'){
     base = base.filter(s => (s.status||'Available') === invStatusFilter);
   }
   if(!invSearchTerm) return base;
@@ -2328,11 +2333,8 @@ function renderInvTable(list){
             : s.status==='Booked'
             ? `<span class="badge badge-amber"><i class="fas fa-bookmark"></i> Booked</span>`
             : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`}
-          ${s.targetFlag===true
-            ? (s.status==='Sold'
-                ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> HH Hidden</span>`
-                : `<span class="badge badge-blue"><i class="fas fa-bullseye"></i> HH Sales</span>`)
-            : ''}
+          ${s.hhFlag==='Sales' ? `<span class="badge badge-blue"><i class="fas fa-bullseye"></i> HH Sales</span>` : ''}
+          ${s.hhFlag==='Hide' ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> HH Hide</span>` : ''}
         </div>
       </td>
       <td class="px-4 py-3" data-th="Actions">
@@ -2348,10 +2350,9 @@ function updateInvStats(){
   const sold = invData.filter(s=>s.status==='Sold').length;
   const booked = invData.filter(s=>s.status==='Booked').length;
   const available = invData.length - sold - booked;
-  // Sales reported toward this period's target = Sold units not hidden, PLUS
-  // non-sold units explicitly flagged as a target entry (XOR of the two).
-  const targetCount = invData.filter(s => (s.status==='Sold') !== (s.targetFlag===true)).length;
-  document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+targetCount+' toward HH';
+  const hhSalesCount = invData.filter(s=>s.hhFlag==='Sales').length;
+  const hhHideCount = invData.filter(s=>s.hhFlag==='Hide').length;
+  document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+hhSalesCount+' HH Sales  ·  '+hhHideCount+' HH Hide';
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -2373,10 +2374,15 @@ async function loadStockReportData(forceRefresh){
   try{
     const snap = await getDocs(collection(db,"inventory"));
     const all = snap.docs.map(d=>({id:d.id,...d.data()}));
-    // Only units still marked Available count as "in stock" — sold units are
-    // excluded from the report/breakdown but tallied separately so the total
-    // fleet size is still visible.
-    const available = all.filter(s => (s.status||'Available') !== 'Sold');
+    // Only units still "in stock" show up here. hhFlag overrides the plain
+    // Available/Sold status when set: HH Hide always excludes a unit (it's
+    // really gone, just not reported to HH yet); HH Sales always includes a
+    // unit (still physically ours, even though HH has been told it's sold).
+    const available = all.filter(s => {
+      if(s.hhFlag==='Hide') return false;
+      if(s.hhFlag==='Sales') return true;
+      return (s.status||'Available') !== 'Sold';
+    });
     const byModel = {};
     available.forEach(s=>{
       const m = s.model || 'Unassigned';
