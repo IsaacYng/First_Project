@@ -1102,6 +1102,7 @@
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status</label>
             <select id="sStatus">
               <option value="Available">Available</option>
+              <option value="Booked">Booked</option>
               <option value="Sold">Sold</option>
             </select>
           </div>
@@ -1155,6 +1156,7 @@
           <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setInvStatusFilter('all')">All</button>
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Available" onclick="setInvStatusFilter('Available')">Available</button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Booked" onclick="setInvStatusFilter('Booked')">Booked</button>
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setInvStatusFilter('Sold')">Sold</button>
           </div>
           <div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
@@ -1721,9 +1723,24 @@ window._toggleKebab = (btn, type, id) => {
     ]);
   } else if(type === 'inventory'){
     const s = invData.find(x=>x.id===id);
-    const isSold = s && s.status === 'Sold';
+    const cur = s?.status || 'Available';
+    const flagged = s?.targetFlag === true;
+    const statusActions = ['Available','Booked','Sold']
+      .filter(st => st !== cur)
+      .map(st => ({
+        label: 'Mark '+st,
+        icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
+        onClick: () => window._setUnitStatus(id, st)
+      }));
+    // Sales-target reporting flag — independent of physical stock status:
+    //  Available/Booked + flag  = "Target Entry"  (counted toward target now, though still in stock)
+    //  Sold + flag              = "Target Hide"   (a real sale, held back from this period's target count)
+    const targetAction = cur==='Sold'
+      ? { label: flagged?'Unhide from Target':'Hide from Target', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) }
+      : { label: flagged?'Remove Target Entry':'Count as Target Entry', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) };
     openKebabMenuFor(btn, [
-      { label: isSold?'Mark Available':'Mark Sold', icon: isSold?'fa-rotate-left':'fa-tag', onClick:()=>window._toggleUnitStatus(id) },
+      ...statusActions,
+      targetAction,
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editInventory(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('inventory', id) }
     ]);
@@ -1742,7 +1759,7 @@ window._toggleKebab = (btn, type, id) => {
 
 /* ─── Duplicate detection (chassis / engine no. must be unique per unit) ─── */
 function normId(v){ return (v||'').toString().trim().toUpperCase().replace(/\s+/g,''); }
-function normModelName(v){ return (v||'').toString().trim().toLowerCase().replace(/\s+/g,' '); }
+function normModelName(v){ return (v||'').toString().trim().toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim(); }
 function findMasterBikeByName(name){
   const target = normModelName(name);
   return allMasterBikes.find(b => normModelName(b.name) === target);
@@ -2131,12 +2148,23 @@ window._editInventory=(id)=>{
   toast('Unit loaded for editing');
 };
 
-window._toggleUnitStatus = async (id) => {
-  const s = invData.find(x=>x.id===id); if(!s) return;
-  const next = s.status === 'Sold' ? 'Available' : 'Sold';
+window._setUnitStatus = async (id, status) => {
   try{
-    await updateDoc(doc(db,"inventory",id),{status:next});
-    toast(next==='Sold' ? 'Unit marked as Sold.' : 'Unit marked as Available.');
+    await updateDoc(doc(db,"inventory",id),{status});
+    toast('Unit marked as '+status+'.');
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
+window._toggleTargetFlag = async (id) => {
+  const s = invData.find(x=>x.id===id); if(!s) return;
+  const next = !(s.targetFlag === true);
+  try{
+    await updateDoc(doc(db,"inventory",id),{targetFlag:next});
+    if(s.status==='Sold'){
+      toast(next ? 'Hidden from this period\'s sales target count.' : 'Un-hidden — counts toward sales target again.');
+    } else {
+      toast(next ? 'Counted as a target-entry sale (still in stock).' : 'Removed from target-entry count.');
+    }
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
 
@@ -2293,9 +2321,18 @@ function renderInvTable(list){
         </span>
       </td>
       <td class="px-4 py-3" data-th="Status">
-        ${s.status==='Sold'
-          ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>`
-          : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`}
+        <div class="flex flex-wrap items-center gap-1.5">
+          ${s.status==='Sold'
+            ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>`
+            : s.status==='Booked'
+            ? `<span class="badge badge-amber"><i class="fas fa-bookmark"></i> Booked</span>`
+            : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`}
+          ${s.targetFlag===true
+            ? (s.status==='Sold'
+                ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> Target Hidden</span>`
+                : `<span class="badge badge-blue"><i class="fas fa-bullseye"></i> Target Entry</span>`)
+            : ''}
+        </div>
       </td>
       <td class="px-4 py-3" data-th="Actions">
         <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'inventory','${s.id}')" aria-label="Row actions">
@@ -2308,8 +2345,12 @@ function renderInvTable(list){
 
 function updateInvStats(){
   const sold = invData.filter(s=>s.status==='Sold').length;
-  const available = invData.length - sold;
-  document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+sold+' sold';
+  const booked = invData.filter(s=>s.status==='Booked').length;
+  const available = invData.length - sold - booked;
+  // Sales reported toward this period's target = Sold units not hidden, PLUS
+  // non-sold units explicitly flagged as a target entry (XOR of the two).
+  const targetCount = invData.filter(s => (s.status==='Sold') !== (s.targetFlag===true)).length;
+  document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+targetCount+' toward target';
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -3401,7 +3442,6 @@ function enhanceNativeSelect(select, opts={}){
 
 function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('mCategory'), { placeholder:'Category' });
-  enhanceNativeSelect(document.getElementById('stockModelSelect'), { placeholder:'Select a model', searchable:true });
   enhanceNativeSelect(document.getElementById('sStatus'), { placeholder:'Available' });
 }
 document.addEventListener('DOMContentLoaded', initCustomSelects);
