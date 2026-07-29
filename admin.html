@@ -3395,6 +3395,7 @@ function enhanceNativeSelect(select, opts={}){
 
 function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('mCategory'), { placeholder:'Category' });
+  enhanceNativeSelect(document.getElementById('stockModelSelect'), { placeholder:'Select a model', searchable:true });
   enhanceNativeSelect(document.getElementById('sStatus'), { placeholder:'Available' });
 }
 document.addEventListener('DOMContentLoaded', initCustomSelects);
