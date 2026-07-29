@@ -488,7 +488,8 @@
     .sidebar-overlay.open{ display:block; opacity:1; }
   }
 
-  .main-col{ flex:1; min-width:0; display:flex; flex-direction:column; }
+  .main-col{ flex:1; min-width:0; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+  .main-scroll{ flex:1 1 auto; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; }
 
   /* ── Topbar ── */
   .topbar{
@@ -900,6 +901,7 @@
         </div>
       </header>
 
+      <div class="main-scroll">
       <div class="flex-1 px-4 sm:px-6 py-6 max-w-7xl mx-auto w-full">
 
     <!-- ═══ PRICE LIST ═══ -->
@@ -1074,9 +1076,9 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Model <span class="text-red-400">*</span></label>
-            <select id="stockModelSelect" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
-              <option value="">— Select Model —</option>
-            </select>
+            <input type="text" id="stockModelSelect" list="modelDatalist" autocomplete="off" placeholder="Type or pick a model…"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+            <datalist id="modelDatalist"></datalist>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Chassis No <span class="text-red-400">*</span></label>
@@ -1098,15 +1100,8 @@
             <input type="text" id="sColor" placeholder="e.g. Fiery Orange"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status</label>
-            <select id="sStatus">
-              <option value="Available">Available</option>
-              <option value="Booked">Booked</option>
-              <option value="Sold">Sold</option>
-            </select>
-          </div>
         </div>
+        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units are added as <b>Available</b> by default — change status later from the row menu if needed.</p>
         <div class="flex gap-2 flex-wrap">
           <button id="saveStockBtn" class="cta-primary">
             <i class="fas fa-floppy-disk"></i> Save Unit
@@ -1465,6 +1460,7 @@
       </div>
     </div>
   </footer>
+      </div><!-- /main-scroll -->
       </div><!-- /main-col -->
     </div><!-- /app-shell -->
 </div>
@@ -2006,11 +2002,9 @@ function updatePriceStats() {
 }
 
 function populateModelDropdown() {
-  const sel=document.getElementById('stockModelSelect');
-  const cur=sel.value;
+  const list=document.getElementById('modelDatalist');
   const validBikes = allMasterBikes.filter(b => b.name && b.name.trim() && b.name.trim() !== '—' && b.name.trim() !== '-');
-  sel.innerHTML='<option value="">Select a model</option>'+validBikes.map(b=>`<option value="${b.name}" data-price="${b.price}">${b.name}</option>`).join('');
-  if(cur) sel.value=cur;
+  list.innerHTML = validBikes.map(b=>`<option value="${b.name}">`).join('');
 }
 
 window._editMaster=(id)=>{
@@ -2095,9 +2089,10 @@ function clearMasterForm(){
 
 /* ─── Inventory ─── */
 document.getElementById('saveStockBtn').addEventListener('click',async()=>{
-  const modelName=document.getElementById('stockModelSelect').value;
-  const bikeInfo=allMasterBikes.find(b=>b.name===modelName);
-  if(!modelName||!bikeInfo){toast('Select a valid model!','err');return;}
+  const modelTyped=document.getElementById('stockModelSelect').value.trim();
+  const bikeInfo=findMasterBikeByName(modelTyped);
+  if(!modelTyped||!bikeInfo){toast('Model not found in the master price list — check spelling or add it there first.','err');return;}
+  const modelName = bikeInfo.name; // canonical spelling/casing from the master list
 
   const chassisCheck = Validate.identifierCode(document.getElementById('sChassis').value, { label:'Chassis No' });
   const engineCheck = Validate.identifierCode(document.getElementById('sEngine').value, { label:'Engine No' });
@@ -2107,7 +2102,6 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
   if(firstErr){ toast(firstErr.error,'err'); return; }
   if(!regNoCheck.ok){ toast(regNoCheck.error,'err'); return; }
   const chassis = chassisCheck.value, engine = engineCheck.value, color = colorCheck.value, regNo = regNoCheck.value;
-  const status = document.getElementById('sStatus').value || 'Available';
 
   const dup = findDuplicateUnit(chassis, engine, currentEditInvId);
   if(dup){
@@ -2124,17 +2118,18 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
 
   try {
     if(currentEditInvId){
-      await updateDoc(doc(db,"inventory",currentEditInvId),{model:modelName,chassis,engine,regNo,color,status});
+      // Status is changed only from the row menu now — not touched here, so
+      // editing details never accidentally resets a unit's Sold/Booked state.
+      await updateDoc(doc(db,"inventory",currentEditInvId),{model:modelName,chassis,engine,regNo,color});
       toast('Unit updated!');
       window.cancelInvEdit();
     } else {
       // Auto S.N — always one more than the current highest S.N in inventory
       const nextSn = invData.length ? Math.max(...invData.map(x=>Number(x.sn)||0)) + 1 : 1;
-      await addDoc(collection(db,"inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,status,addedAt:new Date()});
+      await addDoc(collection(db,"inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,status:'Available',addedAt:new Date()});
       ['sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('stockModelSelect').value='';
-      document.getElementById('sStatus').value='Available';
-      toast('Unit added — S.N '+nextSn+' assigned automatically.');
+      toast('Unit added — S.N '+nextSn+' assigned automatically, marked Available.');
     }
   }catch(e){toast('Error: '+e.message,'err');}
 });
@@ -2147,7 +2142,6 @@ window._editInventory=(id)=>{
   document.getElementById('sEngine').value=s.engine||'';
   document.getElementById('sRegNo').value=s.regNo||'';
   document.getElementById('sColor').value=s.color||'';
-  document.getElementById('sStatus').value=s.status||'Available';
   currentEditInvId=id;
   const btn=document.getElementById('saveStockBtn');
   btn.innerHTML='<i class="fas fa-rotate"></i> Update Unit';
@@ -2159,6 +2153,16 @@ window._editInventory=(id)=>{
 };
 
 window._setUnitStatus = async (id, status) => {
+  const s = invData.find(x=>x.id===id);
+  const modelLabel = s ? `${s.model} — ${s.color||''}`.trim() : 'this unit';
+  const proceed = await showConfirm({
+    title: 'Mark as '+status+'?',
+    message: `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`,
+    okText:'Confirm',
+    okColorClass:'text-bajaj-blue hover:bg-blue-50',
+    iconClass:'fa-rotate', iconColor:'#005EA6', iconBg:'#EAF3FB'
+  });
+  if(!proceed) return;
   try{
     await updateDoc(doc(db,"inventory",id),{status});
     toast('Unit marked as '+status+'.');
@@ -2197,7 +2201,6 @@ window.cancelInvEdit=()=>{
   currentEditInvId=null;
   ['sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('stockModelSelect').value='';
-  document.getElementById('sStatus').value='Available';
   const btn=document.getElementById('saveStockBtn');
   btn.innerHTML='<i class="fas fa-floppy-disk"></i> Save Unit';
   document.getElementById('invFormTitle').textContent='Add Inventory Unit';
@@ -3480,7 +3483,6 @@ function enhanceNativeSelect(select, opts={}){
 
 function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('mCategory'), { placeholder:'Category' });
-  enhanceNativeSelect(document.getElementById('sStatus'), { placeholder:'Available' });
 }
 document.addEventListener('DOMContentLoaded', initCustomSelects);
 </script>
