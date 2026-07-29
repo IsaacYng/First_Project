@@ -1736,14 +1736,18 @@ window._toggleKebab = (btn, type, id) => {
         onClick: () => window._setUnitStatus(id, st)
       }));
     // HH (Hansraj Hulaschand — the distributor) reporting flag — a standalone
-    // 3-state field (Sales / Hide / none), always offered as both options on
-    // every unit regardless of physical status:
+    // 3-state field (Sales / Hide / none):
     //  HH Sales -> counts in OUR stock, reported to HH as sold
     //  HH Hide  -> does NOT count in our stock, held back from HH's report
-    const hhActions = [
-      { label: hh==='Sales' ? 'Undo HH Sales' : 'Make HH Sales', icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, hh==='Sales'?null:'Sales') },
-      { label: hh==='Hide' ? 'Undo HH Hide' : 'Make HH Hide', icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, hh==='Hide'?null:'Hide') }
-    ];
+    // When no flag is set, both options are offered. Once one is active, only
+    // "Undo" for that flag shows — prevents accidentally switching straight
+    // from one to the other with a stray tap.
+    const hhActions = hh
+      ? [{ label: 'Undo HH '+hh, icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, null) }]
+      : [
+          { label:'Make HH Sales', icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, 'Sales') },
+          { label:'Make HH Hide', icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, 'Hide') }
+        ];
     openKebabMenuFor(btn, [
       ...statusActions,
       ...hhActions,
@@ -2162,6 +2166,25 @@ window._setUnitStatus = async (id, status) => {
 };
 
 window._setHHFlag = async (id, hhFlag) => {
+  const s = invData.find(x=>x.id===id);
+  const modelLabel = s ? `${s.model} — ${s.color||''}`.trim() : 'this unit';
+  let title, message;
+  if(hhFlag==='Sales'){
+    title = 'Mark as HH Sales?';
+    message = `<b>${modelLabel}</b> will be counted in our stock and reported to HH as sold. Confirm?`;
+  } else if(hhFlag==='Hide'){
+    title = 'Mark as HH Hide?';
+    message = `<b>${modelLabel}</b> will be removed from our stock count and held back from HH's report. Confirm?`;
+  } else {
+    title = 'Undo HH flag?';
+    message = `Remove the HH flag from <b>${modelLabel}</b> and go back to normal status-based counting. Confirm?`;
+  }
+  const proceed = await showConfirm({
+    title, message, okText:'Confirm',
+    okColorClass:'text-bajaj-blue hover:bg-blue-50',
+    iconClass:'fa-bullseye', iconColor:'#005EA6', iconBg:'#EAF3FB'
+  });
+  if(!proceed) return;
   try{
     await updateDoc(doc(db,"inventory",id),{hhFlag: hhFlag || null});
     if(hhFlag==='Sales') toast('Marked as HH Sales — counted in our stock, reported to HH.');
@@ -2328,13 +2351,14 @@ function renderInvTable(list){
       </td>
       <td class="px-4 py-3" data-th="Status">
         <div class="flex flex-wrap items-center gap-1.5">
-          ${s.status==='Sold'
+          ${s.hhFlag==='Hide' ? '' :
+            s.status==='Sold'
             ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>`
             : s.status==='Booked'
             ? `<span class="badge badge-amber"><i class="fas fa-bookmark"></i> Booked</span>`
             : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`}
           ${s.hhFlag==='Sales' ? `<span class="badge badge-blue"><i class="fas fa-bullseye"></i> HH Sales</span>` : ''}
-          ${s.hhFlag==='Hide' ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> HH Hide</span>` : ''}
+          ${s.hhFlag==='Hide' ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> HH Hide (not in stock)</span>` : ''}
         </div>
       </td>
       <td class="px-4 py-3" data-th="Actions">
