@@ -1742,6 +1742,11 @@ window._toggleKebab = (btn, type, id) => {
 
 /* ─── Duplicate detection (chassis / engine no. must be unique per unit) ─── */
 function normId(v){ return (v||'').toString().trim().toUpperCase().replace(/\s+/g,''); }
+function normModelName(v){ return (v||'').toString().trim().toLowerCase().replace(/\s+/g,' '); }
+function findMasterBikeByName(name){
+  const target = normModelName(name);
+  return allMasterBikes.find(b => normModelName(b.name) === target);
+}
 
 function findDuplicateUnit(chassis, engine, excludeId=null){
   const c = normId(chassis), e = normId(engine);
@@ -3160,11 +3165,12 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
     const colorCheck = Validate.text(row.color, { label:'Color', max:40 });
     const badField = [chassisCheck, engineCheck, modelCheck, colorCheck].find(c=>!c.ok);
     if(badField){ results.failed.push({row, reason: badField.error}); continue; }
-    if(!allMasterBikes.some(b=>b.name===modelCheck.value)){
+    const masterBike = findMasterBikeByName(modelCheck.value);
+    if(!masterBike){
       results.failed.push({row, reason:`Model "${modelCheck.value}" isn't in the master price list — add it there first.`});
       continue;
     }
-    row.model = modelCheck.value; row.chassis = chassisCheck.value; row.engine = engineCheck.value; row.color = colorCheck.value;
+    row.model = masterBike.name; row.chassis = chassisCheck.value; row.engine = engineCheck.value; row.color = colorCheck.value;
     const dupExisting = findDuplicateUnit(row.chassis, row.engine);
     const dupBatch = seenInBatch.find(r=>normId(r.chassis)===normId(row.chassis) || normId(r.engine)===normId(row.engine));
     if(dupExisting || dupBatch){
