@@ -1733,11 +1733,11 @@ window._toggleKebab = (btn, type, id) => {
         onClick: () => window._setUnitStatus(id, st)
       }));
     // Sales-target reporting flag — independent of physical stock status:
-    //  Available/Booked + flag  = "Target Entry"  (counted toward target now, though still in stock)
-    //  Sold + flag              = "Target Hide"   (a real sale, held back from this period's target count)
+    //  Available/Booked + flag  = "Target Sales" (counted toward target now, though still in stock)
+    //  Sold + flag              = "Target Hide"  (a real sale, held back from this period's target count)
     const targetAction = cur==='Sold'
       ? { label: flagged?'Unhide from Target':'Hide from Target', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) }
-      : { label: flagged?'Remove Target Entry':'Count as Target Entry', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) };
+      : { label: flagged?'Remove Target Sale':'Count as Target Sale', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) };
     openKebabMenuFor(btn, [
       ...statusActions,
       targetAction,
@@ -2163,7 +2163,7 @@ window._toggleTargetFlag = async (id) => {
     if(s.status==='Sold'){
       toast(next ? 'Hidden from this period\'s sales target count.' : 'Un-hidden — counts toward sales target again.');
     } else {
-      toast(next ? 'Counted as a target-entry sale (still in stock).' : 'Removed from target-entry count.');
+      toast(next ? 'Counted as a target sale (still in stock).' : 'Removed from target sales count.');
     }
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
@@ -2330,7 +2330,7 @@ function renderInvTable(list){
           ${s.targetFlag===true
             ? (s.status==='Sold'
                 ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> Target Hidden</span>`
-                : `<span class="badge badge-blue"><i class="fas fa-bullseye"></i> Target Entry</span>`)
+                : `<span class="badge badge-blue"><i class="fas fa-bullseye"></i> Target Sales</span>`)
             : ''}
         </div>
       </td>
