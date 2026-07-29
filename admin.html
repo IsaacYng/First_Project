@@ -1732,12 +1732,13 @@ window._toggleKebab = (btn, type, id) => {
         icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
         onClick: () => window._setUnitStatus(id, st)
       }));
-    // Sales-target reporting flag — independent of physical stock status:
-    //  Available/Booked + flag  = "Target Sales" (counted toward target now, though still in stock)
-    //  Sold + flag              = "Target Hide"  (a real sale, held back from this period's target count)
+    // HH (Hansraj Hulaschand — the distributor) reporting flag, independent of
+    // physical stock status:
+    //  Available/Booked + flag  = "HH Sales" (reported to HH as sold now, though physically still in our stock)
+    //  Sold + flag               = "HH Hide"  (a real sale, held back from this period's HH report)
     const targetAction = cur==='Sold'
-      ? { label: flagged?'Unhide from Target':'Hide from Target', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) }
-      : { label: flagged?'Remove Target Sale':'Count as Target Sale', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) };
+      ? { label: flagged?'Unhide from HH Report':'Hide from HH Report', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) }
+      : { label: flagged?'Remove HH Sale':'Count as HH Sale', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) };
     openKebabMenuFor(btn, [
       ...statusActions,
       targetAction,
@@ -2161,9 +2162,9 @@ window._toggleTargetFlag = async (id) => {
   try{
     await updateDoc(doc(db,"inventory",id),{targetFlag:next});
     if(s.status==='Sold'){
-      toast(next ? 'Hidden from this period\'s sales target count.' : 'Un-hidden — counts toward sales target again.');
+      toast(next ? 'Hidden from this period\'s HH report.' : 'Un-hidden — counts toward HH sales again.');
     } else {
-      toast(next ? 'Counted as a target sale (still in stock).' : 'Removed from target sales count.');
+      toast(next ? 'Counted as an HH sale (still in our stock).' : 'Removed from HH sales count.');
     }
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
@@ -2329,8 +2330,8 @@ function renderInvTable(list){
             : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`}
           ${s.targetFlag===true
             ? (s.status==='Sold'
-                ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> Target Hidden</span>`
-                : `<span class="badge badge-blue"><i class="fas fa-bullseye"></i> Target Sales</span>`)
+                ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> HH Hidden</span>`
+                : `<span class="badge badge-blue"><i class="fas fa-bullseye"></i> HH Sales</span>`)
             : ''}
         </div>
       </td>
@@ -2350,7 +2351,7 @@ function updateInvStats(){
   // Sales reported toward this period's target = Sold units not hidden, PLUS
   // non-sold units explicitly flagged as a target entry (XOR of the two).
   const targetCount = invData.filter(s => (s.status==='Sold') !== (s.targetFlag===true)).length;
-  document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+targetCount+' toward target';
+  document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+targetCount+' toward HH';
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -2380,9 +2381,12 @@ async function loadStockReportData(forceRefresh){
     available.forEach(s=>{
       const m = s.model || 'Unassigned';
       const c = (s.color||'Unspecified').trim() || 'Unspecified';
-      byModel[m] = byModel[m] || { total:0, colours:{} };
+      byModel[m] = byModel[m] || { total:0, colours:{}, chassisByColour:{} };
       byModel[m].total++;
       byModel[m].colours[c] = (byModel[m].colours[c]||0) + 1;
+      byModel[m].chassisByColour[c] = byModel[m].chassisByColour[c] || [];
+      const chassisTail = (s.chassis||'').toString().trim().slice(-5);
+      if(chassisTail) byModel[m].chassisByColour[c].push(chassisTail);
     });
     stockReportGrouped = byModel;
     stockReportTotalUnits = available.length;
@@ -2473,7 +2477,11 @@ function buildStockReportPage(){
         return qtyHere;
       });
       areaGridRows.push({ model:m, color:c, perArea, total:available });
-      return `<tr><td>${sn}</td><td>${m}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${available}</td></tr>`;
+      const chassisTails = (info.chassisByColour && info.chassisByColour[c]) || [];
+      const chassisLine = chassisTails.length
+        ? `<div style="font-size:8.5px;color:#8B93A3;font-weight:600;margin-top:2px;letter-spacing:.02em">Chassis: ${chassisTails.join(', ')}</div>`
+        : '';
+      return `<tr><td>${sn}</td><td>${m}${chassisLine}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${available}</td></tr>`;
     }).join('');
   }).join('');
 
