@@ -1734,11 +1734,11 @@ window._toggleKebab = (btn, type, id) => {
       }));
     // HH (Hansraj Hulaschand — the distributor) reporting flag, independent of
     // physical stock status:
-    //  Available/Booked + flag  = "HH Sales" (reported to HH as sold now, though physically still in our stock)
-    //  Sold + flag               = "HH Hide"  (a real sale, held back from this period's HH report)
+    //  Available/Booked + flag  = "HH Sales" (reported to HH as sold now — still counts in OUR stock)
+    //  Sold + flag               = "HH Hide"  (a real sale, held back from HH's report — does NOT count in our stock)
     const targetAction = cur==='Sold'
-      ? { label: flagged?'Unhide from HH Report':'Hide from HH Report', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) }
-      : { label: flagged?'Remove HH Sale':'Count as HH Sale', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) };
+      ? { label: flagged?'Undo HH Hide':'Make HH Hide', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) }
+      : { label: flagged?'Undo HH Sales':'Make HH Sales', icon:'fa-bullseye', onClick:()=>window._toggleTargetFlag(id) };
     openKebabMenuFor(btn, [
       ...statusActions,
       targetAction,
@@ -2162,9 +2162,9 @@ window._toggleTargetFlag = async (id) => {
   try{
     await updateDoc(doc(db,"inventory",id),{targetFlag:next});
     if(s.status==='Sold'){
-      toast(next ? 'Hidden from this period\'s HH report.' : 'Un-hidden — counts toward HH sales again.');
+      toast(next ? 'Marked as HH Hide — held back from HH\'s report, not counted in our stock.' : 'Undone — counts toward HH sales again.');
     } else {
-      toast(next ? 'Counted as an HH sale (still in our stock).' : 'Removed from HH sales count.');
+      toast(next ? 'Marked as HH Sales — reported to HH, still counted in our stock.' : 'Undone — no longer counted as an HH sale.');
     }
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
