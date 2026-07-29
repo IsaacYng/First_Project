@@ -1,0 +1,3508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bajaj Bikes — Admin Panel</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Bebas Neue', 'cursive'],
+          body: ['DM Sans', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+        colors: {
+          bajaj: {
+            blue: '#005EA6',
+            blueDark: '#004A85',
+            blueLight: '#E8F2FB',
+            amber: '#F59E0B',
+            amberDark: '#D97706',
+          },
+          blue: {
+            50:  '#E8F2FB',
+            100: '#D4E9F7',
+            200: '#A8D3EF',
+            300: '#7DBCE7',
+            400: '#3D96D1',
+            500: '#0070C7',
+            600: '#005EA6',
+            700: '#004A85',
+            800: '#003B6E',
+            900: '#002E56',
+          },
+          /* NOTE: a `brand` and `gold` palette used to be defined here,
+             duplicating `blue`/`bajaj` and `amber` respectively with zero
+             actual class usage in this file — removed to cut config bloat.
+             `blue.*` is kept (still used for nav/active-state classes) and
+             intentionally shares its 600 value with `bajaj.blue`; treat
+             `bajaj.*` as the canonical brand token going forward and avoid
+             introducing further one-off palettes. */
+          danger: '#ef4444',
+          success: '#10b981',
+        },
+        boxShadow: {
+          card: '0 2px 12px rgba(0,0,0,0.05)',
+          'card-hover': '0 20px 48px rgba(0,94,166,0.13)',
+          btn: '0 4px 18px rgba(0,94,166,0.3)',
+        },
+        animation: {
+          fadeUp: 'fadeUp 0.3s ease both',
+          slideIn: 'slideIn 0.3s ease both',
+          spin: 'spin 0.6s linear infinite',
+        },
+        keyframes: {
+          fadeUp: { from: { opacity:'0', transform:'translateY(10px)' }, to: { opacity:'1', transform:'translateY(0)' } },
+          slideIn: { from: { opacity:'0', transform:'translateY(20px)' }, to: { opacity:'1', transform:'translateY(0)' } },
+        },
+      }
+    }
+  }
+</script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { max-width:100%; overflow-x:hidden; }
+  body { font-family: 'DM Sans', sans-serif; background:#fff; -webkit-font-smoothing:antialiased; }
+  .font-display{ letter-spacing:0.01em; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #f1f5f9; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,94,166,0.3); border-radius: 99px; }
+
+  /* Section transitions */
+  .sec-panel { display: none; }
+  .sec-panel.active { display: block; animation: fadeUp 0.35s ease both; }
+
+  /* SN input */
+  .sn-input {
+    width: 48px; background: #F8FAFC; border: 1.5px solid #E2E8F0;
+    border-radius: 8px; padding: 3px 6px; text-align: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: #D97706; font-weight: 700; outline: none;
+    transition: border-color 0.2s;
+  }
+  .sn-input:focus { border-color: #F59E0B; box-shadow:0 0 0 3px rgba(245,158,11,.12); }
+
+  /* Spinner */
+  .spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite; display:none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  @keyframes slideIn { from{opacity:0;transform:translateY(16px) scale(.96);} to{opacity:1;transform:translateY(0) scale(1);} }
+  @keyframes toastOut { from{opacity:1;transform:translateY(0) scale(1);} to{opacity:0;transform:translateY(10px) scale(.97);} }
+  @keyframes toastBarShrink { from{width:100%;} to{width:0%;} }
+  #toast{
+    backdrop-filter:blur(10px);
+    background:rgba(255,255,255,.97);
+    box-shadow:0 10px 15px -3px rgba(15,23,42,.08),0 4px 6px -4px rgba(15,23,42,.08),0 0 0 1px rgba(15,23,42,.04);
+  }
+  #toast.leaving{ animation:toastOut .25s ease forwards; }
+  #toastProgress{ animation:toastBarShrink 3.2s linear forwards; }
+  #toastIconWrap{ display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;flex-shrink:0; }
+
+  /* Table row hover */
+  tbody tr { transition: background 0.12s; }
+  tbody tr:hover { background: #F0F7FF; }
+
+  /* Mobile menu transition */
+  .mobile-menu { display: none; }
+  .mobile-menu.open { display: flex; }
+
+  /* Colour dot */
+  .colour-dot { display:inline-block; width:9px; height:9px; border-radius:50%; border:1px solid rgba(0,0,0,.12); flex-shrink:0; }
+
+  /* Input focus ring */
+  input:focus, select:focus { outline: none; border-color: #005EA6 !important; box-shadow: 0 0 0 3px rgba(0,94,166,0.12) !important; }
+
+  /* Gradient top bar */
+  .top-bar-grad { background: linear-gradient(90deg, #005EA6, #F59E0B, #ef4444); }
+
+  /* Page header eyebrow — matches index.html .section-label */
+  .section-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #005EA6; }
+  .section-title { font-family: 'Bebas Neue', cursive; line-height: 1; letter-spacing: 0.01em; color: #0F172A; }
+  .eyebrow-line::before { content:''; display:inline-block; width:14px; height:2px; background:#005EA6; margin-right:6px; vertical-align:middle; }
+
+  @media (max-width: 640px) {
+    .sn-input { width: 40px; }
+    .hide-mobile { display: none !important; }
+
+    /* Tables collapse into stacked "cards" on phones — each <td> becomes a
+       labelled row instead of forcing horizontal scroll across 6-8 columns. */
+    .responsive-table thead { display: none; }
+    .responsive-table, .responsive-table tbody { display: block; width: 100%; }
+    .responsive-table tbody tr {
+      display: block; border: 1px solid #E2E8F0; border-radius: 14px;
+      margin: 0 4px 10px; background: #fff; overflow: hidden;
+    }
+    .responsive-table tbody tr:last-child { margin-bottom: 4px; }
+    .responsive-table tbody td {
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      padding: 9px 14px !important; border-bottom: 1px solid #F1F5F9 !important;
+      text-align: right; white-space: normal !important;
+    }
+    .responsive-table tbody td:last-child { border-bottom: none !important; }
+    .responsive-table tbody td::before {
+      content: attr(data-th); font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .06em; color: #94A3B8; text-align: left; flex-shrink: 0;
+    }
+    .responsive-table tbody td[data-th="Actions"] { justify-content: flex-end; }
+  }
+
+  /* ═══════════ INDEX.HTML DESIGN SYSTEM — CTAs, badges, cards ═══════════ */
+  .cta-primary {
+    background: #005EA6; color: #fff;
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.875rem;
+    letter-spacing: 0.02em; padding: 12px 22px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content:center; gap: 8px;
+    transition: all 0.22s ease; box-shadow: 0 4px 18px rgba(0,94,166,0.3);
+    text-decoration: none; border: 2px solid #005EA6; cursor:pointer;
+    position: relative; overflow: hidden;
+  }
+  .cta-primary::before {
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%);
+    transform: translateX(-160%); transition: transform 0.55s ease;
+  }
+  .cta-primary:hover::before { transform: translateX(160%); }
+  .cta-primary:hover:not(:disabled) { background: #004A85; border-color: #004A85; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(0,94,166,0.38); }
+  .cta-primary:disabled{ opacity:.55; cursor:not-allowed; transform:none !important; }
+  .cta-secondary {
+    background: transparent; color: #005EA6;
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.875rem;
+    letter-spacing: 0.02em; padding: 12px 22px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content:center; gap: 8px;
+    border: 2px solid #005EA6; transition: all 0.22s ease; text-decoration: none; cursor:pointer;
+  }
+  .cta-secondary:hover { background: #005EA6; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(0,94,166,0.22); }
+  .cta-amber {
+    background:#F59E0B; color:#fff; font-weight:700; font-size:.875rem;
+    padding:12px 22px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    box-shadow:0 6px 20px rgba(245,158,11,.28); transition:all .2s ease; border:none; cursor:pointer;
+  }
+  .cta-amber:hover:not(:disabled){ background:#D97706; transform:translateY(-2px); }
+  .cta-amber:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+
+  .price-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #005EA6; color: #fff;
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.7rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 14px; border-radius: 999px; box-shadow: 0 4px 14px rgba(0,94,166,0.28);
+    position: relative; overflow: hidden;
+  }
+  .price-badge::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.55) 50%, transparent 80%);
+    transform: translateX(-140%); animation: badgeShine 3.4s ease-in-out infinite;
+  }
+  @keyframes badgeShine { 0%,55%{transform:translateX(-140%)} 80%{transform:translateX(140%)} 100%{transform:translateX(140%)} }
+
+  .stat-chip {
+    background: #fff; border: 1px solid rgba(0,94,166,0.12); border-radius: 12px;
+    padding: 14px 20px; display: flex; flex-direction: column; align-items: center;
+    gap: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  }
+  .stat-chip:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,94,166,0.16); border-color: rgba(0,94,166,0.3); }
+
+  .yng-card-shell{
+    background:#fff; border-radius:18px; border:1px solid #E8E6E1; overflow:hidden;
+    box-shadow:0 2px 12px rgba(0,0,0,.04); transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  }
+  .yng-card-shell:hover{ transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,94,166,.12); border-color:rgba(0,94,166,.24); }
+
+  /* ═══ LOGIN — light hero matching index.html's hero-section ═══ */
+  :root{
+    --lblue:#005EA6; --lblueDark:#004A85; --lblueLt:#E8F2FB;
+    --lamber:#F59E0B; --lamberDark:#D97706; --lline:#E2E8F0; --lbg:#F8FAFC;
+  }
+  .login-hero{
+    background: linear-gradient(135deg, #F0F7FF 0%, #EBF4FF 60%, #DCEEFB 100%);
+    position:relative; overflow:hidden;
+  }
+  .login-hero::before {
+    content: ''; position: absolute; top: -80px; right: -80px;
+    width: 460px; height: 460px;
+    background: radial-gradient(circle, rgba(0,94,166,0.10) 0%, transparent 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+  .login-hero::after {
+    content: ''; position: absolute; bottom: -60px; left: -60px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(245,158,11,0.09) 0%, transparent 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+  .login-hero-grid{
+    position:absolute; inset:0; opacity:.4;
+    background-image: linear-gradient(rgba(0,94,166,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,94,166,.05) 1px, transparent 1px);
+    background-size: 42px 42px;
+  }
+  .login-ring{ position:absolute; border-radius:50%; border:1.5px solid rgba(0,94,166,0.12); }
+  .login-stat{ text-align:center; }
+  .login-panel{background:#fff;position:relative}
+  .login-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--lblue),var(--lamber))}
+  .lfield-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#64748B;margin-bottom:6px;display:block}
+  .lfield{width:100%;height:48px;border:1.5px solid var(--lline);border-radius:12px;background:var(--lbg);padding:0 14px 0 42px;font-size:14px;color:#0F172A;outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
+  .lfield:focus{border-color:var(--lblue);box-shadow:0 0 0 3px rgba(0,94,166,.1);background:#fff}
+  .lfield-wrap{position:relative}
+  .lfield-wrap i{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:14px}
+  .login-cta{width:100%;padding:14px 20px;background:var(--lblue);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:14px;letter-spacing:.02em;box-shadow:0 6px 20px rgba(0,94,166,.28);transition:background .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+  .login-cta:hover{background:var(--lblueDark);transform:translateY(-1px)}
+  .login-cta:disabled{opacity:.6;cursor:not-allowed;transform:none}
+  .login-support-btn{display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:700;transition:all .18s;text-decoration:none}
+
+  /* ═══ Sidebar nav-tab state (structural rules live in the shell block below) ═══ */
+  #navAvatar{box-shadow:0 0 0 2px #fff, 0 0 0 3.5px rgba(0,94,166,.25)}
+  .fit-toggle-card{display:flex;align-items:center;gap:10px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:9px 12px;cursor:pointer;transition:all .15s ease;user-select:none}
+  .fit-toggle-card:hover{border-color:#cbd5e1}
+  .fit-toggle-icon{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#e2e8f0;color:#94a3b8;font-size:13px;transition:all .15s ease}
+  .fit-toggle-switch{width:36px;height:20px;border-radius:999px;background:#cbd5e1;position:relative;flex-shrink:0;transition:background .15s ease}
+  .fit-toggle-switch::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s ease;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+  .fit-toggle-card input:checked ~ .fit-toggle-switch{background:#f59e0b}
+  .fit-toggle-card input:checked ~ .fit-toggle-switch::after{transform:translateX(16px)}
+  .fit-toggle-card input:checked ~ .fit-toggle-icon{background:#fef3c7;color:#f59e0b}
+  .fit-toggle-card:has(input:checked){border-color:#f59e0b;background:#fffbeb}
+
+  @media (prefers-reduced-motion: reduce){
+    .price-badge::before, .cta-primary::before { animation:none !important; }
+  }
+
+  /* ═══ ROW ACTION KEBAB MENU (3-dot) ═══ */
+  .kebab-btn{
+    width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    color:#64748B; background:#F8FAFC; border:1.5px solid #E2E8F0; cursor:pointer;
+    transition:all .15s ease; flex-shrink:0;
+  }
+  .kebab-btn:hover{ background:#EEF2F7; border-color:#CBD5E1; color:#334155; }
+  .kebab-btn.active{ background:#E8F2FB; border-color:#005EA6; color:#005EA6; }
+  .kebab-menu{
+    position:fixed; z-index:550; min-width:150px; background:#fff; border-radius:12px;
+    border:1px solid #E2E8F0; box-shadow:0 10px 30px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.06);
+    padding:6px; animation:slideIn .14s ease both;
+  }
+  .kebab-menu button{
+    width:100%; display:flex; align-items:center; gap:9px; padding:9px 11px; border-radius:8px;
+    font-size:13px; font-weight:600; text-align:left; background:none; border:none; cursor:pointer;
+    color:#334155; transition:background .12s ease;
+  }
+  .kebab-menu button i{ width:14px; text-align:center; font-size:12px; flex-shrink:0; }
+  .kebab-menu button:hover{ background:#F1F5F9; }
+  .kebab-menu button.kebab-del{ color:#ef4444; }
+  .kebab-menu button.kebab-del:hover{ background:#FEF2F2; }
+  .kebab-menu button.kebab-edit:hover{ background:#E8F2FB; color:#005EA6; }
+
+  /* ═══ INTRO LOADER (index/finance-style) ═══ */
+  #adminLoader{
+    position:fixed;inset:0;width:100%;height:100%;
+    background:radial-gradient(ellipse at 30% 20%,#0A6BB8 0%,#004A85 45%,#002E56 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    z-index:9999;overflow:hidden;
+    transition:opacity .7s cubic-bezier(.4,0,.2,1),visibility .7s;
+    visibility:visible;opacity:1;
+  }
+  #adminLoader::before{
+    content:'';position:absolute;top:-120px;right:-100px;
+    width:460px;height:460px;
+    background:radial-gradient(circle,rgba(245,158,11,.18) 0%,transparent 70%);
+    border-radius:50%;animation:introGlowPulse 3.2s ease-in-out infinite;
+  }
+  #adminLoader::after{
+    content:'';position:absolute;bottom:-140px;left:-100px;
+    width:380px;height:380px;
+    background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);
+    border-radius:50%;
+  }
+  @keyframes introGlowPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.08)}}
+  #adminLoader.fade-out{opacity:0;visibility:hidden}
+
+  .intro-grid{
+    position:absolute;inset:0;opacity:.07;
+    background-image:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),
+                      linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);
+    background-size:42px 42px;
+    animation:introGridDrift 9s linear infinite;
+  }
+  @keyframes introGridDrift{from{background-position:0 0}to{background-position:-84px -84px}}
+
+  .intro-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;}
+
+  .intro-logo-mark{
+    width:58px;height:58px;border-radius:16px;
+    background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;transform:translateY(-10px) scale(.85);
+    animation:introLogoIn .6s cubic-bezier(.34,1.56,.64,1) .05s forwards;
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+    margin-bottom:18px;
+    color:#F59E0B;
+  }
+  @keyframes introLogoIn{to{opacity:1;transform:translateY(0) scale(1)}}
+
+  .intro-road{
+    position:relative;width:min(340px,74vw);height:96px;
+    display:flex;align-items:flex-end;justify-content:center;
+  }
+  .intro-road-line{
+    position:absolute;bottom:24px;left:0;right:0;height:2px;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 18px,transparent 18px 34px);
+    overflow:hidden;
+  }
+  .intro-road-line::after{
+    content:'';position:absolute;inset:0;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 18px,transparent 18px 34px);
+    transform:translateX(-34px);animation:introRoadScroll .55s linear infinite;
+  }
+  @keyframes introRoadScroll{to{transform:translateX(0)}}
+
+  .intro-speed-lines{
+    position:absolute;bottom:30px;left:50%;margin-left:-30px;width:60px;height:34px;
+    opacity:0;animation:introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards,introSpeedShow 2.3s ease forwards;
+  }
+  .intro-speed-lines span{
+    position:absolute;height:2px;border-radius:2px;background:rgba(255,255,255,.55);
+    right:100%;opacity:0;animation:introSpeedFlick .5s ease-in-out infinite;
+  }
+  .intro-speed-lines span:nth-child(1){top:4px;width:22px;animation-delay:.05s}
+  .intro-speed-lines span:nth-child(2){top:15px;width:32px;animation-delay:.12s}
+  .intro-speed-lines span:nth-child(3){top:26px;width:18px;animation-delay:.19s}
+  @keyframes introSpeedFlick{0%{opacity:0;transform:translateX(0)}45%{opacity:.9}100%{opacity:0;transform:translateX(-14px)}}
+  @keyframes introSpeedShow{0%,68%{opacity:0}74%{opacity:1}100%{opacity:0}}
+
+  .intro-bike-wrap{
+    position:absolute;bottom:14px;left:50%;margin-left:-39px;
+    animation:introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+  }
+  .intro-bike-wrap svg{filter:drop-shadow(0 8px 14px rgba(0,0,0,.3))}
+
+  .bike-part{opacity:0;transform:scale(.55);transform-box:fill-box;transform-origin:center;animation:introPartIn .42s cubic-bezier(.34,1.56,.64,1) forwards}
+  .bike-part.bp-wheels{animation-delay:.05s}
+  .bike-part.bp-frame{animation-delay:.28s}
+  .bike-part.bp-panel{animation-delay:.5s}
+  .bike-part.bp-light{animation-delay:.72s}
+  @keyframes introPartIn{to{opacity:1;transform:scale(1)}}
+
+  .intro-headlight{
+    animation:introHeadlightPulse .5s ease-in-out .9s infinite;
+    opacity:0;animation-fill-mode:forwards;
+  }
+  @keyframes introHeadlightPulse{0%{opacity:0}20%,100%{opacity:1}60%{opacity:.55}}
+  .intro-bike-shadow{
+    position:absolute;bottom:8px;left:50%;margin-left:-38px;width:76px;height:11px;
+    background:radial-gradient(ellipse,rgba(0,0,0,.32) 0%,transparent 75%);
+    border-radius:50%;opacity:0;
+    animation:introShadowFade .5s ease .05s forwards,introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+  }
+  @keyframes introShadowFade{to{opacity:.9}}
+  @keyframes introRide{
+    0%{left:50%;margin-left:-39px}
+    68%{left:50%;margin-left:-39px}
+    80%{left:50%;margin-left:-39px}
+    100%{left:118%;margin-left:-39px}
+  }
+
+  .intro-brand{
+    margin-top:22px;text-align:center;opacity:0;transform:translateY(14px);
+    animation:introTextIn .7s ease 1.55s forwards;
+  }
+  .intro-brand .intro-name{
+    font-family:'Bebas Neue',cursive;font-size:clamp(1.9rem,6vw,2.6rem);
+    letter-spacing:.04em;color:#fff;line-height:1;
+  }
+  .intro-brand .intro-name span{color:#F59E0B}
+  .intro-brand .intro-tag{
+    margin-top:6px;font-size:11px;font-weight:600;letter-spacing:.22em;
+    text-transform:uppercase;color:rgba(255,255,255,.65);
+  }
+  @keyframes introTextIn{to{opacity:1;transform:translateY(0)}}
+
+  .intro-progress{
+    margin-top:24px;display:flex;align-items:center;gap:10px;
+    opacity:0;animation:introFade .5s ease 1.7s forwards;
+  }
+  .intro-bar{
+    width:130px;height:3px;border-radius:99px;
+    background:rgba(255,255,255,.18);overflow:hidden;
+  }
+  .intro-bar-fill{
+    width:0%;height:100%;border-radius:99px;
+    background:linear-gradient(90deg,#F59E0B,#FBBF24);
+    animation:introFill 1.9s cubic-bezier(.4,0,.2,1) .15s forwards;
+  }
+  .intro-percent{
+    font-size:11px;font-weight:700;letter-spacing:.03em;
+    color:rgba(255,255,255,.8);min-width:30px;font-variant-numeric:tabular-nums;
+  }
+  @keyframes introFade{to{opacity:1}}
+  @keyframes introFill{to{width:100%}}
+  @media(prefers-reduced-motion:reduce){#adminLoader *{animation:none!important}}
+
+  /* ═══════════════════════════════════════════════════════════════════
+     ELITE DASHBOARD SHELL — sidebar + topbar (Stripe/Vercel-style)
+     ═══════════════════════════════════════════════════════════════════ */
+  body.app-active{ background:#F6F7F9; }
+  .app-shell{ display:flex; min-height:100vh; width:100%; }
+
+  /* ── Sidebar ── */
+  .sidebar{
+    width:250px; flex-shrink:0; background:#fff; border-right:1px solid #E7E9EE;
+    display:flex; flex-direction:column; height:100vh; position:sticky; top:0;
+    z-index:60; transition:transform .25s ease;
+  }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:18px 18px 16px; border-bottom:1px solid #F0F1F4; flex-shrink:0; }
+  .sidebar-nav{ flex:1; overflow-y:auto; padding:14px 12px; display:flex; flex-direction:column; gap:2px; }
+  .sidebar-section-label{ font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#A6ACB9; padding:10px 10px 6px; }
+  .sidebar-link{
+    display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:10px;
+    font-size:13.5px; font-weight:600; color:#4B5262; text-decoration:none; cursor:pointer;
+    border:1px solid transparent; transition:background .15s ease, color .15s ease; position:relative;
+  }
+  .sidebar-link i{ width:16px; text-align:center; font-size:14px; color:#9AA1AF; transition:color .15s ease; flex-shrink:0; }
+  .sidebar-link:hover{ background:#F5F6F8; color:#1F2430; }
+  .sidebar-link:hover i{ color:#5B6270; }
+  /* Active state driven by existing bg-blue-50/border-blue-200/text-blue-700 utility classes */
+  .sidebar-link.bg-blue-50{ background:#EEF5FC !important; color:#005EA6 !important; font-weight:700; border-color:transparent !important; }
+  .sidebar-link.bg-blue-50 i{ color:#005EA6 !important; }
+  .sidebar-link.bg-blue-50::before{
+    content:''; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+    width:3px; height:18px; border-radius:0 4px 4px 0; background:#005EA6;
+  }
+  .sidebar-foot{ padding:14px; border-top:1px solid #F0F1F4; flex-shrink:0; }
+  .sidebar-overlay{ display:none; }
+
+  @media (max-width: 900px){
+    .sidebar{ position:fixed; left:0; top:0; transform:translateX(-100%); box-shadow:0 20px 60px rgba(15,23,42,.25); }
+    .sidebar.open{ transform:translateX(0); }
+    .sidebar-overlay{
+      display:none; position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:59;
+      backdrop-filter:blur(2px); opacity:0; transition:opacity .2s ease;
+    }
+    .sidebar-overlay.open{ display:block; opacity:1; }
+  }
+
+  .main-col{ flex:1; min-width:0; display:flex; flex-direction:column; }
+
+  /* ── Topbar ── */
+  .topbar{
+    position:sticky; top:0; z-index:40; height:64px; flex-shrink:0;
+    background:rgba(255,255,255,.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid #E7E9EE; display:flex; align-items:center; gap:14px; padding:0 18px;
+  }
+  .topbar-menu-btn{
+    width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    color:#5B6270; background:#F5F6F8; border:1px solid #E7E9EE; cursor:pointer; flex-shrink:0; transition:all .15s;
+  }
+  .topbar-menu-btn:hover{ background:#EEF0F3; }
+  .topbar-title{ min-width:0; }
+  .topbar-title .eyebrow{ font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#9AA1AF; }
+  .topbar-title .heading{ font-size:15px; font-weight:800; color:#1F2430; line-height:1.1; margin-top:1px; }
+  .topbar-search{
+    display:flex; align-items:center; gap:8px; background:#F5F6F8; border:1px solid #E7E9EE; border-radius:10px;
+    padding:8px 12px; width:230px; color:#9AA1AF; font-size:13px; cursor:pointer; transition:all .15s ease; flex-shrink:0;
+  }
+  .topbar-search:hover{ border-color:#D7DBE3; background:#F0F1F4; }
+  .topbar-search kbd{ margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px; background:#fff; border:1px solid #E2E5EB; border-radius:4px; padding:1px 5px; color:#A6ACB9; }
+  .topbar-icon-btn{
+    width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    color:#5B6270; background:#fff; border:1px solid #E7E9EE; cursor:pointer; transition:all .15s ease; position:relative; flex-shrink:0;
+  }
+  .topbar-icon-btn:hover{ background:#F5F6F8; border-color:#D7DBE3; color:#1F2430; }
+  .topbar-dot{ position:absolute; top:7px; right:7px; width:7px; height:7px; border-radius:50%; background:#F59E0B; box-shadow:0 0 0 2px #fff; }
+  .topbar-profile{
+    display:flex; align-items:center; gap:8px; padding:5px 10px 5px 5px; border-radius:999px;
+    background:#fff; border:1px solid #E7E9EE; cursor:pointer; transition:all .15s ease; flex-shrink:0;
+  }
+  .topbar-profile:hover{ background:#F5F6F8; border-color:#D7DBE3; }
+  .profile-menu{
+    position:absolute; top:calc(100% + 8px); right:0; min-width:190px; background:#fff; border:1px solid #E7E9EE;
+    border-radius:12px; box-shadow:0 14px 34px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.06);
+    padding:6px; z-index:70; display:none; animation:slideIn .14s ease both;
+  }
+  .profile-menu.open{ display:block; }
+  .profile-menu-user{ padding:9px 10px 10px; border-bottom:1px solid #F0F1F4; margin-bottom:6px; }
+  .profile-menu-user .nm{ font-size:13px; font-weight:700; color:#1F2430; }
+  .profile-menu-user .em{ font-size:11px; color:#9AA1AF; margin-top:1px; }
+
+  /* ═══ Muted status badges (design tokens: neutral / blue / amber / red / green) ═══ */
+  .badge{ display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:7px; font-size:11px; font-weight:700; letter-spacing:.01em; border:1px solid transparent; line-height:1.5; }
+  .badge-neutral{ background:#F1F2F5; color:#565D6B; border-color:#E7E9EE; }
+  .badge-blue{ background:#EAF3FB; color:#005EA6; border-color:#D6E9F9; }
+  .badge-amber{ background:#FEF6E7; color:#B4740E; border-color:#FBEACB; }
+  .badge-red{ background:#FDEDED; color:#C6382E; border-color:#F9D9D6; }
+  .badge-green{ background:#EAF7F0; color:#137A4B; border-color:#D3EFDF; }
+
+  /* Refined card / table chrome (elite, low-contrast) */
+  .yng-card-shell{ border-color:#E7E9EE !important; box-shadow:0 1px 2px rgba(15,23,42,.03) !important; }
+  .yng-card-shell:hover{ box-shadow:0 1px 2px rgba(15,23,42,.03) !important; transform:none !important; border-color:#E7E9EE !important; }
+  table thead tr{ background:#FAFAFB !important; }
+  table th{ color:#8B93A3 !important; font-weight:700 !important; }
+  tbody tr:hover{ background:#FAFBFD !important; }
+  tbody tr{ border-color:#F0F1F4 !important; }
+
+  /* ═══ Custom Select (progressively enhances hidden native <select>) ═══ */
+  .cs-wrap{ position:relative; width:100%; }
+  .cs-wrap select{ position:absolute; inset:0; width:100%; height:100%; opacity:0; pointer-events:none; }
+  .cs-trigger{
+    display:flex; align-items:center; gap:8px; width:100%; background:#F8FAFC; border:2px solid #E2E8F0;
+    border-radius:8px; padding:8px 10px; font-size:13.5px; font-weight:600; color:#1F2430; cursor:pointer;
+    transition:border-color .15s ease, box-shadow .15s ease; text-align:left;
+  }
+  .cs-trigger:hover{ border-color:#CBD5E1; }
+  .cs-trigger.open, .cs-trigger:focus-visible{ border-color:#005EA6; box-shadow:0 0 0 3px rgba(0,94,166,.12); outline:none; }
+  .cs-trigger .cs-label{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cs-trigger .cs-label.placeholder{ color:#94A3B8; font-weight:500; }
+  .cs-trigger .cs-chev{ color:#94A3B8; font-size:11px; transition:transform .15s ease; flex-shrink:0; }
+  .cs-trigger.open .cs-chev{ transform:rotate(180deg); }
+  .cs-menu{
+    position:absolute; z-index:65; top:calc(100% + 6px); left:0; right:0; background:#fff; border:1px solid #E2E8F0;
+    border-radius:12px; box-shadow:0 16px 36px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.06);
+    padding:6px; max-height:280px; display:flex; flex-direction:column; animation:slideIn .14s ease both;
+  }
+  .cs-search{ display:flex; align-items:center; gap:7px; padding:7px 9px; margin-bottom:4px; background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:8px; flex-shrink:0; }
+  .cs-search input{ border:none; background:transparent; outline:none; font-size:13px; width:100%; color:#1F2430; }
+  .cs-search i{ color:#94A3B8; font-size:12px; }
+  .cs-options{ overflow-y:auto; }
+  .cs-option{
+    display:flex; align-items:flex-start; gap:8px; padding:8px 10px; border-radius:8px; font-size:13.5px; font-weight:600;
+    color:#334155; cursor:pointer; transition:background .12s ease; line-height:1.35;
+  }
+  .cs-option:hover, .cs-option.hl{ background:#F1F5F9; }
+  .cs-option.selected{ background:#EAF3FB; color:#005EA6; }
+  .cs-option .cs-check{ margin-left:auto; margin-top:2px; color:#005EA6; font-size:11px; opacity:0; flex-shrink:0; }
+  .cs-option.selected .cs-check{ opacity:1; }
+  .cs-empty{ padding:14px 10px; text-align:center; color:#94A3B8; font-size:12.5px; }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     STOCK REPORT — dashboard tiles + printable A4 sheet
+     (print pattern adapted from sheet.html: pv-titlebar/pv-table/pv-datebar)
+     ═══════════════════════════════════════════════════════════════════ */
+  .stock-tile{ background:#fff; border:1px solid #E7E9EE; border-radius:14px; padding:16px 18px; box-shadow:0 1px 2px rgba(15,23,42,.03); }
+  .stock-tile .k{ font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:#9AA1AF; }
+  .stock-tile .v{ font-family:'Bebas Neue',cursive; font-size:1.8rem; color:#1F2430; letter-spacing:.02em; margin-top:2px; }
+  .model-row{ display:flex; align-items:center; gap:14px; padding:13px 16px; border-bottom:1px solid #F0F1F4; }
+  .model-row:last-child{ border-bottom:none; }
+  .model-row:hover{ background:#FAFBFD; }
+  .colour-chip{ display:inline-flex; align-items:center; gap:5px; background:#F1F2F5; border:1px solid #E7E9EE; border-radius:7px; padding:2px 8px; font-size:11px; font-weight:700; color:#4B5262; }
+  .colour-chip .dot{ width:7px; height:7px; border-radius:50%; background:#005EA6; flex-shrink:0; }
+  .area-qty-input{ width:64px; text-align:center; border:1.5px solid #E2E8F0; border-radius:7px; padding:5px 4px; font-size:13px; font-weight:700; color:#1F2430; background:#F8FAFC; transition:border-color .15s; }
+  .area-qty-input:focus{ outline:none; border-color:#005EA6; box-shadow:0 0 0 3px rgba(0,94,166,.1); }
+  .area-remove-btn{ width:20px; height:20px; border-radius:6px; border:none; background:rgba(220,38,38,.08); color:#DC2626; cursor:pointer; font-size:9px; display:inline-flex; align-items:center; justify-content:center; margin-left:6px; transition:background .15s; }
+  .area-remove-btn:hover{ background:rgba(220,38,38,.18); }
+  .area-total-chip{ display:inline-flex; align-items:center; justify-content:center; min-width:34px; padding:3px 8px; border-radius:7px; background:#EAF3FB; color:#005EA6; font-weight:800; font-size:12.5px; }
+  .area-edit-toggle{ display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:9px; font-size:11.5px; font-weight:700; border:1.5px solid #E2E8F0; background:#F8FAFC; color:#64748B; cursor:pointer; transition:all .15s ease; }
+  .area-edit-toggle:hover{ border-color:#CBD5E1; color:#334155; }
+  .area-edit-toggle.area-edit-on{ background:#FEF6E7; border-color:#FBEACB; color:#B4740E; }
+  .inv-status-tab{ color:#7C8494; }
+  .inv-status-tab:hover{ color:#1F2430; }
+  .inv-status-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
+
+  #stockPreviewOverlay{ position:fixed; inset:0; z-index:500; display:none; background:rgba(10,15,26,.7); backdrop-filter:blur(3px); align-items:center; justify-content:center; padding:16px; }
+  #stockPreviewOverlay.open{ display:flex; }
+  .spv-shell{ background:#161B26; border-radius:16px; width:100%; max-width:1200px; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.5); }
+  .spv-head{ display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid rgba(255,255,255,.08); flex-shrink:0; }
+  .spv-body{ padding:20px; overflow:auto; background:#0F1420; }
+  .spv-btn{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; padding:9px 16px; border-radius:9px; border:none; cursor:pointer; transition:opacity .15s; }
+  .spv-btn:hover{ opacity:.85; }
+  .spv-btn.print{ background:#F59E0B; color:#0F172A; }
+  .spv-btn.close{ background:rgba(255,255,255,.08); color:#fff; }
+
+  .a4l-paper{ font-family:'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important; background:#fff !important; width:297mm; min-height:210mm; height:210mm; padding:9mm 10mm; box-sizing:border-box; margin:0 auto; box-shadow:0 6px 40px rgba(0,0,0,.22); border:1px solid #ddd; display:flex; flex-direction:column; }
+  .pv-titlebar{ flex:0 0 auto; text-align:center; color:#000; font-size:11pt; font-weight:700; margin-bottom:4mm; }
+  .pv-titlebar .sub{ font-size:9pt; font-weight:600; color:#333; margin-top:1mm; }
+  .pv-tablewrap{ flex:1 1 auto; overflow:hidden; }
+  .pv-datebar{ flex:0 0 auto; text-align:right; color:#000; font-size:8.5pt; margin-top:4mm; }
+  .pv-table{ width:100%; table-layout:fixed; border-collapse:collapse; font-size:8.2pt; color:#000; border:1px solid #000; }
+  .pv-table th{ background:#005EA6; color:#fff; padding:6px 4px; text-align:center; font-size:7.4pt; letter-spacing:.01em; border:0.75px solid #000; }
+  .pv-table td{ padding:4px 5px; border:0.5px solid #000; text-align:center; word-wrap:break-word; }
+  .pv-table td.left{ text-align:left; }
+  .pv-table tr:nth-child(even){ background:#EEF2F7; }
+  .pv-table tr.grand-total{ background:#FEF6E7 !important; font-weight:bold; }
+  .pv-table td.total-cell{ font-weight:bold; }
+
+  @media print{
+    body>*:not(#stockPrintWrapper){ display:none !important; }
+    #stockPrintWrapper{ display:block !important; }
+    html,body{ margin:0 !important; padding:0 !important; background:#fff !important; width:297mm !important; overflow:visible !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .print-page{ width:297mm !important; min-height:210mm !important; height:210mm !important; padding:9mm 10mm !important; margin:0 auto !important; box-sizing:border-box !important; page-break-after:always !important; }
+    .print-page:last-child{ page-break-after:avoid !important; }
+    @page{ size:A4 landscape; margin:0; }
+  }
+  #stockPrintWrapper{ display:none; }
+
+  /* ── Simple, clean JPG-exportable report card (not tied to print page size) ── */
+  .jpg-report-paper{ font-family:'DM Sans',sans-serif; background:#fff; width:900px; max-width:100%; padding:34px 38px; margin:0 auto; box-sizing:border-box; color:#0F172A; }
+  .jrp-head{ text-align:center; border-bottom:3px solid #005EA6; padding-bottom:14px; }
+  .jrp-head .brand{ font-family:'Bebas Neue',cursive; font-size:2rem; letter-spacing:.03em; color:#005EA6; }
+  .jrp-head .sub{ font-size:12.5px; color:#64748B; margin-top:3px; font-weight:600; }
+  .jrp-cat-summary{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+  .jrp-cat-chip{ background:#EAF3FB; color:#005EA6; padding:8px 16px; border-radius:9px; font-weight:800; font-size:13.5px; }
+  .jrp-table{ width:100%; border-collapse:collapse; margin-top:20px; font-size:13px; }
+  .jrp-table th{ background:#005EA6; color:#fff; padding:10px 9px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .jrp-table td{ padding:9px; border-bottom:1px solid #E2E8F0; }
+  .jrp-table tr:nth-child(even) td{ background:#F8FAFC; }
+  .jrp-table tr.grand-total td{ background:#FEF6E7; font-weight:800; border-top:2px solid #F59E0B; }
+  .jrp-footer{ margin-top:18px; font-size:11.5px; color:#94A3B8; text-align:right; }
+  .jrp-area-title{ font-family:'Bebas Neue',cursive; font-size:1.1rem; letter-spacing:.03em; color:#1F2430; margin-top:22px; padding-top:14px; border-top:1.5px dashed #E2E8F0; }
+  .jrp-area-grid th{ text-align:center; }
+  .jrp-area-grid td{ text-align:center; }
+  .jrp-area-grid td.left{ text-align:left; }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-700 min-h-screen">
+
+<!-- ══════════ INTRO LOADER ══════════ -->
+<div id="adminLoader">
+  <div class="intro-grid"></div>
+  <div class="intro-content">
+
+    <!-- Icon mark -->
+    <div class="intro-logo-mark">
+      <i class="fas fa-motorcycle" style="font-size:22px;"></i>
+    </div>
+
+    <!-- Road animation: bike riding across screen -->
+    <div class="intro-road">
+      <div class="intro-road-line"></div>
+      <div class="intro-speed-lines"><span></span><span></span><span></span></div>
+      <div class="intro-bike-shadow"></div>
+      <div class="intro-bike-wrap">
+        <svg width="74" height="46" viewBox="0 0 74 46" fill="none">
+          <!-- Wheels -->
+          <g class="bike-part bp-wheels">
+            <circle cx="16" cy="32" r="9" stroke="#fff" stroke-width="2.4" fill="none"/>
+            <circle cx="16" cy="32" r="2.2" fill="#fff"/>
+            <circle cx="58" cy="32" r="9" stroke="#fff" stroke-width="2.4" fill="none"/>
+            <circle cx="58" cy="32" r="2.2" fill="#fff"/>
+          </g>
+          <!-- Frame/Body -->
+          <g class="bike-part bp-frame">
+            <path d="M16 29 Q28 18 37 17 L42 10 L54 8 L57 14" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M37 17 L34 28 L16 29" stroke="#F59E0B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M34 28 Q45 31 58 29" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          </g>
+          <!-- Panel/Dashboard -->
+          <g class="bike-part bp-panel">
+            <rect x="40" y="12" width="14" height="8" rx="2.5" fill="#F59E0B" opacity="0.9"/>
+            <line x1="44" y1="14" x2="44" y2="18" stroke="#fff" stroke-width="1.2" opacity="0.5"/>
+            <line x1="49" y1="14" x2="49" y2="18" stroke="#fff" stroke-width="1.2" opacity="0.5"/>
+          </g>
+          <!-- Light -->
+          <g class="bike-part bp-light">
+            <circle class="intro-headlight" cx="62" cy="13" r="3.2" fill="#FFF3C4"/>
+            <path class="intro-headlight" d="M64 13 L71 13" stroke="#FFF3C4" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Brand text -->
+    <div class="intro-brand">
+      <div class="intro-name">SAMRIDDHI <span>ADMIN</span></div>
+      <div class="intro-tag">Dealer Management System</div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="intro-progress">
+      <div class="intro-bar"><div class="intro-bar-fill"></div></div>
+      <span class="intro-percent" id="intro-percent">0%</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ LOGIN (redesigned — index.html hero language) ══════════════════ -->
+<div id="login-section" class="min-h-screen flex">
+
+  <!-- Left hero — hidden on mobile -->
+  <div class="hidden lg:flex flex-1 flex-col justify-center p-14 login-hero relative">
+    <div class="login-hero-grid"></div>
+    <div class="login-ring w-[440px] h-[440px]" style="top:50%;right:-120px;transform:translateY(-50%);"></div>
+    <div class="login-ring w-[320px] h-[320px]" style="top:50%;right:-60px;transform:translateY(-50%);opacity:.6;"></div>
+    <i class="fas fa-motorcycle absolute right-[-10px] bottom-10 text-bajaj-blue opacity-[0.06]" style="font-size:16rem;transform:scaleX(-1);"></i>
+
+    <div class="relative z-10 max-w-md">
+      <span class="price-badge">
+        <i class="fas fa-shield-halved" style="font-size:11px;"></i>
+        Authorized Dealer Console
+      </span>
+      <h1 class="section-title text-[clamp(2.2rem,4.4vw,3rem)] mt-5">Restricted Access</h1>
+      <p class="text-slate-500 text-sm leading-relaxed mt-3 max-w-sm">
+        This panel controls live pricing, inventory, and finance data for Samriddhi And Brothers. Sign-in is restricted to authorized dealership staff only — all changes are logged.
+      </p>
+      <div class="flex flex-col gap-2.5 mt-7 max-w-xs">
+        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-lock text-bajaj-blue w-4 text-center"></i> Encrypted sign-in via Firebase Auth</div>
+        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-user-shield text-bajaj-blue w-4 text-center"></i> Access limited to approved admin accounts</div>
+        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-clock-rotate-left text-bajaj-blue w-4 text-center"></i> Every change syncs and is timestamped in real time</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right form -->
+  <div class="w-full lg:w-[440px] flex-shrink-0 login-panel flex flex-col justify-center px-8 py-10">
+
+    <!-- Logo -->
+    <div class="flex items-center gap-3 mb-8">
+      <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0" style="background:#005EA6">
+        <i class="fas fa-motorcycle text-lg"></i>
+      </div>
+      <div>
+        <div class="font-display text-2xl text-slate-900 tracking-widest leading-none">SAMRIDDHI <span style="color:#F59E0B">ADMIN</span></div>
+        <div class="text-[10px] text-slate-400 tracking-widest uppercase mt-0.5">Bajaj Authorized Dealer Panel</div>
+      </div>
+    </div>
+
+    <h2 class="section-title text-4xl">Welcome Back</h2>
+    <p class="text-sm text-slate-500 mt-1 mb-7">Sign in to manage your dealership</p>
+
+    <!-- Email -->
+    <div class="flex flex-col gap-1.5 mb-4">
+      <label class="lfield-label">Email Address</label>
+      <div class="lfield-wrap">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="email" placeholder="admin@samriddhibajaj.com" autocomplete="email" class="lfield"/>
+      </div>
+    </div>
+
+    <!-- Password -->
+    <div class="flex flex-col gap-1.5 mb-2">
+      <label class="lfield-label">Password</label>
+      <div class="lfield-wrap">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="pass" placeholder="••••••••••" autocomplete="current-password" class="lfield"/>
+      </div>
+    </div>
+
+    <div class="text-right mb-4">
+      <a href="#" onclick="alert('Contact admin to reset your password');return false;" class="text-xs text-slate-400 hover:text-amber-500 transition-colors">Forgot password?</a>
+    </div>
+
+    <!-- Error -->
+    <div id="loginErr" class="hidden items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 text-sm text-red-600 mb-3">
+      <i class="fas fa-circle-xmark flex-shrink-0"></i>
+      <span id="loginErrText">Invalid credentials</span>
+    </div>
+
+    <!-- Login btn -->
+    <button id="loginBtn" class="login-cta">
+      <span id="loginBtnText" class="flex items-center gap-2"><i class="fas fa-right-to-bracket"></i> Sign In to Panel</span>
+      <div class="spin" id="loginSpin"></div>
+    </button>
+
+    <div class="border-t border-slate-100 pt-5 mt-6">
+      <p class="flex items-center gap-2 text-xs text-slate-400 mb-3"><i class="fas fa-headset" style="color:#F59E0B"></i> Need a new admin ID? Contact support</p>
+      <a class="login-support-btn text-emerald-600 bg-emerald-50 border border-emerald-200 hover:bg-emerald-500 hover:text-white mb-2"
+         href="https://wa.me/9779820907795?text=Hi%2C%20I%20need%20a%20new%20admin%20ID%20for%20Bajaj%20panel" target="_blank">
+        <i class="fab fa-whatsapp text-lg"></i> WhatsApp Support
+      </a>
+      <a class="login-support-btn text-red-600 bg-red-50 border border-red-200 hover:bg-red-500 hover:text-white"
+         href="mailto:yonghangissac@gmail.com?subject=New%20Admin%20ID%20Request&body=Hello%2C%20I%20need%20a%20new%20admin%20ID." target="_blank">
+        <i class="fas fa-envelope text-lg"></i> Email via Gmail
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ ADMIN PANEL ══════════════════ -->
+<div id="admin-section" class="hidden flex-col min-h-screen">
+
+  <div class="app-shell">
+    <!-- Mobile overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeMobileMenu()"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-brand">
+        <div class="w-9 h-9 rounded-xl bg-bajaj-blue flex items-center justify-center text-white shadow-btn flex-shrink-0">
+          <i class="fas fa-motorcycle text-sm"></i>
+        </div>
+        <div class="min-w-0">
+          <div class="font-display text-lg text-slate-900 tracking-widest leading-none truncate">BAJAJ <span class="text-amber-500">ADMIN</span></div>
+          <div class="text-[9px] text-slate-400 tracking-widest uppercase">Dealer Panel</div>
+        </div>
+        <button id="hamburger" onclick="closeMobileMenu()" class="md:hidden ml-auto w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 flex-shrink-0">
+          <i class="fas fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Dealership</div>
+        <button id="navPrice" onclick="switchSec('price');closeMobileMenu()" class="nav-tab sidebar-link active-tab">
+          <i class="fas fa-tags"></i> Price List
+        </button>
+        <button id="navInv" onclick="switchSec('inv');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-warehouse"></i> Inventory
+        </button>
+        <button id="navFin" onclick="switchSec('fin');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-percent"></i> HFL Finance
+        </button>
+        <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-helmet-safety"></i> Accessories
+        </button>
+        <div class="sidebar-section-label">Reports</div>
+        <button id="navStock" onclick="switchSec('stock');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-file-lines"></i> Stock Report
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div id="navDateChip" class="flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 rounded-lg px-3 py-2 text-[11px] text-slate-500 font-mono justify-center">
+          <i class="fas fa-calendar text-amber-500 text-xs"></i>
+          <span id="currentDate"></span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-col">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <button id="hamburgerOpen" onclick="toggleMobileMenu()" class="topbar-menu-btn md:hidden">
+          <i class="fas fa-bars text-sm"></i>
+        </button>
+
+        <div class="topbar-title hidden sm:block">
+          <div class="eyebrow">Samriddhi Admin</div>
+          <div class="heading" id="topbarHeading">Master Price List</div>
+        </div>
+
+        <div class="ml-auto flex items-center gap-2.5 flex-shrink-0">
+          <div class="topbar-search hidden lg:flex" id="topbarSearch" onclick="focusPageSearch()">
+            <i class="fas fa-magnifying-glass text-xs"></i>
+            <span>Search records…</span>
+            <kbd>/</kbd>
+          </div>
+          <button class="topbar-icon-btn" aria-label="Notifications">
+            <i class="fas fa-bell text-sm"></i>
+            <span class="topbar-dot"></span>
+          </button>
+          <div class="relative">
+            <button id="profileTrigger" class="topbar-profile" onclick="toggleProfileMenu(event)">
+              <div id="navAvatar" class="w-7 h-7 rounded-full bg-bajaj-blue flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">A</div>
+              <span id="headerUserName" class="text-xs font-semibold text-slate-700 hidden sm:block">Admin</span>
+              <i class="fas fa-chevron-down text-[9px] text-slate-400 hidden sm:block"></i>
+            </button>
+            <div id="profileMenu" class="profile-menu">
+              <div class="profile-menu-user">
+                <div class="nm" id="profileMenuName">Admin</div>
+                <div class="em">Samriddhi And Brothers</div>
+              </div>
+              <button id="logoutBtn" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold text-red-500 hover:bg-red-50 transition-colors">
+                <i class="fas fa-right-from-bracket text-xs"></i> Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-1 px-4 sm:px-6 py-6 max-w-7xl mx-auto w-full">
+
+    <!-- ═══ PRICE LIST ═══ -->
+    <div class="sec-panel active" id="secPrice">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Management ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Master <span class="text-amber-500">Price List</span></div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <div class="stat-chip !items-start !flex-row !gap-3 !py-4">
+          <div class="w-10 h-10 rounded-xl bg-bajaj-blueLight flex items-center justify-center text-bajaj-blue flex-shrink-0"><i class="fas fa-motorcycle text-sm"></i></div>
+          <div class="min-w-0">
+            <div id="statModels" class="font-display text-3xl text-slate-900 leading-none">0</div>
+            <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Total Models</div>
+          </div>
+        </div>
+        <div class="stat-chip !items-start !flex-row !gap-3 !py-4">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0"><i class="fas fa-money-bill-wave text-sm"></i></div>
+          <div class="min-w-0">
+            <div id="statAvg" class="font-display text-3xl text-slate-900 leading-none truncate">—</div>
+            <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Avg Price</div>
+          </div>
+        </div>
+        <div class="stat-chip !items-start !flex-row !gap-3 !py-4">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0"><i class="fas fa-shield-halved text-sm"></i></div>
+          <div class="min-w-0">
+            <div id="statIns" class="font-display text-3xl text-slate-900 leading-none">0</div>
+            <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">With Insurance</div>
+          </div>
+        </div>
+        <div class="stat-chip !items-start !flex-row !gap-3 !py-4">
+          <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0"><i class="fas fa-file-invoice-dollar text-sm"></i></div>
+          <div class="min-w-0">
+            <div id="statFin" class="font-display text-3xl text-slate-900 leading-none">0</div>
+            <div class="text-[11px] text-slate-400 uppercase tracking-wide mt-0.5 truncate">Finance Avail.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Card -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
+            <span id="masterFormTitle">Add New Bike Model</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
+          <div class="flex flex-col gap-1.5" style="max-width:100px;">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">S.N <span class="text-red-400">*</span></label>
+            <input type="number" id="mSn" placeholder="1" min="1"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5 col-span-2 sm:col-span-2">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Model Name <span class="text-red-400">*</span></label>
+            <input type="text" id="mName" placeholder="e.g. Pulsar NS200"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Category <span class="text-red-400">*</span></label>
+            <select id="mCategory">
+              <option value="Bike">Bike</option>
+              <option value="Scooter">Scooter</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price (Rs.) <span class="text-red-400">*</span></label>
+            <input type="number" id="mPrice" placeholder="145000"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Insurance (Rs.) <span class="text-red-400">*</span></label>
+            <input type="number" id="mNormalIns" placeholder="8500"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Finance Ins. (Rs.) <span class="text-red-400">*</span></label>
+            <input type="number" id="mFinanceIns" placeholder="3200"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5 col-span-2 sm:col-span-1 lg:col-span-1">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Image URL <span class="text-slate-400 font-normal normal-case">(opt.)</span></label>
+            <input type="text" id="mImg" placeholder="https://...image.jpg"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div id="mLegguardWrap" class="flex flex-col gap-1.5 col-span-2 sm:col-span-3 lg:col-span-4 hidden">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Scooter Fitment</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <label class="fit-toggle-card">
+                <input type="checkbox" id="mFitLegguard" class="peer sr-only">
+                <div class="fit-toggle-icon"><i class="fas fa-shield"></i></div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-bold text-slate-700">Leg Guard</div>
+                  <div class="text-[11px] text-slate-400">Adds cost to finance sheet</div>
+                </div>
+                <div class="fit-toggle-switch"></div>
+              </label>
+              <label class="fit-toggle-card">
+                <input type="checkbox" id="mFitSeatcover" class="peer sr-only">
+                <div class="fit-toggle-icon"><i class="fas fa-chair"></i></div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-bold text-slate-700">Seat Cover</div>
+                  <div class="text-[11px] text-slate-400">Adds cost to finance sheet</div>
+                </div>
+                <div class="fit-toggle-switch"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button id="saveModelBtn" class="cta-primary">
+            <i class="fas fa-floppy-disk"></i> Save to Master List
+          </button>
+          <button id="cancelMasterBtn" onclick="cancelMasterEdit()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
+            <i class="fas fa-xmark"></i> Cancel Edit
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-tags text-amber-500"></i> Price Catalogue</div>
+            <span id="priceCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 models</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse responsive-table">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Image</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model Name</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Category</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Price</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Insurance</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Finance Ins.</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="masterTableBody">
+              <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Connecting to database…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ INVENTORY ═══ -->
+    <div class="sec-panel" id="secInv">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Stock Management ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Live <span class="text-amber-500">Inventory</span></div>
+        </div>
+        <span id="invTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500 flex-shrink-0">0 units total</span>
+      </div>
+
+
+      <!-- Inv Form -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center gap-2 section-title text-2xl mb-4 pb-4 border-b border-slate-100">
+          <i class="fas fa-plus-circle text-amber-500 text-lg"></i> <span id="invFormTitle">Add Inventory Unit</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Model <span class="text-red-400">*</span></label>
+            <input type="text" id="stockModelSelect" list="stockModelList" placeholder="Type model name…" autocomplete="off"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+            <datalist id="stockModelList"></datalist>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Chassis No <span class="text-red-400">*</span></label>
+            <input type="text" id="sChassis" placeholder="MD2A12EY..."
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Engine No <span class="text-red-400">*</span></label>
+            <input type="text" id="sEngine" placeholder="BSVI2024..."
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Registration No</label>
+            <input type="text" id="sRegNo" placeholder="BA 2 PA 1234"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Colour <span class="text-red-400">*</span></label>
+            <input type="text" id="sColor" placeholder="e.g. Fiery Orange"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status</label>
+            <select id="sStatus">
+              <option value="Available">Available</option>
+              <option value="Booked">Booked</option>
+              <option value="Sold">Sold</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button id="saveStockBtn" class="cta-primary">
+            <i class="fas fa-floppy-disk"></i> Save Unit
+          </button>
+          <button id="cancelInvBtn" onclick="cancelInvEdit()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
+            <i class="fas fa-xmark"></i> Cancel Edit
+          </button>
+        </div>
+      </div>
+
+      <!-- Excel Bulk Import -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center gap-2 section-title text-2xl mb-1">
+          <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
+        </div>
+        <p class="text-xs text-slate-500 mb-4">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, Chassis, Engine, RegNo, Color</b>. S.N fills in automatically.</p>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all">
+            <i class="fas fa-cloud-arrow-up text-emerald-500 text-lg flex-shrink-0"></i>
+            <span id="excelFileLabel" class="text-sm text-slate-600 font-medium truncate">Click to choose Excel / CSV file…</span>
+            <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" class="hidden"/>
+          </label>
+          <button id="downloadTemplateBtn" class="cta-secondary whitespace-nowrap">
+            <i class="fas fa-download"></i> Sample Template
+          </button>
+          <button id="importExcelBtn" disabled class="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 whitespace-nowrap">
+            <i class="fas fa-upload"></i> <span id="importExcelBtnText">Import Rows</span>
+          </button>
+        </div>
+        <div id="importSummary" class="hidden mt-4 rounded-xl border border-slate-200 overflow-hidden">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-wrap">
+            <span id="importSummaryHead" class="text-xs font-bold text-slate-600"></span>
+          </div>
+          <div id="importSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
+        </div>
+      </div>
+
+      <!-- Inv Table -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-warehouse text-amber-500"></i> Stock Register</div>
+          <span id="invCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+          <span id="invDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-0.5 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
+          <button id="fixSnBtn" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-bajaj-blue text-bajaj-blue text-xs font-bold rounded-lg hover:bg-bajaj-blue hover:text-white transition-all">
+            <i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering
+          </button>
+          <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setInvStatusFilter('all')">All</button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Available" onclick="setInvStatusFilter('Available')">Available</button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Booked" onclick="setInvStatusFilter('Booked')">Booked</button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setInvStatusFilter('Sold')">Sold</button>
+            <span class="w-px h-4 bg-slate-200 mx-0.5"></span>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="HHSales" onclick="setInvStatusFilter('HHSales')">HH Sales</button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="HHHide" onclick="setInvStatusFilter('HHHide')">HH Hide</button>
+          </div>
+          <div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
+            <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="invSearch" autocomplete="off" placeholder="Search chassis, engine, model, reg no…"
+              class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-8 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+            <button id="invSearchClear" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 text-xs"><i class="fas fa-circle-xmark"></i></button>
+            <div id="invSearchDropdown" class="hidden absolute z-40 top-[calc(100%+6px)] left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto"></div>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse responsive-table">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Chassis No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Engine No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Reg. No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Colour</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="stockTableBody">
+              <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading inventory…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ HFL FINANCE ═══ -->
+    <div class="sec-panel" id="secFin">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Finance Schemes ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">HFL <span class="text-amber-500">Finance Options</span></div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
+            <span id="finFormTitle">Add Finance Scheme</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-1.5">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Down Payment (%) <span class="text-red-400">*</span></label>
+            <input type="number" id="fDownPay" placeholder="40" min="0" max="100"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Interest Rate (%) <span class="text-red-400">*</span></label>
+            <input type="number" id="fRate" placeholder="12.99" min="0" step="0.01"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tenure (Months) <span class="text-red-400">*</span></label>
+            <input type="text" id="fTenure" placeholder="12, 24, 36, 48"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-4"><i class="fas fa-circle-info mr-1"></i>Ek dp/rate ma multiple month options dinu parey comma le chuttyaunus — jasto: <span class="font-mono text-slate-500">12, 24, 36, 48</span></p>
+        <div class="flex gap-2 flex-wrap">
+          <button id="saveFinBtn" class="cta-primary">
+            <i class="fas fa-floppy-disk"></i> Save Scheme
+          </button>
+          <button id="cancelFinBtn" onclick="cancelFinEdit()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
+            <i class="fas fa-xmark"></i> Cancel Edit
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-chart-pie text-amber-500"></i> Finance Schemes</div>
+            <span id="finCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 schemes</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse responsive-table">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Down Payment</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Interest Rate</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Tenure</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="finTableBody">
+              <tr><td colspan="4" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading schemes…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ACCESSORIES INVENTORY ═══ -->
+    <div class="sec-panel" id="secAcc">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Accessories ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Accessories <span class="text-amber-500">Inventory</span></div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
+            <span id="accFormTitle">Add Accessory</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Accessory Name <span class="text-red-400">*</span></label>
+            <input type="text" id="aName" placeholder="e.g. Helmet"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Default Price (Rs.) <span class="text-red-400">*</span></label>
+            <input type="number" id="aPrice" placeholder="2500" min="0"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-4"><i class="fas fa-circle-info mr-1"></i>Yaha update gareko price finance.html ma automatically default value ko rup ma dekhincha — code chhunu pardaina. <span class="font-semibold text-slate-500">Helmet</span>, <span class="font-semibold text-slate-500">Leg Guard</span>, <span class="font-semibold text-slate-500">Seat Cover</span>, ra <span class="font-semibold text-slate-500">Namsari</span> nau (naam) exact tesari nai rakhnus so it auto-matches.</p>
+        <div class="flex gap-2 flex-wrap">
+          <button id="saveAccBtn" class="cta-primary">
+            <i class="fas fa-floppy-disk"></i> Save Accessory
+          </button>
+          <button id="cancelAccBtn" onclick="cancelAccEdit()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
+            <i class="fas fa-xmark"></i> Cancel Edit
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-helmet-safety text-amber-500"></i> Accessories</div>
+            <span id="accCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 items</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse responsive-table">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Accessory</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Default Price</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="accTableBody">
+              <tr><td colspan="3" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading accessories…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- STOCK REPORT -->
+    <div class="sec-panel" id="secStock">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Reports ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Stock <span class="text-amber-500">Report</span></div>
+          <p class="text-xs text-slate-400 mt-1">Sold vayeka units ma count hudaina — yaha jati dekhincha, tyati nai showroom ma "available" cha.</p>
+        </div>
+        <button id="genStockReportBtn" onclick="openStockPreview()" class="cta-primary">
+          <i class="fas fa-image"></i> Download Report (JPG)
+        </button>
+      </div>
+
+      <!-- Stat tiles -->
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
+        <div class="stock-tile"><div class="k">Available Stock</div><div class="v" id="stkTotalUnits">—</div></div>
+        <div class="stock-tile"><div class="k">Models In Stock</div><div class="v" id="stkModels">—</div></div>
+        <div class="stock-tile"><div class="k">Colours</div><div class="v" id="stkColours">—</div></div>
+        <div class="stock-tile"><div class="k">Sold (Not In Stock)</div><div class="v" id="stkSold">—</div></div>
+        <div class="stock-tile"><div class="k">Report Date</div><div class="v text-lg" id="stkDate">—</div></div>
+      </div>
+
+      <!-- Category-wise totals: simple, big numbers, easy to read at a glance -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5" id="stkCategoryWrap">
+        <div class="stock-tile flex items-center justify-between">
+          <div><div class="k">Bike</div><div class="v" id="stkCatBike">—</div></div>
+          <i class="fas fa-motorcycle text-3xl text-blue-100"></i>
+        </div>
+        <div class="stock-tile flex items-center justify-between">
+          <div><div class="k">Scooter</div><div class="v" id="stkCatScooter">—</div></div>
+          <i class="fas fa-motorcycle text-3xl text-amber-100"></i>
+        </div>
+      </div>
+
+      <!-- Model x Colour breakdown -->
+      <div class="yng-card-shell overflow-hidden mb-5">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-boxes-stacked text-amber-500"></i> Stock By Model</div>
+          <button onclick="loadStockReportData(true)" class="text-xs font-bold text-bajaj-blue hover:underline flex items-center gap-1.5"><i class="fas fa-arrows-rotate"></i> Refresh</button>
+        </div>
+        <div id="stockModelList">
+          <div class="py-12 text-center text-slate-400">
+            <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading stock…
+          </div>
+        </div>
+      </div>
+
+      <!-- Area-wise stock — manually editable, colour-wise, with addable/removable locations -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div>
+            <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-map-location-dot text-amber-500"></i> Area-Wise Stock</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Yo table haath le bharne ho (auto-calculate hudaina) — jasto: Showroom ma kati, Workshop ma kati, Taplejung ma kati.</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="areaEditModeBtn" onclick="toggleAreaEditMode()" class="area-edit-toggle">
+              <i class="fas fa-lock"></i> View Only — Tap to Edit
+            </button>
+            <input type="text" id="newAreaInput" placeholder="e.g. Taplejung" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 w-32"/>
+            <button onclick="addStockArea()" class="flex items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+              <i class="fas fa-plus text-[10px]"></i> Add Area
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse responsive-table" id="areaStockTable">
+            <thead><tr class="bg-slate-50" id="areaStockHead"></tr></thead>
+            <tbody id="areaStockBody">
+              <tr><td class="px-4 py-12 text-center text-slate-400"><i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading areas…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main content -->
+
+  <!-- FOOTER -->
+  <footer class="bg-[#0F172A] mt-auto relative overflow-hidden">
+    <div class="top-bar-grad absolute top-0 left-0 right-0 h-[3px]"></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-6 py-10 max-w-7xl mx-auto">
+      <div>
+        <div class="flex items-center gap-2.5 mb-3">
+          <div class="w-9 h-9 rounded-lg bg-bajaj-blue flex items-center justify-center text-white"><i class="fas fa-motorcycle text-sm"></i></div>
+          <div class="font-display text-xl text-white tracking-widest">BAJAJ <span class="text-amber-500">BIKES</span></div>
+        </div>
+        <p class="text-xs text-slate-400 leading-relaxed max-w-xs mb-4">Your trusted Bajaj dealership. Premium bikes, competitive pricing, complete post-sale support.</p>
+        <div class="flex gap-2">
+          <a href="https://wa.me/9802315425" target="_blank" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400 text-sm hover:-translate-y-0.5 hover:bg-emerald-500 hover:text-white transition-all"><i class="fab fa-whatsapp"></i></a>
+          <a href="mailto:bajaj.phidim@gmail.com" target="_blank" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-red-400 text-sm hover:-translate-y-0.5 hover:bg-red-500 hover:text-white transition-all"><i class="fas fa-envelope"></i></a>
+          <a href="#" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-sky-400 text-sm hover:-translate-y-0.5 hover:bg-sky-500 hover:text-white transition-all"><i class="fa-brands fa-tiktok"></i></a>
+        </div>
+      </div>
+      <div>
+        <h5 class="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-4 pb-2 border-b border-white/10">Quick Nav</h5>
+        <ul class="space-y-2">
+          <li onclick="switchSec('price')" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-600"></i> Price List</li>
+          <li onclick="switchSec('inv')" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-600"></i> Inventory</li>
+          <li onclick="switchSec('fin')" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-600"></i> HFL Finance</li>
+          <li onclick="switchSec('acc')" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-600"></i> Accessories</li>
+        </ul>
+      </div>
+      <div>
+        <h5 class="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-4 pb-2 border-b border-white/10">Bajaj Models</h5>
+        <ul class="space-y-2">
+          <li class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-circle-dot text-[7px] text-slate-600"></i> Pulsar Series</li>
+          <li class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-circle-dot text-[7px] text-slate-600"></i> Dominar Series</li>
+          <li class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-circle-dot text-[7px] text-slate-600"></i> Chetak Electric</li>
+          <li class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-circle-dot text-[7px] text-slate-600"></i> Platina Series</li>
+          <li class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-circle-dot text-[7px] text-slate-600"></i> Avenger Series</li>
+        </ul>
+      </div>
+      <div>
+        <h5 class="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-4 pb-2 border-b border-white/10">Contact Us</h5>
+        <div class="space-y-2.5">
+          <div class="flex items-start gap-2 text-xs text-slate-400"><i class="fab fa-whatsapp text-amber-500 mt-0.5 flex-shrink-0"></i>+977 9802315425</div>
+          <div class="flex items-start gap-2 text-xs text-slate-400"><i class="fas fa-envelope text-amber-500 mt-0.5 flex-shrink-0"></i>bajaj.phidim@gmail.com</div>
+          <div class="flex items-start gap-2 text-xs text-slate-400"><i class="fas fa-location-dot text-amber-500 mt-0.5 flex-shrink-0"></i>Bajaj Showroom, Main Road, BP Park</div>
+          <div class="flex items-start gap-2 text-xs text-slate-400"><i class="fas fa-clock text-amber-500 mt-0.5 flex-shrink-0"></i>Mon–Sat: 9 AM – 7 PM</div>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center justify-between px-6 py-3 border-t border-white/10 max-w-7xl mx-auto w-full flex-wrap gap-2">
+      <p class="text-xs text-slate-500">&copy; 2026 <span class="text-amber-500 font-semibold">Bajaj Bikes Admin Panel</span>. All rights reserved.</p>
+      <div class="flex gap-4">
+        <a href="#" class="text-xs text-slate-500 hover:text-white transition-colors">Privacy Policy</a>
+        <a href="#" class="text-xs text-slate-500 hover:text-white transition-colors">Terms of Use</a>
+        <a href="#" class="text-xs text-slate-500 hover:text-white transition-colors">Support</a>
+      </div>
+    </div>
+  </footer>
+      </div><!-- /main-col -->
+    </div><!-- /app-shell -->
+</div>
+
+<!-- STOCK REPORT PREVIEW -->
+<div id="stockPreviewOverlay">
+  <div class="spv-shell">
+    <div class="spv-head">
+      <div class="flex-1 min-w-0">
+        <div class="text-white font-bold text-sm">Daily Stock Report Preview</div>
+        <div class="text-white/50 text-xs" id="spvSubtitle">—</div>
+      </div>
+      <button id="spvDownloadBtn" class="spv-btn print" onclick="downloadStockReportJPG()"><i class="fas fa-download"></i> Download JPG</button>
+      <button class="spv-btn close" onclick="closeStockPreview()"><i class="fas fa-xmark"></i> Close</button>
+    </div>
+    <div class="spv-body">
+      <div id="spvPage"></div>
+    </div>
+  </div>
+</div>
+<div id="stockPrintWrapper"></div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirmModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style="animation:slideIn .2s ease;">
+    <div class="p-5 flex items-start gap-3.5">
+      <div id="confirmModalIconWrap" class="w-11 h-11 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+        <i id="confirmModalIcon" class="fas fa-trash-can text-red-500 text-base"></i>
+      </div>
+      <div class="min-w-0 pt-1">
+        <div id="confirmModalTitle" class="font-bold text-slate-900 text-[15px] mb-1">Delete this entry?</div>
+        <div id="confirmModalMsg" class="text-slate-500 text-[13px] leading-relaxed">This action can't be undone. The record will be permanently removed.</div>
+      </div>
+    </div>
+    <div class="flex border-t border-slate-100">
+      <button id="confirmModalCancel" class="flex-1 py-3.5 text-sm font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
+      <div class="w-px bg-slate-100"></div>
+      <button id="confirmModalOk" class="flex-1 py-3.5 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="hidden fixed bottom-5 right-5 z-[500] border border-slate-200/80 rounded-2xl pl-3.5 pr-4 py-3.5 text-sm text-slate-700 items-start gap-3 min-w-[260px] max-w-sm overflow-hidden">
+  <div id="toastIconWrap"><i id="toastIcon" class="fas fa-circle-check text-sm"></i></div>
+  <div class="min-w-0 pt-0.5">
+    <div id="toastTitle" class="font-bold text-slate-800 text-[13px] leading-tight mb-0.5">Success</div>
+    <span id="toastMsg" class="text-slate-500 text-[12.5px] leading-snug block"></span>
+  </div>
+  <button id="toastClose" class="ml-auto flex-shrink-0 text-slate-300 hover:text-slate-500 transition-colors mt-0.5"><i class="fas fa-xmark text-xs"></i></button>
+  <div class="absolute left-0 right-0 bottom-0 h-[3px] bg-slate-100">
+    <div id="toastProgress" class="h-full"></div>
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import {
+  getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc,
+  serverTimestamp, query, orderBy, limit, runTransaction, writeBatch
+} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECURITY NOTE (read before deploying)
+   ───────────────────────────────────────────────────────────────────────
+   The Firebase Web config below (apiKey/authDomain/projectId/appId) is NOT
+   a secret — Google's own docs confirm client apps always ship it in the
+   bundle, and it is not what protects your data. Anyone can read it from
+   devtools regardless of how it's obfuscated here. Real protection comes
+   from two places that live OUTSIDE this file, on the Firebase Console:
+     1. Firestore Security Rules — lock every collection to
+        `allow read, write: if request.auth != null` at minimum, and
+        ideally check a custom-claim/role on the authenticated user
+        (e.g. `request.auth.token.admin == true`) so a signed-in
+        non-admin account still can't write. Rules are the only real
+        gatekeeper for direct REST/SDK calls that bypass this UI.
+     2. Firebase App Check — attaches a per-app attestation token so
+        requests from outside this exact deployed origin are rejected
+        before they even reach your rules.
+   This refactor adds defense-in-depth on the client (input validation,
+   transactional writes, capped reads) but none of it is a substitute for
+   Security Rules — treat that as the actual launch blocker.
+   ═══════════════════════════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
+  authDomain: "first-project-2082-12-26.firebaseapp.com",
+  projectId: "first-project-2082-12-26",
+  appId: "1:545170954251:web:0d2f7905834af3b0be8f0e"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentEditId = null;
+let currentEditInvId = null;
+let currentEditFinId = null;
+let currentEditAccId = null;
+let allMasterBikes = [];
+let invData = [];
+let invUnsub = null;
+let invSearchTerm = '';
+let financeSchemes = [];
+let stockAreas = [];
+let areaStockMap = {};
+let accessories = [];
+
+/* ─── Pagination (bounded reads for the fast-growing inventory collection) ─── */
+const INV_PAGE_SIZE = 200;
+let invPageLimit = INV_PAGE_SIZE;
+let invHasMore = false;
+
+/* ═══════════════════════════════════════════════════════════════════════
+   INPUT VALIDATION — frontend-side defense-in-depth. This does NOT replace
+   Firestore Security Rules (see note above) but stops accidental bad data
+   (NaN, empty strings, script injection via text fields) before it's ever
+   written, and gives staff immediate, specific feedback.
+   ═══════════════════════════════════════════════════════════════════════ */
+const Validate = {
+  // Strips angle brackets (basic XSS-in-render guard, since values are
+  // interpolated into innerHTML elsewhere) and collapses whitespace.
+  text(v, { min = 1, max = 120, label = 'This field' } = {}) {
+    const clean = (v ?? '').toString().trim().replace(/[<>]/g, '').replace(/\s+/g, ' ');
+    if (clean.length < min) return { ok: false, error: `${label} is required.` };
+    if (clean.length > max) return { ok: false, error: `${label} must be under ${max} characters.` };
+    return { ok: true, value: clean };
+  },
+  positiveNumber(v, { label = 'This value', allowZero = false, max = 100000000 } = {}) {
+    const n = Number(v);
+    if (v === '' || v === null || v === undefined || Number.isNaN(n)) return { ok: false, error: `${label} must be a number.` };
+    if (allowZero ? n < 0 : n <= 0) return { ok: false, error: `${label} must be a positive number.` };
+    if (n > max) return { ok: false, error: `${label} is too large.` };
+    return { ok: true, value: n };
+  },
+  // Chassis / Engine numbers: real-world formats vary by manufacturer, so
+  // this stays permissive — alphanumeric plus hyphens, 5–25 chars — while
+  // still rejecting empty values, whitespace-only junk, or obvious garbage.
+  identifierCode(v, { label = 'This field' } = {}) {
+    const clean = (v ?? '').toString().trim().toUpperCase().replace(/\s+/g, '');
+    if (!clean) return { ok: false, error: `${label} is required.` };
+    if (!/^[A-Z0-9\-]{5,25}$/.test(clean)) return { ok: false, error: `${label} looks invalid — use 5–25 letters/numbers only.` };
+    return { ok: true, value: clean };
+  }
+};
+
+/* ─── Custom confirm modal (replaces native browser confirm) ─── */
+function showConfirm(opts){
+  // Back-compat: showConfirm("some message") still works as a plain delete-style confirm
+  if(typeof opts === 'string') opts = { message: opts };
+  const {
+    title = 'Delete this entry?',
+    message = "This action can't be undone.",
+    okText = 'Delete',
+    okColorClass = 'text-red-500 hover:bg-red-50',
+    iconClass = 'fa-trash-can',
+    iconColor = '#ef4444',
+    iconBg = '#FEF2F2'
+  } = opts;
+
+  return new Promise((resolve)=>{
+    const modal = document.getElementById('confirmModal');
+    const titleEl = document.getElementById('confirmModalTitle');
+    const msgEl = document.getElementById('confirmModalMsg');
+    const okBtn = document.getElementById('confirmModalOk');
+    const cancelBtn = document.getElementById('confirmModalCancel');
+    const iconEl = document.getElementById('confirmModalIcon');
+    const iconWrap = document.getElementById('confirmModalIconWrap');
+
+    titleEl.textContent = title;
+    msgEl.innerHTML = message;
+    okBtn.textContent = okText;
+    okBtn.className = 'flex-1 py-3.5 text-sm font-bold transition-colors ' + okColorClass;
+    iconEl.className = 'fas ' + iconClass + ' text-base';
+    iconEl.style.color = iconColor;
+    iconWrap.style.background = iconBg;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    function cleanup(result){
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      modal.removeEventListener('click', onBackdrop);
+      resolve(result);
+    }
+    function onOk(){ cleanup(true); }
+    function onCancel(){ cleanup(false); }
+    function onBackdrop(e){ if(e.target===modal) cleanup(false); }
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    modal.addEventListener('click', onBackdrop);
+  });
+}
+
+/* ─── Row action kebab (3-dot) menu ─── */
+let openKebabMenu = null;
+let openKebabBtn = null;
+
+function closeKebabMenu(){
+  if(openKebabMenu){ openKebabMenu.remove(); openKebabMenu = null; }
+  if(openKebabBtn){ openKebabBtn.classList.remove('active'); openKebabBtn = null; }
+}
+
+// actions: array of { label, icon, onClick, danger:bool }
+function openKebabMenuFor(btn, actions){
+  const alreadyOpenForThis = openKebabBtn === btn;
+  closeKebabMenu();
+  if(alreadyOpenForThis) return; // acts as toggle — clicking again closes it
+
+  const menu = document.createElement('div');
+  menu.className = 'kebab-menu';
+  menu.innerHTML = actions.map((a,i)=>`
+    <button type="button" data-idx="${i}" class="${a.danger?'kebab-del':'kebab-edit'}">
+      <i class="fas ${a.icon}"></i> ${a.label}
+    </button>`).join('');
+  document.body.appendChild(menu);
+
+  // position near the button, keeping inside viewport
+  const r = btn.getBoundingClientRect();
+  const mw = menu.offsetWidth || 150;
+  const mh = menu.offsetHeight || 90;
+  let left = r.right - mw;
+  let top = r.bottom + 6;
+  if(left < 8) left = 8;
+  if(left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
+  if(top + mh > window.innerHeight - 8) top = r.top - mh - 6;
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+
+  menu.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const idx = Number(b.dataset.idx);
+      closeKebabMenu();
+      actions[idx].onClick();
+    });
+  });
+
+  btn.classList.add('active');
+  openKebabMenu = menu;
+  openKebabBtn = btn;
+}
+
+document.addEventListener('click', (e)=>{
+  if(openKebabMenu && !openKebabMenu.contains(e.target) && !(openKebabBtn && openKebabBtn.contains(e.target))){
+    closeKebabMenu();
+  }
+});
+window.addEventListener('scroll', closeKebabMenu, true);
+window.addEventListener('resize', closeKebabMenu);
+
+window._toggleKebab = (btn, type, id) => {
+  if(type === 'bikes'){
+    openKebabMenuFor(btn, [
+      { label:'Edit', icon:'fa-pen', onClick:()=>window._editMaster(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('bikes', id) }
+    ]);
+  } else if(type === 'inventory'){
+    const s = invData.find(x=>x.id===id);
+    const cur = s?.status || 'Available';
+    const hh = s?.hhFlag || null; // 'Sales' | 'Hide' | null
+    const statusActions = ['Available','Booked','Sold']
+      .filter(st => st !== cur)
+      .map(st => ({
+        label: 'Mark '+st,
+        icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
+        onClick: () => window._setUnitStatus(id, st)
+      }));
+    // HH (Hansraj Hulaschand — the distributor) reporting flag — a standalone
+    // 3-state field (Sales / Hide / none):
+    //  HH Sales -> counts in OUR stock, reported to HH as sold
+    //  HH Hide  -> does NOT count in our stock, held back from HH's report
+    // When no flag is set, both options are offered. Once one is active, only
+    // "Undo" for that flag shows — prevents accidentally switching straight
+    // from one to the other with a stray tap.
+    const hhActions = hh
+      ? [{ label: 'Undo HH '+hh, icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, null) }]
+      : [
+          { label:'Make HH Sales', icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, 'Sales') },
+          { label:'Make HH Hide', icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, 'Hide') }
+        ];
+    openKebabMenuFor(btn, [
+      ...statusActions,
+      ...hhActions,
+      { label:'Edit', icon:'fa-pen', onClick:()=>window._editInventory(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('inventory', id) }
+    ]);
+  } else if(type === 'finance_schemes'){
+    openKebabMenuFor(btn, [
+      { label:'Edit', icon:'fa-pen', onClick:()=>window._editFinance(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('finance_schemes', id) }
+    ]);
+  } else if(type === 'accessories'){
+    openKebabMenuFor(btn, [
+      { label:'Edit', icon:'fa-pen', onClick:()=>window._editAccessory(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('accessories', id) }
+    ]);
+  }
+};
+
+/* ─── Duplicate detection (chassis / engine no. must be unique per unit) ─── */
+function normId(v){ return (v||'').toString().trim().toUpperCase().replace(/\s+/g,''); }
+function normModelName(v){ return (v||'').toString().trim().toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim(); }
+function findMasterBikeByName(name){
+  const target = normModelName(name);
+  return allMasterBikes.find(b => normModelName(b.name) === target);
+}
+
+function findDuplicateUnit(chassis, engine, excludeId=null){
+  const c = normId(chassis), e = normId(engine);
+  return invData.find(s => s.id!==excludeId && (
+    (c && normId(s.chassis)===c) || (e && normId(s.engine)===e)
+  ));
+}
+
+// Returns a Set of invData ids that share a chassis or engine no. with at least one other entry
+function computeDuplicateIdSet(){
+  const byChassis = {}, byEngine = {};
+  invData.forEach(s=>{
+    const c = normId(s.chassis), e = normId(s.engine);
+    if(c){ (byChassis[c] = byChassis[c]||[]).push(s.id); }
+    if(e){ (byEngine[e] = byEngine[e]||[]).push(s.id); }
+  });
+  const dupIds = new Set();
+  Object.values(byChassis).forEach(ids=>{ if(ids.length>1) ids.forEach(id=>dupIds.add(id)); });
+  Object.values(byEngine).forEach(ids=>{ if(ids.length>1) ids.forEach(id=>dupIds.add(id)); });
+  return dupIds;
+}
+
+/* ─── Helpers ─── */
+let toastTimer = null;
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  const ic = document.getElementById('toastIcon');
+  const iconWrap = document.getElementById('toastIconWrap');
+  const title = document.getElementById('toastTitle');
+  const progress = document.getElementById('toastProgress');
+
+  const cfg = {
+    ok:   { icon:'fa-circle-check',   color:'#10b981', bg:'#ECFDF5', title:'Success' },
+    err:  { icon:'fa-circle-xmark',   color:'#ef4444', bg:'#FEF2F2', title:'Something went wrong' },
+    warn: { icon:'fa-triangle-exclamation', color:'#f59e0b', bg:'#FFFBEB', title:'Heads up' }
+  }[type] || { icon:'fa-circle-check', color:'#10b981', bg:'#ECFDF5', title:'Success' };
+
+  ic.className = 'fas ' + cfg.icon + ' text-sm';
+  ic.style.color = cfg.color;
+  iconWrap.style.background = cfg.bg;
+  title.textContent = cfg.title;
+  title.style.color = cfg.color === '#f59e0b' ? '#B45309' : (type==='err' ? '#B91C1C' : '#065F46');
+  progress.style.background = cfg.color;
+  document.getElementById('toastMsg').textContent = msg;
+
+  // reset progress-bar animation
+  progress.style.animation = 'none';
+  void progress.offsetWidth;
+  progress.style.animation = 'toastBarShrink 3.2s linear forwards';
+
+  t.classList.remove('hidden','leaving');
+  t.style.display = 'flex';
+  t.style.animation = 'slideIn .3s ease';
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>hideToast(), 3200);
+}
+function hideToast(){
+  const t = document.getElementById('toast');
+  if(t.style.display==='none') return;
+  t.classList.add('leaving');
+  setTimeout(()=>{ t.style.display='none'; t.classList.remove('leaving'); }, 250);
+}
+document.getElementById('toastClose').addEventListener('click', ()=>{ clearTimeout(toastTimer); hideToast(); });
+
+function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function highlightMatch(text, q){
+  text = (text ?? '').toString();
+  if(!q || !q.trim()) return text || '—';
+  const re = new RegExp('('+escapeRegExp(q.trim())+')', 'ig');
+  return (text || '—').replace(re, '<mark class="bg-amber-200 text-slate-900 rounded-sm px-0.5">$1</mark>');
+}
+
+function colourHex(col='') {
+  const map={red:'#ef4444',blue:'#3b82f6',black:'#374151',white:'#e2e8f0',orange:'#f97316',green:'#22c55e',yellow:'#eab308',silver:'#94a3b8',grey:'#64748b',gray:'#64748b',maroon:'#be123c',brown:'#92400e',purple:'#7c3aed',pink:'#ec4899'};
+  const k = col.toLowerCase().split(/\s+/).find(w=>map[w]);
+  return k ? map[k] : '#6366f1';
+}
+
+/* ─── Active tab styles ─── */
+function setActiveTab(sec) {
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
+    t.classList.add('text-slate-500','border-transparent');
+  });
+  document.querySelectorAll('.mobile-tab').forEach(t => {
+    t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
+    t.classList.add('text-slate-600','border-transparent');
+  });
+  const tid = sec==='price' ? 'navPrice' : (sec==='inv' ? 'navInv' : (sec==='fin' ? 'navFin' : (sec==='acc' ? 'navAcc' : 'navStock')));
+  const mtid = sec==='price' ? 'mNavPrice' : (sec==='inv' ? 'mNavInv' : (sec==='fin' ? 'mNavFin' : (sec==='acc' ? 'mNavAcc' : 'mNavStock')));
+  const tab = document.getElementById(tid);
+  const mtab = document.getElementById(mtid);
+  if(tab) { tab.classList.add('bg-blue-50','border-blue-200','text-blue-700'); tab.classList.remove('text-slate-500','border-transparent'); }
+  if(mtab) { mtab.classList.add('bg-blue-50','border-blue-200','text-blue-700'); mtab.classList.remove('text-slate-600','border-transparent'); }
+}
+// Set initial active state
+document.querySelectorAll('.nav-tab').forEach(t=>t.classList.add('border'));
+document.querySelectorAll('.mobile-tab').forEach(t=>t.classList.add('border'));
+setActiveTab('price');
+
+/* ─── Auth ─── */
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    document.getElementById('login-section').style.display = 'none';
+    document.getElementById('admin-section').style.display = 'flex';
+    document.body.classList.add('app-active');
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    await loadProfile(user.uid);
+    loadMasterPriceList();
+    loadLiveStock();
+    loadFinanceSchemes();
+    loadAccessories();
+    loadStockAreas();
+    setBtnState(false);
+  } else {
+    document.getElementById('login-section').style.display = 'flex';
+    document.getElementById('admin-section').style.display = 'none';
+    document.body.classList.remove('app-active');
+    setBtnState(false);
+  }
+});
+
+function setBtnState(loading) {
+  const btn = document.getElementById('loginBtn');
+  const txt = document.getElementById('loginBtnText');
+  const sp = document.getElementById('loginSpin');
+  btn.disabled = loading;
+  txt.style.display = loading ? 'none' : 'flex';
+  sp.style.display = loading ? 'block' : 'none';
+}
+
+document.getElementById('loginBtn').addEventListener('click', () => {
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('pass').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.classList.add('hidden'); errEl.classList.remove('flex');
+  if (!email||!pass) {
+    errEl.classList.remove('hidden'); errEl.classList.add('flex');
+    document.getElementById('loginErrText').textContent='Please enter email and password.'; return;
+  }
+  setBtnState(true);
+  signInWithEmailAndPassword(auth, email, pass).catch(e => {
+    errEl.classList.remove('hidden'); errEl.classList.add('flex');
+    document.getElementById('loginErrText').textContent = e.code==='auth/invalid-credential'?'Wrong email or password.':e.message;
+    setBtnState(false);
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.key==='Enter' && document.getElementById('login-section').style.display!=='none') document.getElementById('loginBtn').click();
+});
+document.getElementById('logoutBtn').addEventListener('click', ()=>signOut(auth));
+
+async function loadProfile(uid) {
+  try {
+    const snap = await getDoc(doc(db,"profiles",uid));
+    const name = snap.exists() ? (snap.data().name||'Admin') : 'Administrator';
+    document.getElementById('headerUserName').textContent = name;
+    document.getElementById('navAvatar').textContent = name.charAt(0).toUpperCase();
+    const pmName = document.getElementById('profileMenuName'); if(pmName) pmName.textContent = name;
+  } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
+}
+
+/* ─── Master Price List ─── */
+function loadMasterPriceList() {
+  onSnapshot(collection(db,"bikes"), snap => {
+    allMasterBikes = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderMasterTable(); updatePriceStats(); populateModelDropdown();
+  }, err => {
+    console.error('bikes listener failed', err);
+    document.getElementById('masterTableBody').innerHTML = `<tr><td colspan="8"><div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load the price list — check your connection.</p>
+      <button onclick="loadMasterPriceList()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div></td></tr>`;
+    toast('Price list sync failed: '+err.message,'err');
+  });
+}
+
+function renderMasterTable() {
+  const tbody = document.getElementById('masterTableBody');
+  document.getElementById('priceCount').textContent = allMasterBikes.length+' model'+(allMasterBikes.length!==1?'s':'');
+  if (!allMasterBikes.length) {
+    tbody.innerHTML=`<tr><td colspan="8"><div class="py-12 text-center text-slate-400"><i class="fas fa-motorcycle text-3xl opacity-25 block mb-2"></i><p class="text-sm">No models yet. Add your first bike above.</p></div></td></tr>`;
+    return;
+  }
+  const sorted=[...allMasterBikes].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
+  tbody.innerHTML = sorted.map(b=>{
+    const category=b.category||'Bike';
+    const legacyFit=b.applyLegguardSeatcover!==false;
+    const fitsLegguard=b.applyLegguard!==undefined?b.applyLegguard:legacyFit;
+    const fitsSeatcover=b.applySeatcover!==undefined?b.applySeatcover:legacyFit;
+    const fitLine=(label,fits)=>`<span class="inline-flex items-center gap-1 text-[10px] font-semibold ${fits?'text-emerald-600':'text-red-500'}"><i class="fas ${fits?'fa-check':'fa-xmark'}"></i> ${label}</span>`;
+    const catBadge=category==='Scooter'
+      ? `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200"><i class="fas fa-motor-cycle text-[10px] text-bajaj-blue"></i>Scooter</span>
+         <div class="flex flex-col gap-0.5 mt-1">${fitLine('Leg Guard',fitsLegguard)}${fitLine('Seat Cover',fitsSeatcover)}</div>`
+      : `<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">Bike</span>`;
+    return `
+    <tr class="border-b border-slate-100" data-label="${b.name}">
+      <td class="px-4 py-3" data-th="S.N">
+        <input class="sn-input" type="number" value="${b.sn||''}" min="1" placeholder="—"
+          onblur="window._saveSn('bikes','${b.id}',this.value)"
+          onkeydown="if(event.key==='Enter')this.blur()"/>
+      </td>
+      <td class="px-4 py-3" data-th="Image">
+        ${b.img
+          ? `<img src="${b.img}" onerror="this.style.display='none'" alt="" class="w-11 h-8 object-cover rounded-lg border border-slate-200">`
+          : `<div class="w-11 h-8 rounded-lg bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs"><i class="fas fa-image"></i></div>`}
+      </td>
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">${b.name}</td>
+      <td class="px-4 py-3 whitespace-nowrap" data-th="Category">${catBadge}</td>
+      <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Price">Rs ${Number(b.price).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Insurance">Rs ${Number(b.Insurance||0).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Finance Ins.">Rs ${Number(b.financeInsurance||0).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3" data-th="Actions">
+        <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'bikes','${b.id}')" aria-label="Row actions">
+          <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function updatePriceStats() {
+  const n=allMasterBikes.length;
+  document.getElementById('statModels').textContent=n;
+  document.getElementById('statAvg').textContent=n?'Rs '+Math.round(allMasterBikes.reduce((s,x)=>s+Number(x.price),0)/n).toLocaleString('en-IN'):'—';
+  document.getElementById('statIns').textContent=allMasterBikes.filter(x=>Number(x.Insurance||0)>0).length;
+  document.getElementById('statFin').textContent=allMasterBikes.filter(x=>Number(x.financeInsurance||0)>0).length;
+}
+
+function populateModelDropdown() {
+  const list=document.getElementById('stockModelList');
+  const validBikes = allMasterBikes.filter(b => b.name && b.name.trim() && b.name.trim() !== '—' && b.name.trim() !== '-');
+  list.innerHTML=validBikes.map(b=>`<option value="${b.name}"></option>`).join('');
+}
+
+window._editMaster=(id)=>{
+  const b=allMasterBikes.find(x=>x.id===id); if(!b)return;
+  document.getElementById('mSn').value=b.sn||'';
+  document.getElementById('mName').value=b.name;
+  document.getElementById('mCategory').value=b.category||'Bike';
+  document.getElementById('mPrice').value=b.price;
+  document.getElementById('mNormalIns').value=b.Insurance||0;
+  document.getElementById('mFinanceIns').value=b.financeInsurance||0;
+  document.getElementById('mImg').value=b.img||'';
+  // Falls back to the old combined applyLegguardSeatcover field for bikes saved before Leg Guard/Seat Cover were split.
+  const legacyFit=b.applyLegguardSeatcover!==false;
+  document.getElementById('mFitLegguard').checked=b.applyLegguard!==undefined?b.applyLegguard:legacyFit;
+  document.getElementById('mFitSeatcover').checked=b.applySeatcover!==undefined?b.applySeatcover:legacyFit;
+  updateLegguardVisibility();
+  currentEditId=id;
+  const btn=document.getElementById('saveModelBtn');
+  btn.innerHTML='<i class="fas fa-rotate"></i> Update Model Info';
+  document.getElementById('masterFormTitle').textContent='Edit Bike Model';
+  const cancel = document.getElementById('cancelMasterBtn');
+  cancel.classList.remove('hidden'); cancel.classList.add('flex');
+  window.scrollTo({top:0,behavior:'smooth'});
+  toast('Model loaded for editing');
+};
+
+window.cancelMasterEdit=()=>{
+  currentEditId=null; clearMasterForm();
+  const btn=document.getElementById('saveModelBtn');
+  btn.innerHTML='<i class="fas fa-floppy-disk"></i> Save to Master List';
+  document.getElementById('masterFormTitle').textContent='Add New Bike Model';
+  const cancel = document.getElementById('cancelMasterBtn');
+  cancel.classList.add('hidden'); cancel.classList.remove('flex');
+};
+
+function updateLegguardVisibility(){
+  const isScooter=document.getElementById('mCategory').value==='Scooter';
+  document.getElementById('mLegguardWrap').classList.toggle('hidden',!isScooter);
+}
+document.getElementById('mCategory').addEventListener('change',()=>{
+  // A fresh switch to Scooter defaults both toggles to "doesn't fit" — matches
+  // the common case (electric scooters like Chetak). Admin can tick either on.
+  if(document.getElementById('mCategory').value==='Scooter'){
+    document.getElementById('mFitLegguard').checked=false;
+    document.getElementById('mFitSeatcover').checked=false;
+  }
+  updateLegguardVisibility();
+});
+updateLegguardVisibility();
+
+document.getElementById('saveModelBtn').addEventListener('click',async()=>{
+  const category=document.getElementById('mCategory').value;
+  const checks = [
+    Validate.positiveNumber(document.getElementById('mSn').value, { label:'S.N' }),
+    Validate.text(document.getElementById('mName').value, { label:'Model name', max:80 }),
+    Validate.positiveNumber(document.getElementById('mPrice').value, { label:'Price' }),
+    Validate.positiveNumber(document.getElementById('mNormalIns').value, { label:'Insurance', allowZero:true }),
+    Validate.positiveNumber(document.getElementById('mFinanceIns').value, { label:'Finance insurance', allowZero:true }),
+  ];
+  const firstError = checks.find(c=>!c.ok);
+  if(firstError){ toast(firstError.error,'err'); return; }
+  const [sn, name, price, ins, fin] = checks.map(c=>c.value);
+  const imgRaw = document.getElementById('mImg').value.trim();
+  if(imgRaw && !/^https?:\/\/.+/i.test(imgRaw)){ toast('Image URL must start with http:// or https://','err'); return; }
+  const applyLegguard=category==='Scooter' ? document.getElementById('mFitLegguard').checked : true;
+  const applySeatcover=category==='Scooter' ? document.getElementById('mFitSeatcover').checked : true;
+  const data={sn,name,category,price,Insurance:ins,financeInsurance:fin,img:imgRaw,applyLegguard,applySeatcover};
+  try {
+    if(currentEditId){await updateDoc(doc(db,"bikes",currentEditId),data);toast('Model updated!');}
+    else{await addDoc(collection(db,"bikes"),data);toast('Model added!');}
+    window.cancelMasterEdit();
+  }catch(e){toast('Error: '+e.message,'err');}
+});
+
+function clearMasterForm(){
+  ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mImg'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mCategory').value='Bike';
+  document.getElementById('mFitLegguard').checked=false;
+  document.getElementById('mFitSeatcover').checked=false;
+  updateLegguardVisibility();
+}
+
+/* ─── Inventory ─── */
+document.getElementById('saveStockBtn').addEventListener('click',async()=>{
+  const modelCheck = Validate.text(document.getElementById('stockModelSelect').value, { label:'Model', max:80 });
+  if(!modelCheck.ok){ toast(modelCheck.error,'err'); return; }
+  const modelName=modelCheck.value;
+
+  const chassisCheck = Validate.identifierCode(document.getElementById('sChassis').value, { label:'Chassis No' });
+  const engineCheck = Validate.identifierCode(document.getElementById('sEngine').value, { label:'Engine No' });
+  const colorCheck = Validate.text(document.getElementById('sColor').value, { label:'Colour', max:40 });
+  const regNoCheck = Validate.text(document.getElementById('sRegNo').value, { min:0, max:20, label:'Registration No' });
+  const firstErr = [chassisCheck, engineCheck, colorCheck].find(c=>!c.ok);
+  if(firstErr){ toast(firstErr.error,'err'); return; }
+  if(!regNoCheck.ok){ toast(regNoCheck.error,'err'); return; }
+  const chassis = chassisCheck.value, engine = engineCheck.value, color = colorCheck.value, regNo = regNoCheck.value;
+  const status = document.getElementById('sStatus').value || 'Available';
+
+  const dup = findDuplicateUnit(chassis, engine, currentEditInvId);
+  if(dup){
+    const whichField = normId(dup.chassis)===normId(chassis) ? 'Chassis No' : 'Engine No';
+    const proceed = await showConfirm({
+      title: 'Possible duplicate unit',
+      message: `${whichField} already exists in inventory — S.N <b>${dup.sn||'—'}</b>, <b>${dup.model}</b>, ${dup.color||'—'}, Chassis <b>${dup.chassis||'—'}</b>, Engine <b>${dup.engine||'—'}</b>.<br><br>${currentEditInvId?'Save this unit anyway?':'Add this unit anyway?'}`,
+      okText: currentEditInvId?'Save Anyway':'Add Anyway',
+      okColorClass: 'text-amber-600 hover:bg-amber-50',
+      iconClass: 'fa-triangle-exclamation', iconColor:'#f59e0b', iconBg:'#FFFBEB'
+    });
+    if(!proceed) return;
+  }
+
+  try {
+    if(currentEditInvId){
+      await updateDoc(doc(db,"inventory",currentEditInvId),{model:modelName,chassis,engine,regNo,color,status});
+      toast('Unit updated!');
+      window.cancelInvEdit();
+    } else {
+      // Auto S.N — always one more than the current highest S.N in inventory
+      const nextSn = invData.length ? Math.max(...invData.map(x=>Number(x.sn)||0)) + 1 : 1;
+      await addDoc(collection(db,"inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,status,addedAt:new Date()});
+      ['sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('stockModelSelect').value='';
+      document.getElementById('sStatus').value='Available';
+      toast('Unit added — S.N '+nextSn+' assigned automatically.');
+    }
+  }catch(e){toast('Error: '+e.message,'err');}
+});
+
+window._editInventory=(id)=>{
+  const s=invData.find(x=>x.id===id); if(!s)return;
+  populateModelDropdown();
+  document.getElementById('stockModelSelect').value=s.model||'';
+  document.getElementById('sChassis').value=s.chassis||'';
+  document.getElementById('sEngine').value=s.engine||'';
+  document.getElementById('sRegNo').value=s.regNo||'';
+  document.getElementById('sColor').value=s.color||'';
+  document.getElementById('sStatus').value=s.status||'Available';
+  currentEditInvId=id;
+  const btn=document.getElementById('saveStockBtn');
+  btn.innerHTML='<i class="fas fa-rotate"></i> Update Unit';
+  document.getElementById('invFormTitle').textContent='Edit Inventory Unit';
+  const cancel = document.getElementById('cancelInvBtn');
+  cancel.classList.remove('hidden'); cancel.classList.add('flex');
+  window.scrollTo({top:0,behavior:'smooth'});
+  toast('Unit loaded for editing');
+};
+
+window._setUnitStatus = async (id, status) => {
+  try{
+    await updateDoc(doc(db,"inventory",id),{status});
+    toast('Unit marked as '+status+'.');
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
+window._setHHFlag = async (id, hhFlag) => {
+  const s = invData.find(x=>x.id===id);
+  const modelLabel = s ? `${s.model} — ${s.color||''}`.trim() : 'this unit';
+  let title, message;
+  if(hhFlag==='Sales'){
+    title = 'Mark as HH Sales?';
+    message = `<b>${modelLabel}</b> will be counted in our stock and reported to HH as sold. Confirm?`;
+  } else if(hhFlag==='Hide'){
+    title = 'Mark as HH Hide?';
+    message = `<b>${modelLabel}</b> will be removed from our stock count and held back from HH's report. Confirm?`;
+  } else {
+    title = 'Undo HH flag?';
+    message = `Remove the HH flag from <b>${modelLabel}</b> and go back to normal status-based counting. Confirm?`;
+  }
+  const proceed = await showConfirm({
+    title, message, okText:'Confirm',
+    okColorClass:'text-bajaj-blue hover:bg-blue-50',
+    iconClass:'fa-bullseye', iconColor:'#005EA6', iconBg:'#EAF3FB'
+  });
+  if(!proceed) return;
+  try{
+    await updateDoc(doc(db,"inventory",id),{hhFlag: hhFlag || null});
+    if(hhFlag==='Sales') toast('Marked as HH Sales — counted in our stock, reported to HH.');
+    else if(hhFlag==='Hide') toast('Marked as HH Hide — NOT counted in our stock, held back from HH\'s report.');
+    else toast('HH flag cleared.');
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
+window.cancelInvEdit=()=>{
+  currentEditInvId=null;
+  ['sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('stockModelSelect').value='';
+  document.getElementById('sStatus').value='Available';
+  const btn=document.getElementById('saveStockBtn');
+  btn.innerHTML='<i class="fas fa-floppy-disk"></i> Save Unit';
+  document.getElementById('invFormTitle').textContent='Add Inventory Unit';
+  const cancel = document.getElementById('cancelInvBtn');
+  cancel.classList.add('hidden'); cancel.classList.remove('flex');
+};
+
+document.getElementById('fixSnBtn').addEventListener('click', async ()=>{
+  if(!invData.length){ toast('No inventory to renumber.','warn'); return; }
+  const ok = await showConfirm({
+    title: 'Fix S.N numbering?',
+    message: `This will resequence all <b>${invData.length}</b> inventory units to S.N 1, 2, 3… in their current order, closing any gaps left by earlier deletions. This can't be undone.`,
+    okText: 'Renumber All',
+    okColorClass: 'text-blue-600 hover:bg-blue-50',
+    iconClass: 'fa-arrow-down-1-9', iconColor:'#005EA6', iconBg:'#E8F2FB'
+  });
+  if(!ok) return;
+  const btn = document.getElementById('fixSnBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-[11px]"></i> Renumbering…';
+  try{
+    const sorted = [...invData].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999) || (a.id>b.id?1:-1));
+    // A single writeBatch commits all-or-nothing (up to Firestore's 500-op
+    // cap per batch), so a mid-renumber failure can't leave S.N numbers
+    // half-shifted — unlike the previous Promise.all of independent writes.
+    const chunks = [];
+    let batch = writeBatch(db), opsInBatch = 0, changed = 0;
+    sorted.forEach((s,i)=>{
+      const correctSn = i+1;
+      if(Number(s.sn) !== correctSn){
+        batch.update(doc(db,'inventory',s.id), { sn: correctSn });
+        opsInBatch++; changed++;
+        if(opsInBatch===450){ chunks.push(batch); batch = writeBatch(db); opsInBatch = 0; }
+      }
+    });
+    if(opsInBatch>0) chunks.push(batch);
+    for(const b of chunks) await b.commit();
+    toast(changed ? `Renumbered ${changed} unit(s) — no more gaps.` : 'Numbering was already correct.');
+  }catch(e){
+    toast('Renumber failed: '+e.message,'err');
+  }finally{
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering';
+  }
+});
+
+function loadLiveStock(){
+  if(invUnsub) invUnsub(); // drop the previous listener before opening a wider one
+  const tbody = document.getElementById('stockTableBody');
+  const q = query(collection(db,"inventory"), orderBy('sn','asc'), limit(invPageLimit));
+  invUnsub = onSnapshot(q, snap=>{
+    invData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    invHasMore = snap.docs.length === invPageLimit; // there may be more beyond this page
+    renderInvTable(getFilteredInv());
+    updateInvStats();
+    renderInvLoadMore();
+  }, err=>{
+    console.error('inventory listener failed', err);
+    tbody.innerHTML = `<tr><td colspan="7"><div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load inventory — check your connection.</p>
+      <button onclick="loadLiveStock()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div></td></tr>`;
+    toast('Inventory sync failed: '+err.message,'err');
+  });
+}
+
+function renderInvLoadMore(){
+  let bar = document.getElementById('invLoadMoreBar');
+  const table = document.getElementById('stockTableBody')?.closest('.overflow-x-auto');
+  if(!table) return;
+  if(!invHasMore){ bar?.remove(); return; }
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'invLoadMoreBar';
+    bar.className = 'px-5 py-3 border-t border-slate-100 text-center';
+    bar.innerHTML = `<button id="invLoadMoreBtn" class="cta-secondary !py-2 !px-4 !text-xs">Load 200 more units</button>`;
+    table.after(bar);
+    bar.querySelector('button').addEventListener('click', ()=>{
+      invPageLimit += INV_PAGE_SIZE;
+      loadLiveStock();
+    });
+  }
+}
+
+let invStatusFilter = 'all';
+function setInvStatusFilter(status){
+  invStatusFilter = status;
+  document.querySelectorAll('.inv-status-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===status));
+  renderInvTable(getFilteredInv());
+}
+window.setInvStatusFilter = setInvStatusFilter;
+
+function getFilteredInv(){
+  let base = invData;
+  if(invStatusFilter === 'HHSales'){
+    base = base.filter(s => s.hhFlag==='Sales');
+  } else if(invStatusFilter === 'HHHide'){
+    base = base.filter(s => s.hhFlag==='Hide');
+  } else if(invStatusFilter !== 'all'){
+    base = base.filter(s => (s.status||'Available') === invStatusFilter);
+  }
+  if(!invSearchTerm) return base;
+  const q = invSearchTerm.toLowerCase().trim();
+  return base.filter(s=>{
+    return (s.model||'').toLowerCase().includes(q)
+        || (s.chassis||'').toLowerCase().includes(q)
+        || (s.engine||'').toLowerCase().includes(q)
+        || (s.regNo||'').toLowerCase().includes(q)
+        || (s.color||'').toLowerCase().includes(q);
+  });
+}
+
+function renderInvTable(list){
+  const tbody=document.getElementById('stockTableBody');
+  document.getElementById('invCount').textContent=list.length+' unit'+(list.length!==1?'s':'')+(invSearchTerm?' found':'');
+  if(!list.length){
+    tbody.innerHTML=`<tr><td colspan="8"><div class="py-12 text-center text-slate-400"><i class="fas fa-warehouse text-3xl opacity-25 block mb-2"></i><p class="text-sm">${invSearchTerm?'No units match your search.':'No inventory yet. Add a unit using the form above.'}</p></div></td></tr>`;
+    return;
+  }
+  const dupIds = computeDuplicateIdSet();
+  const dupChip = document.getElementById('invDupChip');
+  if(dupIds.size>0){
+    dupChip.classList.remove('hidden'); dupChip.classList.add('flex');
+    dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${dupIds.size} duplicate${dupIds.size!==1?'s':''} found`;
+  } else {
+    dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
+  }
+  const sorted=[...list].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
+  const q = invSearchTerm;
+  tbody.innerHTML=sorted.map(s=>{
+    const isDup = dupIds.has(s.id);
+    return`<tr class="border-b ${isDup?'border-red-100 bg-red-50/40':'border-slate-100'}">
+      <td class="px-4 py-3" data-th="S.N">
+        <span class="inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-xs font-mono font-semibold">${s.sn||'—'}</span>
+      </td>
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">
+        ${highlightMatch(s.model, q)}
+        ${isDup ? `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 text-red-600 text-[9px] font-extrabold uppercase tracking-wide align-middle"><i class="fas fa-triangle-exclamation text-[8px]"></i> Duplicate</span>` : ''}
+      </td>
+      <td class="px-4 py-3" data-th="Chassis No"><code class="${isDup?'bg-red-50 text-red-700 border-red-200':'bg-slate-50 text-slate-600 border-slate-200'} text-xs px-2 py-0.5 rounded-md border font-mono">${highlightMatch(s.chassis, q)}</code></td>
+      <td class="px-4 py-3" data-th="Engine No"><code class="${isDup?'bg-red-50 text-red-700 border-red-200':'bg-slate-50 text-slate-600 border-slate-200'} text-xs px-2 py-0.5 rounded-md border font-mono">${highlightMatch(s.engine, q)}</code></td>
+      <td class="px-4 py-3" data-th="Reg. No">${s.regNo
+        ? `<span class="text-sm text-slate-700 font-medium">${highlightMatch(s.regNo, q)}</span>`
+        : `<span class="text-xs text-slate-400 italic">Pending</span>`}
+      </td>
+      <td class="px-4 py-3" data-th="Colour">
+        <span class="flex items-center gap-1.5 text-sm text-slate-600">
+          <span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${highlightMatch(s.color, q)}
+        </span>
+      </td>
+      <td class="px-4 py-3" data-th="Status">
+        <div class="flex flex-wrap items-center gap-1.5">
+          ${s.hhFlag==='Hide' ? '' :
+            s.status==='Sold'
+            ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>`
+            : s.status==='Booked'
+            ? `<span class="badge badge-amber"><i class="fas fa-bookmark"></i> Booked</span>`
+            : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`}
+          ${s.hhFlag==='Sales' ? `<span class="badge badge-blue"><i class="fas fa-bullseye"></i> HH Sales</span>` : ''}
+          ${s.hhFlag==='Hide' ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> HH Hide (not in stock)</span>` : ''}
+        </div>
+      </td>
+      <td class="px-4 py-3" data-th="Actions">
+        <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'inventory','${s.id}')" aria-label="Row actions">
+          <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function updateInvStats(){
+  const sold = invData.filter(s=>s.status==='Sold').length;
+  const booked = invData.filter(s=>s.status==='Booked').length;
+  const available = invData.length - sold - booked;
+  const hhSalesCount = invData.filter(s=>s.hhFlag==='Sales').length;
+  const hhHideCount = invData.filter(s=>s.hhFlag==='Hide').length;
+  document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+hhSalesCount+' HH Sales  ·  '+hhHideCount+' HH Hide';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STOCK REPORT — replaces the manual Excel daily-stock workflow.
+   Fetches the FULL inventory collection (unpaginated, unlike the Live
+   Inventory table which is capped) so counts are always accurate, groups
+   it by model → colour, renders a dashboard view, and can generate a
+   printable A4-landscape report using the same paper pattern as sheet.html.
+   ═══════════════════════════════════════════════════════════════════════ */
+let stockReportGrouped = null;
+let stockReportTotalUnits = 0;
+
+let stockReportSoldUnits = 0;
+
+async function loadStockReportData(forceRefresh){
+  if(stockReportGrouped && !forceRefresh) { renderStockDashboard(); return; }
+  const listEl = document.getElementById('stockModelList');
+  listEl.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading stock…</div>`;
+  try{
+    const snap = await getDocs(collection(db,"inventory"));
+    const all = snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Only units still "in stock" show up here. hhFlag overrides the plain
+    // Available/Sold status when set: HH Hide always excludes a unit (it's
+    // really gone, just not reported to HH yet); HH Sales always includes a
+    // unit (still physically ours, even though HH has been told it's sold).
+    const available = all.filter(s => {
+      if(s.hhFlag==='Hide') return false;
+      if(s.hhFlag==='Sales') return true;
+      return (s.status||'Available') !== 'Sold';
+    });
+    const byModel = {};
+    available.forEach(s=>{
+      const m = s.model || 'Unassigned';
+      const c = (s.color||'Unspecified').trim() || 'Unspecified';
+      byModel[m] = byModel[m] || { total:0, colours:{}, chassisByColour:{} };
+      byModel[m].total++;
+      byModel[m].colours[c] = (byModel[m].colours[c]||0) + 1;
+      byModel[m].chassisByColour[c] = byModel[m].chassisByColour[c] || [];
+      const chassisTail = (s.chassis||'').toString().trim().slice(-5);
+      if(chassisTail) byModel[m].chassisByColour[c].push(chassisTail);
+    });
+    stockReportGrouped = byModel;
+    stockReportTotalUnits = available.length;
+    stockReportSoldUnits = all.length - available.length;
+    renderStockDashboard();
+  }catch(err){
+    console.error('stock report load failed', err);
+    listEl.innerHTML = `<div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load stock data — check your connection.</p>
+      <button onclick="loadStockReportData(true)" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div>`;
+    toast('Stock report load failed: '+err.message,'err');
+  }
+}
+
+function renderStockDashboard(){
+  const byModel = stockReportGrouped || {};
+  const models = Object.keys(byModel);
+  const allColours = new Set();
+  models.forEach(m=>Object.keys(byModel[m].colours).forEach(c=>allColours.add(c)));
+
+  document.getElementById('stkTotalUnits').textContent = stockReportTotalUnits;
+  document.getElementById('stkModels').textContent = models.length;
+  document.getElementById('stkColours').textContent = allColours.size;
+  document.getElementById('stkSold').textContent = stockReportSoldUnits;
+  document.getElementById('stkDate').textContent = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+  let bikeTotal = 0, scooterTotal = 0;
+  models.forEach(m=>{
+    const cat = getModelCategory(m);
+    if(cat==='Scooter') scooterTotal += byModel[m].total; else bikeTotal += byModel[m].total;
+  });
+  document.getElementById('stkCatBike').textContent = bikeTotal;
+  document.getElementById('stkCatScooter').textContent = scooterTotal;
+
+  renderAreaStockTable();
+
+  const listEl = document.getElementById('stockModelList');
+  if(!models.length){
+    listEl.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-boxes-stacked text-3xl opacity-25 block mb-2"></i><p class="text-sm">No inventory yet.</p></div>`;
+    return;
+  }
+  const sorted = models.sort((a,b)=>byModel[b].total-byModel[a].total);
+  listEl.innerHTML = sorted.map(m=>{
+    const info = byModel[m];
+    const chips = Object.entries(info.colours).sort((a,b)=>b[1]-a[1])
+      .map(([c,n])=>`<span class="colour-chip"><span class="dot" style="background:${colourHex(c)}"></span>${c} <span class="text-slate-400 font-mono">×${n}</span></span>`)
+      .join('');
+    return `<div class="model-row">
+      <div class="font-bold text-slate-800 text-sm w-44 flex-shrink-0 truncate">${m}</div>
+      <div class="flex flex-wrap gap-1.5 flex-1">${chips}</div>
+      <div class="badge badge-blue flex-shrink-0">${info.total} unit${info.total!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function getModelCategory(model){
+  const b = allMasterBikes.find(x=>x.name===model);
+  return b ? (b.category||'Bike') : 'Bike';
+}
+
+function buildStockReportPage(){
+  const byModel = stockReportGrouped || {};
+  const models = Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total);
+  const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  const workshopArea = findWorkshopArea();
+  let sn = 0, bikeTotal = 0, scooterTotal = 0;
+  const areaTotals = {};    // areaName -> running total (workshop = computed leftover)
+  const areaGridRows = [];  // one row per model+colour, same shape as the on-screen editable grid
+  stockAreas.forEach(a=>{ areaTotals[a.name]=0; });
+
+  const rows = models.map(m=>{
+    const info = byModel[m];
+    const cat = getModelCategory(m);
+    if(cat==='Scooter') scooterTotal += info.total; else bikeTotal += info.total;
+    // Each colour gets its own row — easier to read at a glance than a combined string.
+    return Object.entries(info.colours).sort((a,b)=>b[1]-a[1]).map(([c,available])=>{
+      sn++;
+      const key = areaStockKey(m,c);
+      const saved = areaStockMap[key]?.areas || {};
+      const sumNonWorkshop = stockAreas.reduce((s,a)=> (workshopArea && a.id===workshopArea.id) ? s : s + (Number(saved[a.name])||0), 0);
+      const unallocated = Math.max(0, available - sumNonWorkshop);
+      const perArea = stockAreas.map(a=>{
+        const isWorkshop = workshopArea && a.id===workshopArea.id;
+        const qtyHere = isWorkshop ? unallocated : (Number(saved[a.name])||0);
+        areaTotals[a.name] += qtyHere;
+        return qtyHere;
+      });
+      areaGridRows.push({ model:m, color:c, perArea, total:available });
+      const chassisTails = (info.chassisByColour && info.chassisByColour[c]) || [];
+      const chassisLine = chassisTails.length
+        ? `<div style="font-size:8.5px;color:#8B93A3;font-weight:600;margin-top:2px;letter-spacing:.02em">Chassis: ${chassisTails.join(', ')}</div>`
+        : '';
+      return `<tr><td>${sn}</td><td>${m}${chassisLine}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${available}</td></tr>`;
+    }).join('');
+  }).join('');
+
+  const AREA_PALETTE = [
+    {bg:'#EAF3FB',fg:'#005EA6'}, {bg:'#FEF6E7',fg:'#B4740E'}, {bg:'#EAF7F0',fg:'#137A4B'},
+    {bg:'#F3EAFB',fg:'#7C3AED'}, {bg:'#FDEDED',fg:'#C6382E'}, {bg:'#F1F2F5',fg:'#4B5262'}
+  ];
+  const areaChips = stockAreas.length
+    ? stockAreas.map((a,i)=>{ const p=AREA_PALETTE[i%AREA_PALETTE.length]; return `<div class="jrp-cat-chip" style="background:${p.bg};color:${p.fg}">${a.name}: ${areaTotals[a.name]||0}</div>`; }).join('')
+    : '';
+
+  // Area-wise grid — same Model / Colour / [Area columns] / Total shape as the
+  // live editable table in-app, so the report matches what staff already see.
+  const areaGridSection = stockAreas.length ? `
+    <div class="jrp-area-title">Area-Wise Distribution</div>
+    <div class="jrp-cat-summary">${areaChips}</div>
+    <table class="jrp-table jrp-area-grid">
+      <thead><tr>
+        <th style="text-align:left">Model</th>
+        <th style="width:18%;text-align:left">Colour</th>
+        ${stockAreas.map(a=>`<th style="width:${Math.floor(40/stockAreas.length)}%">${a.name}</th>`).join('')}
+        <th style="width:10%">Total</th>
+      </tr></thead>
+      <tbody>
+        ${areaGridRows.map(r=>`<tr>
+          <td class="left">${r.model}</td>
+          <td class="left">${r.color}</td>
+          ${r.perArea.map(v=>`<td style="font-weight:${v>0?'800':'400'};color:${v>0?'#000':'#B8BEC9'}">${v}</td>`).join('')}
+          <td style="font-weight:800;background:#F1F5F9">${r.total}</td>
+        </tr>`).join('')}
+        <tr class="grand-total">
+          <td colspan="2">AREA TOTALS</td>
+          ${stockAreas.map(a=>`<td>${areaTotals[a.name]||0}</td>`).join('')}
+          <td>${stockReportTotalUnits}</td>
+        </tr>
+      </tbody>
+    </table>` : '';
+
+  return `
+    <div class="jrp-head">
+      <div class="brand">SAMRIDDHI AND BROTHERS</div>
+      <div class="sub">Bajaj Authorized Dealer · Phidim, Nepal — Daily Stock Report</div>
+    </div>
+    <div class="jrp-cat-summary">
+      <div class="jrp-cat-chip">Bike: ${bikeTotal}</div>
+      <div class="jrp-cat-chip">Scooter: ${scooterTotal}</div>
+      <div class="jrp-cat-chip" style="background:#FEF6E7;color:#B4740E">Total Available: ${stockReportTotalUnits}</div>
+    </div>
+    <table class="jrp-table">
+      <thead><tr><th style="width:6%">S.N</th><th>Model</th><th style="width:14%">Category</th><th style="width:20%">Colour</th><th style="width:10%;text-align:center">Qty</th></tr></thead>
+      <tbody>
+        ${rows}
+        <tr class="grand-total"><td colspan="4">GRAND TOTAL (IN STOCK)</td><td style="text-align:center">${stockReportTotalUnits}</td></tr>
+      </tbody>
+    </table>
+    ${areaGridSection}
+    <div class="jrp-footer">Generated: ${today}</div>`;
+}
+
+window.openStockPreview = async function(){
+  if(!stockReportGrouped) await loadStockReportData();
+  if(!Object.keys(stockReportGrouped||{}).length){ toast('No available inventory to report yet.','warn'); return; }
+  document.getElementById('spvSubtitle').textContent = stockReportTotalUnits+' available units across '+Object.keys(stockReportGrouped).length+' models  ·  '+stockReportSoldUnits+' sold units excluded';
+  document.getElementById('spvPage').innerHTML = `<div class="jpg-report-paper">${buildStockReportPage()}</div>`;
+  document.getElementById('stockPreviewOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+window.closeStockPreview = function(){
+  document.getElementById('stockPreviewOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+};
+window.downloadStockReportJPG = async function(){
+  const target = document.querySelector('#spvPage .jpg-report-paper');
+  if(!target){ toast('Report not ready yet.','err'); return; }
+  const btn = document.getElementById('spvDownloadBtn');
+  const origHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Generating…';
+  btn.disabled = true;
+  try{
+    const canvas = await html2canvas(target, { scale:2, backgroundColor:'#ffffff', useCORS:true });
+    const link = document.createElement('a');
+    link.download = 'Stock-Report-'+new Date().toISOString().slice(0,10)+'.jpg';
+    link.href = canvas.toDataURL('image/jpeg', 0.95);
+    link.click();
+    toast('Stock report downloaded as JPG!');
+  }catch(e){
+    console.error('JPG export failed', e);
+    toast('Could not generate image: '+e.message,'err');
+  }finally{
+    btn.innerHTML = origHtml;
+    btn.disabled = false;
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AREA-WISE STOCK — a manually-edited grid (Showroom / Workshop / Taplejung
+   etc. × Model+Colour). Areas are a live, addable/removable list; quantities
+   are typed in directly since physical distribution isn't tracked per-unit.
+   ═══════════════════════════════════════════════════════════════════════ */
+function areaStockKey(model,color){ return (model+'__'+color).replace(/[\/\.\#\$\[\]]/g,'_'); }
+
+let areaSeedAttempted = false;
+async function seedDefaultAreas(){
+  if(areaSeedAttempted) return;
+  areaSeedAttempted = true;
+  try{
+    await addDoc(collection(db,"stock_areas"),{name:'Showroom'});
+    await addDoc(collection(db,"stock_areas"),{name:'Workshop'});
+  }catch(e){ console.error('seed default areas failed', e); }
+}
+
+function loadStockAreas(){
+  onSnapshot(collection(db,"stock_areas"), snap=>{
+    stockAreas = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    if(!stockAreas.length) seedDefaultAreas();
+    renderAreaStockTable();
+  }, err=>console.error('stock_areas listener failed', err));
+
+  onSnapshot(collection(db,"area_stock"), snap=>{
+    areaStockMap = {};
+    snap.docs.forEach(d=>{ areaStockMap[d.id] = d.data(); });
+    renderAreaStockTable();
+  }, err=>console.error('area_stock listener failed', err));
+}
+
+window.addStockArea = async ()=>{
+  const input = document.getElementById('newAreaInput');
+  const name = (input.value||'').trim();
+  if(!name){ toast('Area ko naam halnus.','warn'); return; }
+  if(stockAreas.some(a=>(a.name||'').toLowerCase()===name.toLowerCase())){ toast('Yo area pahile nai xa.','warn'); return; }
+  try{
+    await addDoc(collection(db,"stock_areas"),{name});
+    input.value='';
+    toast('Area added: '+name);
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
+window.removeStockArea = async (id, name)=>{
+  const proceed = await showConfirm({
+    title:'Remove this area?',
+    message:`<b>${name}</b> lai area list bata hataune? Yo column table bata haraunxa (chai number haru chai save vairahanxa, feri thapda dekhincha).`,
+    okText:'Remove', okColorClass:'text-red-600 hover:bg-red-50',
+    iconClass:'fa-trash-can', iconColor:'#dc2626', iconBg:'#FEF2F2'
+  });
+  if(!proceed) return;
+  try{
+    await deleteDoc(doc(db,"stock_areas",id));
+    toast('Area removed.');
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
+window.saveAreaQty = async (model, color, areaName, value, inputEl)=>{
+  const workshopArea = findWorkshopArea();
+  if(workshopArea && areaName === workshopArea.name){
+    // Workshop is a computed leftover bucket, not an independently editable value — ignore.
+    return;
+  }
+  const key = areaStockKey(model,color);
+  let qty = Math.max(0, parseInt(value)||0);
+  const available = stockReportGrouped?.[model]?.colours?.[color] || 0;
+  const existing = areaStockMap[key]?.areas || {};
+  // Cap against the OTHER non-Workshop areas only — Workshop always absorbs
+  // whatever is left over, so it never competes for the same units and the
+  // row total can never mismatch the real available count.
+  const sumOthers = stockAreas.reduce((s,a)=>{
+    if(a.name===areaName || (workshopArea && a.id===workshopArea.id)) return s;
+    return s + (Number(existing[a.name])||0);
+  }, 0);
+  const maxAllowed = Math.max(0, available - sumOthers);
+  if(qty > maxAllowed){
+    qty = maxAllowed;
+    toast(`${model} · ${color} — ${available} matra available cha, baki areas le ${sumOthers} lisakeko. ${areaName} lai ${maxAllowed} ma adjust gareko (baki Workshop ma dekhincha).`,'warn');
+    if(inputEl) inputEl.value = qty;
+  }
+  try{
+    await setDoc(doc(db,"area_stock",key), {
+      model, color, areas: { ...existing, [areaName]: qty }
+    }, { merge:true });
+  }catch(e){ toast('Error saving area stock: '+e.message,'err'); }
+};
+
+let areaEditMode = false;
+window.toggleAreaEditMode = ()=>{
+  areaEditMode = !areaEditMode;
+  const btn = document.getElementById('areaEditModeBtn');
+  if(btn){
+    btn.innerHTML = areaEditMode
+      ? '<i class="fas fa-lock-open"></i> Editing — Tap to Lock'
+      : '<i class="fas fa-lock"></i> View Only — Tap to Edit';
+    btn.classList.toggle('area-edit-on', areaEditMode);
+  }
+  renderAreaStockTable();
+};
+
+function findWorkshopArea(){
+  return stockAreas.find(a => (a.name||'').trim().toLowerCase()==='workshop');
+}
+
+function renderAreaStockTable(){
+  const head = document.getElementById('areaStockHead');
+  const body = document.getElementById('areaStockBody');
+  if(!head || !body) return;
+
+  head.innerHTML = `<th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
+    <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Colour</th>
+    ${stockAreas.map(a=>`<th class="px-3 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">
+        ${a.name}${areaEditMode ? `<button class="area-remove-btn" onclick="removeStockArea('${a.id}','${(a.name||'').replace(/'/g,"\\'")}')" title="Remove area"><i class="fas fa-xmark"></i></button>` : ''}
+      </th>`).join('')}
+    <th class="px-4 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Row Total</th>`;
+
+  const byModel = stockReportGrouped || {};
+  const models = Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total);
+  if(!models.length){
+    body.innerHTML = `<tr><td colspan="${stockAreas.length+3}" class="px-4 py-10 text-center text-slate-400 text-sm">No available stock yet — area grid will fill in automatically once units are in stock.</td></tr>`;
+    return;
+  }
+  if(!stockAreas.length){
+    body.innerHTML = `<tr><td colspan="3" class="px-4 py-10 text-center text-slate-400 text-sm">Kunai area thapeko xaina. Maathi "Add Area" bata Showroom, Workshop, Taplejung jasto area thapnus.</td></tr>`;
+    return;
+  }
+
+  const workshopArea = findWorkshopArea();
+  const rows = [];
+  models.forEach(m=>{
+    Object.entries(byModel[m].colours).sort((a,b)=>b[1]-a[1]).forEach(([c,available])=>{
+      const key = areaStockKey(m,c);
+      const saved = areaStockMap[key]?.areas || {};
+      const sumEnteredNonWorkshop = stockAreas.reduce((s,a)=> (workshopArea && a.id===workshopArea.id) ? s : s + (Number(saved[a.name])||0), 0);
+      // Any stock not explicitly assigned elsewhere defaults to Workshop — nothing
+      // gets silently lost, and no area combo can ever exceed the real stock count.
+      const unallocated = Math.max(0, available - sumEnteredNonWorkshop);
+
+      const cells = stockAreas.map(a=>{
+        const raw = Number(saved[a.name])||0;
+        const isWorkshop = workshopArea && a.id===workshopArea.id;
+        const thLabel = (a.name||'').replace(/"/g,'&quot;');
+        if(isWorkshop){
+          // Workshop is always the computed leftover — shown, never typed into.
+          return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700" data-th="${thLabel}">${unallocated}</td>`;
+        }
+        if(areaEditMode){
+          const maxForThis = Math.max(raw, available - sumEnteredNonWorkshop + raw);
+          const mEsc = m.replace(/'/g,"\\'"), cEsc = c.replace(/'/g,"\\'"), aEsc = (a.name||'').replace(/'/g,"\\'");
+          return `<td class="px-3 py-2 text-center" data-th="${thLabel}">
+            <input type="number" min="0" max="${maxForThis}" class="area-qty-input" value="${raw}"
+              data-model="${m.replace(/"/g,'&quot;')}" data-color="${c.replace(/"/g,'&quot;')}" data-area="${(a.name||'').replace(/"/g,'&quot;')}"
+              onfocus="this.select()" onkeydown="handleAreaKey(event,this)"
+              onchange="saveAreaQty('${mEsc}','${cEsc}','${aEsc}', this.value, this);">
+          </td>`;
+        }
+        return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700" data-th="${thLabel}">${raw}</td>`;
+      }).join('');
+
+      rows.push(`<tr class="border-b border-slate-100">
+        <td class="px-4 py-2.5 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">${m}</td>
+        <td class="px-4 py-2.5" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(c)}"></span>${c}</span></td>
+        ${cells}
+        <td class="px-3 py-2 text-center" data-th="Row Total"><span class="area-total-chip">${available}</span></td>
+      </tr>`);
+    });
+  });
+  body.innerHTML = rows.join('');
+
+  if(pendingAreaFocus){
+    try{
+      const sel = `.area-qty-input[data-model="${CSS.escape(pendingAreaFocus.model)}"][data-color="${CSS.escape(pendingAreaFocus.color)}"][data-area="${CSS.escape(pendingAreaFocus.area)}"]`;
+      const el = body.querySelector(sel);
+      if(el){ el.focus(); el.select(); }
+    }catch(e){ /* ignore selector edge cases */ }
+    pendingAreaFocus = null;
+  }
+}
+
+let pendingAreaFocus = null;
+window.handleAreaKey = function(e, el){
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  const td = el.closest('td');
+  const tr = el.closest('tr');
+  let target = null;
+  const nextTd = td && td.nextElementSibling;
+  if(nextTd) target = nextTd.querySelector('.area-qty-input');
+  if(!target && tr && tr.nextElementSibling) target = tr.nextElementSibling.querySelector('.area-qty-input');
+  if(target){
+    pendingAreaFocus = { model: target.dataset.model, color: target.dataset.color, area: target.dataset.area };
+  }
+  el.blur(); // triggers the onchange save
+};
+
+
+const invSearchInput = document.getElementById('invSearch');
+const invSearchDropdown = document.getElementById('invSearchDropdown');
+const invSearchClear = document.getElementById('invSearchClear');
+
+function matchScore(field, q){
+  field = (field||'').toLowerCase();
+  if(!field) return -1;
+  if(field === q) return 100;
+  if(field.endsWith(q)) return 80;      // matches by trailing/last digits — most common lookup
+  if(field.startsWith(q)) return 60;
+  if(field.includes(q)) return 40;
+  return -1;
+}
+
+function searchInvSuggestions(q){
+  q = q.toLowerCase().trim();
+  if(!q) return [];
+  const scored = invData.map(s=>{
+    const scores = [
+      matchScore(s.chassis, q),
+      matchScore(s.engine, q),
+      matchScore(s.regNo, q),
+      matchScore(s.model, q),
+      matchScore(s.color, q)
+    ];
+    return { s, score: Math.max(...scores) };
+  }).filter(x=>x.score>=0);
+  scored.sort((a,b)=>b.score-a.score);
+  return scored.slice(0,8).map(x=>x.s);
+}
+
+function renderInvDropdown(list){
+  if(!list.length){
+    invSearchDropdown.innerHTML = `<div class="px-4 py-3 text-xs text-slate-400">No matching units found.</div>`;
+    invSearchDropdown.classList.remove('hidden');
+    return;
+  }
+  const q = invSearchInput.value;
+  invSearchDropdown.innerHTML = list.map(s=>`
+    <button type="button" data-id="${s.id}" class="invSuggestBtn w-full text-left px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-blue-50 border-b border-slate-50 last:border-b-0 transition-colors">
+      <div class="min-w-0">
+        <div class="text-sm font-bold text-slate-800 truncate">${highlightMatch(s.model, q)}</div>
+        <div class="text-[11px] text-slate-400 font-mono truncate">Chassis ${highlightMatch(s.chassis, q)} · Engine ${highlightMatch(s.engine, q)}</div>
+      </div>
+      <span class="flex items-center gap-1.5 text-[11px] text-slate-500 flex-shrink-0">
+        <span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}
+      </span>
+    </button>`).join('');
+  invSearchDropdown.classList.remove('hidden');
+  invSearchDropdown.querySelectorAll('.invSuggestBtn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const s = invData.find(x=>x.id===btn.dataset.id);
+      if(s){
+        invSearchInput.value = s.chassis || s.model;
+        invSearchTerm = invSearchInput.value;
+        invSearchClear.classList.remove('hidden');
+      }
+      invSearchDropdown.classList.add('hidden');
+      renderInvTable(getFilteredInv());
+    });
+  });
+}
+
+invSearchInput.addEventListener('input', ()=>{
+  const val = invSearchInput.value;
+  invSearchTerm = val;
+  invSearchClear.classList.toggle('hidden', !val);
+  renderInvTable(getFilteredInv());
+  const suggestions = searchInvSuggestions(val);
+  if(val.trim()) renderInvDropdown(suggestions);
+  else invSearchDropdown.classList.add('hidden');
+});
+invSearchInput.addEventListener('focus', ()=>{
+  if(invSearchInput.value.trim()) renderInvDropdown(searchInvSuggestions(invSearchInput.value));
+});
+invSearchClear.addEventListener('click', ()=>{
+  invSearchInput.value=''; invSearchTerm='';
+  invSearchClear.classList.add('hidden');
+  invSearchDropdown.classList.add('hidden');
+  renderInvTable(getFilteredInv());
+});
+document.addEventListener('click', (e)=>{
+  const wrap = document.getElementById('invSearchWrap');
+  if(wrap && !wrap.contains(e.target)) invSearchDropdown.classList.add('hidden');
+});
+
+/* ─── Finance Schemes ─── */
+function loadFinanceSchemes(){
+  onSnapshot(collection(db,"finance_schemes"), snap => {
+    financeSchemes = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderFinTable();
+  }, err => {
+    console.error('finance_schemes listener failed', err);
+    document.getElementById('finTableBody').innerHTML = `<tr><td colspan="4"><div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load finance schemes.</p>
+      <button onclick="loadFinanceSchemes()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div></td></tr>`;
+    toast('Finance sync failed: '+err.message,'err');
+  });
+}
+
+function renderFinTable(){
+  const tbody = document.getElementById('finTableBody');
+  document.getElementById('finCount').textContent = financeSchemes.length+' scheme'+(financeSchemes.length!==1?'s':'');
+  if(!financeSchemes.length){
+    tbody.innerHTML=`<tr><td colspan="5"><div class="py-12 text-center text-slate-400"><i class="fas fa-percent text-3xl opacity-25 block mb-2"></i><p class="text-sm">No schemes yet. Add one above.</p></div></td></tr>`;
+    return;
+  }
+  const sorted=[...financeSchemes].sort((a,b)=>{
+    const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+    const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+    return ta-tb;
+  });
+  tbody.innerHTML = sorted.map(f=>`
+    <tr class="border-b border-slate-100">
+      <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Down Payment">${f.downPay}%</td>
+      <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Interest Rate">${f.rate}%</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500 whitespace-nowrap" data-th="Tenure">${(f.tenures||[]).join(', ')} mo</td>
+      <td class="px-4 py-3" data-th="Actions">
+        <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'finance_schemes','${f.id}')" aria-label="Row actions">
+          <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+document.getElementById('saveFinBtn').addEventListener('click', async()=>{
+  const downPayCheck = Validate.positiveNumber(document.getElementById('fDownPay').value, { label:'Down payment', allowZero:true, max:100 });
+  const rateCheck = Validate.positiveNumber(document.getElementById('fRate').value, { label:'Interest rate', allowZero:true, max:100 });
+  const tenureRaw = document.getElementById('fTenure').value.trim();
+
+  if(!downPayCheck.ok){ toast(downPayCheck.error,'err'); return; }
+  if(!rateCheck.ok){ toast(rateCheck.error,'err'); return; }
+  if(!tenureRaw){ toast('Enter at least one tenure in months.','err'); return; }
+
+  const tenures = [...new Set(tenureRaw.split(',').map(t=>Number(t.trim())).filter(t=>t>0 && t<=360))].sort((a,b)=>a-b);
+  if(!tenures.length){
+    toast('Enter valid month(s), e.g. 12, 24, 36','err');
+    return;
+  }
+  const downPay = downPayCheck.value, rate = rateCheck.value;
+
+  try{
+    if(currentEditFinId){
+      await updateDoc(doc(db,"finance_schemes",currentEditFinId), {
+        downPay: Number(downPay),
+        rate: Number(rate),
+        tenures
+      });
+      toast('Finance scheme updated!');
+      window.cancelFinEdit();
+    } else {
+      await addDoc(collection(db,"finance_schemes"), {
+        downPay: Number(downPay),
+        rate: Number(rate),
+        tenures,
+        createdAt: serverTimestamp()
+      });
+      document.getElementById('fDownPay').value='';
+      document.getElementById('fRate').value='';
+      document.getElementById('fTenure').value='';
+      toast('Finance scheme added!');
+    }
+  }catch(e){
+    toast('Error: '+e.message,'err');
+  }
+});
+
+window._editFinance=(id)=>{
+  const f=financeSchemes.find(x=>x.id===id); if(!f)return;
+  document.getElementById('fDownPay').value=f.downPay??'';
+  document.getElementById('fRate').value=f.rate??'';
+  document.getElementById('fTenure').value=(f.tenures||[]).join(', ');
+  currentEditFinId=id;
+  const btn=document.getElementById('saveFinBtn');
+  btn.innerHTML='<i class="fas fa-rotate"></i> Update Scheme';
+  document.getElementById('finFormTitle').textContent='Edit Finance Scheme';
+  const cancel = document.getElementById('cancelFinBtn');
+  cancel.classList.remove('hidden'); cancel.classList.add('flex');
+  window.scrollTo({top:0,behavior:'smooth'});
+  toast('Scheme loaded for editing');
+};
+
+window.cancelFinEdit=()=>{
+  currentEditFinId=null;
+  ['fDownPay','fRate','fTenure'].forEach(id=>document.getElementById(id).value='');
+  const btn=document.getElementById('saveFinBtn');
+  btn.innerHTML='<i class="fas fa-floppy-disk"></i> Save Scheme';
+  document.getElementById('finFormTitle').textContent='Add Finance Scheme';
+  const cancel = document.getElementById('cancelFinBtn');
+  cancel.classList.add('hidden'); cancel.classList.remove('flex');
+};
+
+/* ─── Accessories Inventory ─── */
+function loadAccessories(){
+  onSnapshot(collection(db,"accessories"), snap => {
+    accessories = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderAccTable();
+  }, err => {
+    console.error('accessories listener failed', err);
+    document.getElementById('accTableBody').innerHTML = `<tr><td colspan="3"><div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load accessories.</p>
+      <button onclick="loadAccessories()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div></td></tr>`;
+    toast('Accessories sync failed: '+err.message,'err');
+  });
+}
+
+function renderAccTable(){
+  const tbody = document.getElementById('accTableBody');
+  document.getElementById('accCount').textContent = accessories.length+' item'+(accessories.length!==1?'s':'');
+  if(!accessories.length){
+    tbody.innerHTML=`<tr><td colspan="3"><div class="py-12 text-center text-slate-400"><i class="fas fa-helmet-safety text-3xl opacity-25 block mb-2"></i><p class="text-sm">No accessories yet. Add one above.</p></div></td></tr>`;
+    return;
+  }
+  const sorted=[...accessories].sort((a,b)=>{
+    const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+    const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+    return ta-tb;
+  });
+  tbody.innerHTML = sorted.map(a=>`
+    <tr class="border-b border-slate-100">
+      <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Accessory">${a.name}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-700" data-th="Default Price">Rs. ${Number(a.price).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3" data-th="Actions">
+        <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'accessories','${a.id}')" aria-label="Row actions">
+          <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+document.getElementById('saveAccBtn').addEventListener('click', async()=>{
+  const nameCheck = Validate.text(document.getElementById('aName').value, { label:'Accessory name', max:60 });
+  const priceCheck = Validate.positiveNumber(document.getElementById('aPrice').value, { label:'Price' });
+
+  if(!nameCheck.ok){ toast(nameCheck.error,'err'); return; }
+  if(!priceCheck.ok){ toast(priceCheck.error,'err'); return; }
+  const name = nameCheck.value, price = priceCheck.value;
+
+  try{
+    if(currentEditAccId){
+      await updateDoc(doc(db,"accessories",currentEditAccId), {
+        name,
+        price: Number(price)
+      });
+      toast('Accessory updated!');
+      window.cancelAccEdit();
+    } else {
+      await addDoc(collection(db,"accessories"), {
+        name,
+        price: Number(price),
+        createdAt: serverTimestamp()
+      });
+      document.getElementById('aName').value='';
+      document.getElementById('aPrice').value='';
+      toast('Accessory added!');
+    }
+  }catch(e){
+    toast('Error: '+e.message,'err');
+  }
+});
+
+window._editAccessory=(id)=>{
+  const a=accessories.find(x=>x.id===id); if(!a)return;
+  document.getElementById('aName').value=a.name??'';
+  document.getElementById('aPrice').value=a.price??'';
+  currentEditAccId=id;
+  const btn=document.getElementById('saveAccBtn');
+  btn.innerHTML='<i class="fas fa-rotate"></i> Update Accessory';
+  document.getElementById('accFormTitle').textContent='Edit Accessory';
+  const cancel = document.getElementById('cancelAccBtn');
+  cancel.classList.remove('hidden'); cancel.classList.add('flex');
+  window.scrollTo({top:0,behavior:'smooth'});
+  toast('Accessory loaded for editing');
+};
+
+window.cancelAccEdit=()=>{
+  currentEditAccId=null;
+  ['aName','aPrice'].forEach(id=>document.getElementById(id).value='');
+  const btn=document.getElementById('saveAccBtn');
+  btn.innerHTML='<i class="fas fa-floppy-disk"></i> Save Accessory';
+  document.getElementById('accFormTitle').textContent='Add Accessory';
+  const cancel = document.getElementById('cancelAccBtn');
+  cancel.classList.add('hidden'); cancel.classList.remove('flex');
+};
+
+window._saveSn=async(col,id,val)=>{
+  const check = Validate.positiveNumber(val, { label:'S.N' });
+  if(!check.ok){ toast(check.error,'err'); return; }
+  const num = check.value;
+  try{
+    // Transactional write: re-reads the doc inside the transaction and
+    // Firestore automatically retries if another admin's write lands in
+    // between the read and the commit, instead of silently clobbering it.
+    await runTransaction(db, async (tx) => {
+      const ref = doc(db, col, id);
+      const snap = await tx.get(ref);
+      if(!snap.exists()) throw new Error('This record no longer exists — it may have been deleted by another user.');
+      tx.update(ref, { sn: num });
+    });
+    toast('S.N updated to '+num);
+  }catch(e){ toast('Failed: '+e.message,'err'); }
+};
+
+window._deleteEntry=async(col,id)=>{
+  const ok = await showConfirm({
+    title: 'Delete this entry?',
+    message: col==='bikes' ? "This will permanently remove the model from your price list." : (col==='finance_schemes' ? "This will permanently remove the finance scheme." : (col==='accessories' ? "This will permanently remove the accessory from the price list." : "This will permanently remove the unit from inventory. Remaining S.N numbers will shift up to close the gap.")),
+    okText: 'Delete',
+    okColorClass: 'text-red-500 hover:bg-red-50',
+    iconClass: 'fa-trash-can', iconColor: '#ef4444', iconBg: '#FEF2F2'
+  });
+  if(!ok) return;
+  try{
+    if(col==='inventory'){
+      // Grab the S.N of the unit being removed BEFORE deleting, so we know
+      // which remaining units need to shift down by one.
+      const target = invData.find(x=>x.id===id);
+      const deletedSn = target ? Number(target.sn)||0 : 0;
+
+      await deleteDoc(doc(db,col,id));
+
+      if(deletedSn){
+        const toShift = invData.filter(x=>x.id!==id && Number(x.sn)>deletedSn);
+        if(toShift.length){
+          const batch = writeBatch(db);
+          toShift.forEach(x=>batch.update(doc(db,'inventory',x.id),{sn:Number(x.sn)-1}));
+          await batch.commit();
+        }
+      }
+      toast('Unit removed — S.N renumbered automatically.');
+    } else {
+      await deleteDoc(doc(db,col,id));
+      toast(col==='bikes' ? 'Model deleted.' : 'Finance scheme deleted.');
+    }
+  }catch(e){toast('Delete failed: '+e.message,'err');}
+};
+
+/* ─── Excel Bulk Import ─── */
+let excelParsedRows = [];
+
+document.getElementById('excelFileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const importBtn = document.getElementById('importExcelBtn');
+  const label = document.getElementById('excelFileLabel');
+  const summary = document.getElementById('importSummary');
+  summary.classList.add('hidden');
+  excelParsedRows = [];
+  importBtn.disabled = true;
+
+  if(!file){ label.textContent='Click to choose Excel / CSV file…'; return; }
+  label.textContent = file.name;
+
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      // Read as raw array-of-arrays so we can fuzzy-match header names ourselves
+      // (real-world files use headers like "model_name", "vin_chassis", "engine_number", "registration_number")
+      const aoa = XLSX.utils.sheet_to_json(sheet, {header:1, defval:'', blankrows:false});
+      if(!aoa.length){ toast('File appears empty.','err'); return; }
+
+      const rawHeaders = aoa[0].map(h=>h.toString().trim().toLowerCase().replace(/[^a-z]/g,''));
+      // Find the FIRST column index whose cleaned header contains one of the given keywords
+      function findCol(keywords){
+        for(let i=0;i<rawHeaders.length;i++){
+          if(keywords.some(kw=>rawHeaders[i].includes(kw))) return i;
+        }
+        return -1;
+      }
+      const colIdx = {
+        model:   findCol(['modelname','model']),
+        chassis: findCol(['chassis','vin']),
+        engine:  findCol(['enginenumber','engine']),
+        regNo:   findCol(['registrationnumber','regno','regd','registration']),
+        color:   findCol(['color','colour'])
+      };
+
+      if(colIdx.model===-1 || colIdx.chassis===-1){
+        toast('Could not find Model / Chassis columns in the header row.','err');
+        return;
+      }
+
+      excelParsedRows = aoa.slice(1).map(r=>({
+        model:   colIdx.model!==-1   ? (r[colIdx.model]||'').toString().trim()   : '',
+        chassis: colIdx.chassis!==-1 ? (r[colIdx.chassis]||'').toString().trim() : '',
+        engine:  colIdx.engine!==-1  ? (r[colIdx.engine]||'').toString().trim()  : '',
+        regNo:   colIdx.regNo!==-1   ? (r[colIdx.regNo]||'').toString().trim()   : '',
+        color:   colIdx.color!==-1   ? (r[colIdx.color]||'').toString().trim()   : ''
+      })).filter(r=>r.model || r.chassis || r.engine); // drop fully blank rows
+
+      if(!excelParsedRows.length){ toast('No data rows found in file.','err'); return; }
+      importBtn.disabled = false;
+      toast(excelParsedRows.length+' row(s) detected. Review & click Import.');
+    }catch(err){
+      toast('Could not read file: '+err.message,'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('downloadTemplateBtn').addEventListener('click', ()=>{
+  const wsData = [
+    ['Model','Chassis','Engine','RegNo','Color'],
+    ['Pulsar N150','MD2A12EY000001','BSVI2024000001','BA2PA1234','Fiery Orange'],
+    ['Pulsar NS200','MD2A12EY000002','BSVI2024000002','','Racing Red']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
+  XLSX.writeFile(wb, 'inventory_import_template.xlsx');
+});
+
+document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
+  if(!excelParsedRows.length) return;
+  const btn = document.getElementById('importExcelBtn');
+  const btnText = document.getElementById('importExcelBtnText');
+  btn.disabled = true;
+  btnText.textContent = 'Importing…';
+
+  // Start SN after current max SN in inventory
+  let nextSn = invData.length ? Math.max(...invData.map(x=>Number(x.sn)||0)) + 1 : 1;
+
+  const results = { success:[], failed:[] };
+  const seenInBatch = []; // track chassis/engine already added within this same import run
+
+  for(const row of excelParsedRows){
+    if(!row.model || !row.chassis || !row.engine || !row.color){
+      results.failed.push({row, reason:'Missing required field (Model/Chassis/Engine/Color)'});
+      continue;
+    }
+    const chassisCheck = Validate.identifierCode(row.chassis, { label:'Chassis' });
+    const engineCheck = Validate.identifierCode(row.engine, { label:'Engine' });
+    const modelCheck = Validate.text(row.model, { label:'Model', max:80 });
+    const colorCheck = Validate.text(row.color, { label:'Color', max:40 });
+    const badField = [chassisCheck, engineCheck, modelCheck, colorCheck].find(c=>!c.ok);
+    if(badField){ results.failed.push({row, reason: badField.error}); continue; }
+    const masterBike = findMasterBikeByName(modelCheck.value);
+    if(!masterBike){
+      results.failed.push({row, reason:`Model "${modelCheck.value}" isn't in the master price list — add it there first.`});
+      continue;
+    }
+    row.model = masterBike.name; row.chassis = chassisCheck.value; row.engine = engineCheck.value; row.color = colorCheck.value;
+    const dupExisting = findDuplicateUnit(row.chassis, row.engine);
+    const dupBatch = seenInBatch.find(r=>normId(r.chassis)===normId(row.chassis) || normId(r.engine)===normId(row.engine));
+    if(dupExisting || dupBatch){
+      results.failed.push({row, reason:'Duplicate — chassis/engine already exists'+(dupExisting?` (S.N ${dupExisting.sn||'—'})`:' (within this file)')});
+      continue;
+    }
+    try{
+      await addDoc(collection(db,"inventory"),{
+        sn: nextSn,
+        model: row.model,
+        chassis: row.chassis,
+        engine: row.engine,
+        regNo: row.regNo || '',
+        color: row.color,
+        addedAt: new Date()
+      });
+      seenInBatch.push(row);
+      results.success.push(row);
+      nextSn++;
+    }catch(e){
+      results.failed.push({row, reason:e.message});
+    }
+  }
+
+  // Render summary
+  const summary = document.getElementById('importSummary');
+  const head = document.getElementById('importSummaryHead');
+  const body = document.getElementById('importSummaryBody');
+  head.innerHTML = `<span class="text-emerald-600"><i class="fas fa-circle-check"></i> ${results.success.length} imported</span>` +
+    (results.failed.length ? ` &nbsp;·&nbsp; <span class="text-red-500"><i class="fas fa-circle-xmark"></i> ${results.failed.length} failed</span>` : '');
+  body.innerHTML = results.failed.map(f=>`
+    <div class="px-4 py-2 flex items-center justify-between gap-3">
+      <span class="text-slate-600 truncate">${f.row.model || '(no model)'} — ${f.row.chassis || '(no chassis)'}</span>
+      <span class="text-red-500 font-medium whitespace-nowrap">${f.reason}</span>
+    </div>`).join('') || `<div class="px-4 py-3 text-slate-400">All rows imported successfully.</div>`;
+  summary.classList.remove('hidden');
+
+  toast(`Import done: ${results.success.length} added, ${results.failed.length} failed`, results.failed.length ? 'err' : 'ok');
+
+  btn.disabled = true;
+  btnText.textContent = 'Import Rows';
+  excelParsedRows = [];
+  document.getElementById('excelFileInput').value = '';
+  document.getElementById('excelFileLabel').textContent = 'Click to choose Excel / CSV file…';
+});
+
+// Retry buttons rendered inside onSnapshot error states use inline onclick,
+// which needs these on `window` since this script runs as an ES module.
+window.loadMasterPriceList = loadMasterPriceList;
+window.loadLiveStock = loadLiveStock;
+window.loadFinanceSchemes = loadFinanceSchemes;
+window.loadAccessories = loadAccessories;
+
+/* ─── Nav ─── */
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', fin:'HFL Finance Options', acc:'Accessories Inventory', stock:'Stock Report' };
+window.switchSec=(sec)=>{
+  document.querySelectorAll('.sec-panel').forEach(p=>p.classList.remove('active'));
+  const secId = sec==='price'?'secPrice':(sec==='inv'?'secInv':(sec==='fin'?'secFin':(sec==='acc'?'secAcc':'secStock')));
+  document.getElementById(secId).classList.add('active');
+  setActiveTab(sec);
+  const heading = document.getElementById('topbarHeading');
+  if(heading) heading.textContent = SEC_TITLES[sec] || '';
+  if(sec==='inv') populateModelDropdown();
+  if(sec==='stock') loadStockReportData();
+};
+</script>
+
+<script>
+/* ─── Sidebar drawer (mobile) ─── */
+function toggleMobileMenu(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeMobileMenu(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeMobileMenu(); });
+
+/* ─── Topbar search: jumps to the current page's own search field, if any ─── */
+function focusPageSearch(){
+  const inv = document.getElementById('invSearch');
+  if(inv && document.getElementById('secInv').classList.contains('active')){ inv.focus(); return; }
+  window.switchSec('inv');
+  setTimeout(()=>document.getElementById('invSearch')?.focus(), 60);
+}
+
+/* ─── Profile dropdown ─── */
+function toggleProfileMenu(e){
+  e.stopPropagation();
+  document.getElementById('profileMenu').classList.toggle('open');
+}
+document.addEventListener('click', (e)=>{
+  const menu = document.getElementById('profileMenu');
+  const trigger = document.getElementById('profileTrigger');
+  if(menu && menu.classList.contains('open') && !menu.contains(e.target) && !trigger.contains(e.target)){
+    menu.classList.remove('open');
+  }
+});
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   CUSTOM SELECT ENGINE — progressively enhances native <select> elements
+   into a styled dropdown (search-filterable, keyboard-friendly), while the
+   original <select> stays live in the DOM as the single source of truth.
+   All existing app code that reads/sets `.value` or listens for 'change'
+   on these selects keeps working unmodified.
+   ═══════════════════════════════════════════════════════════════════════ */
+function enhanceNativeSelect(select, opts={}){
+  if(!select || select._csEnhanced) return;
+  select._csEnhanced = true;
+  select.tabIndex = -1;
+  const searchable = !!opts.searchable;
+  const placeholder = opts.placeholder || 'Select…';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'cs-wrap';
+  select.parentNode.insertBefore(wrap, select);
+  wrap.appendChild(select);
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'cs-trigger';
+  trigger.setAttribute('aria-haspopup','listbox');
+  trigger.innerHTML = `<span class="cs-label placeholder">${placeholder}</span><i class="fas fa-chevron-down cs-chev"></i>`;
+  wrap.appendChild(trigger);
+
+  let menu = null;
+
+  function currentLabel(){
+    const opt = select.options[select.selectedIndex];
+    return (opt && opt.value) ? opt.textContent : '';
+  }
+  function syncLabel(){
+    const labelEl = trigger.querySelector('.cs-label');
+    const lbl = currentLabel();
+    if(lbl){ labelEl.textContent = lbl; labelEl.classList.remove('placeholder'); }
+    else { labelEl.textContent = placeholder; labelEl.classList.add('placeholder'); }
+  }
+
+  // Shadow the native `.value` accessor so any existing JS (`select.value = x`)
+  // keeps working exactly as before, and also keeps the custom label in sync.
+  const nativeDesc = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value');
+  Object.defineProperty(select, 'value', {
+    get(){ return nativeDesc.get.call(select); },
+    set(v){ nativeDesc.set.call(select, v); syncLabel(); },
+    configurable:true
+  });
+
+  function closeMenu(){
+    if(menu){ menu.remove(); menu=null; }
+    trigger.classList.remove('open');
+    document.removeEventListener('click', onDocClick, true);
+  }
+  function onDocClick(e){ if(!wrap.contains(e.target)) closeMenu(); }
+
+  function openMenu(){
+    if(menu) return;
+    trigger.classList.add('open');
+    menu = document.createElement('div');
+    menu.className = 'cs-menu';
+
+    let searchInput = null;
+    if(searchable){
+      const sw = document.createElement('div'); sw.className = 'cs-search';
+      sw.innerHTML = `<i class="fas fa-magnifying-glass"></i>`;
+      searchInput = document.createElement('input');
+      searchInput.type = 'text'; searchInput.placeholder = 'Type to filter…';
+      sw.appendChild(searchInput);
+      menu.appendChild(sw);
+    }
+
+    const optWrap = document.createElement('div');
+    optWrap.className = 'cs-options';
+    menu.appendChild(optWrap);
+    wrap.appendChild(menu);
+
+    function renderOptions(filter=''){
+      optWrap.innerHTML = '';
+      const f = filter.trim().toLowerCase();
+      let shown = 0;
+      Array.from(select.options).forEach((opt,idx)=>{
+        const isPlaceholder = idx===0 && opt.value==='';
+        if(isPlaceholder){
+          if(f) return; // hide placeholder row while filtering
+        } else if(!opt.textContent.trim() || /^[-—\s]+$/.test(opt.textContent)){
+          return; // skip blank / dash-only garbage entries
+        }
+        if(f && !opt.textContent.toLowerCase().includes(f)) return;
+        shown++;
+        const row = document.createElement('div');
+        row.className = 'cs-option' + (opt.value===select.value ? ' selected':'');
+        row.setAttribute('role','option');
+        row.innerHTML = `<span>${opt.textContent}</span><i class="fas fa-check cs-check"></i>`;
+        row.addEventListener('click', ()=>{
+          select.value = opt.value; // goes through the defineProperty setter above
+          select.dispatchEvent(new Event('change', {bubbles:true}));
+          closeMenu();
+        });
+        optWrap.appendChild(row);
+      });
+      if(!shown){
+        const empty = document.createElement('div');
+        empty.className = 'cs-empty';
+        empty.textContent = 'No matches found';
+        optWrap.appendChild(empty);
+      }
+    }
+    renderOptions();
+
+    if(searchInput){
+      searchInput.addEventListener('input', ()=>renderOptions(searchInput.value));
+      requestAnimationFrame(()=>searchInput.focus());
+    }
+    setTimeout(()=>document.addEventListener('click', onDocClick, true), 0);
+  }
+
+  trigger.addEventListener('click', ()=>{ menu ? closeMenu() : openMenu(); });
+  trigger.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter' || e.key===' '){ e.preventDefault(); menu ? closeMenu() : openMenu(); }
+    if(e.key==='Escape') closeMenu();
+  });
+
+  syncLabel();
+  select._csSync = syncLabel;
+}
+
+function initCustomSelects(){
+  enhanceNativeSelect(document.getElementById('mCategory'), { placeholder:'Category' });
+  enhanceNativeSelect(document.getElementById('sStatus'), { placeholder:'Available' });
+}
+document.addEventListener('DOMContentLoaded', initCustomSelects);
+</script>
+
+<script>
+/* Intro loader: animated percent counter + dismissal */
+window.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('adminLoader');
+  const percentEl = document.getElementById('intro-percent');
+  const totalMs = 2300;
+  const startMs = performance.now();
+
+  function tickPercent(now) {
+    const elapsed = now - startMs;
+    const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
+    if(percentEl) percentEl.textContent = pct + '%';
+    if(elapsed < totalMs) requestAnimationFrame(tickPercent);
+  }
+  requestAnimationFrame(tickPercent);
+
+  setTimeout(() => {
+    overlay?.classList.add('fade-out');
+  }, totalMs);
+});
+</script>
+</body>
+</html>
