@@ -2512,7 +2512,7 @@ function buildStockReportPage(){
       areaGridRows.push({ model:m, color:c, perArea, total:available });
       const chassisTails = (info.chassisByColour && info.chassisByColour[c]) || [];
       const chassisLine = chassisTails.length
-        ? `<div style="font-size:8.5px;color:#8B93A3;font-weight:600;margin-top:2px;letter-spacing:.02em">Chassis: ${chassisTails.join(', ')}</div>`
+        ? `<div style="font-size:11px;color:#475569;font-weight:700;margin-top:3px;letter-spacing:.02em">Chassis: ${chassisTails.join(', ')}</div>`
         : '';
       return `<tr><td>${sn}</td><td>${m}${chassisLine}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${available}</td></tr>`;
     }).join('');
