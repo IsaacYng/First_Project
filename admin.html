@@ -601,6 +601,9 @@
   .area-edit-toggle{ display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:9px; font-size:11.5px; font-weight:700; border:1.5px solid #E2E8F0; background:#F8FAFC; color:#64748B; cursor:pointer; transition:all .15s ease; }
   .area-edit-toggle:hover{ border-color:#CBD5E1; color:#334155; }
   .area-edit-toggle.area-edit-on{ background:#FEF6E7; border-color:#FBEACB; color:#B4740E; }
+  .fin-cat-chip{ display:inline-flex; align-items:center; gap:7px; background:#F1F2F5; border:1px solid #E7E9EE; border-radius:999px; padding:5px 6px 5px 12px; font-size:12px; font-weight:700; color:#334155; }
+  .fin-cat-chip button{ width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#94A3B8; font-size:10px; background:#fff; border:none; cursor:pointer; transition:all .15s; }
+  .fin-cat-chip button:hover{ background:#FEE2E2; color:#EF4444; }
   .inv-status-tab{ color:#7C8494; }
   .inv-status-tab:hover{ color:#1F2430; }
   .inv-status-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
@@ -1210,6 +1213,24 @@
         </div>
       </div>
 
+      <!-- Category Manager -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-layer-group text-amber-500 text-lg"></i> Finance Categories
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-3">Har category ko aafnai max tenure huncha — jasto Bike 60 months samma, Scooter 36 months samma. Naya category (3 Wheeler jasto) thapna/hataauna milcha.</p>
+        <div id="finCategoryChips" class="flex flex-wrap gap-2 mb-4"></div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <input type="text" id="newFinCatName" placeholder="e.g. 3 Wheeler" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 w-36"/>
+          <input type="number" id="newFinCatMaxTenure" placeholder="Max months, e.g. 48" min="1" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 w-40"/>
+          <button onclick="addFinanceCategory()" class="flex items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+            <i class="fas fa-plus text-[10px]"></i> Add Category
+          </button>
+        </div>
+      </div>
+
       <!-- Form -->
       <div class="yng-card-shell p-5 mb-5">
         <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
@@ -1218,7 +1239,11 @@
             <span id="finFormTitle">Add Finance Scheme</span>
           </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-1.5">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-1.5">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Category <span class="text-red-400">*</span></label>
+            <select id="fCategory" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full"></select>
+          </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Down Payment (%) <span class="text-red-400">*</span></label>
             <input type="number" id="fDownPay" placeholder="40" min="0" max="100"
@@ -1235,7 +1260,7 @@
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
         </div>
-        <p class="text-[11px] text-slate-400 mb-4"><i class="fas fa-circle-info mr-1"></i>Ek dp/rate ma multiple month options dinu parey comma le chuttyaunus — jasto: <span class="font-mono text-slate-500">12, 24, 36, 48</span></p>
+        <p class="text-[11px] text-slate-400 mb-4"><i class="fas fa-circle-info mr-1"></i>Ek dp/rate ma multiple month options dinu parey comma le chuttyaunus — jasto: <span class="font-mono text-slate-500">12, 24, 36, 48</span>. Tenure le selected category ko max limit bhanda badi huna sakdaina.</p>
         <div class="flex gap-2 flex-wrap">
           <button id="saveFinBtn" class="cta-primary">
             <i class="fas fa-floppy-disk"></i> Save Scheme
@@ -1258,6 +1283,7 @@
           <table class="w-full border-collapse responsive-table">
             <thead>
               <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Category</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Down Payment</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Interest Rate</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Tenure</th>
@@ -1265,7 +1291,7 @@
               </tr>
             </thead>
             <tbody id="finTableBody">
-              <tr><td colspan="4" class="px-4 py-12 text-center text-slate-400">
+              <tr><td colspan="5" class="px-4 py-12 text-center text-slate-400">
                 <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading schemes…
               </td></tr>
             </tbody>
@@ -1577,6 +1603,7 @@ let invData = [];
 let invUnsub = null;
 let invSearchTerm = '';
 let financeSchemes = [];
+let financeCategories = []; // dynamic list, e.g. Bike (60mo max), Scooter (36mo max), 3 Wheeler...
 let stockAreas = [];
 let areaStockMap = {};
 let accessories = [];
@@ -1900,6 +1927,7 @@ onAuthStateChanged(auth, async (user) => {
     await loadProfile(user.uid);
     loadMasterPriceList();
     loadLiveStock();
+    loadFinanceCategories();
     loadFinanceSchemes();
     loadAccessories();
     loadStockAreas();
@@ -2934,13 +2962,87 @@ document.addEventListener('click', (e)=>{
 });
 
 /* ─── Finance Schemes ─── */
+let financeCategorySeedAttempted = false;
+async function seedDefaultFinanceCategories(){
+  if(financeCategorySeedAttempted) return;
+  financeCategorySeedAttempted = true;
+  try{
+    await addDoc(collection(db,"finance_categories"),{name:'Bike', maxTenure:60});
+    await addDoc(collection(db,"finance_categories"),{name:'Scooter', maxTenure:36});
+  }catch(e){ console.error('seed default finance categories failed', e); }
+}
+
+function loadFinanceCategories(){
+  onSnapshot(collection(db,"finance_categories"), snap=>{
+    financeCategories = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    if(!financeCategories.length) seedDefaultFinanceCategories();
+    renderFinCategoryChips();
+    renderFinCategorySelect();
+    renderFinTable();
+  }, err=>console.error('finance_categories listener failed', err));
+}
+
+function renderFinCategorySelect(){
+  const sel = document.getElementById('fCategory');
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = financeCategories.map(c=>`<option value="${c.name}">${c.name} (max ${c.maxTenure||0}mo)</option>`).join('');
+  if(cur && financeCategories.some(c=>c.name===cur)) sel.value = cur;
+}
+
+function renderFinCategoryChips(){
+  const wrap = document.getElementById('finCategoryChips');
+  if(!wrap) return;
+  if(!financeCategories.length){
+    wrap.innerHTML = `<span class="text-xs text-slate-400">No categories yet — add one below.</span>`;
+    return;
+  }
+  wrap.innerHTML = financeCategories.map(c=>`
+    <span class="fin-cat-chip">
+      ${c.name} <span class="text-slate-400 font-mono">· ${c.maxTenure||0}mo max</span>
+      <button onclick="removeFinanceCategory('${c.id}','${(c.name||'').replace(/'/g,"\\'")}')" title="Remove category"><i class="fas fa-xmark"></i></button>
+    </span>`).join('');
+}
+
+window.addFinanceCategory = async ()=>{
+  const nameInput = document.getElementById('newFinCatName');
+  const tenureInput = document.getElementById('newFinCatMaxTenure');
+  const name = nameInput.value.trim();
+  const maxTenure = parseInt(tenureInput.value)||0;
+  if(!name){ toast('Category name chahiyo (jasto: 3 Wheeler)','err'); return; }
+  if(financeCategories.some(c=>(c.name||'').toLowerCase()===name.toLowerCase())){ toast('Yo category pahile bata nai xa.','err'); return; }
+  if(!maxTenure || maxTenure<=0){ toast('Max tenure (months) chahiyo, jasto 36 ya 60','err'); return; }
+  try{
+    await addDoc(collection(db,"finance_categories"),{name, maxTenure});
+    nameInput.value=''; tenureInput.value='';
+    toast('Category added: '+name);
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
+window.removeFinanceCategory = async (id, name)=>{
+  const inUse = financeSchemes.filter(f=>f.category===name).length;
+  const proceed = await showConfirm({
+    title: 'Remove category?',
+    message: inUse
+      ? `<b>${name}</b> is used by ${inUse} finance scheme${inUse!==1?'s':''}. Those schemes will keep their old category label, but it won't be selectable for new ones. Continue?`
+      : `Remove <b>${name}</b> from the category list?`,
+    okText:'Remove', okColorClass:'text-red-600 hover:bg-red-50',
+    iconClass:'fa-trash-can', iconColor:'#EF4444', iconBg:'#FEF2F2'
+  });
+  if(!proceed) return;
+  try{
+    await deleteDoc(doc(db,"finance_categories",id));
+    toast('Category removed.');
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
 function loadFinanceSchemes(){
   onSnapshot(collection(db,"finance_schemes"), snap => {
     financeSchemes = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderFinTable();
   }, err => {
     console.error('finance_schemes listener failed', err);
-    document.getElementById('finTableBody').innerHTML = `<tr><td colspan="4"><div class="py-12 text-center text-slate-400">
+    document.getElementById('finTableBody').innerHTML = `<tr><td colspan="5"><div class="py-12 text-center text-slate-400">
       <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
       <p class="text-sm mb-3">Couldn't load finance schemes.</p>
       <button onclick="loadFinanceSchemes()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
@@ -2957,12 +3059,15 @@ function renderFinTable(){
     return;
   }
   const sorted=[...financeSchemes].sort((a,b)=>{
+    const ca=(a.category||''), cb=(b.category||'');
+    if(ca!==cb) return ca.localeCompare(cb);
     const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
     const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
     return ta-tb;
   });
   tbody.innerHTML = sorted.map(f=>`
     <tr class="border-b border-slate-100">
+      <td class="px-4 py-3" data-th="Category"><span class="badge badge-blue">${f.category||'—'}</span></td>
       <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Down Payment">${f.downPay}%</td>
       <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Interest Rate">${f.rate}%</td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500 whitespace-nowrap" data-th="Tenure">${(f.tenures||[]).join(', ')} mo</td>
@@ -2975,6 +3080,11 @@ function renderFinTable(){
 }
 
 document.getElementById('saveFinBtn').addEventListener('click', async()=>{
+  const category = document.getElementById('fCategory').value;
+  if(!category){ toast('Pahile maathi ek category thapnus (Bike/Scooter/...).','err'); return; }
+  const catInfo = financeCategories.find(c=>c.name===category);
+  const maxTenure = catInfo?.maxTenure || 360;
+
   const downPayCheck = Validate.positiveNumber(document.getElementById('fDownPay').value, { label:'Down payment', allowZero:true, max:100 });
   const rateCheck = Validate.positiveNumber(document.getElementById('fRate').value, { label:'Interest rate', allowZero:true, max:100 });
   const tenureRaw = document.getElementById('fTenure').value.trim();
@@ -2983,27 +3093,29 @@ document.getElementById('saveFinBtn').addEventListener('click', async()=>{
   if(!rateCheck.ok){ toast(rateCheck.error,'err'); return; }
   if(!tenureRaw){ toast('Enter at least one tenure in months.','err'); return; }
 
-  const tenures = [...new Set(tenureRaw.split(',').map(t=>Number(t.trim())).filter(t=>t>0 && t<=360))].sort((a,b)=>a-b);
+  let tenures = [...new Set(tenureRaw.split(',').map(t=>Number(t.trim())).filter(t=>t>0 && t<=360))].sort((a,b)=>a-b);
   if(!tenures.length){
     toast('Enter valid month(s), e.g. 12, 24, 36','err');
     return;
+  }
+  const overLimit = tenures.filter(t=>t>maxTenure);
+  if(overLimit.length){
+    tenures = tenures.filter(t=>t<=maxTenure);
+    toast(`${category} ko max tenure ${maxTenure} months ho — ${overLimit.join(', ')} hataayeko.`,'warn');
+    if(!tenures.length) return;
   }
   const downPay = downPayCheck.value, rate = rateCheck.value;
 
   try{
     if(currentEditFinId){
       await updateDoc(doc(db,"finance_schemes",currentEditFinId), {
-        downPay: Number(downPay),
-        rate: Number(rate),
-        tenures
+        category, downPay: Number(downPay), rate: Number(rate), tenures
       });
       toast('Finance scheme updated!');
       window.cancelFinEdit();
     } else {
       await addDoc(collection(db,"finance_schemes"), {
-        downPay: Number(downPay),
-        rate: Number(rate),
-        tenures,
+        category, downPay: Number(downPay), rate: Number(rate), tenures,
         createdAt: serverTimestamp()
       });
       document.getElementById('fDownPay').value='';
@@ -3018,6 +3130,8 @@ document.getElementById('saveFinBtn').addEventListener('click', async()=>{
 
 window._editFinance=(id)=>{
   const f=financeSchemes.find(x=>x.id===id); if(!f)return;
+  renderFinCategorySelect();
+  if(f.category) document.getElementById('fCategory').value=f.category;
   document.getElementById('fDownPay').value=f.downPay??'';
   document.getElementById('fRate').value=f.rate??'';
   document.getElementById('fTenure').value=(f.tenures||[]).join(', ');
