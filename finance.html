@@ -491,6 +491,16 @@ select.styled:focus,input.styled:focus{
 }
 .model-mismatch-warning i{color:var(--amber);margin-top:2px;flex-shrink:0}
 .model-mismatch-warning strong{color:#78350F}
+.chassis-status-warning{
+  display:none;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;
+  background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.4);border-radius:10px;
+  font-size:12px;line-height:1.5;color:#7F1D1D;animation:slideDown .2s ease-out;
+}
+.chassis-status-warning i{color:var(--red);margin-top:2px;flex-shrink:0}
+.chassis-status-warning strong{color:#450A0A}
+.csd-item.csd-flagged{background:rgba(220,38,38,.05)}
+.csd-item.csd-flagged:hover{background:rgba(220,38,38,.1)}
+.csd-status-pill{font-size:9.5px;font-weight:800;letter-spacing:.03em;padding:2px 6px;border-radius:20px;flex-shrink:0;text-transform:uppercase;background:rgba(220,38,38,.12);color:#B91C1C;border:1px solid rgba(220,38,38,.3)}
 @media (max-width:520px){
   .chassis-tools-row{flex-direction:column;align-items:stretch}
   .chassis-tools-row .ct-search,.chassis-tools-row .ct-find,.chassis-tools-row .ct-year{flex:1 1 auto;min-width:0;width:100%}
@@ -1116,6 +1126,7 @@ footer{background:#0F172A}
           </div>
           <p id="searchStatus" style="font-size:11px;color:var(--ink4);font-style:italic;margin-top:8px"></p>
           <div id="modelMismatchWarning" class="model-mismatch-warning"><i class="fa-solid fa-triangle-exclamation"></i><span></span></div>
+          <div id="chassisStatusWarning" class="chassis-status-warning"><i class="fa-solid fa-ban"></i><span></span></div>
         </div>
 
       </div>
@@ -1235,6 +1246,7 @@ footer{background:#0F172A}
     </div>
 
     <div id="previewModelWarning" class="model-mismatch-warning" style="margin:12px 20px 0"></div>
+    <div id="previewChassisStatusWarning" class="chassis-status-warning" style="margin:12px 20px 0"></div>
 
     <div class="preview-body">
 
@@ -1628,6 +1640,7 @@ function openPreview(){
   const sel=document.getElementById('modelSelect');
   const currentModelText=sel?.options[sel.selectedIndex]?.text||'';
   showModelMismatchWarning(currentModelText,window._lastChassisModel||'','previewModelWarning');
+  showChassisStatusWarning(window._lastChassisStatus||'',window._lastChassisHH||'','previewChassisStatusWarning');
   document.getElementById('previewOverlay').classList.add('open');
   document.body.style.overflow='hidden';
 }
@@ -1846,6 +1859,8 @@ window.findChassis=async function(){
       statusEl.innerText="Vehicle data loaded."; statusEl.style.color="#16A34A";
     }else{
       document.getElementById('manualChassis').value=searchVal;
+      window._lastChassisStatus=''; window._lastChassisHH='';
+      showChassisStatusWarning('','');
       statusEl.innerText="Not found in inventory — enter manually."; statusEl.style.color="#F59E0B";
     }
   }catch(err){
@@ -1911,12 +1926,32 @@ window.showModelMismatchWarning=function(selectedModelText,chassisModelText,targ
   el.style.display='flex';
 }
 
+// ═══ Sold / HH-Hide chassis warning ═══
+// Flags a chassis pulled from inventory that's already marked Sold or held
+// back as HH Hide, so it doesn't get quietly re-used on a new finance record.
+window.showChassisStatusWarning=function(status,hhFlag,targetId='chassisStatusWarning'){
+  const el=document.getElementById(targetId);
+  if(!el) return;
+  let msg='';
+  if(hhFlag==='Hide'){
+    msg='This chassis is marked <strong>HH Hide</strong> in inventory — held back from HH\'s report. Please double-check before using it here.';
+  }else if(status==='Sold'){
+    msg='This chassis is already marked <strong>SOLD</strong> in inventory. Please confirm before creating a new finance record for it.';
+  }
+  if(!msg){ el.style.display='none'; el.innerHTML=''; return; }
+  el.innerHTML=`<i class="fa-solid fa-ban"></i><span>${msg}</span>`;
+  el.style.display='flex';
+}
+
 function applyChassisData(data,fallbackChassis){
   document.getElementById('manualChassis').value=data.chassis||fallbackChassis||"";
   document.getElementById('manualEngine').value=data.engine||"";
   document.getElementById('manualReg').value=data.regNo||"";
   document.getElementById('manualColor').value=data.color||"";
   window._lastChassisModel=data.model||'';
+  window._lastChassisStatus=data.status||'';
+  window._lastChassisHH=data.hhFlag||'';
+  showChassisStatusWarning(window._lastChassisStatus,window._lastChassisHH);
   if(data.model){
     const sel=document.getElementById('modelSelect');
     const previouslySelectedText=sel.options[sel.selectedIndex]?.text||'';
@@ -1936,7 +1971,10 @@ function applyChassisData(data,fallbackChassis){
 // longer reliably applies to it, so stop comparing against it.
 document.getElementById('manualChassis')?.addEventListener('input',()=>{
   window._lastChassisModel='';
+  window._lastChassisStatus='';
+  window._lastChassisHH='';
   showModelMismatchWarning('','');
+  showChassisStatusWarning('','');
 });
 
 function normChassis(v){ return (v||'').toString().trim().toUpperCase().replace(/\s+/g,''); }
@@ -1971,14 +2009,18 @@ function renderChassisDropdown(list){
     dd.style.display='block';
     return;
   }
-  dd.innerHTML=list.map(s=>`
-    <button type="button" class="csd-item" data-id="${s.id}">
+  dd.innerHTML=list.map(s=>{
+    const flagged=s.hhFlag==='Hide'||s.status==='Sold';
+    const pill=s.hhFlag==='Hide'?'<span class="csd-status-pill">HH Hide</span>':(s.status==='Sold'?'<span class="csd-status-pill">Sold</span>':'');
+    return `
+    <button type="button" class="csd-item${flagged?' csd-flagged':''}" data-id="${s.id}">
       <span class="csd-main">
         <span class="csd-chassis">${(s.chassis||'—').toUpperCase()}</span>
         <span class="csd-sub">${s.model||'—'} · Engine ${s.engine||'—'}${s.regNo?(' · '+s.regNo):''}</span>
       </span>
+      ${pill}
       <span class="csd-color-dot" style="background:${colourDotHex(s.color||'')}"></span>
-    </button>`).join('');
+    </button>`;}).join('');
   dd.style.display='block';
   dd.querySelectorAll('.csd-item').forEach(item=>{
     item.addEventListener('click',()=>{
