@@ -986,6 +986,16 @@
             <input type="number" id="mFinanceIns" placeholder="3200"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">1st Party Ins. (Rs.)</label>
+            <input type="number" id="mFirstPartyIns" placeholder="0"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">3rd Party Ins. (Rs.)</label>
+            <input type="number" id="mThirdPartyIns" placeholder="0"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
           <div class="flex flex-col gap-1.5 col-span-2 sm:col-span-1 lg:col-span-1">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Image URL <span class="text-slate-400 font-normal normal-case">(opt.)</span></label>
             <input type="text" id="mImg" placeholder="https://...image.jpg"
@@ -1044,6 +1054,8 @@
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Price</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Insurance</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Finance Ins.</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">1st Party Ins.</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">3rd Party Ins.</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
               </tr>
             </thead>
@@ -1940,7 +1952,7 @@ function loadMasterPriceList() {
     renderMasterTable(); updatePriceStats(); populateModelDropdown();
   }, err => {
     console.error('bikes listener failed', err);
-    document.getElementById('masterTableBody').innerHTML = `<tr><td colspan="8"><div class="py-12 text-center text-slate-400">
+    document.getElementById('masterTableBody').innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400">
       <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
       <p class="text-sm mb-3">Couldn't load the price list — check your connection.</p>
       <button onclick="loadMasterPriceList()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
@@ -1953,7 +1965,7 @@ function renderMasterTable() {
   const tbody = document.getElementById('masterTableBody');
   document.getElementById('priceCount').textContent = allMasterBikes.length+' model'+(allMasterBikes.length!==1?'s':'');
   if (!allMasterBikes.length) {
-    tbody.innerHTML=`<tr><td colspan="8"><div class="py-12 text-center text-slate-400"><i class="fas fa-motorcycle text-3xl opacity-25 block mb-2"></i><p class="text-sm">No models yet. Add your first bike above.</p></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="10"><div class="py-12 text-center text-slate-400"><i class="fas fa-motorcycle text-3xl opacity-25 block mb-2"></i><p class="text-sm">No models yet. Add your first bike above.</p></div></td></tr>`;
     return;
   }
   const sorted=[...allMasterBikes].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
@@ -1984,6 +1996,8 @@ function renderMasterTable() {
       <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Price">Rs ${Number(b.price).toLocaleString('en-IN')}</td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Insurance">Rs ${Number(b.Insurance||0).toLocaleString('en-IN')}</td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Finance Ins.">Rs ${Number(b.financeInsurance||0).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="1st Party Ins.">Rs ${Number(b.firstPartyInsurance||0).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="3rd Party Ins.">Rs ${Number(b.thirdPartyInsurance||0).toLocaleString('en-IN')}</td>
       <td class="px-4 py-3" data-th="Actions">
         <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'bikes','${b.id}')" aria-label="Row actions">
           <i class="fas fa-ellipsis-vertical"></i>
@@ -2015,6 +2029,8 @@ window._editMaster=(id)=>{
   document.getElementById('mPrice').value=b.price;
   document.getElementById('mNormalIns').value=b.Insurance||0;
   document.getElementById('mFinanceIns').value=b.financeInsurance||0;
+  document.getElementById('mFirstPartyIns').value=b.firstPartyInsurance||0;
+  document.getElementById('mThirdPartyIns').value=b.thirdPartyInsurance||0;
   document.getElementById('mImg').value=b.img||'';
   // Falls back to the old combined applyLegguardSeatcover field for bikes saved before Leg Guard/Seat Cover were split.
   const legacyFit=b.applyLegguardSeatcover!==false;
@@ -2055,6 +2071,17 @@ document.getElementById('mCategory').addEventListener('change',()=>{
 });
 updateLegguardVisibility();
 
+// When a new/edited bike is saved at an S.N that's already taken, push every
+// bike from that position onward up by one — like inserting a row in a list —
+// so numbering always stays contiguous with no manual renumbering needed.
+async function shiftMasterSnUp(fromSn, excludeId=null){
+  const toShift = allMasterBikes.filter(b => Number(b.sn)>=fromSn && b.id!==excludeId);
+  if(!toShift.length) return;
+  const batch = writeBatch(db);
+  toShift.forEach(b => batch.update(doc(db,"bikes",b.id), { sn: Number(b.sn)+1 }));
+  await batch.commit();
+}
+
 document.getElementById('saveModelBtn').addEventListener('click',async()=>{
   const category=document.getElementById('mCategory').value;
   const checks = [
@@ -2063,24 +2090,32 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
     Validate.positiveNumber(document.getElementById('mPrice').value, { label:'Price' }),
     Validate.positiveNumber(document.getElementById('mNormalIns').value, { label:'Insurance', allowZero:true }),
     Validate.positiveNumber(document.getElementById('mFinanceIns').value, { label:'Finance insurance', allowZero:true }),
+    Validate.positiveNumber(document.getElementById('mFirstPartyIns').value||0, { label:'1st party insurance', allowZero:true }),
+    Validate.positiveNumber(document.getElementById('mThirdPartyIns').value||0, { label:'3rd party insurance', allowZero:true }),
   ];
   const firstError = checks.find(c=>!c.ok);
   if(firstError){ toast(firstError.error,'err'); return; }
-  const [sn, name, price, ins, fin] = checks.map(c=>c.value);
+  const [sn, name, price, ins, fin, firstPartyIns, thirdPartyIns] = checks.map(c=>c.value);
   const imgRaw = document.getElementById('mImg').value.trim();
   if(imgRaw && !/^https?:\/\/.+/i.test(imgRaw)){ toast('Image URL must start with http:// or https://','err'); return; }
   const applyLegguard=category==='Scooter' ? document.getElementById('mFitLegguard').checked : true;
   const applySeatcover=category==='Scooter' ? document.getElementById('mFitSeatcover').checked : true;
-  const data={sn,name,category,price,Insurance:ins,financeInsurance:fin,img:imgRaw,applyLegguard,applySeatcover};
+  const data={sn,name,category,price,Insurance:ins,financeInsurance:fin,firstPartyInsurance:firstPartyIns,thirdPartyInsurance:thirdPartyIns,img:imgRaw,applyLegguard,applySeatcover};
   try {
-    if(currentEditId){await updateDoc(doc(db,"bikes",currentEditId),data);toast('Model updated!');}
-    else{await addDoc(collection(db,"bikes"),data);toast('Model added!');}
+    // If this S.N is already taken by a different model, bump that model
+    // (and everything after it) up by one first, so the new/edited entry
+    // slots in cleanly instead of overwriting or erroring out.
+    const collision = allMasterBikes.some(b => Number(b.sn)===sn && b.id!==currentEditId);
+    if(collision) await shiftMasterSnUp(sn, currentEditId);
+
+    if(currentEditId){await updateDoc(doc(db,"bikes",currentEditId),data);toast('Model updated!'+(collision?' S.N renumbered automatically.':''));}
+    else{await addDoc(collection(db,"bikes"),data);toast('Model added!'+(collision?' S.N renumbered automatically.':''));}
     window.cancelMasterEdit();
   }catch(e){toast('Error: '+e.message,'err');}
 });
 
 function clearMasterForm(){
-  ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mImg'].forEach(id=>document.getElementById(id).value='');
+  ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mFirstPartyIns','mThirdPartyIns','mImg'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('mCategory').value='Bike';
   document.getElementById('mFitLegguard').checked=false;
   document.getElementById('mFitSeatcover').checked=false;
@@ -3115,7 +3150,7 @@ window._saveSn=async(col,id,val)=>{
 window._deleteEntry=async(col,id)=>{
   const ok = await showConfirm({
     title: 'Delete this entry?',
-    message: col==='bikes' ? "This will permanently remove the model from your price list." : (col==='finance_schemes' ? "This will permanently remove the finance scheme." : (col==='accessories' ? "This will permanently remove the accessory from the price list." : "This will permanently remove the unit from inventory. Remaining S.N numbers will shift up to close the gap.")),
+    message: col==='bikes' ? "This will permanently remove the model from your price list. Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will permanently remove the finance scheme." : (col==='accessories' ? "This will permanently remove the accessory from the price list." : "This will permanently remove the unit from inventory. Remaining S.N numbers will shift up to close the gap.")),
     okText: 'Delete',
     okColorClass: 'text-red-500 hover:bg-red-50',
     iconClass: 'fa-trash-can', iconColor: '#ef4444', iconBg: '#FEF2F2'
@@ -3139,9 +3174,26 @@ window._deleteEntry=async(col,id)=>{
         }
       }
       toast('Unit removed — S.N renumbered automatically.');
+    } else if(col==='bikes'){
+      // Same gap-closing behaviour as inventory: shift remaining S.N's down
+      // by one so numbering always stays contiguous after a delete.
+      const target = allMasterBikes.find(x=>x.id===id);
+      const deletedSn = target ? Number(target.sn)||0 : 0;
+
+      await deleteDoc(doc(db,col,id));
+
+      if(deletedSn){
+        const toShift = allMasterBikes.filter(x=>x.id!==id && Number(x.sn)>deletedSn);
+        if(toShift.length){
+          const batch = writeBatch(db);
+          toShift.forEach(x=>batch.update(doc(db,'bikes',x.id),{sn:Number(x.sn)-1}));
+          await batch.commit();
+        }
+      }
+      toast('Model deleted — S.N renumbered automatically.');
     } else {
       await deleteDoc(doc(db,col,id));
-      toast(col==='bikes' ? 'Model deleted.' : 'Finance scheme deleted.');
+      toast(col==='finance_schemes' ? 'Finance scheme deleted.' : 'Entry deleted.');
     }
   }catch(e){toast('Delete failed: '+e.message,'err');}
 };
