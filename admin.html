@@ -1776,6 +1776,13 @@ window._toggleKebab = (btn, type, id) => {
 };
 
 /* ─── Duplicate detection (chassis / engine no. must be unique per unit) ─── */
+// The page shell is fixed (sidebar/topbar don't move) — actual scrolling
+// happens inside .main-scroll, not on window/body. Edit buttons need to
+// scroll THAT to bring the form into view, not the (now-static) window.
+function scrollFormIntoView(){
+  document.querySelector('.main-scroll')?.scrollTo({top:0,behavior:'smooth'});
+}
+
 function normId(v){ return (v||'').toString().trim().toUpperCase().replace(/\s+/g,''); }
 function normModelName(v){ return (v||'').toString().trim().toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim(); }
 function findMasterBikeByName(name){
@@ -2043,7 +2050,7 @@ window._editMaster=(id)=>{
   document.getElementById('masterFormTitle').textContent='Edit Bike Model';
   const cancel = document.getElementById('cancelMasterBtn');
   cancel.classList.remove('hidden'); cancel.classList.add('flex');
-  window.scrollTo({top:0,behavior:'smooth'});
+  scrollFormIntoView();
   toast('Model loaded for editing');
 };
 
@@ -2183,7 +2190,7 @@ window._editInventory=(id)=>{
   document.getElementById('invFormTitle').textContent='Edit Inventory Unit';
   const cancel = document.getElementById('cancelInvBtn');
   cancel.classList.remove('hidden'); cancel.classList.add('flex');
-  window.scrollTo({top:0,behavior:'smooth'});
+  scrollFormIntoView();
   toast('Unit loaded for editing');
 };
 
@@ -3020,7 +3027,7 @@ window._editFinance=(id)=>{
   document.getElementById('finFormTitle').textContent='Edit Finance Scheme';
   const cancel = document.getElementById('cancelFinBtn');
   cancel.classList.remove('hidden'); cancel.classList.add('flex');
-  window.scrollTo({top:0,behavior:'smooth'});
+  scrollFormIntoView();
   toast('Scheme loaded for editing');
 };
 
@@ -3115,7 +3122,7 @@ window._editAccessory=(id)=>{
   document.getElementById('accFormTitle').textContent='Edit Accessory';
   const cancel = document.getElementById('cancelAccBtn');
   cancel.classList.remove('hidden'); cancel.classList.add('flex');
-  window.scrollTo({top:0,behavior:'smooth'});
+  scrollFormIntoView();
   toast('Accessory loaded for editing');
 };
 
