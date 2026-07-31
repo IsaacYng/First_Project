@@ -698,7 +698,12 @@ let BIKES=[];
 let financeSchemes=[];
 
 function buildFinanceSchemeMap(){
-  // Later docs (by createdAt) win on duplicate downPay values; tenures are unioned.
+  // This map drives the DP%/Tenure PICKER only — it unions tenures across every
+  // category at the same Down Payment % so a valid Bike tenure (e.g. 60mo) is
+  // never hidden from the dropdown just because a Scooter scheme shares that DP%.
+  // The interest-rate badge shown for a DP% still reflects whichever scheme was
+  // saved most recently at that DP% (categories can carry different rates —
+  // each row below is priced with ITS OWN category's rate, not this badge).
   const sorted=[...financeSchemes].sort((a,b)=>{
     const ta=a.createdAt?.toMillis?a.createdAt.toMillis():0;
     const tb=b.createdAt?.toMillis?b.createdAt.toMillis():0;
@@ -709,9 +714,48 @@ function buildFinanceSchemeMap(){
     const dp=Number(f.downPay);
     if(!Number.isFinite(dp)) return;
     const tenures=Array.isArray(f.tenures)?f.tenures.map(Number).filter(t=>t>0):[];
-    map.set(dp,{ rate:Number(f.rate)||0, tenures:[...new Set(tenures)].sort((a,b)=>a-b) });
+    const existing=map.get(dp);
+    if(existing){
+      existing.tenures=[...new Set([...existing.tenures,...tenures])].sort((a,b)=>a-b);
+      existing.rate=Number(f.rate)||existing.rate;
+    }else{
+      map.set(dp,{ rate:Number(f.rate)||0, tenures:[...new Set(tenures)].sort((a,b)=>a-b) });
+    }
   });
   return map;
+}
+
+function buildFinanceSchemeMapByCategory(){
+  // Per-category map (Bike / Scooter / ...) — this is what actually prices each
+  // row, so a Scooter scheme never borrows a Bike's rate or tenure list (or
+  // vice-versa) even when both share the same Down Payment %.
+  const sorted=[...financeSchemes].sort((a,b)=>{
+    const ta=a.createdAt?.toMillis?a.createdAt.toMillis():0;
+    const tb=b.createdAt?.toMillis?b.createdAt.toMillis():0;
+    return ta-tb;
+  });
+  const byCat={};
+  sorted.forEach(f=>{
+    const dp=Number(f.downPay);
+    if(!Number.isFinite(dp)) return;
+    const cat=f.category||'Bike';
+    if(!byCat[cat]) byCat[cat]=new Map();
+    const tenures=Array.isArray(f.tenures)?f.tenures.map(Number).filter(t=>t>0):[];
+    byCat[cat].set(dp,{ rate:Number(f.rate)||0, tenures:[...new Set(tenures)].sort((a,b)=>a-b) });
+  });
+  return byCat;
+}
+
+function financeEntryFor(category,dp){
+  const byCat=buildFinanceSchemeMapByCategory();
+  const map=byCat[category]||byCat['Bike'];
+  const dpNum=Number(dp);
+  if(!map||!map.size) return {rate:0,tenures:[]};
+  if(map.has(dpNum)) return map.get(dpNum);
+  const dps=[...map.keys()].sort((a,b)=>a-b);
+  let nearest=dps.filter(d=>d<=dpNum).pop();
+  if(nearest===undefined) nearest=dps[0];
+  return map.get(nearest);
 }
 
 function rateForDp(dp){
@@ -888,11 +932,18 @@ function accessoriesTotal(bike){
 function computeRow(bike,dpPct,tenure,namsari,accTotal,mode){
   const dpAmt=bike.price*(dpPct/100);
   const loanAmt=bike.price-dpAmt;
-  const rate=rateForDp(dpPct);
+  const entry=financeEntryFor(bike.category||'Bike',dpPct);
+  const rate=entry.rate;
+  // If this bike's own category has no scheme configured yet, don't block it —
+  // only flag when the category DOES have tenures defined and this one isn't in them
+  // (e.g. Scooter capped at 36mo, sheet-wide tenure set to 48mo).
+  const tenureOk=entry.tenures.length ? entry.tenures.includes(Number(tenure)) : true;
   const monthlyRate=(rate/12)/100;
-  const emi=(loanAmt>0 && monthlyRate>0)
-    ? (loanAmt*monthlyRate*Math.pow(1+monthlyRate,tenure))/(Math.pow(1+monthlyRate,tenure)-1)
-    : (loanAmt>0 ? loanAmt/tenure : 0);
+  const emi=(tenureOk && loanAmt>0)
+    ? (monthlyRate>0
+        ? (loanAmt*monthlyRate*Math.pow(1+monthlyRate,tenure))/(Math.pow(1+monthlyRate,tenure)-1)
+        : loanAmt/tenure)
+    : 0;
   const financeInsurance=parseFloat(bike.financeInsurance)||0;
   const rawTotal=mode==='indoor'
     ? dpAmt+namsari+bike.insurance+emi+accTotal
@@ -901,7 +952,7 @@ function computeRow(bike,dpPct,tenure,namsari,accTotal,mode){
   const autoRounding=lastThree>0 ? (1000-lastThree) : 0;
   const advanceEmi=emi+autoRounding;
   const total=rawTotal+autoRounding;
-  return {dpAmt,loanAmt,insurance:bike.insurance,financeInsurance,emi,advanceEmi,total,rate};
+  return {dpAmt,loanAmt,insurance:bike.insurance,financeInsurance,emi,advanceEmi,total,rate,tenureOk};
 }
 const fmt=n=>Math.round(n).toLocaleString('en-IN');
 const fmtDec=n=>Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -952,7 +1003,6 @@ function recalcAll(){
   document.getElementById('sumTenure').textContent=schemesReady?(s.tenure+' mo'):'--';
   document.getElementById('sumAcc').textContent='Rs. '+fmt(s.acc);
   document.getElementById('sumNamsari').textContent='Rs. '+fmt(s.namsari);
-  document.getElementById('sumCount').textContent=BIKES.length;
 
   const body=document.getElementById('sheetBody');
 
@@ -966,13 +1016,19 @@ function recalcAll(){
 
   renderSheetHead(s);
   body.innerHTML='';
-  BIKES.forEach((bike,i)=>{
+  // Models whose category doesn't offer the currently-selected tenure at this DP%
+  // (e.g. Chetak/Scooter capped at 36mo while the sheet is set to 48mo) are left
+  // out of the sheet entirely, rather than shown with N/A cells.
+  let shown=0;
+  BIKES.forEach((bike)=>{
     const bikeAcc=accessoriesTotal(bike);
     const r=computeRow(bike,s.dp,s.tenure,s.namsari,bikeAcc,s.mode);
+    if(!r.tenureOk) return;
+    shown++;
     const tr=document.createElement('tr');
     if(s.mode==='indoor'){
       tr.innerHTML=`
-        <td>${i+1}</td>
+        <td>${shown}</td>
         <td class="model-cell">${bike.name}</td>
         <td>${fmt(bike.price)}</td>
         <td>${fmt(r.dpAmt)}</td>
@@ -985,7 +1041,7 @@ function recalcAll(){
         <td class="total-cell">${fmt(r.total)}</td>`;
     }else{
       tr.innerHTML=`
-        <td>${i+1}</td>
+        <td>${shown}</td>
         <td class="model-cell">${bike.name}</td>
         <td>${fmt(bike.price)}</td>
         <td>${fmt(r.dpAmt)}</td>
@@ -998,25 +1054,35 @@ function recalcAll(){
     }
     body.appendChild(tr);
   });
+  document.getElementById('sumCount').textContent=shown;
+  if(!shown){
+    document.getElementById('sheetHead').innerHTML='';
+    body.innerHTML=`<tr><td colspan="11" style="text-align:center;padding:24px;color:var(--ink4)">
+      No models offer ${s.tenure} months at ${s.dp}% Down Payment — pick a different tenure.
+    </td></tr>`;
+  }
 }
 
 /* ══════════ Print-preview modal: one A4-landscape page per tenure (of the current DP's scheme) ══════════ */
 function buildTenurePage(dp,tenure,namsari,acc,mode){
   const rate=rateForDp(dp);
   let rows='';
-  BIKES.forEach((bike,i)=>{
+  let n=0;
+  BIKES.forEach((bike)=>{
     const bikeAcc=accessoriesTotal(bike);
     const r=computeRow(bike,dp,tenure,namsari,bikeAcc,mode);
+    if(!r.tenureOk) return;
+    n++;
     if(mode==='indoor'){
       rows+=`<tr>
-        <td>${i+1}</td><td>${bike.name}</td><td>${fmt(bike.price)}</td>
+        <td>${n}</td><td>${bike.name}</td><td>${fmt(bike.price)}</td>
         <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td><td>${fmt(r.insurance)}</td>
         <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>
         <td>${fmt(bikeAcc)}</td><td>${fmt(namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td></tr>`;
     }else{
       rows+=`<tr>
-        <td>${i+1}</td><td>${bike.name}</td><td>${fmt(bike.price)}</td>
+        <td>${n}</td><td>${bike.name}</td><td>${fmt(bike.price)}</td>
         <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td>
         <td>${fmt(r.financeInsurance)}</td>
         <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>
