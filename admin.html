@@ -624,7 +624,9 @@
   #stockPreviewOverlay.open{ display:flex; }
   .spv-shell{ background:#161B26; border-radius:16px; width:100%; max-width:1200px; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.5); }
   .spv-head{ display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid rgba(255,255,255,.08); flex-shrink:0; }
-  .spv-body{ padding:20px; overflow:auto; background:#0F1420; }
+  .spv-body{ padding:20px; overflow:auto; -webkit-overflow-scrolling:touch; background:#0F1420; }
+  .spv-swipe-hint{ display:none; align-items:center; justify-content:center; gap:7px; color:#94A3B8; font-size:11.5px; font-weight:700; margin-bottom:10px; }
+  @media (max-width:960px){ .spv-swipe-hint{ display:flex; } }
   .spv-btn{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; padding:9px 16px; border-radius:9px; border:none; cursor:pointer; transition:opacity .15s; }
   .spv-btn:hover{ opacity:.85; }
   .spv-btn.print{ background:#F59E0B; color:#0F172A; }
@@ -654,7 +656,7 @@
   #stockPrintWrapper{ display:none; }
 
   /* ── Simple, clean JPG-exportable report card (not tied to print page size) ── */
-  .jpg-report-paper{ font-family:'DM Sans',sans-serif; background:#fff; width:900px; max-width:100%; padding:34px 38px; margin:0 auto; box-sizing:border-box; color:#0F172A; }
+  .jpg-report-paper{ font-family:'DM Sans',sans-serif; background:#fff; width:900px; padding:34px 38px; margin:0 auto; box-sizing:border-box; color:#0F172A; flex-shrink:0; }
   .jrp-head{ text-align:center; border-bottom:3px solid #005EA6; padding-bottom:14px; }
   .jrp-head .brand{ font-family:'Bebas Neue',cursive; font-size:2rem; letter-spacing:.03em; color:#005EA6; }
   .jrp-head .sub{ font-size:12.5px; color:#64748B; margin-top:3px; font-weight:600; }
@@ -1295,6 +1297,33 @@
         </div>
       </div>
 
+      <!-- Excel Bulk Import -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center gap-2 section-title text-2xl mb-1">
+          <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
+        </div>
+        <p class="text-xs text-slate-500 mb-4">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, Chassis, Engine, RegNo, Color, Event</b>. S.N fills in automatically.</p>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all">
+            <i class="fas fa-cloud-arrow-up text-emerald-500 text-lg flex-shrink-0"></i>
+            <span id="hhExcelFileLabel" class="text-sm text-slate-600 font-medium truncate">Click to choose Excel / CSV file…</span>
+            <input type="file" id="hhExcelFileInput" accept=".xlsx,.xls,.csv" class="hidden"/>
+          </label>
+          <button id="hhDownloadTemplateBtn" class="cta-secondary whitespace-nowrap">
+            <i class="fas fa-download"></i> Sample Template
+          </button>
+          <button id="hhImportExcelBtn" disabled class="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 whitespace-nowrap">
+            <i class="fas fa-upload"></i> <span id="hhImportExcelBtnText">Import Rows</span>
+          </button>
+        </div>
+        <div id="hhImportSummary" class="hidden mt-4 rounded-xl border border-slate-200 overflow-hidden">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-wrap">
+            <span id="hhImportSummaryHead" class="text-xs font-bold text-slate-600"></span>
+          </div>
+          <div id="hhImportSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
+        </div>
+      </div>
+
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
@@ -1628,6 +1657,7 @@
       <button class="spv-btn close" onclick="closeStockPreview()"><i class="fas fa-xmark"></i> Close</button>
     </div>
     <div class="spv-body">
+      <div class="spv-swipe-hint"><i class="fas fa-arrows-left-right"></i> Swipe left/right to see the full report</div>
       <div id="spvPage"></div>
     </div>
   </div>
@@ -2406,13 +2436,19 @@ window._setUnitStatus = async (id, status) => {
 window._setHHFlag = async (id, hhFlag) => {
   const s = invData.find(x=>x.id===id);
   const modelLabel = s ? `${s.model} — ${s.color||''}`.trim() : 'this unit';
+  const existingName = (s?.customerName||'').replace(/"/g,'&quot;');
+  const customerField = `<br><br>
+    <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
+    <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
+      style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">`;
   let title, message;
   if(hhFlag==='Sales'){
     title = 'Mark as HH Sales?';
     message = `<b>${modelLabel}</b> will be counted in our stock and reported to HH as sold. Confirm?`;
   } else if(hhFlag==='Hide'){
     title = 'Mark as HH Hide?';
-    message = `<b>${modelLabel}</b> will be removed from our stock count and held back from HH's report. Confirm?`;
+    // HH Hide means the bike is really sold — capture who it went to, same as Mark Sold does.
+    message = `<b>${modelLabel}</b> will be removed from our stock count and held back from HH's report.${customerField}`;
   } else {
     title = 'Undo HH flag?';
     message = `Remove the HH flag from <b>${modelLabel}</b> and go back to normal status-based counting. Confirm?`;
@@ -2423,10 +2459,13 @@ window._setHHFlag = async (id, hhFlag) => {
     iconClass:'fa-bullseye', iconColor:'#005EA6', iconBg:'#EAF3FB'
   });
   if(!proceed) return;
+  const customerName = hhFlag==='Hide' ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : undefined;
   try{
-    await updateDoc(doc(db,"inventory",id),{hhFlag: hhFlag || null});
+    const payload = { hhFlag: hhFlag || null };
+    if(customerName !== undefined) payload.customerName = customerName;
+    await updateDoc(doc(db,"inventory",id), payload);
     if(hhFlag==='Sales') toast('Marked as HH Sales — counted in our stock, reported to HH.');
-    else if(hhFlag==='Hide') toast('Marked as HH Hide — NOT counted in our stock, held back from HH\'s report.');
+    else if(hhFlag==='Hide') toast('Marked as HH Hide'+(customerName?' — '+customerName:'')+' — NOT counted in our stock, held back from HH\'s report.');
     else toast('HH flag cleared.');
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
@@ -3885,8 +3924,161 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
 // which needs these on `window` since this script runs as an ES module.
 window.loadMasterPriceList = loadMasterPriceList;
 window.loadLiveStock = loadLiveStock;
+window.loadHHInventory = loadHHInventory;
 window.loadFinanceSchemes = loadFinanceSchemes;
 window.loadAccessories = loadAccessories;
+
+/* ─── HH Inventory Bulk Import (same pattern as main Inventory + Event column) ─── */
+let hhExcelParsedRows = [];
+
+document.getElementById('hhExcelFileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const importBtn = document.getElementById('hhImportExcelBtn');
+  const label = document.getElementById('hhExcelFileLabel');
+  const summary = document.getElementById('hhImportSummary');
+  summary.classList.add('hidden');
+  hhExcelParsedRows = [];
+  importBtn.disabled = true;
+
+  if(!file){ label.textContent='Click to choose Excel / CSV file…'; return; }
+  label.textContent = file.name;
+
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const aoa = XLSX.utils.sheet_to_json(sheet, {header:1, defval:'', blankrows:false});
+      if(!aoa.length){ toast('File appears empty.','err'); return; }
+
+      const rawHeaders = aoa[0].map(h=>h.toString().trim().toLowerCase().replace(/[^a-z]/g,''));
+      function findCol(keywords){
+        for(let i=0;i<rawHeaders.length;i++){
+          if(keywords.some(kw=>rawHeaders[i].includes(kw))) return i;
+        }
+        return -1;
+      }
+      const colIdx = {
+        model:   findCol(['modelname','model']),
+        chassis: findCol(['chassis','vin']),
+        engine:  findCol(['enginenumber','engine']),
+        regNo:   findCol(['registrationnumber','regno','regd','registration']),
+        color:   findCol(['color','colour']),
+        event:   findCol(['eventname','event','mela'])
+      };
+
+      if(colIdx.model===-1 || colIdx.chassis===-1){
+        toast('Could not find Model / Chassis columns in the header row.','err');
+        return;
+      }
+
+      hhExcelParsedRows = aoa.slice(1).map(r=>({
+        model:   colIdx.model!==-1   ? (r[colIdx.model]||'').toString().trim()   : '',
+        chassis: colIdx.chassis!==-1 ? (r[colIdx.chassis]||'').toString().trim() : '',
+        engine:  colIdx.engine!==-1  ? (r[colIdx.engine]||'').toString().trim()  : '',
+        regNo:   colIdx.regNo!==-1   ? (r[colIdx.regNo]||'').toString().trim()   : '',
+        color:   colIdx.color!==-1   ? (r[colIdx.color]||'').toString().trim()   : '',
+        eventName: colIdx.event!==-1 ? (r[colIdx.event]||'').toString().trim()   : ''
+      })).filter(r=>r.model || r.chassis || r.engine);
+
+      if(!hhExcelParsedRows.length){ toast('No data rows found in file.','err'); return; }
+      importBtn.disabled = false;
+      toast(hhExcelParsedRows.length+' row(s) detected. Review & click Import.');
+    }catch(err){
+      toast('Could not read file: '+err.message,'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('hhDownloadTemplateBtn').addEventListener('click', ()=>{
+  const wsData = [
+    ['Model','Chassis','Engine','RegNo','Color','Event'],
+    ['Pulsar N150','MD2A12EY000001','BSVI2024000001','BA2PA1234','Fiery Orange','Phidim Mela 2026'],
+    ['Pulsar NS200','MD2A12EY000002','BSVI2024000002','','Racing Red','Phidim Mela 2026']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'HH Inventory');
+  XLSX.writeFile(wb, 'hh_inventory_import_template.xlsx');
+});
+
+document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>{
+  if(!hhExcelParsedRows.length) return;
+  const btn = document.getElementById('hhImportExcelBtn');
+  const btnText = document.getElementById('hhImportExcelBtnText');
+  btn.disabled = true;
+  btnText.textContent = 'Importing…';
+
+  let nextSn = hhInvData.length ? Math.max(...hhInvData.map(x=>Number(x.sn)||0)) + 1 : 1;
+  const results = { success:[], failed:[] };
+  const seenInBatch = [];
+
+  for(const row of hhExcelParsedRows){
+    if(!row.model || !row.chassis || !row.engine || !row.color){
+      results.failed.push({row, reason:'Missing required field (Model/Chassis/Engine/Color)'});
+      continue;
+    }
+    const chassisCheck = Validate.identifierCode(row.chassis, { label:'Chassis' });
+    const engineCheck = Validate.identifierCode(row.engine, { label:'Engine' });
+    const modelCheck = Validate.text(row.model, { label:'Model', max:80 });
+    const colorCheck = Validate.text(row.color, { label:'Color', max:40 });
+    const badField = [chassisCheck, engineCheck, modelCheck, colorCheck].find(c=>!c.ok);
+    if(badField){ results.failed.push({row, reason: badField.error}); continue; }
+    const masterBike = findMasterBikeByName(modelCheck.value);
+    if(!masterBike){
+      results.failed.push({row, reason:`Model "${modelCheck.value}" isn't in the master price list — add it there first.`});
+      continue;
+    }
+    row.model = masterBike.name; row.chassis = chassisCheck.value; row.engine = engineCheck.value; row.color = colorCheck.value;
+    const dupExisting = hhInvData.find(x=>normId(x.chassis)===normId(row.chassis) || normId(x.engine)===normId(row.engine));
+    const dupBatch = seenInBatch.find(r=>normId(r.chassis)===normId(row.chassis) || normId(r.engine)===normId(row.engine));
+    if(dupExisting || dupBatch){
+      results.failed.push({row, reason:'Duplicate — chassis/engine already exists'+(dupExisting?` (S.N ${dupExisting.sn||'—'})`:' (within this file)')});
+      continue;
+    }
+    try{
+      await addDoc(collection(db,"hh_inventory"),{
+        sn: nextSn,
+        model: row.model,
+        chassis: row.chassis,
+        engine: row.engine,
+        regNo: row.regNo || '',
+        color: row.color,
+        eventName: row.eventName || '',
+        status: 'Available',
+        customerName: '',
+        addedAt: new Date()
+      });
+      seenInBatch.push(row);
+      results.success.push(row);
+      nextSn++;
+    }catch(e){
+      results.failed.push({row, reason:e.message});
+    }
+  }
+
+  const summary = document.getElementById('hhImportSummary');
+  const head = document.getElementById('hhImportSummaryHead');
+  const body = document.getElementById('hhImportSummaryBody');
+  head.innerHTML = `<span class="text-emerald-600"><i class="fas fa-circle-check"></i> ${results.success.length} imported</span>` +
+    (results.failed.length ? ` &nbsp;·&nbsp; <span class="text-red-500"><i class="fas fa-circle-xmark"></i> ${results.failed.length} failed</span>` : '');
+  body.innerHTML = results.failed.map(f=>`
+    <div class="px-4 py-2 flex items-center justify-between gap-3">
+      <span class="text-slate-600 truncate">${f.row.model || '(no model)'} — ${f.row.chassis || '(no chassis)'}</span>
+      <span class="text-red-500 font-medium whitespace-nowrap">${f.reason}</span>
+    </div>`).join('') || `<div class="px-4 py-3 text-slate-400">All rows imported successfully.</div>`;
+  summary.classList.remove('hidden');
+
+  toast(`Import done: ${results.success.length} added, ${results.failed.length} failed`, results.failed.length ? 'err' : 'ok');
+
+  btn.disabled = true;
+  btnText.textContent = 'Import Rows';
+  hhExcelParsedRows = [];
+  document.getElementById('hhExcelFileInput').value = '';
+  document.getElementById('hhExcelFileLabel').textContent = 'Click to choose Excel / CSV file…';
+});
 
 /* ─── Nav ─── */
 const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', fin:'HFL Finance Options', acc:'Accessories Inventory', stock:'Stock Report' };
