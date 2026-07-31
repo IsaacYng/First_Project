@@ -1687,9 +1687,23 @@ onSnapshot(collection(db,"inventory"), snap=>{
 /* ═══ FINANCE SCHEMES (admin-controlled: Down Payment % / Interest Rate / Tenure) ═══ */
 let financeSchemes = [];
 
+function getSelectedFinanceCategory(){
+  const selId=document.getElementById('modelSelect')?.value;
+  const bike=allBikes.find(b=>b.id===selId);
+  return bike?.category||'Bike';
+}
+
 function buildFinanceSchemeMap(){
+  // Schemes are per-category (Bike 60mo max, Scooter 36mo max, ...). Without this
+  // filter, a Scooter scheme saved at the same Down Payment % as a Bike scheme
+  // would silently overwrite it in the map below — e.g. Bike showing only 36
+  // months even though its own category allows 60 — so filter to the currently
+  // selected model's category first. Schemes saved before category existed have
+  // no `category` field; treat those as universal so old data still shows.
+  const category=getSelectedFinanceCategory();
+  const relevant=financeSchemes.filter(f=>!f.category||f.category===category);
   // Later docs (by createdAt) win on duplicate downPay values; tenures are unioned.
-  const sorted=[...financeSchemes].sort((a,b)=>{
+  const sorted=[...relevant].sort((a,b)=>{
     const ta=a.createdAt?.toMillis?a.createdAt.toMillis():0;
     const tb=b.createdAt?.toMillis?b.createdAt.toMillis():0;
     return ta-tb;
@@ -1751,6 +1765,12 @@ function renderFinanceSchemeUI(){
 // list for that scheme BEFORE the global input-listener recalculates —
 // listeners bound directly on the element run before the document's
 // bubbled listener, so this ordering is safe.
+// When the selected model changes, its category may differ (Bike vs Scooter),
+// so the DP%/tenure options need to be rebuilt for that category BEFORE the
+// global input-listener recalculates — same ordering reason as dpPercent below.
+document.getElementById('modelSelect')?.addEventListener('input',()=>{
+  renderFinanceSchemeUI();
+});
 document.getElementById('dpPercent')?.addEventListener('input',()=>{
   const dp=document.getElementById('dpPercent')?.value;
   renderTenureOptionsForDp(dp);
@@ -1957,7 +1977,7 @@ function applyChassisData(data,fallbackChassis){
     const previouslySelectedText=sel.options[sel.selectedIndex]?.text||'';
     showModelMismatchWarning(previouslySelectedText,data.model);
     for(let i=0;i<sel.options.length;i++){
-      if(sel.options[i].text===data.model){sel.selectedIndex=i;syncCustomSelectUI('modelSelect');calculateFinance();break;}
+      if(sel.options[i].text===data.model){sel.selectedIndex=i;syncCustomSelectUI('modelSelect');renderFinanceSchemeUI();calculateFinance();break;}
     }
   }else{
     showModelMismatchWarning('','');
