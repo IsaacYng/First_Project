@@ -607,6 +607,9 @@
   .inv-status-tab{ color:#7C8494; }
   .inv-status-tab:hover{ color:#1F2430; }
   .inv-status-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
+  .hh-status-tab{ color:#7C8494; }
+  .hh-status-tab:hover{ color:#1F2430; }
+  .hh-status-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
   .inv-filter-scroll{
     -webkit-overflow-scrolling:touch; scrollbar-width:none; -ms-overflow-style:none;
     mask-image:linear-gradient(to right, #000 calc(100% - 22px), transparent 100%);
@@ -851,6 +854,9 @@
         </button>
         <button id="navInv" onclick="switchSec('inv');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-warehouse"></i> Inventory
+        </button>
+        <button id="navHHInv" onclick="switchSec('hhinv');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-tents"></i> HH Inventory
         </button>
         <button id="navFin" onclick="switchSec('fin');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-percent"></i> HFL Finance
@@ -1220,6 +1226,108 @@
             <tbody id="stockTableBody">
               <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
                 <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading inventory…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ HH INVENTORY (OUTDOOR/MELA) ═══ -->
+    <div class="sec-panel" id="secHHInv">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Stock Management ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">HH <span class="text-amber-500">Inventory</span></div>
+        </div>
+        <span id="hhInvTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500 flex-shrink-0">0 units total</span>
+      </div>
+      <p class="text-xs text-slate-400 -mt-4 mb-5"><i class="fas fa-circle-info mr-1"></i>Outdoor mela/event ma laijaeko gadi haru — chutai list, chutai tracking. Yo Live Inventory sanga milaudaina, chutai stock ho.</p>
+
+      <!-- Add Unit -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
+            <span id="hhInvFormTitle">Add HH Inventory Unit</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-1.5">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Model <span class="text-red-400">*</span></label>
+            <input type="text" id="hhModelInput" autocomplete="off" placeholder="Type the exact model name…"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Chassis No <span class="text-red-400">*</span></label>
+            <input type="text" id="hhChassis" placeholder="MD2A12EY..."
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Engine No <span class="text-red-400">*</span></label>
+            <input type="text" id="hhEngine" placeholder="BSVI2024..."
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Registration No</label>
+            <input type="text" id="hhRegNo" placeholder="BA 2 PA 1234"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Colour <span class="text-red-400">*</span></label>
+            <input type="text" id="hhColor" placeholder="e.g. Fiery Orange"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Mela / Event Name <span class="text-red-400">*</span></label>
+            <input type="text" id="hhEventName" placeholder="e.g. Phidim Mela 2026"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units are added as <b>Available</b> by default — change status later from the row menu if needed.</p>
+        <div class="flex gap-2 flex-wrap">
+          <button id="saveHHInvBtn" class="cta-primary">
+            <i class="fas fa-floppy-disk"></i> Save Unit
+          </button>
+          <button id="cancelHHInvBtn" onclick="cancelHHInvEdit()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
+            <i class="fas fa-xmark"></i> Cancel Edit
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-tents text-amber-500"></i> HH Stock Register</div>
+          <span id="hhInvCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+          <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
+            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setHHInvStatusFilter('all')">All</button>
+            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Available" onclick="setHHInvStatusFilter('Available')">Available</button>
+            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Booked" onclick="setHHInvStatusFilter('Booked')">Booked</button>
+            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setHHInvStatusFilter('Sold')">Sold</button>
+          </div>
+          <div class="relative ml-auto w-full sm:w-64">
+            <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="hhInvSearch" autocomplete="off" placeholder="Search chassis, model, event…"
+              class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse responsive-table">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Chassis No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Colour</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Event / Mela</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="hhInvTableBody">
+              <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading HH inventory…
               </td></tr>
             </tbody>
           </table>
@@ -1764,6 +1872,21 @@ window._toggleKebab = (btn, type, id) => {
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editMaster(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('bikes', id) }
     ]);
+  } else if(type === 'hh_inventory'){
+    const s = hhInvData.find(x=>x.id===id);
+    const cur = s?.status || 'Available';
+    const statusActions = ['Available','Booked','Sold']
+      .filter(st => st !== cur)
+      .map(st => ({
+        label: 'Mark '+st,
+        icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
+        onClick: () => window._setHHInvStatus(id, st)
+      }));
+    openKebabMenuFor(btn, [
+      ...statusActions,
+      { label:'Edit', icon:'fa-pen', onClick:()=>window._editHHInv(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('hh_inventory', id) }
+    ]);
   } else if(type === 'inventory'){
     const s = invData.find(x=>x.id===id);
     const cur = s?.status || 'Available';
@@ -1823,21 +1946,22 @@ function findMasterBikeByName(name){
   // 1) Exact match (case/space/punctuation-insensitive) — preferred.
   const exact = allMasterBikes.find(b => normModelName(b.name) === target);
   if(exact) return exact;
-  // 2) Lenient fallback: one name's words are a subset of the other's, e.g.
-  // "Pulsar 220 F ABS BS6" typed in Excel should still match a master entry
-  // saved as "Pulsar 220 F ABS FI BSVI" — same bike, extra/renamed descriptor.
-  const targetWords = new Set(target.split(' '));
+  // 2) Lenient fallback: score how well the SHORTER side is covered by the
+  // longer one (not the max of the two), so short names like "Chetak 3501"
+  // vs a longer master entry "Chetak 3501 Electric" still match confidently
+  // instead of being unfairly penalized for the length difference.
+  const targetWords = target.split(' ');
   let bestMatch = null, bestScore = 0;
   allMasterBikes.forEach(b=>{
     const bWords = normModelName(b.name).split(' ');
+    if(bWords[0] !== targetWords[0]) return; // core model name/number must still match
     const bSet = new Set(bWords);
-    const overlap = [...targetWords].filter(w=>bSet.has(w)).length;
-    const coverage = overlap / Math.max(targetWords.size, bSet.size);
-    // Require most words to match AND the core model number/name to be shared
-    // (first word) so we don't cross-match unrelated models.
-    const firstWordMatches = bWords[0] === target.split(' ')[0];
-    if(firstWordMatches && coverage >= 0.7 && coverage > bestScore){
-      bestScore = coverage; bestMatch = b;
+    const overlap = targetWords.filter(w=>bSet.has(w)).length;
+    const coverageOfTarget = overlap / targetWords.length; // how much of what was typed is recognized
+    const coverageOfMaster = overlap / bWords.length;       // how much of the master entry is covered
+    const score = Math.max(coverageOfTarget, coverageOfMaster);
+    if(score >= 0.6 && score > bestScore){
+      bestScore = score; bestMatch = b;
     }
   });
   return bestMatch;
@@ -1931,8 +2055,10 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const tid = sec==='price' ? 'navPrice' : (sec==='inv' ? 'navInv' : (sec==='fin' ? 'navFin' : (sec==='acc' ? 'navAcc' : 'navStock')));
-  const mtid = sec==='price' ? 'mNavPrice' : (sec==='inv' ? 'mNavInv' : (sec==='fin' ? 'mNavFin' : (sec==='acc' ? 'mNavAcc' : 'mNavStock')));
+  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', fin:'navFin', acc:'navAcc', stock:'navStock' };
+  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', fin:'mNavFin', acc:'mNavAcc', stock:'mNavStock' };
+  const tid = NAV_IDS[sec] || 'navStock';
+  const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
   const mtab = document.getElementById(mtid);
   if(tab) { tab.classList.add('bg-blue-50','border-blue-200','text-blue-700'); tab.classList.remove('text-slate-500','border-transparent'); }
@@ -1953,6 +2079,7 @@ onAuthStateChanged(auth, async (user) => {
     await loadProfile(user.uid);
     loadMasterPriceList();
     loadLiveStock();
+    loadHHInventory();
     loadFinanceCategories();
     loadFinanceSchemes();
     loadAccessories();
@@ -2489,6 +2616,197 @@ function updateInvStats(){
   const hhHideCount = invData.filter(s=>s.hhFlag==='Hide').length;
   document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+hhSalesCount+' HH Sales  ·  '+hhHideCount+' HH Hide';
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   HH INVENTORY — a separate, parallel stock list for units taken out to
+   outdoor melas/events. Does not affect Live Inventory or Stock Report
+   counts; it's tracked independently in its own Firestore collection.
+   ═══════════════════════════════════════════════════════════════════════ */
+let hhInvData = [];
+let hhInvUnsub = null;
+let currentEditHHInvId = null;
+let hhInvStatusFilter = 'all';
+let hhInvSearchTerm = '';
+
+function populateHHModelDropdown(){ /* model is free-text here, validated on save — nothing to populate */ }
+
+function loadHHInventory(){
+  if(hhInvUnsub) hhInvUnsub();
+  const tbody = document.getElementById('hhInvTableBody');
+  hhInvUnsub = onSnapshot(collection(db,"hh_inventory"), snap=>{
+    hhInvData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderHHInvTable();
+    updateHHInvStats();
+  }, err=>{
+    console.error('hh_inventory listener failed', err);
+    tbody.innerHTML = `<tr><td colspan="7"><div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load HH inventory — check your connection.</p>
+      <button onclick="loadHHInventory()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div></td></tr>`;
+    toast('HH inventory sync failed: '+err.message,'err');
+  });
+}
+
+function updateHHInvStats(){
+  const sold = hhInvData.filter(s=>s.status==='Sold').length;
+  const booked = hhInvData.filter(s=>s.status==='Booked').length;
+  const available = hhInvData.length - sold - booked;
+  document.getElementById('hhInvTotalChip').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold';
+}
+
+window.setHHInvStatusFilter = (status)=>{
+  hhInvStatusFilter = status;
+  document.querySelectorAll('.hh-status-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===status));
+  renderHHInvTable();
+};
+
+function getFilteredHHInv(){
+  let base = hhInvData;
+  if(hhInvStatusFilter !== 'all') base = base.filter(s=>(s.status||'Available')===hhInvStatusFilter);
+  if(!hhInvSearchTerm) return base;
+  const q = hhInvSearchTerm.toLowerCase().trim();
+  return base.filter(s=>
+    (s.model||'').toLowerCase().includes(q) ||
+    (s.chassis||'').toLowerCase().includes(q) ||
+    (s.engine||'').toLowerCase().includes(q) ||
+    (s.eventName||'').toLowerCase().includes(q) ||
+    (s.regNo||'').toLowerCase().includes(q)
+  );
+}
+document.getElementById('hhInvSearch').addEventListener('input', e=>{
+  hhInvSearchTerm = e.target.value;
+  renderHHInvTable();
+});
+
+function renderHHInvTable(){
+  const tbody = document.getElementById('hhInvTableBody');
+  const list = getFilteredHHInv();
+  document.getElementById('hhInvCount').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'');
+  if(!list.length){
+    tbody.innerHTML = `<tr><td colspan="7"><div class="py-12 text-center text-slate-400"><i class="fas fa-tents text-3xl opacity-25 block mb-2"></i><p class="text-sm">${hhInvSearchTerm?'No units match your search.':'No HH inventory yet. Add a unit above.'}</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map(s=>`
+    <tr class="border-b border-slate-100">
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${s.sn||'—'}</td>
+      <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">${s.model||'—'}</td>
+      <td class="px-4 py-3 font-mono text-xs text-slate-500" data-th="Chassis No">${s.chassis||'—'}</td>
+      <td class="px-4 py-3" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}</span></td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Event / Mela">${s.eventName||'—'}</td>
+      <td class="px-4 py-3" data-th="Status">
+        <div class="flex flex-wrap items-center gap-1.5">
+          ${s.status==='Sold'
+            ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>`
+            : s.status==='Booked'
+            ? `<span class="badge badge-amber"><i class="fas fa-bookmark"></i> Booked</span>`
+            : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`}
+        </div>
+        ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${s.customerName}</div>` : ''}
+      </td>
+      <td class="px-4 py-3" data-th="Actions">
+        <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'hh_inventory','${s.id}')" aria-label="Row actions">
+          <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
+  const modelTyped = document.getElementById('hhModelInput').value.trim();
+  const bikeInfo = findMasterBikeByName(modelTyped);
+  if(!modelTyped || !bikeInfo){ toast('Model not found in the master price list — check spelling or add it there first.','err'); return; }
+  const modelName = bikeInfo.name;
+
+  const chassisCheck = Validate.identifierCode(document.getElementById('hhChassis').value, { label:'Chassis No' });
+  const engineCheck = Validate.identifierCode(document.getElementById('hhEngine').value, { label:'Engine No' });
+  const colorCheck = Validate.text(document.getElementById('hhColor').value, { label:'Colour', max:40 });
+  const regNoCheck = Validate.text(document.getElementById('hhRegNo').value, { min:0, max:20, label:'Registration No' });
+  const eventCheck = Validate.text(document.getElementById('hhEventName').value, { label:'Mela/Event name', max:60 });
+  const firstErr = [chassisCheck, engineCheck, colorCheck, eventCheck].find(c=>!c.ok);
+  if(firstErr){ toast(firstErr.error,'err'); return; }
+  if(!regNoCheck.ok){ toast(regNoCheck.error,'err'); return; }
+  const chassis = chassisCheck.value, engine = engineCheck.value, color = colorCheck.value, regNo = regNoCheck.value, eventName = eventCheck.value;
+
+  const dup = hhInvData.find(x=>x.id!==currentEditHHInvId && (normId(x.chassis)===normId(chassis) || normId(x.engine)===normId(engine)));
+  if(dup){
+    const proceed = await showConfirm({
+      title:'Possible duplicate unit',
+      message:`Chassis/Engine already exists in HH Inventory — S.N <b>${dup.sn||'—'}</b>, <b>${dup.model}</b>, ${dup.color||'—'}.<br><br>Save anyway?`,
+      okText:'Save Anyway', okColorClass:'text-amber-600 hover:bg-amber-50',
+      iconClass:'fa-triangle-exclamation', iconColor:'#f59e0b', iconBg:'#FFFBEB'
+    });
+    if(!proceed) return;
+  }
+
+  try{
+    if(currentEditHHInvId){
+      await updateDoc(doc(db,"hh_inventory",currentEditHHInvId),{model:modelName,chassis,engine,regNo,color,eventName});
+      toast('HH unit updated!');
+      window.cancelHHInvEdit();
+    } else {
+      const nextSn = hhInvData.length ? Math.max(...hhInvData.map(x=>Number(x.sn)||0))+1 : 1;
+      await addDoc(collection(db,"hh_inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,eventName,status:'Available',customerName:'',addedAt:new Date()});
+      ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('hhModelInput').value='';
+      toast('HH unit added — S.N '+nextSn+' assigned, marked Available.');
+    }
+  }catch(e){ toast('Error: '+e.message,'err'); }
+});
+
+window._editHHInv = (id)=>{
+  const s = hhInvData.find(x=>x.id===id); if(!s) return;
+  document.getElementById('hhModelInput').value = s.model||'';
+  document.getElementById('hhChassis').value = s.chassis||'';
+  document.getElementById('hhEngine').value = s.engine||'';
+  document.getElementById('hhRegNo').value = s.regNo||'';
+  document.getElementById('hhColor').value = s.color||'';
+  document.getElementById('hhEventName').value = s.eventName||'';
+  currentEditHHInvId = id;
+  const btn = document.getElementById('saveHHInvBtn');
+  btn.innerHTML = '<i class="fas fa-rotate"></i> Update Unit';
+  document.getElementById('hhInvFormTitle').textContent = 'Edit HH Inventory Unit';
+  const cancel = document.getElementById('cancelHHInvBtn');
+  cancel.classList.remove('hidden'); cancel.classList.add('flex');
+  scrollFormIntoView();
+  toast('Unit loaded for editing');
+};
+
+window.cancelHHInvEdit = ()=>{
+  currentEditHHInvId = null;
+  ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('hhModelInput').value='';
+  const btn = document.getElementById('saveHHInvBtn');
+  btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Unit';
+  document.getElementById('hhInvFormTitle').textContent = 'Add HH Inventory Unit';
+  const cancel = document.getElementById('cancelHHInvBtn');
+  cancel.classList.add('hidden'); cancel.classList.remove('flex');
+};
+
+window._setHHInvStatus = async (id, status) => {
+  const s = hhInvData.find(x=>x.id===id);
+  const modelLabel = s ? `${s.model} — ${s.color||''}`.trim() : 'this unit';
+  const needsCustomer = (status==='Booked' || status==='Sold');
+  const existingName = (s?.customerName||'').replace(/"/g,'&quot;');
+  const message = needsCustomer
+    ? `<b>${modelLabel}</b> will be marked <b>${status}</b>.<br><br>
+       <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
+       <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
+         style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">`
+    : `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`;
+  const proceed = await showConfirm({
+    title:'Mark as '+status+'?', message, okText:'Confirm',
+    okColorClass:'text-bajaj-blue hover:bg-blue-50',
+    iconClass:'fa-rotate', iconColor:'#005EA6', iconBg:'#EAF3FB'
+  });
+  if(!proceed) return;
+  const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : '';
+  try{
+    await updateDoc(doc(db,"hh_inventory",id),{status, customerName});
+    toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
 
 /* ═══════════════════════════════════════════════════════════════════════
    STOCK REPORT — replaces the manual Excel daily-stock workflow.
@@ -3345,7 +3663,7 @@ window._saveSn=async(col,id,val)=>{
 window._deleteEntry=async(col,id)=>{
   const ok = await showConfirm({
     title: 'Delete this entry?',
-    message: col==='bikes' ? "This will permanently remove the model from your price list. Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will permanently remove the finance scheme." : (col==='accessories' ? "This will permanently remove the accessory from the price list." : "This will permanently remove the unit from inventory. Remaining S.N numbers will shift up to close the gap.")),
+    message: col==='bikes' ? "This will permanently remove the model from your price list. Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will permanently remove the finance scheme." : (col==='accessories' ? "This will permanently remove the accessory from the price list." : (col==='hh_inventory' ? "This will permanently remove the unit from HH Inventory. Remaining S.N numbers will shift up to close the gap." : "This will permanently remove the unit from inventory. Remaining S.N numbers will shift up to close the gap."))),
     okText: 'Delete',
     okColorClass: 'text-red-500 hover:bg-red-50',
     iconClass: 'fa-trash-can', iconColor: '#ef4444', iconBg: '#FEF2F2'
@@ -3386,6 +3704,21 @@ window._deleteEntry=async(col,id)=>{
         }
       }
       toast('Model deleted — S.N renumbered automatically.');
+    } else if(col==='hh_inventory'){
+      const target = hhInvData.find(x=>x.id===id);
+      const deletedSn = target ? Number(target.sn)||0 : 0;
+
+      await deleteDoc(doc(db,col,id));
+
+      if(deletedSn){
+        const toShift = hhInvData.filter(x=>x.id!==id && Number(x.sn)>deletedSn);
+        if(toShift.length){
+          const batch = writeBatch(db);
+          toShift.forEach(x=>batch.update(doc(db,'hh_inventory',x.id),{sn:Number(x.sn)-1}));
+          await batch.commit();
+        }
+      }
+      toast('HH unit removed — S.N renumbered automatically.');
     } else {
       await deleteDoc(doc(db,col,id));
       toast(col==='finance_schemes' ? 'Finance scheme deleted.' : 'Entry deleted.');
@@ -3556,15 +3889,16 @@ window.loadFinanceSchemes = loadFinanceSchemes;
 window.loadAccessories = loadAccessories;
 
 /* ─── Nav ─── */
-const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', fin:'HFL Finance Options', acc:'Accessories Inventory', stock:'Stock Report' };
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', fin:'HFL Finance Options', acc:'Accessories Inventory', stock:'Stock Report' };
+const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', fin:'secFin', acc:'secAcc', stock:'secStock' };
 window.switchSec=(sec)=>{
   document.querySelectorAll('.sec-panel').forEach(p=>p.classList.remove('active'));
-  const secId = sec==='price'?'secPrice':(sec==='inv'?'secInv':(sec==='fin'?'secFin':(sec==='acc'?'secAcc':'secStock')));
-  document.getElementById(secId).classList.add('active');
+  document.getElementById(SEC_IDS[sec] || 'secStock').classList.add('active');
   setActiveTab(sec);
   const heading = document.getElementById('topbarHeading');
   if(heading) heading.textContent = SEC_TITLES[sec] || '';
   if(sec==='inv') populateModelDropdown();
+  if(sec==='hhinv') populateHHModelDropdown();
   if(sec==='stock') loadStockReportData();
 };
 </script>
