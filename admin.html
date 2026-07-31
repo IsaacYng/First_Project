@@ -2251,17 +2251,28 @@ window._editInventory=(id)=>{
 window._setUnitStatus = async (id, status) => {
   const s = invData.find(x=>x.id===id);
   const modelLabel = s ? `${s.model} — ${s.color||''}`.trim() : 'this unit';
+  const needsCustomer = (status==='Booked' || status==='Sold');
+  const existingName = (s?.customerName||'').replace(/"/g,'&quot;');
+  const message = needsCustomer
+    ? `<b>${modelLabel}</b> will be marked <b>${status}</b>.<br><br>
+       <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
+       <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
+         style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">`
+    : `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`;
   const proceed = await showConfirm({
     title: 'Mark as '+status+'?',
-    message: `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`,
+    message,
     okText:'Confirm',
     okColorClass:'text-bajaj-blue hover:bg-blue-50',
     iconClass:'fa-rotate', iconColor:'#005EA6', iconBg:'#EAF3FB'
   });
   if(!proceed) return;
+  // Read the embedded input's value right after the modal resolves — the
+  // DOM node is still there (only hidden), and nothing else touches it yet.
+  const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : '';
   try{
-    await updateDoc(doc(db,"inventory",id),{status});
-    toast('Unit marked as '+status+'.');
+    await updateDoc(doc(db,"inventory",id),{status, customerName});
+    toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
 
@@ -2459,6 +2470,7 @@ function renderInvTable(list){
           ${s.hhFlag==='Sales' ? `<span class="badge badge-blue"><i class="fas fa-bullseye"></i> HH Sales</span>` : ''}
           ${s.hhFlag==='Hide' ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> HH Hide (not in stock)</span>` : ''}
         </div>
+        ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${s.customerName}</div>` : ''}
       </td>
       <td class="px-4 py-3" data-th="Actions">
         <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'inventory','${s.id}')" aria-label="Row actions">
@@ -2663,11 +2675,12 @@ function buildStockReportPage(){
       <td class="left">${s.color||'—'}</td>
       <td class="left" style="font-family:'JetBrains Mono',monospace;font-size:10.5px">${s.chassis||'—'}</td>
       <td class="left">${s.regNo||'—'}</td>
+      <td class="left">${s.customerName||'—'}</td>
     </tr>`).join('');
     return `
       <div class="jrp-area-title" style="border-top-color:${chipBg}">${title} <span class="jrp-cat-chip" style="background:${chipBg};color:${chipFg};margin-left:8px">${list.length} unit${list.length!==1?'s':''}</span></div>
       <table class="jrp-table">
-        <thead><tr><th style="width:6%">S.N</th><th>Model</th><th style="width:18%">Colour</th><th style="width:22%">Chassis No</th><th style="width:18%">Reg. No</th></tr></thead>
+        <thead><tr><th style="width:5%">S.N</th><th>Model</th><th style="width:15%">Colour</th><th style="width:19%">Chassis No</th><th style="width:15%">Reg. No</th><th style="width:18%">Customer</th></tr></thead>
         <tbody>${bodyRows}</tbody>
       </table>`;
   }
@@ -3501,6 +3514,8 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
         engine: row.engine,
         regNo: row.regNo || '',
         color: row.color,
+        status: 'Available',
+        customerName: '',
         addedAt: new Date()
       });
       seenInBatch.push(row);
