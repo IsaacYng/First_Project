@@ -3126,7 +3126,7 @@ function buildStockReportPage(){
     if(!list.length) return '';
     const bodyRows = list.map((s,i)=>`<tr>
       <td>${i+1}</td>
-      <td class="left">${s.model||'—'}</td>
+      <td class="left">${findMasterBikeByName(s.model)?.name || s.model || '—'}</td>
       <td class="left">${s.color||'—'}</td>
       <td class="left" style="font-family:'JetBrains Mono',monospace;font-size:10.5px">${s.chassis||'—'}</td>
       <td class="left">${s.regNo||'—'}</td>
