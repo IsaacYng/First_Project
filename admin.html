@@ -3042,14 +3042,12 @@ function buildStockReportPage(){
       </table>`;
   }
   const bookedList = stockReportAllUnits.filter(s=>s.status==='Booked');
-  const soldList = stockReportAllUnits.filter(s=>s.status==='Sold');
   const hhSalesList = stockReportAllUnits.filter(s=>s.hhFlag==='Sales');
   const hhHideList = stockReportAllUnits.filter(s=>s.hhFlag==='Hide');
   const detailSections = [
     buildDetailSection('Booked Units', bookedList, '#FEF6E7', '#B4740E'),
     buildDetailSection('HH Sales (Reported, Still In Our Stock)', hhSalesList, '#EAF3FB', '#005EA6'),
     buildDetailSection('HH Hide (Sold, Held Back From HH Report)', hhHideList, '#F1F2F5', '#4B5262'),
-    buildDetailSection('Sold Units', soldList, '#FDEDED', '#C6382E'),
   ].join('');
 
   return `
@@ -3075,9 +3073,9 @@ function buildStockReportPage(){
 }
 
 window.openStockPreview = async function(){
-  if(!stockReportGrouped) await loadStockReportData();
+  await loadStockReportData(true); // always fresh — never show a stale/cached report
   if(!Object.keys(stockReportGrouped||{}).length){ toast('No available inventory to report yet.','warn'); return; }
-  document.getElementById('spvSubtitle').textContent = stockReportTotalUnits+' available units across '+Object.keys(stockReportGrouped).length+' models  ·  '+stockReportSoldUnits+' sold units excluded';
+  document.getElementById('spvSubtitle').textContent = stockReportTotalUnits+' available units across '+Object.keys(stockReportGrouped).length+' models';
   document.getElementById('spvPage').innerHTML = `<div class="jpg-report-paper">${buildStockReportPage()}</div>`;
   document.getElementById('stockPreviewOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -3866,12 +3864,12 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
     const colorCheck = Validate.text(row.color, { label:'Color', max:40 });
     const badField = [chassisCheck, engineCheck, modelCheck, colorCheck].find(c=>!c.ok);
     if(badField){ results.failed.push({row, reason: badField.error}); continue; }
+    // Model is trusted as typed — no master-price-list cross-check. If a close
+    // match does exist we still use its canonical spelling for consistency;
+    // otherwise the Excel value is imported exactly as given.
     const masterBike = findMasterBikeByName(modelCheck.value);
-    if(!masterBike){
-      results.failed.push({row, reason:`Model "${modelCheck.value}" isn't in the master price list — add it there first.`});
-      continue;
-    }
-    row.model = masterBike.name; row.chassis = chassisCheck.value; row.engine = engineCheck.value; row.color = colorCheck.value;
+    row.model = masterBike ? masterBike.name : modelCheck.value;
+    row.chassis = chassisCheck.value; row.engine = engineCheck.value; row.color = colorCheck.value;
     const dupExisting = findDuplicateUnit(row.chassis, row.engine);
     const dupBatch = seenInBatch.find(r=>normId(r.chassis)===normId(row.chassis) || normId(r.engine)===normId(row.engine));
     if(dupExisting || dupBatch){
@@ -4027,11 +4025,8 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
     const badField = [chassisCheck, engineCheck, modelCheck, colorCheck].find(c=>!c.ok);
     if(badField){ results.failed.push({row, reason: badField.error}); continue; }
     const masterBike = findMasterBikeByName(modelCheck.value);
-    if(!masterBike){
-      results.failed.push({row, reason:`Model "${modelCheck.value}" isn't in the master price list — add it there first.`});
-      continue;
-    }
-    row.model = masterBike.name; row.chassis = chassisCheck.value; row.engine = engineCheck.value; row.color = colorCheck.value;
+    row.model = masterBike ? masterBike.name : modelCheck.value;
+    row.chassis = chassisCheck.value; row.engine = engineCheck.value; row.color = colorCheck.value;
     const dupExisting = hhInvData.find(x=>normId(x.chassis)===normId(row.chassis) || normId(x.engine)===normId(row.engine));
     const dupBatch = seenInBatch.find(r=>normId(r.chassis)===normId(row.chassis) || normId(r.engine)===normId(row.engine));
     if(dupExisting || dupBatch){
@@ -4091,7 +4086,7 @@ window.switchSec=(sec)=>{
   if(heading) heading.textContent = SEC_TITLES[sec] || '';
   if(sec==='inv') populateModelDropdown();
   if(sec==='hhinv') populateHHModelDropdown();
-  if(sec==='stock') loadStockReportData();
+  if(sec==='stock') loadStockReportData(true);
 };
 </script>
 
