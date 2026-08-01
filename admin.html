@@ -2975,7 +2975,10 @@ async function loadStockReportData(forceRefresh){
     });
     const byModel = {};
     available.forEach(s=>{
-      const m = s.model || 'Unassigned';
+      // Resolve to the Master Price List's canonical spelling so entries that
+      // differ only by spacing/casing (e.g. "PULSAR 220 F ABS FI BSVI" vs
+      // "Pulsar 220 F ABS FI BS VI") group together as one model, not two.
+      const m = findMasterBikeByName(s.model)?.name || s.model || 'Unassigned';
       const c = (s.color||'Unspecified').trim() || 'Unspecified';
       byModel[m] = byModel[m] || { total:0, colours:{}, chassisByColour:{} };
       byModel[m].total++;
