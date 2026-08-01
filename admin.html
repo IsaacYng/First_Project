@@ -604,7 +604,13 @@
   .fin-cat-chip{ display:inline-flex; align-items:center; gap:7px; background:#F1F2F5; border:1px solid #E7E9EE; border-radius:999px; padding:5px 6px 5px 12px; font-size:12px; font-weight:700; color:#334155; }
   .fin-cat-chip button{ width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#94A3B8; font-size:10px; background:#fff; border:none; cursor:pointer; transition:all .15s; }
   .fin-cat-chip button:hover{ background:#FEE2E2; color:#EF4444; }
-  .inv-status-tab{ color:#7C8494; }
+  .inv-status-tab{ color:#7C8494; display:inline-flex; align-items:center; gap:5px; }
+  .pill-count{
+    display:inline-flex; align-items:center; justify-content:center; min-width:17px; height:17px;
+    padding:0 4px; border-radius:999px; background:#E2E8F0; color:#64748B; font-size:9.5px; font-weight:800;
+    font-family:'JetBrains Mono',monospace; transition:all .15s ease;
+  }
+  .inv-status-tab.active .pill-count, .hh-status-tab.active .pill-count{ background:#005EA6; color:#fff; }
   .inv-status-tab:hover{ color:#1F2430; }
   .inv-status-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
   .hh-status-tab{ color:#7C8494; }
@@ -1194,14 +1200,17 @@
           <button id="fixSnBtn" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-bajaj-blue text-bajaj-blue text-xs font-bold rounded-lg hover:bg-bajaj-blue hover:text-white transition-all">
             <i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering
           </button>
+          <button onclick="clearAllInventory()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all">
+            <i class="fas fa-trash-can text-[11px]"></i> Clear All
+          </button>
           <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 overflow-x-auto max-w-full inv-filter-scroll">
-            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active flex-shrink-0" data-status="all" onclick="setInvStatusFilter('all')">All</button>
-            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Available" onclick="setInvStatusFilter('Available')">Available</button>
-            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Booked" onclick="setInvStatusFilter('Booked')">Booked</button>
-            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Sold" onclick="setInvStatusFilter('Sold')">Sold</button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active flex-shrink-0" data-status="all" onclick="setInvStatusFilter('all')">All <span class="pill-count" id="pcAll">0</span></button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Available" onclick="setInvStatusFilter('Available')">Available <span class="pill-count" id="pcAvailable">0</span></button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Booked" onclick="setInvStatusFilter('Booked')">Booked <span class="pill-count" id="pcBooked">0</span></button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Sold" onclick="setInvStatusFilter('Sold')">Sold <span class="pill-count" id="pcSold">0</span></button>
             <span class="w-px h-4 bg-slate-200 mx-0.5 flex-shrink-0"></span>
-            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="HHSales" onclick="setInvStatusFilter('HHSales')">HH Sales</button>
-            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="HHHide" onclick="setInvStatusFilter('HHHide')">HH Hide</button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="HHSales" onclick="setInvStatusFilter('HHSales')">HH Sales <span class="pill-count" id="pcHHSales">0</span></button>
+            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="HHHide" onclick="setInvStatusFilter('HHHide')">HH Hide <span class="pill-count" id="pcHHHide">0</span></button>
           </div>
           <div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -1329,11 +1338,14 @@
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
           <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-tents text-amber-500"></i> HH Stock Register</div>
           <span id="hhInvCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+          <button onclick="clearAllHHInventory()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all">
+            <i class="fas fa-trash-can text-[11px]"></i> Clear All
+          </button>
           <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
-            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setHHInvStatusFilter('all')">All</button>
-            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Available" onclick="setHHInvStatusFilter('Available')">Available</button>
-            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Booked" onclick="setHHInvStatusFilter('Booked')">Booked</button>
-            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setHHInvStatusFilter('Sold')">Sold</button>
+            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setHHInvStatusFilter('all')">All <span class="pill-count" id="pcHHAll">0</span></button>
+            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Available" onclick="setHHInvStatusFilter('Available')">Available <span class="pill-count" id="pcHHAvailable">0</span></button>
+            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Booked" onclick="setHHInvStatusFilter('Booked')">Booked <span class="pill-count" id="pcHHBooked">0</span></button>
+            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setHHInvStatusFilter('Sold')">Sold <span class="pill-count" id="pcHHSold">0</span></button>
           </div>
           <div class="relative ml-auto w-full sm:w-64">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -1348,6 +1360,7 @@
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Chassis No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Reg. No</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Colour</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Event / Mela</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
@@ -1355,7 +1368,7 @@
               </tr>
             </thead>
             <tbody id="hhInvTableBody">
-              <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
+              <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">
                 <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading HH inventory…
               </td></tr>
             </tbody>
@@ -1839,7 +1852,84 @@ function showConfirm(opts){
   });
 }
 
-/* ─── Row action kebab (3-dot) menu ─── */
+// Same modal, but for very destructive actions (clear everything) — the OK
+// button stays disabled for a countdown so it can't be tapped by accident.
+function showDangerousConfirm(opts){
+  const { title='Are you sure?', message='', okText='Delete All', countdownSec=10 } = opts;
+  return new Promise((resolve)=>{
+    const modal = document.getElementById('confirmModal');
+    const titleEl = document.getElementById('confirmModalTitle');
+    const msgEl = document.getElementById('confirmModalMsg');
+    const okBtn = document.getElementById('confirmModalOk');
+    const cancelBtn = document.getElementById('confirmModalCancel');
+    const iconEl = document.getElementById('confirmModalIcon');
+    const iconWrap = document.getElementById('confirmModalIconWrap');
+
+    titleEl.textContent = title;
+    msgEl.innerHTML = message;
+    okBtn.className = 'flex-1 py-3.5 text-sm font-bold transition-colors text-red-500 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed';
+    okBtn.disabled = true;
+    iconEl.className = 'fas fa-triangle-exclamation text-base';
+    iconEl.style.color = '#ef4444';
+    iconWrap.style.background = '#FEF2F2';
+
+    let remaining = countdownSec;
+    okBtn.textContent = `Wait ${remaining}s…`;
+    const timer = setInterval(()=>{
+      remaining--;
+      if(remaining<=0){
+        clearInterval(timer);
+        okBtn.disabled = false;
+        okBtn.textContent = okText;
+      } else {
+        okBtn.textContent = `Wait ${remaining}s…`;
+      }
+    }, 1000);
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    function cleanup(result){
+      clearInterval(timer);
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      okBtn.disabled = false; // reset so the plain showConfirm() isn't left disabled next time
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      modal.removeEventListener('click', onBackdrop);
+      resolve(result);
+    }
+    function onOk(){ if(!okBtn.disabled) cleanup(true); }
+    function onCancel(){ cleanup(false); }
+    function onBackdrop(e){ if(e.target===modal) cleanup(false); }
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    modal.addEventListener('click', onBackdrop);
+  });
+}
+
+async function clearAllInCollection(colName, dataArr, label){
+  if(!dataArr.length){ toast('Already empty — nothing to clear.'); return; }
+  const proceed = await showDangerousConfirm({
+    title: `Clear ALL ${label}?`,
+    message: `This will <b>permanently delete all ${dataArr.length} unit${dataArr.length!==1?'s':''}</b> from ${label}. This cannot be undone.<br><br>The button unlocks in 10 seconds — please make sure this is really what you want.`,
+    okText: 'Delete All'
+  });
+  if(!proceed) return;
+  try{
+    const chunks = [];
+    for(let i=0;i<dataArr.length;i+=400) chunks.push(dataArr.slice(i,i+400));
+    for(const chunk of chunks){
+      const batch = writeBatch(db);
+      chunk.forEach(x=>batch.delete(doc(db,colName,x.id)));
+      await batch.commit();
+    }
+    toast(`Cleared all ${dataArr.length} unit(s) from ${label}.`);
+  }catch(e){ toast('Clear failed: '+e.message,'err'); }
+}
+window.clearAllInventory = ()=>clearAllInCollection('inventory', invData, 'Live Inventory');
+window.clearAllHHInventory = ()=>clearAllInCollection('hh_inventory', hhInvData, 'HH Inventory');
+
+
 let openKebabMenu = null;
 let openKebabBtn = null;
 
@@ -2654,6 +2744,8 @@ function updateInvStats(){
   const hhSalesCount = invData.filter(s=>s.hhFlag==='Sales').length;
   const hhHideCount = invData.filter(s=>s.hhFlag==='Hide').length;
   document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+hhSalesCount+' HH Sales  ·  '+hhHideCount+' HH Hide';
+  const pc = { pcAll:invData.length, pcAvailable:available, pcBooked:booked, pcSold:sold, pcHHSales:hhSalesCount, pcHHHide:hhHideCount };
+  Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -2692,6 +2784,8 @@ function updateHHInvStats(){
   const booked = hhInvData.filter(s=>s.status==='Booked').length;
   const available = hhInvData.length - sold - booked;
   document.getElementById('hhInvTotalChip').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold';
+  const pc = { pcHHAll:hhInvData.length, pcHHAvailable:available, pcHHBooked:booked, pcHHSold:sold };
+  Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
 }
 
 window.setHHInvStatusFilter = (status)=>{
@@ -2723,7 +2817,7 @@ function renderHHInvTable(){
   const list = getFilteredHHInv();
   document.getElementById('hhInvCount').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'');
   if(!list.length){
-    tbody.innerHTML = `<tr><td colspan="7"><div class="py-12 text-center text-slate-400"><i class="fas fa-tents text-3xl opacity-25 block mb-2"></i><p class="text-sm">${hhInvSearchTerm?'No units match your search.':'No HH inventory yet. Add a unit above.'}</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="py-12 text-center text-slate-400"><i class="fas fa-tents text-3xl opacity-25 block mb-2"></i><p class="text-sm">${hhInvSearchTerm?'No units match your search.':'No HH inventory yet. Add a unit above.'}</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map(s=>`
@@ -2731,6 +2825,7 @@ function renderHHInvTable(){
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${s.sn||'—'}</td>
       <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">${s.model||'—'}</td>
       <td class="px-4 py-3 font-mono text-xs text-slate-500" data-th="Chassis No">${s.chassis||'—'}</td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${s.regNo||'—'}</td>
       <td class="px-4 py-3" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}</span></td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Event / Mela">${s.eventName||'—'}</td>
       <td class="px-4 py-3" data-th="Status">
