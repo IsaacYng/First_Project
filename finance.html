@@ -199,6 +199,13 @@ main{animation:fadeInUp .8s ease-out .6s both}
 
 .results-panel{animation:slideInRight .7s cubic-bezier(.34,1.56,.64,1) .9s both}
 footer{animation:fadeInUp .6s ease-out 1.3s both}
+/* `main` and `footer` are siblings that both animate with a transform, so each
+   forms its own stacking context — raising a dropdown's z-index INSIDE main
+   only wins against other cards inside main, never against footer, since footer
+   comes later in the DOM. Ranking main above footer here fixes that once and
+   for all, for any current or future dropdown/overlay opened inside main. */
+main{position:relative;z-index:2}
+footer{position:relative;z-index:1}
 
 @keyframes slideDownFade{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
