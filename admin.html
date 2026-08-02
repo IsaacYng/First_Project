@@ -629,6 +629,13 @@
   #stockPreviewOverlay{ position:fixed; inset:0; z-index:500; display:none; background:rgba(10,15,26,.7); backdrop-filter:blur(3px); align-items:center; justify-content:center; padding:16px; }
   #stockPreviewOverlay.open{ display:flex; }
   .spv-shell{ background:#161B26; border-radius:16px; width:100%; max-width:1200px; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.5); }
+  .form-modal-overlay{
+    display:none; position:fixed; inset:0; z-index:400; background:rgba(15,23,42,.55); backdrop-filter:blur(2px);
+    align-items:flex-start; justify-content:center; padding:5vh 16px 16px; overflow-y:auto;
+  }
+  .form-modal-overlay.open{ display:flex; }
+  .form-modal-box{ width:100%; max-width:640px; animation:slideIn .16s ease both; }
+  .form-modal-box .yng-card-shell{ margin-bottom:0 !important; max-height:88vh; overflow-y:auto; }
   .spv-head{ display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid rgba(255,255,255,.08); flex-shrink:0; }
   .spv-body{ padding:20px; overflow:auto; -webkit-overflow-scrolling:touch; background:#0F1420; }
   .spv-swipe-hint{ display:none; align-items:center; justify-content:center; gap:7px; color:#94A3B8; font-size:11.5px; font-weight:700; margin-bottom:10px; }
@@ -1116,14 +1123,21 @@
           <div class="section-label">Stock Management ·</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Live <span class="text-amber-500">Inventory</span></div>
         </div>
-        <span id="invTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500 flex-shrink-0">0 units total</span>
+        <div class="flex items-center gap-2 flex-wrap flex-shrink-0">
+          <span id="invTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500">0 units total</span>
+          <button onclick="openInvFormModal()" class="cta-primary !py-2 !px-4 !text-xs">
+            <i class="fas fa-plus"></i> Add Unit
+          </button>
+        </div>
       </div>
 
-
-      <!-- Inv Form -->
+      <!-- Inv Form (modal) -->
+      <div id="invFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelInvEdit()">
+      <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
-        <div class="flex items-center gap-2 section-title text-2xl mb-4 pb-4 border-b border-slate-100">
-          <i class="fas fa-plus-circle text-amber-500 text-lg"></i> <span id="invFormTitle">Add Inventory Unit</span>
+        <div class="flex items-center justify-between gap-2 section-title text-2xl mb-4 pb-4 border-b border-slate-100">
+          <span class="flex items-center gap-2"><i class="fas fa-plus-circle text-amber-500 text-lg"></i> <span id="invFormTitle">Add Inventory Unit</span></span>
+          <button onclick="cancelInvEdit()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
           <div class="flex flex-col gap-1.5">
@@ -1163,6 +1177,8 @@
           </button>
         </div>
       </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /invFormModal -->
 
       <!-- Excel Bulk Import -->
       <div class="yng-card-shell p-5 mb-5">
@@ -1251,17 +1267,25 @@
           <div class="section-label">Stock Management ·</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">HH <span class="text-amber-500">Inventory</span></div>
         </div>
-        <span id="hhInvTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500 flex-shrink-0">0 units total</span>
+        <div class="flex items-center gap-2 flex-wrap flex-shrink-0">
+          <span id="hhInvTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500">0 units total</span>
+          <button onclick="openHHInvFormModal()" class="cta-primary !py-2 !px-4 !text-xs">
+            <i class="fas fa-plus"></i> Add Unit
+          </button>
+        </div>
       </div>
       <p class="text-xs text-slate-400 -mt-4 mb-5"><i class="fas fa-circle-info mr-1"></i>Outdoor mela/event ma laijaeko gadi haru — chutai list, chutai tracking. Yo Live Inventory sanga milaudaina, chutai stock ho.</p>
 
-      <!-- Add Unit -->
+      <!-- Add Unit (modal) -->
+      <div id="hhInvFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelHHInvEdit()">
+      <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
         <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
           <div class="flex items-center gap-2 section-title text-2xl">
             <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
             <span id="hhInvFormTitle">Add HH Inventory Unit</span>
           </div>
+          <button onclick="cancelHHInvEdit()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-1.5">
           <div class="flex flex-col gap-1.5">
@@ -1305,6 +1329,8 @@
           </button>
         </div>
       </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /hhInvFormModal -->
 
       <!-- Excel Bulk Import -->
       <div class="yng-card-shell p-5 mb-5">
@@ -2440,7 +2466,7 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
   const chassisCheck = Validate.identifierCode(document.getElementById('sChassis').value, { label:'Chassis No' });
   const engineCheck = Validate.identifierCode(document.getElementById('sEngine').value, { label:'Engine No' });
   const colorCheck = Validate.text(document.getElementById('sColor').value, { label:'Colour', max:40 });
-  const regNoCheck = Validate.text(document.getElementById('sRegNo').value, { min:0, max:20, label:'Registration No' });
+  const regNoCheck = Validate.text(document.getElementById('sRegNo').value, { min:0, max:40, label:'Registration No' });
   const firstErr = [chassisCheck, engineCheck, colorCheck].find(c=>!c.ok);
   if(firstErr){ toast(firstErr.error,'err'); return; }
   if(!regNoCheck.ok){ toast(regNoCheck.error,'err'); return; }
@@ -2491,7 +2517,7 @@ window._editInventory=(id)=>{
   document.getElementById('invFormTitle').textContent='Edit Inventory Unit';
   const cancel = document.getElementById('cancelInvBtn');
   cancel.classList.remove('hidden'); cancel.classList.add('flex');
-  scrollFormIntoView();
+  openInvFormModal();
   toast('Unit loaded for editing');
 };
 
@@ -2560,6 +2586,13 @@ window._setHHFlag = async (id, hhFlag) => {
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
 
+window.openInvFormModal = ()=>{
+  document.getElementById('invFormModal').classList.add('open');
+};
+window.closeInvFormModal = ()=>{
+  document.getElementById('invFormModal').classList.remove('open');
+};
+
 window.cancelInvEdit=()=>{
   currentEditInvId=null;
   ['sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
@@ -2569,6 +2602,7 @@ window.cancelInvEdit=()=>{
   document.getElementById('invFormTitle').textContent='Add Inventory Unit';
   const cancel = document.getElementById('cancelInvBtn');
   cancel.classList.add('hidden'); cancel.classList.remove('flex');
+  closeInvFormModal();
 };
 
 document.getElementById('fixSnBtn').addEventListener('click', async ()=>{
@@ -2855,7 +2889,7 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
   const chassisCheck = Validate.identifierCode(document.getElementById('hhChassis').value, { label:'Chassis No' });
   const engineCheck = Validate.identifierCode(document.getElementById('hhEngine').value, { label:'Engine No' });
   const colorCheck = Validate.text(document.getElementById('hhColor').value, { label:'Colour', max:40 });
-  const regNoCheck = Validate.text(document.getElementById('hhRegNo').value, { min:0, max:20, label:'Registration No' });
+  const regNoCheck = Validate.text(document.getElementById('hhRegNo').value, { min:0, max:40, label:'Registration No' });
   const eventCheck = Validate.text(document.getElementById('hhEventName').value, { label:'Mela/Event name', max:60 });
   const firstErr = [chassisCheck, engineCheck, colorCheck, eventCheck].find(c=>!c.ok);
   if(firstErr){ toast(firstErr.error,'err'); return; }
@@ -2888,6 +2922,13 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
   }catch(e){ toast('Error: '+e.message,'err'); }
 });
 
+window.openHHInvFormModal = ()=>{
+  document.getElementById('hhInvFormModal').classList.add('open');
+};
+window.closeHHInvFormModal = ()=>{
+  document.getElementById('hhInvFormModal').classList.remove('open');
+};
+
 window._editHHInv = (id)=>{
   const s = hhInvData.find(x=>x.id===id); if(!s) return;
   document.getElementById('hhModelInput').value = s.model||'';
@@ -2902,7 +2943,7 @@ window._editHHInv = (id)=>{
   document.getElementById('hhInvFormTitle').textContent = 'Edit HH Inventory Unit';
   const cancel = document.getElementById('cancelHHInvBtn');
   cancel.classList.remove('hidden'); cancel.classList.add('flex');
-  scrollFormIntoView();
+  openHHInvFormModal();
   toast('Unit loaded for editing');
 };
 
@@ -2915,6 +2956,7 @@ window.cancelHHInvEdit = ()=>{
   document.getElementById('hhInvFormTitle').textContent = 'Add HH Inventory Unit';
   const cancel = document.getElementById('cancelHHInvBtn');
   cancel.classList.add('hidden'); cancel.classList.remove('flex');
+  closeHHInvFormModal();
 };
 
 window._setHHInvStatus = async (id, status) => {
