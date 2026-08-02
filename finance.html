@@ -1676,8 +1676,23 @@ const db  = getFirestore(app);
 let allBikes = [];
 
 let invList = [];
+let hhInvList = [];
+// Units taken out to outdoor melas/events live in their own `hh_inventory`
+// collection (separate from the shop's main `inventory`) — merged into the
+// same chassis search here so a customer's bike bought at a mela can still be
+// found when writing up their finance record.
+function allInventoryRecords(){
+  return [...invList, ...hhInvList];
+}
+onSnapshot(collection(db,"hh_inventory"), snap=>{
+  hhInvList = snap.docs.map(d=>({id:d.id,...d.data(),_source:'hh'}));
+  const activeInput=document.getElementById('chassisSearch');
+  if(activeInput && document.activeElement===activeInput && activeInput.value.trim()){
+    renderChassisDropdown(searchChassisSuggestions(activeInput.value.trim()));
+  }
+});
 onSnapshot(collection(db,"inventory"), snap=>{
-  invList = snap.docs.map(d=>({id:d.id,...d.data()}));
+  invList = snap.docs.map(d=>({id:d.id,...d.data(),_source:'main'}));
   const activeInput=document.getElementById('chassisSearch');
   if(activeInput && document.activeElement===activeInput && activeInput.value.trim()){
     renderChassisDropdown(searchChassisSuggestions(activeInput.value));
@@ -1878,10 +1893,20 @@ window.findChassis=async function(){
       applyChassisData(data,searchVal);
       statusEl.innerText="Vehicle data loaded."; statusEl.style.color="#16A34A";
     }else{
-      document.getElementById('manualChassis').value=searchVal;
-      window._lastChassisStatus=''; window._lastChassisHH='';
-      showChassisStatusWarning('','');
-      statusEl.innerText="Not found in inventory — enter manually."; statusEl.style.color="#F59E0B";
+      // Not in the shop's main stock — check the HH mela/event inventory too
+      // before giving up.
+      const hq=query(collection(db,"hh_inventory"),where("chassis","==",searchVal));
+      const hqs=await getDocs(hq);
+      if(!hqs.empty){
+        const data=hqs.docs[0].data();
+        applyChassisData(data,searchVal);
+        statusEl.innerText="Vehicle data loaded (HH Mela stock)."; statusEl.style.color="#16A34A";
+      }else{
+        document.getElementById('manualChassis').value=searchVal;
+        window._lastChassisStatus=''; window._lastChassisHH='';
+        showChassisStatusWarning('','');
+        statusEl.innerText="Not found in inventory — enter manually."; statusEl.style.color="#F59E0B";
+      }
     }
   }catch(err){
     statusEl.innerText="Connection error."; statusEl.style.color="#DC2626";
@@ -2009,7 +2034,7 @@ function chassisMatchScore(chassis,q){
 }
 function searchChassisSuggestions(q){
   if(!q||!q.trim()) return [];
-  return invList
+  return allInventoryRecords()
     .map(s=>({s,score:chassisMatchScore(s.chassis,q)}))
     .filter(x=>x.score>=0)
     .sort((a,b)=>b.score-a.score)
@@ -2032,19 +2057,20 @@ function renderChassisDropdown(list){
   dd.innerHTML=list.map(s=>{
     const flagged=s.hhFlag==='Hide'||s.status==='Sold';
     const pill=s.hhFlag==='Hide'?'<span class="csd-status-pill">HH Hide</span>':(s.status==='Sold'?'<span class="csd-status-pill">Sold</span>':'');
+    const sourceTag=s._source==='hh'?'<span class="csd-status-pill" style="background:rgba(0,94,166,.1);color:#005EA6;border-color:rgba(0,94,166,.3)">HH Mela</span>':'';
     return `
     <button type="button" class="csd-item${flagged?' csd-flagged':''}" data-id="${s.id}">
       <span class="csd-main">
         <span class="csd-chassis">${(s.chassis||'—').toUpperCase()}</span>
         <span class="csd-sub">${s.model||'—'} · Engine ${s.engine||'—'}${s.regNo?(' · '+s.regNo):''}</span>
       </span>
-      ${pill}
+      ${sourceTag}${pill}
       <span class="csd-color-dot" style="background:${colourDotHex(s.color||'')}"></span>
     </button>`;}).join('');
   dd.style.display='block';
   dd.querySelectorAll('.csd-item').forEach(item=>{
     item.addEventListener('click',()=>{
-      const rec=invList.find(x=>x.id===item.dataset.id);
+      const rec=allInventoryRecords().find(x=>x.id===item.dataset.id);
       if(rec){
         document.getElementById('chassisSearch').value=rec.chassis||'';
         applyChassisData(rec,rec.chassis);
