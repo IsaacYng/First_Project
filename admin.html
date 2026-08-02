@@ -631,7 +631,7 @@
   .spv-shell{ background:#161B26; border-radius:16px; width:100%; max-width:1200px; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.5); }
   .form-modal-overlay{
     display:none; position:fixed; inset:0; z-index:400; background:rgba(15,23,42,.55); backdrop-filter:blur(2px);
-    align-items:flex-start; justify-content:center; padding:5vh 16px 16px; overflow-y:auto;
+    align-items:center; justify-content:center; padding:16px; overflow-y:auto;
   }
   .form-modal-overlay.open{ display:flex; }
   .form-modal-box{ width:100%; max-width:640px; animation:slideIn .16s ease both; }
@@ -944,6 +944,9 @@
           <div class="section-label">Management ·</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Master <span class="text-amber-500">Price List</span></div>
         </div>
+        <button onclick="openMasterFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <i class="fas fa-plus"></i> Add Model
+        </button>
       </div>
 
       <!-- Stats -->
@@ -995,13 +998,25 @@
         </div>
       </div>
 
-      <!-- Form Card -->
+      <!-- Duplicate Model Detector -->
+      <div id="dupModelCard" class="yng-card-shell p-5 mb-5" style="display:none;">
+        <div class="flex items-center gap-2 section-title text-2xl mb-2">
+          <i class="fas fa-triangle-exclamation text-amber-500 text-lg"></i> Possible Duplicate Models
+        </div>
+        <p class="text-[11px] text-slate-400 mb-3">Yi model naam haru dherai milcha (spacing/spelling farak matra) — sambhavatah eutai bike duita entry vayeko. Ek matra rakhera baki delete garnu hola, natra Stock Report/Inventory ma pani chutai-chutai dekhincha.</p>
+        <div id="dupModelList" class="flex flex-col gap-2"></div>
+      </div>
+
+      <!-- Form Card (modal) -->
+      <div id="masterFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelMasterEdit()">
+      <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
         <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
           <div class="flex items-center gap-2 section-title text-2xl">
             <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
             <span id="masterFormTitle">Add New Bike Model</span>
           </div>
+          <button onclick="cancelMasterEdit()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
           <div class="flex flex-col gap-1.5" style="max-width:100px;">
@@ -1081,6 +1096,8 @@
           </button>
         </div>
       </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /masterFormModal -->
 
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
@@ -1410,15 +1427,21 @@
           <div class="section-label">Finance Schemes ·</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">HFL <span class="text-amber-500">Finance Options</span></div>
         </div>
+        <button onclick="openFinFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <i class="fas fa-plus"></i> Add Scheme
+        </button>
       </div>
 
-      <!-- Form -->
+      <!-- Form (modal) -->
+      <div id="finFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelFinEdit()">
+      <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
         <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
           <div class="flex items-center gap-2 section-title text-2xl">
             <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
             <span id="finFormTitle">Add Finance Scheme</span>
           </div>
+          <button onclick="cancelFinEdit()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-1.5">
           <div class="flex flex-col gap-1.5">
@@ -1451,6 +1474,8 @@
           </button>
         </div>
       </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /finFormModal -->
 
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
@@ -1488,15 +1513,21 @@
           <div class="section-label">Accessories ·</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Accessories <span class="text-amber-500">Inventory</span></div>
         </div>
+        <button onclick="openAccFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <i class="fas fa-plus"></i> Add Accessory
+        </button>
       </div>
 
-      <!-- Form -->
+      <!-- Form (modal) -->
+      <div id="accFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelAccEdit()">
+      <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
         <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
           <div class="flex items-center gap-2 section-title text-2xl">
             <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
             <span id="accFormTitle">Add Accessory</span>
           </div>
+          <button onclick="cancelAccEdit()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           <div class="flex flex-col gap-1.5">
@@ -1520,6 +1551,8 @@
           </button>
         </div>
       </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /accFormModal -->
 
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
@@ -2295,9 +2328,56 @@ function loadMasterPriceList() {
   });
 }
 
+function findPossibleDuplicateGroups(){
+  const groups = [];
+  const used = new Set();
+  allMasterBikes.forEach((a, i) => {
+    if(used.has(a.id)) return;
+    const aWords = normModelName(a.name).split(' ').filter(Boolean);
+    if(!aWords.length) return;
+    const group = [a];
+    allMasterBikes.forEach((b, j) => {
+      if(i===j || used.has(b.id)) return;
+      const bWords = normModelName(b.name).split(' ').filter(Boolean);
+      if(!bWords.length || aWords[0] !== bWords[0]) return;
+      const bSet = new Set(bWords);
+      const overlap = aWords.filter(w=>bSet.has(w)).length;
+      const score = Math.max(overlap/aWords.length, overlap/bWords.length);
+      if(score >= 0.6) group.push(b);
+    });
+    if(group.length > 1){
+      group.forEach(g=>used.add(g.id));
+      groups.push(group);
+    }
+  });
+  return groups;
+}
+
+function renderDupModelCard(){
+  const groups = findPossibleDuplicateGroups();
+  const card = document.getElementById('dupModelCard');
+  const list = document.getElementById('dupModelList');
+  if(!groups.length){ card.style.display='none'; return; }
+  card.style.display='block';
+  list.innerHTML = groups.map(g => `
+    <div class="border border-amber-200 bg-amber-50/60 rounded-xl p-3 flex flex-wrap gap-2">
+      ${g.map(b=>`
+        <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg pl-3 pr-1.5 py-1.5">
+          <div>
+            <div class="text-sm font-bold text-slate-800">${b.name}</div>
+            <div class="text-[11px] text-slate-400">S.N ${b.sn} · Rs ${Number(b.price||0).toLocaleString('en-IN')}</div>
+          </div>
+          <button onclick="window._deleteEntry('bikes','${b.id}')" class="w-7 h-7 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600 transition-all flex-shrink-0" title="Delete this duplicate">
+            <i class="fas fa-trash-can text-xs"></i>
+          </button>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
 function renderMasterTable() {
   const tbody = document.getElementById('masterTableBody');
   document.getElementById('priceCount').textContent = allMasterBikes.length+' model'+(allMasterBikes.length!==1?'s':'');
+  renderDupModelCard();
   if (!allMasterBikes.length) {
     tbody.innerHTML=`<tr><td colspan="10"><div class="py-12 text-center text-slate-400"><i class="fas fa-motorcycle text-3xl opacity-25 block mb-2"></i><p class="text-sm">No models yet. Add your first bike above.</p></div></td></tr>`;
     return;
@@ -2355,6 +2435,9 @@ function populateModelDropdown() {
   list.innerHTML = validBikes.map(b=>`<option value="${b.name}">`).join('');
 }
 
+window.openMasterFormModal = ()=>document.getElementById('masterFormModal').classList.add('open');
+window.closeMasterFormModal = ()=>document.getElementById('masterFormModal').classList.remove('open');
+
 window._editMaster=(id)=>{
   const b=allMasterBikes.find(x=>x.id===id); if(!b)return;
   document.getElementById('mSn').value=b.sn||'';
@@ -2377,7 +2460,7 @@ window._editMaster=(id)=>{
   document.getElementById('masterFormTitle').textContent='Edit Bike Model';
   const cancel = document.getElementById('cancelMasterBtn');
   cancel.classList.remove('hidden'); cancel.classList.add('flex');
-  scrollFormIntoView();
+  openMasterFormModal();
   toast('Model loaded for editing');
 };
 
@@ -2388,6 +2471,7 @@ window.cancelMasterEdit=()=>{
   document.getElementById('masterFormTitle').textContent='Add New Bike Model';
   const cancel = document.getElementById('cancelMasterBtn');
   cancel.classList.add('hidden'); cancel.classList.remove('flex');
+  closeMasterFormModal();
 };
 
 function updateLegguardVisibility(){
@@ -2697,6 +2781,8 @@ function getFilteredInv(){
     base = base.filter(s => s.hhFlag==='Sales');
   } else if(invStatusFilter === 'HHHide'){
     base = base.filter(s => s.hhFlag==='Hide');
+  } else if(invStatusFilter === 'Available'){
+    base = base.filter(s => (s.status||'Available')==='Available' && s.hhFlag!=='Hide');
   } else if(invStatusFilter !== 'all'){
     base = base.filter(s => (s.status||'Available') === invStatusFilter);
   }
@@ -2774,9 +2860,12 @@ function renderInvTable(list){
 function updateInvStats(){
   const sold = invData.filter(s=>s.status==='Sold').length;
   const booked = invData.filter(s=>s.status==='Booked').length;
-  const available = invData.length - sold - booked;
   const hhSalesCount = invData.filter(s=>s.hhFlag==='Sales').length;
   const hhHideCount = invData.filter(s=>s.hhFlag==='Hide').length;
+  // "Available" means truly in stock right now — a unit marked HH Hide is
+  // really gone (even if its raw status field still says Available), so it
+  // must not be counted here even though it isn't Sold/Booked either.
+  const available = invData.filter(s=>(s.status||'Available')==='Available' && s.hhFlag!=='Hide').length;
   document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+hhSalesCount+' HH Sales  ·  '+hhHideCount+' HH Hide';
   const pc = { pcAll:invData.length, pcAvailable:available, pcBooked:booked, pcSold:sold, pcHHSales:hhSalesCount, pcHHHide:hhHideCount };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
@@ -3697,6 +3786,9 @@ document.getElementById('saveFinBtn').addEventListener('click', async()=>{
   }
 });
 
+window.openFinFormModal = ()=>document.getElementById('finFormModal').classList.add('open');
+window.closeFinFormModal = ()=>document.getElementById('finFormModal').classList.remove('open');
+
 window._editFinance=(id)=>{
   const f=financeSchemes.find(x=>x.id===id); if(!f)return;
   renderFinCategorySelect();
@@ -3710,7 +3802,7 @@ window._editFinance=(id)=>{
   document.getElementById('finFormTitle').textContent='Edit Finance Scheme';
   const cancel = document.getElementById('cancelFinBtn');
   cancel.classList.remove('hidden'); cancel.classList.add('flex');
-  scrollFormIntoView();
+  openFinFormModal();
   toast('Scheme loaded for editing');
 };
 
@@ -3722,6 +3814,7 @@ window.cancelFinEdit=()=>{
   document.getElementById('finFormTitle').textContent='Add Finance Scheme';
   const cancel = document.getElementById('cancelFinBtn');
   cancel.classList.add('hidden'); cancel.classList.remove('flex');
+  closeFinFormModal();
 };
 
 /* ─── Accessories Inventory ─── */
@@ -3795,6 +3888,9 @@ document.getElementById('saveAccBtn').addEventListener('click', async()=>{
   }
 });
 
+window.openAccFormModal = ()=>document.getElementById('accFormModal').classList.add('open');
+window.closeAccFormModal = ()=>document.getElementById('accFormModal').classList.remove('open');
+
 window._editAccessory=(id)=>{
   const a=accessories.find(x=>x.id===id); if(!a)return;
   document.getElementById('aName').value=a.name??'';
@@ -3805,7 +3901,7 @@ window._editAccessory=(id)=>{
   document.getElementById('accFormTitle').textContent='Edit Accessory';
   const cancel = document.getElementById('cancelAccBtn');
   cancel.classList.remove('hidden'); cancel.classList.add('flex');
-  scrollFormIntoView();
+  openAccFormModal();
   toast('Accessory loaded for editing');
 };
 
@@ -3817,6 +3913,7 @@ window.cancelAccEdit=()=>{
   document.getElementById('accFormTitle').textContent='Add Accessory';
   const cancel = document.getElementById('cancelAccBtn');
   cancel.classList.add('hidden'); cancel.classList.remove('flex');
+  closeAccFormModal();
 };
 
 window._saveSn=async(col,id,val)=>{
