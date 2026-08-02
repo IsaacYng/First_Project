@@ -2049,9 +2049,13 @@ function colourDotHex(col=''){
 function renderChassisDropdown(list){
   const dd=document.getElementById('chassisSearchDropdown');
   if(!dd) return;
+  const card=document.getElementById('chassisSearchWrap')?.closest('.calc-card');
+  const openDropdown=()=>{ dd.style.display='block'; card?.classList.add('dropdown-open'); };
+  const closeDropdown=()=>{ dd.style.display='none'; card?.classList.remove('dropdown-open'); };
+  window._closeChassisDropdown=closeDropdown;
   if(!list.length){
     dd.innerHTML='<div class="csd-empty">No matching chassis found.</div>';
-    dd.style.display='block';
+    openDropdown();
     return;
   }
   dd.innerHTML=list.map(s=>{
@@ -2067,7 +2071,7 @@ function renderChassisDropdown(list){
       ${sourceTag}${pill}
       <span class="csd-color-dot" style="background:${colourDotHex(s.color||'')}"></span>
     </button>`;}).join('');
-  dd.style.display='block';
+  openDropdown();
   dd.querySelectorAll('.csd-item').forEach(item=>{
     item.addEventListener('click',()=>{
       const rec=allInventoryRecords().find(x=>x.id===item.dataset.id);
@@ -2077,14 +2081,14 @@ function renderChassisDropdown(list){
         const statusEl=document.getElementById('searchStatus');
         if(statusEl){statusEl.innerText="Vehicle data loaded."; statusEl.style.color="#16A34A";}
       }
-      dd.style.display='none';
+      closeDropdown();
     });
   });
 }
 const chassisSearchInput=document.getElementById('chassisSearch');
 chassisSearchInput?.addEventListener('input',(e)=>{
   const val=e.target.value;
-  if(!val.trim()){ document.getElementById('chassisSearchDropdown').style.display='none'; return; }
+  if(!val.trim()){ window._closeChassisDropdown ? window._closeChassisDropdown() : document.getElementById('chassisSearchDropdown').style.display='none'; return; }
   renderChassisDropdown(searchChassisSuggestions(val));
 });
 chassisSearchInput?.addEventListener('focus',(e)=>{
@@ -2093,14 +2097,14 @@ chassisSearchInput?.addEventListener('focus',(e)=>{
 document.addEventListener('click',(e)=>{
   const wrap=document.getElementById('chassisSearchWrap');
   if(wrap && !wrap.contains(e.target)){
-    const dd=document.getElementById('chassisSearchDropdown');
-    if(dd) dd.style.display='none';
+    if(window._closeChassisDropdown) window._closeChassisDropdown();
+    else{ const dd=document.getElementById('chassisSearchDropdown'); if(dd) dd.style.display='none'; }
   }
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
-    const dd=document.getElementById('chassisSearchDropdown');
-    if(dd) dd.style.display='none';
+    if(window._closeChassisDropdown) window._closeChassisDropdown();
+    else{ const dd=document.getElementById('chassisSearchDropdown'); if(dd) dd.style.display='none'; }
   }
 });
 
