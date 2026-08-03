@@ -901,6 +901,12 @@
         <button id="navStock" onclick="switchSec('stock');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-file-lines"></i> Stock Report
         </button>
+        <button id="navHistory" onclick="switchSec('history');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-clock-rotate-left"></i> Activity Log
+        </button>
+        <button id="navTrash" onclick="switchSec('trash');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-trash-can"></i> Trash <span id="trashNavCount" class="hidden ml-auto bg-red-100 text-red-600 text-[10px] font-extrabold rounded-full px-1.5 py-0.5"></span>
+        </button>
       </nav>
 
       <div class="sidebar-foot">
@@ -1238,6 +1244,9 @@
           <button id="fixSnBtn" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-bajaj-blue text-bajaj-blue text-xs font-bold rounded-lg hover:bg-bajaj-blue hover:text-white transition-all">
             <i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering
           </button>
+          <button onclick="exportInventoryToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+            <i class="fas fa-file-excel text-[11px]"></i> Export
+          </button>
           <button onclick="clearAllInventory()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all">
             <i class="fas fa-trash-can text-[11px]"></i> Clear All
           </button>
@@ -1398,6 +1407,9 @@
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
           <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-tents text-amber-500"></i> HH Stock Register</div>
           <span id="hhInvCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+          <button onclick="exportHHInventoryToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+            <i class="fas fa-file-excel text-[11px]"></i> Export
+          </button>
           <button onclick="clearAllHHInventory()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all">
             <i class="fas fa-trash-can text-[11px]"></i> Clear All
           </button>
@@ -1688,6 +1700,85 @@
       </div>
     </div>
 
+    <!-- ═══ ACTIVITY LOG ═══ -->
+    <div class="sec-panel" id="secHistory">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="eyebrow">Audit Trail</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Activity <span class="text-amber-500">Log</span></div>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Who deleted, sold, or restored what — and when. Kept for reference; doesn't affect live stock.</p>
+        </div>
+      </div>
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-clock-rotate-left text-amber-500"></i> Recent Activity</div>
+          <span id="historyCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 entries</span>
+          <div class="relative ml-auto w-full sm:w-72">
+            <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="historySearch" autocomplete="off" placeholder="Search model, chassis, action, by…"
+              class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse responsive-table">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">When</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Action</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Where</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Unit / Details</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">By</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr><td colspan="5" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading activity log…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TRASH ═══ -->
+    <div class="sec-panel" id="secTrash">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="eyebrow">Recovery</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Trash <span class="text-amber-500">Bin</span></div>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Deleted units land here first. Restore within 7 days — after that they're purged for good automatically.</p>
+        </div>
+      </div>
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-trash-can text-amber-500"></i> Deleted Items</div>
+          <span id="trashCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 items</span>
+          <button onclick="emptyTrash()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all">
+            <i class="fas fa-trash-can text-[11px]"></i> Empty Trash Permanently
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse responsive-table">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Deleted</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">From</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model / Item</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Chassis / Info</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Expires</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="trashTableBody">
+              <tr><td colspan="6" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading trash…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /main content -->
 
   <!-- FOOTER -->
@@ -1809,6 +1900,44 @@ import {
   getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc,
   serverTimestamp, query, orderBy, limit, runTransaction, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+/* ─── Who's doing it — used by the Trash / Activity Log so every delete,
+   sale, and restore is attributed to whoever was signed in at the time. ─── */
+let currentUserEmail = '';
+let currentUserName = 'Admin';
+
+// Moves a doc's data into the `trash` collection (7-day recovery window)
+// before it gets removed from its live collection. Never blocks/throws the
+// caller's delete flow — if trash-saving fails, the delete still proceeds,
+// it just won't be recoverable.
+async function moveToTrash(colName, id, data){
+  try{
+    const { id:_ignore, ...rest } = data || {};
+    await addDoc(collection(db,'trash'), {
+      originalCollection: colName,
+      originalId: id,
+      data: rest,
+      deletedAt: new Date(),
+      deletedBy: currentUserEmail || currentUserName || 'Unknown'
+    });
+  }catch(e){ console.error('moveToTrash failed', e); }
+}
+
+// Activity log — a lightweight audit trail: who deleted / sold / restored
+// what, and when. Never blocks the caller if logging fails.
+async function logActivity(action, colName, info){
+  try{
+    await addDoc(collection(db,'activity_log'), {
+      action, collection: colName,
+      model: info?.model || info?.name || '',
+      chassis: info?.chassis || '',
+      sn: info?.sn ?? '',
+      customerName: info?.customerName || '',
+      by: currentUserEmail || currentUserName || 'Unknown',
+      at: new Date()
+    });
+  }catch(e){ console.error('logActivity failed', e); }
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    SECURITY NOTE (read before deploying)
@@ -2002,11 +2131,15 @@ async function clearAllInCollection(colName, dataArr, label){
   if(!dataArr.length){ toast('Already empty — nothing to clear.'); return; }
   const proceed = await showDangerousConfirm({
     title: `Clear ALL ${label}?`,
-    message: `This will <b>permanently delete all ${dataArr.length} unit${dataArr.length!==1?'s':''}</b> from ${label}. This cannot be undone.<br><br>The button unlocks in 5 seconds — please make sure this is really what you want.`,
+    message: `This will move all <b>${dataArr.length} unit${dataArr.length!==1?'s':''}</b> from ${label} to Trash (recoverable for 7 days), then remove them from the live list.<br><br>The button unlocks in 5 seconds — please make sure this is really what you want.`,
     okText: 'Delete All'
   });
   if(!proceed) return;
   try{
+    // Move every unit to Trash first, in the same chunk size as the delete
+    // batches, so a Clear All is fully recoverable like any other delete.
+    const items = [...dataArr];
+    for(const x of items) await moveToTrash(colName, x.id, x);
     const chunks = [];
     for(let i=0;i<dataArr.length;i+=400) chunks.push(dataArr.slice(i,i+400));
     for(const chunk of chunks){
@@ -2014,7 +2147,8 @@ async function clearAllInCollection(colName, dataArr, label){
       chunk.forEach(x=>batch.delete(doc(db,colName,x.id)));
       await batch.commit();
     }
-    toast(`Cleared all ${dataArr.length} unit(s) from ${label}.`);
+    logActivity('Cleared All', colName, { model: `${items.length} unit(s)`, sn: '' });
+    toast(`Moved all ${dataArr.length} unit(s) from ${label} to Trash.`);
   }catch(e){ toast('Clear failed: '+e.message,'err'); }
 }
 window.clearAllInventory = ()=>clearAllInCollection('inventory', invData, 'Live Inventory');
@@ -2298,8 +2432,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', fin:'navFin', acc:'navAcc', stock:'navStock' };
-  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', fin:'mNavFin', acc:'mNavAcc', stock:'mNavStock' };
+  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', fin:'navFin', acc:'navAcc', stock:'navStock', history:'navHistory', trash:'navTrash' };
+  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', fin:'mNavFin', acc:'mNavAcc', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -2315,6 +2449,7 @@ setActiveTab('price');
 /* ─── Auth ─── */
 onAuthStateChanged(auth, async (user) => {
   if (user) {
+    currentUserEmail = user.email || '';
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('admin-section').style.display = 'flex';
     document.body.classList.add('app-active');
@@ -2327,6 +2462,8 @@ onAuthStateChanged(auth, async (user) => {
     loadFinanceSchemes();
     loadAccessories();
     loadStockAreas();
+    loadTrash();
+    loadActivityLog();
     setBtnState(false);
   } else {
     document.getElementById('login-section').style.display = 'flex';
@@ -2370,6 +2507,7 @@ async function loadProfile(uid) {
   try {
     const snap = await getDoc(doc(db,"profiles",uid));
     const name = snap.exists() ? (snap.data().name||'Admin') : 'Administrator';
+    currentUserName = name;
     document.getElementById('headerUserName').textContent = name;
     document.getElementById('navAvatar').textContent = name.charAt(0).toUpperCase();
     const pmName = document.getElementById('profileMenuName'); if(pmName) pmName.textContent = name;
@@ -2646,6 +2784,7 @@ window._setUnitStatus = async (id, status) => {
   const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : '';
   try{
     await updateDoc(doc(db,"inventory",id),{status, customerName});
+    logActivity(status==='Sold' ? 'Marked Sold' : 'Status: '+status, 'inventory', {...s, customerName});
     toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
@@ -2681,6 +2820,7 @@ window._setHHFlag = async (id, hhFlag) => {
     const payload = { hhFlag: hhFlag || null };
     if(customerName !== undefined) payload.customerName = customerName;
     await updateDoc(doc(db,"inventory",id), payload);
+    logActivity(hhFlag==='Sales' ? 'HH Sales' : (hhFlag==='Hide' ? 'HH Hide (Sold)' : 'HH Flag Undone'), 'inventory', {...s, customerName: customerName!==undefined?customerName:s?.customerName});
     if(hhFlag==='Sales') toast('Marked as HH Sales — counted in our stock, reported to HH.');
     else if(hhFlag==='Hide') toast('Marked as HH Hide'+(customerName?' — '+customerName:'')+' — NOT counted in our stock, held back from HH\'s report.');
     else toast('HH flag cleared.');
@@ -2939,6 +3079,8 @@ window.deleteSelectedInvUnits = async ()=>{
   });
   if(!proceed) return;
   try{
+    const targets = ids.map(id=>invData.find(x=>x.id===id)).filter(Boolean);
+    for(const t of targets) await moveToTrash('inventory', t.id, t);
     const chunks = [];
     for(let i=0;i<ids.length;i+=400) chunks.push(ids.slice(i,i+400));
     for(const chunk of chunks){
@@ -2946,7 +3088,8 @@ window.deleteSelectedInvUnits = async ()=>{
       chunk.forEach(id=>batch.delete(doc(db,'inventory',id)));
       await batch.commit();
     }
-    toast(`${ids.length} unit(s) deleted.`);
+    logActivity('Bulk Deleted', 'inventory', { model: `${targets.length} unit(s)`, sn: '' });
+    toast(`${ids.length} unit(s) moved to Trash.`);
     selectedInvIds.clear();
     document.getElementById('stockTable')?.classList.remove('select-mode');
     updateDeleteSelectedBtn();
@@ -3131,6 +3274,8 @@ window.deleteSelectedHHInvUnits = async ()=>{
   });
   if(!proceed) return;
   try{
+    const targets = ids.map(id=>hhInvData.find(x=>x.id===id)).filter(Boolean);
+    for(const t of targets) await moveToTrash('hh_inventory', t.id, t);
     const chunks = [];
     for(let i=0;i<ids.length;i+=400) chunks.push(ids.slice(i,i+400));
     for(const chunk of chunks){
@@ -3138,7 +3283,8 @@ window.deleteSelectedHHInvUnits = async ()=>{
       chunk.forEach(id=>batch.delete(doc(db,'hh_inventory',id)));
       await batch.commit();
     }
-    toast(`${ids.length} HH unit(s) deleted.`);
+    logActivity('Bulk Deleted', 'hh_inventory', { model: `${targets.length} unit(s)`, sn: '' });
+    toast(`${ids.length} HH unit(s) moved to Trash.`);
     selectedHHInvIds.clear();
     document.getElementById('hhInvTable')?.classList.remove('select-mode');
     updateDeleteSelectedHHBtn();
@@ -3244,6 +3390,7 @@ window._setHHInvStatus = async (id, status) => {
   const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : '';
   try{
     await updateDoc(doc(db,"hh_inventory",id),{status, customerName});
+    logActivity(status==='Sold' ? 'Marked Sold' : 'Status: '+status, 'hh_inventory', {...s, customerName});
     toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
@@ -4146,10 +4293,11 @@ window._saveSn=async(col,id,val)=>{
 window._deleteEntry=async(col,id)=>{
   // Every delete — single row or bulk — waits out a short countdown before
   // the button unlocks. A stray/fast tap can never delete something by
-  // accident.
+  // accident. Deletes are also soft: the record moves to Trash first (7-day
+  // recovery window) before being removed from its live collection.
   const ok = await showDangerousConfirm({
     title: 'Delete this entry?',
-    message: col==='bikes' ? "This will permanently remove the model from your price list. Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will permanently remove the finance scheme." : (col==='accessories' ? "This will permanently remove the accessory from the price list." : (col==='hh_inventory' ? "This will permanently remove the unit from HH Inventory. Remaining S.N numbers will shift up to close the gap." : "This will permanently remove the unit from inventory. Remaining S.N numbers will shift up to close the gap."))),
+    message: col==='bikes' ? "This will remove the model from your price list (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will remove the finance scheme (recoverable from Trash for 7 days)." : (col==='accessories' ? "This will remove the accessory from the price list (recoverable from Trash for 7 days)." : (col==='hh_inventory' ? "This will remove the unit from HH Inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : "This will remove the unit from inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap."))),
     okText: 'Delete',
     countdownSec: 3
   });
@@ -4161,7 +4309,9 @@ window._deleteEntry=async(col,id)=>{
       const target = invData.find(x=>x.id===id);
       const deletedSn = target ? Number(target.sn)||0 : 0;
 
+      if(target) await moveToTrash('inventory', id, target);
       await deleteDoc(doc(db,col,id));
+      if(target) logActivity('Deleted', 'inventory', target);
 
       if(deletedSn){
         const toShift = invData.filter(x=>x.id!==id && Number(x.sn)>deletedSn);
@@ -4171,14 +4321,16 @@ window._deleteEntry=async(col,id)=>{
           await batch.commit();
         }
       }
-      toast('Unit removed — S.N renumbered automatically.');
+      toast('Unit moved to Trash — S.N renumbered automatically.');
     } else if(col==='bikes'){
       // Same gap-closing behaviour as inventory: shift remaining S.N's down
       // by one so numbering always stays contiguous after a delete.
       const target = allMasterBikes.find(x=>x.id===id);
       const deletedSn = target ? Number(target.sn)||0 : 0;
 
+      if(target) await moveToTrash('bikes', id, target);
       await deleteDoc(doc(db,col,id));
+      if(target) logActivity('Deleted', 'bikes', target);
 
       if(deletedSn){
         const toShift = allMasterBikes.filter(x=>x.id!==id && Number(x.sn)>deletedSn);
@@ -4188,12 +4340,14 @@ window._deleteEntry=async(col,id)=>{
           await batch.commit();
         }
       }
-      toast('Model deleted — S.N renumbered automatically.');
+      toast('Model moved to Trash — S.N renumbered automatically.');
     } else if(col==='hh_inventory'){
       const target = hhInvData.find(x=>x.id===id);
       const deletedSn = target ? Number(target.sn)||0 : 0;
 
+      if(target) await moveToTrash('hh_inventory', id, target);
       await deleteDoc(doc(db,col,id));
+      if(target) logActivity('Deleted', 'hh_inventory', target);
 
       if(deletedSn){
         const toShift = hhInvData.filter(x=>x.id!==id && Number(x.sn)>deletedSn);
@@ -4203,12 +4357,255 @@ window._deleteEntry=async(col,id)=>{
           await batch.commit();
         }
       }
-      toast('HH unit removed — S.N renumbered automatically.');
+      toast('HH unit moved to Trash — S.N renumbered automatically.');
     } else {
+      const srcArr = col==='finance_schemes' ? financeSchemes : (col==='accessories' ? accessories : []);
+      const target = srcArr.find(x=>x.id===id);
+      if(target) await moveToTrash(col, id, target);
       await deleteDoc(doc(db,col,id));
-      toast(col==='finance_schemes' ? 'Finance scheme deleted.' : 'Entry deleted.');
+      if(target) logActivity('Deleted', col, target);
+      toast(col==='finance_schemes' ? 'Finance scheme moved to Trash.' : 'Entry moved to Trash.');
     }
   }catch(e){toast('Delete failed: '+e.message,'err');}
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TRASH — soft-delete recovery. Every delete (single, bulk, clear-all)
+   copies the record here first; items older than 7 days are purged
+   automatically the next time the Trash list loads.
+   ═══════════════════════════════════════════════════════════════════════ */
+let trashData = [];
+let trashUnsub = null;
+const TRASH_RETENTION_DAYS = 7;
+
+function loadTrash(){
+  if(trashUnsub) trashUnsub();
+  trashUnsub = onSnapshot(collection(db,"trash"), snap=>{
+    trashData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    purgeExpiredTrash();
+    renderTrashTable();
+    const navCount = document.getElementById('trashNavCount');
+    if(navCount){
+      if(trashData.length){ navCount.textContent = trashData.length; navCount.classList.remove('hidden'); }
+      else navCount.classList.add('hidden');
+    }
+  }, err=>console.error('trash listener failed', err));
+}
+
+// Silent cleanup — anything past the retention window is gone for good.
+// Restoring the original record is never possible after this runs.
+async function purgeExpiredTrash(){
+  const cutoff = Date.now() - TRASH_RETENTION_DAYS*24*60*60*1000;
+  const expired = trashData.filter(t=>{
+    const at = t.deletedAt?.toDate ? t.deletedAt.toDate() : new Date(t.deletedAt);
+    return at.getTime() < cutoff;
+  });
+  for(const t of expired){
+    try{ await deleteDoc(doc(db,'trash',t.id)); }catch(e){ console.error('purge failed', e); }
+  }
+}
+
+function daysLeft(deletedAt){
+  const at = deletedAt?.toDate ? deletedAt.toDate() : new Date(deletedAt);
+  const diffDays = TRASH_RETENTION_DAYS - Math.floor((Date.now()-at.getTime())/(24*60*60*1000));
+  return Math.max(0, diffDays);
+}
+
+const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory' };
+
+function renderTrashTable(){
+  const tbody = document.getElementById('trashTableBody');
+  if(!tbody) return;
+  document.getElementById('trashCount').textContent = trashData.length+' item'+(trashData.length!==1?'s':'');
+  if(!trashData.length){
+    tbody.innerHTML = `<tr><td colspan="6"><div class="py-12 text-center text-slate-400"><i class="fas fa-trash-can text-3xl opacity-25 block mb-2"></i><p class="text-sm">Trash is empty.</p></div></td></tr>`;
+    return;
+  }
+  const sorted = [...trashData].sort((a,b)=>{
+    const ta = a.deletedAt?.toDate ? a.deletedAt.toDate() : new Date(a.deletedAt);
+    const tb = b.deletedAt?.toDate ? b.deletedAt.toDate() : new Date(b.deletedAt);
+    return tb - ta;
+  });
+  tbody.innerHTML = sorted.map(t=>{
+    const at = t.deletedAt?.toDate ? t.deletedAt.toDate() : new Date(t.deletedAt);
+    const d = t.data || {};
+    const left = daysLeft(t.deletedAt);
+    return `<tr class="border-b border-slate-100">
+      <td class="px-4 py-3 text-xs text-slate-500 whitespace-nowrap" data-th="Deleted">${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}, ${at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</td>
+      <td class="px-4 py-3" data-th="From"><span class="badge badge-blue">${TRASH_LABELS[t.originalCollection]||t.originalCollection}</span></td>
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm" data-th="Model / Item">${d.model || d.name || '—'}</td>
+      <td class="px-4 py-3 text-xs text-slate-500 font-mono" data-th="Chassis / Info">${d.chassis || d.regNo || '—'}${d.customerName?`<div class="text-slate-400">${d.customerName}</div>`:''}</td>
+      <td class="px-4 py-3" data-th="Expires">${left<=1 ? `<span class="badge badge-red">${left===0?'Today':'1 day'}</span>` : `<span class="text-xs text-slate-500">${left} days</span>`}</td>
+      <td class="px-4 py-3" data-th="Actions">
+        <div class="flex items-center gap-2 justify-end sm:justify-start">
+          <button onclick="restoreFromTrash('${t.id}')" class="flex items-center gap-1 px-2.5 py-1 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all"><i class="fas fa-clock-rotate-left text-[10px]"></i> Restore</button>
+          <button onclick="permanentlyDeleteTrashItem('${t.id}')" class="flex items-center gap-1 px-2.5 py-1 border-2 border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"><i class="fas fa-xmark text-[10px]"></i> Delete Forever</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+window.restoreFromTrash = async (trashId)=>{
+  const t = trashData.find(x=>x.id===trashId);
+  if(!t) return;
+  const label = TRASH_LABELS[t.originalCollection] || t.originalCollection;
+  const ok = await showConfirm({
+    title: 'Restore this item?',
+    message: `<b>${t.data?.model || t.data?.name || 'This item'}</b> will go back to <b>${label}</b>.`,
+    okText: 'Restore', okColorClass: 'text-emerald-600 hover:bg-emerald-50',
+    iconClass: 'fa-clock-rotate-left', iconColor: '#059669', iconBg: '#ECFDF5'
+  });
+  if(!ok) return;
+  try{
+    await setDoc(doc(db, t.originalCollection, t.originalId), t.data);
+    await deleteDoc(doc(db,'trash',trashId));
+    logActivity('Restored', t.originalCollection, t.data);
+    toast('Restored to '+label+'.');
+  }catch(e){ toast('Restore failed: '+e.message,'err'); }
+};
+
+window.permanentlyDeleteTrashItem = async (trashId)=>{
+  const t = trashData.find(x=>x.id===trashId);
+  const ok = await showDangerousConfirm({
+    title: 'Delete forever?',
+    message: `<b>${t?.data?.model || t?.data?.name || 'This item'}</b> will be permanently erased — this cannot be undone, even from here.`,
+    okText: 'Delete Forever', countdownSec: 3
+  });
+  if(!ok) return;
+  try{ await deleteDoc(doc(db,'trash',trashId)); toast('Permanently deleted.'); }
+  catch(e){ toast('Delete failed: '+e.message,'err'); }
+};
+
+window.emptyTrash = async ()=>{
+  if(!trashData.length){ toast('Trash is already empty.'); return; }
+  const ok = await showDangerousConfirm({
+    title: `Empty Trash — ${trashData.length} item${trashData.length!==1?'s':''}?`,
+    message: `Every item currently in Trash will be permanently erased. This cannot be undone.`,
+    okText: 'Empty Trash', countdownSec: 5
+  });
+  if(!ok) return;
+  try{
+    const chunks = [];
+    const items = [...trashData];
+    for(let i=0;i<items.length;i+=400) chunks.push(items.slice(i,i+400));
+    for(const chunk of chunks){
+      const batch = writeBatch(db);
+      chunk.forEach(t=>batch.delete(doc(db,'trash',t.id)));
+      await batch.commit();
+    }
+    toast('Trash emptied.');
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ACTIVITY LOG — read-only audit trail of deletes / sales / restores.
+   ═══════════════════════════════════════════════════════════════════════ */
+let activityLogData = [];
+let activityLogUnsub = null;
+let historySearchTerm = '';
+
+function loadActivityLog(){
+  if(activityLogUnsub) activityLogUnsub();
+  const q = query(collection(db,"activity_log"), orderBy('at','desc'), limit(500));
+  activityLogUnsub = onSnapshot(q, snap=>{
+    activityLogData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderActivityLog();
+  }, err=>console.error('activity_log listener failed', err));
+}
+
+const ACTION_STYLE = {
+  'Deleted': {icon:'fa-trash-can', cls:'badge-red'},
+  'Bulk Deleted': {icon:'fa-trash-can', cls:'badge-red'},
+  'Cleared All': {icon:'fa-trash-can', cls:'badge-red'},
+  'Restored': {icon:'fa-clock-rotate-left', cls:'badge-green'},
+  'Marked Sold': {icon:'fa-tag', cls:'badge-red'},
+  'HH Sales': {icon:'fa-bullseye', cls:'badge-blue'},
+  'HH Hide (Sold)': {icon:'fa-bullseye', cls:'badge-neutral'},
+  'HH Flag Undone': {icon:'fa-rotate-left', cls:'badge-neutral'}
+};
+
+function renderActivityLog(){
+  const tbody = document.getElementById('historyTableBody');
+  if(!tbody) return;
+  const q = historySearchTerm.toLowerCase().trim();
+  const list = q ? activityLogData.filter(a=>
+    (a.action||'').toLowerCase().includes(q) ||
+    (a.model||'').toLowerCase().includes(q) ||
+    (a.chassis||'').toLowerCase().includes(q) ||
+    (a.customerName||'').toLowerCase().includes(q) ||
+    (a.by||'').toLowerCase().includes(q)
+  ) : activityLogData;
+  document.getElementById('historyCount').textContent = list.length+' entr'+(list.length!==1?'ies':'y');
+  if(!list.length){
+    tbody.innerHTML = `<tr><td colspan="5"><div class="py-12 text-center text-slate-400"><i class="fas fa-clock-rotate-left text-3xl opacity-25 block mb-2"></i><p class="text-sm">${q?'No matching activity.':'No activity recorded yet.'}</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(a=>{
+    const at = a.at?.toDate ? a.at.toDate() : new Date(a.at);
+    const style = ACTION_STYLE[a.action] || {icon:'fa-circle-info', cls:'badge-neutral'};
+    return `<tr class="border-b border-slate-100">
+      <td class="px-4 py-3 text-xs text-slate-500 whitespace-nowrap" data-th="When">${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}, ${at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</td>
+      <td class="px-4 py-3" data-th="Action"><span class="badge ${style.cls}"><i class="fas ${style.icon}"></i> ${a.action}</span></td>
+      <td class="px-4 py-3 text-xs text-slate-500" data-th="Where">${TRASH_LABELS[a.collection]||a.collection}</td>
+      <td class="px-4 py-3 text-sm text-slate-700" data-th="Unit / Details">
+        <span class="font-semibold">${a.model||'—'}</span>${a.chassis?` <span class="text-xs text-slate-400 font-mono">(${a.chassis})</span>`:''}
+        ${a.customerName?`<div class="text-[11px] text-slate-500">${a.customerName}</div>`:''}
+      </td>
+      <td class="px-4 py-3 text-xs text-slate-500" data-th="By">${a.by||'Unknown'}</td>
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('historySearch')?.addEventListener('input', function(){
+  historySearchTerm = this.value;
+  renderActivityLog();
+});
+
+/* ─── Excel Export (current view — respects active filter/search) ─── */
+window.exportInventoryToExcel = ()=>{
+  const list = getFilteredInv();
+  if(!list.length){ toast('Nothing to export in the current view.','warn'); return; }
+  const sorted = [...list].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
+  const rows = sorted.map(s=>({
+    'S.N': s.sn||'',
+    'Model': s.model||'',
+    'Chassis No': s.chassis||'',
+    'Engine No': s.engine||'',
+    'Reg. No': s.regNo||'',
+    'Colour': s.color||'',
+    'Status': s.hhFlag==='Hide' ? 'Sold (HH Hide)' : (s.status||'Available'),
+    'HH Flag': s.hhFlag||'',
+    'Customer': s.customerName||''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:6},{wch:26},{wch:20},{wch:16},{wch:18},{wch:16},{wch:16},{wch:10},{wch:22}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
+  XLSX.writeFile(wb, `inventory_export_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast(`Exported ${rows.length} unit(s).`);
+};
+
+window.exportHHInventoryToExcel = ()=>{
+  const list = getFilteredHHInv();
+  if(!list.length){ toast('Nothing to export in the current view.','warn'); return; }
+  const sorted = [...list].sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0));
+  const rows = sorted.map(s=>({
+    'S.N': s.sn||'',
+    'Model': s.model||'',
+    'Chassis No': s.chassis||'',
+    'Reg. No': s.regNo||'',
+    'Colour': s.color||'',
+    'Event / Mela': s.eventName||'',
+    'Status': s.status||'Available',
+    'Customer': s.customerName||''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:6},{wch:26},{wch:20},{wch:18},{wch:16},{wch:20},{wch:12},{wch:22}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'HH Inventory');
+  XLSX.writeFile(wb, `hh_inventory_export_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast(`Exported ${rows.length} HH unit(s).`);
 };
 
 /* ─── Excel Bulk Import ─── */
@@ -4524,8 +4921,8 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', fin:'HFL Finance Options', acc:'Accessories Inventory', stock:'Stock Report' };
-const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', fin:'secFin', acc:'secAcc', stock:'secStock' };
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', fin:'HFL Finance Options', acc:'Accessories Inventory', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
+const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', fin:'secFin', acc:'secAcc', stock:'secStock', history:'secHistory', trash:'secTrash' };
 window.switchSec=(sec)=>{
   document.querySelectorAll('.sec-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(SEC_IDS[sec] || 'secStock').classList.add('active');
@@ -4535,6 +4932,8 @@ window.switchSec=(sec)=>{
   if(sec==='inv') populateModelDropdown();
   if(sec==='hhinv') populateHHModelDropdown();
   if(sec==='stock') loadStockReportData(true);
+  if(sec==='history') renderActivityLog();
+  if(sec==='trash') renderTrashTable();
 };
 </script>
 
