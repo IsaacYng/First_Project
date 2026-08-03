@@ -2103,9 +2103,22 @@ const Validate = {
 };
 
 /* ─── Custom confirm modal (replaces native browser confirm) ─── */
+// Both showConfirm() and showDangerousConfirm() share this ONE modal
+// element. Without a guard, a fast double-tap (very easy on mobile) could
+// fire the function twice before the first dialog resolved — each call
+// stacking its OWN onOk/onCancel/onBackdrop listeners onto the SAME
+// buttons. A single later click would then fire every stacked listener at
+// once, running the action multiple times (and Cancel could look like the
+// dialog "came back", since a second stacked call resets the modal's
+// countdown/content). This flag makes an already-open confirm ignore any
+// extra trigger until it's actually dismissed.
+let confirmModalBusy = false;
+
 function showConfirm(opts){
   // Back-compat: showConfirm("some message") still works as a plain delete-style confirm
   if(typeof opts === 'string') opts = { message: opts };
+  if(confirmModalBusy) return Promise.resolve(false);
+  confirmModalBusy = true;
   const {
     title = 'Delete this entry?',
     message = "This action can't be undone.",
@@ -2136,6 +2149,7 @@ function showConfirm(opts){
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     function cleanup(result){
+      confirmModalBusy = false;
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       okBtn.removeEventListener('click', onOk);
@@ -2155,6 +2169,8 @@ function showConfirm(opts){
 // Same modal, but for very destructive actions (clear everything) — the OK
 // button stays disabled for a countdown so it can't be tapped by accident.
 function showDangerousConfirm(opts){
+  if(confirmModalBusy) return Promise.resolve(false);
+  confirmModalBusy = true;
   const { title='Are you sure?', message='', okText='Delete All', countdownSec=5 } = opts;
   return new Promise((resolve)=>{
     const modal = document.getElementById('confirmModal');
@@ -2189,6 +2205,7 @@ function showDangerousConfirm(opts){
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     function cleanup(result){
+      confirmModalBusy = false;
       clearInterval(timer);
       modal.classList.add('hidden');
       modal.classList.remove('flex');
