@@ -3081,14 +3081,24 @@ function renderMasterTable() {
   const sorted=[...allMasterBikes].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
   tbody.innerHTML = sorted.map(b=>{
     const category=b.category||'Bike';
+    // Fitments now come from whatever accessories are actually configured
+    // for this bike's category (Category Manager → Accessories) — not a
+    // hardcoded Leg Guard/Seat Cover pair. Bikes saved before this existed
+    // fall back to their old boolean fields for those two specific names.
     const legacyFit=b.applyLegguardSeatcover!==false;
-    const fitsLegguard=b.applyLegguard!==undefined?b.applyLegguard:legacyFit;
-    const fitsSeatcover=b.applySeatcover!==undefined?b.applySeatcover:legacyFit;
-    const fitLine=(label,fits)=>`<span class="inline-flex items-center gap-1 text-[10px] font-semibold ${fits?'text-emerald-600':'text-red-500'}"><i class="fas ${fits?'fa-check':'fa-xmark'}"></i> ${label}</span>`;
-    const catBadge=category==='Scooter'
-      ? `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200"><i class="fas fa-motor-cycle text-[10px] text-bajaj-blue"></i>Scooter</span>
-         <div class="flex flex-col gap-0.5 mt-1">${fitLine('Leg Guard',fitsLegguard)}${fitLine('Seat Cover',fitsSeatcover)}</div>`
-      : `<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">Bike</span>`;
+    const catAccessoryNames = financeCategories.find(c=>c.name===category)?.accessoryNames || [];
+    const fitLine=(label,fits)=>`<span class="inline-flex items-center gap-1 text-[10px] font-semibold ${fits?'text-emerald-600':'text-red-500'}"><i class="fas ${fits?'fa-check':'fa-xmark'}"></i> ${escapeHtml(label)}</span>`;
+    const fitmentLines = catAccessoryNames.map(name=>{
+      let fits = b.fitments?.[name];
+      if(fits===undefined){
+        if(name==='Leg Guard') fits = b.applyLegguard!==undefined?b.applyLegguard:legacyFit;
+        else if(name==='Seat Cover') fits = b.applySeatcover!==undefined?b.applySeatcover:legacyFit;
+        else fits = false;
+      }
+      return fitLine(name, fits);
+    }).join('');
+    const catBadge=`<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">${escapeHtml(category)}</span>`
+      + (fitmentLines ? `<div class="flex flex-col gap-0.5 mt-1">${fitmentLines}</div>` : '');
     return `
     <tr class="border-b border-slate-100" data-label="${escapeHtml(b.name)}">
       <td class="px-4 py-3" data-th="S.N">
@@ -4779,6 +4789,10 @@ function loadFinanceCategories(){
     renderFinCategoryChips();
     renderFinCategorySelect();
     renderFinTable();
+    // The Price List table's fitment badges are driven by each category's
+    // configured accessories — refresh it here too, or it'd show stale/no
+    // badges until something else (e.g. editing a bike) happened to re-render it.
+    if(typeof renderMasterTable === 'function' && allMasterBikes.length) renderMasterTable();
   }, err=>console.error('finance_categories listener failed', err));
 }
 
@@ -4928,6 +4942,20 @@ document.addEventListener('click', (e)=>{
     categoryAccMenuOpenId = null;
   }
 });
+
+// The popover's position is computed once, at the moment it opens, from its
+// trigger button's on-screen coordinates. If the page (or the Category
+// Manager modal's own scrollable card) scrolls afterward, the button moves
+// but the popover — being position:fixed — doesn't follow it, so it visibly
+// detaches and ends up floating over whatever content happens to be at
+// those old screen coordinates. Simplest fix: close it on any scroll,
+// same as most dropdowns already do.
+document.addEventListener('scroll', ()=>{
+  if(categoryAccMenuOpenId){
+    document.querySelectorAll('.cat-acc-menu').forEach(m=>m.remove());
+    categoryAccMenuOpenId = null;
+  }
+}, true); // capture phase — catches scrolling inside nested scrollable containers too, not just window
 
 window.startCategoryRename = (id)=>{
   categoryRenamingId = id;
