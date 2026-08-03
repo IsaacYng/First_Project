@@ -2225,9 +2225,15 @@ let areaStockMap = {};
 let accessories = [];
 
 /* ─── Pagination (bounded reads for the fast-growing inventory collection) ─── */
-const INV_PAGE_SIZE = 200;
+const INV_PAGE_SIZE = 30;
 let invPageLimit = INV_PAGE_SIZE;
 let invHasMore = false;
+// HH Inventory previously had NO limit at all — it pulled the entire
+// collection on every session regardless of size. Same paginated pattern
+// as Inventory now applies here too.
+const HH_PAGE_SIZE = 30;
+let hhPageLimit = HH_PAGE_SIZE;
+let hhHasMore = false;
 
 /* ═══════════════════════════════════════════════════════════════════════
    INPUT VALIDATION — frontend-side defense-in-depth. This does NOT replace
@@ -3635,6 +3641,18 @@ function loadLiveStock(){
   });
 }
 
+// Shared scroll-triggered auto-loader — watches a sentinel element and
+// fires the callback once it scrolls near the viewport, instead of making
+// the person hunt for and tap a "Load More" button every time. The button
+// stays too, as a fallback for browsers without IntersectionObserver.
+function observeLoadMoreSentinel(el, onTrigger){
+  if(!('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver((entries)=>{
+    if(entries[0].isIntersecting){ io.disconnect(); onTrigger(); }
+  }, { rootMargin: '400px' }); // fires a bit before it's actually on-screen, so scrolling feels seamless
+  io.observe(el);
+}
+
 function renderInvLoadMore(){
   let bar = document.getElementById('invLoadMoreBar');
   const table = document.getElementById('stockTableBody')?.closest('.overflow-x-auto');
@@ -3644,12 +3662,28 @@ function renderInvLoadMore(){
     bar = document.createElement('div');
     bar.id = 'invLoadMoreBar';
     bar.className = 'px-5 py-3 border-t border-slate-100 text-center';
-    bar.innerHTML = `<button id="invLoadMoreBtn" class="cta-secondary !py-2 !px-4 !text-xs">Load 200 more units</button>`;
+    bar.innerHTML = `<button id="invLoadMoreBtn" class="cta-secondary !py-2 !px-4 !text-xs">Load ${INV_PAGE_SIZE} more units</button>`;
     table.after(bar);
-    bar.querySelector('button').addEventListener('click', ()=>{
-      invPageLimit += INV_PAGE_SIZE;
-      loadLiveStock();
-    });
+    const trigger = ()=>{ invPageLimit += INV_PAGE_SIZE; loadLiveStock(); };
+    bar.querySelector('button').addEventListener('click', trigger);
+    observeLoadMoreSentinel(bar, trigger);
+  }
+}
+
+function renderHHInvLoadMore(){
+  let bar = document.getElementById('hhInvLoadMoreBar');
+  const table = document.getElementById('hhInvTableBody')?.closest('.overflow-x-auto');
+  if(!table) return;
+  if(!hhHasMore){ bar?.remove(); return; }
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'hhInvLoadMoreBar';
+    bar.className = 'px-5 py-3 border-t border-slate-100 text-center';
+    bar.innerHTML = `<button id="hhInvLoadMoreBtn" class="cta-secondary !py-2 !px-4 !text-xs">Load ${HH_PAGE_SIZE} more units</button>`;
+    table.after(bar);
+    const trigger = ()=>{ hhPageLimit += HH_PAGE_SIZE; loadHHInventory(); };
+    bar.querySelector('button').addEventListener('click', trigger);
+    observeLoadMoreSentinel(bar, trigger);
   }
 }
 
@@ -3947,12 +3981,15 @@ function populateHHModelDropdown(){ /* model is free-text here, validated on sav
 function loadHHInventory(){
   if(hhInvUnsub) hhInvUnsub();
   const tbody = document.getElementById('hhInvTableBody');
-  hhInvUnsub = onSnapshot(collection(db,"hh_inventory"), snap=>{
+  const q = query(collection(db,"hh_inventory"), orderBy('sn','asc'), limit(hhPageLimit));
+  hhInvUnsub = onSnapshot(q, snap=>{
     hhInvData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    hhHasMore = snap.docs.length === hhPageLimit;
     const liveIds = new Set(hhInvData.map(s=>s.id));
     selectedHHInvIds.forEach(id=>{ if(!liveIds.has(id)) selectedHHInvIds.delete(id); });
     renderHHInvTable();
     updateHHInvStats();
+    renderHHInvLoadMore();
   }, err=>{
     console.error('hh_inventory listener failed', err);
     tbody.innerHTML = `<tr><td colspan="9"><div class="py-12 text-center text-slate-400">
