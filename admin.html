@@ -891,6 +891,9 @@
         <button id="navHHInv" onclick="switchSec('hhinv');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-tents"></i> HH Inventory
         </button>
+        <button id="navAllInv" onclick="switchSec('allinv');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-layer-group"></i> All Inventory
+        </button>
         <button id="navFin" onclick="switchSec('fin');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-percent"></i> HFL Finance
         </button>
@@ -1012,7 +1015,7 @@
             <i class="fas fa-layer-group text-amber-500 text-lg"></i> Model Categories
           </div>
         </div>
-        <p class="text-[11px] text-slate-400 mb-3">Bike, Scooter jasto category haru yehi baata manage garnus — naya category (3 Wheeler jasto) thapna/hataauna milcha. Yo list HFL Finance page ko category dropdown ma pani dekhincha.</p>
+        <p class="text-[11px] text-slate-400 mb-3">Manage categories like Bike, Scooter from here — you can add or remove new categories (e.g. 3 Wheeler). This list also shows up in the category dropdown on the HFL Finance page.</p>
         <div id="finCategoryChips" class="flex flex-wrap gap-2 mb-4"></div>
         <div class="flex items-center gap-2 flex-wrap">
           <input type="text" id="newFinCatName" placeholder="e.g. 3 Wheeler" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 w-36"/>
@@ -1317,7 +1320,7 @@
           <span id="hhInvTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500">0 units total</span>
         </div>
       </div>
-      <p class="text-xs text-slate-400 -mt-4 mb-5"><i class="fas fa-circle-info mr-1"></i>Outdoor mela/event ma laijaeko gadi haru — chutai list, chutai tracking. Yo Live Inventory sanga milaudaina, chutai stock ho.</p>
+      <p class="text-xs text-slate-400 -mt-4 mb-5"><i class="fas fa-circle-info mr-1"></i>Units taken out to outdoor melas/events — a separate list, tracked separately. Doesn't affect Live Inventory; this is a separate stock.</p>
 
       <!-- Add Unit (modal) -->
       <div id="hhInvFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelHHInvEdit()">
@@ -1407,6 +1410,7 @@
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
           <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-tents text-amber-500"></i> HH Stock Register</div>
           <span id="hhInvCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+          <span id="hhInvDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-0.5 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
           <button onclick="exportHHInventoryToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
             <i class="fas fa-file-excel text-[11px]"></i> Export
           </button>
@@ -1464,6 +1468,55 @@
       </div>
     </div>
 
+    <!-- ═══ ALL INVENTORY (COMBINED) ═══ -->
+    <div class="sec-panel" id="secAllInv">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="eyebrow">Combined View</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">All <span class="text-amber-500">Inventory</span></div>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Live Inventory + HH Inventory in one list, read-only — same chassis/engine in both is flagged as a duplicate here too.</p>
+        </div>
+      </div>
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-layer-group text-amber-500"></i> Combined Register</div>
+          <span id="allInvCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+          <span id="allInvDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-0.5 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
+          <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
+            <button class="allinv-source-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-source="all" onclick="setAllInvSourceFilter('all')">All</button>
+            <button class="allinv-source-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-source="inventory" onclick="setAllInvSourceFilter('inventory')">Inventory</button>
+            <button class="allinv-source-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-source="hh_inventory" onclick="setAllInvSourceFilter('hh_inventory')">HH Inventory</button>
+          </div>
+          <div class="relative ml-auto w-full sm:w-72">
+            <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="allInvSearch" autocomplete="off" placeholder="Search chassis, engine, model, customer…"
+              class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse responsive-table">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Source</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Chassis No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Engine No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Reg. No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Colour</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
+              </tr>
+            </thead>
+            <tbody id="allInvTableBody">
+              <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading combined inventory…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ HFL FINANCE ═══ -->
     <div class="sec-panel" id="secFin">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
@@ -1508,7 +1561,7 @@
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
         </div>
-        <p class="text-[11px] text-slate-400 mb-4"><i class="fas fa-circle-info mr-1"></i>Ek dp/rate ma multiple month options dinu parey comma le chuttyaunus — jasto: <span class="font-mono text-slate-500">12, 24, 36, 48</span>. Tenure le selected category ko max limit bhanda badi huna sakdaina.</p>
+        <p class="text-[11px] text-slate-400 mb-4"><i class="fas fa-circle-info mr-1"></i>If one down payment/rate has multiple month options, separate them with commas — e.g. <span class="font-mono text-slate-500">12, 24, 36, 48</span>. Tenure can't exceed the selected category's max limit.</p>
         <div class="flex gap-2 flex-wrap">
           <button id="saveFinBtn" class="cta-primary">
             <i class="fas fa-floppy-disk"></i> Save Scheme
@@ -1585,7 +1638,7 @@
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
         </div>
-        <p class="text-[11px] text-slate-400 mb-4"><i class="fas fa-circle-info mr-1"></i>Yaha update gareko price finance.html ma automatically default value ko rup ma dekhincha — code chhunu pardaina. <span class="font-semibold text-slate-500">Helmet</span>, <span class="font-semibold text-slate-500">Leg Guard</span>, <span class="font-semibold text-slate-500">Seat Cover</span>, ra <span class="font-semibold text-slate-500">Namsari</span> nau (naam) exact tesari nai rakhnus so it auto-matches.</p>
+        <p class="text-[11px] text-slate-400 mb-4"><i class="fas fa-circle-info mr-1"></i>Prices updated here automatically show up as the default value on finance.html — no code changes needed. Keep <span class="font-semibold text-slate-500">Helmet</span>, <span class="font-semibold text-slate-500">Leg Guard</span>, <span class="font-semibold text-slate-500">Seat Cover</span>, and <span class="font-semibold text-slate-500">Namsari</span> named exactly like that so it auto-matches.</p>
         <div class="flex gap-2 flex-wrap">
           <button id="saveAccBtn" class="cta-primary">
             <i class="fas fa-floppy-disk"></i> Save Accessory
@@ -1631,7 +1684,7 @@
         <div>
           <div class="section-label">Reports ·</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Stock <span class="text-amber-500">Report</span></div>
-          <p class="text-xs text-slate-400 mt-1">Sold vayeka units ma count hudaina — yaha jati dekhincha, tyati nai showroom ma "available" cha.</p>
+          <p class="text-xs text-slate-400 mt-1">Sold units aren't counted — however many show here is exactly what's "available" in the showroom.</p>
         </div>
         <button id="genStockReportBtn" onclick="openStockPreview()" class="cta-primary">
           <i class="fas fa-image"></i> Download Report (JPG)
@@ -1677,7 +1730,7 @@
         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
           <div>
             <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-map-location-dot text-amber-500"></i> Area-Wise Stock</div>
-            <p class="text-[11px] text-slate-400 mt-0.5">Yo table haath le bharne ho (auto-calculate hudaina) — jasto: Showroom ma kati, Workshop ma kati, Taplejung ma kati.</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">This table is filled in by hand (not auto-calculated) — e.g. how many in Showroom, how many in Workshop, how many in Taplejung.</p>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <button id="areaEditModeBtn" onclick="toggleAreaEditMode()" class="area-edit-toggle">
@@ -2351,6 +2404,23 @@ function findDuplicateUnit(chassis, engine, excludeId=null){
   ));
 }
 
+// Same chassis/engine shouldn't exist in BOTH Inventory and HH Inventory at
+// once — it's the same physical bike and can't be in two stock lists
+// simultaneously. Used at save-time (warn, don't hard-block) and to flag
+// rows in either table.
+function findHHCrossDuplicate(chassis, engine, excludeId=null){
+  const c = normId(chassis), e = normId(engine);
+  return hhInvData.find(s => s.id!==excludeId && (
+    (c && normId(s.chassis)===c) || (e && normId(s.engine)===e)
+  ));
+}
+function findInvCrossDuplicate(chassis, engine, excludeId=null){
+  const c = normId(chassis), e = normId(engine);
+  return invData.find(s => s.id!==excludeId && (
+    (c && normId(s.chassis)===c) || (e && normId(s.engine)===e)
+  ));
+}
+
 // Returns a Set of invData ids that share a chassis or engine no. with at least one other entry
 function computeDuplicateIdSet(){
   const byChassis = {}, byEngine = {};
@@ -2362,7 +2432,126 @@ function computeDuplicateIdSet(){
   const dupIds = new Set();
   Object.values(byChassis).forEach(ids=>{ if(ids.length>1) ids.forEach(id=>dupIds.add(id)); });
   Object.values(byEngine).forEach(ids=>{ if(ids.length>1) ids.forEach(id=>dupIds.add(id)); });
+  // Cross-check against HH Inventory too — flags a unit sitting in both
+  // stock lists at once, not just duplicates within Inventory itself.
+  const hhChassisSet = new Set(hhInvData.map(s=>normId(s.chassis)).filter(Boolean));
+  const hhEngineSet = new Set(hhInvData.map(s=>normId(s.engine)).filter(Boolean));
+  invData.forEach(s=>{
+    const c = normId(s.chassis), e = normId(s.engine);
+    if((c && hhChassisSet.has(c)) || (e && hhEngineSet.has(e))) dupIds.add(s.id);
+  });
   return dupIds;
+}
+
+// Mirror of computeDuplicateIdSet, but for the HH Inventory table — flags
+// HH units that share a chassis/engine with another HH unit, or with a unit
+// already sitting in the main Inventory.
+function computeHHDuplicateIdSet(){
+  const byChassis = {}, byEngine = {};
+  hhInvData.forEach(s=>{
+    const c = normId(s.chassis), e = normId(s.engine);
+    if(c){ (byChassis[c] = byChassis[c]||[]).push(s.id); }
+    if(e){ (byEngine[e] = byEngine[e]||[]).push(s.id); }
+  });
+  const dupIds = new Set();
+  Object.values(byChassis).forEach(ids=>{ if(ids.length>1) ids.forEach(id=>dupIds.add(id)); });
+  Object.values(byEngine).forEach(ids=>{ if(ids.length>1) ids.forEach(id=>dupIds.add(id)); });
+  const invChassisSet = new Set(invData.map(s=>normId(s.chassis)).filter(Boolean));
+  const invEngineSet = new Set(invData.map(s=>normId(s.engine)).filter(Boolean));
+  hhInvData.forEach(s=>{
+    const c = normId(s.chassis), e = normId(s.engine);
+    if((c && invChassisSet.has(c)) || (e && invEngineSet.has(e))) dupIds.add(s.id);
+  });
+  return dupIds;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ALL INVENTORY — read-only combined view of Inventory + HH Inventory,
+   used to eyeball the whole stock (and spot cross-collection duplicates)
+   in one place without switching pages.
+   ═══════════════════════════════════════════════════════════════════════ */
+let allInvSourceFilter = 'all';
+let allInvSearchTerm = '';
+
+window.setAllInvSourceFilter = (src)=>{
+  allInvSourceFilter = src;
+  document.querySelectorAll('.allinv-source-tab').forEach(t=>t.classList.toggle('active', t.dataset.source===src));
+  renderAllInventoryTable();
+};
+
+document.getElementById('allInvSearch')?.addEventListener('input', function(){
+  allInvSearchTerm = this.value;
+  renderAllInventoryTable();
+});
+
+function renderAllInventoryTable(){
+  const tbody = document.getElementById('allInvTableBody');
+  if(!tbody) return;
+  const invDupIds = computeDuplicateIdSet();
+  const hhDupIds = computeHHDuplicateIdSet();
+  let combined = [
+    ...invData.map(s=>({ ...s, __source:'inventory', __isDup: invDupIds.has(s.id) })),
+    ...hhInvData.map(s=>({ ...s, __source:'hh_inventory', __isDup: hhDupIds.has(s.id) }))
+  ];
+  if(allInvSourceFilter !== 'all') combined = combined.filter(s=>s.__source===allInvSourceFilter);
+  const q = allInvSearchTerm.toLowerCase().trim();
+  if(q){
+    combined = combined.filter(s=>
+      (s.model||'').toLowerCase().includes(q) ||
+      (s.chassis||'').toLowerCase().includes(q) ||
+      (s.engine||'').toLowerCase().includes(q) ||
+      (s.regNo||'').toLowerCase().includes(q) ||
+      (s.color||'').toLowerCase().includes(q) ||
+      (s.customerName||'').toLowerCase().includes(q)
+    );
+  }
+  document.getElementById('allInvCount').textContent = combined.length+' unit'+(combined.length!==1?'s':'');
+  const dupChip = document.getElementById('allInvDupChip');
+  const totalDups = combined.filter(s=>s.__isDup).length;
+  if(dupChip){
+    if(totalDups>0){ dupChip.classList.remove('hidden'); dupChip.classList.add('flex'); dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${totalDups} duplicate${totalDups!==1?'s':''} found`; }
+    else { dupChip.classList.add('hidden'); dupChip.classList.remove('flex'); }
+  }
+  if(!combined.length){
+    tbody.innerHTML = `<tr><td colspan="8"><div class="py-12 text-center text-slate-400"><i class="fas fa-layer-group text-3xl opacity-25 block mb-2"></i><p class="text-sm">${q?'No units match your search.':'No inventory yet.'}</p></div></td></tr>`;
+    return;
+  }
+  const sorted = combined.sort((a,b)=> (a.__source===b.__source ? (Number(a.sn)||9999)-(Number(b.sn)||9999) : (a.__source==='inventory'?-1:1)));
+  tbody.innerHTML = sorted.map(s=>{
+    const isHH = s.__source==='hh_inventory';
+    const sourceBadge = isHH
+      ? `<span class="badge badge-amber"><i class="fas fa-tents"></i> HH</span>`
+      : `<span class="badge badge-blue"><i class="fas fa-warehouse"></i> Inventory</span>`;
+    let statusHtml;
+    if(isHH){
+      statusHtml = s.status==='Sold' ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>`
+        : s.status==='Booked' ? `<span class="badge badge-amber"><i class="fas fa-bookmark"></i> Booked</span>`
+        : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`;
+    } else {
+      statusHtml = s.hhFlag==='Hide' ? '' :
+        s.status==='Sold' ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>`
+        : s.status==='Booked' ? `<span class="badge badge-amber"><i class="fas fa-bookmark"></i> Booked</span>`
+        : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`;
+      statusHtml += s.hhFlag==='Sales' ? ` <span class="badge badge-blue"><i class="fas fa-bullseye"></i> HH Sales</span>` : '';
+      statusHtml += s.hhFlag==='Hide' ? ` <span class="badge badge-neutral"><i class="fas fa-bullseye"></i> HH Hide</span>` : '';
+    }
+    return `<tr class="border-b ${s.__isDup?'border-red-100 bg-red-50/40':'border-slate-100'}">
+      <td class="px-4 py-3" data-th="Source">${sourceBadge}</td>
+      <td class="px-4 py-3 font-mono text-xs text-slate-500" data-th="S.N">${s.sn||'—'}</td>
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">
+        ${s.model||'—'}
+        ${s.__isDup ? `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 text-red-600 text-[9px] font-extrabold uppercase tracking-wide align-middle"><i class="fas fa-triangle-exclamation text-[8px]"></i> Duplicate</span>` : ''}
+      </td>
+      <td class="px-4 py-3" data-th="Chassis No"><code class="${s.__isDup?'bg-red-50 text-red-700 border-red-200':'bg-slate-50 text-slate-600 border-slate-200'} text-xs px-2 py-0.5 rounded-md border font-mono">${s.chassis||'—'}</code></td>
+      <td class="px-4 py-3 font-mono text-xs text-slate-500" data-th="Engine No">${s.engine||'—'}</td>
+      <td class="px-4 py-3 text-sm text-slate-700" data-th="Reg. No">${s.regNo||'—'}</td>
+      <td class="px-4 py-3" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}</span></td>
+      <td class="px-4 py-3" data-th="Status">
+        <div class="flex flex-wrap items-center gap-1.5">${statusHtml}</div>
+        ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${s.customerName}</div>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 /* ─── Helpers ─── */
@@ -2432,8 +2621,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', fin:'navFin', acc:'navAcc', stock:'navStock', history:'navHistory', trash:'navTrash' };
-  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', fin:'mNavFin', acc:'mNavAcc', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
+  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', stock:'navStock', history:'navHistory', trash:'navTrash' };
+  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -2722,6 +2911,21 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
       iconClass: 'fa-triangle-exclamation', iconColor:'#f59e0b', iconBg:'#FFFBEB'
     });
     if(!proceed) return;
+  } else {
+    // Same chassis/engine can't physically be in Inventory AND HH Inventory
+    // at once — warn if it's already sitting in the HH stock list.
+    const hhDup = findHHCrossDuplicate(chassis, engine);
+    if(hhDup){
+      const whichField = normId(hhDup.chassis)===normId(chassis) ? 'Chassis No' : 'Engine No';
+      const proceed = await showConfirm({
+        title: 'Found in HH Inventory',
+        message: `${whichField} already exists in <b>HH Inventory</b> — S.N <b>${hhDup.sn||'—'}</b>, <b>${hhDup.model}</b>, ${hhDup.color||'—'}.<br><br>A unit shouldn't normally sit in both lists at once — add here anyway?`,
+        okText: 'Add Anyway',
+        okColorClass: 'text-amber-600 hover:bg-amber-50',
+        iconClass: 'fa-triangle-exclamation', iconColor:'#f59e0b', iconBg:'#FFFBEB'
+      });
+      if(!proceed) return;
+    }
   }
 
   try {
@@ -3025,6 +3229,7 @@ function renderInvTable(list){
     </tr>`;
   }).join('');
   updateDeleteSelectedBtn();
+  if(document.getElementById('allInvTableBody')) renderAllInventoryTable();
 }
 
 /* ─── Multi-select + bulk delete (Inventory) ─── */
@@ -3184,6 +3389,16 @@ function renderHHInvTable(){
   const tbody = document.getElementById('hhInvTableBody');
   const list = getFilteredHHInv();
   document.getElementById('hhInvCount').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'');
+  const dupIds = computeHHDuplicateIdSet();
+  const dupChip = document.getElementById('hhInvDupChip');
+  if(dupChip){
+    if(dupIds.size>0){
+      dupChip.classList.remove('hidden'); dupChip.classList.add('flex');
+      dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${dupIds.size} duplicate${dupIds.size!==1?'s':''} found`;
+    } else {
+      dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
+    }
+  }
   if(!list.length){
     tbody.innerHTML = `<tr><td colspan="9"><div class="py-12 text-center text-slate-400"><i class="fas fa-tents text-3xl opacity-25 block mb-2"></i><p class="text-sm">${hhInvSearchTerm?'No units match your search.':'No HH inventory yet. Add a unit above.'}</p></div></td></tr>`;
     updateDeleteSelectedHHBtn();
@@ -3191,14 +3406,18 @@ function renderHHInvTable(){
   }
   tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map(s=>{
     const isSel = selectedHHInvIds.has(s.id);
+    const isDup = dupIds.has(s.id);
     return `
-    <tr class="border-b border-slate-100 ${isSel?'row-selected':''}" data-row-id="${s.id}">
+    <tr class="border-b ${isDup?'border-red-100 bg-red-50/40':'border-slate-100'} ${isSel?'row-selected':''}" data-row-id="${s.id}">
       <td class="px-3 py-3 sel-col" data-th="">
         <input type="checkbox" class="hhinv-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${isSel?'checked':''} onchange="toggleSelectHHInvUnit('${s.id}', this.checked); this.closest('tr').classList.toggle('row-selected', this.checked)">
       </td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${s.sn||'—'}</td>
-      <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">${s.model||'—'}</td>
-      <td class="px-4 py-3 font-mono text-xs text-slate-500" data-th="Chassis No">${s.chassis||'—'}</td>
+      <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">
+        ${s.model||'—'}
+        ${isDup ? `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 text-red-600 text-[9px] font-extrabold uppercase tracking-wide align-middle"><i class="fas fa-triangle-exclamation text-[8px]"></i> Duplicate</span>` : ''}
+      </td>
+      <td class="px-4 py-3 font-mono text-xs ${isDup?'text-red-700':'text-slate-500'}" data-th="Chassis No">${s.chassis||'—'}</td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${s.regNo||'—'}</td>
       <td class="px-4 py-3" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}</span></td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Event / Mela">${s.eventName||'—'}</td>
@@ -3220,6 +3439,7 @@ function renderHHInvTable(){
     </tr>`;
   }).join('');
   updateDeleteSelectedHHBtn();
+  if(document.getElementById('allInvTableBody')) renderAllInventoryTable();
 }
 
 /* ─── Multi-select + bulk delete (HH Inventory) ─── */
@@ -3316,6 +3536,21 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
       iconClass:'fa-triangle-exclamation', iconColor:'#f59e0b', iconBg:'#FFFBEB'
     });
     if(!proceed) return;
+  } else {
+    // Same chassis/engine can't physically be in both stock lists at once —
+    // warn if it's already sitting in the main Inventory.
+    const invDup = findInvCrossDuplicate(chassis, engine);
+    if(invDup){
+      const whichField = normId(invDup.chassis)===normId(chassis) ? 'Chassis No' : 'Engine No';
+      const proceed = await showConfirm({
+        title: 'Found in main Inventory',
+        message: `${whichField} already exists in the main <b>Inventory</b> — S.N <b>${invDup.sn||'—'}</b>, <b>${invDup.model}</b>, ${invDup.color||'—'}.<br><br>A unit shouldn't normally sit in both lists at once — add here anyway?`,
+        okText: 'Add Anyway',
+        okColorClass: 'text-amber-600 hover:bg-amber-50',
+        iconClass: 'fa-triangle-exclamation', iconColor:'#f59e0b', iconBg:'#FFFBEB'
+      });
+      if(!proceed) return;
+    }
   }
 
   try{
@@ -3694,8 +3929,8 @@ function loadStockAreas(){
 window.addStockArea = async ()=>{
   const input = document.getElementById('newAreaInput');
   const name = (input.value||'').trim();
-  if(!name){ toast('Area ko naam halnus.','warn'); return; }
-  if(stockAreas.some(a=>(a.name||'').toLowerCase()===name.toLowerCase())){ toast('Yo area pahile nai xa.','warn'); return; }
+  if(!name){ toast('Please enter an area name.','warn'); return; }
+  if(stockAreas.some(a=>(a.name||'').toLowerCase()===name.toLowerCase())){ toast('This area already exists.','warn'); return; }
   try{
     await addDoc(collection(db,"stock_areas"),{name});
     input.value='';
@@ -3706,7 +3941,7 @@ window.addStockArea = async ()=>{
 window.removeStockArea = async (id, name)=>{
   const proceed = await showConfirm({
     title:'Remove this area?',
-    message:`<b>${name}</b> lai area list bata hataune? Yo column table bata haraunxa (chai number haru chai save vairahanxa, feri thapda dekhincha).`,
+    message:`Remove <b>${name}</b> from the area list? This column will disappear from the table (the numbers stay saved though — they'll show up again if you add it back).`,
     okText:'Remove', okColorClass:'text-red-600 hover:bg-red-50',
     iconClass:'fa-trash-can', iconColor:'#dc2626', iconBg:'#FEF2F2'
   });
@@ -3737,7 +3972,7 @@ window.saveAreaQty = async (model, color, areaName, value, inputEl)=>{
   const maxAllowed = Math.max(0, available - sumOthers);
   if(qty > maxAllowed){
     qty = maxAllowed;
-    toast(`${model} · ${color} — ${available} matra available cha, baki areas le ${sumOthers} lisakeko. ${areaName} lai ${maxAllowed} ma adjust gareko (baki Workshop ma dekhincha).`,'warn');
+    toast(`${model} · ${color} — only ${available} available, other areas already have ${sumOthers}. Adjusted ${areaName} to ${maxAllowed} (the rest will show in Workshop).`,'warn');
     if(inputEl) inputEl.value = qty;
   }
   try{
@@ -3811,7 +4046,7 @@ function renderAreaStockTable(){
     return;
   }
   if(!stockAreas.length){
-    body.innerHTML = `<tr><td colspan="3" class="px-4 py-10 text-center text-slate-400 text-sm">Kunai area thapeko xaina. Maathi "Add Area" bata Showroom, Workshop, Taplejung jasto area thapnus.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="3" class="px-4 py-10 text-center text-slate-400 text-sm">No areas added yet. Use "Add Area" above to add areas like Showroom, Workshop, Taplejung.</td></tr>`;
     return;
   }
 
@@ -4032,8 +4267,8 @@ function renderFinCategoryChips(){
 window.addFinanceCategory = async ()=>{
   const nameInput = document.getElementById('newFinCatName');
   const name = nameInput.value.trim();
-  if(!name){ toast('Category name chahiyo (jasto: 3 Wheeler)','err'); return; }
-  if(financeCategories.some(c=>(c.name||'').toLowerCase()===name.toLowerCase())){ toast('Yo category pahile bata nai xa.','err'); return; }
+  if(!name){ toast('Category name required (e.g. 3 Wheeler)','err'); return; }
+  if(financeCategories.some(c=>(c.name||'').toLowerCase()===name.toLowerCase())){ toast('This category already exists.','err'); return; }
   try{
     await addDoc(collection(db,"finance_categories"),{name});
     nameInput.value='';
@@ -4103,7 +4338,7 @@ function renderFinTable(){
 
 document.getElementById('saveFinBtn').addEventListener('click', async()=>{
   const category = document.getElementById('fCategory').value;
-  if(!category){ toast('Pahile maathi ek category thapnus (Bike/Scooter/...).','err'); return; }
+  if(!category){ toast('Add a category above first (Bike/Scooter/...).','err'); return; }
 
   const downPayCheck = Validate.positiveNumber(document.getElementById('fDownPay').value, { label:'Down payment', allowZero:true, max:100 });
   const rateCheck = Validate.positiveNumber(document.getElementById('fRate').value, { label:'Interest rate', allowZero:true, max:100 });
@@ -4921,8 +5156,8 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', fin:'HFL Finance Options', acc:'Accessories Inventory', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
-const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', fin:'secFin', acc:'secAcc', stock:'secStock', history:'secHistory', trash:'secTrash' };
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
+const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', stock:'secStock', history:'secHistory', trash:'secTrash' };
 window.switchSec=(sec)=>{
   document.querySelectorAll('.sec-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(SEC_IDS[sec] || 'secStock').classList.add('active');
@@ -4931,6 +5166,7 @@ window.switchSec=(sec)=>{
   if(heading) heading.textContent = SEC_TITLES[sec] || '';
   if(sec==='inv') populateModelDropdown();
   if(sec==='hhinv') populateHHModelDropdown();
+  if(sec==='allinv') renderAllInventoryTable();
   if(sec==='stock') loadStockReportData(true);
   if(sec==='history') renderActivityLog();
   if(sec==='trash') renderTrashTable();
