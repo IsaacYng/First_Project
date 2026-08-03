@@ -155,6 +155,11 @@
       letter-spacing: .06em; color: #94A3B8; text-align: left; flex-shrink: 0;
     }
     .responsive-table tbody td[data-th="Actions"] { justify-content: flex-end; }
+    /* On the stacked mobile card layout, the checkbox cell (once select-mode
+       reveals it) should sit as a flex row like every other cell, not the
+       desktop table-cell display used above 640px. !important guarantees
+       this wins over the ID-scoped desktop rule at this breakpoint. */
+    #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col { display: flex !important; justify-content: flex-end !important; }
   }
 
   /* ═══════════ INDEX.HTML DESIGN SYSTEM — CTAs, badges, cards ═══════════ */
@@ -284,6 +289,11 @@
   }
   .kebab-btn:hover{ background:#EEF2F7; border-color:#CBD5E1; color:#334155; }
   .kebab-btn.active{ background:#E8F2FB; border-color:#005EA6; color:#005EA6; }
+  /* Select/checkbox column stays hidden until "Select" is tapped from a
+     row's action menu (or the bulk bar is otherwise engaged) — keeps the
+     table clean day-to-day instead of always showing tick-boxes. */
+  #stockTable .sel-col, #hhInvTable .sel-col{ display:none; }
+  #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col{ display:table-cell; }
   .kebab-menu{
     position:fixed; z-index:550; min-width:150px; background:#fff; border-radius:12px;
     border:1px solid #E2E8F0; box-shadow:0 10px 30px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.06);
@@ -1226,6 +1236,9 @@
           <button id="deleteSelectedBtn" onclick="deleteSelectedInvUnits()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all">
             <i class="fas fa-trash-can text-[11px]"></i> Delete Selected (<span id="deleteSelectedCount">0</span>)
           </button>
+          <button id="cancelSelectBtn" onclick="setInvSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
+            <i class="fas fa-xmark text-[11px]"></i> Cancel Select
+          </button>
           <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 overflow-x-auto max-w-full inv-filter-scroll">
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active flex-shrink-0" data-status="all" onclick="setInvStatusFilter('all')">All <span class="pill-count" id="pcAll">0</span></button>
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Available" onclick="setInvStatusFilter('Available')">Available <span class="pill-count" id="pcAvailable">0</span></button>
@@ -1247,10 +1260,10 @@
           </button>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse responsive-table">
+          <table class="w-full border-collapse responsive-table" id="stockTable">
             <thead>
               <tr class="bg-slate-50">
-                <th class="px-3 py-3 text-left border-b border-slate-200 w-8">
+                <th class="px-3 py-3 text-left border-b border-slate-200 w-8 sel-col">
                   <input type="checkbox" id="invSelectAll" onchange="toggleSelectAllInv(this.checked)" class="w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer">
                 </th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
@@ -1380,6 +1393,9 @@
           <button id="deleteSelectedHHBtn" onclick="deleteSelectedHHInvUnits()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all">
             <i class="fas fa-trash-can text-[11px]"></i> Delete Selected (<span id="deleteSelectedHHCount">0</span>)
           </button>
+          <button id="cancelSelectHHBtn" onclick="setHHInvSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
+            <i class="fas fa-xmark text-[11px]"></i> Cancel Select
+          </button>
           <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setHHInvStatusFilter('all')">All <span class="pill-count" id="pcHHAll">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Available" onclick="setHHInvStatusFilter('Available')">Available <span class="pill-count" id="pcHHAvailable">0</span></button>
@@ -1396,10 +1412,10 @@
           </button>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse responsive-table">
+          <table class="w-full border-collapse responsive-table" id="hhInvTable">
             <thead>
               <tr class="bg-slate-50">
-                <th class="px-3 py-3 text-left border-b border-slate-200 w-8">
+                <th class="px-3 py-3 text-left border-b border-slate-200 w-8 sel-col">
                   <input type="checkbox" id="hhInvSelectAll" onchange="toggleSelectAllHHInv(this.checked)" class="w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer">
                 </th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
@@ -2073,20 +2089,22 @@ window._toggleKebab = (btn, type, id) => {
     const s = invData.find(x=>x.id===id);
     const cur = s?.status || 'Available';
     const hh = s?.hhFlag || null; // 'Sales' | 'Hide' | null
-    const statusActions = ['Available','Booked','Sold']
+    // HH (Hansraj Hulaschand — the distributor) reporting flag — a standalone
+    // 3-state field (Sales / Hide / none):
+    //  HH Sales -> counts in OUR stock, reported to HH as sold
+    //  HH Hide  -> does NOT count in our stock, held back from HH's report
+    //           (functionally the bike is really sold — same as Mark Sold)
+    // Once an HH flag is active, plain status changes (Available/Booked/Sold)
+    // are hidden — only "Undo HH ..." shows. This stops a unit ending up in
+    // a contradictory state, e.g. "Booked" while also HH Hide (which really
+    // means already sold). Undo the flag first, then change status if needed.
+    const statusActions = hh ? [] : ['Available','Booked','Sold']
       .filter(st => st !== cur)
       .map(st => ({
         label: 'Mark '+st,
         icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
         onClick: () => window._setUnitStatus(id, st)
       }));
-    // HH (Hansraj Hulaschand — the distributor) reporting flag — a standalone
-    // 3-state field (Sales / Hide / none):
-    //  HH Sales -> counts in OUR stock, reported to HH as sold
-    //  HH Hide  -> does NOT count in our stock, held back from HH's report
-    // When no flag is set, both options are offered. Once one is active, only
-    // "Undo" for that flag shows — prevents accidentally switching straight
-    // from one to the other with a stray tap.
     const hhActions = hh
       ? [{ label: 'Undo HH '+hh, icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, null) }]
       : [
@@ -2113,14 +2131,26 @@ window._toggleKebab = (btn, type, id) => {
   }
 };
 
-// Kebab "Select" action — ticks that row's checkbox and reveals the bulk
-// action bar, so a person doesn't have to hunt for the checkbox column.
+// Kebab "Select" action — turns on select mode for that table (reveals the
+// checkbox column, which stays hidden otherwise) and ticks that row.
+window.setInvSelectMode = (on)=>{
+  const table = document.getElementById('stockTable');
+  if(table) table.classList.toggle('select-mode', on);
+  if(!on && selectedInvIds.size){ selectedInvIds.clear(); updateDeleteSelectedBtn(); }
+};
+window.setHHInvSelectMode = (on)=>{
+  const table = document.getElementById('hhInvTable');
+  if(table) table.classList.toggle('select-mode', on);
+  if(!on && selectedHHInvIds.size){ selectedHHInvIds.clear(); updateDeleteSelectedHHBtn(); }
+};
 window._selectRow = (type, id)=>{
   if(type==='inventory'){
+    window.setInvSelectMode(true);
     toggleSelectInvUnit(id, true);
     const cb = document.querySelector(`.inv-row-checkbox[data-id="${id}"]`);
     if(cb){ cb.checked = true; cb.scrollIntoView({behavior:'smooth', block:'center'}); }
   } else if(type==='hh_inventory'){
+    window.setHHInvSelectMode(true);
     toggleSelectHHInvUnit(id, true);
     const cb = document.querySelector(`.hhinv-row-checkbox[data-id="${id}"]`);
     if(cb){ cb.checked = true; cb.scrollIntoView({behavior:'smooth', block:'center'}); }
@@ -2796,7 +2826,7 @@ function renderInvTable(list){
   tbody.innerHTML=sorted.map(s=>{
     const isDup = dupIds.has(s.id);
     return`<tr class="border-b ${isDup?'border-red-100 bg-red-50/40':'border-slate-100'}">
-      <td class="px-3 py-3" data-th="">
+      <td class="px-3 py-3 sel-col" data-th="">
         <input type="checkbox" class="inv-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${selectedInvIds.has(s.id)?'checked':''} onchange="toggleSelectInvUnit('${s.id}', this.checked)">
       </td>
       <td class="px-4 py-3" data-th="S.N">
@@ -2846,9 +2876,15 @@ let selectedInvIds = new Set();
 function updateDeleteSelectedBtn(){
   const btn = document.getElementById('deleteSelectedBtn');
   const countEl = document.getElementById('deleteSelectedCount');
+  const cancelBtn = document.getElementById('cancelSelectBtn');
+  const inSelectMode = document.getElementById('stockTable')?.classList.contains('select-mode');
   countEl.textContent = selectedInvIds.size;
   if(selectedInvIds.size>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); }
   else { btn.classList.add('hidden'); btn.classList.remove('flex'); }
+  if(cancelBtn){
+    if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
+    else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
+  }
   const selectAll = document.getElementById('invSelectAll');
   if(selectAll){
     const visibleIds = getFilteredInv().map(s=>s.id);
@@ -2890,6 +2926,7 @@ window.deleteSelectedInvUnits = async ()=>{
     }
     toast(`${ids.length} unit(s) deleted.`);
     selectedInvIds.clear();
+    document.getElementById('stockTable')?.classList.remove('select-mode');
     updateDeleteSelectedBtn();
   }catch(e){ toast('Delete failed: '+e.message,'err'); }
 };
@@ -2989,7 +3026,7 @@ function renderHHInvTable(){
   }
   tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map(s=>`
     <tr class="border-b border-slate-100">
-      <td class="px-3 py-3" data-th="">
+      <td class="px-3 py-3 sel-col" data-th="">
         <input type="checkbox" class="hhinv-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${selectedHHInvIds.has(s.id)?'checked':''} onchange="toggleSelectHHInvUnit('${s.id}', this.checked)">
       </td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${s.sn||'—'}</td>
@@ -3023,10 +3060,16 @@ let selectedHHInvIds = new Set();
 function updateDeleteSelectedHHBtn(){
   const btn = document.getElementById('deleteSelectedHHBtn');
   const countEl = document.getElementById('deleteSelectedHHCount');
+  const cancelBtn = document.getElementById('cancelSelectHHBtn');
   if(!btn || !countEl) return;
+  const inSelectMode = document.getElementById('hhInvTable')?.classList.contains('select-mode');
   countEl.textContent = selectedHHInvIds.size;
   if(selectedHHInvIds.size>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); }
   else { btn.classList.add('hidden'); btn.classList.remove('flex'); }
+  if(cancelBtn){
+    if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
+    else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
+  }
   const selectAll = document.getElementById('hhInvSelectAll');
   if(selectAll){
     const visibleIds = getFilteredHHInv().map(s=>s.id);
@@ -3067,6 +3110,7 @@ window.deleteSelectedHHInvUnits = async ()=>{
     }
     toast(`${ids.length} HH unit(s) deleted.`);
     selectedHHInvIds.clear();
+    document.getElementById('hhInvTable')?.classList.remove('select-mode');
     updateDeleteSelectedHHBtn();
   }catch(e){ toast('Delete failed: '+e.message,'err'); }
 };
