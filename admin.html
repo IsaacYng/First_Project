@@ -294,6 +294,14 @@
      table clean day-to-day instead of always showing tick-boxes. */
   #stockTable .sel-col, #hhInvTable .sel-col{ display:none; }
   #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col{ display:table-cell; }
+  /* Selected-row glow — Bajaj blue tint so a ticked unit is obvious at a
+     glance, not just a tiny checkmark easy to lose track of. */
+  #stockTable.select-mode tbody tr.row-selected, #hhInvTable.select-mode tbody tr.row-selected {
+    background: #EAF3FB !important;
+    box-shadow: inset 3px 0 0 #005EA6;
+    transition: background .15s ease;
+  }
+  #stockTable.select-mode tbody tr, #hhInvTable.select-mode tbody tr { transition: background .15s ease; }
   .kebab-menu{
     position:fixed; z-index:550; min-width:150px; background:#fff; border-radius:12px;
     border:1px solid #E2E8F0; box-shadow:0 10px 30px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.06);
@@ -1239,6 +1247,9 @@
           <button id="cancelSelectBtn" onclick="setInvSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
             <i class="fas fa-xmark text-[11px]"></i> Cancel Select
           </button>
+          <span id="selectModeHint" class="hidden items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-bajaj-blue">
+            <i class="fas fa-hand-pointer text-[10px]"></i> Select mode — tap rows to add
+          </span>
           <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 overflow-x-auto max-w-full inv-filter-scroll">
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active flex-shrink-0" data-status="all" onclick="setInvStatusFilter('all')">All <span class="pill-count" id="pcAll">0</span></button>
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Available" onclick="setInvStatusFilter('Available')">Available <span class="pill-count" id="pcAvailable">0</span></button>
@@ -1396,6 +1407,9 @@
           <button id="cancelSelectHHBtn" onclick="setHHInvSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
             <i class="fas fa-xmark text-[11px]"></i> Cancel Select
           </button>
+          <span id="selectModeHintHH" class="hidden items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-bajaj-blue">
+            <i class="fas fa-hand-pointer text-[10px]"></i> Select mode — tap rows to add
+          </span>
           <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setHHInvStatusFilter('all')">All <span class="pill-count" id="pcHHAll">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Available" onclick="setHHInvStatusFilter('Available')">Available <span class="pill-count" id="pcHHAvailable">0</span></button>
@@ -2136,12 +2150,14 @@ window._toggleKebab = (btn, type, id) => {
 window.setInvSelectMode = (on)=>{
   const table = document.getElementById('stockTable');
   if(table) table.classList.toggle('select-mode', on);
-  if(!on && selectedInvIds.size){ selectedInvIds.clear(); updateDeleteSelectedBtn(); }
+  if(!on) selectedInvIds.clear();
+  updateDeleteSelectedBtn();
 };
 window.setHHInvSelectMode = (on)=>{
   const table = document.getElementById('hhInvTable');
   if(table) table.classList.toggle('select-mode', on);
-  if(!on && selectedHHInvIds.size){ selectedHHInvIds.clear(); updateDeleteSelectedHHBtn(); }
+  if(!on) selectedHHInvIds.clear();
+  updateDeleteSelectedHHBtn();
 };
 window._selectRow = (type, id)=>{
   if(type==='inventory'){
@@ -2825,9 +2841,10 @@ function renderInvTable(list){
   const q = invSearchTerm;
   tbody.innerHTML=sorted.map(s=>{
     const isDup = dupIds.has(s.id);
-    return`<tr class="border-b ${isDup?'border-red-100 bg-red-50/40':'border-slate-100'}">
+    const isSel = selectedInvIds.has(s.id);
+    return`<tr class="border-b ${isDup?'border-red-100 bg-red-50/40':'border-slate-100'} ${isSel?'row-selected':''}" data-row-id="${s.id}">
       <td class="px-3 py-3 sel-col" data-th="">
-        <input type="checkbox" class="inv-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${selectedInvIds.has(s.id)?'checked':''} onchange="toggleSelectInvUnit('${s.id}', this.checked)">
+        <input type="checkbox" class="inv-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${isSel?'checked':''} onchange="toggleSelectInvUnit('${s.id}', this.checked); this.closest('tr').classList.toggle('row-selected', this.checked)">
       </td>
       <td class="px-4 py-3" data-th="S.N">
         <span class="inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-xs font-mono font-semibold">${s.sn||'—'}</span>
@@ -2877,6 +2894,7 @@ function updateDeleteSelectedBtn(){
   const btn = document.getElementById('deleteSelectedBtn');
   const countEl = document.getElementById('deleteSelectedCount');
   const cancelBtn = document.getElementById('cancelSelectBtn');
+  const hint = document.getElementById('selectModeHint');
   const inSelectMode = document.getElementById('stockTable')?.classList.contains('select-mode');
   countEl.textContent = selectedInvIds.size;
   if(selectedInvIds.size>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); }
@@ -2884,6 +2902,10 @@ function updateDeleteSelectedBtn(){
   if(cancelBtn){
     if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
     else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
+  }
+  if(hint){
+    if(inSelectMode && selectedInvIds.size===0){ hint.classList.remove('hidden'); hint.classList.add('flex'); }
+    else { hint.classList.add('hidden'); hint.classList.remove('flex'); }
   }
   const selectAll = document.getElementById('invSelectAll');
   if(selectAll){
@@ -3024,10 +3046,12 @@ function renderHHInvTable(){
     updateDeleteSelectedHHBtn();
     return;
   }
-  tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map(s=>`
-    <tr class="border-b border-slate-100">
+  tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map(s=>{
+    const isSel = selectedHHInvIds.has(s.id);
+    return `
+    <tr class="border-b border-slate-100 ${isSel?'row-selected':''}" data-row-id="${s.id}">
       <td class="px-3 py-3 sel-col" data-th="">
-        <input type="checkbox" class="hhinv-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${selectedHHInvIds.has(s.id)?'checked':''} onchange="toggleSelectHHInvUnit('${s.id}', this.checked)">
+        <input type="checkbox" class="hhinv-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${isSel?'checked':''} onchange="toggleSelectHHInvUnit('${s.id}', this.checked); this.closest('tr').classList.toggle('row-selected', this.checked)">
       </td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${s.sn||'—'}</td>
       <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">${s.model||'—'}</td>
@@ -3050,7 +3074,8 @@ function renderHHInvTable(){
           <i class="fas fa-ellipsis-vertical"></i>
         </button>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   updateDeleteSelectedHHBtn();
 }
 
@@ -3061,6 +3086,7 @@ function updateDeleteSelectedHHBtn(){
   const btn = document.getElementById('deleteSelectedHHBtn');
   const countEl = document.getElementById('deleteSelectedHHCount');
   const cancelBtn = document.getElementById('cancelSelectHHBtn');
+  const hint = document.getElementById('selectModeHintHH');
   if(!btn || !countEl) return;
   const inSelectMode = document.getElementById('hhInvTable')?.classList.contains('select-mode');
   countEl.textContent = selectedHHInvIds.size;
@@ -3069,6 +3095,10 @@ function updateDeleteSelectedHHBtn(){
   if(cancelBtn){
     if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
     else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
+  }
+  if(hint){
+    if(inSelectMode && selectedHHInvIds.size===0){ hint.classList.remove('hidden'); hint.classList.add('flex'); }
+    else { hint.classList.add('hidden'); hint.classList.remove('flex'); }
   }
   const selectAll = document.getElementById('hhInvSelectAll');
   if(selectAll){
