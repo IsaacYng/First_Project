@@ -1044,8 +1044,15 @@
             <div id="profileMenu" class="profile-menu">
               <div class="profile-menu-user">
                 <div class="nm" id="profileMenuName">Admin</div>
-                <div class="em">Samriddhi And Brothers</div>
+                <div class="em" id="profileMenuEmail">Samriddhi And Brothers</div>
               </div>
+              <button onclick="openProfileModal();toggleProfileMenu()" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+                <i class="fas fa-user text-xs text-slate-400"></i> My Profile
+              </button>
+              <button id="teamMembersMenuBtn" onclick="openTeamModal();toggleProfileMenu()" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+                <i class="fas fa-users text-xs text-slate-400"></i> Team Members
+              </button>
+              <div class="border-t border-slate-100 my-1"></div>
               <button id="logoutBtn" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold text-red-500 hover:bg-red-50 transition-colors">
                 <i class="fas fa-right-from-bracket text-xs"></i> Logout
               </button>
@@ -2099,6 +2106,80 @@
   </div>
 </div>
 
+<!-- MY PROFILE -->
+<div id="profileFormModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);" onclick="if(event.target===this) closeProfileModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col" style="max-height:90vh; animation:slideIn .2s ease;">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-user text-amber-500 text-lg"></i> My Profile</div>
+      <button onclick="closeProfileModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="overflow-y-auto p-5">
+      <div class="flex items-center gap-4 mb-5">
+        <div id="profileAvatarPreview" class="w-16 h-16 rounded-full bg-bajaj-blue flex items-center justify-center text-white text-xl font-bold flex-shrink-0">A</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Avatar Colour</div>
+          <div id="avatarColorPicker" class="flex items-center gap-2 flex-wrap"></div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5 mb-4">
+        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Name</label>
+        <input type="text" id="profileNameInput" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-bajaj-blue transition-all" placeholder="Your name"/>
+      </div>
+      <div class="flex flex-col gap-1.5 mb-4">
+        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Email</label>
+        <input type="text" id="profileEmailDisplay" disabled class="bg-slate-100 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-500"/>
+      </div>
+      <button onclick="saveProfileInfo()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all mb-6">
+        <i class="fas fa-check mr-1"></i> Save Changes
+      </button>
+
+      <div class="border-t border-slate-100 pt-5 mb-6">
+        <div class="text-sm font-bold text-slate-700 mb-3"><i class="fas fa-lock text-slate-400 mr-1"></i> Change Password</div>
+        <div class="flex flex-col gap-2.5">
+          <input type="password" id="profileCurrentPass" placeholder="Current password" autocomplete="current-password" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          <input type="password" id="profileNewPass" placeholder="New password (min 6 characters)" autocomplete="new-password" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          <input type="password" id="profileConfirmPass" placeholder="Confirm new password" autocomplete="new-password" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          <button onclick="changeOwnPassword()" class="w-full py-2.5 border-2 border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
+            Update Password
+          </button>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-100 pt-5">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="text-sm font-bold text-slate-700"><i class="fas fa-clock-rotate-left text-slate-400 mr-1"></i> My Recent Activity</div>
+        </div>
+        <div id="myActivityList" class="flex flex-col gap-2 max-h-64 overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TEAM MEMBERS -->
+<div id="teamFormModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);" onclick="if(event.target===this) closeTeamModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col" style="max-height:90vh; animation:slideIn .2s ease;">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-users text-amber-500 text-lg"></i> Team Members</div>
+      <button onclick="closeTeamModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="overflow-y-auto p-5">
+      <p class="text-[11px] text-slate-400 mb-4">Everyone here can sign in and use this admin panel. Disabling someone blocks their login immediately — it doesn't erase their account, so it can be undone anytime.</p>
+      <div id="teamMembersList" class="flex flex-col gap-2 mb-5"></div>
+      <div class="border-t border-slate-100 pt-4">
+        <div class="text-sm font-bold text-slate-700 mb-3"><i class="fas fa-user-plus text-slate-400 mr-1"></i> Add a Team Member</div>
+        <div class="flex flex-col gap-2.5">
+          <input type="text" id="newStaffName" placeholder="Full name" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          <input type="email" id="newStaffEmail" placeholder="Email address" autocomplete="off" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          <input type="password" id="newStaffPass" placeholder="Temporary password (min 6 characters)" autocomplete="new-password" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          <button onclick="addTeamMember()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+            <i class="fas fa-plus mr-1"></i> Create Account
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast" class="hidden fixed bottom-5 right-5 z-[500] border border-slate-200/80 rounded-2xl pl-3.5 pr-4 py-3.5 text-sm text-slate-700 items-start gap-3 min-w-[260px] max-w-sm overflow-hidden">
   <div id="toastIconWrap"><i id="toastIcon" class="fas fa-circle-check text-sm"></i></div>
@@ -2115,7 +2196,11 @@
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut,
+  updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider,
+  createUserWithEmailAndPassword, sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import {
   getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc,
   serverTimestamp, query, orderBy, limit, runTransaction, writeBatch, getCountFromServer
@@ -2189,6 +2274,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+// A second, independent Firebase app instance — used ONLY when creating a
+// new staff account. createUserWithEmailAndPassword normally signs in as
+// the newly-created user on whatever auth instance it's called against; by
+// running it against this separate instance instead of the main one, the
+// admin creating the account stays signed in on their own session the
+// whole time. Signed out immediately after each use.
+const secondaryApp = initializeApp(firebaseConfig, "StaffCreation");
+const secondaryAuth = getAuth(secondaryApp);
 
 let currentEditId = null;
 // Which accessories (from the model's category) are toggled ON for the bike
@@ -3087,16 +3180,244 @@ window.togglePasswordVisibility = ()=>{
   btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
 };
 
+const AVATAR_COLORS = ['#005EA6','#B4740E','#059669','#7C3AED','#DC2626','#0891B2','#DB2777','#4B5563'];
+let currentUserRole = 'owner'; // backward-compatible default — see loadProfile
+let currentUserAvatarColor = AVATAR_COLORS[0];
+
 async function loadProfile(uid) {
   try {
     const snap = await getDoc(doc(db,"profiles",uid));
-    const name = snap.exists() ? (snap.data().name||'Admin') : 'Administrator';
+    const data = snap.exists() ? snap.data() : {};
+    // A profile disabled from Team Members blocks login immediately, even
+    // if the account itself still technically exists in Firebase Auth
+    // (client apps can't truly delete other users' accounts — see the
+    // Team Members modal for why this is a deactivate, not a delete).
+    if(data.active === false){
+      toast('This account has been disabled. Contact an admin.', 'err');
+      await signOut(auth);
+      return;
+    }
+    const name = data.name || 'Admin';
     currentUserName = name;
+    currentUserRole = data.role || 'owner'; // accounts created before Team Members existed default to owner
+    currentUserAvatarColor = data.avatarColor || AVATAR_COLORS[0];
     document.getElementById('headerUserName').textContent = name;
-    document.getElementById('navAvatar').textContent = name.charAt(0).toUpperCase();
+    const avatarEl = document.getElementById('navAvatar');
+    avatarEl.textContent = name.charAt(0).toUpperCase();
+    avatarEl.style.background = currentUserAvatarColor;
     const pmName = document.getElementById('profileMenuName'); if(pmName) pmName.textContent = name;
+    const pmEmail = document.getElementById('profileMenuEmail'); if(pmEmail) pmEmail.textContent = currentUserEmail;
+    const teamBtn = document.getElementById('teamMembersMenuBtn');
+    if(teamBtn) teamBtn.classList.toggle('hidden', currentUserRole !== 'owner');
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MY PROFILE — personal name/avatar, password change, own activity feed.
+   ═══════════════════════════════════════════════════════════════════════ */
+window.openProfileModal = ()=>{
+  document.getElementById('profileNameInput').value = currentUserName;
+  document.getElementById('profileEmailDisplay').value = currentUserEmail;
+  document.getElementById('profileCurrentPass').value = '';
+  document.getElementById('profileNewPass').value = '';
+  document.getElementById('profileConfirmPass').value = '';
+  renderAvatarColorPicker();
+  renderMyActivity();
+  document.getElementById('profileFormModal').classList.remove('hidden');
+  document.getElementById('profileFormModal').classList.add('flex');
+};
+window.closeProfileModal = ()=>{
+  document.getElementById('profileFormModal').classList.add('hidden');
+  document.getElementById('profileFormModal').classList.remove('flex');
+};
+
+function renderAvatarColorPicker(){
+  const wrap = document.getElementById('avatarColorPicker');
+  const preview = document.getElementById('profileAvatarPreview');
+  const name = document.getElementById('profileNameInput').value || currentUserName;
+  preview.textContent = name.charAt(0).toUpperCase();
+  preview.style.background = currentUserAvatarColor;
+  wrap.innerHTML = AVATAR_COLORS.map(c=>`
+    <button type="button" onclick="selectAvatarColor('${c}')" style="background:${c}"
+      class="w-6 h-6 rounded-full flex-shrink-0 transition-all ${c===currentUserAvatarColor?'ring-2 ring-offset-2 ring-slate-400':''}"></button>
+  `).join('');
+}
+window.selectAvatarColor = (color)=>{
+  currentUserAvatarColor = color;
+  renderAvatarColorPicker();
+};
+
+window.saveProfileInfo = async ()=>{
+  const name = document.getElementById('profileNameInput').value.trim();
+  if(!name){ toast('Name cannot be empty.','err'); return; }
+  try{
+    await setDoc(doc(db,'profiles',auth.currentUser.uid), { name, avatarColor: currentUserAvatarColor }, { merge:true });
+    try{ await updateProfile(auth.currentUser, { displayName: name }); }catch{} // best-effort, Firestore is the source of truth here
+    currentUserName = name;
+    document.getElementById('headerUserName').textContent = name;
+    const avatarEl = document.getElementById('navAvatar');
+    avatarEl.textContent = name.charAt(0).toUpperCase();
+    avatarEl.style.background = currentUserAvatarColor;
+    const pmName = document.getElementById('profileMenuName'); if(pmName) pmName.textContent = name;
+    toast('Profile updated.');
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
+window.changeOwnPassword = async ()=>{
+  const current = document.getElementById('profileCurrentPass').value;
+  const next = document.getElementById('profileNewPass').value;
+  const confirm = document.getElementById('profileConfirmPass').value;
+  if(!current || !next || !confirm){ toast('Fill in all three password fields.','err'); return; }
+  if(next.length < 6){ toast('New password must be at least 6 characters.','err'); return; }
+  if(next !== confirm){ toast("New password and confirmation don't match.",'err'); return; }
+  try{
+    // Firebase requires re-proving the current password before allowing a
+    // sensitive change like this — protects against someone using an
+    // already-open session on a shared computer to lock the real owner out.
+    const cred = EmailAuthProvider.credential(auth.currentUser.email, current);
+    await reauthenticateWithCredential(auth.currentUser, cred);
+    await updatePassword(auth.currentUser, next);
+    document.getElementById('profileCurrentPass').value = '';
+    document.getElementById('profileNewPass').value = '';
+    document.getElementById('profileConfirmPass').value = '';
+    toast('Password updated.');
+  }catch(e){
+    const msg = e.code==='auth/wrong-password' ? 'Current password is incorrect.' : e.message;
+    toast('Error: '+msg,'err');
+  }
+};
+
+function renderMyActivity(){
+  const wrap = document.getElementById('myActivityList');
+  if(!wrap) return;
+  const mine = (activityLogData||[]).filter(a=>a.by===currentUserEmail).slice(0,25);
+  if(!mine.length){ wrap.innerHTML = `<div class="text-xs text-slate-400 text-center py-4">No activity recorded yet.</div>`; return; }
+  wrap.innerHTML = mine.map(a=>{
+    const at = a.at?.toDate ? a.at.toDate() : new Date(a.at);
+    const style = ACTION_STYLE[a.action] || {icon:'fa-circle-info', cls:'badge-neutral'};
+    return `<div class="flex items-center gap-2.5 text-xs border-b border-slate-50 pb-2">
+      <span class="badge ${style.cls} flex-shrink-0"><i class="fas ${style.icon}"></i> ${escapeHtml(a.action||'')}</span>
+      <span class="text-slate-600 truncate flex-1">${escapeHtml(a.model||'')}</span>
+      <span class="text-slate-400 flex-shrink-0">${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TEAM MEMBERS — everyone who can sign into this admin panel. Only visible
+   to 'owner' role accounts. Client apps can't truly delete another user's
+   Firebase Auth account (that needs Admin SDK on a backend), so "removing"
+   someone here disables their Firestore profile — loadProfile() checks
+   that flag on every login and force-signs-out anyone disabled, even
+   though their underlying Auth account still technically exists.
+   ═══════════════════════════════════════════════════════════════════════ */
+let teamMembers = [];
+
+window.openTeamModal = async ()=>{
+  if(currentUserRole !== 'owner'){ toast("Only an owner account can manage team members.",'err'); return; }
+  document.getElementById('teamFormModal').classList.remove('hidden');
+  document.getElementById('teamFormModal').classList.add('flex');
+  await loadTeamMembers();
+};
+window.closeTeamModal = ()=>{
+  document.getElementById('teamFormModal').classList.add('hidden');
+  document.getElementById('teamFormModal').classList.remove('flex');
+};
+
+async function loadTeamMembers(){
+  const list = document.getElementById('teamMembersList');
+  list.innerHTML = `<div class="text-xs text-slate-400 text-center py-4"><i class="fas fa-circle-notch animate-spin mr-1.5"></i>Loading…</div>`;
+  try{
+    const snap = await getDocs(collection(db,'profiles'));
+    teamMembers = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderTeamMembersList();
+  }catch(e){
+    list.innerHTML = `<div class="text-xs text-red-500 text-center py-4">Couldn't load team members: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function renderTeamMembersList(){
+  const list = document.getElementById('teamMembersList');
+  if(!teamMembers.length){ list.innerHTML = `<div class="text-xs text-slate-400 text-center py-4">No team members found.</div>`; return; }
+  const sorted = [...teamMembers].sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  list.innerHTML = sorted.map(m=>{
+    const isSelf = m.id === auth.currentUser?.uid;
+    const isActive = m.active !== false;
+    const initial = (m.name||'?').charAt(0).toUpperCase();
+    const color = m.avatarColor || AVATAR_COLORS[0];
+    return `<div class="flex items-center gap-3 p-3 border border-slate-100 rounded-xl ${!isActive?'opacity-60':''}">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style="background:${color}">${initial}</div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-bold text-slate-800 truncate">${escapeHtml(m.name||'Unnamed')} ${isSelf?'<span class="text-[10px] text-slate-400 font-semibold">(you)</span>':''} ${m.role==='owner'?'<span class="badge badge-blue ml-1">Owner</span>':''}</div>
+        <div class="text-[11px] text-slate-400 truncate">${escapeHtml(m.email||'')}</div>
+      </div>
+      ${!isActive ? '<span class="badge badge-red flex-shrink-0">Disabled</span>' : ''}
+      ${!isSelf ? `
+      <div class="flex items-center gap-1.5 flex-shrink-0">
+        <button onclick="sendStaffPasswordReset('${escapeJsAttr(m.email)}')" title="Send password reset" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-bajaj-blue hover:border-bajaj-blue transition-all"><i class="fas fa-key text-xs"></i></button>
+        <button onclick="toggleStaffActive('${m.id}', ${isActive})" title="${isActive?'Disable':'Enable'}" class="w-8 h-8 flex items-center justify-center rounded-lg border ${isActive?'border-red-200 text-red-500 hover:bg-red-50':'border-emerald-200 text-emerald-600 hover:bg-emerald-50'} transition-all"><i class="fas ${isActive?'fa-user-slash':'fa-user-check'} text-xs"></i></button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+window.addTeamMember = async ()=>{
+  const name = document.getElementById('newStaffName').value.trim();
+  const email = document.getElementById('newStaffEmail').value.trim();
+  const pass = document.getElementById('newStaffPass').value;
+  if(!name || !email){ toast('Name and email are required.','err'); return; }
+  if(!/^\S+@\S+\.\S+$/.test(email)){ toast('Enter a valid email address.','err'); return; }
+  if(!pass || pass.length < 6){ toast('Temporary password must be at least 6 characters.','err'); return; }
+  try{
+    // Created on the SECONDARY auth instance so this doesn't sign the
+    // current admin out of their own session (see the constant's comment
+    // near the top of this file for why).
+    const cred = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
+    await setDoc(doc(db,'profiles',cred.user.uid), {
+      name, email, role:'staff', active:true, avatarColor: AVATAR_COLORS[teamMembers.length % AVATAR_COLORS.length]
+    });
+    await signOut(secondaryAuth); // clean up the temporary session
+    logActivity('Team Member Added', 'profiles', { model: name, customerName: email });
+    toast(`${name} can now sign in.`);
+    document.getElementById('newStaffName').value = '';
+    document.getElementById('newStaffEmail').value = '';
+    document.getElementById('newStaffPass').value = '';
+    await loadTeamMembers();
+  }catch(e){
+    const msg = e.code==='auth/email-already-in-use' ? 'That email is already registered.' : e.message;
+    toast('Error: '+msg,'err');
+  }
+};
+
+window.toggleStaffActive = async (uid, currentlyActive)=>{
+  const member = teamMembers.find(m=>m.id===uid);
+  if(!member) return;
+  const proceed = await showConfirm({
+    title: currentlyActive ? `Disable ${member.name}?` : `Re-enable ${member.name}?`,
+    message: currentlyActive
+      ? `<b>${escapeHtml(member.name)}</b> won't be able to sign in anymore. Their account itself isn't deleted — you can re-enable it anytime.`
+      : `<b>${escapeHtml(member.name)}</b> will be able to sign in again.`,
+    okText: currentlyActive ? 'Disable' : 'Enable',
+    okColorClass: currentlyActive ? 'text-red-500 hover:bg-red-50' : 'text-emerald-600 hover:bg-emerald-50',
+    iconClass: currentlyActive ? 'fa-user-slash' : 'fa-user-check',
+    iconColor: currentlyActive ? '#ef4444' : '#059669',
+    iconBg: currentlyActive ? '#FEF2F2' : '#ECFDF5'
+  });
+  if(!proceed) return;
+  try{
+    await updateDoc(doc(db,'profiles',uid), { active: !currentlyActive });
+    logActivity(currentlyActive ? 'Team Member Disabled' : 'Team Member Enabled', 'profiles', { model: member.name, customerName: member.email });
+    toast(currentlyActive ? `${member.name} has been disabled.` : `${member.name} re-enabled.`);
+    await loadTeamMembers();
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
+window.sendStaffPasswordReset = async (email)=>{
+  try{
+    await sendPasswordResetEmail(auth, email);
+    toast(`Password reset link sent to ${email}.`);
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
 
 /* ─── Master Price List ─── */
 function loadMasterPriceList() {
@@ -5508,7 +5829,7 @@ function daysLeft(deletedAt){
   return Math.max(0, diffDays);
 }
 
-const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory' };
+const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team' };
 
 function renderTrashTable(){
   const tbody = document.getElementById('trashTableBody');
@@ -5620,7 +5941,10 @@ const ACTION_STYLE = {
   'HH Sales': {icon:'fa-bullseye', cls:'badge-blue'},
   'HH Hide (Sold)': {icon:'fa-bullseye', cls:'badge-neutral'},
   'HH Flag Undone': {icon:'fa-rotate-left', cls:'badge-neutral'},
-  'Duplicate Resolved': {icon:'fa-code-compare', cls:'badge-red'}
+  'Duplicate Resolved': {icon:'fa-code-compare', cls:'badge-red'},
+  'Team Member Added': {icon:'fa-user-plus', cls:'badge-green'},
+  'Team Member Disabled': {icon:'fa-user-slash', cls:'badge-red'},
+  'Team Member Enabled': {icon:'fa-user-check', cls:'badge-green'}
 };
 
 function renderActivityLog(){
