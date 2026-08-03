@@ -641,10 +641,6 @@
   .cat-row-body{ flex:1; min-width:0; }
   .cat-row-top{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .cat-row-name{ font-weight:800; font-size:14.5px; color:#1F2430; }
-  .cat-row-name-input{
-    font-weight:800; font-size:13px; color:#1F2430; border:2px solid #005EA6; border-radius:8px;
-    padding:6px 10px; flex:1; min-width:110px; outline:none;
-  }
   .cat-row-model-count{ font-size:11px; color:#94A3B8; font-weight:600; margin-top:1px; }
   .cat-acc-chips{ display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
   .cat-acc-chip{
@@ -660,19 +656,6 @@
   }
   .cat-row-btn.acc{ color:#005EA6; background:#EAF3FB; }
   .cat-row-btn.acc:hover{ background:#D4E9F7; }
-  .cat-row-btn.save{ color:#059669; background:#ECFDF5; }
-  .cat-row-btn.save:hover{ background:#D1FAE5; }
-  /* Rename/Delete are quieter icon-only buttons — Accessories stays the one
-     clearly "primary" labeled action for this row, since it's what gets
-     used most; the other two fade in strength until you actually hover. */
-  .cat-row-icon-btn{
-    width:30px; height:30px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center;
-    color:#94A3B8; background:#F8FAFC; border:1px solid #E7E9EE; cursor:pointer; transition:all .15s; font-size:12px;
-    margin-left:auto;
-  }
-  .cat-row-icon-btn:hover{ color:#1F2430; border-color:#CBD5E1; background:#fff; }
-  .cat-row-icon-btn.del:hover{ color:#EF4444; border-color:#FECACA; background:#FEF2F2; }
-  .cat-row-icon-btn + .cat-row-icon-btn{ margin-left:0; }
   /* "Add Category" — a soft dashed card matching the file-upload style used
      elsewhere, instead of a bare input+button pair, so it reads as its own
      inviting action rather than an afterthought at the bottom of the list. */
@@ -3215,11 +3198,9 @@ window.closeMasterFormModal = ()=>document.getElementById('masterFormModal').cla
 window.openCategoryModal = ()=>document.getElementById('categoryFormModal').classList.add('open');
 window.closeCategoryModal = ()=>{
   document.getElementById('categoryFormModal').classList.remove('open');
-  // Closing the modal should also tidy up any open accessories popover and
-  // in-progress rename, so reopening later starts from a clean state.
+  // Closing the modal should also tidy up any open accessories popover.
   document.querySelectorAll('.cat-acc-menu').forEach(m=>m.remove());
   categoryAccMenuOpenId = null;
-  categoryRenamingId = null;
 };
 
 window._editMaster=(id)=>{
@@ -4917,7 +4898,6 @@ function renderFinCategorySelect(){
   }
 }
 
-let categoryRenamingId = null; // which category (if any) is currently in inline-rename mode
 let categoryAccMenuOpenId = null; // which category's accessory popover (if any) is open
 
 const CAT_AVATAR_PALETTE = [
@@ -4926,6 +4906,21 @@ const CAT_AVATAR_PALETTE = [
   {bg:'linear-gradient(135deg,#ECFDF5,#D1FAE5)', fg:'#059669'},
   {bg:'linear-gradient(135deg,#F5F3FF,#EDE9FE)', fg:'#7C3AED'},
 ];
+
+// Rename/Delete now live behind the same "⋮" kebab menu used for every
+// other row in the app (Inventory, Accessories, Price List, etc.) instead
+// of separate always-visible icon buttons — one consistent pattern
+// everywhere, and Rename opens a proper popup rather than swapping the
+// name for an inline text box in place.
+window._toggleCategoryKebab = (btn, id)=>{
+  openKebabMenuFor(btn, [
+    { label:'Rename', icon:'fa-pen', onClick:()=>window.startCategoryRename(id) },
+    { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>{
+        const cat = financeCategories.find(c=>c.id===id);
+        if(cat) window.removeFinanceCategory(id, cat.name);
+      } }
+  ]);
+};
 
 function renderFinCategoryChips(){
   const wrap = document.getElementById('finCategoryChips');
@@ -4939,34 +4934,28 @@ function renderFinCategoryChips(){
     return;
   }
   wrap.innerHTML = financeCategories.map((c,i)=>{
-    const isRenaming = categoryRenamingId===c.id;
-    const accNames = c.accessoryNames||[];
+    // A category's accessoryNames can go stale if one of those accessories
+    // gets deleted later on the Accessories page — filter against what
+    // actually still exists so a deleted item doesn't keep showing as
+    // "selected" forever.
+    const liveAccessoryNames = new Set(accessories.map(a=>a.name));
+    const accNames = (c.accessoryNames||[]).filter(n=>liveAccessoryNames.has(n));
     const modelCount = allMasterBikes.filter(b=>b.category===c.name).length;
     const palette = CAT_AVATAR_PALETTE[i % CAT_AVATAR_PALETTE.length];
-    const nameBlock = isRenaming
-      ? `<input type="text" id="catRenameInput_${c.id}" value="${escapeHtml(c.name||'')}" class="cat-row-name-input" onkeydown="if(event.key==='Enter')saveCategoryRename('${c.id}'); if(event.key==='Escape')cancelCategoryRename();">`
-      : `<span class="cat-row-name">${escapeHtml(c.name)}</span>`;
-    const editBtn = isRenaming
-      ? `<button class="cat-row-btn save" onclick="saveCategoryRename('${c.id}')"><i class="fas fa-check text-[10px]"></i> Save</button>
-         <button class="cat-row-icon-btn" onclick="cancelCategoryRename()" title="Cancel"><i class="fas fa-xmark"></i></button>`
-      : '';
-    const chipsBlock = isRenaming ? '' : (accNames.length
+    const chipsBlock = accNames.length
       ? `<div class="cat-acc-chips">${accNames.map(n=>`<span class="cat-acc-chip"><i class="fas fa-check text-[8px]"></i> ${escapeHtml(n)}</span>`).join('')}</div>`
-      : `<div class="cat-acc-chip-empty">No accessories set for this category yet</div>`);
+      : `<div class="cat-acc-chip-empty">No accessories set for this category yet</div>`;
     return `<div class="cat-row" data-cat-id="${c.id}">
       <div class="cat-row-avatar" style="background:${palette.bg};color:${palette.fg}"><i class="fas fa-motorcycle"></i></div>
       <div class="cat-row-body">
         <div class="cat-row-top">
-          ${nameBlock}
-          ${editBtn}
+          <span class="cat-row-name">${escapeHtml(c.name)}</span>
+          <button type="button" class="kebab-btn" style="margin-left:auto" onclick="window._toggleCategoryKebab(this,'${c.id}')" aria-label="Category actions"><i class="fas fa-ellipsis-vertical"></i></button>
         </div>
-        ${isRenaming ? '' : `<div class="cat-row-model-count">${modelCount} model${modelCount!==1?'s':''} using this category</div>`}
+        <div class="cat-row-model-count">${modelCount} model${modelCount!==1?'s':''} using this category</div>
         ${chipsBlock}
         <div class="cat-row-actions">
           <button class="cat-row-btn acc" id="accBtn_${c.id}" onclick="toggleCategoryAccMenu('${c.id}')"><i class="fas fa-helmet-safety text-[10px]"></i> Accessories${accNames.length ? ` (${accNames.length})` : ''}</button>
-          ${isRenaming ? '' : `
-          <button class="cat-row-icon-btn" onclick="startCategoryRename('${c.id}')" title="Rename"><i class="fas fa-pen"></i></button>
-          <button class="cat-row-icon-btn del" onclick="removeFinanceCategory('${c.id}','${escapeJsAttr(c.name)}')" title="Delete"><i class="fas fa-trash-can"></i></button>`}
         </div>
       </div>
     </div>`;
@@ -5075,25 +5064,25 @@ document.addEventListener('scroll', ()=>{
   }
 }, true); // capture phase — catches scrolling inside nested scrollable containers too, not just window
 
-window.startCategoryRename = (id)=>{
-  categoryRenamingId = id;
-  renderFinCategoryChips();
-  setTimeout(()=>document.getElementById('catRenameInput_'+id)?.focus(), 30);
-};
-window.cancelCategoryRename = ()=>{
-  categoryRenamingId = null;
-  renderFinCategoryChips();
-};
-window.saveCategoryRename = async (id)=>{
-  const input = document.getElementById('catRenameInput_'+id);
-  const newName = input?.value.trim();
+window.startCategoryRename = async (id)=>{
   const cat = financeCategories.find(c=>c.id===id);
   if(!cat) return;
+  const proceed = await showConfirm({
+    title: 'Rename Category',
+    message: `<label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Category Name</label>
+       <input id="confirmCategoryRenameInput" type="text" value="${escapeHtml(cat.name||'')}" placeholder="e.g. Bike"
+         style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">`,
+    okText: 'Save', okColorClass: 'text-bajaj-blue hover:bg-blue-50',
+    iconClass: 'fa-pen', iconColor:'#005EA6', iconBg:'#EAF3FB'
+  });
+  if(!proceed) return;
+  const input = document.getElementById('confirmCategoryRenameInput');
+  const newName = input?.value.trim();
   if(!newName){ toast('Category name cannot be empty.','err'); return; }
   if(newName!==cat.name && financeCategories.some(c=>c.id!==id && (c.name||'').toLowerCase()===newName.toLowerCase())){
     toast('Another category already has that name.','err'); return;
   }
-  if(newName===cat.name){ categoryRenamingId=null; renderFinCategoryChips(); return; }
+  if(newName===cat.name) return;
   try{
     const oldName = cat.name;
     await updateDoc(doc(db,"finance_categories",id),{name:newName});
@@ -5108,7 +5097,6 @@ window.saveCategoryRename = async (id)=>{
       affectedSchemes.forEach(f=>batch.update(doc(db,'finance_schemes',f.id),{category:newName}));
       await batch.commit();
     }
-    categoryRenamingId = null;
     toast(`Category renamed to "${newName}"`+(affectedBikes.length||affectedSchemes.length ? ` — updated on ${affectedBikes.length} model(s) and ${affectedSchemes.length} scheme(s).` : '.'));
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
@@ -5456,6 +5444,17 @@ window._deleteEntry=async(col,id)=>{
       if(target) await moveToTrash(col, id, target);
       await deleteDoc(doc(db,col,id));
       if(target) logActivity('Deleted', col, target);
+      // Deleting an accessory shouldn't leave it lingering as "selected" on
+      // whatever categories had it checked — clean those up too, not just
+      // filter it out visually.
+      if(col==='accessories' && target){
+        const affected = financeCategories.filter(c=>(c.accessoryNames||[]).includes(target.name));
+        for(const c of affected){
+          const updated = (c.accessoryNames||[]).filter(n=>n!==target.name);
+          try{ await updateDoc(doc(db,'finance_categories',c.id),{accessoryNames:updated}); }
+          catch(e){ console.error('Failed to clean up deleted accessory from category', c.name, e); }
+        }
+      }
       toast(col==='finance_schemes' ? 'Finance scheme moved to Trash.' : 'Entry moved to Trash.');
     }
   }catch(e){toast('Delete failed: '+e.message,'err');}
