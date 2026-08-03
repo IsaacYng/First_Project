@@ -1038,9 +1038,14 @@
           <div class="section-label">Management ·</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Master <span class="text-amber-500">Price List</span></div>
         </div>
-        <button onclick="openMasterFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
-          <i class="fas fa-plus"></i> Add Model
-        </button>
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="openCategoryModal()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
+            <i class="fas fa-layer-group"></i> Manage Categories
+          </button>
+          <button onclick="openMasterFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+            <i class="fas fa-plus"></i> Add Model
+          </button>
+        </div>
       </div>
 
       <!-- Stats -->
@@ -1075,12 +1080,15 @@
         </div>
       </div>
 
-      <!-- Category Manager -->
+      <!-- Category Manager (modal) -->
+      <div id="categoryFormModal" class="form-modal-overlay" onclick="if(event.target===this) closeCategoryModal()">
+      <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
-        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2 pb-3 border-b border-slate-100">
           <div class="flex items-center gap-2 section-title text-2xl">
             <i class="fas fa-layer-group text-amber-500 text-lg"></i> Model Categories
           </div>
+          <button onclick="closeCategoryModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
         </div>
         <p class="text-[11px] text-slate-400 mb-3">Manage categories like Bike, Scooter from here — add, rename, or delete, and choose which accessories (Helmet, Leg Guard, Seat Cover, etc.) apply to each. This list also shows up in the category dropdown on the HFL Finance page.</p>
         <div id="finCategoryChips" class="flex flex-wrap gap-2 mb-4"></div>
@@ -1091,6 +1099,8 @@
           </button>
         </div>
       </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /categoryFormModal -->
 
 
       <!-- Form Card (modal) -->
@@ -3100,6 +3110,15 @@ function populateModelDropdown() {
 
 window.openMasterFormModal = ()=>document.getElementById('masterFormModal').classList.add('open');
 window.closeMasterFormModal = ()=>document.getElementById('masterFormModal').classList.remove('open');
+window.openCategoryModal = ()=>document.getElementById('categoryFormModal').classList.add('open');
+window.closeCategoryModal = ()=>{
+  document.getElementById('categoryFormModal').classList.remove('open');
+  // Closing the modal should also tidy up any open accessories popover and
+  // in-progress rename, so reopening later starts from a clean state.
+  document.querySelectorAll('.cat-acc-menu').forEach(m=>m.remove());
+  categoryAccMenuOpenId = null;
+  categoryRenamingId = null;
+};
 
 window._editMaster=(id)=>{
   const b=allMasterBikes.find(x=>x.id===id); if(!b)return;
@@ -3232,7 +3251,11 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
 
 function clearMasterForm(){
   ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mFirstPartyIns','mThirdPartyIns','mImg'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('mCategory').value='Bike';
+  const catSel = document.getElementById('mCategory');
+  // "Bike" is the sensible default for a fresh Add Model form — fall back to
+  // whatever category happens to exist first only if Bike isn't set up.
+  if(financeCategories.some(c=>c.name==='Bike')) catSel.value = 'Bike';
+  else if(financeCategories.length) catSel.value = financeCategories[0].name;
   currentEditBikeFitments = {};
   renderModelFitmentToggles();
 }
@@ -4744,6 +4767,7 @@ function renderFinCategorySelect(){
     const curM = mSel.value;
     mSel.innerHTML = financeCategories.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
     if(curM && financeCategories.some(c=>c.name===curM)) mSel.value = curM;
+    else if(financeCategories.some(c=>c.name==='Bike')) mSel.value = 'Bike';
     else if(financeCategories.length) mSel.value = financeCategories[0].name;
     mSel._csSync?.(); // refresh custom-select trigger label if enhanced
     renderModelFitmentToggles();
@@ -4831,13 +4855,16 @@ function positionAccMenu(menu, btn){
 
 function renderCategoryAccMenu(cat){
   const selected = new Set(cat.accessoryNames||[]);
-  if(!accessories.length){
+  // Namsari applies to every model regardless of category — it's not a
+  // per-category on/off choice, so it's left out of this list entirely.
+  const selectable = accessories.filter(a=>(a.name||'').trim().toLowerCase()!=='namsari');
+  if(!selectable.length){
     return `<div class="cat-acc-menu">
       <div class="text-xs text-slate-400 px-2 py-1">No accessories set up yet — add some on the Accessories page first.</div>
     </div>`;
   }
   return `<div class="cat-acc-menu">
-    ${accessories.map(a=>{
+    ${selectable.map(a=>{
       const isChecked = selected.has(a.name);
       return `
       <label class="cat-acc-option ${isChecked?'checked':''}">
