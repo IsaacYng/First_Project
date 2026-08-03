@@ -1118,6 +1118,33 @@
       </div><!-- /form-modal-box -->
       </div><!-- /masterFormModal -->
 
+      <!-- Excel Bulk Import -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center gap-2 section-title text-2xl mb-1">
+          <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
+        </div>
+        <p class="text-xs text-slate-500 mb-4">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, Category, Price, Insurance, FinanceInsurance, FirstPartyInsurance, ThirdPartyInsurance, ImageURL</b>. S.N fills in automatically.</p>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all">
+            <i class="fas fa-cloud-arrow-up text-emerald-500 text-lg flex-shrink-0"></i>
+            <span id="priceExcelFileLabel" class="text-sm text-slate-600 font-medium truncate">Click to choose Excel / CSV file…</span>
+            <input type="file" id="priceExcelFileInput" accept=".xlsx,.xls,.csv" class="hidden"/>
+          </label>
+          <button id="priceDownloadTemplateBtn" class="cta-secondary whitespace-nowrap">
+            <i class="fas fa-download"></i> Sample Template
+          </button>
+          <button id="priceImportExcelBtn" disabled class="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 whitespace-nowrap">
+            <i class="fas fa-upload"></i> <span id="priceImportExcelBtnText">Import Rows</span>
+          </button>
+        </div>
+        <div id="priceImportSummary" class="hidden mt-4 rounded-xl border border-slate-200 overflow-hidden">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-wrap">
+            <span id="priceImportSummaryHead" class="text-xs font-bold text-slate-600"></span>
+          </div>
+          <div id="priceImportSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
+        </div>
+      </div>
+
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
@@ -1272,9 +1299,13 @@
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="HHSales" onclick="setInvStatusFilter('HHSales')">HH Sales <span class="pill-count" id="pcHHSales">0</span></button>
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="HHHide" onclick="setInvStatusFilter('HHHide')">HH Hide <span class="pill-count" id="pcHHHide">0</span></button>
           </div>
-          <select id="invModelFilterSelect" onchange="setInvModelFilter(this.value)" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-semibold max-w-[160px] sm:max-w-[200px]">
-            <option value="all">All Models</option>
-          </select>
+          <div class="relative flex-shrink-0">
+            <i class="fas fa-motorcycle absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+            <select id="invModelFilterSelect" onchange="setInvModelFilter(this.value)" class="appearance-none bg-slate-50 border-2 border-slate-200 rounded-lg pl-8 pr-7 py-2 text-sm text-slate-700 font-semibold max-w-[160px] sm:max-w-[200px] cursor-pointer hover:border-bajaj-blue focus:border-bajaj-blue focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all">
+              <option value="all">All Models</option>
+            </select>
+            <i class="fas fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+          </div>
           <div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="invSearch" autocomplete="off" placeholder="Search chassis, engine, model, reg no, customer…"
@@ -1437,9 +1468,13 @@
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Booked" onclick="setHHInvStatusFilter('Booked')">Booked <span class="pill-count" id="pcHHBooked">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setHHInvStatusFilter('Sold')">Sold <span class="pill-count" id="pcHHSold">0</span></button>
           </div>
-          <select id="hhInvModelFilterSelect" onchange="setHHInvModelFilter(this.value)" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-semibold max-w-[160px] sm:max-w-[200px]">
-            <option value="all">All Models</option>
-          </select>
+          <div class="relative flex-shrink-0">
+            <i class="fas fa-motorcycle absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+            <select id="hhInvModelFilterSelect" onchange="setHHInvModelFilter(this.value)" class="appearance-none bg-slate-50 border-2 border-slate-200 rounded-lg pl-8 pr-7 py-2 text-sm text-slate-700 font-semibold max-w-[160px] sm:max-w-[200px] cursor-pointer hover:border-bajaj-blue focus:border-bajaj-blue focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all">
+              <option value="all">All Models</option>
+            </select>
+            <i class="fas fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+          </div>
           <div class="relative ml-auto w-full sm:w-64">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="hhInvSearch" autocomplete="off" placeholder="Search chassis, model, event, customer…"
@@ -1500,9 +1535,13 @@
             <button class="allinv-source-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-source="inventory" onclick="setAllInvSourceFilter('inventory')">Inventory</button>
             <button class="allinv-source-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-source="hh_inventory" onclick="setAllInvSourceFilter('hh_inventory')">HH Inventory</button>
           </div>
-          <select id="allInvModelFilterSelect" onchange="setAllInvModelFilter(this.value)" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-semibold max-w-[160px] sm:max-w-[200px]">
-            <option value="all">All Models</option>
-          </select>
+          <div class="relative flex-shrink-0">
+            <i class="fas fa-motorcycle absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+            <select id="allInvModelFilterSelect" onchange="setAllInvModelFilter(this.value)" class="appearance-none bg-slate-50 border-2 border-slate-200 rounded-lg pl-8 pr-7 py-2 text-sm text-slate-700 font-semibold max-w-[160px] sm:max-w-[200px] cursor-pointer hover:border-bajaj-blue focus:border-bajaj-blue focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all">
+              <option value="all">All Models</option>
+            </select>
+            <i class="fas fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+          </div>
           <div class="relative ml-auto w-full sm:w-72">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="allInvSearch" autocomplete="off" placeholder="Search chassis, engine, model, customer…"
@@ -2848,13 +2887,42 @@ onAuthStateChanged(auth, async (user) => {
     loadTrash();
     loadActivityLog();
     setBtnState(false);
+    startIdleLogoutTimer();
   } else {
     document.getElementById('login-section').style.display = 'flex';
     document.getElementById('admin-section').style.display = 'none';
     document.body.classList.remove('app-active');
     setBtnState(false);
+    stopIdleLogoutTimer();
   }
 });
+
+/* ─── Auto-logout after 10 minutes of inactivity ───────────────────────────
+   A security measure for a shared/showroom device — if nobody touches the
+   screen (tap, click, key, scroll) for 10 minutes while logged in, the
+   session signs itself out automatically. Any activity resets the clock;
+   it only fires from genuine idle time, never mid-use. */
+const IDLE_LOGOUT_MS = 10 * 60 * 1000;
+let idleLogoutTimer = null;
+const idleActivityEvents = ['mousedown','mousemove','keydown','touchstart','scroll','wheel'];
+
+function resetIdleLogoutTimer(){
+  if(idleLogoutTimer) clearTimeout(idleLogoutTimer);
+  idleLogoutTimer = setTimeout(async ()=>{
+    toast('Signed out after 10 minutes of inactivity.', 'warn');
+    try{ await signOut(auth); }catch(e){ console.error('idle sign-out failed', e); }
+  }, IDLE_LOGOUT_MS);
+}
+
+function startIdleLogoutTimer(){
+  idleActivityEvents.forEach(evt=>document.addEventListener(evt, resetIdleLogoutTimer, {passive:true}));
+  resetIdleLogoutTimer();
+}
+
+function stopIdleLogoutTimer(){
+  if(idleLogoutTimer){ clearTimeout(idleLogoutTimer); idleLogoutTimer = null; }
+  idleActivityEvents.forEach(evt=>document.removeEventListener(evt, resetIdleLogoutTimer));
+}
 
 function setBtnState(loading) {
   const btn = document.getElementById('loginBtn');
@@ -5469,6 +5537,170 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
   hhExcelParsedRows = [];
   document.getElementById('hhExcelFileInput').value = '';
   document.getElementById('hhExcelFileLabel').textContent = 'Click to choose Excel / CSV file…';
+});
+
+/* ─── Excel Bulk Import (Master Price List — Model, Price, Insurance) ─── */
+let priceExcelParsedRows = [];
+
+document.getElementById('priceExcelFileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const importBtn = document.getElementById('priceImportExcelBtn');
+  const label = document.getElementById('priceExcelFileLabel');
+  const summary = document.getElementById('priceImportSummary');
+  summary.classList.add('hidden');
+  priceExcelParsedRows = [];
+  importBtn.disabled = true;
+
+  if(!file){ label.textContent='Click to choose Excel / CSV file…'; return; }
+  label.textContent = file.name;
+
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const aoa = XLSX.utils.sheet_to_json(sheet, {header:1, defval:'', blankrows:false});
+      if(!aoa.length){ toast('File appears empty.','err'); return; }
+
+      const rawHeaders = aoa[0].map(h=>h.toString().trim().toLowerCase().replace(/[^a-z]/g,''));
+      function findCol(keywords){
+        for(let i=0;i<rawHeaders.length;i++){
+          if(keywords.some(kw=>rawHeaders[i].includes(kw))) return i;
+        }
+        return -1;
+      }
+      const colIdx = {
+        model:    findCol(['modelname','model']),
+        category: findCol(['category']),
+        price:    findCol(['price']),
+        ins:      findCol(['insurancenormal','normalinsurance','insurance']),
+        finIns:   findCol(['financeinsurance','financeins']),
+        fpIns:    findCol(['firstpartyinsurance','firstparty','1stparty']),
+        tpIns:    findCol(['thirdpartyinsurance','thirdparty','3rdparty']),
+        img:      findCol(['imageurl','image'])
+      };
+
+      if(colIdx.model===-1 || colIdx.price===-1){
+        toast('Could not find Model / Price columns in the header row.','err');
+        return;
+      }
+
+      priceExcelParsedRows = aoa.slice(1).map(r=>({
+        model:    colIdx.model!==-1    ? (r[colIdx.model]||'').toString().trim()    : '',
+        category: colIdx.category!==-1 ? (r[colIdx.category]||'').toString().trim() : '',
+        price:    colIdx.price!==-1    ? (r[colIdx.price]||'').toString().trim()    : '',
+        ins:      colIdx.ins!==-1      ? (r[colIdx.ins]||'').toString().trim()      : '0',
+        finIns:   colIdx.finIns!==-1   ? (r[colIdx.finIns]||'').toString().trim()   : '0',
+        fpIns:    colIdx.fpIns!==-1    ? (r[colIdx.fpIns]||'').toString().trim()    : '0',
+        tpIns:    colIdx.tpIns!==-1    ? (r[colIdx.tpIns]||'').toString().trim()    : '0',
+        img:      colIdx.img!==-1      ? (r[colIdx.img]||'').toString().trim()      : ''
+      })).filter(r=>r.model || r.price);
+
+      if(!priceExcelParsedRows.length){ toast('No data rows found in file.','err'); return; }
+      importBtn.disabled = false;
+      toast(priceExcelParsedRows.length+' row(s) detected. Review & click Import.');
+    }catch(err){
+      toast('Could not read file: '+err.message,'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('priceDownloadTemplateBtn').addEventListener('click', ()=>{
+  const wsData = [
+    ['Model','Category','Price','Insurance','FinanceInsurance','FirstPartyInsurance','ThirdPartyInsurance','ImageURL'],
+    ['Pulsar N150','Bike','280000','8500','3200','0','0','https://...image.jpg'],
+    ['Chetak 3501','Scooter','215000','6000','2500','0','0','']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Price List');
+  XLSX.writeFile(wb, 'price_list_import_template.xlsx');
+});
+
+document.getElementById('priceImportExcelBtn').addEventListener('click', async ()=>{
+  if(!priceExcelParsedRows.length) return;
+  const btn = document.getElementById('priceImportExcelBtn');
+  const btnText = document.getElementById('priceImportExcelBtnText');
+  btn.disabled = true;
+  btnText.textContent = 'Importing…';
+
+  let nextSn = allMasterBikes.length ? Math.max(...allMasterBikes.map(x=>Number(x.sn)||0)) + 1 : 1;
+  const results = { success:[], failed:[] };
+  const seenInBatch = []; // track model names already added within this same import run
+
+  for(const row of priceExcelParsedRows){
+    if(!row.model || !row.price){
+      results.failed.push({row, reason:'Missing required field (Model/Price)'});
+      continue;
+    }
+    const modelCheck = Validate.text(row.model, { label:'Model', max:80 });
+    const priceCheck = Validate.positiveNumber(row.price, { label:'Price' });
+    const insCheck = Validate.positiveNumber(row.ins||0, { label:'Insurance', allowZero:true });
+    const finInsCheck = Validate.positiveNumber(row.finIns||0, { label:'Finance Insurance', allowZero:true });
+    const fpInsCheck = Validate.positiveNumber(row.fpIns||0, { label:'1st Party Insurance', allowZero:true });
+    const tpInsCheck = Validate.positiveNumber(row.tpIns||0, { label:'3rd Party Insurance', allowZero:true });
+    const badField = [modelCheck, priceCheck, insCheck, finInsCheck, fpInsCheck, tpInsCheck].find(c=>!c.ok);
+    if(badField){ results.failed.push({row, reason: badField.error}); continue; }
+    if(row.img && !/^https?:\/\/.+/i.test(row.img)){ results.failed.push({row, reason:'Image URL must start with http:// or https://'}); continue; }
+
+    // Category — matched case-insensitively against the categories already
+    // set up on this page; falls back to the first available category
+    // rather than rejecting the row outright, since a near-miss spelling
+    // shouldn't block an otherwise-good price list row.
+    const catMatch = financeCategories.find(c=>(c.name||'').toLowerCase()===row.category.toLowerCase());
+    const category = catMatch ? catMatch.name : (financeCategories[0]?.name || 'Bike');
+
+    const modelNorm = normModelName(row.model);
+    const dupExisting = allMasterBikes.find(b=>normModelName(b.name)===modelNorm);
+    const dupBatch = seenInBatch.find(r=>normModelName(r.model)===modelNorm);
+    if(dupExisting || dupBatch){
+      results.failed.push({row, reason:'Duplicate — model already exists'+(dupExisting?` (S.N ${dupExisting.sn||'—'})`:' (within this file)')});
+      continue;
+    }
+
+    try{
+      await addDoc(collection(db,"bikes"),{
+        sn: nextSn,
+        name: modelCheck.value,
+        category,
+        price: priceCheck.value,
+        Insurance: insCheck.value,
+        financeInsurance: finInsCheck.value,
+        firstPartyInsurance: fpInsCheck.value,
+        thirdPartyInsurance: tpInsCheck.value,
+        img: row.img || '',
+        applyLegguard: true,
+        applySeatcover: true
+      });
+      seenInBatch.push(row);
+      results.success.push(row);
+      nextSn++;
+    }catch(e){
+      results.failed.push({row, reason:e.message});
+    }
+  }
+
+  const summary = document.getElementById('priceImportSummary');
+  const head = document.getElementById('priceImportSummaryHead');
+  const body = document.getElementById('priceImportSummaryBody');
+  head.innerHTML = `<span class="text-emerald-600"><i class="fas fa-circle-check"></i> ${results.success.length} imported</span>` +
+    (results.failed.length ? ` &nbsp;·&nbsp; <span class="text-red-500"><i class="fas fa-circle-xmark"></i> ${results.failed.length} failed</span>` : '');
+  body.innerHTML = results.failed.map(f=>`
+    <div class="px-4 py-2 flex items-center justify-between gap-3">
+      <span class="text-slate-600 truncate">${f.row.model || '(no model)'} — Price ${f.row.price || '(none)'}</span>
+      <span class="text-red-500 font-medium whitespace-nowrap">${f.reason}</span>
+    </div>`).join('') || `<div class="px-4 py-3 text-slate-400">All rows imported successfully.</div>`;
+  summary.classList.remove('hidden');
+
+  toast(`Import done: ${results.success.length} added, ${results.failed.length} failed`, results.failed.length ? 'err' : 'ok');
+
+  btn.disabled = true;
+  btnText.textContent = 'Import Rows';
+  priceExcelParsedRows = [];
+  document.getElementById('priceExcelFileInput').value = '';
+  document.getElementById('priceExcelFileLabel').textContent = 'Click to choose Excel / CSV file…';
 });
 
 /* ─── Nav ─── */
