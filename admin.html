@@ -1178,6 +1178,9 @@
           <div class="flex items-center gap-2">
             <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-tags text-amber-500"></i> Price Catalogue</div>
             <span id="priceCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 models</span>
+            <button onclick="exportPriceListToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+              <i class="fas fa-file-excel text-[11px]"></i> Export
+            </button>
           </div>
         </div>
         <div class="overflow-x-auto">
@@ -5325,6 +5328,30 @@ window.exportAllInventoryToExcel = ()=>{
   XLSX.utils.book_append_sheet(wb, ws, 'All Inventory');
   XLSX.writeFile(wb, `all_inventory_export_${new Date().toISOString().slice(0,10)}.xlsx`);
   toast(`Exported ${rows.length} unit(s).`);
+};
+
+window.exportPriceListToExcel = ()=>{
+  if(!allMasterBikes.length){ toast('Price list is empty — nothing to export.','warn'); return; }
+  const sorted = [...allMasterBikes].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
+  const rows = sorted.map(b=>({
+    'S.N': b.sn||'',
+    'Model': b.name||'',
+    'Category': b.category||'',
+    'Price': b.price||0,
+    'Insurance': b.Insurance||0,
+    'Finance Insurance': b.financeInsurance||0,
+    '1st Party Insurance': b.firstPartyInsurance||0,
+    '3rd Party Insurance': b.thirdPartyInsurance||0,
+    'Image URL': b.img||'',
+    'Fits Leg Guard': b.applyLegguard ? 'Yes' : 'No',
+    'Fits Seat Cover': b.applySeatcover ? 'Yes' : 'No'
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:6},{wch:26},{wch:12},{wch:12},{wch:12},{wch:16},{wch:16},{wch:16},{wch:30},{wch:12},{wch:12}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Price List');
+  XLSX.writeFile(wb, `price_list_export_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast(`Exported ${rows.length} model(s).`);
 };
 
 /* ─── Excel Bulk Import ─── */
