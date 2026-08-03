@@ -651,7 +651,7 @@
      since absolute-inside-a-narrow-card was overflowing off the right edge
      of the screen on mobile and getting clipped. */
   .cat-acc-menu{
-    position:fixed; z-index:70; width:230px; max-width:calc(100vw - 24px); max-height:280px; overflow-y:auto;
+    position:fixed; z-index:450; width:230px; max-width:calc(100vw - 24px); max-height:280px; overflow-y:auto;
     background:#fff; border:1px solid #E2E8F0; border-radius:12px; box-shadow:0 12px 34px rgba(15,23,42,.18); padding:8px;
   }
   .cat-acc-option{
@@ -2528,6 +2528,26 @@ function scrollFormIntoView(){
   document.querySelector('.main-scroll')?.scrollTo({top:0,behavior:'smooth'});
 }
 
+// Every field a person can type (customer name, model, chassis, colour,
+// etc.) gets rendered straight into innerHTML all over this app. Without
+// escaping, a customer name like `<img src=x onerror=...>` would execute as
+// real HTML/JS the moment that record is displayed anywhere — Inventory,
+// Trash, Activity Log, printed reports, all of it. This neutralizes that,
+// safe to use in both text content and quoted attribute values.
+function escapeHtml(v){
+  return (v==null ? '' : String(v)).replace(/[&<>"']/g, c => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[c]));
+}
+// For a value embedded like onclick="doThing('VALUE')" — a JS string
+// literal sitting inside an HTML attribute. The browser decodes the HTML
+// attribute FIRST, then hands the JS engine the decoded text to parse as
+// code, so escaping has to run in that same order (JS-string-escape, then
+// HTML-attribute-escape) or one of the two layers leaks straight through.
+function escapeJsAttr(v){
+  const jsEscaped = (v==null?'':String(v)).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');
+  return escapeHtml(jsEscaped);
+}
 function normId(v){ return (v||'').toString().trim().toUpperCase().replace(/\s+/g,''); }
 function normModelName(v){
   return (v||'').toString().trim().toLowerCase()
@@ -2727,16 +2747,16 @@ function renderAllInventoryTable(){
       <td class="px-4 py-3" data-th="Source">${sourceBadge}</td>
       <td class="px-4 py-3 font-mono text-xs text-slate-500" data-th="S.N">${s.sn||'—'}</td>
       <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">
-        ${s.model||'—'}
+        ${escapeHtml(s.model||'—')}
         ${s.__isDup ? `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 text-red-600 text-[9px] font-extrabold uppercase tracking-wide align-middle"><i class="fas fa-triangle-exclamation text-[8px]"></i> Duplicate</span>` : ''}
       </td>
-      <td class="px-4 py-3" data-th="Chassis No"><code class="${s.__isDup?'bg-red-50 text-red-700 border-red-200':'bg-slate-50 text-slate-600 border-slate-200'} text-xs px-2 py-0.5 rounded-md border font-mono">${s.chassis||'—'}</code></td>
-      <td class="px-4 py-3 font-mono text-xs text-slate-500" data-th="Engine No">${s.engine||'—'}</td>
-      <td class="px-4 py-3 text-sm text-slate-700" data-th="Reg. No">${s.regNo||'—'}</td>
-      <td class="px-4 py-3" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}</span></td>
+      <td class="px-4 py-3" data-th="Chassis No"><code class="${s.__isDup?'bg-red-50 text-red-700 border-red-200':'bg-slate-50 text-slate-600 border-slate-200'} text-xs px-2 py-0.5 rounded-md border font-mono">${escapeHtml(s.chassis||'—')}</code></td>
+      <td class="px-4 py-3 font-mono text-xs text-slate-500" data-th="Engine No">${escapeHtml(s.engine||'—')}</td>
+      <td class="px-4 py-3 text-sm text-slate-700" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
+      <td class="px-4 py-3" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${escapeHtml(s.color||'—')}</span></td>
       <td class="px-4 py-3" data-th="Status">
         <div class="flex flex-wrap items-center gap-1.5">${statusHtml}</div>
-        ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${s.customerName}</div>` : ''}
+        ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
       </td>
     </tr>`;
   }).join('');
@@ -2802,15 +2822,15 @@ function renderDuplicateResolver(groups){
     const crossCollection = new Set(members.map(m=>m.__source)).size > 1;
     return `<div class="border ${crossCollection?'border-amber-200 bg-amber-50/40':'border-red-200 bg-red-50/40'} rounded-xl p-3 mb-3">
       <div class="text-xs font-bold ${crossCollection?'text-amber-600':'text-red-600'} mb-2 flex items-center gap-1.5">
-        <i class="fas fa-triangle-exclamation"></i> ${crossCollection?'Cross-collection duplicate':'Duplicate'} — Chassis ${members[0].chassis||'—'}${members[0].engine?` / Engine ${members[0].engine}`:''}
+        <i class="fas fa-triangle-exclamation"></i> ${crossCollection?'Cross-collection duplicate':'Duplicate'} — Chassis ${escapeHtml(members[0].chassis||'—')}${members[0].engine?` / Engine ${escapeHtml(members[0].engine)}`:''}
       </div>
       ${members.map(m=>{
         const badge = m.__source==='hh_inventory' ? `<span class="badge badge-amber"><i class="fas fa-tents"></i> HH Inventory</span>` : `<span class="badge badge-blue"><i class="fas fa-warehouse"></i> Inventory</span>`;
         return `<label class="flex items-center gap-2.5 py-1.5 px-2 rounded-lg hover:bg-white cursor-pointer">
           <input type="checkbox" class="dup-del-checkbox w-4 h-4 rounded border-slate-300 accent-red-500 flex-shrink-0" data-source="${m.__source}" data-id="${m.id}">
           ${badge}
-          <span class="text-sm font-semibold text-slate-700 truncate">${m.model||'—'}</span>
-          <span class="text-xs text-slate-400 font-mono ml-auto flex-shrink-0">S.N ${m.sn||'—'}${m.customerName?' · '+m.customerName:''}</span>
+          <span class="text-sm font-semibold text-slate-700 truncate">${escapeHtml(m.model||'—')}</span>
+          <span class="text-xs text-slate-400 font-mono ml-auto flex-shrink-0">S.N ${m.sn||'—'}${escapeHtml(m.customerName?' · '+m.customerName:'')}</span>
         </label>`;
       }).join('')}
     </div>`;
@@ -2828,7 +2848,7 @@ window.confirmDeleteDuplicates = async ()=>{
     const src = c.dataset.source;
     const unit = (src==='inventory' ? invData : hhInvData).find(x=>x.id===c.dataset.id);
     const label = src==='inventory' ? 'Inventory' : 'HH Inventory';
-    return unit ? `S.N ${unit.sn||'—'} — ${unit.model||'—'} (${label})` : `Unknown unit (${label})`;
+    return unit ? `S.N ${unit.sn||'—'} — ${escapeHtml(unit.model||'—')} (${label})` : `Unknown unit (${label})`;
   });
   const proceed = await showDangerousConfirm({
     title: `Delete ${checked.length} duplicate unit(s)?`,
@@ -2899,9 +2919,12 @@ document.getElementById('toastClose').addEventListener('click', ()=>{ clearTimeo
 
 function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 function highlightMatch(text, q){
-  text = (text ?? '').toString();
+  // Escape FIRST, then highlight — otherwise this was returning raw,
+  // unescaped user text (chassis/model/etc.) with only the matched portion
+  // wrapped in <mark>, which is exactly the same XSS hole as everywhere else.
+  text = escapeHtml((text ?? '').toString());
   if(!q || !q.trim()) return text || '—';
-  const re = new RegExp('('+escapeRegExp(q.trim())+')', 'ig');
+  const re = new RegExp('('+escapeRegExp(escapeHtml(q.trim()))+')', 'ig');
   return (text || '—').replace(re, '<mark class="bg-amber-200 text-slate-900 rounded-sm px-0.5">$1</mark>');
 }
 
@@ -3067,7 +3090,7 @@ function renderMasterTable() {
          <div class="flex flex-col gap-0.5 mt-1">${fitLine('Leg Guard',fitsLegguard)}${fitLine('Seat Cover',fitsSeatcover)}</div>`
       : `<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">Bike</span>`;
     return `
-    <tr class="border-b border-slate-100" data-label="${b.name}">
+    <tr class="border-b border-slate-100" data-label="${escapeHtml(b.name)}">
       <td class="px-4 py-3" data-th="S.N">
         <input class="sn-input" type="number" value="${b.sn||''}" min="1" placeholder="—"
           onblur="window._saveSn('bikes','${b.id}',this.value)"
@@ -3078,7 +3101,7 @@ function renderMasterTable() {
           ? `<img src="${b.img}" onerror="this.style.display='none'" alt="" class="w-11 h-8 object-cover rounded-lg border border-slate-200">`
           : `<div class="w-11 h-8 rounded-lg bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs"><i class="fas fa-image"></i></div>`}
       </td>
-      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">${b.name}</td>
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">${escapeHtml(b.name)}</td>
       <td class="px-4 py-3 whitespace-nowrap" data-th="Category">${catBadge}</td>
       <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Price">Rs ${Number(b.price).toLocaleString('en-IN')}</td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Insurance">Rs ${Number(b.Insurance||0).toLocaleString('en-IN')}</td>
@@ -3105,7 +3128,7 @@ function updatePriceStats() {
 function populateModelDropdown() {
   const list=document.getElementById('modelDatalist');
   const validBikes = allMasterBikes.filter(b => b.name && b.name.trim() && b.name.trim() !== '—' && b.name.trim() !== '-');
-  list.innerHTML = validBikes.map(b=>`<option value="${b.name}">`).join('');
+  list.innerHTML = validBikes.map(b=>`<option value="${escapeHtml(b.name)}">`).join('');
 }
 
 window.openMasterFormModal = ()=>document.getElementById('masterFormModal').classList.add('open');
@@ -3182,11 +3205,11 @@ function renderModelFitmentToggles(){
   grid.innerHTML = names.map(name=>{
     const checked = currentEditBikeFitments[name] || false;
     const escId = 'mFit_'+name.replace(/[^a-zA-Z0-9]/g,'_');
-    const escName = name.replace(/'/g,"\\'");
+    const escName = escapeJsAttr(name);
     return `<label class="flex items-center gap-2 text-sm text-slate-700 font-medium cursor-pointer">
-      <input type="checkbox" id="${escId}" data-fitment-name="${name.replace(/"/g,'&quot;')}" class="model-fitment-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer"
+      <input type="checkbox" id="${escId}" data-fitment-name="${escapeHtml(name)}" class="model-fitment-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer"
         ${checked?'checked':''} onchange="currentEditBikeFitments['${escName}']=this.checked">
-      ${name}
+      ${escapeHtml(name)}
     </label>`;
   }).join('');
 }
@@ -3332,7 +3355,7 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
     const whichField = normId(dup.chassis)===normId(chassis) ? 'Chassis No' : 'Engine No';
     const proceed = await showConfirm({
       title: 'Possible duplicate unit',
-      message: `${whichField} already exists in inventory — S.N <b>${dup.sn||'—'}</b>, <b>${dup.model}</b>, ${dup.color||'—'}, Chassis <b>${dup.chassis||'—'}</b>, Engine <b>${dup.engine||'—'}</b>.<br><br>${currentEditInvId?'Save this unit anyway?':'Add this unit anyway?'}`,
+      message: `${whichField} already exists in inventory — S.N <b>${dup.sn||'—'}</b>, <b>${escapeHtml(dup.model)}</b>, ${escapeHtml(dup.color||'—')}, Chassis <b>${escapeHtml(dup.chassis||'—')}</b>, Engine <b>${escapeHtml(dup.engine||'—')}</b>.<br><br>${currentEditInvId?'Save this unit anyway?':'Add this unit anyway?'}`,
       okText: currentEditInvId?'Save Anyway':'Add Anyway',
       okColorClass: 'text-amber-600 hover:bg-amber-50',
       iconClass: 'fa-triangle-exclamation', iconColor:'#f59e0b', iconBg:'#FFFBEB'
@@ -3346,7 +3369,7 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
       const whichField = normId(hhDup.chassis)===normId(chassis) ? 'Chassis No' : 'Engine No';
       const proceed = await showConfirm({
         title: 'Found in HH Inventory',
-        message: `${whichField} already exists in <b>HH Inventory</b> — S.N <b>${hhDup.sn||'—'}</b>, <b>${hhDup.model}</b>, ${hhDup.color||'—'}.<br><br>A unit shouldn't normally sit in both lists at once — add here anyway?`,
+        message: `${whichField} already exists in <b>HH Inventory</b> — S.N <b>${hhDup.sn||'—'}</b>, <b>${escapeHtml(hhDup.model)}</b>, ${escapeHtml(hhDup.color||'—')}.<br><br>A unit shouldn't normally sit in both lists at once — add here anyway?`,
         okText: 'Add Anyway',
         okColorClass: 'text-amber-600 hover:bg-amber-50',
         iconClass: 'fa-triangle-exclamation', iconColor:'#f59e0b', iconBg:'#FFFBEB'
@@ -3393,9 +3416,9 @@ window._editInventory=(id)=>{
 
 window._setUnitStatus = async (id, status) => {
   const s = invData.find(x=>x.id===id);
-  const modelLabel = s ? `${s.model} — ${s.color||''}`.trim() : 'this unit';
+  const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const needsCustomer = (status==='Booked' || status==='Sold');
-  const existingName = (s?.customerName||'').replace(/"/g,'&quot;');
+  const existingName = escapeHtml(s?.customerName||'');
   const message = needsCustomer
     ? `<b>${modelLabel}</b> will be marked <b>${status}</b>.<br><br>
        <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
@@ -3422,8 +3445,8 @@ window._setUnitStatus = async (id, status) => {
 
 window._setHHFlag = async (id, hhFlag) => {
   const s = invData.find(x=>x.id===id);
-  const modelLabel = s ? `${s.model} — ${s.color||''}`.trim() : 'this unit';
-  const existingName = (s?.customerName||'').replace(/"/g,'&quot;');
+  const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
+  const existingName = escapeHtml(s?.customerName||'');
   const customerField = `<br><br>
     <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
     <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
@@ -3641,10 +3664,10 @@ function populateModelFilterDropdown(type, dataArr, currentValue){
   const options = [{value:'all', text:'All Models'}, ...models.map(m=>({value:m, text:m}))];
   menu.innerHTML = options.map(o=>{
     const isActive = o.value===effectiveValue;
-    const esc = o.value.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    const esc = escapeJsAttr(o.value);
     return `<div class="model-filter-option ${isActive?'active':''}" onclick="selectModelFilterOption('${type}','${esc}')">
-      <span class="check-slot">${isActive?'<i class=\"fas fa-check\"></i>':''}</span>
-      <span class="truncate">${o.text}</span>
+      <span class="check-slot">${isActive?'<i class="fas fa-check"></i>':''}</span>
+      <span class="truncate">${escapeHtml(o.text)}</span>
     </div>`;
   }).join('');
   label.textContent = effectiveValue==='all' ? 'All Models' : effectiveValue;
@@ -3732,7 +3755,7 @@ function renderInvTable(list){
           ${s.hhFlag==='Sales' ? `<span class="badge badge-blue"><i class="fas fa-bullseye"></i> HH Sales</span>` : ''}
           ${s.hhFlag==='Hide' ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> HH Hide (not in stock)</span>` : ''}
         </div>
-        ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${s.customerName}</div>` : ''}
+        ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
       </td>
       <td class="px-4 py-3" data-th="Actions">
         <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'inventory','${s.id}')" aria-label="Row actions">
@@ -3939,13 +3962,13 @@ function renderHHInvTable(){
       </td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${s.sn||'—'}</td>
       <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">
-        ${s.model||'—'}
+        ${escapeHtml(s.model||'—')}
         ${isDup ? `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 text-red-600 text-[9px] font-extrabold uppercase tracking-wide align-middle"><i class="fas fa-triangle-exclamation text-[8px]"></i> Duplicate</span>` : ''}
       </td>
-      <td class="px-4 py-3 font-mono text-xs ${isDup?'text-red-700':'text-slate-500'}" data-th="Chassis No">${s.chassis||'—'}</td>
-      <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${s.regNo||'—'}</td>
-      <td class="px-4 py-3" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}</span></td>
-      <td class="px-4 py-3 text-sm text-slate-600" data-th="Event / Mela">${s.eventName||'—'}</td>
+      <td class="px-4 py-3 font-mono text-xs ${isDup?'text-red-700':'text-slate-500'}" data-th="Chassis No">${escapeHtml(s.chassis||'—')}</td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
+      <td class="px-4 py-3" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${escapeHtml(s.color||'—')}</span></td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Event / Mela">${escapeHtml(s.eventName||'—')}</td>
       <td class="px-4 py-3" data-th="Status">
         <div class="flex flex-wrap items-center gap-1.5">
           ${s.status==='Sold'
@@ -3954,7 +3977,7 @@ function renderHHInvTable(){
             ? `<span class="badge badge-amber"><i class="fas fa-bookmark"></i> Booked</span>`
             : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`}
         </div>
-        ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${s.customerName}</div>` : ''}
+        ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold mt-1 flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
       </td>
       <td class="px-4 py-3" data-th="Actions">
         <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'hh_inventory','${s.id}')" aria-label="Row actions">
@@ -4060,7 +4083,7 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
   if(dup){
     const proceed = await showConfirm({
       title:'Possible duplicate unit',
-      message:`Chassis/Engine already exists in HH Inventory — S.N <b>${dup.sn||'—'}</b>, <b>${dup.model}</b>, ${dup.color||'—'}.<br><br>Save anyway?`,
+      message:`Chassis/Engine already exists in HH Inventory — S.N <b>${dup.sn||'—'}</b>, <b>${escapeHtml(dup.model)}</b>, ${escapeHtml(dup.color||'—')}.<br><br>Save anyway?`,
       okText:'Save Anyway', okColorClass:'text-amber-600 hover:bg-amber-50',
       iconClass:'fa-triangle-exclamation', iconColor:'#f59e0b', iconBg:'#FFFBEB'
     });
@@ -4073,7 +4096,7 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
       const whichField = normId(invDup.chassis)===normId(chassis) ? 'Chassis No' : 'Engine No';
       const proceed = await showConfirm({
         title: 'Found in main Inventory',
-        message: `${whichField} already exists in the main <b>Inventory</b> — S.N <b>${invDup.sn||'—'}</b>, <b>${invDup.model}</b>, ${invDup.color||'—'}.<br><br>A unit shouldn't normally sit in both lists at once — add here anyway?`,
+        message: `${whichField} already exists in the main <b>Inventory</b> — S.N <b>${invDup.sn||'—'}</b>, <b>${escapeHtml(invDup.model)}</b>, ${escapeHtml(invDup.color||'—')}.<br><br>A unit shouldn't normally sit in both lists at once — add here anyway?`,
         okText: 'Add Anyway',
         okColorClass: 'text-amber-600 hover:bg-amber-50',
         iconClass: 'fa-triangle-exclamation', iconColor:'#f59e0b', iconBg:'#FFFBEB'
@@ -4136,9 +4159,9 @@ window.cancelHHInvEdit = ()=>{
 
 window._setHHInvStatus = async (id, status) => {
   const s = hhInvData.find(x=>x.id===id);
-  const modelLabel = s ? `${s.model} — ${s.color||''}`.trim() : 'this unit';
+  const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const needsCustomer = (status==='Booked' || status==='Sold');
-  const existingName = (s?.customerName||'').replace(/"/g,'&quot;');
+  const existingName = escapeHtml(s?.customerName||'');
   const message = needsCustomer
     ? `<b>${modelLabel}</b> will be marked <b>${status}</b>.<br><br>
        <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
@@ -4308,7 +4331,7 @@ function buildStockReportPage(){
     {bg:'#F3EAFB',fg:'#7C3AED'}, {bg:'#FDEDED',fg:'#C6382E'}, {bg:'#F1F2F5',fg:'#4B5262'}
   ];
   const areaChips = stockAreas.length
-    ? stockAreas.map((a,i)=>{ const p=AREA_PALETTE[i%AREA_PALETTE.length]; return `<div class="jrp-cat-chip" style="background:${p.bg};color:${p.fg}">${a.name}: ${areaTotals[a.name]||0}</div>`; }).join('')
+    ? stockAreas.map((a,i)=>{ const p=AREA_PALETTE[i%AREA_PALETTE.length]; return `<div class="jrp-cat-chip" style="background:${p.bg};color:${p.fg}">${escapeHtml(a.name)}: ${areaTotals[a.name]||0}</div>`; }).join('')
     : '';
 
   // Area-wise grid — same Model / Colour / [Area columns] / Total shape as the
@@ -4320,13 +4343,13 @@ function buildStockReportPage(){
       <thead><tr>
         <th style="text-align:left">Model</th>
         <th style="width:18%;text-align:left">Colour</th>
-        ${stockAreas.map(a=>`<th style="width:${Math.floor(40/stockAreas.length)}%">${a.name}</th>`).join('')}
+        ${stockAreas.map(a=>`<th style="width:${Math.floor(40/stockAreas.length)}%">${escapeHtml(a.name)}</th>`).join('')}
         <th style="width:10%">Total</th>
       </tr></thead>
       <tbody>
         ${areaGridRows.map(r=>`<tr>
-          <td class="left">${r.model}</td>
-          <td class="left">${r.color}</td>
+          <td class="left">${escapeHtml(r.model)}</td>
+          <td class="left">${escapeHtml(r.color)}</td>
           ${r.perArea.map(v=>`<td style="font-weight:${v>0?'800':'400'};color:${v>0?'#000':'#B8BEC9'}">${v}</td>`).join('')}
           <td style="font-weight:800;background:#F1F5F9">${r.total}</td>
         </tr>`).join('')}
@@ -4345,11 +4368,11 @@ function buildStockReportPage(){
     if(!list.length) return '';
     const bodyRows = list.map((s,i)=>`<tr>
       <td>${i+1}</td>
-      <td class="left">${findMasterBikeByName(s.model)?.name || s.model || '—'}</td>
-      <td class="left">${s.color||'—'}</td>
-      <td class="left" style="font-family:'JetBrains Mono',monospace;font-size:10.5px">${s.chassis||'—'}</td>
-      <td class="left">${s.regNo||'—'}</td>
-      <td class="left">${s.customerName||'—'}</td>
+      <td class="left">${escapeHtml(findMasterBikeByName(s.model)?.name || s.model || '—')}</td>
+      <td class="left">${escapeHtml(s.color||'—')}</td>
+      <td class="left" style="font-family:'JetBrains Mono',monospace;font-size:10.5px">${escapeHtml(s.chassis||'—')}</td>
+      <td class="left">${escapeHtml(s.regNo||'—')}</td>
+      <td class="left">${escapeHtml(s.customerName||'—')}</td>
     </tr>`).join('');
     return `
       <div class="jrp-area-title" style="border-top-color:${chipBg}">${title} <span class="jrp-cat-chip" style="background:${chipBg};color:${chipFg};margin-left:8px">${list.length} unit${list.length!==1?'s':''}</span></div>
@@ -4564,7 +4587,7 @@ function renderAreaStockTable(){
   head.innerHTML = `<th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
     <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Colour</th>
     ${stockAreas.map(a=>`<th class="px-3 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">
-        ${a.name}${areaEditMode ? `<button class="area-remove-btn" onclick="removeStockArea('${a.id}','${(a.name||'').replace(/'/g,"\\'")}')" title="Remove area"><i class="fas fa-xmark"></i></button>` : ''}
+        ${escapeHtml(a.name)}${areaEditMode ? `<button class="area-remove-btn" onclick="removeStockArea('${a.id}','${escapeJsAttr(a.name)}')" title="Remove area"><i class="fas fa-xmark"></i></button>` : ''}
       </th>`).join('')}
     <th class="px-4 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Row Total</th>`;
 
@@ -4597,17 +4620,17 @@ function renderAreaStockTable(){
       const cells = stockAreas.map(a=>{
         const raw = Number(saved[a.name])||0;
         const isWorkshop = workshopArea && a.id===workshopArea.id;
-        const thLabel = (a.name||'').replace(/"/g,'&quot;');
+        const thLabel = escapeHtml(a.name||'');
         if(isWorkshop){
           // Workshop is always the computed leftover — shown, never typed into.
           return `<td class="px-3 py-2 text-center text-sm font-semibold text-slate-700" data-th="${thLabel}">${displayPerArea[a.name] ?? unallocated}</td>`;
         }
         if(areaEditMode){
           const maxForThis = Math.max(raw, available - sumEnteredNonWorkshop + raw);
-          const mEsc = m.replace(/'/g,"\\'"), cEsc = c.replace(/'/g,"\\'"), aEsc = (a.name||'').replace(/'/g,"\\'");
+          const mEsc = escapeJsAttr(m), cEsc = escapeJsAttr(c), aEsc = escapeJsAttr(a.name);
           return `<td class="px-3 py-2 text-center" data-th="${thLabel}">
             <input type="number" min="0" max="${maxForThis}" class="area-qty-input" value="${raw}"
-              data-model="${m.replace(/"/g,'&quot;')}" data-color="${c.replace(/"/g,'&quot;')}" data-area="${(a.name||'').replace(/"/g,'&quot;')}"
+              data-model="${escapeHtml(m)}" data-color="${escapeHtml(c)}" data-area="${escapeHtml(a.name||'')}"
               onfocus="this.select()" onkeydown="handleAreaKey(event,this)"
               onchange="saveAreaQty('${mEsc}','${cEsc}','${aEsc}', this.value, this);">
           </td>`;
@@ -4616,8 +4639,8 @@ function renderAreaStockTable(){
       }).join('');
 
       rows.push(`<tr class="border-b border-slate-100">
-        <td class="px-4 py-2.5 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">${m}</td>
-        <td class="px-4 py-2.5" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(c)}"></span>${c}</span></td>
+        <td class="px-4 py-2.5 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">${escapeHtml(m)}</td>
+        <td class="px-4 py-2.5" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(c)}"></span>${escapeHtml(c)}</span></td>
         ${cells}
         <td class="px-3 py-2 text-center" data-th="Row Total"><span class="area-total-chip">${available}</span></td>
       </tr>`);
@@ -4697,7 +4720,7 @@ function renderInvDropdown(list){
         <div class="text-[11px] text-slate-400 font-mono truncate">Chassis ${highlightMatch(s.chassis, q)} · Engine ${highlightMatch(s.engine, q)}</div>
       </div>
       <span class="flex items-center gap-1.5 text-[11px] text-slate-500 flex-shrink-0">
-        <span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${s.color||'—'}
+        <span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${escapeHtml(s.color||'—')}
       </span>
     </button>`).join('');
   invSearchDropdown.classList.remove('hidden');
@@ -4765,7 +4788,7 @@ function renderFinCategorySelect(){
   const mSel = document.getElementById('mCategory');
   if(mSel){
     const curM = mSel.value;
-    mSel.innerHTML = financeCategories.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+    mSel.innerHTML = financeCategories.map(c=>`<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join('');
     if(curM && financeCategories.some(c=>c.name===curM)) mSel.value = curM;
     else if(financeCategories.some(c=>c.name==='Bike')) mSel.value = 'Bike';
     else if(financeCategories.length) mSel.value = financeCategories[0].name;
@@ -4775,7 +4798,7 @@ function renderFinCategorySelect(){
   const sel = document.getElementById('fCategory');
   if(sel){
     const cur = sel.value;
-    sel.innerHTML = financeCategories.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+    sel.innerHTML = financeCategories.map(c=>`<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join('');
     if(cur && financeCategories.some(c=>c.name===cur)) sel.value = cur;
   }
 }
@@ -4798,8 +4821,8 @@ function renderFinCategoryChips(){
     const isRenaming = categoryRenamingId===c.id;
     const accCount = (c.accessoryNames||[]).length;
     const nameBlock = isRenaming
-      ? `<input type="text" id="catRenameInput_${c.id}" value="${(c.name||'').replace(/"/g,'&quot;')}" class="cat-row-name-input" onkeydown="if(event.key==='Enter')saveCategoryRename('${c.id}'); if(event.key==='Escape')cancelCategoryRename();">`
-      : `<span class="cat-row-name">${c.name}</span>`;
+      ? `<input type="text" id="catRenameInput_${c.id}" value="${escapeHtml(c.name||'')}" class="cat-row-name-input" onkeydown="if(event.key==='Enter')saveCategoryRename('${c.id}'); if(event.key==='Escape')cancelCategoryRename();">`
+      : `<span class="cat-row-name">${escapeHtml(c.name)}</span>`;
     const editBtn = isRenaming
       ? `<button class="cat-row-btn save" onclick="saveCategoryRename('${c.id}')"><i class="fas fa-check text-[10px]"></i> Save</button>
          <button class="cat-row-btn edit" onclick="cancelCategoryRename()"><i class="fas fa-xmark text-[10px]"></i></button>`
@@ -4812,7 +4835,7 @@ function renderFinCategoryChips(){
       <div class="cat-row-actions">
         ${isRenaming ? '' : `<button class="cat-row-btn edit" onclick="startCategoryRename('${c.id}')"><i class="fas fa-pen text-[10px]"></i> Rename</button>`}
         <button class="cat-row-btn acc" id="accBtn_${c.id}" onclick="toggleCategoryAccMenu('${c.id}')"><i class="fas fa-helmet-safety text-[10px]"></i> Accessories ${accCount ? `(${accCount})` : ''}</button>
-        <button class="cat-row-btn del" onclick="removeFinanceCategory('${c.id}','${(c.name||'').replace(/'/g,"\\'")}')"><i class="fas fa-trash-can text-[10px]"></i> Delete</button>
+        <button class="cat-row-btn del" onclick="removeFinanceCategory('${c.id}','${escapeJsAttr(c.name)}')"><i class="fas fa-trash-can text-[10px]"></i> Delete</button>
       </div>
     </div>`;
   }).join('');
@@ -4869,8 +4892,8 @@ function renderCategoryAccMenu(cat){
       return `
       <label class="cat-acc-option ${isChecked?'checked':''}">
         <input type="checkbox" class="w-4 h-4 rounded border-slate-300 accent-bajaj-blue flex-shrink-0" ${isChecked?'checked':''}
-          onchange="toggleCategoryAccessory('${cat.id}','${(a.name||'').replace(/'/g,"\\'")}', this.checked)">
-        <span class="flex-1">${a.name}</span>
+          onchange="toggleCategoryAccessory('${cat.id}','${escapeJsAttr(a.name)}', this.checked)">
+        <span class="flex-1">${escapeHtml(a.name)}</span>
         ${isChecked?'<i class="fas fa-check text-[11px]"></i>':''}
       </label>`;
     }).join('')}
@@ -4890,7 +4913,7 @@ window.toggleCategoryAccessory = async (id, accName, checked)=>{
   if(checked) current.add(accName); else current.delete(accName);
   try{
     await updateDoc(doc(db,"finance_categories",id),{accessoryNames:[...current]});
-    toast(`${accName} ${checked?'added to':'removed from'} ${cat.name}.`);
+    toast(`${accName} ${checked?'added to':'removed from'} ${escapeHtml(cat.name)}.`);
     // Live-refresh the fitment grid on the model form in case this category
     // is the one currently selected there, so it doesn't go stale.
     if(document.getElementById('mCategory')?.value === cat.name) renderModelFitmentToggles();
@@ -5012,7 +5035,7 @@ function renderFinTable(){
   });
   tbody.innerHTML = sorted.map(f=>`
     <tr class="border-b border-slate-100">
-      <td class="px-4 py-3" data-th="Category"><span class="badge badge-blue">${f.category||'—'}</span></td>
+      <td class="px-4 py-3" data-th="Category"><span class="badge badge-blue">${escapeHtml(f.category||'—')}</span></td>
       <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Down Payment">${f.downPay}%</td>
       <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Interest Rate">${f.rate}%</td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500 whitespace-nowrap" data-th="Tenure">${(f.tenures||[]).join(', ')} mo</td>
@@ -5126,7 +5149,7 @@ function renderAccTable(){
   });
   tbody.innerHTML = sorted.map(a=>`
     <tr class="border-b border-slate-100">
-      <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Accessory">${a.name}</td>
+      <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Accessory">${escapeHtml(a.name)}</td>
       <td class="px-4 py-3 font-mono text-sm text-slate-700" data-th="Default Price">Rs. ${Number(a.price).toLocaleString('en-IN')}</td>
       <td class="px-4 py-3" data-th="Actions">
         <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'accessories','${a.id}')" aria-label="Row actions">
@@ -5356,8 +5379,8 @@ function renderTrashTable(){
     return `<tr class="border-b border-slate-100">
       <td class="px-4 py-3 text-xs text-slate-500 whitespace-nowrap" data-th="Deleted">${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}, ${at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</td>
       <td class="px-4 py-3" data-th="From"><span class="badge badge-blue">${TRASH_LABELS[t.originalCollection]||t.originalCollection}</span></td>
-      <td class="px-4 py-3 font-bold text-slate-800 text-sm" data-th="Model / Item">${d.model || d.name || '—'}</td>
-      <td class="px-4 py-3 text-xs text-slate-500 font-mono" data-th="Chassis / Info">${d.chassis || d.regNo || '—'}${d.customerName?`<div class="text-slate-400">${d.customerName}</div>`:''}</td>
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm" data-th="Model / Item">${escapeHtml(d.model || d.name || '—')}</td>
+      <td class="px-4 py-3 text-xs text-slate-500 font-mono" data-th="Chassis / Info">${escapeHtml(d.chassis || d.regNo || '—')}${d.customerName?`<div class="text-slate-400">${escapeHtml(d.customerName)}</div>`:''}</td>
       <td class="px-4 py-3" data-th="Expires">${left<=1 ? `<span class="badge badge-red">${left===0?'Today':'1 day'}</span>` : `<span class="text-xs text-slate-500">${left} days</span>`}</td>
       <td class="px-4 py-3" data-th="Actions">
         <div class="flex items-center gap-2 justify-end sm:justify-start">
@@ -5375,7 +5398,7 @@ window.restoreFromTrash = async (trashId)=>{
   const label = TRASH_LABELS[t.originalCollection] || t.originalCollection;
   const ok = await showConfirm({
     title: 'Restore this item?',
-    message: `<b>${t.data?.model || t.data?.name || 'This item'}</b> will go back to <b>${label}</b>.`,
+    message: `<b>${escapeHtml(t.data?.model || t.data?.name || 'This item')}</b> will go back to <b>${label}</b>.`,
     okText: 'Restore', okColorClass: 'text-emerald-600 hover:bg-emerald-50',
     iconClass: 'fa-clock-rotate-left', iconColor: '#059669', iconBg: '#ECFDF5'
   });
@@ -5392,7 +5415,7 @@ window.permanentlyDeleteTrashItem = async (trashId)=>{
   const t = trashData.find(x=>x.id===trashId);
   const ok = await showDangerousConfirm({
     title: 'Delete forever?',
-    message: `<b>${t?.data?.model || t?.data?.name || 'This item'}</b> will be permanently erased — this cannot be undone, even from here.`,
+    message: `<b>${escapeHtml(t?.data?.model || t?.data?.name || 'This item')}</b> will be permanently erased — this cannot be undone, even from here.`,
     okText: 'Delete Forever', countdownSec: 3
   });
   if(!ok) return;
@@ -5473,8 +5496,8 @@ function renderActivityLog(){
       <td class="px-4 py-3" data-th="Action"><span class="badge ${style.cls}"><i class="fas ${style.icon}"></i> ${a.action}</span></td>
       <td class="px-4 py-3 text-xs text-slate-500" data-th="Where">${TRASH_LABELS[a.collection]||a.collection}</td>
       <td class="px-4 py-3 text-sm text-slate-700" data-th="Unit / Details">
-        <span class="font-semibold">${a.model||'—'}</span>${a.chassis?` <span class="text-xs text-slate-400 font-mono">(${a.chassis})</span>`:''}
-        ${a.customerName?`<div class="text-[11px] text-slate-500">${a.customerName}</div>`:''}
+        <span class="font-semibold">${escapeHtml(a.model||'—')}</span>${a.chassis?` <span class="text-xs text-slate-400 font-mono">(${escapeHtml(a.chassis)})</span>`:''}
+        ${a.customerName?`<div class="text-[11px] text-slate-500">${escapeHtml(a.customerName)}</div>`:''}
       </td>
       <td class="px-4 py-3 text-xs text-slate-500" data-th="By">${a.by||'Unknown'}</td>
     </tr>`;
@@ -5745,7 +5768,7 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
     (results.failed.length ? ` &nbsp;·&nbsp; <span class="text-red-500"><i class="fas fa-circle-xmark"></i> ${results.failed.length} failed</span>` : '');
   body.innerHTML = results.failed.map(f=>`
     <div class="px-4 py-2 flex items-center justify-between gap-3">
-      <span class="text-slate-600 truncate">${f.row.model || '(no model)'} — ${f.row.chassis || '(no chassis)'}</span>
+      <span class="text-slate-600 truncate">${escapeHtml(f.row.model || '(no model)')} — ${escapeHtml(f.row.chassis || '(no chassis)')}</span>
       <span class="text-red-500 font-medium whitespace-nowrap">${f.reason}</span>
     </div>`).join('') || `<div class="px-4 py-3 text-slate-400">All rows imported successfully.</div>`;
   summary.classList.remove('hidden');
@@ -5912,7 +5935,7 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
     (results.failed.length ? ` &nbsp;·&nbsp; <span class="text-red-500"><i class="fas fa-circle-xmark"></i> ${results.failed.length} failed</span>` : '');
   body.innerHTML = results.failed.map(f=>`
     <div class="px-4 py-2 flex items-center justify-between gap-3">
-      <span class="text-slate-600 truncate">${f.row.model || '(no model)'} — ${f.row.chassis || '(no chassis)'}</span>
+      <span class="text-slate-600 truncate">${escapeHtml(f.row.model || '(no model)')} — ${escapeHtml(f.row.chassis || '(no chassis)')}</span>
       <span class="text-red-500 font-medium whitespace-nowrap">${f.reason}</span>
     </div>`).join('') || `<div class="px-4 py-3 text-slate-400">All rows imported successfully.</div>`;
   summary.classList.remove('hidden');
@@ -6076,7 +6099,7 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
     (results.failed.length ? ` &nbsp;·&nbsp; <span class="text-red-500"><i class="fas fa-circle-xmark"></i> ${results.failed.length} failed</span>` : '');
   body.innerHTML = results.failed.map(f=>`
     <div class="px-4 py-2 flex items-center justify-between gap-3">
-      <span class="text-slate-600 truncate">${f.row.model || '(no model)'} — Price ${f.row.price || '(none)'}</span>
+      <span class="text-slate-600 truncate">${escapeHtml(f.row.model || '(no model)')} — Price ${f.row.price || '(none)'}</span>
       <span class="text-red-500 font-medium whitespace-nowrap">${f.reason}</span>
     </div>`).join('') || `<div class="px-4 py-3 text-slate-400">All rows imported successfully.</div>`;
   summary.classList.remove('hidden');
