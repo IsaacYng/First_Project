@@ -3160,7 +3160,7 @@ function renderMasterTable() {
       </td>
       <td class="px-4 py-3" data-th="Image">
         ${b.img
-          ? `<img src="${b.img}" onerror="this.style.display='none'" alt="" class="w-11 h-8 object-cover rounded-lg border border-slate-200">`
+          ? `<img src="${escapeHtml(b.img)}" onerror="this.style.display='none'" alt="" class="w-11 h-8 object-cover rounded-lg border border-slate-200">`
           : `<div class="w-11 h-8 rounded-lg bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs"><i class="fas fa-image"></i></div>`}
       </td>
       <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">${escapeHtml(b.name)}</td>
