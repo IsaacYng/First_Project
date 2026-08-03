@@ -623,17 +623,20 @@
   .fin-cat-chip button{ width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#94A3B8; font-size:10px; background:#fff; border:none; cursor:pointer; transition:all .15s; }
   .fin-cat-chip button:hover{ background:#FEE2E2; color:#EF4444; }
   .cat-row{
-    display:flex; align-items:center; gap:8px; background:#F8FAFC; border:1px solid #E2E8F0;
-    border-radius:12px; padding:8px 10px; margin-bottom:8px; flex-wrap:wrap;
+    display:flex; flex-direction:column; gap:8px; background:#F8FAFC; border:1px solid #E2E8F0;
+    border-radius:12px; padding:10px 12px; margin-bottom:8px;
   }
-  .cat-row-name{ font-weight:800; font-size:13px; color:#1F2430; min-width:70px; }
+  .cat-row-top{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .cat-row-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .cat-row-name{ font-weight:800; font-size:14px; color:#1F2430; }
   .cat-row-name-input{
     font-weight:800; font-size:13px; color:#1F2430; border:2px solid #005EA6; border-radius:8px;
-    padding:4px 8px; min-width:110px; outline:none;
+    padding:6px 10px; flex:1; min-width:110px; outline:none;
   }
   .cat-row-btn{
-    display:inline-flex; align-items:center; gap:5px; padding:5px 9px; border-radius:8px;
-    font-size:11px; font-weight:700; cursor:pointer; transition:all .15s; border:1px solid transparent;
+    display:inline-flex; align-items:center; gap:5px; padding:6px 10px; border-radius:8px;
+    font-size:11.5px; font-weight:700; cursor:pointer; transition:all .15s; border:1px solid transparent;
+    white-space:nowrap;
   }
   .cat-row-btn.acc{ color:#005EA6; background:#EAF3FB; }
   .cat-row-btn.acc:hover{ background:#D4E9F7; }
@@ -643,12 +646,22 @@
   .cat-row-btn.save:hover{ background:#D1FAE5; }
   .cat-row-btn.del{ color:#EF4444; background:#fff; border:1px solid #FECACA; margin-left:auto; }
   .cat-row-btn.del:hover{ background:#FEF2F2; }
+  /* Accessories popover is positioned via JS (position:fixed, clamped to the
+     viewport) — see toggleCategoryAccMenu — instead of plain CSS absolute,
+     since absolute-inside-a-narrow-card was overflowing off the right edge
+     of the screen on mobile and getting clipped. */
   .cat-acc-menu{
-    position:absolute; z-index:45; margin-top:6px; min-width:200px; max-height:260px; overflow-y:auto;
-    background:#fff; border:1px solid #E2E8F0; border-radius:12px; box-shadow:0 10px 30px rgba(15,23,42,.14); padding:8px;
+    position:fixed; z-index:70; width:230px; max-width:calc(100vw - 24px); max-height:280px; overflow-y:auto;
+    background:#fff; border:1px solid #E2E8F0; border-radius:12px; box-shadow:0 12px 34px rgba(15,23,42,.18); padding:8px;
   }
-  .cat-acc-option{ display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:8px; font-size:12.5px; font-weight:600; color:#475569; cursor:pointer; }
+  .cat-acc-option{
+    display:flex; align-items:center; gap:9px; padding:8px 9px; border-radius:8px; font-size:13px;
+    font-weight:600; color:#475569; cursor:pointer; transition:background .12s ease, color .12s ease;
+  }
   .cat-acc-option:hover{ background:#F1F5F9; }
+  /* Selected state gets its own background highlight + bold text, not just
+     a small checkbox tick — much easier to tell at a glance what's on. */
+  .cat-acc-option.checked{ background:#EAF3FB; color:#005EA6; font-weight:800; }
   .inv-status-tab{ color:#7C8494; display:inline-flex; align-items:center; gap:5px; }
   .pill-count{
     display:inline-flex; align-items:center; justify-content:center; min-width:17px; height:17px;
@@ -4749,6 +4762,10 @@ let categoryAccMenuOpenId = null; // which category's accessory popover (if any)
 function renderFinCategoryChips(){
   const wrap = document.getElementById('finCategoryChips');
   if(!wrap) return;
+  // The popover lives on <body> (so it can be positioned/clamped anywhere on
+  // screen) — always clear any existing one before rebuilding, or repeated
+  // re-renders (e.g. right after toggling a checkbox) would stack up copies.
+  document.querySelectorAll('.cat-acc-menu').forEach(m=>m.remove());
   if(!financeCategories.length){
     wrap.innerHTML = `<span class="text-xs text-slate-400">No categories yet — add one below.</span>`;
     return;
@@ -4762,17 +4779,54 @@ function renderFinCategoryChips(){
     const editBtn = isRenaming
       ? `<button class="cat-row-btn save" onclick="saveCategoryRename('${c.id}')"><i class="fas fa-check text-[10px]"></i> Save</button>
          <button class="cat-row-btn edit" onclick="cancelCategoryRename()"><i class="fas fa-xmark text-[10px]"></i></button>`
-      : `<button class="cat-row-btn edit" onclick="startCategoryRename('${c.id}')"><i class="fas fa-pen text-[10px]"></i> Rename</button>`;
+      : '';
     return `<div class="cat-row" data-cat-id="${c.id}">
-      ${nameBlock}
-      ${editBtn}
-      <div class="relative">
-        <button class="cat-row-btn acc" onclick="toggleCategoryAccMenu('${c.id}')"><i class="fas fa-helmet-safety text-[10px]"></i> Accessories ${accCount ? `(${accCount})` : ''}</button>
-        ${categoryAccMenuOpenId===c.id ? renderCategoryAccMenu(c) : ''}
+      <div class="cat-row-top">
+        ${nameBlock}
+        ${editBtn}
       </div>
-      <button class="cat-row-btn del" onclick="removeFinanceCategory('${c.id}','${(c.name||'').replace(/'/g,"\\'")}')"><i class="fas fa-trash-can text-[10px]"></i> Delete</button>
+      <div class="cat-row-actions">
+        ${isRenaming ? '' : `<button class="cat-row-btn edit" onclick="startCategoryRename('${c.id}')"><i class="fas fa-pen text-[10px]"></i> Rename</button>`}
+        <button class="cat-row-btn acc" id="accBtn_${c.id}" onclick="toggleCategoryAccMenu('${c.id}')"><i class="fas fa-helmet-safety text-[10px]"></i> Accessories ${accCount ? `(${accCount})` : ''}</button>
+        <button class="cat-row-btn del" onclick="removeFinanceCategory('${c.id}','${(c.name||'').replace(/'/g,"\\'")}')"><i class="fas fa-trash-can text-[10px]"></i> Delete</button>
+      </div>
     </div>`;
   }).join('');
+  // The popover is appended after render, then positioned relative to its
+  // trigger button — done here (not inside the string above) so it can use
+  // real getBoundingClientRect() coordinates.
+  if(categoryAccMenuOpenId){
+    const cat = financeCategories.find(c=>c.id===categoryAccMenuOpenId);
+    const btn = document.getElementById('accBtn_'+categoryAccMenuOpenId);
+    if(cat && btn){
+      const menuEl = document.createElement('div');
+      menuEl.innerHTML = renderCategoryAccMenu(cat);
+      const menu = menuEl.firstElementChild;
+      document.body.appendChild(menu);
+      positionAccMenu(menu, btn);
+    } else {
+      categoryAccMenuOpenId = null;
+    }
+  }
+}
+
+// Clamps the popover fully inside the viewport regardless of how close to
+// the screen edge its trigger button sits — this is what stops it from
+// hanging off-screen and getting clipped, which is what was happening with
+// plain CSS `position:absolute` inside a narrow card.
+function positionAccMenu(menu, btn){
+  const btnRect = btn.getBoundingClientRect();
+  const menuW = menu.offsetWidth || 230;
+  const menuH = menu.offsetHeight || 200;
+  let left = btnRect.left;
+  let top = btnRect.bottom + 6;
+  const margin = 12;
+  if(left + menuW > window.innerWidth - margin) left = window.innerWidth - menuW - margin;
+  if(left < margin) left = margin;
+  if(top + menuH > window.innerHeight - margin) top = btnRect.top - menuH - 6; // flip above if no room below
+  if(top < margin) top = margin;
+  menu.style.left = left+'px';
+  menu.style.top = top+'px';
 }
 
 function renderCategoryAccMenu(cat){
@@ -4783,16 +4837,21 @@ function renderCategoryAccMenu(cat){
     </div>`;
   }
   return `<div class="cat-acc-menu">
-    ${accessories.map(a=>`
-      <label class="cat-acc-option">
-        <input type="checkbox" class="w-3.5 h-3.5 rounded border-slate-300 accent-bajaj-blue" ${selected.has(a.name)?'checked':''}
+    ${accessories.map(a=>{
+      const isChecked = selected.has(a.name);
+      return `
+      <label class="cat-acc-option ${isChecked?'checked':''}">
+        <input type="checkbox" class="w-4 h-4 rounded border-slate-300 accent-bajaj-blue flex-shrink-0" ${isChecked?'checked':''}
           onchange="toggleCategoryAccessory('${cat.id}','${(a.name||'').replace(/'/g,"\\'")}', this.checked)">
-        ${a.name}
-      </label>`).join('')}
+        <span class="flex-1">${a.name}</span>
+        ${isChecked?'<i class="fas fa-check text-[11px]"></i>':''}
+      </label>`;
+    }).join('')}
   </div>`;
 }
 
 window.toggleCategoryAccMenu = (id)=>{
+  document.querySelectorAll('.cat-acc-menu').forEach(m=>m.remove());
   categoryAccMenuOpenId = (categoryAccMenuOpenId===id) ? null : id;
   renderFinCategoryChips();
 };
@@ -4804,11 +4863,21 @@ window.toggleCategoryAccessory = async (id, accName, checked)=>{
   if(checked) current.add(accName); else current.delete(accName);
   try{
     await updateDoc(doc(db,"finance_categories",id),{accessoryNames:[...current]});
+    toast(`${accName} ${checked?'added to':'removed from'} ${cat.name}.`);
     // Live-refresh the fitment grid on the model form in case this category
     // is the one currently selected there, so it doesn't go stale.
     if(document.getElementById('mCategory')?.value === cat.name) renderModelFitmentToggles();
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
+
+// Click-outside closes the accessories popover (it's appended to <body>, so
+// this checks against the trigger button rather than the row itself).
+document.addEventListener('click', (e)=>{
+  if(categoryAccMenuOpenId && !e.target.closest('.cat-acc-menu') && !e.target.closest('[id^="accBtn_"]')){
+    document.querySelectorAll('.cat-acc-menu').forEach(m=>m.remove());
+    categoryAccMenuOpenId = null;
+  }
+});
 
 window.startCategoryRename = (id)=>{
   categoryRenamingId = id;
@@ -4883,14 +4952,6 @@ window.removeFinanceCategory = async (id, name)=>{
     toast('Category removed.');
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
-
-// Click-outside closes any open category-accessories popover.
-document.addEventListener('click', (e)=>{
-  if(categoryAccMenuOpenId && !e.target.closest('.cat-row')){
-    categoryAccMenuOpenId = null;
-    renderFinCategoryChips();
-  }
-});
 
 
 function loadFinanceSchemes(){
