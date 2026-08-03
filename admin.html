@@ -632,6 +632,33 @@
   .inv-status-tab:hover{ color:#1F2430; }
   .inv-status-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
   .hh-status-tab{ color:#7C8494; }
+  .allinv-source-tab{ color:#7C8494; display:inline-flex; align-items:center; gap:5px; }
+  .allinv-source-tab:hover{ color:#1F2430; }
+  .allinv-source-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
+  /* Custom model-filter dropdown — native <select> option lists can't be
+     restyled consistently across browsers (Android shows a plain blue-
+     highlight system list), so this is a fully custom button+menu instead,
+     matching the rest of the app's look and making the active choice obvious. */
+  .model-filter-btn{
+    display:flex; align-items:center; gap:8px; background:#F8FAFC; border:2px solid #E2E8F0;
+    border-radius:10px; padding:8px 10px; font-size:13px; font-weight:600; color:#334155;
+    min-width:140px; max-width:200px; cursor:pointer; transition:all .15s ease;
+  }
+  .model-filter-btn:hover{ border-color:#005EA6; }
+  .model-filter-btn.menu-open{ border-color:#005EA6; box-shadow:0 0 0 3px #EAF3FB; }
+  .model-filter-menu{
+    position:absolute; z-index:45; top:calc(100% + 6px); left:0; min-width:100%; width:230px;
+    max-height:280px; overflow-y:auto; background:#fff; border:1px solid #E2E8F0; border-radius:12px;
+    box-shadow:0 10px 30px rgba(15,23,42,.14); padding:6px;
+  }
+  .model-filter-option{
+    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:8px; font-size:13px;
+    font-weight:600; color:#475569; cursor:pointer; transition:background .12s ease; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis;
+  }
+  .model-filter-option:hover{ background:#F1F5F9; }
+  .model-filter-option.active{ background:#EAF3FB; color:#005EA6; }
+  .model-filter-option .check-slot{ width:14px; flex-shrink:0; text-align:center; font-size:11px; }
   .hh-status-tab:hover{ color:#1F2430; }
   .hh-status-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
   .inv-filter-scroll{
@@ -1299,12 +1326,13 @@
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="HHSales" onclick="setInvStatusFilter('HHSales')">HH Sales <span class="pill-count" id="pcHHSales">0</span></button>
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="HHHide" onclick="setInvStatusFilter('HHHide')">HH Hide <span class="pill-count" id="pcHHHide">0</span></button>
           </div>
-          <div class="relative flex-shrink-0">
-            <i class="fas fa-motorcycle absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-            <select id="invModelFilterSelect" onchange="setInvModelFilter(this.value)" class="appearance-none bg-slate-50 border-2 border-slate-200 rounded-lg pl-8 pr-7 py-2 text-sm text-slate-700 font-semibold max-w-[160px] sm:max-w-[200px] cursor-pointer hover:border-bajaj-blue focus:border-bajaj-blue focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all">
-              <option value="all">All Models</option>
-            </select>
-            <i class="fas fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+          <div class="relative flex-shrink-0" id="invModelFilterWrap">
+            <button type="button" onclick="toggleModelFilterMenu('inv')" class="model-filter-btn">
+              <i class="fas fa-motorcycle text-slate-400 text-xs flex-shrink-0"></i>
+              <span id="invModelFilterLabel" class="truncate">All Models</span>
+              <i class="fas fa-chevron-down text-slate-400 text-[10px] flex-shrink-0 ml-auto"></i>
+            </button>
+            <div id="invModelFilterMenu" class="model-filter-menu hidden"></div>
           </div>
           <div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -1468,12 +1496,13 @@
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Booked" onclick="setHHInvStatusFilter('Booked')">Booked <span class="pill-count" id="pcHHBooked">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setHHInvStatusFilter('Sold')">Sold <span class="pill-count" id="pcHHSold">0</span></button>
           </div>
-          <div class="relative flex-shrink-0">
-            <i class="fas fa-motorcycle absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-            <select id="hhInvModelFilterSelect" onchange="setHHInvModelFilter(this.value)" class="appearance-none bg-slate-50 border-2 border-slate-200 rounded-lg pl-8 pr-7 py-2 text-sm text-slate-700 font-semibold max-w-[160px] sm:max-w-[200px] cursor-pointer hover:border-bajaj-blue focus:border-bajaj-blue focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all">
-              <option value="all">All Models</option>
-            </select>
-            <i class="fas fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+          <div class="relative flex-shrink-0" id="hhInvModelFilterWrap">
+            <button type="button" onclick="toggleModelFilterMenu('hh')" class="model-filter-btn">
+              <i class="fas fa-motorcycle text-slate-400 text-xs flex-shrink-0"></i>
+              <span id="hhInvModelFilterLabel" class="truncate">All Models</span>
+              <i class="fas fa-chevron-down text-slate-400 text-[10px] flex-shrink-0 ml-auto"></i>
+            </button>
+            <div id="hhInvModelFilterMenu" class="model-filter-menu hidden"></div>
           </div>
           <div class="relative ml-auto w-full sm:w-64">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -1535,12 +1564,13 @@
             <button class="allinv-source-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-source="inventory" onclick="setAllInvSourceFilter('inventory')">Inventory</button>
             <button class="allinv-source-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-source="hh_inventory" onclick="setAllInvSourceFilter('hh_inventory')">HH Inventory</button>
           </div>
-          <div class="relative flex-shrink-0">
-            <i class="fas fa-motorcycle absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-            <select id="allInvModelFilterSelect" onchange="setAllInvModelFilter(this.value)" class="appearance-none bg-slate-50 border-2 border-slate-200 rounded-lg pl-8 pr-7 py-2 text-sm text-slate-700 font-semibold max-w-[160px] sm:max-w-[200px] cursor-pointer hover:border-bajaj-blue focus:border-bajaj-blue focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all">
-              <option value="all">All Models</option>
-            </select>
-            <i class="fas fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+          <div class="relative flex-shrink-0" id="allInvModelFilterWrap">
+            <button type="button" onclick="toggleModelFilterMenu('allinv')" class="model-filter-btn">
+              <i class="fas fa-motorcycle text-slate-400 text-xs flex-shrink-0"></i>
+              <span id="allInvModelFilterLabel" class="truncate">All Models</span>
+              <i class="fas fa-chevron-down text-slate-400 text-[10px] flex-shrink-0 ml-auto"></i>
+            </button>
+            <div id="allInvModelFilterMenu" class="model-filter-menu hidden"></div>
           </div>
           <div class="relative ml-auto w-full sm:w-72">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -2027,7 +2057,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/fireba
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import {
   getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc,
-  serverTimestamp, query, orderBy, limit, runTransaction, writeBatch
+  serverTimestamp, query, orderBy, limit, runTransaction, writeBatch, getCountFromServer
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 /* ─── Who's doing it — used by the Trash / Activity Log so every delete,
@@ -2619,7 +2649,7 @@ function renderAllInventoryTable(){
     );
   }
   document.getElementById('allInvCount').textContent = combined.length+' unit'+(combined.length!==1?'s':'');
-  populateModelFilterDropdown('allInvModelFilterSelect', [...invData, ...hhInvData], allInvModelFilter);
+  populateModelFilterDropdown('allinv', [...invData, ...hhInvData], allInvModelFilter);
   updateStorageUsageChip();
   const dupChip = document.getElementById('allInvDupChip');
   const resolveBtn = document.getElementById('resolveDupBtnAll');
@@ -3151,13 +3181,40 @@ function clearMasterForm(){
 // collections from growing unbounded and running into storage/performance
 // trouble. Only blocks ADDING a brand-new unit; editing an existing one
 // never changes the total count, so it's never blocked by this.
+//
+// IMPORTANT: invData is loaded PAGINATED (200 at a time, "Load More" button),
+// so invData.length alone can badly undercount the real total once Inventory
+// grows past one page — that would let the cap silently stop working right
+// when it matters most. This asks Firestore directly for the true document
+// counts instead of trusting whatever happens to be loaded locally.
 const MAX_TOTAL_INVENTORY_UNITS = 2000;
-function totalInventoryUnitCount(){ return invData.length + hhInvData.length; }
+let cachedTotalUnitCount = null;
+let cachedTotalUnitCountAt = 0;
+const TOTAL_COUNT_CACHE_MS = 15000; // avoid hitting Firestore on every render/keystroke
 
-function updateStorageUsageChip(){
+async function getAccurateTotalInventoryCount(forceRefresh){
+  const now = Date.now();
+  if(!forceRefresh && cachedTotalUnitCount!==null && (now-cachedTotalUnitCountAt) < TOTAL_COUNT_CACHE_MS){
+    return cachedTotalUnitCount;
+  }
+  try{
+    const [invSnap, hhSnap] = await Promise.all([
+      getCountFromServer(collection(db,'inventory')),
+      getCountFromServer(collection(db,'hh_inventory'))
+    ]);
+    cachedTotalUnitCount = invSnap.data().count + hhSnap.data().count;
+  }catch(e){
+    console.error('Accurate count fetch failed — falling back to loaded-data estimate (may undercount if Inventory is paginated)', e);
+    cachedTotalUnitCount = invData.length + hhInvData.length;
+  }
+  cachedTotalUnitCountAt = now;
+  return cachedTotalUnitCount;
+}
+
+async function updateStorageUsageChip(){
   const chip = document.getElementById('storageUsageChip');
   if(!chip) return;
-  const used = totalInventoryUnitCount();
+  const used = await getAccurateTotalInventoryCount();
   const pct = used / MAX_TOTAL_INVENTORY_UNITS;
   let cls, icon;
   if(pct >= 1){ cls = 'bg-red-50 border-red-200 text-red-600'; icon = 'fa-triangle-exclamation'; }
@@ -3168,7 +3225,7 @@ function updateStorageUsageChip(){
 }
 
 document.getElementById('saveStockBtn').addEventListener('click',async()=>{
-  if(!currentEditInvId && totalInventoryUnitCount() >= MAX_TOTAL_INVENTORY_UNITS){
+  if(!currentEditInvId && (await getAccurateTotalInventoryCount(true)) >= MAX_TOTAL_INVENTORY_UNITS){
     toast(`Storage full — Inventory + HH Inventory combined has reached the ${MAX_TOTAL_INVENTORY_UNITS} unit limit. Delete or clear out some units (Trash included) before adding more.`,'err');
     return;
   }
@@ -3435,15 +3492,78 @@ window.setInvModelFilter = (model)=>{
   renderInvTable(getFilteredInv());
 };
 
-// Rebuilds a model-filter <select>'s options from whatever models are
-// actually present in the data right now, without resetting the person's
-// current selection out from under them.
-function populateModelFilterDropdown(selectId, dataArr, currentValue){
-  const sel = document.getElementById(selectId);
-  if(!sel) return;
+// Custom model-filter dropdown — replaces the native <select> so the option
+// list can be fully styled (and the active choice made obvious), since
+// mobile browsers render native <select> option lists with their own
+// uncustomizable system UI.
+const MODEL_FILTER_CONFIG = {
+  inv:    { menuId:'invModelFilterMenu',    wrapId:'invModelFilterWrap',    labelId:'invModelFilterLabel',    getFilter:()=>invModelFilter,    setFilter:(m)=>window.setInvModelFilter(m) },
+  hh:     { menuId:'hhInvModelFilterMenu',  wrapId:'hhInvModelFilterWrap',  labelId:'hhInvModelFilterLabel',  getFilter:()=>hhInvModelFilter,  setFilter:(m)=>window.setHHInvModelFilter(m) },
+  allinv: { menuId:'allInvModelFilterMenu', wrapId:'allInvModelFilterWrap', labelId:'allInvModelFilterLabel', getFilter:()=>allInvModelFilter, setFilter:(m)=>window.setAllInvModelFilter(m) }
+};
+
+window.toggleModelFilterMenu = (type)=>{
+  const cfg = MODEL_FILTER_CONFIG[type];
+  if(!cfg) return;
+  const menu = document.getElementById(cfg.menuId);
+  const wasOpen = menu && !menu.classList.contains('hidden');
+  // Only one of these menus (and only one at a time vs. other dropdowns)
+  // should ever be open — close everything first, then reopen if it wasn't
+  // already the one that was open.
+  Object.values(MODEL_FILTER_CONFIG).forEach(c=>{
+    document.getElementById(c.menuId)?.classList.add('hidden');
+    document.getElementById(c.wrapId)?.querySelector('.model-filter-btn')?.classList.remove('menu-open');
+  });
+  if(!wasOpen && menu){
+    menu.classList.remove('hidden');
+    document.getElementById(cfg.wrapId)?.querySelector('.model-filter-btn')?.classList.add('menu-open');
+  }
+};
+
+window.selectModelFilterOption = (type, model)=>{
+  const cfg = MODEL_FILTER_CONFIG[type];
+  if(!cfg) return;
+  cfg.setFilter(model);
+  document.getElementById(cfg.menuId)?.classList.add('hidden');
+  document.getElementById(cfg.wrapId)?.querySelector('.model-filter-btn')?.classList.remove('menu-open');
+};
+
+// Click-outside closes any open model-filter menu.
+document.addEventListener('click', (e)=>{
+  Object.values(MODEL_FILTER_CONFIG).forEach(c=>{
+    const wrap = document.getElementById(c.wrapId);
+    if(wrap && !wrap.contains(e.target)){
+      document.getElementById(c.menuId)?.classList.add('hidden');
+      wrap.querySelector('.model-filter-btn')?.classList.remove('menu-open');
+    }
+  });
+});
+
+// Rebuilds a model-filter menu's option list from whatever models are
+// actually present in the data right now. If the currently-selected model
+// no longer exists in the data (its last unit got deleted, say), this falls
+// back to "All Models" for real — updating the underlying filter, not just
+// the label — so the button and the actual filtered list never disagree.
+function populateModelFilterDropdown(type, dataArr, currentValue){
+  const cfg = MODEL_FILTER_CONFIG[type];
+  if(!cfg) return;
+  const menu = document.getElementById(cfg.menuId);
+  const label = document.getElementById(cfg.labelId);
+  if(!menu || !label) return;
   const models = [...new Set(dataArr.map(s=>s.model).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  sel.innerHTML = `<option value="all">All Models</option>` + models.map(m=>`<option value="${m.replace(/"/g,'&quot;')}">${m}</option>`).join('');
-  sel.value = models.includes(currentValue) ? currentValue : 'all';
+  const effectiveValue = models.includes(currentValue) ? currentValue : 'all';
+  if(effectiveValue !== currentValue){ cfg.setFilter('all'); return; } // setFilter triggers a re-render, which calls this again with the corrected value
+
+  const options = [{value:'all', text:'All Models'}, ...models.map(m=>({value:m, text:m}))];
+  menu.innerHTML = options.map(o=>{
+    const isActive = o.value===effectiveValue;
+    const esc = o.value.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    return `<div class="model-filter-option ${isActive?'active':''}" onclick="selectModelFilterOption('${type}','${esc}')">
+      <span class="check-slot">${isActive?'<i class=\"fas fa-check\"></i>':''}</span>
+      <span class="truncate">${o.text}</span>
+    </div>`;
+  }).join('');
+  label.textContent = effectiveValue==='all' ? 'All Models' : effectiveValue;
 }
 
 function getFilteredInv(){
@@ -3473,7 +3593,7 @@ function getFilteredInv(){
 function renderInvTable(list){
   const tbody=document.getElementById('stockTableBody');
   document.getElementById('invCount').textContent=list.length+' unit'+(list.length!==1?'s':'')+(invSearchTerm?' found':'');
-  populateModelFilterDropdown('invModelFilterSelect', invData, invModelFilter);
+  populateModelFilterDropdown('inv', invData, invModelFilter);
   if(!list.length){
     tbody.innerHTML=`<tr><td colspan="9"><div class="py-12 text-center text-slate-400"><i class="fas fa-warehouse text-3xl opacity-25 block mb-2"></i><p class="text-sm">${invSearchTerm?'No units match your search.':'No inventory yet. Add a unit using the form above.'}</p></div></td></tr>`;
     updateDeleteSelectedBtn();
@@ -3706,7 +3826,7 @@ function renderHHInvTable(){
   const tbody = document.getElementById('hhInvTableBody');
   const list = getFilteredHHInv();
   document.getElementById('hhInvCount').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'');
-  populateModelFilterDropdown('hhInvModelFilterSelect', hhInvData, hhInvModelFilter);
+  populateModelFilterDropdown('hh', hhInvData, hhInvModelFilter);
   const dupIds = computeHHDuplicateIdSet();
   const dupChip = document.getElementById('hhInvDupChip');
   const resolveBtn = document.getElementById('resolveDupBtnHH');
@@ -3833,7 +3953,7 @@ window.deleteSelectedHHInvUnits = async ()=>{
 };
 
 document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
-  if(!currentEditHHInvId && totalInventoryUnitCount() >= MAX_TOTAL_INVENTORY_UNITS){
+  if(!currentEditHHInvId && (await getAccurateTotalInventoryCount(true)) >= MAX_TOTAL_INVENTORY_UNITS){
     toast(`Storage full — Inventory + HH Inventory combined has reached the ${MAX_TOTAL_INVENTORY_UNITS} unit limit. Delete or clear out some units (Trash included) before adding more.`,'err');
     return;
   }
@@ -5296,7 +5416,7 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
 
   const results = { success:[], failed:[] };
   const seenInBatch = []; // track chassis/engine already added within this same import run
-  let runningTotal = totalInventoryUnitCount(); // tracked locally since invData won't update mid-loop
+  let runningTotal = await getAccurateTotalInventoryCount(true); // real Firestore count, not just what's paginated locally
 
   for(const row of excelParsedRows){
     if(runningTotal >= MAX_TOTAL_INVENTORY_UNITS){
@@ -5466,7 +5586,7 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
   let nextSn = hhInvData.length ? Math.max(...hhInvData.map(x=>Number(x.sn)||0)) + 1 : 1;
   const results = { success:[], failed:[] };
   const seenInBatch = [];
-  let runningTotal = totalInventoryUnitCount();
+  let runningTotal = await getAccurateTotalInventoryCount(true);
 
   for(const row of hhExcelParsedRows){
     if(runningTotal >= MAX_TOTAL_INVENTORY_UNITS){
