@@ -3257,8 +3257,14 @@ function renderModelFitmentToggles(){
   const cat = financeCategories.find(c=>c.name===catName);
   const names = cat?.accessoryNames || [];
   if(!names.length){
-    wrap.classList.add('hidden');
-    grid.innerHTML = '';
+    // Previously this just hid the whole section silently, which read as
+    // "fitments are broken for this category" — it's not broken, nothing's
+    // configured for it yet. Say so, with a direct way to fix it.
+    wrap.classList.remove('hidden');
+    grid.innerHTML = `<div class="col-span-full text-xs text-slate-400 flex items-center gap-2">
+      <i class="fas fa-circle-info"></i> No accessories set up for "${escapeHtml(catName||'this category')}" yet.
+      <button type="button" onclick="openCategoryModal()" class="text-bajaj-blue font-bold hover:underline">Set up in Manage Categories</button>
+    </div>`;
     return;
   }
   wrap.classList.remove('hidden');
