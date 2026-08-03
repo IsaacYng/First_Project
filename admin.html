@@ -260,6 +260,13 @@
   .lfield:focus{border-color:var(--lblue);box-shadow:0 0 0 3px rgba(0,94,166,.1);background:#fff}
   .lfield-wrap{position:relative}
   .lfield-wrap i{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:14px}
+  .lfield-wrap .pass-toggle-btn{
+    position:absolute; right:6px; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center; color:#94A3B8; background:transparent; border:none;
+    cursor:pointer; transition:all .15s ease; font-size:14px;
+  }
+  .lfield-wrap .pass-toggle-btn:hover{ color:#475569; background:#F1F5F9; }
+  .lfield-wrap input[type="password"], .lfield-wrap input[type="text"].lfield{ padding-right:40px; }
   .login-cta{width:100%;padding:14px 20px;background:var(--lblue);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:14px;letter-spacing:.02em;box-shadow:0 6px 20px rgba(0,94,166,.28);transition:background .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
   .login-cta:hover{background:var(--lblueDark);transform:translateY(-1px)}
   .login-cta:disabled{opacity:.6;cursor:not-allowed;transform:none}
@@ -925,6 +932,9 @@
       <div class="lfield-wrap">
         <i class="fas fa-lock"></i>
         <input type="password" id="pass" placeholder="••••••••••" autocomplete="current-password" class="lfield"/>
+        <button type="button" id="togglePassBtn" onclick="togglePasswordVisibility()" class="pass-toggle-btn" aria-label="Show password" tabindex="-1">
+          <i class="fas fa-eye" id="togglePassIcon"></i>
+        </button>
       </div>
     </div>
 
@@ -3078,6 +3088,16 @@ document.addEventListener('keydown', e => {
 });
 document.getElementById('logoutBtn').addEventListener('click', ()=>signOut(auth));
 
+window.togglePasswordVisibility = ()=>{
+  const input = document.getElementById('pass');
+  const icon = document.getElementById('togglePassIcon');
+  const btn = document.getElementById('togglePassBtn');
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  icon.className = isHidden ? 'fas fa-eye-slash' : 'fas fa-eye';
+  btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+};
+
 async function loadProfile(uid) {
   try {
     const snap = await getDoc(doc(db,"profiles",uid));
@@ -3123,18 +3143,25 @@ function renderMasterTable() {
     // fall back to their old boolean fields for those two specific names.
     const legacyFit=b.applyLegguardSeatcover!==false;
     const catAccessoryNames = financeCategories.find(c=>c.name===category)?.accessoryNames || [];
-    const fitLine=(label,fits)=>`<span class="inline-flex items-center gap-1 text-[10px] font-semibold ${fits?'text-emerald-600':'text-red-500'}"><i class="fas ${fits?'fa-check':'fa-xmark'}"></i> ${escapeHtml(label)}</span>`;
-    const fitmentLines = catAccessoryNames.map(name=>{
+    // Only the ones that actually fit get shown, as small green chips — a
+    // row of red X's for every accessory this model *doesn't* have looked
+    // like an error state when it's really just neutral information.
+    const fittedNames = catAccessoryNames.filter(name=>{
       let fits = b.fitments?.[name];
       if(fits===undefined){
         if(name==='Leg Guard') fits = b.applyLegguard!==undefined?b.applyLegguard:legacyFit;
         else if(name==='Seat Cover') fits = b.applySeatcover!==undefined?b.applySeatcover:legacyFit;
         else fits = false;
       }
-      return fitLine(name, fits);
-    }).join('');
+      return fits;
+    });
+    const fitmentBlock = catAccessoryNames.length
+      ? (fittedNames.length
+          ? `<div class="flex flex-wrap gap-1 mt-1">${fittedNames.map(name=>`<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-semibold"><i class="fas fa-check text-[8px]"></i> ${escapeHtml(name)}</span>`).join('')}</div>`
+          : `<div class="text-[10px] text-slate-400 mt-1">No accessories fitted</div>`)
+      : '';
     const catBadge=`<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">${escapeHtml(category)}</span>`
-      + (fitmentLines ? `<div class="flex flex-col gap-0.5 mt-1">${fitmentLines}</div>` : '');
+      + fitmentBlock;
     return `
     <tr class="border-b border-slate-100" data-label="${escapeHtml(b.name)}">
       <td class="px-4 py-3" data-th="S.N">
