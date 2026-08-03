@@ -1272,6 +1272,9 @@
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="HHSales" onclick="setInvStatusFilter('HHSales')">HH Sales <span class="pill-count" id="pcHHSales">0</span></button>
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="HHHide" onclick="setInvStatusFilter('HHHide')">HH Hide <span class="pill-count" id="pcHHHide">0</span></button>
           </div>
+          <select id="invModelFilterSelect" onchange="setInvModelFilter(this.value)" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-semibold max-w-[160px] sm:max-w-[200px]">
+            <option value="all">All Models</option>
+          </select>
           <div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="invSearch" autocomplete="off" placeholder="Search chassis, engine, model, reg no, customer…"
@@ -1434,6 +1437,9 @@
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Booked" onclick="setHHInvStatusFilter('Booked')">Booked <span class="pill-count" id="pcHHBooked">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setHHInvStatusFilter('Sold')">Sold <span class="pill-count" id="pcHHSold">0</span></button>
           </div>
+          <select id="hhInvModelFilterSelect" onchange="setHHInvModelFilter(this.value)" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-semibold max-w-[160px] sm:max-w-[200px]">
+            <option value="all">All Models</option>
+          </select>
           <div class="relative ml-auto w-full sm:w-64">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="hhInvSearch" autocomplete="off" placeholder="Search chassis, model, event, customer…"
@@ -1483,6 +1489,7 @@
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
           <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-layer-group text-amber-500"></i> Combined Register</div>
           <span id="allInvCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+          <span id="storageUsageChip" class="items-center gap-1 border rounded-md px-2 py-0.5 text-xs font-mono flex"></span>
           <button onclick="exportAllInventoryToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
             <i class="fas fa-file-excel text-[11px]"></i> Export
           </button>
@@ -1493,6 +1500,9 @@
             <button class="allinv-source-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-source="inventory" onclick="setAllInvSourceFilter('inventory')">Inventory</button>
             <button class="allinv-source-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-source="hh_inventory" onclick="setAllInvSourceFilter('hh_inventory')">HH Inventory</button>
           </div>
+          <select id="allInvModelFilterSelect" onchange="setAllInvModelFilter(this.value)" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 font-semibold max-w-[160px] sm:max-w-[200px]">
+            <option value="all">All Models</option>
+          </select>
           <div class="relative ml-auto w-full sm:w-72">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="allInvSearch" autocomplete="off" placeholder="Search chassis, engine, model, customer…"
@@ -2528,11 +2538,17 @@ function computeHHDuplicateIdSet(){
    in one place without switching pages.
    ═══════════════════════════════════════════════════════════════════════ */
 let allInvSourceFilter = 'all';
+let allInvModelFilter = 'all';
 let allInvSearchTerm = '';
 
 window.setAllInvSourceFilter = (src)=>{
   allInvSourceFilter = src;
   document.querySelectorAll('.allinv-source-tab').forEach(t=>t.classList.toggle('active', t.dataset.source===src));
+  renderAllInventoryTable();
+};
+
+window.setAllInvModelFilter = (model)=>{
+  allInvModelFilter = model;
   renderAllInventoryTable();
 };
 
@@ -2551,6 +2567,7 @@ function renderAllInventoryTable(){
     ...hhInvData.map(s=>({ ...s, __source:'hh_inventory', __isDup: hhDupIds.has(s.id) }))
   ];
   if(allInvSourceFilter !== 'all') combined = combined.filter(s=>s.__source===allInvSourceFilter);
+  if(allInvModelFilter !== 'all') combined = combined.filter(s=>s.model===allInvModelFilter);
   const q = allInvSearchTerm.toLowerCase().trim();
   if(q){
     combined = combined.filter(s=>
@@ -2563,6 +2580,8 @@ function renderAllInventoryTable(){
     );
   }
   document.getElementById('allInvCount').textContent = combined.length+' unit'+(combined.length!==1?'s':'');
+  populateModelFilterDropdown('allInvModelFilterSelect', [...invData, ...hhInvData], allInvModelFilter);
+  updateStorageUsageChip();
   const dupChip = document.getElementById('allInvDupChip');
   const resolveBtn = document.getElementById('resolveDupBtnAll');
   const totalDups = combined.filter(s=>s.__isDup).length;
@@ -3060,7 +3079,31 @@ function clearMasterForm(){
 }
 
 /* ─── Inventory ─── */
+// Combined cap across Inventory + HH Inventory — keeps the two Firestore
+// collections from growing unbounded and running into storage/performance
+// trouble. Only blocks ADDING a brand-new unit; editing an existing one
+// never changes the total count, so it's never blocked by this.
+const MAX_TOTAL_INVENTORY_UNITS = 2000;
+function totalInventoryUnitCount(){ return invData.length + hhInvData.length; }
+
+function updateStorageUsageChip(){
+  const chip = document.getElementById('storageUsageChip');
+  if(!chip) return;
+  const used = totalInventoryUnitCount();
+  const pct = used / MAX_TOTAL_INVENTORY_UNITS;
+  let cls, icon;
+  if(pct >= 1){ cls = 'bg-red-50 border-red-200 text-red-600'; icon = 'fa-triangle-exclamation'; }
+  else if(pct >= 0.9){ cls = 'bg-amber-50 border-amber-200 text-amber-600'; icon = 'fa-triangle-exclamation'; }
+  else { cls = 'bg-slate-100 border-slate-200 text-slate-500'; icon = 'fa-database'; }
+  chip.className = `items-center gap-1 border rounded-md px-2 py-0.5 text-xs font-mono flex ${cls}`;
+  chip.innerHTML = `<i class="fas ${icon} text-[10px]"></i> ${used} / ${MAX_TOTAL_INVENTORY_UNITS} storage used`;
+}
+
 document.getElementById('saveStockBtn').addEventListener('click',async()=>{
+  if(!currentEditInvId && totalInventoryUnitCount() >= MAX_TOTAL_INVENTORY_UNITS){
+    toast(`Storage full — Inventory + HH Inventory combined has reached the ${MAX_TOTAL_INVENTORY_UNITS} unit limit. Delete or clear out some units (Trash included) before adding more.`,'err');
+    return;
+  }
   const modelTyped=document.getElementById('stockModelSelect').value.trim();
   const bikeInfo=findMasterBikeByName(modelTyped);
   if(!modelTyped||!bikeInfo){toast('Model not found in the master price list — check spelling or add it there first.','err');return;}
@@ -3306,6 +3349,7 @@ function renderInvLoadMore(){
 }
 
 let invStatusFilter = 'all';
+let invModelFilter = 'all';
 function setInvStatusFilter(status){
   invStatusFilter = status;
   document.querySelectorAll('.inv-status-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===status));
@@ -3316,6 +3360,23 @@ function setInvStatusFilter(status){
   renderInvTable(getFilteredInv());
 }
 window.setInvStatusFilter = setInvStatusFilter;
+
+window.setInvModelFilter = (model)=>{
+  invModelFilter = model;
+  if(selectedInvIds.size){ selectedInvIds.clear(); }
+  renderInvTable(getFilteredInv());
+};
+
+// Rebuilds a model-filter <select>'s options from whatever models are
+// actually present in the data right now, without resetting the person's
+// current selection out from under them.
+function populateModelFilterDropdown(selectId, dataArr, currentValue){
+  const sel = document.getElementById(selectId);
+  if(!sel) return;
+  const models = [...new Set(dataArr.map(s=>s.model).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  sel.innerHTML = `<option value="all">All Models</option>` + models.map(m=>`<option value="${m.replace(/"/g,'&quot;')}">${m}</option>`).join('');
+  sel.value = models.includes(currentValue) ? currentValue : 'all';
+}
 
 function getFilteredInv(){
   let base = invData;
@@ -3328,6 +3389,7 @@ function getFilteredInv(){
   } else if(invStatusFilter !== 'all'){
     base = base.filter(s => (s.status||'Available') === invStatusFilter);
   }
+  if(invModelFilter !== 'all') base = base.filter(s => s.model === invModelFilter);
   if(!invSearchTerm) return base;
   const q = invSearchTerm.toLowerCase().trim();
   return base.filter(s=>{
@@ -3343,6 +3405,7 @@ function getFilteredInv(){
 function renderInvTable(list){
   const tbody=document.getElementById('stockTableBody');
   document.getElementById('invCount').textContent=list.length+' unit'+(list.length!==1?'s':'')+(invSearchTerm?' found':'');
+  populateModelFilterDropdown('invModelFilterSelect', invData, invModelFilter);
   if(!list.length){
     tbody.innerHTML=`<tr><td colspan="9"><div class="py-12 text-center text-slate-400"><i class="fas fa-warehouse text-3xl opacity-25 block mb-2"></i><p class="text-sm">${invSearchTerm?'No units match your search.':'No inventory yet. Add a unit using the form above.'}</p></div></td></tr>`;
     updateDeleteSelectedBtn();
@@ -3502,7 +3565,14 @@ let hhInvData = [];
 let hhInvUnsub = null;
 let currentEditHHInvId = null;
 let hhInvStatusFilter = 'all';
+let hhInvModelFilter = 'all';
 let hhInvSearchTerm = '';
+
+window.setHHInvModelFilter = (model)=>{
+  hhInvModelFilter = model;
+  if(selectedHHInvIds.size){ selectedHHInvIds.clear(); }
+  renderHHInvTable();
+};
 
 function populateHHModelDropdown(){ /* model is free-text here, validated on save — nothing to populate */ }
 
@@ -3554,6 +3624,7 @@ function hhSearchMatches(s, q){
 function getFilteredHHInv(){
   let base = hhInvData;
   if(hhInvStatusFilter !== 'all') base = base.filter(s=>(s.status||'Available')===hhInvStatusFilter);
+  if(hhInvModelFilter !== 'all') base = base.filter(s=>s.model===hhInvModelFilter);
   if(!hhInvSearchTerm) return base;
   const q = hhInvSearchTerm.toLowerCase().trim();
   return base.filter(s=>hhSearchMatches(s,q));
@@ -3567,6 +3638,7 @@ function renderHHInvTable(){
   const tbody = document.getElementById('hhInvTableBody');
   const list = getFilteredHHInv();
   document.getElementById('hhInvCount').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'');
+  populateModelFilterDropdown('hhInvModelFilterSelect', hhInvData, hhInvModelFilter);
   const dupIds = computeHHDuplicateIdSet();
   const dupChip = document.getElementById('hhInvDupChip');
   const resolveBtn = document.getElementById('resolveDupBtnHH');
@@ -3693,6 +3765,10 @@ window.deleteSelectedHHInvUnits = async ()=>{
 };
 
 document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
+  if(!currentEditHHInvId && totalInventoryUnitCount() >= MAX_TOTAL_INVENTORY_UNITS){
+    toast(`Storage full — Inventory + HH Inventory combined has reached the ${MAX_TOTAL_INVENTORY_UNITS} unit limit. Delete or clear out some units (Trash included) before adding more.`,'err');
+    return;
+  }
   const modelTyped = document.getElementById('hhModelInput').value.trim();
   const bikeInfo = findMasterBikeByName(modelTyped);
   if(!modelTyped || !bikeInfo){ toast('Model not found in the master price list — check spelling or add it there first.','err'); return; }
@@ -5152,8 +5228,13 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
 
   const results = { success:[], failed:[] };
   const seenInBatch = []; // track chassis/engine already added within this same import run
+  let runningTotal = totalInventoryUnitCount(); // tracked locally since invData won't update mid-loop
 
   for(const row of excelParsedRows){
+    if(runningTotal >= MAX_TOTAL_INVENTORY_UNITS){
+      results.failed.push({row, reason:`Storage full — ${MAX_TOTAL_INVENTORY_UNITS} unit combined limit reached`});
+      continue;
+    }
     if(!row.model || !row.chassis || !row.engine || !row.color){
       results.failed.push({row, reason:'Missing required field (Model/Chassis/Engine/Color)'});
       continue;
@@ -5195,6 +5276,7 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
       seenInBatch.push(row);
       results.success.push(row);
       nextSn++;
+      runningTotal++;
     }catch(e){
       results.failed.push({row, reason:e.message});
     }
@@ -5316,8 +5398,13 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
   let nextSn = hhInvData.length ? Math.max(...hhInvData.map(x=>Number(x.sn)||0)) + 1 : 1;
   const results = { success:[], failed:[] };
   const seenInBatch = [];
+  let runningTotal = totalInventoryUnitCount();
 
   for(const row of hhExcelParsedRows){
+    if(runningTotal >= MAX_TOTAL_INVENTORY_UNITS){
+      results.failed.push({row, reason:`Storage full — ${MAX_TOTAL_INVENTORY_UNITS} unit combined limit reached`});
+      continue;
+    }
     if(!row.model || !row.chassis || !row.engine || !row.color){
       results.failed.push({row, reason:'Missing required field (Model/Chassis/Engine/Color)'});
       continue;
@@ -5357,6 +5444,7 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
       seenInBatch.push(row);
       results.success.push(row);
       nextSn++;
+      runningTotal++;
     }catch(e){
       results.failed.push({row, reason:e.message});
     }
