@@ -1483,6 +1483,9 @@
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
           <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-layer-group text-amber-500"></i> Combined Register</div>
           <span id="allInvCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+          <button onclick="exportAllInventoryToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+            <i class="fas fa-file-excel text-[11px]"></i> Export
+          </button>
           <span id="allInvDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-0.5 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
           <button id="resolveDupBtnAll" onclick="openDuplicateResolver()" class="hidden items-center gap-1.5 px-2.5 py-1 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all"><i class="fas fa-code-compare text-[10px]"></i> Resolve Duplicates</button>
           <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
@@ -2393,7 +2396,17 @@ function scrollFormIntoView(){
 }
 
 function normId(v){ return (v||'').toString().trim().toUpperCase().replace(/\s+/g,''); }
-function normModelName(v){ return (v||'').toString().trim().toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim(); }
+function normModelName(v){
+  return (v||'').toString().trim().toLowerCase()
+    .replace(/[^a-z0-9]+/g,' ')       // punctuation/symbols -> space
+    // Inventory names and Master Price List names often differ only in
+    // spacing/formatting — "Pulsar150" vs "Pulsar 150", "150CC" vs "150 CC".
+    // Without splitting these boundaries, two entries for the exact same
+    // model+CC fail to match just because one was typed without a space.
+    .replace(/([a-z])(\d)/g,'$1 $2')  // letter→digit boundary: pulsar150 -> pulsar 150
+    .replace(/(\d)([a-z])/g,'$1 $2')  // digit→letter boundary: 150cc -> 150 cc
+    .replace(/\s+/g,' ').trim();
+}
 function findMasterBikeByName(name){
   const target = normModelName(name);
   if(!target) return null;
@@ -2408,7 +2421,10 @@ function findMasterBikeByName(name){
   let bestMatch = null, bestScore = 0;
   allMasterBikes.forEach(b=>{
     const bWords = normModelName(b.name).split(' ');
-    if(bWords[0] !== targetWords[0]) return; // core model name/number must still match
+    // Anchor check relaxed to "appears somewhere", not strictly position 0 —
+    // handles a brand prefix on one side ("Bajaj Pulsar 150" vs "Pulsar 150")
+    // or the base name/number simply written in a different order.
+    if(!bWords.includes(targetWords[0]) && !targetWords.includes(bWords[0])) return;
     const bSet = new Set(bWords);
     const overlap = targetWords.filter(w=>bSet.has(w)).length;
     const coverageOfTarget = overlap / targetWords.length; // how much of what was typed is recognized
@@ -2593,27 +2609,37 @@ function renderAllInventoryTable(){
    ═══════════════════════════════════════════════════════════════════════ */
 function computeAllDuplicateGroups(){
   const all = [
-    ...invData.map(s=>({...s, __source:'inventory'})),
-    ...hhInvData.map(s=>({...s, __source:'hh_inventory'}))
+    ...invData.map(s=>({...s, __source:'inventory', __uid:'inventory:'+s.id})),
+    ...hhInvData.map(s=>({...s, __source:'hh_inventory', __uid:'hh_inventory:'+s.id}))
   ];
-  const byKey = {};
+  // Union-find so a chain of matches (A shares chassis with B, B shares
+  // engine with C) merges into ONE group of {A,B,C} — the previous version
+  // built separate overlapping groups per matching key, which could list
+  // the same unit's checkbox more than once and made it easy to tick more
+  // (or fewer) units than intended without realizing it.
+  const parent = {};
+  const find = (x)=>{ while(parent[x] && parent[x]!==x) x = parent[x]; return x; };
+  const union = (a,b)=>{ const ra=find(a), rb=find(b); if(ra!==rb) parent[ra]=rb; };
+  all.forEach(s=>{ parent[s.__uid] = s.__uid; });
+
+  const byChassis = {}, byEngine = {};
   all.forEach(s=>{
     const c = normId(s.chassis), e = normId(s.engine);
-    if(c) (byKey['c:'+c] = byKey['c:'+c]||[]).push(s);
-    if(e) (byKey['e:'+e] = byKey['e:'+e]||[]).push(s);
+    if(c) (byChassis[c] = byChassis[c]||[]).push(s.__uid);
+    if(e) (byEngine[e] = byEngine[e]||[]).push(s.__uid);
   });
-  const groups = [];
-  const coveredKeys = new Set();
-  Object.entries(byKey).forEach(([key, members])=>{
-    if(members.length<2 || coveredKeys.has(key)) return;
-    const ids = new Set(members.map(m=>m.__source+':'+m.id));
-    // Skip if an already-built group covers exactly the same set of units —
-    // avoids listing the same pair twice when both chassis and engine match.
-    const dup = groups.some(g=> g.idSet.size===ids.size && [...ids].every(id=>g.idSet.has(id)));
-    if(dup) return;
-    groups.push({ idSet: ids, members });
+  [byChassis, byEngine].forEach(byKey=>{
+    Object.values(byKey).forEach(uids=>{
+      for(let i=1;i<uids.length;i++) union(uids[0], uids[i]);
+    });
   });
-  return groups.map(g=>g.members);
+
+  const groupsByRoot = {};
+  all.forEach(s=>{
+    const root = find(s.__uid);
+    (groupsByRoot[root] = groupsByRoot[root]||[]).push(s);
+  });
+  return Object.values(groupsByRoot).filter(g=>g.length>1);
 }
 
 window.openDuplicateResolver = ()=>{
@@ -2654,9 +2680,17 @@ window.confirmDeleteDuplicates = async ()=>{
   if(!checked.length){ toast('Tick at least one unit to delete.','warn'); return; }
   const invIds = checked.filter(c=>c.dataset.source==='inventory').map(c=>c.dataset.id);
   const hhIds = checked.filter(c=>c.dataset.source==='hh_inventory').map(c=>c.dataset.id);
+  // Spell out exactly which units — not just a count — so it's obvious
+  // before confirming if more (or fewer) got ticked than intended.
+  const listLines = checked.map(c=>{
+    const src = c.dataset.source;
+    const unit = (src==='inventory' ? invData : hhInvData).find(x=>x.id===c.dataset.id);
+    const label = src==='inventory' ? 'Inventory' : 'HH Inventory';
+    return unit ? `S.N ${unit.sn||'—'} — ${unit.model||'—'} (${label})` : `Unknown unit (${label})`;
+  });
   const proceed = await showDangerousConfirm({
     title: `Delete ${checked.length} duplicate unit(s)?`,
-    message: `${invIds.length} from Inventory and ${hhIds.length} from HH Inventory will be moved to Trash (recoverable for 7 days). Whatever you didn't tick stays untouched.`,
+    message: `<div style="max-height:180px;overflow-y:auto;margin:6px 0;padding:8px 10px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;font-size:12.5px;line-height:1.6;">${listLines.join('<br>')}</div>${invIds.length} from Inventory and ${hhIds.length} from HH Inventory will be moved to Trash (recoverable for 7 days). Whatever you didn't tick stays untouched.`,
     okText: 'Delete Selected', countdownSec: 4
   });
   if(!proceed) return;
@@ -4974,6 +5008,44 @@ window.exportHHInventoryToExcel = ()=>{
   toast(`Exported ${rows.length} HH unit(s).`);
 };
 
+window.exportAllInventoryToExcel = ()=>{
+  const invDupIds = computeDuplicateIdSet();
+  const hhDupIds = computeHHDuplicateIdSet();
+  let combined = [
+    ...invData.map(s=>({ ...s, __source:'Inventory', __isDup: invDupIds.has(s.id) })),
+    ...hhInvData.map(s=>({ ...s, __source:'HH Inventory', __isDup: hhDupIds.has(s.id) }))
+  ];
+  if(allInvSourceFilter !== 'all') combined = combined.filter(s=>s.__source===(allInvSourceFilter==='inventory'?'Inventory':'HH Inventory'));
+  const q = allInvSearchTerm.toLowerCase().trim();
+  if(q){
+    combined = combined.filter(s=>
+      (s.model||'').toLowerCase().includes(q) || (s.chassis||'').toLowerCase().includes(q) ||
+      (s.engine||'').toLowerCase().includes(q) || (s.regNo||'').toLowerCase().includes(q) ||
+      (s.color||'').toLowerCase().includes(q) || (s.customerName||'').toLowerCase().includes(q)
+    );
+  }
+  if(!combined.length){ toast('Nothing to export in the current view.','warn'); return; }
+  const sorted = combined.sort((a,b)=> (a.__source===b.__source ? (Number(a.sn)||9999)-(Number(b.sn)||9999) : (a.__source==='Inventory'?-1:1)));
+  const rows = sorted.map(s=>({
+    'Source': s.__source,
+    'S.N': s.sn||'',
+    'Model': s.model||'',
+    'Chassis No': s.chassis||'',
+    'Engine No': s.engine||'',
+    'Reg. No': s.regNo||'',
+    'Colour': s.color||'',
+    'Status': s.__source==='Inventory' ? (s.hhFlag==='Hide' ? 'Sold (HH Hide)' : (s.status||'Available')) : (s.status||'Available'),
+    'Customer': s.customerName||'',
+    'Duplicate': s.__isDup ? 'Yes' : ''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:12},{wch:6},{wch:26},{wch:20},{wch:16},{wch:18},{wch:16},{wch:18},{wch:22},{wch:10}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'All Inventory');
+  XLSX.writeFile(wb, `all_inventory_export_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast(`Exported ${rows.length} unit(s).`);
+};
+
 /* ─── Excel Bulk Import ─── */
 let excelParsedRows = [];
 
@@ -5082,9 +5154,13 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
     row.model = masterBike ? masterBike.name : modelCheck.value;
     row.chassis = chassisCheck.value; row.engine = engineCheck.value; row.color = colorCheck.value;
     const dupExisting = findDuplicateUnit(row.chassis, row.engine);
+    const dupHH = findHHCrossDuplicate(row.chassis, row.engine);
     const dupBatch = seenInBatch.find(r=>normId(r.chassis)===normId(row.chassis) || normId(r.engine)===normId(row.engine));
-    if(dupExisting || dupBatch){
-      results.failed.push({row, reason:'Duplicate — chassis/engine already exists'+(dupExisting?` (S.N ${dupExisting.sn||'—'})`:' (within this file)')});
+    if(dupExisting || dupHH || dupBatch){
+      const reason = dupExisting ? `Duplicate — chassis/engine already exists (S.N ${dupExisting.sn||'—'})`
+        : dupHH ? `Duplicate — chassis/engine already exists in HH Inventory (S.N ${dupHH.sn||'—'})`
+        : 'Duplicate — chassis/engine already exists (within this file)';
+      results.failed.push({row, reason});
       continue;
     }
     try{
@@ -5239,9 +5315,13 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
     row.model = masterBike ? masterBike.name : modelCheck.value;
     row.chassis = chassisCheck.value; row.engine = engineCheck.value; row.color = colorCheck.value;
     const dupExisting = hhInvData.find(x=>normId(x.chassis)===normId(row.chassis) || normId(x.engine)===normId(row.engine));
+    const dupInv = findInvCrossDuplicate(row.chassis, row.engine);
     const dupBatch = seenInBatch.find(r=>normId(r.chassis)===normId(row.chassis) || normId(r.engine)===normId(row.engine));
-    if(dupExisting || dupBatch){
-      results.failed.push({row, reason:'Duplicate — chassis/engine already exists'+(dupExisting?` (S.N ${dupExisting.sn||'—'})`:' (within this file)')});
+    if(dupExisting || dupInv || dupBatch){
+      const reason = dupExisting ? `Duplicate — chassis/engine already exists (S.N ${dupExisting.sn||'—'})`
+        : dupInv ? `Duplicate — chassis/engine already exists in main Inventory (S.N ${dupInv.sn||'—'})`
+        : 'Duplicate — chassis/engine already exists (within this file)';
+      results.failed.push({row, reason});
       continue;
     }
     try{
