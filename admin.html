@@ -622,6 +622,33 @@
   .fin-cat-chip{ display:inline-flex; align-items:center; gap:7px; background:#F1F2F5; border:1px solid #E7E9EE; border-radius:999px; padding:5px 6px 5px 12px; font-size:12px; font-weight:700; color:#334155; }
   .fin-cat-chip button{ width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#94A3B8; font-size:10px; background:#fff; border:none; cursor:pointer; transition:all .15s; }
   .fin-cat-chip button:hover{ background:#FEE2E2; color:#EF4444; }
+  .cat-row{
+    display:flex; align-items:center; gap:8px; background:#F8FAFC; border:1px solid #E2E8F0;
+    border-radius:12px; padding:8px 10px; margin-bottom:8px; flex-wrap:wrap;
+  }
+  .cat-row-name{ font-weight:800; font-size:13px; color:#1F2430; min-width:70px; }
+  .cat-row-name-input{
+    font-weight:800; font-size:13px; color:#1F2430; border:2px solid #005EA6; border-radius:8px;
+    padding:4px 8px; min-width:110px; outline:none;
+  }
+  .cat-row-btn{
+    display:inline-flex; align-items:center; gap:5px; padding:5px 9px; border-radius:8px;
+    font-size:11px; font-weight:700; cursor:pointer; transition:all .15s; border:1px solid transparent;
+  }
+  .cat-row-btn.acc{ color:#005EA6; background:#EAF3FB; }
+  .cat-row-btn.acc:hover{ background:#D4E9F7; }
+  .cat-row-btn.edit{ color:#7C8494; background:#fff; border-color:#E2E8F0; }
+  .cat-row-btn.edit:hover{ color:#1F2430; border-color:#CBD5E1; }
+  .cat-row-btn.save{ color:#059669; background:#ECFDF5; }
+  .cat-row-btn.save:hover{ background:#D1FAE5; }
+  .cat-row-btn.del{ color:#EF4444; background:#fff; border:1px solid #FECACA; margin-left:auto; }
+  .cat-row-btn.del:hover{ background:#FEF2F2; }
+  .cat-acc-menu{
+    position:absolute; z-index:45; margin-top:6px; min-width:200px; max-height:260px; overflow-y:auto;
+    background:#fff; border:1px solid #E2E8F0; border-radius:12px; box-shadow:0 10px 30px rgba(15,23,42,.14); padding:8px;
+  }
+  .cat-acc-option{ display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:8px; font-size:12.5px; font-weight:600; color:#475569; cursor:pointer; }
+  .cat-acc-option:hover{ background:#F1F5F9; }
   .inv-status-tab{ color:#7C8494; display:inline-flex; align-items:center; gap:5px; }
   .pill-count{
     display:inline-flex; align-items:center; justify-content:center; min-width:17px; height:17px;
@@ -1042,7 +1069,7 @@
             <i class="fas fa-layer-group text-amber-500 text-lg"></i> Model Categories
           </div>
         </div>
-        <p class="text-[11px] text-slate-400 mb-3">Manage categories like Bike, Scooter from here — you can add or remove new categories (e.g. 3 Wheeler). This list also shows up in the category dropdown on the HFL Finance page.</p>
+        <p class="text-[11px] text-slate-400 mb-3">Manage categories like Bike, Scooter from here — add, rename, or delete, and choose which accessories (Helmet, Leg Guard, Seat Cover, etc.) apply to each. This list also shows up in the category dropdown on the HFL Finance page.</p>
         <div id="finCategoryChips" class="flex flex-wrap gap-2 mb-4"></div>
         <div class="flex items-center gap-2 flex-wrap">
           <input type="text" id="newFinCatName" placeholder="e.g. 3 Wheeler" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 w-36"/>
@@ -1110,27 +1137,8 @@
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div id="mLegguardWrap" class="flex flex-col gap-1.5 col-span-2 sm:col-span-3 lg:col-span-4 hidden">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Scooter Fitment</label>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <label class="fit-toggle-card">
-                <input type="checkbox" id="mFitLegguard" class="peer sr-only">
-                <div class="fit-toggle-icon"><i class="fas fa-shield"></i></div>
-                <div class="flex-1 min-w-0">
-                  <div class="text-sm font-bold text-slate-700">Leg Guard</div>
-                  <div class="text-[11px] text-slate-400">Adds cost to finance sheet</div>
-                </div>
-                <div class="fit-toggle-switch"></div>
-              </label>
-              <label class="fit-toggle-card">
-                <input type="checkbox" id="mFitSeatcover" class="peer sr-only">
-                <div class="fit-toggle-icon"><i class="fas fa-chair"></i></div>
-                <div class="flex-1 min-w-0">
-                  <div class="text-sm font-bold text-slate-700">Seat Cover</div>
-                  <div class="text-[11px] text-slate-400">Adds cost to finance sheet</div>
-                </div>
-                <div class="fit-toggle-switch"></div>
-              </label>
-            </div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Accessory Fitment (this category)</label>
+            <div id="mFitmentGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
           </div>
         </div>
         <div class="flex gap-2 flex-wrap">
@@ -2133,6 +2141,9 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentEditId = null;
+// Which accessories (from the model's category) are toggled ON for the bike
+// currently being added/edited — keyed by accessory name, e.g. {'Seat Cover':true}.
+let currentEditBikeFitments = {};
 let currentEditInvId = null;
 let currentEditFinId = null;
 let currentEditAccId = null;
@@ -3088,11 +3099,17 @@ window._editMaster=(id)=>{
   document.getElementById('mFirstPartyIns').value=b.firstPartyInsurance||0;
   document.getElementById('mThirdPartyIns').value=b.thirdPartyInsurance||0;
   document.getElementById('mImg').value=b.img||'';
-  // Falls back to the old combined applyLegguardSeatcover field for bikes saved before Leg Guard/Seat Cover were split.
-  const legacyFit=b.applyLegguardSeatcover!==false;
-  document.getElementById('mFitLegguard').checked=b.applyLegguard!==undefined?b.applyLegguard:legacyFit;
-  document.getElementById('mFitSeatcover').checked=b.applySeatcover!==undefined?b.applySeatcover:legacyFit;
-  updateLegguardVisibility();
+  // Fitments come from the new per-model map; bikes saved before this
+  // existed fall back to their old applyLegguard/applySeatcover booleans
+  // (or the even older combined applyLegguardSeatcover flag) for those two
+  // specific accessory names, so nothing that was already set gets lost.
+  const legacyFit = b.applyLegguardSeatcover!==false;
+  currentEditBikeFitments = { ...(b.fitments||{}) };
+  if(currentEditBikeFitments['Leg Guard']===undefined && b.applyLegguard!==undefined) currentEditBikeFitments['Leg Guard'] = b.applyLegguard;
+  else if(currentEditBikeFitments['Leg Guard']===undefined) currentEditBikeFitments['Leg Guard'] = legacyFit;
+  if(currentEditBikeFitments['Seat Cover']===undefined && b.applySeatcover!==undefined) currentEditBikeFitments['Seat Cover'] = b.applySeatcover;
+  else if(currentEditBikeFitments['Seat Cover']===undefined) currentEditBikeFitments['Seat Cover'] = legacyFit;
+  renderModelFitmentToggles();
   currentEditId=id;
   const btn=document.getElementById('saveModelBtn');
   btn.innerHTML='<i class="fas fa-rotate"></i> Update Model Info';
@@ -3113,20 +3130,41 @@ window.cancelMasterEdit=()=>{
   closeMasterFormModal();
 };
 
-function updateLegguardVisibility(){
-  const isScooter=document.getElementById('mCategory').value==='Scooter';
-  document.getElementById('mLegguardWrap').classList.toggle('hidden',!isScooter);
+// Renders one on/off toggle per accessory that's been marked as applicable
+// to the currently-selected category (set up via the Accessories popover on
+// the Category Manager above). Nothing configured for this category? The
+// whole section just stays hidden — there's nothing to toggle.
+function renderModelFitmentToggles(){
+  const wrap = document.getElementById('mLegguardWrap');
+  const grid = document.getElementById('mFitmentGrid');
+  if(!wrap || !grid) return;
+  const catName = document.getElementById('mCategory').value;
+  const cat = financeCategories.find(c=>c.name===catName);
+  const names = cat?.accessoryNames || [];
+  if(!names.length){
+    wrap.classList.add('hidden');
+    grid.innerHTML = '';
+    return;
+  }
+  wrap.classList.remove('hidden');
+  grid.innerHTML = names.map(name=>{
+    const checked = currentEditBikeFitments[name] || false;
+    const escId = 'mFit_'+name.replace(/[^a-zA-Z0-9]/g,'_');
+    const escName = name.replace(/'/g,"\\'");
+    return `<label class="flex items-center gap-2 text-sm text-slate-700 font-medium cursor-pointer">
+      <input type="checkbox" id="${escId}" data-fitment-name="${name.replace(/"/g,'&quot;')}" class="model-fitment-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer"
+        ${checked?'checked':''} onchange="currentEditBikeFitments['${escName}']=this.checked">
+      ${name}
+    </label>`;
+  }).join('');
 }
 document.getElementById('mCategory').addEventListener('change',()=>{
-  // A fresh switch to Scooter defaults both toggles to "doesn't fit" — matches
-  // the common case (electric scooters like Chetak). Admin can tick either on.
-  if(document.getElementById('mCategory').value==='Scooter'){
-    document.getElementById('mFitLegguard').checked=false;
-    document.getElementById('mFitSeatcover').checked=false;
-  }
-  updateLegguardVisibility();
+  // Switching category resets fitment choices — the accessories applicable
+  // to the OLD category may not even apply to the new one.
+  currentEditBikeFitments = {};
+  renderModelFitmentToggles();
 });
-updateLegguardVisibility();
+renderModelFitmentToggles();
 
 // When a new/edited bike is saved at an S.N that's already taken, push every
 // bike from that position onward up by one — like inserting a row in a list —
@@ -3155,9 +3193,17 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
   const [sn, name, price, ins, fin, firstPartyIns, thirdPartyIns] = checks.map(c=>c.value);
   const imgRaw = document.getElementById('mImg').value.trim();
   if(imgRaw && !/^https?:\/\/.+/i.test(imgRaw)){ toast('Image URL must start with http:// or https://','err'); return; }
-  const applyLegguard=category==='Scooter' ? document.getElementById('mFitLegguard').checked : true;
-  const applySeatcover=category==='Scooter' ? document.getElementById('mFitSeatcover').checked : true;
-  const data={sn,name,category,price,Insurance:ins,financeInsurance:fin,firstPartyInsurance:firstPartyIns,thirdPartyInsurance:thirdPartyIns,img:imgRaw,applyLegguard,applySeatcover};
+  // Build the fitments map from whichever toggles are currently rendered
+  // (driven by the category's configured accessory list), then mirror
+  // "Leg Guard"/"Seat Cover" into the old boolean fields too, since
+  // finance.html still reads those two by name.
+  const fitments = {};
+  document.querySelectorAll('.model-fitment-checkbox').forEach(cb=>{
+    fitments[cb.dataset.fitmentName] = cb.checked;
+  });
+  const applyLegguard = fitments['Leg Guard'] !== undefined ? fitments['Leg Guard'] : true;
+  const applySeatcover = fitments['Seat Cover'] !== undefined ? fitments['Seat Cover'] : true;
+  const data={sn,name,category,price,Insurance:ins,financeInsurance:fin,firstPartyInsurance:firstPartyIns,thirdPartyInsurance:thirdPartyIns,img:imgRaw,fitments,applyLegguard,applySeatcover};
   try {
     // If this S.N is already taken by a different model, bump that model
     // (and everything after it) up by one first, so the new/edited entry
@@ -3174,9 +3220,8 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
 function clearMasterForm(){
   ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mFirstPartyIns','mThirdPartyIns','mImg'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('mCategory').value='Bike';
-  document.getElementById('mFitLegguard').checked=false;
-  document.getElementById('mFitSeatcover').checked=false;
-  updateLegguardVisibility();
+  currentEditBikeFitments = {};
+  renderModelFitmentToggles();
 }
 
 /* ─── Inventory ─── */
@@ -4688,7 +4733,7 @@ function renderFinCategorySelect(){
     if(curM && financeCategories.some(c=>c.name===curM)) mSel.value = curM;
     else if(financeCategories.length) mSel.value = financeCategories[0].name;
     mSel._csSync?.(); // refresh custom-select trigger label if enhanced
-    updateLegguardVisibility();
+    renderModelFitmentToggles();
   }
   const sel = document.getElementById('fCategory');
   if(sel){
@@ -4698,6 +4743,9 @@ function renderFinCategorySelect(){
   }
 }
 
+let categoryRenamingId = null; // which category (if any) is currently in inline-rename mode
+let categoryAccMenuOpenId = null; // which category's accessory popover (if any) is open
+
 function renderFinCategoryChips(){
   const wrap = document.getElementById('finCategoryChips');
   if(!wrap) return;
@@ -4705,12 +4753,100 @@ function renderFinCategoryChips(){
     wrap.innerHTML = `<span class="text-xs text-slate-400">No categories yet — add one below.</span>`;
     return;
   }
-  wrap.innerHTML = financeCategories.map(c=>`
-    <span class="fin-cat-chip">
-      ${c.name}
-      <button onclick="removeFinanceCategory('${c.id}','${(c.name||'').replace(/'/g,"\\'")}')" title="Remove category"><i class="fas fa-xmark"></i></button>
-    </span>`).join('');
+  wrap.innerHTML = financeCategories.map(c=>{
+    const isRenaming = categoryRenamingId===c.id;
+    const accCount = (c.accessoryNames||[]).length;
+    const nameBlock = isRenaming
+      ? `<input type="text" id="catRenameInput_${c.id}" value="${(c.name||'').replace(/"/g,'&quot;')}" class="cat-row-name-input" onkeydown="if(event.key==='Enter')saveCategoryRename('${c.id}'); if(event.key==='Escape')cancelCategoryRename();">`
+      : `<span class="cat-row-name">${c.name}</span>`;
+    const editBtn = isRenaming
+      ? `<button class="cat-row-btn save" onclick="saveCategoryRename('${c.id}')"><i class="fas fa-check text-[10px]"></i> Save</button>
+         <button class="cat-row-btn edit" onclick="cancelCategoryRename()"><i class="fas fa-xmark text-[10px]"></i></button>`
+      : `<button class="cat-row-btn edit" onclick="startCategoryRename('${c.id}')"><i class="fas fa-pen text-[10px]"></i> Rename</button>`;
+    return `<div class="cat-row" data-cat-id="${c.id}">
+      ${nameBlock}
+      ${editBtn}
+      <div class="relative">
+        <button class="cat-row-btn acc" onclick="toggleCategoryAccMenu('${c.id}')"><i class="fas fa-helmet-safety text-[10px]"></i> Accessories ${accCount ? `(${accCount})` : ''}</button>
+        ${categoryAccMenuOpenId===c.id ? renderCategoryAccMenu(c) : ''}
+      </div>
+      <button class="cat-row-btn del" onclick="removeFinanceCategory('${c.id}','${(c.name||'').replace(/'/g,"\\'")}')"><i class="fas fa-trash-can text-[10px]"></i> Delete</button>
+    </div>`;
+  }).join('');
 }
+
+function renderCategoryAccMenu(cat){
+  const selected = new Set(cat.accessoryNames||[]);
+  if(!accessories.length){
+    return `<div class="cat-acc-menu">
+      <div class="text-xs text-slate-400 px-2 py-1">No accessories set up yet — add some on the Accessories page first.</div>
+    </div>`;
+  }
+  return `<div class="cat-acc-menu">
+    ${accessories.map(a=>`
+      <label class="cat-acc-option">
+        <input type="checkbox" class="w-3.5 h-3.5 rounded border-slate-300 accent-bajaj-blue" ${selected.has(a.name)?'checked':''}
+          onchange="toggleCategoryAccessory('${cat.id}','${(a.name||'').replace(/'/g,"\\'")}', this.checked)">
+        ${a.name}
+      </label>`).join('')}
+  </div>`;
+}
+
+window.toggleCategoryAccMenu = (id)=>{
+  categoryAccMenuOpenId = (categoryAccMenuOpenId===id) ? null : id;
+  renderFinCategoryChips();
+};
+
+window.toggleCategoryAccessory = async (id, accName, checked)=>{
+  const cat = financeCategories.find(c=>c.id===id);
+  if(!cat) return;
+  const current = new Set(cat.accessoryNames||[]);
+  if(checked) current.add(accName); else current.delete(accName);
+  try{
+    await updateDoc(doc(db,"finance_categories",id),{accessoryNames:[...current]});
+    // Live-refresh the fitment grid on the model form in case this category
+    // is the one currently selected there, so it doesn't go stale.
+    if(document.getElementById('mCategory')?.value === cat.name) renderModelFitmentToggles();
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
+
+window.startCategoryRename = (id)=>{
+  categoryRenamingId = id;
+  renderFinCategoryChips();
+  setTimeout(()=>document.getElementById('catRenameInput_'+id)?.focus(), 30);
+};
+window.cancelCategoryRename = ()=>{
+  categoryRenamingId = null;
+  renderFinCategoryChips();
+};
+window.saveCategoryRename = async (id)=>{
+  const input = document.getElementById('catRenameInput_'+id);
+  const newName = input?.value.trim();
+  const cat = financeCategories.find(c=>c.id===id);
+  if(!cat) return;
+  if(!newName){ toast('Category name cannot be empty.','err'); return; }
+  if(newName!==cat.name && financeCategories.some(c=>c.id!==id && (c.name||'').toLowerCase()===newName.toLowerCase())){
+    toast('Another category already has that name.','err'); return;
+  }
+  if(newName===cat.name){ categoryRenamingId=null; renderFinCategoryChips(); return; }
+  try{
+    const oldName = cat.name;
+    await updateDoc(doc(db,"finance_categories",id),{name:newName});
+    // Cascade the rename onto anything that stored the old category name as
+    // plain text, so bikes/finance schemes don't silently fall out of sync
+    // with a category that no longer exists under that name.
+    const affectedBikes = allMasterBikes.filter(b=>b.category===oldName);
+    const affectedSchemes = financeSchemes.filter(f=>f.category===oldName);
+    if(affectedBikes.length || affectedSchemes.length){
+      const batch = writeBatch(db);
+      affectedBikes.forEach(b=>batch.update(doc(db,'bikes',b.id),{category:newName}));
+      affectedSchemes.forEach(f=>batch.update(doc(db,'finance_schemes',f.id),{category:newName}));
+      await batch.commit();
+    }
+    categoryRenamingId = null;
+    toast(`Category renamed to "${newName}"`+(affectedBikes.length||affectedSchemes.length ? ` — updated on ${affectedBikes.length} model(s) and ${affectedSchemes.length} scheme(s).` : '.'));
+  }catch(e){ toast('Error: '+e.message,'err'); }
+};
 
 window.addFinanceCategory = async ()=>{
   const nameInput = document.getElementById('newFinCatName');
@@ -4718,21 +4854,28 @@ window.addFinanceCategory = async ()=>{
   if(!name){ toast('Category name required (e.g. 3 Wheeler)','err'); return; }
   if(financeCategories.some(c=>(c.name||'').toLowerCase()===name.toLowerCase())){ toast('This category already exists.','err'); return; }
   try{
-    await addDoc(collection(db,"finance_categories"),{name});
+    await addDoc(collection(db,"finance_categories"),{name, accessoryNames:[]});
     nameInput.value='';
     toast('Category added: '+name);
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
 
 window.removeFinanceCategory = async (id, name)=>{
-  const inUse = financeSchemes.filter(f=>f.category===name).length;
-  const proceed = await showConfirm({
-    title: 'Remove category?',
-    message: inUse
-      ? `<b>${name}</b> is used by ${inUse} finance scheme${inUse!==1?'s':''}. Those schemes will keep their old category label, but it won't be selectable for new ones. Continue?`
+  const inUseSchemes = financeSchemes.filter(f=>f.category===name).length;
+  const inUseBikes = allMasterBikes.filter(b=>b.category===name).length;
+  const usageNote = [
+    inUseBikes ? `${inUseBikes} model${inUseBikes!==1?'s':''}` : '',
+    inUseSchemes ? `${inUseSchemes} finance scheme${inUseSchemes!==1?'s':''}` : ''
+  ].filter(Boolean).join(' and ');
+  // Every delete in this app waits out a short countdown — categories are no
+  // exception, especially since deleting one used elsewhere leaves those
+  // records with an orphaned category label.
+  const proceed = await showDangerousConfirm({
+    title: 'Delete this category?',
+    message: usageNote
+      ? `<b>${name}</b> is currently used by ${usageNote}. Those will keep their old category label, but it won't be selectable for new ones anymore.`
       : `Remove <b>${name}</b> from the category list?`,
-    okText:'Remove', okColorClass:'text-red-600 hover:bg-red-50',
-    iconClass:'fa-trash-can', iconColor:'#EF4444', iconBg:'#FEF2F2'
+    okText:'Delete', countdownSec:3
   });
   if(!proceed) return;
   try{
@@ -4740,6 +4883,15 @@ window.removeFinanceCategory = async (id, name)=>{
     toast('Category removed.');
   }catch(e){ toast('Error: '+e.message,'err'); }
 };
+
+// Click-outside closes any open category-accessories popover.
+document.addEventListener('click', (e)=>{
+  if(categoryAccMenuOpenId && !e.target.closest('.cat-row')){
+    categoryAccMenuOpenId = null;
+    renderFinCategoryChips();
+  }
+});
+
 
 function loadFinanceSchemes(){
   onSnapshot(collection(db,"finance_schemes"), snap => {
