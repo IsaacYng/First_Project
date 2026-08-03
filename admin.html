@@ -1244,6 +1244,7 @@
           <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-warehouse text-amber-500"></i> Stock Register</div>
           <span id="invCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
           <span id="invDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-0.5 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
+          <button id="resolveDupBtnInv" onclick="openDuplicateResolver()" class="hidden items-center gap-1.5 px-2.5 py-1 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all"><i class="fas fa-code-compare text-[10px]"></i> Resolve Duplicates</button>
           <button id="fixSnBtn" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-bajaj-blue text-bajaj-blue text-xs font-bold rounded-lg hover:bg-bajaj-blue hover:text-white transition-all">
             <i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering
           </button>
@@ -1411,6 +1412,7 @@
           <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-tents text-amber-500"></i> HH Stock Register</div>
           <span id="hhInvCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
           <span id="hhInvDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-0.5 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
+          <button id="resolveDupBtnHH" onclick="openDuplicateResolver()" class="hidden items-center gap-1.5 px-2.5 py-1 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all"><i class="fas fa-code-compare text-[10px]"></i> Resolve Duplicates</button>
           <button onclick="exportHHInventoryToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
             <i class="fas fa-file-excel text-[11px]"></i> Export
           </button>
@@ -1482,6 +1484,7 @@
           <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-layer-group text-amber-500"></i> Combined Register</div>
           <span id="allInvCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
           <span id="allInvDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-0.5 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
+          <button id="resolveDupBtnAll" onclick="openDuplicateResolver()" class="hidden items-center gap-1.5 px-2.5 py-1 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all"><i class="fas fa-code-compare text-[10px]"></i> Resolve Duplicates</button>
           <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
             <button class="allinv-source-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-source="all" onclick="setAllInvSourceFilter('all')">All</button>
             <button class="allinv-source-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-source="inventory" onclick="setAllInvSourceFilter('inventory')">Inventory</button>
@@ -1928,6 +1931,27 @@
       <button id="confirmModalCancel" class="flex-1 py-3.5 text-sm font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
       <div class="w-px bg-slate-100"></div>
       <button id="confirmModalOk" class="flex-1 py-3.5 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- DUPLICATE RESOLVER -->
+<div id="duplicateResolveModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col" style="max-height:85vh; animation:slideIn .2s ease;">
+    <div class="p-5 border-b border-slate-100 flex items-start gap-3.5 flex-shrink-0">
+      <div class="w-11 h-11 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-triangle-exclamation text-red-500 text-base"></i>
+      </div>
+      <div class="min-w-0 pt-1">
+        <div class="font-bold text-slate-900 text-[15px] mb-1">Resolve Duplicates</div>
+        <div class="text-slate-500 text-[13px] leading-relaxed">Same chassis/engine found more than once — including across Inventory and HH Inventory. Tick exactly which copy(ies) to delete for each group; nothing is pre-selected.</div>
+      </div>
+    </div>
+    <div id="duplicateResolveBody" class="overflow-y-auto p-4 flex-1"></div>
+    <div class="flex border-t border-slate-100 flex-shrink-0">
+      <button onclick="closeDuplicateResolver()" class="flex-1 py-3.5 text-sm font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
+      <div class="w-px bg-slate-100"></div>
+      <button onclick="confirmDeleteDuplicates()" class="flex-1 py-3.5 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors"><i class="fas fa-trash-can mr-1"></i> Delete Selected</button>
     </div>
   </div>
 </div>
@@ -2507,10 +2531,16 @@ function renderAllInventoryTable(){
   }
   document.getElementById('allInvCount').textContent = combined.length+' unit'+(combined.length!==1?'s':'');
   const dupChip = document.getElementById('allInvDupChip');
+  const resolveBtn = document.getElementById('resolveDupBtnAll');
   const totalDups = combined.filter(s=>s.__isDup).length;
   if(dupChip){
-    if(totalDups>0){ dupChip.classList.remove('hidden'); dupChip.classList.add('flex'); dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${totalDups} duplicate${totalDups!==1?'s':''} found`; }
-    else { dupChip.classList.add('hidden'); dupChip.classList.remove('flex'); }
+    if(totalDups>0){
+      dupChip.classList.remove('hidden'); dupChip.classList.add('flex'); dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${totalDups} duplicate${totalDups!==1?'s':''} found`;
+      if(resolveBtn){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
+    } else {
+      dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
+      if(resolveBtn){ resolveBtn.classList.add('hidden'); resolveBtn.classList.remove('flex'); }
+    }
   }
   if(!combined.length){
     tbody.innerHTML = `<tr><td colspan="8"><div class="py-12 text-center text-slate-400"><i class="fas fa-layer-group text-3xl opacity-25 block mb-2"></i><p class="text-sm">${q?'No units match your search.':'No inventory yet.'}</p></div></td></tr>`;
@@ -2553,6 +2583,100 @@ function renderAllInventoryTable(){
     </tr>`;
   }).join('');
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DUPLICATE RESOLVER — groups every chassis/engine collision (within a
+   collection, or across Inventory <-> HH Inventory) and lets the person
+   explicitly choose which copy(ies) to delete. Nothing is pre-selected,
+   especially across-collection groups — deleting the wrong side there
+   could wipe the one you actually meant to keep.
+   ═══════════════════════════════════════════════════════════════════════ */
+function computeAllDuplicateGroups(){
+  const all = [
+    ...invData.map(s=>({...s, __source:'inventory'})),
+    ...hhInvData.map(s=>({...s, __source:'hh_inventory'}))
+  ];
+  const byKey = {};
+  all.forEach(s=>{
+    const c = normId(s.chassis), e = normId(s.engine);
+    if(c) (byKey['c:'+c] = byKey['c:'+c]||[]).push(s);
+    if(e) (byKey['e:'+e] = byKey['e:'+e]||[]).push(s);
+  });
+  const groups = [];
+  const coveredKeys = new Set();
+  Object.entries(byKey).forEach(([key, members])=>{
+    if(members.length<2 || coveredKeys.has(key)) return;
+    const ids = new Set(members.map(m=>m.__source+':'+m.id));
+    // Skip if an already-built group covers exactly the same set of units —
+    // avoids listing the same pair twice when both chassis and engine match.
+    const dup = groups.some(g=> g.idSet.size===ids.size && [...ids].every(id=>g.idSet.has(id)));
+    if(dup) return;
+    groups.push({ idSet: ids, members });
+  });
+  return groups.map(g=>g.members);
+}
+
+window.openDuplicateResolver = ()=>{
+  const groups = computeAllDuplicateGroups();
+  if(!groups.length){ toast('No duplicates found.'); return; }
+  renderDuplicateResolver(groups);
+  document.getElementById('duplicateResolveModal').classList.remove('hidden');
+  document.getElementById('duplicateResolveModal').classList.add('flex');
+};
+window.closeDuplicateResolver = ()=>{
+  document.getElementById('duplicateResolveModal').classList.add('hidden');
+  document.getElementById('duplicateResolveModal').classList.remove('flex');
+};
+
+function renderDuplicateResolver(groups){
+  const body = document.getElementById('duplicateResolveBody');
+  body.innerHTML = groups.map((members)=>{
+    const crossCollection = new Set(members.map(m=>m.__source)).size > 1;
+    return `<div class="border ${crossCollection?'border-amber-200 bg-amber-50/40':'border-red-200 bg-red-50/40'} rounded-xl p-3 mb-3">
+      <div class="text-xs font-bold ${crossCollection?'text-amber-600':'text-red-600'} mb-2 flex items-center gap-1.5">
+        <i class="fas fa-triangle-exclamation"></i> ${crossCollection?'Cross-collection duplicate':'Duplicate'} — Chassis ${members[0].chassis||'—'}${members[0].engine?` / Engine ${members[0].engine}`:''}
+      </div>
+      ${members.map(m=>{
+        const badge = m.__source==='hh_inventory' ? `<span class="badge badge-amber"><i class="fas fa-tents"></i> HH Inventory</span>` : `<span class="badge badge-blue"><i class="fas fa-warehouse"></i> Inventory</span>`;
+        return `<label class="flex items-center gap-2.5 py-1.5 px-2 rounded-lg hover:bg-white cursor-pointer">
+          <input type="checkbox" class="dup-del-checkbox w-4 h-4 rounded border-slate-300 accent-red-500 flex-shrink-0" data-source="${m.__source}" data-id="${m.id}">
+          ${badge}
+          <span class="text-sm font-semibold text-slate-700 truncate">${m.model||'—'}</span>
+          <span class="text-xs text-slate-400 font-mono ml-auto flex-shrink-0">S.N ${m.sn||'—'}${m.customerName?' · '+m.customerName:''}</span>
+        </label>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+window.confirmDeleteDuplicates = async ()=>{
+  const checked = [...document.querySelectorAll('.dup-del-checkbox:checked')];
+  if(!checked.length){ toast('Tick at least one unit to delete.','warn'); return; }
+  const invIds = checked.filter(c=>c.dataset.source==='inventory').map(c=>c.dataset.id);
+  const hhIds = checked.filter(c=>c.dataset.source==='hh_inventory').map(c=>c.dataset.id);
+  const proceed = await showDangerousConfirm({
+    title: `Delete ${checked.length} duplicate unit(s)?`,
+    message: `${invIds.length} from Inventory and ${hhIds.length} from HH Inventory will be moved to Trash (recoverable for 7 days). Whatever you didn't tick stays untouched.`,
+    okText: 'Delete Selected', countdownSec: 4
+  });
+  if(!proceed) return;
+  try{
+    if(invIds.length){
+      for(const id of invIds){ const t = invData.find(x=>x.id===id); if(t) await moveToTrash('inventory', id, t); }
+      const chunks = []; for(let i=0;i<invIds.length;i+=400) chunks.push(invIds.slice(i,i+400));
+      for(const chunk of chunks){ const batch = writeBatch(db); chunk.forEach(id=>batch.delete(doc(db,'inventory',id))); await batch.commit(); }
+      logActivity('Duplicate Resolved', 'inventory', { model: `${invIds.length} unit(s)`, sn:'' });
+    }
+    if(hhIds.length){
+      for(const id of hhIds){ const t = hhInvData.find(x=>x.id===id); if(t) await moveToTrash('hh_inventory', id, t); }
+      const chunks = []; for(let i=0;i<hhIds.length;i+=400) chunks.push(hhIds.slice(i,i+400));
+      for(const chunk of chunks){ const batch = writeBatch(db); chunk.forEach(id=>batch.delete(doc(db,'hh_inventory',id))); await batch.commit(); }
+      logActivity('Duplicate Resolved', 'hh_inventory', { model: `${hhIds.length} unit(s)`, sn:'' });
+    }
+    toast(`${checked.length} duplicate unit(s) moved to Trash.${invIds.length?' Use "Fix Numbering" on Inventory to re-sequence S.N if needed.':''}`);
+    closeDuplicateResolver();
+  }catch(e){ toast('Delete failed: '+e.message,'err'); }
+};
 
 /* ─── Helpers ─── */
 let toastTimer = null;
@@ -3175,11 +3299,14 @@ function renderInvTable(list){
   }
   const dupIds = computeDuplicateIdSet();
   const dupChip = document.getElementById('invDupChip');
+  const resolveBtn = document.getElementById('resolveDupBtnInv');
   if(dupIds.size>0){
     dupChip.classList.remove('hidden'); dupChip.classList.add('flex');
     dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${dupIds.size} duplicate${dupIds.size!==1?'s':''} found`;
+    if(resolveBtn){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
   } else {
     dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
+    if(resolveBtn){ resolveBtn.classList.add('hidden'); resolveBtn.classList.remove('flex'); }
   }
   const sorted=[...list].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
   const q = invSearchTerm;
@@ -3391,12 +3518,15 @@ function renderHHInvTable(){
   document.getElementById('hhInvCount').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'');
   const dupIds = computeHHDuplicateIdSet();
   const dupChip = document.getElementById('hhInvDupChip');
+  const resolveBtn = document.getElementById('resolveDupBtnHH');
   if(dupChip){
     if(dupIds.size>0){
       dupChip.classList.remove('hidden'); dupChip.classList.add('flex');
       dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${dupIds.size} duplicate${dupIds.size!==1?'s':''} found`;
+      if(resolveBtn){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
     } else {
       dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
+      if(resolveBtn){ resolveBtn.classList.add('hidden'); resolveBtn.classList.remove('flex'); }
     }
   }
   if(!list.length){
@@ -4757,7 +4887,8 @@ const ACTION_STYLE = {
   'Marked Sold': {icon:'fa-tag', cls:'badge-red'},
   'HH Sales': {icon:'fa-bullseye', cls:'badge-blue'},
   'HH Hide (Sold)': {icon:'fa-bullseye', cls:'badge-neutral'},
-  'HH Flag Undone': {icon:'fa-rotate-left', cls:'badge-neutral'}
+  'HH Flag Undone': {icon:'fa-rotate-left', cls:'badge-neutral'},
+  'Duplicate Resolved': {icon:'fa-code-compare', cls:'badge-red'}
 };
 
 function renderActivityLog(){
