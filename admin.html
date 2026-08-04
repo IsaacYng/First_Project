@@ -2110,7 +2110,10 @@
 <div id="profileFormModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);" onclick="if(event.target===this) closeProfileModal()">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col" style="max-height:90vh; animation:slideIn .2s ease;">
     <div class="p-5 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-      <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-user text-amber-500 text-lg"></i> My Profile</div>
+      <div>
+        <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-user text-amber-500 text-lg"></i> My Profile</div>
+        <div id="profileMemberSince" class="text-[10px] text-slate-400 font-semibold mt-0.5 ml-0.5"></div>
+      </div>
       <button onclick="closeProfileModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
     </div>
     <div class="overflow-y-auto p-5">
@@ -2161,9 +2164,11 @@
       </div>
 
       <div class="border-t border-slate-100 pt-5">
-        <div class="flex items-center gap-2 mb-3">
+        <div class="flex items-center justify-between gap-2 mb-3">
           <div class="text-sm font-bold text-slate-700"><i class="fas fa-clock-rotate-left text-slate-400 mr-1"></i> My Recent Activity</div>
+          <button onclick="exportMyActivity()" class="text-[11px] font-bold text-bajaj-blue hover:underline flex-shrink-0"><i class="fas fa-file-excel mr-1"></i>Export</button>
         </div>
+        <div id="myActivityStats" class="grid grid-cols-3 gap-2 mb-3"></div>
         <div id="myActivityList" class="flex flex-col gap-2 max-h-64 overflow-y-auto"></div>
       </div>
     </div>
@@ -3280,8 +3285,10 @@ async function loadProfile(uid) {
     const pmEmail = document.getElementById('profileMenuEmail'); if(pmEmail) pmEmail.textContent = currentUserEmail;
     const pmRole = document.getElementById('profileMenuRoleBadge');
     if(pmRole){
-      pmRole.textContent = currentUserRole==='owner' ? 'Master ID' : 'Normal ID';
-      pmRole.className = 'badge ' + (currentUserRole==='owner' ? 'badge-blue' : 'badge-neutral');
+      // Master ID gets a visible badge; Normal ID gets none at all — no
+      // need to label everyone who *isn't* special.
+      pmRole.textContent = 'Master ID';
+      pmRole.className = currentUserRole==='owner' ? 'badge badge-blue' : 'badge badge-blue hidden';
       pmRole.style.cssText = 'font-size:9px;padding:1px 6px;vertical-align:middle;';
     }
     const teamBtn = document.getElementById('teamMembersMenuBtn');
@@ -3301,6 +3308,9 @@ window.openProfileModal = ()=>{
   document.getElementById('profileNewPass').value = '';
   document.getElementById('profileConfirmPass').value = '';
   pendingProfilePhoto = null; // reset staged photo each time the modal opens fresh
+  const memberSinceEl = document.getElementById('profileMemberSince');
+  const creationTime = auth.currentUser?.metadata?.creationTime;
+  memberSinceEl.textContent = creationTime ? 'Member since ' + new Date(creationTime).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '';
   renderAvatarColorPicker();
   renderMyActivity();
   document.getElementById('profileFormModal').classList.remove('hidden');
@@ -3431,7 +3441,36 @@ window.changeOwnPassword = async ()=>{
 function renderMyActivity(){
   const wrap = document.getElementById('myActivityList');
   if(!wrap) return;
-  const mine = (activityLogData||[]).filter(a=>a.by===currentUserEmail).slice(0,25);
+  const allMine = (activityLogData||[]).filter(a=>a.by===currentUserEmail);
+  const statsWrap = document.getElementById('myActivityStats');
+  if(statsWrap){
+    if(!allMine.length){
+      statsWrap.innerHTML = '';
+    } else {
+      const now = new Date();
+      const thisMonthCount = allMine.filter(a=>{
+        const at = a.at?.toDate ? a.at.toDate() : new Date(a.at);
+        return at.getMonth()===now.getMonth() && at.getFullYear()===now.getFullYear();
+      }).length;
+      const counts = {};
+      allMine.forEach(a=>{ counts[a.action] = (counts[a.action]||0)+1; });
+      const topAction = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+      statsWrap.innerHTML = `
+        <div class="bg-slate-50 rounded-lg p-2.5 text-center">
+          <div class="text-lg font-extrabold text-slate-800">${allMine.length}</div>
+          <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Total Actions</div>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-2.5 text-center">
+          <div class="text-lg font-extrabold text-slate-800">${thisMonthCount}</div>
+          <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">This Month</div>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-2.5 text-center">
+          <div class="text-[13px] font-extrabold text-slate-800 truncate" title="${escapeHtml(topAction?.[0]||'—')}">${escapeHtml(topAction?.[0]||'—')}</div>
+          <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Most Common</div>
+        </div>`;
+    }
+  }
+  const mine = allMine.slice(0,25);
   if(!mine.length){ wrap.innerHTML = `<div class="text-xs text-slate-400 text-center py-4">No activity recorded yet.</div>`; return; }
   wrap.innerHTML = mine.map(a=>{
     const at = a.at?.toDate ? a.at.toDate() : new Date(a.at);
@@ -3443,6 +3482,28 @@ function renderMyActivity(){
     </div>`;
   }).join('');
 }
+
+window.exportMyActivity = ()=>{
+  const mine = (activityLogData||[]).filter(a=>a.by===currentUserEmail);
+  if(!mine.length){ toast('No activity to export yet.','warn'); return; }
+  const rows = mine.map(a=>{
+    const at = a.at?.toDate ? a.at.toDate() : new Date(a.at);
+    return {
+      'Date': at.toLocaleDateString('en-GB'),
+      'Time': at.toLocaleTimeString('en-GB'),
+      'Action': a.action||'',
+      'Where': TRASH_LABELS[a.collection]||a.collection||'',
+      'Details': a.model||'',
+      'Customer': a.customerName||''
+    };
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:12},{wch:10},{wch:18},{wch:14},{wch:26},{wch:22}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'My Activity');
+  XLSX.writeFile(wb, `my_activity_${currentUserName.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast(`Exported ${rows.length} entries.`);
+};
 
 /* ═══════════════════════════════════════════════════════════════════════
    TEAM MEMBERS — everyone who can sign into this admin panel. Only visible
@@ -3491,10 +3552,9 @@ function renderTeamMembersList(){
     const initial = (m.name||'?').charAt(0).toUpperCase();
     const color = m.avatarColor || AVATAR_COLORS[0];
     const avatarInner = m.photoBase64 ? `<img src="${escapeHtml(m.photoBase64)}" class="w-full h-full object-cover">` : initial;
-    // "Master ID" / "Normal ID" is just clearer wording for the same
-    // owner/staff roles already gating Team Members access — a Master ID
-    // can add/disable other accounts, a Normal ID can't.
-    const roleBadge = m.role==='owner' ? '<span class="badge badge-blue ml-1">Master ID</span>' : '<span class="badge badge-neutral ml-1">Normal ID</span>';
+    // Only Master ID gets a badge — no need to label everyone else as
+    // "normal", that's just the default, unlabeled state.
+    const roleBadge = m.role==='owner' ? '<span class="badge badge-blue ml-1">Master ID</span>' : '';
     return `<div class="flex items-center gap-3 p-3 border border-slate-100 rounded-xl ${!isActive?'opacity-60':''}">
       <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden" style="background:${color}">${avatarInner}</div>
       <div class="flex-1 min-w-0">
