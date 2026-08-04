@@ -1043,7 +1043,7 @@
             </button>
             <div id="profileMenu" class="profile-menu">
               <div class="profile-menu-user">
-                <div class="nm" id="profileMenuName">Admin</div>
+                <div class="nm"><span id="profileMenuName">Admin</span> <span id="profileMenuRoleBadge" class="badge badge-blue" style="font-size:9px;padding:1px 6px;vertical-align:middle;">Master ID</span></div>
                 <div class="em" id="profileMenuEmail">Samriddhi And Brothers</div>
               </div>
               <button onclick="openProfileModal();toggleProfileMenu()" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
@@ -2115,10 +2115,17 @@
     </div>
     <div class="overflow-y-auto p-5">
       <div class="flex items-center gap-4 mb-5">
-        <div id="profileAvatarPreview" class="w-16 h-16 rounded-full bg-bajaj-blue flex items-center justify-center text-white text-xl font-bold flex-shrink-0">A</div>
+        <div class="relative flex-shrink-0">
+          <div id="profileAvatarPreview" class="w-16 h-16 rounded-full bg-bajaj-blue flex items-center justify-center text-white text-xl font-bold overflow-hidden">A</div>
+          <label class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center cursor-pointer hover:border-bajaj-blue transition-all" title="Upload photo">
+            <i class="fas fa-camera text-[10px] text-slate-500"></i>
+            <input type="file" accept="image/*" id="profilePhotoInput" class="hidden" onchange="handleProfilePhotoSelect(event)"/>
+          </label>
+        </div>
         <div class="flex-1 min-w-0">
-          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Avatar Colour</div>
-          <div id="avatarColorPicker" class="flex items-center gap-2 flex-wrap"></div>
+          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Avatar Colour <span class="normal-case font-medium text-slate-300">(used when no photo)</span></div>
+          <div id="avatarColorPicker" class="flex items-center gap-2 flex-wrap mb-1.5"></div>
+          <button type="button" id="removePhotoBtn" onclick="removeProfilePhoto()" class="hidden text-[11px] text-red-500 font-semibold hover:underline"><i class="fas fa-trash-can mr-1"></i>Remove photo</button>
         </div>
       </div>
       <div class="flex flex-col gap-1.5 mb-4">
@@ -2128,6 +2135,14 @@
       <div class="flex flex-col gap-1.5 mb-4">
         <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Email</label>
         <input type="text" id="profileEmailDisplay" disabled class="bg-slate-100 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-500"/>
+      </div>
+      <div class="flex flex-col gap-1.5 mb-4">
+        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Mobile Number</label>
+        <input type="tel" id="profileMobileInput" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-bajaj-blue transition-all" placeholder="98XXXXXXXX"/>
+      </div>
+      <div class="flex flex-col gap-1.5 mb-4">
+        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Bio <span class="normal-case font-medium text-slate-300">(optional, max 150 characters)</span></label>
+        <textarea id="profileBioInput" maxlength="150" rows="2" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-bajaj-blue transition-all resize-none" placeholder="A short line about yourself"></textarea>
       </div>
       <button onclick="saveProfileInfo()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all mb-6">
         <i class="fas fa-check mr-1"></i> Save Changes
@@ -3183,6 +3198,13 @@ window.togglePasswordVisibility = ()=>{
 const AVATAR_COLORS = ['#005EA6','#B4740E','#059669','#7C3AED','#DC2626','#0891B2','#DB2777','#4B5563'];
 let currentUserRole = 'owner'; // backward-compatible default — see loadProfile
 let currentUserAvatarColor = AVATAR_COLORS[0];
+let currentUserPhoto = ''; // base64 data URL, empty if none set
+let currentUserBio = '';
+let currentUserMobile = '';
+// Staged photo change, only committed to Firestore when Save Changes is
+// clicked — null means "no change made this session", '' means "explicitly
+// removed", a data URL string means "new photo chosen".
+let pendingProfilePhoto = null;
 
 async function loadProfile(uid) {
   try {
@@ -3201,12 +3223,26 @@ async function loadProfile(uid) {
     currentUserName = name;
     currentUserRole = data.role || 'owner'; // accounts created before Team Members existed default to owner
     currentUserAvatarColor = data.avatarColor || AVATAR_COLORS[0];
+    currentUserPhoto = data.photoBase64 || '';
+    currentUserBio = data.bio || '';
+    currentUserMobile = data.mobile || '';
     document.getElementById('headerUserName').textContent = name;
     const avatarEl = document.getElementById('navAvatar');
-    avatarEl.textContent = name.charAt(0).toUpperCase();
-    avatarEl.style.background = currentUserAvatarColor;
+    if(currentUserPhoto){
+      avatarEl.innerHTML = `<img src="${escapeHtml(currentUserPhoto)}" class="w-full h-full object-cover rounded-full">`;
+      avatarEl.style.background = 'transparent';
+    } else {
+      avatarEl.textContent = name.charAt(0).toUpperCase();
+      avatarEl.style.background = currentUserAvatarColor;
+    }
     const pmName = document.getElementById('profileMenuName'); if(pmName) pmName.textContent = name;
     const pmEmail = document.getElementById('profileMenuEmail'); if(pmEmail) pmEmail.textContent = currentUserEmail;
+    const pmRole = document.getElementById('profileMenuRoleBadge');
+    if(pmRole){
+      pmRole.textContent = currentUserRole==='owner' ? 'Master ID' : 'Normal ID';
+      pmRole.className = 'badge ' + (currentUserRole==='owner' ? 'badge-blue' : 'badge-neutral');
+      pmRole.style.cssText = 'font-size:9px;padding:1px 6px;vertical-align:middle;';
+    }
     const teamBtn = document.getElementById('teamMembersMenuBtn');
     if(teamBtn) teamBtn.classList.toggle('hidden', currentUserRole !== 'owner');
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
@@ -3218,9 +3254,12 @@ async function loadProfile(uid) {
 window.openProfileModal = ()=>{
   document.getElementById('profileNameInput').value = currentUserName;
   document.getElementById('profileEmailDisplay').value = currentUserEmail;
+  document.getElementById('profileMobileInput').value = currentUserMobile;
+  document.getElementById('profileBioInput').value = currentUserBio;
   document.getElementById('profileCurrentPass').value = '';
   document.getElementById('profileNewPass').value = '';
   document.getElementById('profileConfirmPass').value = '';
+  pendingProfilePhoto = null; // reset staged photo each time the modal opens fresh
   renderAvatarColorPicker();
   renderMyActivity();
   document.getElementById('profileFormModal').classList.remove('hidden');
@@ -3231,12 +3270,24 @@ window.closeProfileModal = ()=>{
   document.getElementById('profileFormModal').classList.remove('flex');
 };
 
+// Shows: a newly-staged photo > the saved photo > colour+initial, in that
+// priority order, so the preview always reflects what Save Changes would
+// actually write.
 function renderAvatarColorPicker(){
   const wrap = document.getElementById('avatarColorPicker');
   const preview = document.getElementById('profileAvatarPreview');
+  const removeBtn = document.getElementById('removePhotoBtn');
   const name = document.getElementById('profileNameInput').value || currentUserName;
-  preview.textContent = name.charAt(0).toUpperCase();
-  preview.style.background = currentUserAvatarColor;
+  const effectivePhoto = pendingProfilePhoto !== null ? pendingProfilePhoto : currentUserPhoto;
+  if(effectivePhoto){
+    preview.innerHTML = `<img src="${escapeHtml(effectivePhoto)}" class="w-full h-full object-cover">`;
+    preview.style.background = 'transparent';
+    removeBtn.classList.remove('hidden');
+  } else {
+    preview.textContent = name.charAt(0).toUpperCase();
+    preview.style.background = currentUserAvatarColor;
+    removeBtn.classList.add('hidden');
+  }
   wrap.innerHTML = AVATAR_COLORS.map(c=>`
     <button type="button" onclick="selectAvatarColor('${c}')" style="background:${c}"
       class="w-6 h-6 rounded-full flex-shrink-0 transition-all ${c===currentUserAvatarColor?'ring-2 ring-offset-2 ring-slate-400':''}"></button>
@@ -3247,17 +3298,66 @@ window.selectAvatarColor = (color)=>{
   renderAvatarColorPicker();
 };
 
+// Resized/compressed client-side and stored as base64 directly in the
+// Firestore doc — this project doesn't need Firebase Storage set up just
+// for a small square avatar, and a 160x160 JPEG comfortably clears
+// Firestore's 1MB document limit with plenty of room to spare.
+window.handleProfilePhotoSelect = (event)=>{
+  const file = event.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ toast('Please choose an image file.','err'); return; }
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const size = 160;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const minSide = Math.min(img.width, img.height);
+      const sx = (img.width - minSide)/2, sy = (img.height - minSide)/2;
+      ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+      const base64 = canvas.toDataURL('image/jpeg', 0.75);
+      if(base64.length > 700000){ toast('Photo is too large even after compression — try a different image.','err'); return; }
+      pendingProfilePhoto = base64;
+      renderAvatarColorPicker();
+    };
+    img.onerror = ()=>toast('Could not read that image.','err');
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = ''; // lets the same file be re-selected later if needed
+};
+window.removeProfilePhoto = ()=>{
+  pendingProfilePhoto = ''; // explicit "remove" marker, distinct from null ("no change")
+  renderAvatarColorPicker();
+};
+
 window.saveProfileInfo = async ()=>{
   const name = document.getElementById('profileNameInput').value.trim();
+  const mobile = document.getElementById('profileMobileInput').value.trim();
+  const bio = document.getElementById('profileBioInput').value.trim();
   if(!name){ toast('Name cannot be empty.','err'); return; }
+  const updateData = { name, avatarColor: currentUserAvatarColor, mobile, bio };
+  if(pendingProfilePhoto !== null) updateData.photoBase64 = pendingProfilePhoto;
   try{
-    await setDoc(doc(db,'profiles',auth.currentUser.uid), { name, avatarColor: currentUserAvatarColor }, { merge:true });
+    await setDoc(doc(db,'profiles',auth.currentUser.uid), updateData, { merge:true });
     try{ await updateProfile(auth.currentUser, { displayName: name }); }catch{} // best-effort, Firestore is the source of truth here
     currentUserName = name;
+    currentUserMobile = mobile;
+    currentUserBio = bio;
+    if(pendingProfilePhoto !== null) currentUserPhoto = pendingProfilePhoto;
+    pendingProfilePhoto = null;
     document.getElementById('headerUserName').textContent = name;
     const avatarEl = document.getElementById('navAvatar');
-    avatarEl.textContent = name.charAt(0).toUpperCase();
-    avatarEl.style.background = currentUserAvatarColor;
+    if(currentUserPhoto){
+      avatarEl.innerHTML = `<img src="${escapeHtml(currentUserPhoto)}" class="w-full h-full object-cover rounded-full">`;
+      avatarEl.style.background = 'transparent';
+    } else {
+      avatarEl.innerHTML = '';
+      avatarEl.textContent = name.charAt(0).toUpperCase();
+      avatarEl.style.background = currentUserAvatarColor;
+    }
     const pmName = document.getElementById('profileMenuName'); if(pmName) pmName.textContent = name;
     toast('Profile updated.');
   }catch(e){ toast('Error: '+e.message,'err'); }
@@ -3314,7 +3414,7 @@ function renderMyActivity(){
 let teamMembers = [];
 
 window.openTeamModal = async ()=>{
-  if(currentUserRole !== 'owner'){ toast("Only an owner account can manage team members.",'err'); return; }
+  if(currentUserRole !== 'owner'){ toast("Only a Master ID can manage team members.",'err'); return; }
   document.getElementById('teamFormModal').classList.remove('hidden');
   document.getElementById('teamFormModal').classList.add('flex');
   await loadTeamMembers();
@@ -3345,11 +3445,16 @@ function renderTeamMembersList(){
     const isActive = m.active !== false;
     const initial = (m.name||'?').charAt(0).toUpperCase();
     const color = m.avatarColor || AVATAR_COLORS[0];
+    const avatarInner = m.photoBase64 ? `<img src="${escapeHtml(m.photoBase64)}" class="w-full h-full object-cover">` : initial;
+    // "Master ID" / "Normal ID" is just clearer wording for the same
+    // owner/staff roles already gating Team Members access — a Master ID
+    // can add/disable other accounts, a Normal ID can't.
+    const roleBadge = m.role==='owner' ? '<span class="badge badge-blue ml-1">Master ID</span>' : '<span class="badge badge-neutral ml-1">Normal ID</span>';
     return `<div class="flex items-center gap-3 p-3 border border-slate-100 rounded-xl ${!isActive?'opacity-60':''}">
-      <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style="background:${color}">${initial}</div>
+      <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden" style="background:${color}">${avatarInner}</div>
       <div class="flex-1 min-w-0">
-        <div class="text-sm font-bold text-slate-800 truncate">${escapeHtml(m.name||'Unnamed')} ${isSelf?'<span class="text-[10px] text-slate-400 font-semibold">(you)</span>':''} ${m.role==='owner'?'<span class="badge badge-blue ml-1">Owner</span>':''}</div>
-        <div class="text-[11px] text-slate-400 truncate">${escapeHtml(m.email||'')}</div>
+        <div class="text-sm font-bold text-slate-800 truncate">${escapeHtml(m.name||'Unnamed')} ${isSelf?'<span class="text-[10px] text-slate-400 font-semibold">(you)</span>':''} ${roleBadge}</div>
+        <div class="text-[11px] text-slate-400 truncate">${escapeHtml(m.email||'')}${m.mobile?' · '+escapeHtml(m.mobile):''}</div>
       </div>
       ${!isActive ? '<span class="badge badge-red flex-shrink-0">Disabled</span>' : ''}
       ${!isSelf ? `
