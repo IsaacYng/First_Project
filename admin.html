@@ -2354,7 +2354,7 @@ async function logActivity(action, colName, info){
   try{
     await addDoc(collection(db,'activity_log'), {
       action, collection: colName,
-      model: info?.model || info?.name || '',
+      model: info?.model || info?.name || info?.title || '',
       chassis: info?.chassis || '',
       sn: info?.sn ?? '',
       customerName: info?.customerName || '',
@@ -3254,12 +3254,14 @@ onAuthStateChanged(auth, async (user) => {
     loadActivityLog();
     setBtnState(false);
     startIdleLogoutTimer();
+    startActiveStatusCheck();
   } else {
     document.getElementById('login-section').style.display = 'flex';
     document.getElementById('admin-section').style.display = 'none';
     document.body.classList.remove('app-active');
     setBtnState(false);
     stopIdleLogoutTimer();
+    stopActiveStatusCheck();
     eventPopupShownThisLoad = false;
   }
 });
@@ -3289,6 +3291,31 @@ function startIdleLogoutTimer(){
 function stopIdleLogoutTimer(){
   if(idleLogoutTimer){ clearTimeout(idleLogoutTimer); idleLogoutTimer = null; }
   idleActivityEvents.forEach(evt=>document.removeEventListener(evt, resetIdleLogoutTimer));
+}
+
+/* ─── Mid-session disable check ──────────────────────────────────────────
+   loadProfile() only checks the "active" flag at LOGIN time. Without this,
+   someone a Master ID disables mid-session would keep full access until
+   they happened to log out or hit the 10-minute idle timeout — not exactly
+   "blocks their login immediately" like the Team Members page promises.
+   This re-checks every few minutes and signs out the moment it's disabled. */
+const ACTIVE_STATUS_CHECK_MS = 3 * 60 * 1000;
+let activeStatusCheckTimer = null;
+function startActiveStatusCheck(){
+  stopActiveStatusCheck();
+  activeStatusCheckTimer = setInterval(async ()=>{
+    if(!auth.currentUser) return;
+    try{
+      const snap = await getDoc(doc(db,'profiles',auth.currentUser.uid));
+      if(snap.exists() && snap.data().active === false){
+        toast('This account has been disabled. Contact an admin.', 'err');
+        await signOut(auth);
+      }
+    }catch(e){ console.error('active-status check failed', e); }
+  }, ACTIVE_STATUS_CHECK_MS);
+}
+function stopActiveStatusCheck(){
+  if(activeStatusCheckTimer){ clearInterval(activeStatusCheckTimer); activeStatusCheckTimer = null; }
 }
 
 function setBtnState(loading) {
@@ -6471,7 +6498,7 @@ function renderTrashTable(){
     return `<tr class="border-b border-slate-100">
       <td class="px-4 py-3 text-xs text-slate-500 whitespace-nowrap" data-th="Deleted">${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}, ${at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</td>
       <td class="px-4 py-3" data-th="From"><span class="badge badge-blue">${TRASH_LABELS[t.originalCollection]||t.originalCollection}</span></td>
-      <td class="px-4 py-3 font-bold text-slate-800 text-sm" data-th="Model / Item">${escapeHtml(d.model || d.name || '—')}</td>
+      <td class="px-4 py-3 font-bold text-slate-800 text-sm" data-th="Model / Item">${escapeHtml(d.model || d.name || d.title || '—')}</td>
       <td class="px-4 py-3 text-xs text-slate-500 font-mono" data-th="Chassis / Info">${escapeHtml(d.chassis || d.regNo || '—')}${d.customerName?`<div class="text-slate-400">${escapeHtml(d.customerName)}</div>`:''}</td>
       <td class="px-4 py-3" data-th="Expires">${left<=1 ? `<span class="badge badge-red">${left===0?'Today':'1 day'}</span>` : `<span class="text-xs text-slate-500">${left} days</span>`}</td>
       <td class="px-4 py-3" data-th="Actions">
@@ -6490,7 +6517,7 @@ window.restoreFromTrash = async (trashId)=>{
   const label = TRASH_LABELS[t.originalCollection] || t.originalCollection;
   const ok = await showConfirm({
     title: 'Restore this item?',
-    message: `<b>${escapeHtml(t.data?.model || t.data?.name || 'This item')}</b> will go back to <b>${label}</b>.`,
+    message: `<b>${escapeHtml(t.data?.model || t.data?.name || t.data?.title || 'This item')}</b> will go back to <b>${label}</b>.`,
     okText: 'Restore', okColorClass: 'text-emerald-600 hover:bg-emerald-50',
     iconClass: 'fa-clock-rotate-left', iconColor: '#059669', iconBg: '#ECFDF5'
   });
@@ -6507,7 +6534,7 @@ window.permanentlyDeleteTrashItem = async (trashId)=>{
   const t = trashData.find(x=>x.id===trashId);
   const ok = await showDangerousConfirm({
     title: 'Delete forever?',
-    message: `<b>${escapeHtml(t?.data?.model || t?.data?.name || 'This item')}</b> will be permanently erased — this cannot be undone, even from here.`,
+    message: `<b>${escapeHtml(t?.data?.model || t?.data?.name || t?.data?.title || 'This item')}</b> will be permanently erased — this cannot be undone, even from here.`,
     okText: 'Delete Forever', countdownSec: 3
   });
   if(!ok) return;
