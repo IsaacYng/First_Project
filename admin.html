@@ -3293,6 +3293,11 @@ async function loadProfile(uid) {
     }
     const teamBtn = document.getElementById('teamMembersMenuBtn');
     if(teamBtn) teamBtn.classList.remove('hidden'); // everyone can view the team; only Master ID can manage it
+    // Activity Log shows EVERYONE's actions across the whole system — a
+    // Normal ID only gets to see their own via "My Activity" in Profile.
+    // Only Master ID sees the full combined log.
+    const historyNavBtn = document.getElementById('navHistory');
+    if(historyNavBtn) historyNavBtn.classList.toggle('hidden', currentUserRole !== 'owner');
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
 }
 
@@ -6806,6 +6811,10 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
 const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', stock:'secStock', history:'secHistory', trash:'secTrash' };
 window.switchSec=(sec)=>{
+  if(sec==='history' && currentUserRole !== 'owner'){
+    toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
+    sec = 'price';
+  }
   document.querySelectorAll('.sec-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(SEC_IDS[sec] || 'secStock').classList.add('active');
   setActiveTab(sec);
