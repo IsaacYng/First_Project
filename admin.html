@@ -669,6 +669,12 @@
     min-width:0;
   }
   .cat-add-row input::placeholder{ color:#B4B9C4; font-weight:500; }
+  /* Event popup carousel dots — small and quiet until active */
+  .event-popup-dot{
+    width:7px; height:7px; border-radius:50%; background:#E2E8F0; border:none; padding:0; cursor:pointer;
+    transition:all .2s ease;
+  }
+  .event-popup-dot.active{ background:#005EA6; width:20px; border-radius:4px; }
   /* Accessories popover is positioned via JS (position:fixed, clamped to the
      viewport) — see toggleCategoryAccMenu — instead of plain CSS absolute,
      since absolute-inside-a-narrow-card was overflowing off the right edge
@@ -2277,20 +2283,16 @@
   </div>
 </div>
 
-<!-- EVENT POPUP — shown automatically on login/refresh if an event is currently running -->
-<div id="eventPopupOverlay" class="hidden fixed inset-0 z-[650] items-center justify-center p-4" style="background:rgba(15,23,42,.65);backdrop-filter:blur(3px);" onclick="if(event.target===this) closeEventPopup()">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative" style="animation:slideIn .25s ease;">
-    <button onclick="closeEventPopup()" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 transition-all">
+<!-- EVENT POPUP — shown automatically on login/refresh; a swipeable carousel
+     if more than one event is currently running/upcoming, so nothing gets
+     silently left out when several promotions are live at once. -->
+<div id="eventPopupOverlay" class="hidden fixed inset-0 z-[650] items-center justify-center p-4" style="background:rgba(15,23,42,.7);backdrop-filter:blur(3px);" onclick="if(event.target===this) closeEventPopup()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden relative flex flex-col" style="animation:slideIn .25s ease; max-height:92vh;">
+    <button onclick="closeEventPopup()" class="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 transition-all">
       <i class="fas fa-xmark"></i>
     </button>
-    <div id="eventPopupBg" class="w-full h-40 bg-gradient-to-br from-bajaj-blue to-blue-700 bg-cover bg-center flex items-end p-4">
-      <div id="eventPopupDaysBadge" class="bg-amber-400 text-slate-900 text-xs font-extrabold px-2.5 py-1 rounded-full"></div>
-    </div>
-    <div class="p-5">
-      <div id="eventPopupTitle" class="text-xl font-extrabold text-slate-900 mb-1.5"></div>
-      <div id="eventPopupLocation" class="text-xs text-slate-500 font-semibold mb-2 flex items-center gap-1.5"></div>
-      <div id="eventPopupDescription" class="text-sm text-slate-600 leading-relaxed whitespace-pre-line"></div>
-    </div>
+    <div id="eventPopupCarousel" class="overflow-x-auto overflow-y-auto flex-1" style="scroll-snap-type:x mandatory; display:flex; -webkit-overflow-scrolling:touch;"></div>
+    <div id="eventPopupDots" class="hidden items-center justify-center gap-2 py-3 border-t border-slate-100 flex-shrink-0"></div>
   </div>
 </div>
 
@@ -6095,49 +6097,69 @@ window.saveEvent = async ()=>{
 // fresh login/page load. Picking "soonest ending" means an urgent offer
 // wrapping up today surfaces ahead of one that just started.
 function checkAndShowEventPopup(){
-  // Shows a RUNNING event if one exists (soonest-ending first, since that's
-  // most urgent) — otherwise falls back to the soonest UPCOMING event as a
-  // "starts in X days" teaser, matching "yeti din baki" for an event that
-  // hasn't started yet, not just ones already underway.
-  const running = events.filter(ev => eventStatus(ev)==='running');
-  const upcoming = events.filter(ev => eventStatus(ev)==='upcoming');
-  let chosen, isUpcoming;
-  if(running.length){
-    chosen = [...running].sort((a,b)=> new Date(a.endDate) - new Date(b.endDate))[0];
-    isUpcoming = false;
-  } else if(upcoming.length){
-    chosen = [...upcoming].sort((a,b)=> new Date(a.startDate) - new Date(b.startDate))[0];
-    isUpcoming = true;
+  // Shows EVERY currently-running event (soonest-ending first) as a
+  // swipeable carousel — if none are running, falls back to ALL upcoming
+  // ones (soonest-starting first) as "starts in X days" teasers. Nothing
+  // gets silently dropped just because more than one promotion is live.
+  const running = [...events.filter(ev => eventStatus(ev)==='running')].sort((a,b)=> new Date(a.endDate) - new Date(b.endDate));
+  const upcoming = [...events.filter(ev => eventStatus(ev)==='upcoming')].sort((a,b)=> new Date(a.startDate) - new Date(b.startDate));
+  const list = running.length ? running.map(ev=>({ev, isUpcoming:false})) : upcoming.map(ev=>({ev, isUpcoming:true}));
+  if(!list.length) return;
+
+  const carousel = document.getElementById('eventPopupCarousel');
+  const dotsWrap = document.getElementById('eventPopupDots');
+  carousel.innerHTML = list.map(({ev, isUpcoming})=>{
+    const badgeText = isUpcoming
+      ? (daysUntil(ev.startDate)<=0 ? 'Starting today!' : `Starts in ${daysUntil(ev.startDate)} day${daysUntil(ev.startDate)!==1?'s':''}`)
+      : (daysUntil(ev.endDate)<=0 ? 'Last day!' : `${daysUntil(ev.endDate)} day${daysUntil(ev.endDate)!==1?'s':''} left`);
+    // The full poster shows uncropped (object-contain) — a marketing banner
+    // is usually packed with text/offers, so cropping it (as a plain CSS
+    // background-cover box did before) was cutting off real content.
+    const imageBlock = ev.bgImage
+      ? `<div class="w-full bg-slate-100 flex items-center justify-center relative">
+           <img src="${escapeHtml(ev.bgImage)}" class="w-full h-auto max-h-[60vh] object-contain">
+           <div class="absolute bottom-2.5 left-2.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-2.5 py-1 rounded-full shadow">${badgeText}</div>
+         </div>`
+      : `<div class="w-full h-36 bg-gradient-to-br from-bajaj-blue to-blue-700 flex items-end p-4">
+           <div class="bg-amber-400 text-slate-900 text-xs font-extrabold px-2.5 py-1 rounded-full">${badgeText}</div>
+         </div>`;
+    return `<div class="w-full flex-shrink-0" style="scroll-snap-align:start;">
+      ${imageBlock}
+      <div class="p-5">
+        <div class="text-xl font-extrabold text-slate-900 mb-1.5">${escapeHtml(ev.title||'')}</div>
+        ${ev.location ? `<div class="text-xs text-slate-500 font-semibold mb-2 flex items-center gap-1.5"><i class="fas fa-location-dot"></i> ${escapeHtml(ev.location)}</div>` : ''}
+        ${ev.description ? `<div class="text-sm text-slate-600 leading-relaxed whitespace-pre-line">${escapeHtml(ev.description)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Dot indicators — only shown when there's more than one card, tapping a
+  // dot scrolls straight to that card.
+  if(list.length > 1){
+    dotsWrap.classList.remove('hidden'); dotsWrap.classList.add('flex');
+    dotsWrap.innerHTML = list.map((_,i)=>`<button type="button" data-dot="${i}" class="event-popup-dot ${i===0?'active':''}" onclick="scrollEventPopupTo(${i})"></button>`).join('');
+    carousel.onscroll = ()=>{
+      const idx = Math.round(carousel.scrollLeft / carousel.clientWidth);
+      dotsWrap.querySelectorAll('.event-popup-dot').forEach((d,i)=>d.classList.toggle('active', i===idx));
+    };
   } else {
-    return;
+    dotsWrap.classList.add('hidden'); dotsWrap.classList.remove('flex');
+    carousel.onscroll = null;
   }
-  document.getElementById('eventPopupTitle').textContent = chosen.title || '';
-  document.getElementById('eventPopupLocation').innerHTML = chosen.location ? `<i class="fas fa-location-dot"></i> ${escapeHtml(chosen.location)}` : '';
-  document.getElementById('eventPopupDescription').textContent = chosen.description || '';
-  const badgeEl = document.getElementById('eventPopupDaysBadge');
-  if(isUpcoming){
-    const daysToStart = daysUntil(chosen.startDate);
-    badgeEl.textContent = daysToStart<=0 ? 'Starting today!' : `Starts in ${daysToStart} day${daysToStart!==1?'s':''}`;
-  } else {
-    const daysLeft = daysUntil(chosen.endDate);
-    badgeEl.textContent = daysLeft<=0 ? 'Last day!' : `${daysLeft} day${daysLeft!==1?'s':''} left`;
-  }
-  const bgEl = document.getElementById('eventPopupBg');
-  if(chosen.bgImage){
-    bgEl.style.backgroundImage = `url('${chosen.bgImage.replace(/'/g,"\\'")}')`;
-    bgEl.classList.remove('bg-gradient-to-br','from-bajaj-blue','to-blue-700');
-  } else {
-    bgEl.style.backgroundImage = '';
-    bgEl.classList.add('bg-gradient-to-br','from-bajaj-blue','to-blue-700');
-  }
+
   const overlay = document.getElementById('eventPopupOverlay');
   overlay.classList.remove('hidden');
   overlay.classList.add('flex');
 }
+window.scrollEventPopupTo = (idx)=>{
+  const carousel = document.getElementById('eventPopupCarousel');
+  carousel.scrollTo({ left: idx * carousel.clientWidth, behavior: 'smooth' });
+};
 window.closeEventPopup = ()=>{
   const overlay = document.getElementById('eventPopupOverlay');
   overlay.classList.add('hidden');
   overlay.classList.remove('flex');
+
 };
 
 function renderAccTable(){
