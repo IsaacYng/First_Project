@@ -6017,17 +6017,36 @@ window.saveEvent = async ()=>{
 // fresh login/page load. Picking "soonest ending" means an urgent offer
 // wrapping up today surfaces ahead of one that just started.
 function checkAndShowEventPopup(){
+  // Shows a RUNNING event if one exists (soonest-ending first, since that's
+  // most urgent) — otherwise falls back to the soonest UPCOMING event as a
+  // "starts in X days" teaser, matching "yeti din baki" for an event that
+  // hasn't started yet, not just ones already underway.
   const running = events.filter(ev => eventStatus(ev)==='running');
-  if(!running.length) return;
-  const soonest = [...running].sort((a,b)=> new Date(a.endDate) - new Date(b.endDate))[0];
-  const daysLeft = daysUntil(soonest.endDate);
-  document.getElementById('eventPopupTitle').textContent = soonest.title || '';
-  document.getElementById('eventPopupLocation').innerHTML = soonest.location ? `<i class="fas fa-location-dot"></i> ${escapeHtml(soonest.location)}` : '';
-  document.getElementById('eventPopupDescription').textContent = soonest.description || '';
-  document.getElementById('eventPopupDaysBadge').textContent = daysLeft<=0 ? 'Last day!' : `${daysLeft} day${daysLeft!==1?'s':''} left`;
+  const upcoming = events.filter(ev => eventStatus(ev)==='upcoming');
+  let chosen, isUpcoming;
+  if(running.length){
+    chosen = [...running].sort((a,b)=> new Date(a.endDate) - new Date(b.endDate))[0];
+    isUpcoming = false;
+  } else if(upcoming.length){
+    chosen = [...upcoming].sort((a,b)=> new Date(a.startDate) - new Date(b.startDate))[0];
+    isUpcoming = true;
+  } else {
+    return;
+  }
+  document.getElementById('eventPopupTitle').textContent = chosen.title || '';
+  document.getElementById('eventPopupLocation').innerHTML = chosen.location ? `<i class="fas fa-location-dot"></i> ${escapeHtml(chosen.location)}` : '';
+  document.getElementById('eventPopupDescription').textContent = chosen.description || '';
+  const badgeEl = document.getElementById('eventPopupDaysBadge');
+  if(isUpcoming){
+    const daysToStart = daysUntil(chosen.startDate);
+    badgeEl.textContent = daysToStart<=0 ? 'Starting today!' : `Starts in ${daysToStart} day${daysToStart!==1?'s':''}`;
+  } else {
+    const daysLeft = daysUntil(chosen.endDate);
+    badgeEl.textContent = daysLeft<=0 ? 'Last day!' : `${daysLeft} day${daysLeft!==1?'s':''} left`;
+  }
   const bgEl = document.getElementById('eventPopupBg');
-  if(soonest.bgImage){
-    bgEl.style.backgroundImage = `url('${soonest.bgImage.replace(/'/g,"\\'")}')`;
+  if(chosen.bgImage){
+    bgEl.style.backgroundImage = `url('${chosen.bgImage.replace(/'/g,"\\'")}')`;
     bgEl.classList.remove('bg-gradient-to-br','from-bajaj-blue','to-blue-700');
   } else {
     bgEl.style.backgroundImage = '';
