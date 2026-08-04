@@ -2217,7 +2217,7 @@ import {
   createUserWithEmailAndPassword, sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import {
-  getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc,
+  getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc, where,
   serverTimestamp, query, orderBy, limit, runTransaction, writeBatch, getCountFromServer
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
@@ -3221,7 +3221,24 @@ async function loadProfile(uid) {
     }
     const name = data.name || 'Admin';
     currentUserName = name;
-    currentUserRole = data.role || 'owner'; // accounts created before Team Members existed default to owner
+    if(data.role === undefined){
+      // No role recorded — either a pre-existing account from before Team
+      // Members existed, or a profile doc that's incomplete. This must
+      // NEVER just default to Master ID for everyone with a missing role
+      // field, or any stray/incomplete profile silently becomes an admin.
+      // Instead: only auto-grant Master ID if NO Master ID exists ANYWHERE
+      // in the system yet (the true first-time-setup case) — otherwise it
+      // safely falls back to Normal ID.
+      let ownerExists = true;
+      try{
+        const ownerSnap = await getDocs(query(collection(db,'profiles'), where('role','==','owner')));
+        ownerExists = !ownerSnap.empty;
+      }catch{ /* if this check fails for any reason, fail safe (assume an owner exists) */ }
+      currentUserRole = ownerExists ? 'staff' : 'owner';
+      try{ await setDoc(doc(db,'profiles',uid), { role: currentUserRole }, { merge:true }); }catch{}
+    } else {
+      currentUserRole = data.role;
+    }
     currentUserAvatarColor = data.avatarColor || AVATAR_COLORS[0];
     currentUserPhoto = data.photoBase64 || '';
     currentUserBio = data.bio || '';
