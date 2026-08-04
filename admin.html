@@ -675,6 +675,10 @@
     transition:all .2s ease;
   }
   .event-popup-dot.active{ background:#005EA6; width:20px; border-radius:4px; }
+  /* Hides the native horizontal scrollbar on the event popup carousel —
+     scroll-snap swiping still works, it just doesn't show as a visible bar. */
+  .no-scrollbar{ scrollbar-width:none; -ms-overflow-style:none; }
+  .no-scrollbar::-webkit-scrollbar{ display:none; }
   /* Accessories popover is positioned via JS (position:fixed, clamped to the
      viewport) — see toggleCategoryAccMenu — instead of plain CSS absolute,
      since absolute-inside-a-narrow-card was overflowing off the right edge
@@ -2291,7 +2295,7 @@
     <button onclick="closeEventPopup()" class="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-white/95 hover:bg-white shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 transition-all">
       <i class="fas fa-xmark"></i>
     </button>
-    <div id="eventPopupCarousel" class="overflow-x-auto flex-1" style="scroll-snap-type:x mandatory; display:flex; align-items:flex-start; -webkit-overflow-scrolling:touch;"></div>
+    <div id="eventPopupCarousel" class="overflow-x-auto no-scrollbar" style="scroll-snap-type:x mandatory; display:flex; align-items:flex-start; -webkit-overflow-scrolling:touch;"></div>
     <div id="eventPopupDots" class="hidden items-center justify-center gap-2 py-3 border-t border-slate-100 flex-shrink-0"></div>
   </div>
 </div>
@@ -5926,6 +5930,8 @@ function loadAccessories(){
 let events = [];
 let eventEditingId = null;
 let eventPopupShownThisLoad = false;
+let eventPopupAutoSlideTimer = null;
+let eventPopupCountdownTimers = [];
 
 function loadEvents(){
   onSnapshot(collection(db,"events"), snap => {
@@ -6109,7 +6115,7 @@ function checkAndShowEventPopup(){
 
   const carousel = document.getElementById('eventPopupCarousel');
   const dotsWrap = document.getElementById('eventPopupDots');
-  carousel.innerHTML = list.map(({ev, isUpcoming})=>{
+  carousel.innerHTML = list.map(({ev, isUpcoming}, i)=>{
     const badgeText = isUpcoming
       ? (daysUntil(ev.startDate)<=0 ? 'Starting today!' : `Starts in ${daysUntil(ev.startDate)} day${daysUntil(ev.startDate)!==1?'s':''}`)
       : (daysUntil(ev.endDate)<=0 ? 'Last day!' : `${daysUntil(ev.endDate)} day${daysUntil(ev.endDate)!==1?'s':''} left`);
@@ -6123,11 +6129,11 @@ function checkAndShowEventPopup(){
       ? `<div class="w-full bg-slate-900 flex items-center justify-center relative">
            <img src="${escapeHtml(ev.bgImage)}" class="w-full h-auto max-h-[55vh] object-contain">
            <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent pointer-events-none"></div>
-           <div class="absolute bottom-3 left-3 inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg"><i class="fas ${badgeIcon} text-[10px]"></i>${badgeText}</div>
+           <div id="eventPopupBadge_${i}" class="absolute bottom-3 left-3 inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg"><i class="fas ${badgeIcon} text-[10px]"></i>${badgeText}</div>
          </div>`
       : `<div class="w-full h-32 bg-gradient-to-br from-bajaj-blue via-blue-700 to-blue-800 flex items-end p-4 relative overflow-hidden">
            <i class="fas fa-bullhorn absolute -right-3 -top-3 text-8xl text-white/10"></i>
-           <div class="inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg"><i class="fas ${badgeIcon} text-[10px]"></i>${badgeText}</div>
+           <div id="eventPopupBadge_${i}" class="inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg"><i class="fas ${badgeIcon} text-[10px]"></i>${badgeText}</div>
          </div>`;
     return `<div class="w-full flex-shrink-0 overflow-y-auto" style="scroll-snap-align:start; max-height:min(calc(92vh - 50px), 640px);">
       ${imageBlock}
@@ -6142,21 +6148,61 @@ function checkAndShowEventPopup(){
 
   // Dot indicators — only shown when there's more than one card, tapping a
   // dot scrolls straight to that card.
+  stopEventPopupCountdowns();
   if(list.length > 1){
     dotsWrap.classList.remove('hidden'); dotsWrap.classList.add('flex');
     dotsWrap.innerHTML = list.map((_,i)=>`<button type="button" data-dot="${i}" class="event-popup-dot ${i===0?'active':''}" onclick="scrollEventPopupTo(${i})"></button>`).join('');
-    carousel.onscroll = ()=>{
-      const idx = Math.round(carousel.scrollLeft / carousel.clientWidth);
-      dotsWrap.querySelectorAll('.event-popup-dot').forEach((d,i)=>d.classList.toggle('active', i===idx));
+    let currentIdx = 0;
+    const goTo = (idx)=>{
+      currentIdx = ((idx % list.length) + list.length) % list.length;
+      carousel.scrollTo({ left: currentIdx * carousel.clientWidth, behavior: 'smooth' });
     };
+    carousel.onscroll = ()=>{
+      currentIdx = Math.round(carousel.scrollLeft / carousel.clientWidth);
+      dotsWrap.querySelectorAll('.event-popup-dot').forEach((d,i)=>d.classList.toggle('active', i===currentIdx));
+    };
+    // Auto-advance every 5s, looping back to the first card after the last
+    // — pauses for a bit whenever the person manually swipes/taps a dot, so
+    // it doesn't fight their own navigation.
+    const restartAutoSlide = ()=>{
+      clearInterval(eventPopupAutoSlideTimer);
+      eventPopupAutoSlideTimer = setInterval(()=>goTo(currentIdx+1), 5000);
+    };
+    carousel.addEventListener('scroll', restartAutoSlide, {passive:true});
+    restartAutoSlide();
   } else {
     dotsWrap.classList.add('hidden'); dotsWrap.classList.remove('flex');
     carousel.onscroll = null;
+    clearInterval(eventPopupAutoSlideTimer);
   }
+
+  // Once the date/time is close (within ~26 hours), a live ticking
+  // HH:MM:SS countdown replaces the plain "X days left" badge — a lot more
+  // urgent-feeling right when it actually matters most.
+  list.forEach(({ev, isUpcoming}, i)=>{
+    const target = isUpcoming ? new Date(ev.startDate) : endOfDay(ev.endDate);
+    if((target - new Date()) >= 26*60*60*1000) return; // not near yet — static day-badge is enough
+    const badgeEl = document.getElementById('eventPopupBadge_'+i);
+    if(!badgeEl) return;
+    const tick = ()=>{
+      const diff = target - new Date();
+      if(diff <= 0){ badgeEl.innerHTML = `<i class="fas fa-fire text-[10px]"></i>${isUpcoming?'Starting now!':'Ending now!'}`; return; }
+      const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+      const label = isUpcoming ? 'Starts in' : 'Ends in';
+      badgeEl.innerHTML = `<i class="fas fa-stopwatch text-[10px]"></i>${label} ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    };
+    tick();
+    eventPopupCountdownTimers.push(setInterval(tick, 1000));
+  });
 
   const overlay = document.getElementById('eventPopupOverlay');
   overlay.classList.remove('hidden');
   overlay.classList.add('flex');
+}
+function endOfDay(dateStr){ const d = new Date(dateStr); d.setHours(23,59,59,999); return d; }
+function stopEventPopupCountdowns(){
+  eventPopupCountdownTimers.forEach(t=>clearInterval(t));
+  eventPopupCountdownTimers = [];
 }
 window.scrollEventPopupTo = (idx)=>{
   const carousel = document.getElementById('eventPopupCarousel');
@@ -6166,7 +6212,8 @@ window.closeEventPopup = ()=>{
   const overlay = document.getElementById('eventPopupOverlay');
   overlay.classList.add('hidden');
   overlay.classList.remove('flex');
-
+  clearInterval(eventPopupAutoSlideTimer);
+  stopEventPopupCountdowns();
 };
 
 function renderAccTable(){
