@@ -6113,23 +6113,29 @@ function checkAndShowEventPopup(){
     const badgeText = isUpcoming
       ? (daysUntil(ev.startDate)<=0 ? 'Starting today!' : `Starts in ${daysUntil(ev.startDate)} day${daysUntil(ev.startDate)!==1?'s':''}`)
       : (daysUntil(ev.endDate)<=0 ? 'Last day!' : `${daysUntil(ev.endDate)} day${daysUntil(ev.endDate)!==1?'s':''} left`);
+    const badgeIcon = isUpcoming ? 'fa-hourglass-half' : 'fa-fire';
     // The full poster shows uncropped (object-contain) — a marketing banner
     // is usually packed with text/offers, so cropping it (as a plain CSS
-    // background-cover box did before) was cutting off real content.
+    // background-cover box did before) was cutting off real content. A
+    // gradient wash along the bottom keeps the badge readable over busy
+    // poster art without needing a hard edge/box around it.
     const imageBlock = ev.bgImage
-      ? `<div class="w-full bg-slate-100 flex items-center justify-center relative">
-           <img src="${escapeHtml(ev.bgImage)}" class="w-full h-auto max-h-[60vh] object-contain">
-           <div class="absolute bottom-2.5 left-2.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-2.5 py-1 rounded-full shadow">${badgeText}</div>
+      ? `<div class="w-full bg-slate-900 flex items-center justify-center relative">
+           <img src="${escapeHtml(ev.bgImage)}" class="w-full h-auto max-h-[55vh] object-contain">
+           <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent pointer-events-none"></div>
+           <div class="absolute bottom-3 left-3 inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg"><i class="fas ${badgeIcon} text-[10px]"></i>${badgeText}</div>
          </div>`
-      : `<div class="w-full h-36 bg-gradient-to-br from-bajaj-blue to-blue-700 flex items-end p-4">
-           <div class="bg-amber-400 text-slate-900 text-xs font-extrabold px-2.5 py-1 rounded-full">${badgeText}</div>
+      : `<div class="w-full h-32 bg-gradient-to-br from-bajaj-blue via-blue-700 to-blue-800 flex items-end p-4 relative overflow-hidden">
+           <i class="fas fa-bullhorn absolute -right-3 -top-3 text-8xl text-white/10"></i>
+           <div class="inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg"><i class="fas ${badgeIcon} text-[10px]"></i>${badgeText}</div>
          </div>`;
     return `<div class="w-full flex-shrink-0 overflow-y-auto" style="scroll-snap-align:start; max-height:min(calc(92vh - 50px), 640px);">
       ${imageBlock}
       <div class="p-5">
-        <div class="text-xl font-extrabold text-slate-900 mb-1.5">${escapeHtml(ev.title||'')}</div>
-        ${ev.location ? `<div class="text-xs text-slate-500 font-semibold mb-2 flex items-center gap-1.5"><i class="fas fa-location-dot"></i> ${escapeHtml(ev.location)}</div>` : ''}
-        ${ev.description ? `<div class="text-sm text-slate-600 leading-relaxed whitespace-pre-line">${escapeHtml(ev.description)}</div>` : ''}
+        <div class="section-title text-[1.8rem] leading-tight text-slate-900 mb-2">${escapeHtml(ev.title||'')}</div>
+        ${ev.location ? `<div class="inline-flex items-center gap-1.5 bg-blue-50 text-bajaj-blue text-[11px] font-bold px-2.5 py-1 rounded-full mb-3"><i class="fas fa-location-dot"></i> ${escapeHtml(ev.location)}</div>` : ''}
+        ${ev.description ? `<div class="text-sm text-slate-600 leading-relaxed whitespace-pre-line mb-4">${escapeHtml(ev.description)}</div>` : ''}
+        <button onclick="closeEventPopup()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">Got it</button>
       </div>
     </div>`;
   }).join('');
