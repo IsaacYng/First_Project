@@ -2178,9 +2178,9 @@
       <button onclick="closeTeamModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
     </div>
     <div class="overflow-y-auto p-5">
-      <p class="text-[11px] text-slate-400 mb-4">Everyone here can sign in and use this admin panel. Disabling someone blocks their login immediately — it doesn't erase their account, so it can be undone anytime.</p>
+      <p id="teamModalDesc" class="text-[11px] text-slate-400 mb-4"></p>
       <div id="teamMembersList" class="flex flex-col gap-2 mb-5"></div>
-      <div class="border-t border-slate-100 pt-4">
+      <div id="teamAddSection" class="hidden border-t border-slate-100 pt-4">
         <div class="text-sm font-bold text-slate-700 mb-3"><i class="fas fa-user-plus text-slate-400 mr-1"></i> Add a Team Member</div>
         <div class="flex flex-col gap-2.5">
           <input type="text" id="newStaffName" placeholder="Full name" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
@@ -2503,7 +2503,7 @@ async function clearAllInCollection(colName, dataArr, label){
     }
     logActivity('Cleared All', colName, { model: `${items.length} unit(s)`, sn: '' });
     toast(`Moved all ${dataArr.length} unit(s) from ${label} to Trash.`);
-  }catch(e){ toast('Clear failed: '+e.message,'err'); }
+  }catch(e){ toast('Clear failed: '+friendlyError(e),'err'); }
 }
 window.clearAllInventory = ()=>clearAllInCollection('inventory', invData, 'Live Inventory');
 window.clearAllHHInventory = ()=>clearAllInCollection('hh_inventory', hhInvData, 'HH Inventory');
@@ -2688,6 +2688,30 @@ function escapeHtml(v){
 function escapeJsAttr(v){
   const jsEscaped = (v==null?'':String(v)).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');
   return escapeHtml(jsEscaped);
+}
+// Raw Firebase/Firestore error text (e.message) can hint at collection
+// names, security-rule internals, or just confirm "this app runs on
+// Firebase" to anyone poking around — none of that should reach the
+// screen. This maps known error codes to plain, generic wording and falls
+// back to one safe catch-all for anything unrecognized.
+function friendlyError(e){
+  const code = (e && e.code) || '';
+  const map = {
+    'auth/wrong-password': 'That password is incorrect.',
+    'auth/user-not-found': 'No account found with that email.',
+    'auth/email-already-in-use': 'That email is already registered.',
+    'auth/invalid-email': 'That email address looks invalid.',
+    'auth/weak-password': 'Please choose a stronger password (at least 6 characters).',
+    'auth/too-many-requests': 'Too many attempts — please wait a moment and try again.',
+    'auth/network-request-failed': 'Network issue — check your connection and try again.',
+    'auth/requires-recent-login': 'Please sign out and back in, then try that again.',
+    'permission-denied': "You don't have permission to do that.",
+    'not-found': 'That record could not be found.',
+    'unavailable': 'Connection issue — please try again.',
+    'unauthenticated': 'Your session expired — please sign in again.'
+  };
+  for(const key in map){ if(code.includes(key)) return map[key]; }
+  return 'Something went wrong — please try again.';
 }
 function normId(v){ return (v||'').toString().trim().toUpperCase().replace(/\s+/g,''); }
 function normModelName(v){
@@ -3012,7 +3036,7 @@ window.confirmDeleteDuplicates = async ()=>{
     }
     toast(`${checked.length} duplicate unit(s) moved to Trash.${invIds.length?' Use "Fix Numbering" on Inventory to re-sequence S.N if needed.':''}`);
     closeDuplicateResolver();
-  }catch(e){ toast('Delete failed: '+e.message,'err'); }
+  }catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
 };
 
 /* ─── Helpers ─── */
@@ -3176,7 +3200,7 @@ document.getElementById('loginBtn').addEventListener('click', () => {
   setBtnState(true);
   signInWithEmailAndPassword(auth, email, pass).catch(e => {
     errEl.classList.remove('hidden'); errEl.classList.add('flex');
-    document.getElementById('loginErrText').textContent = e.code==='auth/invalid-credential'?'Wrong email or password.':e.message;
+    document.getElementById('loginErrText').textContent = friendlyError(e);
     setBtnState(false);
   });
 });
@@ -3261,7 +3285,7 @@ async function loadProfile(uid) {
       pmRole.style.cssText = 'font-size:9px;padding:1px 6px;vertical-align:middle;';
     }
     const teamBtn = document.getElementById('teamMembersMenuBtn');
-    if(teamBtn) teamBtn.classList.toggle('hidden', currentUserRole !== 'owner');
+    if(teamBtn) teamBtn.classList.remove('hidden'); // everyone can view the team; only Master ID can manage it
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
 }
 
@@ -3377,7 +3401,7 @@ window.saveProfileInfo = async ()=>{
     }
     const pmName = document.getElementById('profileMenuName'); if(pmName) pmName.textContent = name;
     toast('Profile updated.');
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 window.changeOwnPassword = async ()=>{
@@ -3399,7 +3423,7 @@ window.changeOwnPassword = async ()=>{
     document.getElementById('profileConfirmPass').value = '';
     toast('Password updated.');
   }catch(e){
-    const msg = e.code==='auth/wrong-password' ? 'Current password is incorrect.' : e.message;
+    const msg = friendlyError(e);
     toast('Error: '+msg,'err');
   }
 };
@@ -3431,7 +3455,11 @@ function renderMyActivity(){
 let teamMembers = [];
 
 window.openTeamModal = async ()=>{
-  if(currentUserRole !== 'owner'){ toast("Only a Master ID can manage team members.",'err'); return; }
+  const isMaster = currentUserRole === 'owner';
+  document.getElementById('teamModalDesc').textContent = isMaster
+    ? "Everyone here can sign in and use this admin panel. Disabling someone blocks their login immediately — it doesn't erase their account, so it can be undone anytime."
+    : "Everyone who can sign into this admin panel. Only a Master ID can add someone, disable an account, or send a password reset.";
+  document.getElementById('teamAddSection').classList.toggle('hidden', !isMaster);
   document.getElementById('teamFormModal').classList.remove('hidden');
   document.getElementById('teamFormModal').classList.add('flex');
   await loadTeamMembers();
@@ -3449,7 +3477,7 @@ async function loadTeamMembers(){
     teamMembers = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderTeamMembersList();
   }catch(e){
-    list.innerHTML = `<div class="text-xs text-red-500 text-center py-4">Couldn't load team members: ${escapeHtml(e.message)}</div>`;
+    list.innerHTML = `<div class="text-xs text-red-500 text-center py-4">Couldn't load team members: ${friendlyError(e)}</div>`;
   }
 }
 
@@ -3472,9 +3500,10 @@ function renderTeamMembersList(){
       <div class="flex-1 min-w-0">
         <div class="text-sm font-bold text-slate-800 truncate">${escapeHtml(m.name||'Unnamed')} ${isSelf?'<span class="text-[10px] text-slate-400 font-semibold">(you)</span>':''} ${roleBadge}</div>
         <div class="text-[11px] text-slate-400 truncate">${escapeHtml(m.email||'')}${m.mobile?' · '+escapeHtml(m.mobile):''}</div>
+        ${m.bio ? `<div class="text-[11px] text-slate-500 italic truncate mt-0.5">${escapeHtml(m.bio)}</div>` : ''}
       </div>
       ${!isActive ? '<span class="badge badge-red flex-shrink-0">Disabled</span>' : ''}
-      ${!isSelf ? `
+      ${(!isSelf && currentUserRole==='owner') ? `
       <div class="flex items-center gap-1.5 flex-shrink-0">
         <button onclick="sendStaffPasswordReset('${escapeJsAttr(m.email)}')" title="Send password reset" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-bajaj-blue hover:border-bajaj-blue transition-all"><i class="fas fa-key text-xs"></i></button>
         <button onclick="toggleStaffActive('${m.id}', ${isActive})" title="${isActive?'Disable':'Enable'}" class="w-8 h-8 flex items-center justify-center rounded-lg border ${isActive?'border-red-200 text-red-500 hover:bg-red-50':'border-emerald-200 text-emerald-600 hover:bg-emerald-50'} transition-all"><i class="fas ${isActive?'fa-user-slash':'fa-user-check'} text-xs"></i></button>
@@ -3484,6 +3513,7 @@ function renderTeamMembersList(){
 }
 
 window.addTeamMember = async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can add team members.','err'); return; }
   const name = document.getElementById('newStaffName').value.trim();
   const email = document.getElementById('newStaffEmail').value.trim();
   const pass = document.getElementById('newStaffPass').value;
@@ -3506,12 +3536,13 @@ window.addTeamMember = async ()=>{
     document.getElementById('newStaffPass').value = '';
     await loadTeamMembers();
   }catch(e){
-    const msg = e.code==='auth/email-already-in-use' ? 'That email is already registered.' : e.message;
+    const msg = friendlyError(e);
     toast('Error: '+msg,'err');
   }
 };
 
 window.toggleStaffActive = async (uid, currentlyActive)=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can do that.','err'); return; }
   const member = teamMembers.find(m=>m.id===uid);
   if(!member) return;
   const proceed = await showConfirm({
@@ -3531,14 +3562,15 @@ window.toggleStaffActive = async (uid, currentlyActive)=>{
     logActivity(currentlyActive ? 'Team Member Disabled' : 'Team Member Enabled', 'profiles', { model: member.name, customerName: member.email });
     toast(currentlyActive ? `${member.name} has been disabled.` : `${member.name} re-enabled.`);
     await loadTeamMembers();
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 window.sendStaffPasswordReset = async (email)=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can do that.','err'); return; }
   try{
     await sendPasswordResetEmail(auth, email);
     toast(`Password reset link sent to ${email}.`);
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 /* ─── Master Price List ─── */
@@ -3778,7 +3810,7 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
     if(currentEditId){await updateDoc(doc(db,"bikes",currentEditId),data);toast('Model updated!'+(collision?' S.N renumbered automatically.':''));}
     else{await addDoc(collection(db,"bikes"),data);toast('Model added!'+(collision?' S.N renumbered automatically.':''));}
     window.cancelMasterEdit();
-  }catch(e){toast('Error: '+e.message,'err');}
+  }catch(e){toast('Error: '+friendlyError(e),'err');}
 });
 
 function clearMasterForm(){
@@ -3902,7 +3934,7 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
       document.getElementById('stockModelSelect').value='';
       toast('Unit added — S.N '+nextSn+' assigned automatically, marked Available.');
     }
-  }catch(e){toast('Error: '+e.message,'err');}
+  }catch(e){toast('Error: '+friendlyError(e),'err');}
 });
 
 window._editInventory=(id)=>{
@@ -3949,7 +3981,7 @@ window._setUnitStatus = async (id, status) => {
     await updateDoc(doc(db,"inventory",id),{status, customerName});
     logActivity(status==='Sold' ? 'Marked Sold' : 'Status: '+status, 'inventory', {...s, customerName});
     toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 window._setHHFlag = async (id, hhFlag) => {
@@ -3987,7 +4019,7 @@ window._setHHFlag = async (id, hhFlag) => {
     if(hhFlag==='Sales') toast('Marked as HH Sales — counted in our stock, reported to HH.');
     else if(hhFlag==='Hide') toast('Marked as HH Hide'+(customerName?' — '+customerName:'')+' — NOT counted in our stock, held back from HH\'s report.');
     else toast('HH flag cleared.');
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 window.openInvFormModal = ()=>{
@@ -4041,7 +4073,7 @@ document.getElementById('fixSnBtn').addEventListener('click', async ()=>{
     for(const b of chunks) await b.commit();
     toast(changed ? `Renumbered ${changed} unit(s) — no more gaps.` : 'Numbering was already correct.');
   }catch(e){
-    toast('Renumber failed: '+e.message,'err');
+    toast('Renumber failed: '+friendlyError(e),'err');
   }finally{
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering';
@@ -4371,7 +4403,7 @@ window.deleteSelectedInvUnits = async ()=>{
     selectedInvIds.clear();
     document.getElementById('stockTable')?.classList.remove('select-mode');
     updateDeleteSelectedBtn();
-  }catch(e){ toast('Delete failed: '+e.message,'err'); }
+  }catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
 };
 
 function updateInvStats(){
@@ -4596,7 +4628,7 @@ window.deleteSelectedHHInvUnits = async ()=>{
     selectedHHInvIds.clear();
     document.getElementById('hhInvTable')?.classList.remove('select-mode');
     updateDeleteSelectedHHBtn();
-  }catch(e){ toast('Delete failed: '+e.message,'err'); }
+  }catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
 };
 
 document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
@@ -4657,7 +4689,7 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
       document.getElementById('hhModelInput').value='';
       toast('HH unit added — S.N '+nextSn+' assigned, marked Available.');
     }
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 });
 
 window.openHHInvFormModal = ()=>{
@@ -4719,7 +4751,7 @@ window._setHHInvStatus = async (id, status) => {
     await updateDoc(doc(db,"hh_inventory",id),{status, customerName});
     logActivity(status==='Sold' ? 'Marked Sold' : 'Status: '+status, 'hh_inventory', {...s, customerName});
     toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 
@@ -4980,7 +5012,7 @@ window.downloadStockReportJPG = async function(){
     toast('Stock report downloaded as JPG!');
   }catch(e){
     console.error('JPG export failed', e);
-    toast('Could not generate image: '+e.message,'err');
+    toast('Could not generate image: '+friendlyError(e),'err');
   }finally{
     btn.innerHTML = origHtml;
     btn.disabled = false;
@@ -5027,7 +5059,7 @@ window.addStockArea = async ()=>{
     await addDoc(collection(db,"stock_areas"),{name});
     input.value='';
     toast('Area added: '+name);
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 window.removeStockArea = async (id, name)=>{
@@ -5041,7 +5073,7 @@ window.removeStockArea = async (id, name)=>{
   try{
     await deleteDoc(doc(db,"stock_areas",id));
     toast('Area removed.');
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 window.saveAreaQty = async (model, color, areaName, value, inputEl)=>{
@@ -5071,7 +5103,7 @@ window.saveAreaQty = async (model, color, areaName, value, inputEl)=>{
     await setDoc(doc(db,"area_stock",key), {
       model, color, areas: { ...existing, [areaName]: qty }
     }, { merge:true });
-  }catch(e){ toast('Error saving area stock: '+e.message,'err'); }
+  }catch(e){ toast('Error saving area stock: '+friendlyError(e),'err'); }
 };
 
 let areaEditMode = false;
@@ -5487,7 +5519,7 @@ window.toggleCategoryAccessory = async (id, accName, checked)=>{
     // Live-refresh the fitment grid on the model form in case this category
     // is the one currently selected there, so it doesn't go stale.
     if(document.getElementById('mCategory')?.value === cat.name) renderModelFitmentToggles();
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 // Click-outside closes the accessories popover (it's appended to <body>, so
@@ -5547,7 +5579,7 @@ window.startCategoryRename = async (id)=>{
       await batch.commit();
     }
     toast(`Category renamed to "${newName}"`+(affectedBikes.length||affectedSchemes.length ? ` — updated on ${affectedBikes.length} model(s) and ${affectedSchemes.length} scheme(s).` : '.'));
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 window.addFinanceCategory = async ()=>{
@@ -5559,7 +5591,7 @@ window.addFinanceCategory = async ()=>{
     await addDoc(collection(db,"finance_categories"),{name, accessoryNames:[]});
     nameInput.value='';
     toast('Category added: '+name);
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 window.removeFinanceCategory = async (id, name)=>{
@@ -5583,7 +5615,7 @@ window.removeFinanceCategory = async (id, name)=>{
   try{
     await deleteDoc(doc(db,"finance_categories",id));
     toast('Category removed.');
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 
@@ -5667,7 +5699,7 @@ document.getElementById('saveFinBtn').addEventListener('click', async()=>{
       toast('Finance scheme added!');
     }
   }catch(e){
-    toast('Error: '+e.message,'err');
+    toast('Error: '+friendlyError(e),'err');
   }
 });
 
@@ -5769,7 +5801,7 @@ document.getElementById('saveAccBtn').addEventListener('click', async()=>{
       toast('Accessory added!');
     }
   }catch(e){
-    toast('Error: '+e.message,'err');
+    toast('Error: '+friendlyError(e),'err');
   }
 });
 
@@ -5816,7 +5848,7 @@ window._saveSn=async(col,id,val)=>{
       tx.update(ref, { sn: num });
     });
     toast('S.N updated to '+num);
-  }catch(e){ toast('Failed: '+e.message,'err'); }
+  }catch(e){ toast('Failed: '+friendlyError(e),'err'); }
 };
 
 window._deleteEntry=async(col,id)=>{
@@ -5906,7 +5938,7 @@ window._deleteEntry=async(col,id)=>{
       }
       toast(col==='finance_schemes' ? 'Finance scheme moved to Trash.' : 'Entry moved to Trash.');
     }
-  }catch(e){toast('Delete failed: '+e.message,'err');}
+  }catch(e){toast('Delete failed: '+friendlyError(e),'err');}
 };
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -6002,7 +6034,7 @@ window.restoreFromTrash = async (trashId)=>{
     await deleteDoc(doc(db,'trash',trashId));
     logActivity('Restored', t.originalCollection, t.data);
     toast('Restored to '+label+'.');
-  }catch(e){ toast('Restore failed: '+e.message,'err'); }
+  }catch(e){ toast('Restore failed: '+friendlyError(e),'err'); }
 };
 
 window.permanentlyDeleteTrashItem = async (trashId)=>{
@@ -6014,7 +6046,7 @@ window.permanentlyDeleteTrashItem = async (trashId)=>{
   });
   if(!ok) return;
   try{ await deleteDoc(doc(db,'trash',trashId)); toast('Permanently deleted.'); }
-  catch(e){ toast('Delete failed: '+e.message,'err'); }
+  catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
 };
 
 window.emptyTrash = async ()=>{
@@ -6035,7 +6067,7 @@ window.emptyTrash = async ()=>{
       await batch.commit();
     }
     toast('Trash emptied.');
-  }catch(e){ toast('Error: '+e.message,'err'); }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -6353,7 +6385,7 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
       nextSn++;
       runningTotal++;
     }catch(e){
-      results.failed.push({row, reason:e.message});
+      results.failed.push({row, reason:friendlyError(e)});
     }
   }
 
@@ -6521,7 +6553,7 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
       nextSn++;
       runningTotal++;
     }catch(e){
-      results.failed.push({row, reason:e.message});
+      results.failed.push({row, reason:friendlyError(e)});
     }
   }
 
@@ -6685,7 +6717,7 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
       results.success.push(row);
       nextSn++;
     }catch(e){
-      results.failed.push({row, reason:e.message});
+      results.failed.push({row, reason:friendlyError(e)});
     }
   }
 
