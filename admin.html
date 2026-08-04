@@ -993,6 +993,10 @@
         <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-helmet-safety"></i> Accessories
         </button>
+        <div class="sidebar-section-label">Marketing</div>
+        <button id="navEvents" onclick="switchSec('events');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-bullhorn"></i> Events & Offers
+        </button>
         <div class="sidebar-section-label">Reports</div>
         <button id="navStock" onclick="switchSec('stock');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-file-lines"></i> Stock Report
@@ -1831,6 +1835,65 @@
       </div>
     </div>
 
+    <!-- ═══ EVENTS & OFFERS ═══ -->
+    <div class="sec-panel" id="secEvents">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="eyebrow">Marketing</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Events <span class="text-amber-500">& Offers</span></div>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Melas, Dashain/summer offers, exchange campaigns — whatever's currently running shows as a popup to anyone opening the app.</p>
+        </div>
+        <button onclick="openEventFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <i class="fas fa-plus"></i> Add Event
+        </button>
+      </div>
+      <div id="eventsListWrap" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+    </div>
+
+    <!-- EVENT ADD/EDIT MODAL -->
+    <div id="eventFormModal" class="form-modal-overlay" onclick="if(event.target===this) closeEventFormModal()">
+      <div class="form-modal-box">
+      <div class="yng-card-shell p-5">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+          <div id="eventFormTitle" class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-bullhorn text-amber-500 text-lg"></i> Add Event</div>
+          <button onclick="closeEventFormModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5 sm:col-span-2">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Title <span class="text-red-500">*</span></label>
+            <input type="text" id="evTitle" placeholder="e.g. Bajaj Exchange Mela" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Start Date <span class="text-red-500">*</span></label>
+            <input type="date" id="evStartDate" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">End Date <span class="text-red-500">*</span></label>
+            <input type="date" id="evEndDate" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+          <div class="flex flex-col gap-1.5 sm:col-span-2">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Location <span class="normal-case font-medium text-slate-300">(optional)</span></label>
+            <input type="text" id="evLocation" placeholder="e.g. New Pathibhara Hotel Front, Fagunanda Chowk" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+          <div class="flex flex-col gap-1.5 sm:col-span-2">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Description <span class="normal-case font-medium text-slate-300">(optional — offers, highlights, etc.)</span></label>
+            <textarea id="evDescription" rows="3" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all resize-none" placeholder="e.g. Highest valuation on exchange, on-the-spot finance, free helmet..."></textarea>
+          </div>
+          <div class="flex flex-col gap-1.5 sm:col-span-2">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Popup Background Image URL <span class="normal-case font-medium text-slate-300">(optional)</span></label>
+            <input type="text" id="evBgImage" placeholder="https://...poster.jpg" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+        </div>
+        <div class="flex gap-2 mt-5">
+          <button id="saveEventBtn" onclick="saveEvent()" class="flex-1 py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+            <i class="fas fa-check mr-1"></i> Save Event
+          </button>
+          <button onclick="closeEventFormModal()" class="px-5 py-2.5 border-2 border-slate-200 text-slate-600 text-sm font-bold rounded-lg hover:border-slate-300 transition-all">Cancel</button>
+        </div>
+      </div>
+      </div>
+    </div>
+
     <!-- STOCK REPORT -->
     <div class="sec-panel" id="secStock">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
@@ -2196,6 +2259,23 @@
           </button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT POPUP — shown automatically on login/refresh if an event is currently running -->
+<div id="eventPopupOverlay" class="hidden fixed inset-0 z-[650] items-center justify-center p-4" style="background:rgba(15,23,42,.65);backdrop-filter:blur(3px);" onclick="if(event.target===this) closeEventPopup()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative" style="animation:slideIn .25s ease;">
+    <button onclick="closeEventPopup()" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 transition-all">
+      <i class="fas fa-xmark"></i>
+    </button>
+    <div id="eventPopupBg" class="w-full h-40 bg-gradient-to-br from-bajaj-blue to-blue-700 bg-cover bg-center flex items-end p-4">
+      <div id="eventPopupDaysBadge" class="bg-amber-400 text-slate-900 text-xs font-extrabold px-2.5 py-1 rounded-full"></div>
+    </div>
+    <div class="p-5">
+      <div id="eventPopupTitle" class="text-xl font-extrabold text-slate-900 mb-1.5"></div>
+      <div id="eventPopupLocation" class="text-xs text-slate-500 font-semibold mb-2 flex items-center gap-1.5"></div>
+      <div id="eventPopupDescription" class="text-sm text-slate-600 leading-relaxed whitespace-pre-line"></div>
     </div>
   </div>
 </div>
@@ -2575,6 +2655,11 @@ window._toggleKebab = (btn, type, id) => {
     openKebabMenuFor(btn, [
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editMaster(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('bikes', id) }
+    ]);
+  } else if(type === 'events'){
+    openKebabMenuFor(btn, [
+      { label:'Edit', icon:'fa-pen', onClick:()=>window.openEventFormModal(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('events', id) }
     ]);
   } else if(type === 'hh_inventory'){
     const s = hhInvData.find(x=>x.id===id);
@@ -3114,8 +3199,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', stock:'navStock', history:'navHistory', trash:'navTrash' };
-  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
+  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', events:'navEvents', stock:'navStock', history:'navHistory', trash:'navTrash' };
+  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', events:'mNavEvents', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -3143,6 +3228,7 @@ onAuthStateChanged(auth, async (user) => {
     loadFinanceCategories();
     loadFinanceSchemes();
     loadAccessories();
+    loadEvents();
     loadStockAreas();
     loadTrash();
     loadActivityLog();
@@ -3154,6 +3240,7 @@ onAuthStateChanged(auth, async (user) => {
     document.body.classList.remove('app-active');
     setBtnState(false);
     stopIdleLogoutTimer();
+    eventPopupShownThisLoad = false;
   }
 });
 
@@ -5811,9 +5898,150 @@ function loadAccessories(){
       <p class="text-sm mb-3">Couldn't load accessories.</p>
       <button onclick="loadAccessories()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
     </div></td></tr>`;
-    toast('Accessories sync failed: '+err.message,'err');
+    toast('Accessories sync failed: '+friendlyError(err),'err');
   });
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   EVENTS & OFFERS — melas, seasonal offers, campaigns. Whatever's running
+   today (start date <= today <= end date) shows as a popup automatically
+   on login/refresh, and everything is manageable from its own page.
+   ═══════════════════════════════════════════════════════════════════════ */
+let events = [];
+let eventEditingId = null;
+let eventPopupShownThisLoad = false;
+
+function loadEvents(){
+  onSnapshot(collection(db,"events"), snap => {
+    events = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderEventsPage();
+    if(!eventPopupShownThisLoad){
+      eventPopupShownThisLoad = true; // only auto-pop once per login/refresh, not on every live update
+      checkAndShowEventPopup();
+    }
+  }, err => {
+    console.error('events listener failed', err);
+  });
+}
+
+// Today-relative status for a given event, used both for the page's status
+// badges and for deciding which event(s) qualify for the auto-popup.
+function eventStatus(ev){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(ev.startDate); start.setHours(0,0,0,0);
+  const end = new Date(ev.endDate); end.setHours(23,59,59,999);
+  if(today < start) return 'upcoming';
+  if(today > end) return 'ended';
+  return 'running';
+}
+function daysUntil(dateStr){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(dateStr); target.setHours(0,0,0,0);
+  return Math.round((target - today) / (24*60*60*1000));
+}
+
+function renderEventsPage(){
+  const wrap = document.getElementById('eventsListWrap');
+  if(!wrap) return;
+  if(!events.length){
+    wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-bullhorn text-3xl opacity-25 block mb-2"></i><p class="text-sm">No events yet — add one to show a popup when people open the app.</p></div>`;
+    return;
+  }
+  const sorted = [...events].sort((a,b)=> new Date(a.startDate) - new Date(b.startDate));
+  wrap.innerHTML = sorted.map(ev=>{
+    const status = eventStatus(ev);
+    const badge = status==='running' ? `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Running — ${daysUntil(ev.endDate)} day${daysUntil(ev.endDate)!==1?'s':''} left</span>`
+      : status==='upcoming' ? `<span class="badge badge-amber"><i class="fas fa-clock"></i> Starts in ${daysUntil(ev.startDate)} day${daysUntil(ev.startDate)!==1?'s':''}</span>`
+      : `<span class="badge badge-neutral"><i class="fas fa-flag-checkered"></i> Ended</span>`;
+    const thumb = ev.bgImage
+      ? `<div class="w-full h-24 rounded-lg bg-cover bg-center mb-3" style="background-image:url('${escapeHtml(ev.bgImage)}')"></div>`
+      : `<div class="w-full h-24 rounded-lg bg-gradient-to-br from-bajaj-blue to-blue-700 mb-3 flex items-center justify-center"><i class="fas fa-bullhorn text-white text-2xl opacity-50"></i></div>`;
+    return `<div class="yng-card-shell p-4">
+      ${thumb}
+      <div class="flex items-start justify-between gap-2 mb-1.5">
+        <div class="font-extrabold text-slate-800 text-base leading-snug">${escapeHtml(ev.title||'Untitled')}</div>
+        <button type="button" class="kebab-btn flex-shrink-0" onclick="window._toggleKebab(this,'events','${ev.id}')" aria-label="Event actions"><i class="fas fa-ellipsis-vertical"></i></button>
+      </div>
+      <div class="mb-2">${badge}</div>
+      <div class="text-xs text-slate-500 font-semibold mb-1"><i class="fas fa-calendar-days text-slate-300 mr-1"></i>${new Date(ev.startDate).toLocaleDateString('en-GB',{day:'numeric',month:'short'})} – ${new Date(ev.endDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+      ${ev.location ? `<div class="text-xs text-slate-500 mb-1"><i class="fas fa-location-dot text-slate-300 mr-1"></i>${escapeHtml(ev.location)}</div>` : ''}
+      ${ev.description ? `<div class="text-xs text-slate-500 mt-2 line-clamp-3">${escapeHtml(ev.description)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+window.openEventFormModal = (id)=>{
+  eventEditingId = id || null;
+  const ev = id ? events.find(x=>x.id===id) : null;
+  document.getElementById('eventFormTitle').innerHTML = `<i class="fas fa-bullhorn text-amber-500 text-lg"></i> ${id?'Edit':'Add'} Event`;
+  document.getElementById('evTitle').value = ev?.title || '';
+  document.getElementById('evStartDate').value = ev?.startDate || '';
+  document.getElementById('evEndDate').value = ev?.endDate || '';
+  document.getElementById('evLocation').value = ev?.location || '';
+  document.getElementById('evDescription').value = ev?.description || '';
+  document.getElementById('evBgImage').value = ev?.bgImage || '';
+  document.getElementById('eventFormModal').classList.add('open');
+};
+window.closeEventFormModal = ()=>{
+  document.getElementById('eventFormModal').classList.remove('open');
+  eventEditingId = null;
+};
+
+window.saveEvent = async ()=>{
+  const title = document.getElementById('evTitle').value.trim();
+  const startDate = document.getElementById('evStartDate').value;
+  const endDate = document.getElementById('evEndDate').value;
+  const location = document.getElementById('evLocation').value.trim();
+  const description = document.getElementById('evDescription').value.trim();
+  const bgImage = document.getElementById('evBgImage').value.trim();
+  if(!title){ toast('Event title is required.','err'); return; }
+  if(!startDate || !endDate){ toast('Start and end dates are required.','err'); return; }
+  if(new Date(endDate) < new Date(startDate)){ toast('End date must be on or after the start date.','err'); return; }
+  if(bgImage && !/^https?:\/\/.+/i.test(bgImage)){ toast('Background image URL must start with http:// or https://','err'); return; }
+  const data = { title, startDate, endDate, location, description, bgImage };
+  try{
+    if(eventEditingId){
+      await updateDoc(doc(db,'events',eventEditingId), data);
+      logActivity('Updated', 'events', { model: title });
+      toast('Event updated.');
+    } else {
+      await addDoc(collection(db,'events'), data);
+      logActivity('Added', 'events', { model: title });
+      toast('Event added.');
+    }
+    closeEventFormModal();
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
+// Auto-popup — shows the soonest-ending currently-running event, once per
+// fresh login/page load. Picking "soonest ending" means an urgent offer
+// wrapping up today surfaces ahead of one that just started.
+function checkAndShowEventPopup(){
+  const running = events.filter(ev => eventStatus(ev)==='running');
+  if(!running.length) return;
+  const soonest = [...running].sort((a,b)=> new Date(a.endDate) - new Date(b.endDate))[0];
+  const daysLeft = daysUntil(soonest.endDate);
+  document.getElementById('eventPopupTitle').textContent = soonest.title || '';
+  document.getElementById('eventPopupLocation').innerHTML = soonest.location ? `<i class="fas fa-location-dot"></i> ${escapeHtml(soonest.location)}` : '';
+  document.getElementById('eventPopupDescription').textContent = soonest.description || '';
+  document.getElementById('eventPopupDaysBadge').textContent = daysLeft<=0 ? 'Last day!' : `${daysLeft} day${daysLeft!==1?'s':''} left`;
+  const bgEl = document.getElementById('eventPopupBg');
+  if(soonest.bgImage){
+    bgEl.style.backgroundImage = `url('${soonest.bgImage.replace(/'/g,"\\'")}')`;
+    bgEl.classList.remove('bg-gradient-to-br','from-bajaj-blue','to-blue-700');
+  } else {
+    bgEl.style.backgroundImage = '';
+    bgEl.classList.add('bg-gradient-to-br','from-bajaj-blue','to-blue-700');
+  }
+  const overlay = document.getElementById('eventPopupOverlay');
+  overlay.classList.remove('hidden');
+  overlay.classList.add('flex');
+}
+window.closeEventPopup = ()=>{
+  const overlay = document.getElementById('eventPopupOverlay');
+  overlay.classList.add('hidden');
+  overlay.classList.remove('flex');
+};
 
 function renderAccTable(){
   const tbody = document.getElementById('accTableBody');
@@ -5923,7 +6151,7 @@ window._deleteEntry=async(col,id)=>{
   // recovery window) before being removed from its live collection.
   const ok = await showDangerousConfirm({
     title: 'Delete this entry?',
-    message: col==='bikes' ? "This will remove the model from your price list (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will remove the finance scheme (recoverable from Trash for 7 days)." : (col==='accessories' ? "This will remove the accessory from the price list (recoverable from Trash for 7 days)." : (col==='hh_inventory' ? "This will remove the unit from HH Inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : "This will remove the unit from inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap."))),
+    message: col==='bikes' ? "This will remove the model from your price list (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will remove the finance scheme (recoverable from Trash for 7 days)." : (col==='accessories' ? "This will remove the accessory from the price list (recoverable from Trash for 7 days)." : (col==='events' ? "This will remove the event — it'll stop showing as a popup (recoverable from Trash for 7 days)." : (col==='hh_inventory' ? "This will remove the unit from HH Inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : "This will remove the unit from inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap.")))),
     okText: 'Delete',
     countdownSec: 3
   });
@@ -5985,7 +6213,7 @@ window._deleteEntry=async(col,id)=>{
       }
       toast('HH unit moved to Trash — S.N renumbered automatically.');
     } else {
-      const srcArr = col==='finance_schemes' ? financeSchemes : (col==='accessories' ? accessories : []);
+      const srcArr = col==='finance_schemes' ? financeSchemes : (col==='accessories' ? accessories : (col==='events' ? events : []));
       const target = srcArr.find(x=>x.id===id);
       if(target) await moveToTrash(col, id, target);
       await deleteDoc(doc(db,col,id));
@@ -6001,7 +6229,7 @@ window._deleteEntry=async(col,id)=>{
           catch(e){ console.error('Failed to clean up deleted accessory from category', c.name, e); }
         }
       }
-      toast(col==='finance_schemes' ? 'Finance scheme moved to Trash.' : 'Entry moved to Trash.');
+      toast(col==='finance_schemes' ? 'Finance scheme moved to Trash.' : (col==='events' ? 'Event moved to Trash.' : 'Entry moved to Trash.'));
     }
   }catch(e){toast('Delete failed: '+friendlyError(e),'err');}
 };
@@ -6048,7 +6276,7 @@ function daysLeft(deletedAt){
   return Math.max(0, diffDays);
 }
 
-const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team' };
+const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event' };
 
 function renderTrashTable(){
   const tbody = document.getElementById('trashTableBody');
@@ -6808,8 +7036,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
-const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', stock:'secStock', history:'secHistory', trash:'secTrash' };
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', events:'Events & Offers', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
+const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', events:'secEvents', stock:'secStock', history:'secHistory', trash:'secTrash' };
 window.switchSec=(sec)=>{
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
@@ -6823,6 +7051,7 @@ window.switchSec=(sec)=>{
   if(sec==='inv') populateModelDropdown();
   if(sec==='hhinv') populateHHModelDropdown();
   if(sec==='allinv') renderAllInventoryTable();
+  if(sec==='events') renderEventsPage();
   if(sec==='stock') loadStockReportData(true);
   if(sec==='history') renderActivityLog();
   if(sec==='trash') renderTrashTable();
