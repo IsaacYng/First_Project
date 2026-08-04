@@ -1880,8 +1880,22 @@
             <textarea id="evDescription" rows="3" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all resize-none" placeholder="e.g. Highest valuation on exchange, on-the-spot finance, free helmet..."></textarea>
           </div>
           <div class="flex flex-col gap-1.5 sm:col-span-2">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Popup Background Image URL <span class="normal-case font-medium text-slate-300">(optional)</span></label>
-            <input type="text" id="evBgImage" placeholder="https://...poster.jpg" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Popup Background Image <span class="normal-case font-medium text-slate-300">(optional)</span></label>
+            <div id="evBgPreviewWrap" class="hidden relative mb-1.5">
+              <img id="evBgPreview" class="w-full h-32 object-cover rounded-lg border border-slate-200"/>
+              <button type="button" onclick="removeEventBgImage()" class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-white/90 hover:bg-white shadow flex items-center justify-center text-red-500"><i class="fas fa-trash-can text-xs"></i></button>
+            </div>
+            <label class="flex items-center gap-3 border-2 border-dashed border-slate-300 bg-slate-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-slate-50 hover:border-bajaj-blue transition-all">
+              <i class="fas fa-cloud-arrow-up text-slate-400 text-lg flex-shrink-0"></i>
+              <span id="evBgUploadLabel" class="text-sm text-slate-500 font-medium truncate">Click to upload an image…</span>
+              <input type="file" accept="image/*" id="evBgImageInput" class="hidden" onchange="handleEventBgImageSelect(event)"/>
+            </label>
+            <div class="flex items-center gap-2 my-1">
+              <div class="flex-1 h-px bg-slate-100"></div>
+              <span class="text-[10px] text-slate-300 font-bold uppercase">or paste a URL</span>
+              <div class="flex-1 h-px bg-slate-100"></div>
+            </div>
+            <input type="text" id="evBgImage" placeholder="https://...poster.jpg" oninput="handleEventBgUrlInput()" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
           </div>
         </div>
         <div class="flex gap-2 mt-5">
@@ -5980,11 +5994,75 @@ window.openEventFormModal = (id)=>{
   document.getElementById('evLocation').value = ev?.location || '';
   document.getElementById('evDescription').value = ev?.description || '';
   document.getElementById('evBgImage').value = ev?.bgImage || '';
+  updateEventBgPreview(ev?.bgImage || '');
   document.getElementById('eventFormModal').classList.add('open');
 };
 window.closeEventFormModal = ()=>{
   document.getElementById('eventFormModal').classList.remove('open');
   eventEditingId = null;
+};
+
+// Shows/hides the preview thumbnail and keeps the upload-area label in sync
+// with whatever is currently set — whether that came from an upload or a
+// pasted URL, both end up in the same #evBgImage field.
+function updateEventBgPreview(src){
+  const wrap = document.getElementById('evBgPreviewWrap');
+  const img = document.getElementById('evBgPreview');
+  const label = document.getElementById('evBgUploadLabel');
+  if(src){
+    img.src = src;
+    wrap.classList.remove('hidden');
+    label.textContent = 'Click to replace the image…';
+  } else {
+    wrap.classList.add('hidden');
+    label.textContent = 'Click to upload an image…';
+  }
+}
+window.handleEventBgUrlInput = ()=>{
+  updateEventBgPreview(document.getElementById('evBgImage').value.trim());
+};
+window.removeEventBgImage = ()=>{
+  document.getElementById('evBgImage').value = '';
+  updateEventBgPreview('');
+};
+
+// Resized client-side and stored as base64 directly in the event doc — same
+// approach as the profile photo, so this doesn't depend on Firebase Storage
+// being set up. Banners are wider than an avatar, so this caps width/height
+// instead of cropping to a square, and compresses harder since a marketing
+// banner has more detail than a small round photo.
+window.handleEventBgImageSelect = (event)=>{
+  const file = event.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ toast('Please choose an image file.','err'); return; }
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const maxW = 900, maxH = 500;
+      let w = img.width, h = img.height;
+      const scale = Math.min(maxW/w, maxH/h, 1); // never upscale, only shrink if needed
+      w = Math.round(w*scale); h = Math.round(h*scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      let quality = 0.72;
+      let base64 = canvas.toDataURL('image/jpeg', quality);
+      // Firestore documents cap out at 1MB total — back off quality a bit
+      // more if a busy/detailed poster still comes out large after resizing.
+      while(base64.length > 700000 && quality > 0.35){
+        quality -= 0.12;
+        base64 = canvas.toDataURL('image/jpeg', quality);
+      }
+      if(base64.length > 700000){ toast('Image is too large even after compression — try a simpler/smaller image.','err'); return; }
+      document.getElementById('evBgImage').value = base64;
+      updateEventBgPreview(base64);
+    };
+    img.onerror = ()=>toast('Could not read that image.','err');
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
 };
 
 window.saveEvent = async ()=>{
@@ -5997,7 +6075,7 @@ window.saveEvent = async ()=>{
   if(!title){ toast('Event title is required.','err'); return; }
   if(!startDate || !endDate){ toast('Start and end dates are required.','err'); return; }
   if(new Date(endDate) < new Date(startDate)){ toast('End date must be on or after the start date.','err'); return; }
-  if(bgImage && !/^https?:\/\/.+/i.test(bgImage)){ toast('Background image URL must start with http:// or https://','err'); return; }
+  if(bgImage && !/^https?:\/\/.+/i.test(bgImage) && !/^data:image\//i.test(bgImage)){ toast('Background image must be a valid http(s) URL or an uploaded image.','err'); return; }
   const data = { title, startDate, endDate, location, description, bgImage };
   try{
     if(eventEditingId){
