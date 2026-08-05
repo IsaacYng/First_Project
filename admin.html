@@ -1080,6 +1080,13 @@
 
     <!-- ═══ PRICE LIST ═══ -->
     <div class="sec-panel active" id="secPrice">
+      <div id="greetingBanner" class="mb-5 flex items-center gap-3 bg-gradient-to-r from-blue-50 to-transparent border border-blue-100 rounded-xl px-4 py-3">
+        <div id="greetingIcon" class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-amber-500 text-base flex-shrink-0 shadow-sm"><i class="fas fa-sun"></i></div>
+        <div>
+          <div id="greetingText" class="text-sm font-extrabold text-slate-800">Good Morning, Admin!</div>
+          <div id="greetingDate" class="text-[11px] text-slate-400 font-semibold"></div>
+        </div>
+      </div>
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
         <div>
           <div class="section-label">Management ·</div>
@@ -3371,6 +3378,26 @@ let currentUserMobile = '';
 // removed", a data URL string means "new photo chosen".
 let pendingProfilePhoto = null;
 
+// Good Morning/Afternoon/Evening — a small personal touch on the landing
+// page, based on the device's local clock and whatever name is on file.
+function renderGreeting(){
+  const textEl = document.getElementById('greetingText');
+  if(!textEl) return;
+  const hour = new Date().getHours();
+  let greeting, icon;
+  if(hour < 5){ greeting = 'Working late'; icon = 'fa-moon'; }
+  else if(hour < 12){ greeting = 'Good Morning'; icon = 'fa-sun'; }
+  else if(hour < 17){ greeting = 'Good Afternoon'; icon = 'fa-cloud-sun'; }
+  else if(hour < 21){ greeting = 'Good Evening'; icon = 'fa-cloud-moon'; }
+  else { greeting = 'Working late'; icon = 'fa-moon'; }
+  const firstName = (currentUserName||'Admin').trim().split(/\s+/)[0];
+  textEl.textContent = `${greeting}, ${firstName}!`;
+  const iconEl = document.getElementById('greetingIcon');
+  if(iconEl) iconEl.innerHTML = `<i class="fas ${icon}"></i>`;
+  const dateEl = document.getElementById('greetingDate');
+  if(dateEl) dateEl.textContent = new Date().toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+}
+
 async function loadProfile(uid) {
   try {
     const snap = await getDoc(doc(db,"profiles",uid));
@@ -3418,6 +3445,7 @@ async function loadProfile(uid) {
       avatarEl.style.background = currentUserAvatarColor;
     }
     const pmName = document.getElementById('profileMenuName'); if(pmName) pmName.textContent = name;
+    renderGreeting();
     const pmEmail = document.getElementById('profileMenuEmail'); if(pmEmail) pmEmail.textContent = currentUserEmail;
     const pmRole = document.getElementById('profileMenuRoleBadge');
     if(pmRole){
@@ -3820,10 +3848,8 @@ function renderMasterTable() {
       }
       return fits;
     });
-    const fitmentBlock = catAccessoryNames.length
-      ? (fittedNames.length
-          ? `<div class="flex flex-wrap justify-end gap-1">${fittedNames.map(name=>`<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-semibold"><i class="fas fa-check text-[8px]"></i> ${escapeHtml(name)}</span>`).join('')}</div>`
-          : `<div class="text-[10px] text-slate-400">No accessories fitted</div>`)
+    const fitmentBlock = (catAccessoryNames.length && fittedNames.length)
+      ? `<div class="flex flex-wrap justify-end gap-1">${fittedNames.map(name=>`<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-semibold"><i class="fas fa-check text-[8px]"></i> ${escapeHtml(name)}</span>`).join('')}</div>`
       : '';
     const catBadge=`<div class="flex flex-col items-end gap-1">
       <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">${escapeHtml(category)}</span>
@@ -5946,6 +5972,12 @@ function loadAccessories(){
   onSnapshot(collection(db,"accessories"), snap => {
     accessories = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderAccTable();
+    // Category cards show which accessories are selected, filtered against
+    // this same list — if categories happened to load and render BEFORE
+    // accessories arrived, they'd show "No accessories set" incorrectly
+    // until something else (like opening the popover) re-rendered them.
+    if(typeof renderFinCategoryChips === 'function') renderFinCategoryChips();
+    if(typeof renderMasterTable === 'function' && allMasterBikes.length) renderMasterTable();
   }, err => {
     console.error('accessories listener failed', err);
     document.getElementById('accTableBody').innerHTML = `<tr><td colspan="3"><div class="py-12 text-center text-slate-400">
