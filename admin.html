@@ -6612,32 +6612,53 @@ window.closeDocUploadModal = ()=>{
 };
 
 window.handleDocFileSelect = (event)=>{
-  const file = event.target.files[0];
-  if(!file) return;
-  const ext = (file.name.split('.').pop()||'').toLowerCase();
-  if(!DOC_ALLOWED_EXT.includes(ext)){
-    toast('Only PDF, JPG/PNG photos, Word (.doc/.docx), or Excel (.xls/.xlsx) files are allowed.','err');
-    event.target.value = '';
-    return;
+  try{
+    const file = event.target.files[0];
+    console.log('[docUpload] file selected:', file?.name, file?.size, file?.type);
+    if(!file) return;
+    const ext = (file.name.split('.').pop()||'').toLowerCase();
+    if(!DOC_ALLOWED_EXT.includes(ext)){
+      toast('Only PDF, JPG/PNG photos, Word (.doc/.docx), or Excel (.xls/.xlsx) files are allowed.','err');
+      event.target.value = '';
+      return;
+    }
+    if(file.size > DOC_MAX_FILE_SIZE){
+      toast(`File is too large — max ${formatBytes(DOC_MAX_FILE_SIZE)} per document.`,'err');
+      event.target.value = '';
+      return;
+    }
+    pendingDocFile = file;
+    const labelEl = document.getElementById('docFileLabel');
+    if(labelEl) labelEl.textContent = file.name;
+    console.log('[docUpload] file accepted, ready to upload');
+  }catch(e){
+    console.error('[docUpload] file selection failed:', e);
+    toast('Could not read that file: '+(e.message||'unknown error'),'err');
   }
-  if(file.size > DOC_MAX_FILE_SIZE){
-    toast(`File is too large — max ${formatBytes(DOC_MAX_FILE_SIZE)} per document.`,'err');
-    event.target.value = '';
-    return;
-  }
-  pendingDocFile = file;
-  document.getElementById('docFileLabel').textContent = file.name;
 };
 
 window.uploadDocument = async ()=>{
-  const name = document.getElementById('docName').value.trim();
-  const category = document.getElementById('docCategory').value;
+ try{
+  console.log('[docUpload] button clicked');
+  const nameEl = document.getElementById('docName');
+  const categoryEl = document.getElementById('docCategory');
+  if(!nameEl || !categoryEl){
+    toast('Upload form did not load correctly — please refresh the page.','err');
+    console.error('[docUpload] missing form elements', {nameEl, categoryEl});
+    return;
+  }
+  const name = nameEl.value.trim();
+  const category = categoryEl.value;
   if(!name){ toast('Document name is required.','err'); return; }
-  if(!pendingDocFile){ toast('Choose a file to upload.','err'); return; }
+  if(!pendingDocFile){ toast('Choose a file to upload first.','err'); return; }
+  console.log('[docUpload] validated, file:', pendingDocFile.name, pendingDocFile.size, 'bytes');
 
   // The whole point of the 40% cap — check BEFORE uploading, not after, so
   // a big file never gets partway uploaded only to be rejected.
-  if(getTotalStorageUsed() + pendingDocFile.size > STORAGE_CAP_BYTES){
+  const used = getTotalStorageUsed();
+  console.log('[docUpload] storage check:', used, '+', pendingDocFile.size, 'vs cap', STORAGE_CAP_BYTES);
+  if(used + pendingDocFile.size > STORAGE_CAP_BYTES){
+    console.log('[docUpload] blocked — over storage cap, showing upgrade modal');
     closeDocUploadModal();
     openDocUpgradeModal();
     return;
@@ -6646,25 +6667,31 @@ window.uploadDocument = async ()=>{
   const btn = document.getElementById('docUploadBtn');
   const progressWrap = document.getElementById('docUploadProgress');
   const progressBar = document.getElementById('docUploadProgressBar');
-  btn.disabled = true;
-  progressWrap.classList.remove('hidden');
-  progressBar.style.width = '0%';
+  if(btn) btn.disabled = true;
+  if(progressWrap) progressWrap.classList.remove('hidden');
+  if(progressBar) progressBar.style.width = '0%';
+  toast('Uploading…');
 
   const ext = (pendingDocFile.name.split('.').pop()||'').toLowerCase();
   const storagePath = `documents/${Date.now()}_${pendingDocFile.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+  console.log('[docUpload] starting upload to', storagePath);
   const storageRef = ref(storage, storagePath);
   const uploadTask = uploadBytesResumable(storageRef, pendingDocFile);
 
   uploadTask.on('state_changed',
-    (snap)=>{ progressBar.style.width = Math.round((snap.bytesTransferred/snap.totalBytes)*100)+'%'; },
+    (snap)=>{
+      console.log('[docUpload] progress', snap.bytesTransferred, '/', snap.totalBytes);
+      if(progressBar) progressBar.style.width = Math.round((snap.bytesTransferred/snap.totalBytes)*100)+'%';
+    },
     (err)=>{
-      console.error('Document upload failed:', err.code, err.message, err);
-      toast('Upload failed: '+friendlyError(err),'err');
-      btn.disabled = false;
-      progressWrap.classList.add('hidden');
+      console.error('[docUpload] upload failed:', err.code, err.message, err);
+      toast('Upload failed: '+friendlyError(err)+(err.code?` (${err.code})`:''),'err');
+      if(btn) btn.disabled = false;
+      if(progressWrap) progressWrap.classList.add('hidden');
     },
     async ()=>{
       try{
+        console.log('[docUpload] upload complete, getting download URL');
         const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
         await addDoc(collection(db,'documents'), {
           name, category, fileExt: ext, fileName: pendingDocFile.name,
@@ -6672,17 +6699,30 @@ window.uploadDocument = async ()=>{
           uploadedBy: currentUserEmail || currentUserName || 'Unknown',
           uploadedAt: new Date()
         });
+        console.log('[docUpload] Firestore record saved — done');
         logActivity('Uploaded', 'documents', { model: name });
         toast('Document uploaded.');
         closeDocUploadModal();
       }catch(e){
-        toast('Error: '+friendlyError(e),'err');
+        console.error('[docUpload] post-upload step failed:', e.code, e.message, e);
+        toast('Error: '+friendlyError(e)+(e.code?` (${e.code})`:''),'err');
       }finally{
-        btn.disabled = false;
-        progressWrap.classList.add('hidden');
+        if(btn) btn.disabled = false;
+        if(progressWrap) progressWrap.classList.add('hidden');
       }
     }
   );
+ }catch(outerErr){
+   // Catches anything unexpected happening before the async upload even
+   // starts — without this, a synchronous error here would fail completely
+   // silently: no toast, nothing in the UI, just a swallowed exception.
+   console.error('[docUpload] unexpected error before upload started:', outerErr);
+   toast('Something went wrong opening the upload: '+(outerErr.message||'unknown error'),'err');
+   const btn = document.getElementById('docUploadBtn');
+   const progressWrap = document.getElementById('docUploadProgress');
+   if(btn) btn.disabled = false;
+   if(progressWrap) progressWrap.classList.add('hidden');
+ }
 };
 
 window.downloadDocument = (id)=>{
