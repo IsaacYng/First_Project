@@ -1864,7 +1864,7 @@
         <div>
           <div class="eyebrow">Dealership</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Document <span class="text-amber-500">Vault</span></div>
-          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Shared across the whole team — KYC forms, allocation forms, Namsari letters — scanned and stored safely. PDF, photo, Word, or Excel, up to 10 MB each.</p>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Shared across the whole team — KYC forms, allocation forms, Namsari letters — scanned and stored safely. PDF, photo, Word, or Excel — photos are compressed automatically, PDFs/Word/Excel need to already be under ~700 KB.</p>
         </div>
         <button onclick="openDocUploadModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
           <i class="fas fa-upload"></i> Upload Document
@@ -1918,7 +1918,7 @@
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">File <span class="text-red-500">*</span> <span class="normal-case font-medium text-slate-300">(PDF, JPG/PNG photo, Word, or Excel — max 10 MB)</span></label>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">File <span class="text-red-500">*</span> <span class="normal-case font-medium text-slate-300">(PDF, JPG/PNG photo, Word, or Excel — photos auto-compress, others need to be under ~700 KB)</span></label>
             <label class="flex items-center gap-3 border-2 border-dashed border-slate-300 bg-slate-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-slate-50 hover:border-bajaj-blue transition-all">
               <i class="fas fa-cloud-arrow-up text-slate-400 text-lg flex-shrink-0"></i>
               <span id="docFileLabel" class="text-sm text-slate-500 font-medium truncate">Click to choose a file…</span>
@@ -2473,9 +2473,6 @@ import {
   getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc, where,
   serverTimestamp, query, orderBy, limit, runTransaction, writeBatch, getCountFromServer
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-import {
-  getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject
-} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-storage.js";
 
 /* ─── Who's doing it — used by the Trash / Activity Log so every delete,
    sale, and restore is attributed to whoever was signed in at the time. ─── */
@@ -2547,7 +2544,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
 // A second, independent Firebase app instance — used ONLY when creating a
 // new staff account. createUserWithEmailAndPassword normally signs in as
 // the newly-created user on whatever auth instance it's called against; by
@@ -6453,11 +6449,11 @@ window.closeEventPopup = ()=>{
 
 /* ═══════════════════════════════════════════════════════════════════════
    DOCUMENT VAULT — KYC forms, allocation forms, Namsari letters, etc.
-   Stored in Firebase Storage (actual files can run several MB, well past
-   what Firestore's own 1MB-per-document limit could hold), with metadata
-   (name, category, size, who/when) tracked in Firestore for listing.
-   Capped at 40% of the free-tier storage plan on purpose — leaves real
-   headroom before anything is ever at risk of silently failing.
+   Stored as base64 directly in Firestore (not Firebase Storage — that
+   needs the paid Blaze plan even for free-tier-sized usage, so this stays
+   on the free Spark plan instead). Each file is capped around 700KB to
+   stay well under Firestore's 1MB-per-document limit; photos are
+   auto-compressed to fit, PDF/Word/Excel need to already be small enough.
    ═══════════════════════════════════════════════════════════════════════ */
 let documents = [];
 let docTypeFilter = 'all';
@@ -6469,15 +6465,18 @@ window.setDocTypeFilter = (type)=>{
   renderDocumentsPage();
 };
 let pendingDocFile = null;
-const DOC_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB per file
+const DOC_MAX_FILE_SIZE = 700 * 1024; // ~700KB stored as base64 text — leaves comfortable room under Firestore's 1MB-per-document limit
 const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png'];
-// Firebase's free (Spark) plan includes 5GB of Cloud Storage — capping
-// usage at 40% of that (2GB) keeps a comfortable safety margin rather than
-// running right up to the actual limit.
-// Firebase's free (Spark) plan includes 5GB of Cloud Storage by default —
-// this starts there but a Master ID can change it to whatever unit/amount
-// makes sense (KB through TB) from the gear icon on the Documents page.
-let STORAGE_CAP_BYTES = 5 * 1024 * 1024 * 1024 * 0.4;
+// Firestore's free (Spark) tier gives ~1 GiB of total stored data for the
+// ENTIRE database — documents-as-base64 (~700KB each) dwarf everything
+// else that lives here: inventory/price-list records are ~1-2KB each,
+// activity log entries ~300 bytes (even 100,000 of them is only ~30MB),
+// events/team photos are occasional and small. Realistically, everything
+// EXCEPT documents stays under 50-60MB even after years of heavy use — so
+// documents get 70% of the full 1 GiB here, leaving a genuinely comfortable
+// ~300MB buffer for everything else plus room to grow. A Master ID can
+// change this from the gear icon if actual usage patterns turn out different.
+let STORAGE_CAP_BYTES = 1024 * 1024 * 1024 * 0.7;
 const BYTE_UNITS = { KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 };
 
 function loadStorageSettings(){
@@ -6622,8 +6621,17 @@ window.handleDocFileSelect = (event)=>{
       event.target.value = '';
       return;
     }
-    if(file.size > DOC_MAX_FILE_SIZE){
-      toast(`File is too large — max ${formatBytes(DOC_MAX_FILE_SIZE)} per document.`,'err');
+    const isImage = ['jpg','jpeg','png'].includes(ext);
+    // Photos get compressed automatically before saving, so allow a much
+    // larger original — a typical phone photo (3-8MB) compresses down
+    // comfortably. PDF/Word/Excel can't be compressed the same way, so
+    // those need to already be under the real limit (accounting for the
+    // ~37% size increase from base64-encoding before it's stored).
+    const rawLimit = isImage ? 20*1024*1024 : Math.floor(DOC_MAX_FILE_SIZE / 1.37);
+    if(file.size > rawLimit){
+      toast(isImage
+        ? `That photo is too large to process — try a smaller one (max 20 MB original).`
+        : `File is too large — max ~${formatBytes(rawLimit)} for PDF/Word/Excel files.`, 'err');
       event.target.value = '';
       return;
     }
@@ -6653,71 +6661,114 @@ window.uploadDocument = async ()=>{
   if(!pendingDocFile){ toast('Choose a file to upload first.','err'); return; }
   console.log('[docUpload] validated, file:', pendingDocFile.name, pendingDocFile.size, 'bytes');
 
-  // The whole point of the 40% cap — check BEFORE uploading, not after, so
-  // a big file never gets partway uploaded only to be rejected.
-  const used = getTotalStorageUsed();
-  console.log('[docUpload] storage check:', used, '+', pendingDocFile.size, 'vs cap', STORAGE_CAP_BYTES);
-  if(used + pendingDocFile.size > STORAGE_CAP_BYTES){
-    console.log('[docUpload] blocked — over storage cap, showing upgrade modal');
-    closeDocUploadModal();
-    openDocUpgradeModal();
-    return;
-  }
-
   const btn = document.getElementById('docUploadBtn');
   const progressWrap = document.getElementById('docUploadProgress');
   const progressBar = document.getElementById('docUploadProgressBar');
   if(btn) btn.disabled = true;
   if(progressWrap) progressWrap.classList.remove('hidden');
-  if(progressBar) progressBar.style.width = '0%';
+  if(progressBar) progressBar.style.width = '30%';
   toast('Uploading…');
 
   const ext = (pendingDocFile.name.split('.').pop()||'').toLowerCase();
-  const storagePath = `documents/${Date.now()}_${pendingDocFile.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-  console.log('[docUpload] starting upload to', storagePath);
-  const storageRef = ref(storage, storagePath);
-  const uploadTask = uploadBytesResumable(storageRef, pendingDocFile);
+  const isImage = ['jpg','jpeg','png'].includes(ext);
 
-  uploadTask.on('state_changed',
-    (snap)=>{
-      console.log('[docUpload] progress', snap.bytesTransferred, '/', snap.totalBytes);
-      if(progressBar) progressBar.style.width = Math.round((snap.bytesTransferred/snap.totalBytes)*100)+'%';
-    },
-    (err)=>{
-      console.error('[docUpload] upload failed:', err.code, err.message, err);
-      toast('Upload failed: '+friendlyError(err)+(err.code?` (${err.code})`:''),'err');
+  const finish = async (fileData)=>{
+    // The whole point of the cap — check the ACTUAL stored size (base64
+    // text, which is what counts against Firestore) before writing, not
+    // after.
+    const used = getTotalStorageUsed();
+    if(used + fileData.length > STORAGE_CAP_BYTES){
+      console.log('[docUpload] blocked — over storage cap, showing upgrade modal');
+      closeDocUploadModal();
+      openDocUpgradeModal();
       if(btn) btn.disabled = false;
       if(progressWrap) progressWrap.classList.add('hidden');
-    },
-    async ()=>{
-      try{
-        console.log('[docUpload] upload complete, getting download URL');
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        await addDoc(collection(db,'documents'), {
-          name, category, fileExt: ext, fileName: pendingDocFile.name,
-          sizeBytes: pendingDocFile.size, storagePath, downloadURL,
-          uploadedBy: currentUserEmail || currentUserName || 'Unknown',
-          uploadedAt: new Date()
-        });
-        console.log('[docUpload] Firestore record saved — done');
-        logActivity('Uploaded', 'documents', { model: name });
-        toast('Document uploaded.');
-        closeDocUploadModal();
-      }catch(e){
-        console.error('[docUpload] post-upload step failed:', e.code, e.message, e);
-        toast('Error: '+friendlyError(e)+(e.code?` (${e.code})`:''),'err');
-      }finally{
+      return;
+    }
+    if(progressBar) progressBar.style.width = '80%';
+    try{
+      await addDoc(collection(db,'documents'), {
+        name, category, fileExt: ext, fileName: pendingDocFile.name,
+        fileData, sizeBytes: fileData.length,
+        uploadedBy: currentUserEmail || currentUserName || 'Unknown',
+        uploadedAt: new Date()
+      });
+      console.log('[docUpload] Firestore record saved — done');
+      if(progressBar) progressBar.style.width = '100%';
+      logActivity('Uploaded', 'documents', { model: name });
+      toast('Document uploaded.');
+      closeDocUploadModal();
+    }catch(e){
+      console.error('[docUpload] save failed:', e.code, e.message, e);
+      toast('Error: '+friendlyError(e)+(e.code?` (${e.code})`:''),'err');
+    }finally{
+      if(btn) btn.disabled = false;
+      if(progressWrap) progressWrap.classList.add('hidden');
+    }
+  };
+
+  const reader = new FileReader();
+  reader.onerror = ()=>{
+    console.error('[docUpload] FileReader failed');
+    toast('Could not read that file.','err');
+    if(btn) btn.disabled = false;
+    if(progressWrap) progressWrap.classList.add('hidden');
+  };
+
+  if(isImage){
+    // Photos get resized/compressed toward the size limit automatically —
+    // a phone-camera photo of a citizenship card easily starts well over
+    // 700KB, and there's no reason to reject it outright when a quick
+    // downscale gets it comfortably under.
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const maxDim = 1600;
+        let w = img.width, h = img.height;
+        const scale = Math.min(maxDim/w, maxDim/h, 1);
+        w = Math.round(w*scale); h = Math.round(h*scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        let quality = 0.82;
+        let fileData = canvas.toDataURL('image/jpeg', quality);
+        while(fileData.length > DOC_MAX_FILE_SIZE && quality > 0.3){
+          quality -= 0.1;
+          fileData = canvas.toDataURL('image/jpeg', quality);
+        }
+        if(fileData.length > DOC_MAX_FILE_SIZE){
+          toast(`Even compressed, this photo is too large — try a simpler/smaller photo (max ~${formatBytes(DOC_MAX_FILE_SIZE)}).`,'err');
+          if(btn) btn.disabled = false;
+          if(progressWrap) progressWrap.classList.add('hidden');
+          return;
+        }
+        finish(fileData);
+      };
+      img.onerror = ()=>{ toast('Could not read that image.','err'); if(btn) btn.disabled = false; if(progressWrap) progressWrap.classList.add('hidden'); };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(pendingDocFile);
+  } else {
+    // PDF/Word/Excel can't be auto-compressed client-side the way an image
+    // can — these just need to already fit under the limit.
+    reader.onload = (e)=>{
+      const fileData = e.target.result;
+      if(fileData.length > DOC_MAX_FILE_SIZE){
+        toast(`File is too large once stored — max ~${formatBytes(DOC_MAX_FILE_SIZE)} for PDF/Word/Excel files.`,'err');
         if(btn) btn.disabled = false;
         if(progressWrap) progressWrap.classList.add('hidden');
+        return;
       }
-    }
-  );
+      finish(fileData);
+    };
+    reader.readAsDataURL(pendingDocFile);
+  }
  }catch(outerErr){
-   // Catches anything unexpected happening before the async upload even
-   // starts — without this, a synchronous error here would fail completely
+   // Catches anything unexpected happening before the read even starts —
+   // without this, a synchronous error here would fail completely
    // silently: no toast, nothing in the UI, just a swallowed exception.
-   console.error('[docUpload] unexpected error before upload started:', outerErr);
-   toast('Something went wrong opening the upload: '+(outerErr.message||'unknown error'),'err');
+   console.error('[docUpload] unexpected error:', outerErr);
+   toast('Something went wrong: '+(outerErr.message||'unknown error'),'err');
    const btn = document.getElementById('docUploadBtn');
    const progressWrap = document.getElementById('docUploadProgress');
    if(btn) btn.disabled = false;
@@ -6727,8 +6778,13 @@ window.uploadDocument = async ()=>{
 
 window.downloadDocument = (id)=>{
   const d = documents.find(x=>x.id===id);
-  if(!d?.downloadURL) return;
-  window.open(d.downloadURL, '_blank');
+  if(!d?.fileData) return;
+  const a = document.createElement('a');
+  a.href = d.fileData;
+  a.download = d.fileName || d.name || 'document';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 };
 
 /* ─── Storage-full "upgrade" flow ──────────────────────────────────────
@@ -6998,12 +7054,6 @@ async function purgeExpiredTrash(){
   });
   for(const t of expired){
     try{
-      // A trashed document's actual file in Storage was kept around this
-      // whole time so restoring still worked — now that it's truly expired,
-      // clean that up too, not just the Firestore metadata.
-      if(t.originalCollection==='documents' && t.data?.storagePath){
-        try{ await deleteObject(ref(storage, t.data.storagePath)); }catch(e){ console.error('storage cleanup failed', e); }
-      }
       await deleteDoc(doc(db,'trash',t.id));
     }catch(e){ console.error('purge failed', e); }
   }
@@ -7078,9 +7128,6 @@ window.permanentlyDeleteTrashItem = async (trashId)=>{
   });
   if(!ok) return;
   try{
-    if(t?.originalCollection==='documents' && t?.data?.storagePath){
-      try{ await deleteObject(ref(storage, t.data.storagePath)); }catch(e){ console.error('storage cleanup failed', e); }
-    }
     await deleteDoc(doc(db,'trash',trashId));
     toast('Permanently deleted.');
   }
