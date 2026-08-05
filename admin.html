@@ -1003,6 +1003,9 @@
         <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-helmet-safety"></i> Accessories
         </button>
+        <button id="navDocs" onclick="switchSec('docs');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-folder-open"></i> Documents
+        </button>
         <div class="sidebar-section-label">Marketing</div>
         <button id="navEvents" onclick="switchSec('events');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-bullhorn"></i> Events & Offers
@@ -1852,6 +1855,106 @@
       </div>
     </div>
 
+    <!-- ═══ DOCUMENTS ═══ -->
+    <div class="sec-panel" id="secDocs">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="eyebrow">Dealership</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Document <span class="text-amber-500">Vault</span></div>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">KYC forms, allocation forms, Namsari letters — scanned and stored safely. PDF, Word, or Excel, up to 10 MB each.</p>
+        </div>
+        <button onclick="openDocUploadModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <i class="fas fa-upload"></i> Upload Document
+        </button>
+      </div>
+
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <div class="text-xs font-bold text-slate-600"><i class="fas fa-database text-slate-400 mr-1"></i> Storage Used</div>
+          <div id="docStorageLabel" class="text-xs font-bold text-slate-500">0 MB / 0 MB</div>
+        </div>
+        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+          <div id="docStorageBar" class="h-full bg-bajaj-blue rounded-full transition-all" style="width:0%"></div>
+        </div>
+        <p class="text-[10.5px] text-slate-400 mt-1.5">Capped at 40% of the free storage plan, so there's always headroom before anything runs short.</p>
+      </div>
+
+      <div id="docsListWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+
+    <!-- DOCUMENT UPLOAD MODAL -->
+    <div id="docUploadModal" class="form-modal-overlay" onclick="if(event.target===this) closeDocUploadModal()">
+      <div class="form-modal-box">
+      <div class="yng-card-shell p-5">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-folder-open text-amber-500 text-lg"></i> Upload Document</div>
+          <button onclick="closeDocUploadModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Document Name <span class="text-red-500">*</span></label>
+            <input type="text" id="docName" placeholder="e.g. Santosh Rai - KYC Form" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Category</label>
+            <select id="docCategory" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
+              <option>KYC Form</option>
+              <option>Allocation Form</option>
+              <option>Namsari Letter</option>
+              <option>Citizenship / ID</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">File <span class="text-red-500">*</span> <span class="normal-case font-medium text-slate-300">(PDF, Word, or Excel — max 10 MB)</span></label>
+            <label class="flex items-center gap-3 border-2 border-dashed border-slate-300 bg-slate-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-slate-50 hover:border-bajaj-blue transition-all">
+              <i class="fas fa-cloud-arrow-up text-slate-400 text-lg flex-shrink-0"></i>
+              <span id="docFileLabel" class="text-sm text-slate-500 font-medium truncate">Click to choose a file…</span>
+              <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" id="docFileInput" class="hidden" onchange="handleDocFileSelect(event)"/>
+            </label>
+          </div>
+          <div id="docUploadProgress" class="hidden">
+            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div id="docUploadProgressBar" class="h-full bg-emerald-500 rounded-full transition-all" style="width:0%"></div>
+            </div>
+          </div>
+          <button id="docUploadBtn" onclick="uploadDocument()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+            <i class="fas fa-upload mr-1"></i> Upload
+          </button>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- STORAGE FULL — "UPGRADE" POPUP (this business runs on the Firebase free
+         tier; there's no real payment backend, so this is a friendly dead-end
+         that always points back to the Master ID rather than pretending to
+         process a real charge) -->
+    <div id="docUpgradeModal" class="hidden fixed inset-0 z-[650] items-center justify-center p-4" style="background:rgba(15,23,42,.65);backdrop-filter:blur(3px);" onclick="if(event.target===this) closeDocUpgradeModal()">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative" style="animation:slideIn .2s ease;">
+        <button onclick="closeDocUpgradeModal()" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-all"><i class="fas fa-xmark"></i></button>
+        <div class="p-6" id="docUpgradeContent">
+          <div class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center mb-3"><i class="fas fa-triangle-exclamation text-amber-500 text-lg"></i></div>
+          <div class="section-title text-2xl text-slate-900 mb-1.5">Storage Almost Full</div>
+          <p class="text-xs text-slate-500 mb-4 leading-relaxed">You've reached the safe storage limit on the free plan. Upgrade to Pay-As-You-Go to keep uploading documents.</p>
+          <div class="border border-slate-200 rounded-xl p-4 mb-4">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Card Details</div>
+            <div class="flex flex-col gap-2.5">
+              <input type="text" placeholder="Card Number" maxlength="19" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all" oninput="this.value=this.value.replace(/\D/g,'').replace(/(.{4})/g,'$1 ').trim()"/>
+              <div class="grid grid-cols-2 gap-2.5">
+                <input type="text" placeholder="MM / YY" maxlength="7" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+                <input type="text" placeholder="CVV" maxlength="4" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+              </div>
+              <input type="text" placeholder="Cardholder Name" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+            </div>
+          </div>
+          <button onclick="attemptFakeSubscribe()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+            <i class="fas fa-lock mr-1"></i> Subscribe — Pay As You Go
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ EVENTS & OFFERS ═══ -->
     <div class="sec-panel" id="secEvents">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
@@ -2332,6 +2435,9 @@ import {
   getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc, where,
   serverTimestamp, query, orderBy, limit, runTransaction, writeBatch, getCountFromServer
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject
+} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-storage.js";
 
 /* ─── Who's doing it — used by the Trash / Activity Log so every delete,
    sale, and restore is attributed to whoever was signed in at the time. ─── */
@@ -2396,11 +2502,14 @@ const firebaseConfig = {
   apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
   authDomain: "first-project-2082-12-26.firebaseapp.com",
   projectId: "first-project-2082-12-26",
+  storageBucket: "first-project-2082-12-26.firebasestorage.app",
+  messagingSenderId: "545170954251",
   appId: "1:545170954251:web:0d2f7905834af3b0be8f0e"
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 // A second, independent Firebase app instance — used ONLY when creating a
 // new staff account. createUserWithEmailAndPassword normally signs in as
 // the newly-created user on whatever auth instance it's called against; by
@@ -2687,6 +2796,11 @@ window._toggleKebab = (btn, type, id) => {
     openKebabMenuFor(btn, [
       { label:'Edit', icon:'fa-pen', onClick:()=>window.openEventFormModal(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('events', id) }
+    ]);
+  } else if(type === 'documents'){
+    openKebabMenuFor(btn, [
+      { label:'Download', icon:'fa-download', onClick:()=>window.downloadDocument(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('documents', id) }
     ]);
   } else if(type === 'hh_inventory'){
     const s = hhInvData.find(x=>x.id===id);
@@ -3228,8 +3342,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', events:'navEvents', stock:'navStock', history:'navHistory', trash:'navTrash' };
-  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', events:'mNavEvents', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
+  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', events:'navEvents', stock:'navStock', history:'navHistory', trash:'navTrash' };
+  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', events:'mNavEvents', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -3258,6 +3372,7 @@ onAuthStateChanged(auth, async (user) => {
     loadFinanceSchemes();
     loadAccessories();
     loadEvents();
+    loadDocuments();
     loadStockAreas();
     loadTrash();
     loadActivityLog();
@@ -6283,6 +6398,216 @@ window.closeEventPopup = ()=>{
   stopEventPopupCountdowns();
 };
 
+/* ═══════════════════════════════════════════════════════════════════════
+   DOCUMENT VAULT — KYC forms, allocation forms, Namsari letters, etc.
+   Stored in Firebase Storage (actual files can run several MB, well past
+   what Firestore's own 1MB-per-document limit could hold), with metadata
+   (name, category, size, who/when) tracked in Firestore for listing.
+   Capped at 40% of the free-tier storage plan on purpose — leaves real
+   headroom before anything is ever at risk of silently failing.
+   ═══════════════════════════════════════════════════════════════════════ */
+let documents = [];
+let pendingDocFile = null;
+const DOC_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB per file
+const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx'];
+// Firebase's free (Spark) plan includes 5GB of Cloud Storage — capping
+// usage at 40% of that (2GB) keeps a comfortable safety margin rather than
+// running right up to the actual limit.
+const STORAGE_CAP_BYTES = 5 * 1024 * 1024 * 1024 * 0.4;
+
+function loadDocuments(){
+  onSnapshot(collection(db,"documents"), snap=>{
+    documents = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderDocumentsPage();
+    updateStorageBar();
+  }, err=>console.error('documents listener failed', err));
+}
+
+function getTotalStorageUsed(){
+  return documents.reduce((sum,d)=>sum+(d.sizeBytes||0),0);
+}
+function formatBytes(bytes){
+  if(!bytes) return '0 MB';
+  const mb = bytes/(1024*1024);
+  return mb >= 1024 ? (mb/1024).toFixed(2)+' GB' : mb.toFixed(1)+' MB';
+}
+function updateStorageBar(){
+  const bar = document.getElementById('docStorageBar');
+  const label = document.getElementById('docStorageLabel');
+  if(!bar || !label) return;
+  const used = getTotalStorageUsed();
+  const pct = Math.min(100, (used/STORAGE_CAP_BYTES)*100);
+  bar.style.width = pct+'%';
+  bar.className = 'h-full rounded-full transition-all ' + (pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue');
+  label.textContent = `${formatBytes(used)} / ${formatBytes(STORAGE_CAP_BYTES)}`;
+}
+
+const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626'}, doc:{icon:'fa-file-word',color:'#2563EB'}, docx:{icon:'fa-file-word',color:'#2563EB'}, xls:{icon:'fa-file-excel',color:'#059669'}, xlsx:{icon:'fa-file-excel',color:'#059669'} };
+
+function renderDocumentsPage(){
+  const wrap = document.getElementById('docsListWrap');
+  if(!wrap) return;
+  if(!documents.length){
+    wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-folder-open text-3xl opacity-25 block mb-2"></i><p class="text-sm">No documents uploaded yet.</p></div>`;
+    return;
+  }
+  const sorted = [...documents].sort((a,b)=>{
+    const at = a.uploadedAt?.toDate ? a.uploadedAt.toDate() : new Date(a.uploadedAt||0);
+    const bt = b.uploadedAt?.toDate ? b.uploadedAt.toDate() : new Date(b.uploadedAt||0);
+    return bt-at;
+  });
+  wrap.innerHTML = sorted.map(d=>{
+    const ext = (d.fileExt||'').toLowerCase();
+    const iconInfo = DOC_FILE_ICONS[ext] || {icon:'fa-file', color:'#64748B'};
+    const at = d.uploadedAt?.toDate ? d.uploadedAt.toDate() : new Date(d.uploadedAt||Date.now());
+    return `<div class="yng-card-shell p-4">
+      <div class="flex items-start justify-between gap-2 mb-3">
+        <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${iconInfo.color}15">
+          <i class="fas ${iconInfo.icon} text-lg" style="color:${iconInfo.color}"></i>
+        </div>
+        <button type="button" class="kebab-btn flex-shrink-0" onclick="window._toggleKebab(this,'documents','${d.id}')" aria-label="Document actions"><i class="fas fa-ellipsis-vertical"></i></button>
+      </div>
+      <div class="font-bold text-slate-800 text-sm leading-snug mb-1 truncate" title="${escapeHtml(d.name||'')}">${escapeHtml(d.name||'Untitled')}</div>
+      <span class="badge badge-blue mb-2">${escapeHtml(d.category||'Other')}</span>
+      <div class="text-[11px] text-slate-400 flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+        <span>${formatBytes(d.sizeBytes||0)}</span>
+        <span>${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.openDocUploadModal = ()=>{
+  document.getElementById('docName').value = '';
+  document.getElementById('docCategory').value = 'KYC Form';
+  document.getElementById('docFileInput').value = '';
+  document.getElementById('docFileLabel').textContent = 'Click to choose a file…';
+  document.getElementById('docUploadProgress').classList.add('hidden');
+  pendingDocFile = null;
+  document.getElementById('docUploadModal').classList.add('open');
+};
+window.closeDocUploadModal = ()=>{
+  document.getElementById('docUploadModal').classList.remove('open');
+};
+
+window.handleDocFileSelect = (event)=>{
+  const file = event.target.files[0];
+  if(!file) return;
+  const ext = (file.name.split('.').pop()||'').toLowerCase();
+  if(!DOC_ALLOWED_EXT.includes(ext)){
+    toast('Only PDF, Word (.doc/.docx), or Excel (.xls/.xlsx) files are allowed.','err');
+    event.target.value = '';
+    return;
+  }
+  if(file.size > DOC_MAX_FILE_SIZE){
+    toast(`File is too large — max ${formatBytes(DOC_MAX_FILE_SIZE)} per document.`,'err');
+    event.target.value = '';
+    return;
+  }
+  pendingDocFile = file;
+  document.getElementById('docFileLabel').textContent = file.name;
+};
+
+window.uploadDocument = async ()=>{
+  const name = document.getElementById('docName').value.trim();
+  const category = document.getElementById('docCategory').value;
+  if(!name){ toast('Document name is required.','err'); return; }
+  if(!pendingDocFile){ toast('Choose a file to upload.','err'); return; }
+
+  // The whole point of the 40% cap — check BEFORE uploading, not after, so
+  // a big file never gets partway uploaded only to be rejected.
+  if(getTotalStorageUsed() + pendingDocFile.size > STORAGE_CAP_BYTES){
+    closeDocUploadModal();
+    openDocUpgradeModal();
+    return;
+  }
+
+  const btn = document.getElementById('docUploadBtn');
+  const progressWrap = document.getElementById('docUploadProgress');
+  const progressBar = document.getElementById('docUploadProgressBar');
+  btn.disabled = true;
+  progressWrap.classList.remove('hidden');
+  progressBar.style.width = '0%';
+
+  const ext = (pendingDocFile.name.split('.').pop()||'').toLowerCase();
+  const storagePath = `documents/${Date.now()}_${pendingDocFile.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+  const storageRef = ref(storage, storagePath);
+  const uploadTask = uploadBytesResumable(storageRef, pendingDocFile);
+
+  uploadTask.on('state_changed',
+    (snap)=>{ progressBar.style.width = Math.round((snap.bytesTransferred/snap.totalBytes)*100)+'%'; },
+    (err)=>{
+      toast('Upload failed: '+friendlyError(err),'err');
+      btn.disabled = false;
+      progressWrap.classList.add('hidden');
+    },
+    async ()=>{
+      try{
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        await addDoc(collection(db,'documents'), {
+          name, category, fileExt: ext, fileName: pendingDocFile.name,
+          sizeBytes: pendingDocFile.size, storagePath, downloadURL,
+          uploadedBy: currentUserEmail || currentUserName || 'Unknown',
+          uploadedAt: new Date()
+        });
+        logActivity('Uploaded', 'documents', { model: name });
+        toast('Document uploaded.');
+        closeDocUploadModal();
+      }catch(e){
+        toast('Error: '+friendlyError(e),'err');
+      }finally{
+        btn.disabled = false;
+        progressWrap.classList.add('hidden');
+      }
+    }
+  );
+};
+
+window.downloadDocument = (id)=>{
+  const d = documents.find(x=>x.id===id);
+  if(!d?.downloadURL) return;
+  window.open(d.downloadURL, '_blank');
+};
+
+/* ─── Storage-full "upgrade" flow ──────────────────────────────────────
+   This dealership runs on Firebase's free tier with no real payment
+   backend wired up — rather than pretend to process an actual card, this
+   always politely dead-ends and points back to the Master ID, who can
+   decide whether to actually upgrade the Firebase plan from the console. */
+window.openDocUpgradeModal = ()=>{
+  document.getElementById('docUpgradeModal').classList.remove('hidden');
+  document.getElementById('docUpgradeModal').classList.add('flex');
+};
+window.closeDocUpgradeModal = ()=>{
+  document.getElementById('docUpgradeModal').classList.add('hidden');
+  document.getElementById('docUpgradeModal').classList.remove('flex');
+};
+
+window.attemptFakeSubscribe = async ()=>{
+  const contentEl = document.getElementById('docUpgradeContent');
+  contentEl.innerHTML = `<div class="text-center py-4"><i class="fas fa-circle-notch animate-spin text-2xl text-slate-300"></i></div>`;
+  // A short, deliberate pause so this doesn't feel like an instant/obvious
+  // dead end — then surfaces whoever the current Master ID actually is.
+  await new Promise(r=>setTimeout(r, 1100));
+  let masterInfo = null;
+  try{
+    const snap = await getDocs(query(collection(db,'profiles'), where('role','==','owner')));
+    if(!snap.empty){ const m = snap.docs[0].data(); masterInfo = { name:m.name||'the Master ID', email:m.email||'', mobile:m.mobile||'' }; }
+  }catch(e){ console.error('could not fetch master ID for contact card', e); }
+  contentEl.innerHTML = `
+    <div class="w-12 h-12 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center mb-3"><i class="fas fa-wifi text-red-500 text-lg"></i></div>
+    <div class="section-title text-2xl text-slate-900 mb-1.5">Not Connected to Server</div>
+    <p class="text-xs text-slate-500 mb-4 leading-relaxed">Couldn't reach the payment server right now. Please contact the account owner directly to arrange an upgrade:</p>
+    <div class="border border-slate-200 rounded-xl p-4 flex flex-col gap-1.5">
+      <div class="font-bold text-slate-800 text-sm">${escapeHtml(masterInfo?.name || 'Master ID')}</div>
+      ${masterInfo?.email ? `<div class="text-xs text-slate-500"><i class="fas fa-envelope text-slate-300 mr-1.5"></i>${escapeHtml(masterInfo.email)}</div>` : ''}
+      ${masterInfo?.mobile ? `<div class="text-xs text-slate-500"><i class="fas fa-phone text-slate-300 mr-1.5"></i>${escapeHtml(masterInfo.mobile)}</div>` : ''}
+      ${!masterInfo ? `<div class="text-xs text-slate-400">Contact info not set up in Team Members yet.</div>` : ''}
+    </div>
+    <button onclick="closeDocUpgradeModal()" class="w-full mt-4 py-2.5 border-2 border-slate-200 text-slate-600 text-sm font-bold rounded-lg hover:border-slate-300 transition-all">Close</button>
+  `;
+};
+
 function renderAccTable(){
   const tbody = document.getElementById('accTableBody');
   document.getElementById('accCount').textContent = accessories.length+' item'+(accessories.length!==1?'s':'');
@@ -6391,7 +6716,7 @@ window._deleteEntry=async(col,id)=>{
   // recovery window) before being removed from its live collection.
   const ok = await showDangerousConfirm({
     title: 'Delete this entry?',
-    message: col==='bikes' ? "This will remove the model from your price list (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will remove the finance scheme (recoverable from Trash for 7 days)." : (col==='accessories' ? "This will remove the accessory from the price list (recoverable from Trash for 7 days)." : (col==='events' ? "This will remove the event — it'll stop showing as a popup (recoverable from Trash for 7 days)." : (col==='hh_inventory' ? "This will remove the unit from HH Inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : "This will remove the unit from inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap.")))),
+    message: col==='bikes' ? "This will remove the model from your price list (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will remove the finance scheme (recoverable from Trash for 7 days)." : (col==='accessories' ? "This will remove the accessory from the price list (recoverable from Trash for 7 days)." : (col==='events' ? "This will remove the event — it'll stop showing as a popup (recoverable from Trash for 7 days)." : (col==='documents' ? "This will remove the document (recoverable from Trash for 7 days — the file itself stays safe until then)." : (col==='hh_inventory' ? "This will remove the unit from HH Inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : "This will remove the unit from inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap."))))),
     okText: 'Delete',
     countdownSec: 3
   });
@@ -6453,7 +6778,7 @@ window._deleteEntry=async(col,id)=>{
       }
       toast('HH unit moved to Trash — S.N renumbered automatically.');
     } else {
-      const srcArr = col==='finance_schemes' ? financeSchemes : (col==='accessories' ? accessories : (col==='events' ? events : []));
+      const srcArr = col==='finance_schemes' ? financeSchemes : (col==='accessories' ? accessories : (col==='events' ? events : (col==='documents' ? documents : [])));
       const target = srcArr.find(x=>x.id===id);
       if(target) await moveToTrash(col, id, target);
       await deleteDoc(doc(db,col,id));
@@ -6469,7 +6794,7 @@ window._deleteEntry=async(col,id)=>{
           catch(e){ console.error('Failed to clean up deleted accessory from category', c.name, e); }
         }
       }
-      toast(col==='finance_schemes' ? 'Finance scheme moved to Trash.' : (col==='events' ? 'Event moved to Trash.' : 'Entry moved to Trash.'));
+      toast(col==='finance_schemes' ? 'Finance scheme moved to Trash.' : (col==='events' ? 'Event moved to Trash.' : (col==='documents' ? 'Document moved to Trash.' : 'Entry moved to Trash.')));
     }
   }catch(e){toast('Delete failed: '+friendlyError(e),'err');}
 };
@@ -6506,7 +6831,15 @@ async function purgeExpiredTrash(){
     return at.getTime() < cutoff;
   });
   for(const t of expired){
-    try{ await deleteDoc(doc(db,'trash',t.id)); }catch(e){ console.error('purge failed', e); }
+    try{
+      // A trashed document's actual file in Storage was kept around this
+      // whole time so restoring still worked — now that it's truly expired,
+      // clean that up too, not just the Firestore metadata.
+      if(t.originalCollection==='documents' && t.data?.storagePath){
+        try{ await deleteObject(ref(storage, t.data.storagePath)); }catch(e){ console.error('storage cleanup failed', e); }
+      }
+      await deleteDoc(doc(db,'trash',t.id));
+    }catch(e){ console.error('purge failed', e); }
   }
 }
 
@@ -6516,7 +6849,7 @@ function daysLeft(deletedAt){
   return Math.max(0, diffDays);
 }
 
-const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event' };
+const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event', documents:'Document' };
 
 function renderTrashTable(){
   const tbody = document.getElementById('trashTableBody');
@@ -6578,7 +6911,13 @@ window.permanentlyDeleteTrashItem = async (trashId)=>{
     okText: 'Delete Forever', countdownSec: 3
   });
   if(!ok) return;
-  try{ await deleteDoc(doc(db,'trash',trashId)); toast('Permanently deleted.'); }
+  try{
+    if(t?.originalCollection==='documents' && t?.data?.storagePath){
+      try{ await deleteObject(ref(storage, t.data.storagePath)); }catch(e){ console.error('storage cleanup failed', e); }
+    }
+    await deleteDoc(doc(db,'trash',trashId));
+    toast('Permanently deleted.');
+  }
   catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
 };
 
@@ -7276,8 +7615,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', events:'Events & Offers', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
-const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', events:'secEvents', stock:'secStock', history:'secHistory', trash:'secTrash' };
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Documents', events:'Events & Offers', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
+const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', events:'secEvents', stock:'secStock', history:'secHistory', trash:'secTrash' };
 window.switchSec=(sec)=>{
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
@@ -7291,6 +7630,7 @@ window.switchSec=(sec)=>{
   if(sec==='inv') populateModelDropdown();
   if(sec==='hhinv') populateHHModelDropdown();
   if(sec==='allinv') renderAllInventoryTable();
+  if(sec==='docs') renderDocumentsPage();
   if(sec==='events') renderEventsPage();
   if(sec==='stock') loadStockReportData(true);
   if(sec==='history') renderActivityLog();
