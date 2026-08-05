@@ -708,6 +708,9 @@
   .allinv-source-tab{ color:#7C8494; display:inline-flex; align-items:center; gap:5px; }
   .allinv-source-tab:hover{ color:#1F2430; }
   .allinv-source-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
+  .doc-type-tab{ color:#7C8494; display:inline-flex; align-items:center; }
+  .doc-type-tab:hover{ color:#1F2430; }
+  .doc-type-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
   /* Custom model-filter dropdown — native <select> option lists can't be
      restyled consistently across browsers (Android shows a plain blue-
      highlight system list), so this is a fully custom button+menu instead,
@@ -1861,7 +1864,7 @@
         <div>
           <div class="eyebrow">Dealership</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Document <span class="text-amber-500">Vault</span></div>
-          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">KYC forms, allocation forms, Namsari letters — scanned and stored safely. PDF, Word, or Excel, up to 10 MB each.</p>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Shared across the whole team — KYC forms, allocation forms, Namsari letters — scanned and stored safely. PDF, photo, Word, or Excel, up to 10 MB each.</p>
         </div>
         <button onclick="openDocUploadModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
           <i class="fas fa-upload"></i> Upload Document
@@ -1871,14 +1874,23 @@
       <div class="yng-card-shell p-5 mb-5">
         <div class="flex items-center justify-between gap-2 mb-2">
           <div class="text-xs font-bold text-slate-600"><i class="fas fa-database text-slate-400 mr-1"></i> Storage Used</div>
-          <div id="docStorageLabel" class="text-xs font-bold text-slate-500">0 MB / 0 MB</div>
+          <div class="flex items-center gap-2">
+            <div id="docStorageLabel" class="text-xs font-bold text-slate-500">0 MB / 0 MB</div>
+            <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set storage limit"><i class="fas fa-gear text-xs"></i></button>
+          </div>
         </div>
         <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
           <div id="docStorageBar" class="h-full bg-bajaj-blue rounded-full transition-all" style="width:0%"></div>
         </div>
-        <p class="text-[10.5px] text-slate-400 mt-1.5">Capped at 40% of the free storage plan, so there's always headroom before anything runs short.</p>
       </div>
 
+      <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 mb-4 w-fit flex-wrap">
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-type="all" onclick="setDocTypeFilter('all')">All</button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="pdf" onclick="setDocTypeFilter('pdf')"><i class="fas fa-file-pdf mr-1"></i>PDF</button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="photo" onclick="setDocTypeFilter('photo')"><i class="fas fa-file-image mr-1"></i>Photo</button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="word" onclick="setDocTypeFilter('word')"><i class="fas fa-file-word mr-1"></i>Word</button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="excel" onclick="setDocTypeFilter('excel')"><i class="fas fa-file-excel mr-1"></i>Excel</button>
+      </div>
       <div id="docsListWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </div>
 
@@ -1906,11 +1918,11 @@
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">File <span class="text-red-500">*</span> <span class="normal-case font-medium text-slate-300">(PDF, Word, or Excel — max 10 MB)</span></label>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">File <span class="text-red-500">*</span> <span class="normal-case font-medium text-slate-300">(PDF, JPG/PNG photo, Word, or Excel — max 10 MB)</span></label>
             <label class="flex items-center gap-3 border-2 border-dashed border-slate-300 bg-slate-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-slate-50 hover:border-bajaj-blue transition-all">
               <i class="fas fa-cloud-arrow-up text-slate-400 text-lg flex-shrink-0"></i>
               <span id="docFileLabel" class="text-sm text-slate-500 font-medium truncate">Click to choose a file…</span>
-              <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" id="docFileInput" class="hidden" onchange="handleDocFileSelect(event)"/>
+              <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" id="docFileInput" class="hidden" onchange="handleDocFileSelect(event)"/>
             </label>
           </div>
           <div id="docUploadProgress" class="hidden">
@@ -1922,6 +1934,32 @@
             <i class="fas fa-upload mr-1"></i> Upload
           </button>
         </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- STORAGE LIMIT SETTINGS (Master ID only) -->
+    <div id="storageCapModal" class="form-modal-overlay" onclick="if(event.target===this) closeStorageCapModal()">
+      <div class="form-modal-box" style="max-width:400px">
+      <div class="yng-card-shell p-5">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-gear text-amber-500 text-lg"></i> Storage Limit</div>
+          <button onclick="closeStorageCapModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
+        </div>
+        <p class="text-xs text-slate-500 mb-4">Set how much storage the Document Vault is allowed to use before it stops accepting new uploads. Pick whatever unit is easiest — KB, MB, GB, or TB.</p>
+        <div class="flex gap-2 mb-4">
+          <input type="number" id="storageCapValue" min="1" step="any" placeholder="e.g. 2" class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          <select id="storageCapUnit" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
+            <option value="KB">KB</option>
+            <option value="MB">MB</option>
+            <option value="GB" selected>GB</option>
+            <option value="TB">TB</option>
+          </select>
+        </div>
+        <p id="storageCapPreview" class="text-[11px] text-slate-400 mb-4"></p>
+        <button onclick="saveStorageCap()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+          <i class="fas fa-check mr-1"></i> Save Limit
+        </button>
       </div>
       </div>
     </div>
@@ -2798,10 +2836,12 @@ window._toggleKebab = (btn, type, id) => {
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('events', id) }
     ]);
   } else if(type === 'documents'){
-    openKebabMenuFor(btn, [
-      { label:'Download', icon:'fa-download', onClick:()=>window.downloadDocument(id) },
-      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('documents', id) }
-    ]);
+    // Everyone can view/download/upload — any staff member processing a
+    // sale or loan needs to attach a customer's documents. Delete is
+    // Master-ID-only though, since these often contain personal ID info.
+    const docActions = [{ label:'Download', icon:'fa-download', onClick:()=>window.downloadDocument(id) }];
+    if(currentUserRole === 'owner') docActions.push({ label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('documents', id) });
+    openKebabMenuFor(btn, docActions);
   } else if(type === 'hh_inventory'){
     const s = hhInvData.find(x=>x.id===id);
     const cur = s?.status || 'Available';
@@ -3373,6 +3413,7 @@ onAuthStateChanged(auth, async (user) => {
     loadAccessories();
     loadEvents();
     loadDocuments();
+    loadStorageSettings();
     loadStockAreas();
     loadTrash();
     loadActivityLog();
@@ -6407,13 +6448,78 @@ window.closeEventPopup = ()=>{
    headroom before anything is ever at risk of silently failing.
    ═══════════════════════════════════════════════════════════════════════ */
 let documents = [];
+let docTypeFilter = 'all';
+const DOC_TYPE_GROUPS = { pdf:['pdf'], photo:['jpg','jpeg','png'], word:['doc','docx'], excel:['xls','xlsx'] };
+
+window.setDocTypeFilter = (type)=>{
+  docTypeFilter = type;
+  document.querySelectorAll('.doc-type-tab').forEach(t=>t.classList.toggle('active', t.dataset.type===type));
+  renderDocumentsPage();
+};
 let pendingDocFile = null;
 const DOC_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB per file
-const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx'];
+const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png'];
 // Firebase's free (Spark) plan includes 5GB of Cloud Storage — capping
 // usage at 40% of that (2GB) keeps a comfortable safety margin rather than
 // running right up to the actual limit.
-const STORAGE_CAP_BYTES = 5 * 1024 * 1024 * 1024 * 0.4;
+// Firebase's free (Spark) plan includes 5GB of Cloud Storage by default —
+// this starts there but a Master ID can change it to whatever unit/amount
+// makes sense (KB through TB) from the gear icon on the Documents page.
+let STORAGE_CAP_BYTES = 5 * 1024 * 1024 * 1024 * 0.4;
+const BYTE_UNITS = { KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 };
+
+function loadStorageSettings(){
+  onSnapshot(doc(db,'settings','storage'), snap=>{
+    if(snap.exists() && snap.data().capBytes){
+      STORAGE_CAP_BYTES = snap.data().capBytes;
+    }
+    updateStorageBar();
+    const gearBtn = document.getElementById('docStorageSettingsBtn');
+    if(gearBtn) gearBtn.classList.toggle('hidden', currentUserRole !== 'owner');
+  }, err=>console.error('storage settings listener failed', err));
+}
+
+window.openStorageCapModal = ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change the storage limit.','err'); return; }
+  // Show the current cap in whatever unit displays it as the cleanest whole-ish number.
+  let unit = 'GB', value = STORAGE_CAP_BYTES / BYTE_UNITS.GB;
+  if(value < 1){ unit = 'MB'; value = STORAGE_CAP_BYTES / BYTE_UNITS.MB; }
+  if(value >= 1024){ unit = 'TB'; value = STORAGE_CAP_BYTES / BYTE_UNITS.TB; }
+  document.getElementById('storageCapValue').value = Math.round(value*100)/100;
+  document.getElementById('storageCapUnit').value = unit;
+  updateStorageCapPreview();
+  document.getElementById('storageCapModal').classList.add('open');
+};
+window.closeStorageCapModal = ()=>{
+  document.getElementById('storageCapModal').classList.remove('open');
+};
+
+function updateStorageCapPreview(){
+  const value = parseFloat(document.getElementById('storageCapValue').value) || 0;
+  const unit = document.getElementById('storageCapUnit').value;
+  const bytes = value * (BYTE_UNITS[unit]||BYTE_UNITS.MB);
+  const used = getTotalStorageUsed();
+  const previewEl = document.getElementById('storageCapPreview');
+  if(previewEl) previewEl.textContent = `= ${formatBytes(bytes)}. Currently using ${formatBytes(used)}.`;
+}
+document.getElementById('storageCapValue')?.addEventListener('input', updateStorageCapPreview);
+document.getElementById('storageCapUnit')?.addEventListener('change', updateStorageCapPreview);
+
+window.saveStorageCap = async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change the storage limit.','err'); return; }
+  const value = parseFloat(document.getElementById('storageCapValue').value);
+  const unit = document.getElementById('storageCapUnit').value;
+  if(!value || value <= 0){ toast('Enter a valid limit.','err'); return; }
+  const capBytes = value * (BYTE_UNITS[unit]||BYTE_UNITS.MB);
+  try{
+    await setDoc(doc(db,'settings','storage'), { capBytes, capValue:value, capUnit:unit }, { merge:true });
+    logActivity('Storage Limit Changed', 'settings', { model: `${value} ${unit}` });
+    toast(`Storage limit set to ${formatBytes(capBytes)}.`);
+    closeStorageCapModal();
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
+
 
 function loadDocuments(){
   onSnapshot(collection(db,"documents"), snap=>{
@@ -6442,16 +6548,19 @@ function updateStorageBar(){
   label.textContent = `${formatBytes(used)} / ${formatBytes(STORAGE_CAP_BYTES)}`;
 }
 
-const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626'}, doc:{icon:'fa-file-word',color:'#2563EB'}, docx:{icon:'fa-file-word',color:'#2563EB'}, xls:{icon:'fa-file-excel',color:'#059669'}, xlsx:{icon:'fa-file-excel',color:'#059669'} };
+const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626'}, doc:{icon:'fa-file-word',color:'#2563EB'}, docx:{icon:'fa-file-word',color:'#2563EB'}, xls:{icon:'fa-file-excel',color:'#059669'}, xlsx:{icon:'fa-file-excel',color:'#059669'}, jpg:{icon:'fa-file-image',color:'#D97706'}, jpeg:{icon:'fa-file-image',color:'#D97706'}, png:{icon:'fa-file-image',color:'#D97706'} };
 
 function renderDocumentsPage(){
   const wrap = document.getElementById('docsListWrap');
   if(!wrap) return;
-  if(!documents.length){
-    wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-folder-open text-3xl opacity-25 block mb-2"></i><p class="text-sm">No documents uploaded yet.</p></div>`;
+  const filtered = docTypeFilter==='all'
+    ? documents
+    : documents.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes((d.fileExt||'').toLowerCase()));
+  if(!filtered.length){
+    wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-folder-open text-3xl opacity-25 block mb-2"></i><p class="text-sm">${documents.length ? 'No documents match this filter.' : 'No documents uploaded yet.'}</p></div>`;
     return;
   }
-  const sorted = [...documents].sort((a,b)=>{
+  const sorted = [...filtered].sort((a,b)=>{
     const at = a.uploadedAt?.toDate ? a.uploadedAt.toDate() : new Date(a.uploadedAt||0);
     const bt = b.uploadedAt?.toDate ? b.uploadedAt.toDate() : new Date(b.uploadedAt||0);
     return bt-at;
@@ -6495,7 +6604,7 @@ window.handleDocFileSelect = (event)=>{
   if(!file) return;
   const ext = (file.name.split('.').pop()||'').toLowerCase();
   if(!DOC_ALLOWED_EXT.includes(ext)){
-    toast('Only PDF, Word (.doc/.docx), or Excel (.xls/.xlsx) files are allowed.','err');
+    toast('Only PDF, JPG/PNG photos, Word (.doc/.docx), or Excel (.xls/.xlsx) files are allowed.','err');
     event.target.value = '';
     return;
   }
@@ -6710,6 +6819,10 @@ window._saveSn=async(col,id,val)=>{
 };
 
 window._deleteEntry=async(col,id)=>{
+  if(col==='documents' && currentUserRole !== 'owner'){
+    toast('Only a Master ID can delete documents.','err');
+    return;
+  }
   // Every delete — single row or bulk — waits out a short countdown before
   // the button unlocks. A stray/fast tap can never delete something by
   // accident. Deletes are also soft: the record moves to Trash first (7-day
