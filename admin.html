@@ -1873,15 +1873,30 @@
 
       <div class="yng-card-shell p-5 mb-5">
         <div class="flex items-center justify-between gap-2 mb-2">
-          <div class="text-xs font-bold text-slate-600"><i class="fas fa-database text-slate-400 mr-1"></i> Storage Used</div>
+          <div class="text-xs font-bold text-slate-600"><i class="fas fa-chart-pie text-slate-400 mr-1"></i> Total System Usage</div>
+          <div id="totalStorageLabel" class="text-xs font-bold text-slate-500">0 MB / 0 MB</div>
+        </div>
+        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mb-1">
+          <div id="totalStorageBar" class="h-full bg-bajaj-blue rounded-full transition-all" style="width:0%"></div>
+        </div>
+        <p class="text-[10px] text-slate-400 mb-4">Everything combined — documents, inventory, price list, and the rest — stays capped at 90% of the free plan's total.</p>
+
+        <div class="flex items-center justify-between gap-2 mb-2 pt-3 border-t border-slate-100">
+          <div class="text-xs font-bold text-slate-600"><i class="fas fa-database text-slate-400 mr-1"></i> Document Vault</div>
           <div class="flex items-center gap-2">
             <div id="docStorageLabel" class="text-xs font-bold text-slate-500">0 MB / 0 MB</div>
             <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set storage limit"><i class="fas fa-gear text-xs"></i></button>
           </div>
         </div>
-        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mb-4">
           <div id="docStorageBar" class="h-full bg-bajaj-blue rounded-full transition-all" style="width:0%"></div>
         </div>
+
+        <div class="flex items-center justify-between gap-2 mb-2 pt-3 border-t border-slate-100">
+          <div class="text-xs font-bold text-slate-600"><i class="fas fa-list-check text-slate-400 mr-1"></i> Record Limits</div>
+          <button id="systemLimitsSettingsBtn" onclick="openSystemLimitsModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set record limits"><i class="fas fa-gear text-xs"></i></button>
+        </div>
+        <div id="recordLimitsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
       </div>
 
       <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 mb-4 w-fit flex-wrap">
@@ -1959,6 +1974,40 @@
         <p id="storageCapPreview" class="text-[11px] text-slate-400 mb-4"></p>
         <button onclick="saveStorageCap()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
           <i class="fas fa-check mr-1"></i> Save Limit
+        </button>
+      </div>
+      </div>
+    </div>
+
+    <!-- RECORD LIMITS SETTINGS (Master ID only) -->
+    <div id="systemLimitsModal" class="form-modal-overlay" onclick="if(event.target===this) closeSystemLimitsModal()">
+      <div class="form-modal-box" style="max-width:420px">
+      <div class="yng-card-shell p-5">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-list-check text-amber-500 text-lg"></i> Record Limits</div>
+          <button onclick="closeSystemLimitsModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
+        </div>
+        <p class="text-xs text-slate-500 mb-4">How many of each record type this dealership can have at once — applies to everyone, Master ID included. Keeps total Firestore usage predictable alongside the Document Vault.</p>
+        <div class="flex flex-col gap-3 mb-4">
+          <div class="flex items-center justify-between gap-3">
+            <label class="text-xs font-bold text-slate-600 flex-1">Master Price List models</label>
+            <input type="number" id="limitMaxBikes" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <label class="text-xs font-bold text-slate-600 flex-1">All Inventory (Inventory + HH combined)</label>
+            <input type="number" id="limitMaxInventory" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <label class="text-xs font-bold text-slate-600 flex-1">Accessories</label>
+            <input type="number" id="limitMaxAccessories" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <label class="text-xs font-bold text-slate-600 flex-1">Finance Schemes (down-payment/tenure combos)</label>
+            <input type="number" id="limitMaxFinanceSchemes" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+        </div>
+        <button onclick="saveSystemLimits()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+          <i class="fas fa-check mr-1"></i> Save Limits
         </button>
       </div>
       </div>
@@ -3422,6 +3471,7 @@ onAuthStateChanged(auth, async (user) => {
     loadEvents();
     loadDocuments();
     loadStorageSettings();
+    loadSystemLimits();
     loadStockAreas();
     loadTrash();
     loadActivityLog();
@@ -3973,6 +4023,7 @@ function loadMasterPriceList() {
     renderMasterTable(); updatePriceStats(); populateModelDropdown();
     // Category rows show "N models using this category" — keep that fresh too.
     if(typeof renderFinCategoryChips === 'function') renderFinCategoryChips();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err => {
     console.error('bikes listener failed', err);
     document.getElementById('masterTableBody').innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400">
@@ -4179,6 +4230,10 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
   ];
   const firstError = checks.find(c=>!c.ok);
   if(firstError){ toast(firstError.error,'err'); return; }
+  if(!currentEditId && allMasterBikes.length >= MAX_BIKES){
+    toast(`Model limit reached — the Master Price List is capped at ${MAX_BIKES} models. Remove one first, or ask a Master ID to raise the limit.`,'err');
+    return;
+  }
   const [sn, name, price, ins, fin, firstPartyIns, thirdPartyIns] = checks.map(c=>c.value);
   const imgRaw = document.getElementById('mImg').value.trim();
   if(imgRaw && !/^https?:\/\/.+/i.test(imgRaw)){ toast('Image URL must start with http:// or https://','err'); return; }
@@ -4228,7 +4283,117 @@ function clearMasterForm(){
 // grows past one page — that would let the cap silently stop working right
 // when it matters most. This asks Firestore directly for the true document
 // counts instead of trusting whatever happens to be loaded locally.
-const MAX_TOTAL_INVENTORY_UNITS = 2000;
+// All four caps below are configurable by a Master ID (see the System
+// Limits settings modal) — these are just the starting defaults, loaded
+// once and then kept in sync with settings/limits via loadSystemLimits().
+let MAX_TOTAL_INVENTORY_UNITS = 2000;
+let MAX_BIKES = 50;
+let MAX_ACCESSORIES = 20;
+let MAX_FINANCE_SCHEMES = 20;
+
+function loadSystemLimits(){
+  onSnapshot(doc(db,'settings','limits'), snap=>{
+    if(snap.exists()){
+      const d = snap.data();
+      if(d.maxTotalInventory) MAX_TOTAL_INVENTORY_UNITS = d.maxTotalInventory;
+      if(d.maxBikes) MAX_BIKES = d.maxBikes;
+      if(d.maxAccessories) MAX_ACCESSORIES = d.maxAccessories;
+      if(d.maxFinanceSchemes) MAX_FINANCE_SCHEMES = d.maxFinanceSchemes;
+    }
+    updateStorageOverview();
+    const gearBtn2 = document.getElementById('systemLimitsSettingsBtn');
+    if(gearBtn2) gearBtn2.classList.toggle('hidden', currentUserRole !== 'owner');
+  }, err=>console.error('system limits listener failed', err));
+}
+
+// Rough per-record byte estimates, used only to give a reasonable overall
+// picture — Firestore's client SDK has no direct "how many bytes is this
+// collection" API, so this approximates from typical field sizes rather
+// than reading and summing every document (which would itself cost reads).
+const RECORD_SIZE_ESTIMATE = { bike: 500, inventoryUnit: 1200, accessory: 100, financeScheme: 300 };
+const OTHER_COLLECTIONS_ESTIMATE = 5 * 1024 * 1024; // rough allowance for activity log / trash / events / team photos combined
+
+async function updateStorageOverview(){
+  const grid = document.getElementById('recordLimitsGrid');
+  if(grid){
+    const invCount = await getAccurateTotalInventoryCount();
+    const stats = [
+      { label:'Models', used: allMasterBikes.length, max: MAX_BIKES },
+      { label:'All Inventory', used: invCount, max: MAX_TOTAL_INVENTORY_UNITS },
+      { label:'Accessories', used: accessories.length, max: MAX_ACCESSORIES },
+      { label:'Finance Schemes', used: financeSchemes.length, max: MAX_FINANCE_SCHEMES }
+    ];
+    grid.innerHTML = stats.map(s=>{
+      const pct = s.max ? Math.min(100, (s.used/s.max)*100) : 0;
+      const barColor = pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue';
+      return `<div class="bg-slate-50 rounded-lg p-2.5">
+        <div class="text-[10px] font-bold text-slate-500 mb-1">${escapeHtml(s.label)}</div>
+        <div class="text-sm font-extrabold text-slate-800 mb-1.5">${s.used} / ${s.max}</div>
+        <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full ${barColor} rounded-full" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('');
+
+    const totalLabel = document.getElementById('totalStorageLabel');
+    const totalBar = document.getElementById('totalStorageBar');
+    if(totalLabel && totalBar){
+      const docBytes = getTotalStorageUsed();
+      const estimatedOtherBytes = (allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike)
+        + (invCount*RECORD_SIZE_ESTIMATE.inventoryUnit)
+        + (accessories.length*RECORD_SIZE_ESTIMATE.accessory)
+        + (financeSchemes.length*RECORD_SIZE_ESTIMATE.financeScheme)
+        + OTHER_COLLECTIONS_ESTIMATE;
+      const totalEstimated = docBytes + estimatedOtherBytes;
+      const firestoreFreeTotal = 1024*1024*1024; // ~1 GiB, Firestore's Spark-tier total
+      const ceiling = firestoreFreeTotal * 0.9; // the 90% ceiling requested — always leaves 10% breathing room
+      const pct = Math.min(100, (totalEstimated/ceiling)*100);
+      totalBar.style.width = pct+'%';
+      totalBar.className = 'h-full rounded-full transition-all ' + (pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue');
+      totalLabel.textContent = `~${formatBytes(totalEstimated)} / ${formatBytes(ceiling)}`;
+    }
+  }
+}
+
+window.openSystemLimitsModal = ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change record limits.','err'); return; }
+  document.getElementById('limitMaxBikes').value = MAX_BIKES;
+  document.getElementById('limitMaxInventory').value = MAX_TOTAL_INVENTORY_UNITS;
+  document.getElementById('limitMaxAccessories').value = MAX_ACCESSORIES;
+  document.getElementById('limitMaxFinanceSchemes').value = MAX_FINANCE_SCHEMES;
+  document.getElementById('systemLimitsModal').classList.add('open');
+};
+window.closeSystemLimitsModal = ()=>{
+  document.getElementById('systemLimitsModal').classList.remove('open');
+};
+window.saveSystemLimits = async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change record limits.','err'); return; }
+  const maxBikes = parseInt(document.getElementById('limitMaxBikes').value);
+  const maxInventory = parseInt(document.getElementById('limitMaxInventory').value);
+  const maxAccessories = parseInt(document.getElementById('limitMaxAccessories').value);
+  const maxFinanceSchemes = parseInt(document.getElementById('limitMaxFinanceSchemes').value);
+  if(![maxBikes,maxInventory,maxAccessories,maxFinanceSchemes].every(v=>Number.isInteger(v) && v>0)){
+    toast('Enter a valid whole number greater than 0 for each limit.','err');
+    return;
+  }
+  // These limits can't be set below what's already in use — that would
+  // instantly lock everyone out of editing existing records for no reason.
+  const invCount = await getAccurateTotalInventoryCount(true);
+  const checks = [
+    [maxBikes, allMasterBikes.length, 'models'],
+    [maxInventory, invCount, 'inventory units'],
+    [maxAccessories, accessories.length, 'accessories'],
+    [maxFinanceSchemes, financeSchemes.length, 'finance schemes']
+  ];
+  for(const [limit, used, label] of checks){
+    if(limit < used){ toast(`Can't set the ${label} limit below the ${used} already on file.`,'err'); return; }
+  }
+  try{
+    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxAccessories, maxFinanceSchemes }, { merge:true });
+    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Acc:${maxAccessories} Fin:${maxFinanceSchemes}` });
+    toast('Record limits updated.');
+    closeSystemLimitsModal();
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
 let cachedTotalUnitCount = null;
 let cachedTotalUnitCountAt = 0;
 const TOTAL_COUNT_CACHE_MS = 15000; // avoid hitting Firestore on every render/keystroke
@@ -4485,6 +4650,7 @@ function loadLiveStock(){
     renderInvTable(getFilteredInv());
     updateInvStats();
     renderInvLoadMore();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err=>{
     console.error('inventory listener failed', err);
     tbody.innerHTML = `<tr><td colspan="9"><div class="py-12 text-center text-slate-400">
@@ -4847,6 +5013,7 @@ function loadHHInventory(){
     renderHHInvTable();
     updateHHInvStats();
     renderHHInvLoadMore();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err=>{
     console.error('hh_inventory listener failed', err);
     tbody.innerHTML = `<tr><td colspan="9"><div class="py-12 text-center text-slate-400">
@@ -6020,6 +6187,7 @@ function loadFinanceSchemes(){
   onSnapshot(collection(db,"finance_schemes"), snap => {
     financeSchemes = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderFinTable();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err => {
     console.error('finance_schemes listener failed', err);
     document.getElementById('finTableBody').innerHTML = `<tr><td colspan="5"><div class="py-12 text-center text-slate-400">
@@ -6074,6 +6242,10 @@ document.getElementById('saveFinBtn').addEventListener('click', async()=>{
   const tenures = [...new Set(tenureRaw.split(',').map(t=>Number(t.trim())).filter(t=>t>0 && t<=360))].sort((a,b)=>a-b);
   if(!tenures.length){
     toast('Enter valid month(s), e.g. 12, 24, 36','err');
+    return;
+  }
+  if(!currentEditFinId && financeSchemes.length >= MAX_FINANCE_SCHEMES){
+    toast(`Finance scheme limit reached — capped at ${MAX_FINANCE_SCHEMES} schemes. Remove one first, or ask a Master ID to raise the limit.`,'err');
     return;
   }
   const downPay = downPayCheck.value, rate = rateCheck.value;
@@ -6142,6 +6314,7 @@ function loadAccessories(){
     // until something else (like opening the popover) re-rendered them.
     if(typeof renderFinCategoryChips === 'function') renderFinCategoryChips();
     if(typeof renderMasterTable === 'function' && allMasterBikes.length) renderMasterTable();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err => {
     console.error('accessories listener failed', err);
     document.getElementById('accTableBody').innerHTML = `<tr><td colspan="3"><div class="py-12 text-center text-slate-400">
@@ -6537,6 +6710,7 @@ function loadDocuments(){
     documents = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderDocumentsPage();
     updateStorageBar();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err=>console.error('documents listener failed', err));
 }
 
@@ -6856,6 +7030,10 @@ document.getElementById('saveAccBtn').addEventListener('click', async()=>{
 
   if(!nameCheck.ok){ toast(nameCheck.error,'err'); return; }
   if(!priceCheck.ok){ toast(priceCheck.error,'err'); return; }
+  if(!currentEditAccId && accessories.length >= MAX_ACCESSORIES){
+    toast(`Accessory limit reached — capped at ${MAX_ACCESSORIES} accessories. Remove one first, or ask a Master ID to raise the limit.`,'err');
+    return;
+  }
   const name = nameCheck.value, price = priceCheck.value;
 
   try{
@@ -7751,10 +7929,15 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
   btnText.textContent = 'Importing…';
 
   let nextSn = allMasterBikes.length ? Math.max(...allMasterBikes.map(x=>Number(x.sn)||0)) + 1 : 1;
+  let runningModelCount = allMasterBikes.length;
   const results = { success:[], failed:[] };
   const seenInBatch = []; // track model names already added within this same import run
 
   for(const row of priceExcelParsedRows){
+    if(runningModelCount >= MAX_BIKES){
+      results.failed.push({row, reason:`Model limit reached — capped at ${MAX_BIKES} models`});
+      continue;
+    }
     if(!row.model || !row.price){
       results.failed.push({row, reason:'Missing required field (Model/Price)'});
       continue;
@@ -7801,6 +7984,7 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
       seenInBatch.push(row);
       results.success.push(row);
       nextSn++;
+      runningModelCount++;
     }catch(e){
       results.failed.push({row, reason:friendlyError(e)});
     }
