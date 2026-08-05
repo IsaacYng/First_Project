@@ -2979,7 +2979,19 @@ function friendlyError(e){
     'permission-denied': "You don't have permission to do that.",
     'not-found': 'That record could not be found.',
     'unavailable': 'Connection issue — please try again.',
-    'unauthenticated': 'Your session expired — please sign in again.'
+    'unauthenticated': 'Your session expired — please sign in again.',
+    // Storage errors are shown with the actual cause rather than
+    // genericized — this app is admin-only, and these two specifically
+    // mean the Firebase project needs a one-time setup step (enabling
+    // Storage, or adding a security rule) that only the Master ID can
+    // actually go fix in the Firebase Console.
+    'storage/unauthorized': "Storage security rules are blocking this — the Firebase Console needs a rule allowing signed-in users to write to Storage.",
+    'storage/unauthenticated': 'Your session expired — please sign in again.',
+    'storage/unknown': "Firebase Storage may not be set up for this project yet — check the Firebase Console (Build → Storage → Get Started).",
+    'storage/object-not-found': 'That file could not be found in storage.',
+    'storage/quota-exceeded': "Firebase's storage quota has been used up — check the Firebase Console.",
+    'storage/retry-limit-exceeded': 'Upload timed out — check your connection and try again.',
+    'storage/canceled': 'Upload was canceled.'
   };
   for(const key in map){ if(code.includes(key)) return map[key]; }
   return 'Something went wrong — please try again.';
@@ -6646,6 +6658,7 @@ window.uploadDocument = async ()=>{
   uploadTask.on('state_changed',
     (snap)=>{ progressBar.style.width = Math.round((snap.bytesTransferred/snap.totalBytes)*100)+'%'; },
     (err)=>{
+      console.error('Document upload failed:', err.code, err.message, err);
       toast('Upload failed: '+friendlyError(err),'err');
       btn.disabled = false;
       progressWrap.classList.add('hidden');
