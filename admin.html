@@ -3502,6 +3502,10 @@ function setActiveTab(sec) {
 // Set initial active state
 document.querySelectorAll('.nav-tab').forEach(t=>t.classList.add('border'));
 document.querySelectorAll('.mobile-tab').forEach(t=>t.classList.add('border'));
+// Same belt-and-suspenders inline-style forcing as switchSec() — applied
+// once upfront too, so the very first paint is never dependent on the
+// class-based CSS rule alone.
+document.querySelectorAll('.sec-panel').forEach(p=>{ p.style.display = p.classList.contains('active') ? 'block' : 'none'; });
 setActiveTab('price');
 
 /* ─── Auth ─── */
@@ -8215,8 +8219,17 @@ window.switchSec=(sec)=>{
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
     sec = 'price';
   }
-  document.querySelectorAll('.sec-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById(SEC_IDS[sec] || 'secStock').classList.add('active');
+  // Belt-and-suspenders: force display via inline style directly, on TOP of
+  // the class toggle — inline styles always win regardless of any CSS
+  // specificity/cascade conflict that might exist in a given environment,
+  // so a section can never stay visible by accident no matter what.
+  document.querySelectorAll('.sec-panel').forEach(p=>{
+    p.classList.remove('active');
+    p.style.display = 'none';
+  });
+  const target = document.getElementById(SEC_IDS[sec] || 'secStock');
+  target.classList.add('active');
+  target.style.display = 'block';
   setActiveTab(sec);
   const heading = document.getElementById('topbarHeading');
   if(heading) heading.textContent = SEC_TITLES[sec] || '';
