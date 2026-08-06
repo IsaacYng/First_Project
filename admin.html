@@ -1868,7 +1868,7 @@
         <div>
           <div class="eyebrow">Documents</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Document <span class="text-amber-500">Vault</span></div>
-          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Shared across the whole team — KYC forms, allocation forms, Namsari letters — scanned and stored safely. Photos are compressed automatically; PDF/Word/Excel need to already be under ~700 KB.</p>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Shared across the whole team — KYC forms, allocation forms, Namsari letters — scanned and stored safely. Photos are compressed automatically; PDF/Word/Excel need to already be under ~900 KB.</p>
         </div>
         <button onclick="openDocUploadModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
           <i class="fas fa-upload"></i> Upload Document
@@ -1922,26 +1922,16 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-        <div class="yng-card-shell p-5">
-          <div class="flex items-center justify-between gap-2 mb-2">
-            <div class="text-xs font-bold text-slate-600"><i class="fas fa-folder-open text-amber-500 mr-1"></i> Document Vault</div>
-            <div class="flex items-center gap-2">
-              <div id="docStorageLabel" class="text-xs font-bold text-slate-500">0 MB / 0 MB</div>
-              <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set storage limit"><i class="fas fa-gear text-xs"></i></button>
-            </div>
-          </div>
-          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-            <div id="docStorageBar" class="h-full bg-bajaj-blue rounded-full transition-all" style="width:0%"></div>
-          </div>
-        </div>
-        <div class="yng-card-shell p-5">
-          <div class="flex items-center justify-between gap-2 mb-2">
-            <div class="text-xs font-bold text-slate-600"><i class="fas fa-list-check text-bajaj-blue mr-1"></i> Record Limits</div>
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <div class="text-xs font-bold text-slate-600"><i class="fas fa-chart-simple text-bajaj-blue mr-1"></i> Storage Allocation</div>
+          <div class="flex items-center gap-1">
+            <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set Document Vault limit"><i class="fas fa-gear text-xs"></i></button>
             <button id="systemLimitsSettingsBtn" onclick="openSystemLimitsModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set record limits"><i class="fas fa-gear text-xs"></i></button>
           </div>
-          <div id="recordLimitsGrid" class="grid grid-cols-2 gap-2"></div>
         </div>
+        <p class="text-[11px] text-slate-400 mb-4">What the Master ID has allowed for each category — and how much is actually being used right now.</p>
+        <div id="storageAllocationList" class="flex flex-col gap-4"></div>
       </div>
 
       <div id="perUserStorageWrap" class="hidden yng-card-shell p-5">
@@ -6644,7 +6634,7 @@ let docTypeFilter = 'all';
 let docEditingId = null;
 let pendingDocFile = null;
 const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','mp3','mp4'];
-const DOC_MAX_FILE_SIZE = 700 * 1024; // ~700KB as base64 text — comfortably under Firestore's 1MB-per-document limit
+const DOC_MAX_FILE_SIZE = 900 * 1024; // ~900KB as base64 text — the safe practical ceiling; Firestore hard-caps every single document at 1MB total (including all its other fields), so this is as close to that wall as it's safe to go
 const DOC_TYPE_GROUPS = { pdf:['pdf'], photo:['jpg','jpeg','png'], word:['doc','docx'], excel:['xls','xlsx'] };
 const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626'}, doc:{icon:'fa-file-word',color:'#2563EB'}, docx:{icon:'fa-file-word',color:'#2563EB'}, xls:{icon:'fa-file-excel',color:'#059669'}, xlsx:{icon:'fa-file-excel',color:'#059669'}, jpg:{icon:'fa-file-image',color:'#D97706'}, jpeg:{icon:'fa-file-image',color:'#D97706'}, png:{icon:'fa-file-image',color:'#D97706'}, mp3:{icon:'fa-file-audio',color:'#7C3AED'}, mp4:{icon:'fa-file-video',color:'#DB2777'} };
 // Firestore's free (Spark) tier gives ~1 GiB of total stored data for the
@@ -6712,35 +6702,46 @@ function formatBytes(bytes){
 }
 
 async function updateStorageOverview(){
-  const grid = document.getElementById('recordLimitsGrid');
-  if(!grid) return;
+  const list = document.getElementById('storageAllocationList');
+  if(!list) return;
   const invCount = await getAccurateTotalInventoryCount();
-  const stats = [
-    { label:'Models', used: allMasterBikes.length, max: MAX_BIKES, perRecord: RECORD_SIZE_ESTIMATE.bike },
-    { label:'All Inventory', used: invCount, max: MAX_TOTAL_INVENTORY_UNITS, perRecord: RECORD_SIZE_ESTIMATE.inventoryUnit },
-    { label:'Accessories', used: accessories.length, max: MAX_ACCESSORIES, perRecord: RECORD_SIZE_ESTIMATE.accessory },
-    { label:'Finance Schemes', used: financeSchemes.length, max: MAX_FINANCE_SCHEMES, perRecord: RECORD_SIZE_ESTIMATE.financeScheme }
+  const used = getTotalStorageUsed();
+
+  const rows = [
+    { icon:'fa-folder-open', color:'#D97706', label:'Document Vault', usedBytes: used, maxBytes: STORAGE_CAP_BYTES,
+      sub: `${formatBytes(used)} used of ${formatBytes(STORAGE_CAP_BYTES)} allowed` },
+    { icon:'fa-tags', color:'#005EA6', label:'Master Price List (Models)', count: allMasterBikes.length, maxCount: MAX_BIKES,
+      usedBytes: allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike, maxBytes: MAX_BIKES*RECORD_SIZE_ESTIMATE.bike,
+      sub: `${allMasterBikes.length} / ${MAX_BIKES} models — up to ${formatBytes(MAX_BIKES*RECORD_SIZE_ESTIMATE.bike)} at full capacity` },
+    { icon:'fa-warehouse', color:'#059669', label:'All Inventory', count: invCount, maxCount: MAX_TOTAL_INVENTORY_UNITS,
+      usedBytes: invCount*RECORD_SIZE_ESTIMATE.inventoryUnit, maxBytes: MAX_TOTAL_INVENTORY_UNITS*RECORD_SIZE_ESTIMATE.inventoryUnit,
+      sub: `${invCount} / ${MAX_TOTAL_INVENTORY_UNITS} units — up to ${formatBytes(MAX_TOTAL_INVENTORY_UNITS*RECORD_SIZE_ESTIMATE.inventoryUnit)} at full capacity` },
+    { icon:'fa-helmet-safety', color:'#7C3AED', label:'Accessories', count: accessories.length, maxCount: MAX_ACCESSORIES,
+      usedBytes: accessories.length*RECORD_SIZE_ESTIMATE.accessory, maxBytes: MAX_ACCESSORIES*RECORD_SIZE_ESTIMATE.accessory,
+      sub: `${accessories.length} / ${MAX_ACCESSORIES} items — up to ${formatBytes(MAX_ACCESSORIES*RECORD_SIZE_ESTIMATE.accessory)} at full capacity` },
+    { icon:'fa-percent', color:'#DB2777', label:'Finance Schemes', count: financeSchemes.length, maxCount: MAX_FINANCE_SCHEMES,
+      usedBytes: financeSchemes.length*RECORD_SIZE_ESTIMATE.financeScheme, maxBytes: MAX_FINANCE_SCHEMES*RECORD_SIZE_ESTIMATE.financeScheme,
+      sub: `${financeSchemes.length} / ${MAX_FINANCE_SCHEMES} schemes — up to ${formatBytes(MAX_FINANCE_SCHEMES*RECORD_SIZE_ESTIMATE.financeScheme)} at full capacity` }
   ];
-  grid.innerHTML = stats.map(s=>{
-    const pct = s.max ? Math.min(100, (s.used/s.max)*100) : 0;
+
+  list.innerHTML = rows.map(r=>{
+    // Bar tracks whichever ceiling actually governs this category — count
+    // for the four record types (that's the real enforced limit), bytes
+    // for the Document Vault (which has no record-count cap, only a size one).
+    const pct = r.maxCount ? Math.min(100, (r.count/r.maxCount)*100) : Math.min(100, (r.usedBytes/r.maxBytes)*100);
     const barColor = pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue';
-    return `<div class="bg-slate-50 rounded-lg p-2.5">
-      <div class="text-[10px] font-bold text-slate-500 mb-1">${escapeHtml(s.label)}</div>
-      <div class="text-sm font-extrabold text-slate-800">${s.used} / ${s.max}</div>
-      <div class="text-[10px] text-slate-400 mb-1.5">~${formatBytes(s.used*s.perRecord)}</div>
-      <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full ${barColor} rounded-full" style="width:${pct}%"></div></div>
+    return `<div>
+      <div class="flex items-center justify-between gap-2 mb-1">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style="background:${r.color}15"><i class="fas ${r.icon} text-xs" style="color:${r.color}"></i></div>
+          <span class="text-xs font-bold text-slate-700 truncate">${escapeHtml(r.label)}</span>
+        </div>
+        <span class="text-xs font-extrabold text-slate-800 flex-shrink-0">${formatBytes(r.usedBytes)}</span>
+      </div>
+      <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-1"><div class="h-full ${barColor} rounded-full transition-all" style="width:${pct}%"></div></div>
+      <p class="text-[10.5px] text-slate-400 pl-9">${r.sub}</p>
     </div>`;
   }).join('');
-
-  const docLabel = document.getElementById('docStorageLabel');
-  const docBar = document.getElementById('docStorageBar');
-  const used = getTotalStorageUsed();
-  if(docLabel && docBar){
-    const pct = Math.min(100, (used/STORAGE_CAP_BYTES)*100);
-    docBar.style.width = pct+'%';
-    docBar.className = 'h-full rounded-full transition-all ' + (pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue');
-    docLabel.textContent = `${formatBytes(used)} / ${formatBytes(STORAGE_CAP_BYTES)}`;
-  }
 
   const perUserWrap = document.getElementById('perUserStorageWrap');
   const perUserList = document.getElementById('perUserStorageList');
