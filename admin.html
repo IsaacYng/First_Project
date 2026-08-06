@@ -987,6 +987,10 @@
       </div>
 
       <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Documents</div>
+        <button id="navDocs" onclick="switchSec('docs');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-folder-open"></i> Document Vault
+        </button>
         <div class="sidebar-section-label">Dealership</div>
         <button id="navPrice" onclick="switchSec('price');closeMobileMenu()" class="nav-tab sidebar-link active-tab">
           <i class="fas fa-tags"></i> Price List
@@ -1005,10 +1009,6 @@
         </button>
         <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-helmet-safety"></i> Accessories
-        </button>
-        <div class="sidebar-section-label">Documents</div>
-        <button id="navDocs" onclick="switchSec('docs');closeMobileMenu()" class="nav-tab sidebar-link">
-          <i class="fas fa-folder-open"></i> Document Vault
         </button>
         <div class="sidebar-section-label">Marketing</div>
         <button id="navEvents" onclick="switchSec('events');closeMobileMenu()" class="nav-tab sidebar-link">
@@ -1881,7 +1881,7 @@
       </div>
       <div id="docsListWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"></div>
 
-      <div class="yng-card-shell p-6 mb-5 flex flex-col sm:flex-row items-center gap-6">
+      <div id="totalStorageWrap" class="hidden yng-card-shell p-6 mb-5 flex flex-col sm:flex-row items-center gap-6">
         <div class="relative flex-shrink-0" style="width:130px;height:130px;">
           <div id="storageRing" class="w-full h-full rounded-full flex items-center justify-center" style="background:conic-gradient(#005EA6 0deg, #E2E8F0 0deg);">
             <div class="bg-white rounded-full flex flex-col items-center justify-center" style="width:96px;height:96px;">
@@ -2310,8 +2310,19 @@
         </select>
       </div>
       <p id="storageCapPreview" class="text-[11px] text-slate-400 mb-4"></p>
+      <div class="border-t border-slate-100 pt-4 mb-4">
+        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Per-person limit <span class="normal-case font-medium text-slate-300">(so no one uploader uses it all)</span></label>
+        <div class="flex gap-2">
+          <input type="number" id="perUserCapValue" min="1" step="any" placeholder="e.g. 100" class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          <select id="perUserCapUnit" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
+            <option value="KB">KB</option>
+            <option value="MB" selected>MB</option>
+            <option value="GB">GB</option>
+          </select>
+        </div>
+      </div>
       <button onclick="saveStorageCap()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
-        <i class="fas fa-check mr-1"></i> Save Limit
+        <i class="fas fa-check mr-1"></i> Save Limits
       </button>
     </div>
   </div>
@@ -6539,6 +6550,10 @@ const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626'}, doc:{icon:'fa
 // genuinely comfortable buffer for everything else. Configurable by a
 // Master ID from the gear icon.
 let STORAGE_CAP_BYTES = 1024 * 1024 * 1024 * 0.7;
+// A per-person ceiling too, so one very active uploader can't quietly use
+// up the entire Document Vault, leaving nothing for everyone else. Default
+// is generous for a small team; a Master ID can adjust it.
+let MAX_PER_USER_STORAGE_BYTES = 100 * 1024 * 1024;
 const BYTE_UNITS = { KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 };
 const RECORD_SIZE_ESTIMATE = { bike: 500, inventoryUnit: 1200, accessory: 100, financeScheme: 300 };
 const OTHER_COLLECTIONS_ESTIMATE = 5 * 1024 * 1024; // rough allowance for activity log / trash / events / team photos
@@ -6553,7 +6568,11 @@ function loadDocuments(){
 
 function loadStorageSettings(){
   onSnapshot(doc(db,'settings','storage'), snap=>{
-    if(snap.exists() && snap.data().capBytes) STORAGE_CAP_BYTES = snap.data().capBytes;
+    if(snap.exists()){
+      const d = snap.data();
+      if(d.capBytes) STORAGE_CAP_BYTES = d.capBytes;
+      if(d.perUserCapBytes) MAX_PER_USER_STORAGE_BYTES = d.perUserCapBytes;
+    }
     updateStorageOverview();
     const gearBtn = document.getElementById('docStorageSettingsBtn');
     if(gearBtn) gearBtn.classList.toggle('hidden', currentUserRole !== 'owner');
@@ -6628,15 +6647,27 @@ async function updateStorageOverview(){
       documents.forEach(d=>{ const who=d.uploadedBy||'Unknown'; byUser[who]=(byUser[who]||0)+(d.sizeBytes||0); });
       const rows = Object.entries(byUser).sort((a,b)=>b[1]-a[1]);
       perUserList.innerHTML = rows.length
-        ? rows.map(([who,bytes])=>`<div class="flex items-center justify-between text-xs"><span class="text-slate-600 truncate">${escapeHtml(who)}</span><span class="font-bold text-slate-500 flex-shrink-0 ml-2">${formatBytes(bytes)}</span></div>`).join('')
+        ? rows.map(([who,bytes])=>{
+            const pct = Math.min(100, (bytes/MAX_PER_USER_STORAGE_BYTES)*100);
+            const barColor = pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue';
+            return `<div class="text-xs">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-slate-600 truncate">${escapeHtml(who)}</span>
+                <span class="font-bold text-slate-500 flex-shrink-0 ml-2">${formatBytes(bytes)} / ${formatBytes(MAX_PER_USER_STORAGE_BYTES)}</span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${barColor} rounded-full" style="width:${pct}%"></div></div>
+            </div>`;
+          }).join('')
         : `<div class="text-xs text-slate-400">No documents uploaded yet.</div>`;
     }
   }
 
+  const totalWrap = document.getElementById('totalStorageWrap');
   const totalLabel = document.getElementById('totalStorageLabel');
   const ring = document.getElementById('storageRing');
   const ringPct = document.getElementById('storageRingPct');
-  if(totalLabel && ring && ringPct){
+  if(totalWrap) totalWrap.classList.toggle('hidden', currentUserRole !== 'owner');
+  if(totalLabel && ring && ringPct && currentUserRole === 'owner'){
     const estimatedOtherBytes = (allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike)
       + (invCount*RECORD_SIZE_ESTIMATE.inventoryUnit)
       + (accessories.length*RECORD_SIZE_ESTIMATE.accessory)
@@ -6787,6 +6818,13 @@ window.uploadDocument = async ()=>{
 
   const finish = async (fileData)=>{
     const used = getTotalStorageUsed();
+    const myUsed = documents.filter(d=>d.uploadedBy===(currentUserEmail||currentUserName)).reduce((s,d)=>s+(d.sizeBytes||0),0);
+    if(myUsed + fileData.length > MAX_PER_USER_STORAGE_BYTES){
+      if(btn) btn.disabled = false;
+      if(progressWrap) progressWrap.classList.add('hidden');
+      toast(`You've used ${formatBytes(myUsed)} of your ${formatBytes(MAX_PER_USER_STORAGE_BYTES)} personal storage allowance — ask a Master ID to raise it, or remove some older documents.`,'err');
+      return;
+    }
     if(used + fileData.length > STORAGE_CAP_BYTES){
       closeDocUploadModal();
       openDocUpgradeModal();
@@ -6928,6 +6966,11 @@ window.openStorageCapModal = ()=>{
   if(value >= 1024){ unit = 'TB'; value = STORAGE_CAP_BYTES / BYTE_UNITS.TB; }
   document.getElementById('storageCapValue').value = Math.round(value*100)/100;
   document.getElementById('storageCapUnit').value = unit;
+  let puUnit = 'MB', puValue = MAX_PER_USER_STORAGE_BYTES / BYTE_UNITS.MB;
+  if(puValue >= 1024){ puUnit = 'GB'; puValue = MAX_PER_USER_STORAGE_BYTES / BYTE_UNITS.GB; }
+  if(puValue < 1){ puUnit = 'KB'; puValue = MAX_PER_USER_STORAGE_BYTES / BYTE_UNITS.KB; }
+  document.getElementById('perUserCapValue').value = Math.round(puValue*100)/100;
+  document.getElementById('perUserCapUnit').value = puUnit;
   updateStorageCapPreview();
   document.getElementById('storageCapModal').classList.remove('hidden');
   document.getElementById('storageCapModal').classList.add('flex');
@@ -6949,12 +6992,17 @@ window.saveStorageCap = async ()=>{
   if(currentUserRole !== 'owner'){ toast('Only a Master ID can change the storage limit.','err'); return; }
   const value = parseFloat(document.getElementById('storageCapValue').value);
   const unit = document.getElementById('storageCapUnit').value;
-  if(!value || value <= 0){ toast('Enter a valid limit.','err'); return; }
+  const puValue = parseFloat(document.getElementById('perUserCapValue').value);
+  const puUnit = document.getElementById('perUserCapUnit').value;
+  if(!value || value <= 0){ toast('Enter a valid overall limit.','err'); return; }
+  if(!puValue || puValue <= 0){ toast('Enter a valid per-person limit.','err'); return; }
   const capBytes = value * (BYTE_UNITS[unit]||BYTE_UNITS.MB);
+  const perUserCapBytes = puValue * (BYTE_UNITS[puUnit]||BYTE_UNITS.MB);
+  if(perUserCapBytes > capBytes){ toast("The per-person limit can't be larger than the overall limit.",'err'); return; }
   try{
-    await setDoc(doc(db,'settings','storage'), { capBytes, capValue:value, capUnit:unit }, { merge:true });
-    logActivity('Storage Limit Changed', 'settings', { model: `${value} ${unit}` });
-    toast(`Storage limit set to ${formatBytes(capBytes)}.`);
+    await setDoc(doc(db,'settings','storage'), { capBytes, capValue:value, capUnit:unit, perUserCapBytes, perUserCapValue:puValue, perUserCapUnit:puUnit }, { merge:true });
+    logActivity('Storage Limit Changed', 'settings', { model: `Overall:${value}${unit} PerUser:${puValue}${puUnit}` });
+    toast(`Storage limits updated.`);
     closeStorageCapModal();
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
@@ -8062,7 +8110,7 @@ window.switchSec=(sec)=>{
   if(sec==='inv') populateModelDropdown();
   if(sec==='hhinv') populateHHModelDropdown();
   if(sec==='allinv') renderAllInventoryTable();
-  if(sec==='docs') renderDocumentsPage();
+  if(sec==='docs'){ renderDocumentsPage(); updateStorageOverview(); }
   if(sec==='events') renderEventsPage();
   if(sec==='stock') loadStockReportData(true);
   if(sec==='history') renderActivityLog();
