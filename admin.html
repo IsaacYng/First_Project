@@ -1006,8 +1006,9 @@
         <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-helmet-safety"></i> Accessories
         </button>
+        <div class="sidebar-section-label">Documents</div>
         <button id="navDocs" onclick="switchSec('docs');closeMobileMenu()" class="nav-tab sidebar-link">
-          <i class="fas fa-folder-open"></i> Documents
+          <i class="fas fa-folder-open"></i> Document Vault
         </button>
         <div class="sidebar-section-label">Marketing</div>
         <button id="navEvents" onclick="switchSec('events');closeMobileMenu()" class="nav-tab sidebar-link">
@@ -1051,6 +1052,10 @@
             <span>Search records…</span>
             <kbd>/</kbd>
           </div>
+          <button id="topbarStorageChip" onclick="switchSec('docs')" class="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 transition-all" title="Total storage usage — click for details">
+            <i class="fas fa-database text-[10px] text-slate-400"></i>
+            <span id="topbarStorageChipText" class="text-[11px] font-bold text-slate-500">—</span>
+          </button>
           <button class="topbar-icon-btn" aria-label="Notifications">
             <i class="fas fa-bell text-sm"></i>
             <span class="topbar-dot"></span>
@@ -1897,6 +1902,11 @@
           <button id="systemLimitsSettingsBtn" onclick="openSystemLimitsModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set record limits"><i class="fas fa-gear text-xs"></i></button>
         </div>
         <div id="recordLimitsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+
+        <div id="perUserStorageWrap" class="hidden mt-3 pt-3 border-t border-slate-100">
+          <div class="text-xs font-bold text-slate-600 mb-2"><i class="fas fa-user-lock text-slate-400 mr-1"></i> Storage by Team Member <span class="normal-case font-medium text-slate-300">(visible to Master ID only)</span></div>
+          <div id="perUserStorageList" class="flex flex-col gap-1.5"></div>
+        </div>
       </div>
 
       <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 mb-4 w-fit flex-wrap">
@@ -1914,30 +1924,35 @@
       <div class="form-modal-box">
       <div class="yng-card-shell p-5">
         <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-folder-open text-amber-500 text-lg"></i> Upload Document</div>
+          <div id="docModalTitle" class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-folder-open text-amber-500 text-lg"></i> Upload Document</div>
           <button onclick="closeDocUploadModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
         </div>
         <div class="flex flex-col gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Document Name <span class="text-red-500">*</span></label>
-            <input type="text" id="docName" placeholder="e.g. Santosh Rai - KYC Form" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+            <input type="text" id="docName" placeholder="e.g. KYC Form" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Category</label>
-            <select id="docCategory" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
+            <select id="docCategory" onchange="updateDocCategoryHint()" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
               <option>KYC Form</option>
               <option>Allocation Form</option>
               <option>Namsari Letter</option>
               <option>Citizenship / ID</option>
               <option>Other</option>
             </select>
+            <p id="docCategoryHint" class="text-[10.5px] text-slate-400 mt-0.5"></p>
           </div>
-          <div class="flex flex-col gap-1.5">
+          <div id="docFileNameFieldWrap" class="hidden flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Saved File Name <span class="normal-case font-medium text-slate-300">(keep the extension, e.g. .pdf)</span></label>
+            <input type="text" id="docFileNameInput" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+          <div id="docFileFieldWrap" class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">File <span class="text-red-500">*</span> <span class="normal-case font-medium text-slate-300">(PDF, JPG/PNG photo, Word, or Excel — photos auto-compress, others need to be under ~700 KB)</span></label>
             <label class="flex items-center gap-3 border-2 border-dashed border-slate-300 bg-slate-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-slate-50 hover:border-bajaj-blue transition-all">
               <i class="fas fa-cloud-arrow-up text-slate-400 text-lg flex-shrink-0"></i>
               <span id="docFileLabel" class="text-sm text-slate-500 font-medium truncate">Click to choose a file…</span>
-              <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" id="docFileInput" class="hidden" onchange="handleDocFileSelect(event)"/>
+              <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.mp3,.mp4" id="docFileInput" class="hidden" onchange="handleDocFileSelect(event)"/>
             </label>
           </div>
           <div id="docUploadProgress" class="hidden">
@@ -2010,6 +2025,23 @@
           <i class="fas fa-check mr-1"></i> Save Limits
         </button>
       </div>
+      </div>
+    </div>
+
+    <!-- DOCUMENT PREVIEW -->
+    <div id="docPreviewModal" class="hidden fixed inset-0 z-[650] items-center justify-center p-4" style="background:rgba(15,23,42,.75);backdrop-filter:blur(3px);" onclick="if(event.target===this) closeDocPreview()">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative flex flex-col" style="max-height:92vh;">
+        <div class="flex items-center justify-between gap-2 p-4 border-b border-slate-100 flex-shrink-0">
+          <div class="min-w-0">
+            <div id="docPreviewTitle" class="font-extrabold text-slate-800 text-sm truncate"></div>
+            <div id="docPreviewMeta" class="text-[11px] text-slate-400"></div>
+          </div>
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <button id="docPreviewDownloadBtn" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-bajaj-blue hover:border-bajaj-blue flex items-center justify-center transition-all" title="Download"><i class="fas fa-download text-xs"></i></button>
+            <button onclick="closeDocPreview()" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all" title="Close"><i class="fas fa-xmark text-xs"></i></button>
+          </div>
+        </div>
+        <div id="docPreviewBody" class="flex-1 overflow-auto bg-slate-50 flex items-center justify-center p-4" style="min-height:300px;"></div>
       </div>
     </div>
 
@@ -2881,10 +2913,14 @@ window._toggleKebab = (btn, type, id) => {
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('events', id) }
     ]);
   } else if(type === 'documents'){
-    // Everyone can view/download/upload — any staff member processing a
-    // sale or loan needs to attach a customer's documents. Delete is
-    // Master-ID-only though, since these often contain personal ID info.
-    const docActions = [{ label:'Download', icon:'fa-download', onClick:()=>window.downloadDocument(id) }];
+    // Everyone can view/download/upload/edit — any staff member processing a
+    // sale or loan needs to attach and correct a customer's documents.
+    // Delete is Master-ID-only though, since these often contain personal ID info.
+    const docActions = [
+      { label:'Preview', icon:'fa-eye', onClick:()=>window.openDocPreview(id) },
+      { label:'Download', icon:'fa-download', onClick:()=>window.downloadDocument(id) },
+      { label:'Edit', icon:'fa-pen', onClick:()=>window.openDocUploadModal(id) }
+    ];
     if(currentUserRole === 'owner') docActions.push({ label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('documents', id) });
     openKebabMenuFor(btn, docActions);
   } else if(type === 'hh_inventory'){
@@ -3744,15 +3780,24 @@ window.handleProfilePhotoSelect = (event)=>{
   reader.onload = (e)=>{
     const img = new Image();
     img.onload = ()=>{
-      const size = 160;
+      // A round avatar never needs to be big — 100px is already sharp on
+      // any screen it actually appears at, and keeping this small matters
+      // more now that every account's photo eats into the same shared
+      // storage cap as the Document Vault.
+      const size = 100;
       const canvas = document.createElement('canvas');
       canvas.width = size; canvas.height = size;
       const ctx = canvas.getContext('2d');
       const minSide = Math.min(img.width, img.height);
       const sx = (img.width - minSide)/2, sy = (img.height - minSide)/2;
       ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
-      const base64 = canvas.toDataURL('image/jpeg', 0.75);
-      if(base64.length > 700000){ toast('Photo is too large even after compression — try a different image.','err'); return; }
+      let quality = 0.7;
+      let base64 = canvas.toDataURL('image/jpeg', quality);
+      while(base64.length > 80000 && quality > 0.3){
+        quality -= 0.1;
+        base64 = canvas.toDataURL('image/jpeg', quality);
+      }
+      if(base64.length > 80000){ toast('Photo is too large even after compression — try a simpler image.','err'); return; }
       pendingProfilePhoto = base64;
       renderAvatarColorPicker();
     };
@@ -4333,6 +4378,30 @@ async function updateStorageOverview(){
       </div>`;
     }).join('');
 
+    // Per-uploader document storage — Master ID only, since this is really
+    // just a management/oversight view rather than something a Normal ID
+    // needs day-to-day.
+    const perUserWrap = document.getElementById('perUserStorageWrap');
+    const perUserList = document.getElementById('perUserStorageList');
+    if(perUserWrap && perUserList){
+      const isMaster = currentUserRole === 'owner';
+      perUserWrap.classList.toggle('hidden', !isMaster);
+      if(isMaster){
+        const byUser = {};
+        documents.forEach(d=>{
+          const who = d.uploadedBy || 'Unknown';
+          byUser[who] = (byUser[who]||0) + (d.sizeBytes||0);
+        });
+        const rows = Object.entries(byUser).sort((a,b)=>b[1]-a[1]);
+        perUserList.innerHTML = rows.length
+          ? rows.map(([who,bytes])=>`<div class="flex items-center justify-between text-xs">
+              <span class="text-slate-600 truncate">${escapeHtml(who)}</span>
+              <span class="font-bold text-slate-500 flex-shrink-0 ml-2">${formatBytes(bytes)}</span>
+            </div>`).join('')
+          : `<div class="text-xs text-slate-400">No documents uploaded yet.</div>`;
+      }
+    }
+
     const totalLabel = document.getElementById('totalStorageLabel');
     const totalBar = document.getElementById('totalStorageBar');
     if(totalLabel && totalBar){
@@ -4349,6 +4418,14 @@ async function updateStorageOverview(){
       totalBar.style.width = pct+'%';
       totalBar.className = 'h-full rounded-full transition-all ' + (pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue');
       totalLabel.textContent = `~${formatBytes(totalEstimated)} / ${formatBytes(ceiling)}`;
+
+      // The same figure, visible from every page — not everyone will
+      // naturally think to check the Documents page for this.
+      const chipText = document.getElementById('topbarStorageChipText');
+      if(chipText){
+        chipText.textContent = `${Math.round(pct)}%`;
+        chipText.className = 'text-[11px] font-bold ' + (pct>=90 ? 'text-red-500' : pct>=70 ? 'text-amber-500' : 'text-slate-500');
+      }
     }
   }
 }
@@ -6639,7 +6716,7 @@ window.setDocTypeFilter = (type)=>{
 };
 let pendingDocFile = null;
 const DOC_MAX_FILE_SIZE = 700 * 1024; // ~700KB stored as base64 text — leaves comfortable room under Firestore's 1MB-per-document limit
-const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png'];
+const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','mp3','mp4'];
 // Firestore's free (Spark) tier gives ~1 GiB of total stored data for the
 // ENTIRE database — documents-as-base64 (~700KB each) dwarf everything
 // else that lives here: inventory/price-list records are ~1-2KB each,
@@ -6718,9 +6795,13 @@ function getTotalStorageUsed(){
   return documents.reduce((sum,d)=>sum+(d.sizeBytes||0),0);
 }
 function formatBytes(bytes){
-  if(!bytes) return '0 MB';
-  const mb = bytes/(1024*1024);
-  return mb >= 1024 ? (mb/1024).toFixed(2)+' GB' : mb.toFixed(1)+' MB';
+  if(!bytes) return '0 KB';
+  if(bytes < 1024) return bytes+' B';
+  const kb = bytes/1024;
+  if(kb < 1024) return kb.toFixed(kb<10?2:1)+' KB';
+  const mb = kb/1024;
+  if(mb < 1024) return mb.toFixed(mb<10?2:1)+' MB';
+  return (mb/1024).toFixed(2)+' GB';
 }
 function updateStorageBar(){
   const bar = document.getElementById('docStorageBar');
@@ -6733,7 +6814,7 @@ function updateStorageBar(){
   label.textContent = `${formatBytes(used)} / ${formatBytes(STORAGE_CAP_BYTES)}`;
 }
 
-const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626'}, doc:{icon:'fa-file-word',color:'#2563EB'}, docx:{icon:'fa-file-word',color:'#2563EB'}, xls:{icon:'fa-file-excel',color:'#059669'}, xlsx:{icon:'fa-file-excel',color:'#059669'}, jpg:{icon:'fa-file-image',color:'#D97706'}, jpeg:{icon:'fa-file-image',color:'#D97706'}, png:{icon:'fa-file-image',color:'#D97706'} };
+const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626'}, doc:{icon:'fa-file-word',color:'#2563EB'}, docx:{icon:'fa-file-word',color:'#2563EB'}, xls:{icon:'fa-file-excel',color:'#059669'}, xlsx:{icon:'fa-file-excel',color:'#059669'}, jpg:{icon:'fa-file-image',color:'#D97706'}, jpeg:{icon:'fa-file-image',color:'#D97706'}, png:{icon:'fa-file-image',color:'#D97706'}, mp3:{icon:'fa-file-audio',color:'#7C3AED'}, mp4:{icon:'fa-file-video',color:'#DB2777'} };
 
 function renderDocumentsPage(){
   const wrap = document.getElementById('docsListWrap');
@@ -6754,12 +6835,12 @@ function renderDocumentsPage(){
     const ext = (d.fileExt||'').toLowerCase();
     const iconInfo = DOC_FILE_ICONS[ext] || {icon:'fa-file', color:'#64748B'};
     const at = d.uploadedAt?.toDate ? d.uploadedAt.toDate() : new Date(d.uploadedAt||Date.now());
-    return `<div class="yng-card-shell p-4">
+    return `<div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="openDocPreview('${d.id}')">
       <div class="flex items-start justify-between gap-2 mb-3">
         <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${iconInfo.color}15">
           <i class="fas ${iconInfo.icon} text-lg" style="color:${iconInfo.color}"></i>
         </div>
-        <button type="button" class="kebab-btn flex-shrink-0" onclick="window._toggleKebab(this,'documents','${d.id}')" aria-label="Document actions"><i class="fas fa-ellipsis-vertical"></i></button>
+        <button type="button" class="kebab-btn flex-shrink-0" onclick="event.stopPropagation(); window._toggleKebab(this,'documents','${d.id}')" aria-label="Document actions"><i class="fas fa-ellipsis-vertical"></i></button>
       </div>
       <div class="font-bold text-slate-800 text-sm leading-snug mb-1 truncate" title="${escapeHtml(d.name||'')}">${escapeHtml(d.name||'Untitled')}</div>
       <span class="badge badge-blue mb-2">${escapeHtml(d.category||'Other')}</span>
@@ -6771,17 +6852,55 @@ function renderDocumentsPage(){
   }).join('');
 }
 
-window.openDocUploadModal = ()=>{
-  document.getElementById('docName').value = '';
-  document.getElementById('docCategory').value = 'KYC Form';
+const DOC_CATEGORY_HINTS = {
+  'KYC Form': 'The signed Know-Your-Customer form itself — used to verify identity for a loan/finance application.',
+  'Allocation Form': 'The dealer allocation/booking form confirming which unit is assigned to which customer.',
+  'Namsari Letter': 'The ownership-transfer (Namsari) letter for a bike changing hands.',
+  'Citizenship / ID': 'A scan of citizenship, license, or other official ID used to support an application.',
+  'Other': 'Anything that doesn\'t fit the categories above.'
+};
+window.updateDocCategoryHint = ()=>{
+  const hintEl = document.getElementById('docCategoryHint');
+  const cat = document.getElementById('docCategory')?.value;
+  if(hintEl) hintEl.textContent = DOC_CATEGORY_HINTS[cat] || '';
+};
+
+let docEditingId = null;
+
+window.openDocUploadModal = (id)=>{
+  const d = id ? documents.find(x=>x.id===id) : null;
+  docEditingId = id || null;
+  document.getElementById('docName').value = d?.name || '';
+  document.getElementById('docCategory').value = d?.category || 'KYC Form';
   document.getElementById('docFileInput').value = '';
-  document.getElementById('docFileLabel').textContent = 'Click to choose a file…';
-  document.getElementById('docUploadProgress').classList.add('hidden');
   pendingDocFile = null;
+  const fileFieldWrap = document.getElementById('docFileFieldWrap');
+  const fileNameFieldWrap = document.getElementById('docFileNameFieldWrap');
+  if(d){
+    // Editing: the file itself stays as-is (re-uploading isn't required
+    // just to fix a typo in the name) — but the saved filename is editable,
+    // since that's what controls the extension/icon when downloaded.
+    document.getElementById('docModalTitle').innerHTML = '<i class="fas fa-folder-open text-amber-500 text-lg"></i> Edit Document';
+    document.getElementById('docUploadBtn').innerHTML = '<i class="fas fa-check mr-1"></i> Save Changes';
+    if(fileFieldWrap) fileFieldWrap.classList.add('hidden');
+    if(fileNameFieldWrap){
+      fileNameFieldWrap.classList.remove('hidden');
+      document.getElementById('docFileNameInput').value = d.fileName || '';
+    }
+  } else {
+    document.getElementById('docModalTitle').innerHTML = '<i class="fas fa-folder-open text-amber-500 text-lg"></i> Upload Document';
+    document.getElementById('docUploadBtn').innerHTML = '<i class="fas fa-upload mr-1"></i> Upload';
+    document.getElementById('docFileLabel').textContent = 'Click to choose a file…';
+    if(fileFieldWrap) fileFieldWrap.classList.remove('hidden');
+    if(fileNameFieldWrap) fileNameFieldWrap.classList.add('hidden');
+  }
+  document.getElementById('docUploadProgress').classList.add('hidden');
+  updateDocCategoryHint();
   document.getElementById('docUploadModal').classList.add('open');
 };
 window.closeDocUploadModal = ()=>{
   document.getElementById('docUploadModal').classList.remove('open');
+  docEditingId = null;
 };
 
 window.handleDocFileSelect = (event)=>{
@@ -6791,7 +6910,7 @@ window.handleDocFileSelect = (event)=>{
     if(!file) return;
     const ext = (file.name.split('.').pop()||'').toLowerCase();
     if(!DOC_ALLOWED_EXT.includes(ext)){
-      toast('Only PDF, JPG/PNG photos, Word (.doc/.docx), or Excel (.xls/.xlsx) files are allowed.','err');
+      toast('Only PDF, JPG/PNG photos, Word, Excel, MP3, or MP4 files are allowed.','err');
       event.target.value = '';
       return;
     }
@@ -6832,6 +6951,25 @@ window.uploadDocument = async ()=>{
   const name = nameEl.value.trim();
   const category = categoryEl.value;
   if(!name){ toast('Document name is required.','err'); return; }
+
+  // Editing an existing document — just updates the metadata (name,
+  // category, saved file name); the file itself is untouched, so there's
+  // no size/type checks or storage-quota math to redo here.
+  if(docEditingId){
+    const fileNameInput = document.getElementById('docFileNameInput');
+    const fileName = fileNameInput?.value.trim() || undefined;
+    try{
+      await updateDoc(doc(db,'documents',docEditingId), { name, category, ...(fileName ? {fileName} : {}) });
+      logActivity('Updated', 'documents', { model: name });
+      toast('Document updated.');
+      closeDocUploadModal();
+    }catch(e){
+      console.error('[docUpload] edit save failed:', e.code, e.message, e);
+      toast('Error: '+friendlyError(e)+(e.code?` (${e.code})`:''),'err');
+    }
+    return;
+  }
+
   if(!pendingDocFile){ toast('Choose a file to upload first.','err'); return; }
   console.log('[docUpload] validated, file:', pendingDocFile.name, pendingDocFile.size, 'bytes');
 
@@ -6953,12 +7091,63 @@ window.uploadDocument = async ()=>{
 window.downloadDocument = (id)=>{
   const d = documents.find(x=>x.id===id);
   if(!d?.fileData) return;
+  // Always guarantee the right extension on the downloaded filename — if
+  // fileName was missing/generic or someone renamed the document without
+  // an extension, downloading with the wrong (or no) extension is exactly
+  // what makes the OS/browser guess wrong and show something like a PNG
+  // icon for what's actually a PDF.
+  let filename = (d.fileName || d.name || 'document').trim();
+  const ext = (d.fileExt||'').toLowerCase();
+  if(ext && !filename.toLowerCase().endsWith('.'+ext)) filename += '.'+ext;
   const a = document.createElement('a');
   a.href = d.fileData;
-  a.download = d.fileName || d.name || 'document';
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();
+};
+
+window.openDocPreview = (id)=>{
+  const d = documents.find(x=>x.id===id);
+  if(!d) return;
+  const ext = (d.fileExt||'').toLowerCase();
+  document.getElementById('docPreviewTitle').textContent = d.name || 'Document';
+  document.getElementById('docPreviewMeta').textContent = `${escapeHtml(d.category||'')} · ${formatBytes(d.sizeBytes||0)}`;
+  document.getElementById('docPreviewDownloadBtn').onclick = ()=>downloadDocument(id);
+
+  const body = document.getElementById('docPreviewBody');
+  if(['jpg','jpeg','png'].includes(ext)){
+    body.innerHTML = `<img src="${escapeHtml(d.fileData)}" class="max-w-full max-h-[70vh] object-contain rounded-lg">`;
+  } else if(ext==='pdf'){
+    // Most browsers render PDFs natively inside an <embed> — no external
+    // library needed for this one.
+    body.innerHTML = `<embed src="${escapeHtml(d.fileData)}" type="application/pdf" class="w-full h-[70vh] rounded-lg">`;
+  } else if(ext==='mp3'){
+    body.innerHTML = `<audio controls class="w-full" src="${escapeHtml(d.fileData)}"></audio>`;
+  } else if(ext==='mp4'){
+    body.innerHTML = `<video controls class="max-w-full max-h-[70vh] rounded-lg" src="${escapeHtml(d.fileData)}"></video>`;
+  } else {
+    // Word/Excel can't be rendered in-browser without a heavy external
+    // library — a clean fallback beats a broken/blank preview.
+    const iconInfo = DOC_FILE_ICONS[ext] || {icon:'fa-file', color:'#64748B'};
+    body.innerHTML = `<div class="text-center py-10">
+      <div class="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-3" style="background:${iconInfo.color}15">
+        <i class="fas ${iconInfo.icon} text-3xl" style="color:${iconInfo.color}"></i>
+      </div>
+      <p class="text-sm text-slate-500 mb-4">Preview isn't available for this file type — download it to view.</p>
+      <button onclick="downloadDocument('${id}')" class="cta-primary !py-2 !px-4 !text-xs"><i class="fas fa-download"></i> Download</button>
+    </div>`;
+  }
+
+  const overlay = document.getElementById('docPreviewModal');
+  overlay.classList.remove('hidden');
+  overlay.classList.add('flex');
+};
+window.closeDocPreview = ()=>{
+  const overlay = document.getElementById('docPreviewModal');
+  overlay.classList.add('hidden');
+  overlay.classList.remove('flex');
+  document.getElementById('docPreviewBody').innerHTML = ''; // stop any playing audio/video
 };
 
 /* ─── Storage-full "upgrade" flow ──────────────────────────────────────
