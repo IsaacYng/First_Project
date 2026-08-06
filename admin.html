@@ -1875,6 +1875,20 @@
         </button>
       </div>
 
+      <div class="yng-card-shell p-4 mb-4 flex items-center gap-4 w-fit">
+        <div class="relative flex-shrink-0" style="width:64px;height:64px;">
+          <div id="myStorageRing" class="w-full h-full rounded-full flex items-center justify-center" style="background:conic-gradient(#005EA6 0deg, #E2E8F0 0deg);">
+            <div class="bg-white rounded-full flex items-center justify-center" style="width:48px;height:48px;">
+              <div id="myStorageRingPct" class="text-[11px] font-extrabold text-slate-800">0%</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">My Storage</div>
+          <div id="myStorageLabel" class="text-sm font-extrabold text-slate-800">0 MB / 0 MB</div>
+        </div>
+      </div>
+
       <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 mb-4 w-fit flex-wrap">
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-type="all" onclick="setDocTypeFilter('all')">All</button>
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="pdf" onclick="setDocTypeFilter('pdf')"><i class="fas fa-file-pdf mr-1"></i>PDF</button>
@@ -2304,6 +2318,34 @@
 </div>
 
 <!-- STORAGE LIMIT SETTINGS (Master ID only) -->
+<!-- PER-MEMBER STORAGE QUOTA (Master ID only) -->
+<div id="memberQuotaModal" class="hidden fixed inset-0 z-[610] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);" onclick="if(event.target===this) closeMemberQuotaModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style="animation:slideIn .2s ease;">
+    <div class="p-5">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-database text-amber-500 text-lg"></i> Storage Quota</div>
+        <button onclick="closeMemberQuotaModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
+      </div>
+      <p id="memberQuotaName" class="text-xs text-slate-500 mb-4">How much document storage this person can use.</p>
+      <div class="flex gap-2 mb-2">
+        <input type="number" id="memberQuotaValue" min="1" step="any" placeholder="e.g. 100" class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+        <select id="memberQuotaUnit" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
+          <option value="KB">KB</option>
+          <option value="MB" selected>MB</option>
+          <option value="GB">GB</option>
+        </select>
+      </div>
+      <p class="text-[10.5px] text-slate-400 mb-4">Leave blank to use the team-wide default instead.</p>
+      <div class="flex gap-2">
+        <button onclick="saveMemberQuota()" class="flex-1 py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+          <i class="fas fa-check mr-1"></i> Save
+        </button>
+        <button onclick="clearMemberQuota()" class="px-4 py-2.5 border-2 border-slate-200 text-slate-600 text-sm font-bold rounded-lg hover:border-slate-300 transition-all">Use Default</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="storageCapModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);" onclick="if(event.target===this) closeStorageCapModal()">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style="animation:slideIn .2s ease;">
     <div class="p-5">
@@ -3599,6 +3641,7 @@ window.togglePasswordVisibility = ()=>{
 
 const AVATAR_COLORS = ['#005EA6','#B4740E','#059669','#7C3AED','#DC2626','#0891B2','#DB2777','#4B5563'];
 let currentUserRole = 'owner'; // backward-compatible default — see loadProfile
+let currentUserStorageQuota = null; // this user's individual quota override, if a Master ID has set one
 let currentUserAvatarColor = AVATAR_COLORS[0];
 let currentUserPhoto = ''; // base64 data URL, empty if none set
 let currentUserBio = '';
@@ -3643,6 +3686,7 @@ async function loadProfile(uid) {
     }
     const name = data.name || 'Admin';
     currentUserName = name;
+    currentUserStorageQuota = data.storageQuotaBytes || null;
     if(data.role === undefined){
       // No role recorded — either a pre-existing account from before Team
       // Members existed, or a profile doc that's incomplete. This must
@@ -3969,12 +4013,14 @@ function renderTeamMembersList(){
         <div class="text-sm font-bold text-slate-800 truncate">${escapeHtml(m.name||'Unnamed')} ${isSelf?'<span class="text-[10px] text-slate-400 font-semibold">(you)</span>':''} ${roleBadge}</div>
         <div class="text-[11px] text-slate-400 truncate">${escapeHtml(m.email||'')}${m.mobile?' · '+escapeHtml(m.mobile):''}</div>
         ${m.bio ? `<div class="text-[11px] text-slate-500 italic truncate mt-0.5">${escapeHtml(m.bio)}</div>` : ''}
+        <div class="text-[10px] text-slate-400 mt-0.5"><i class="fas fa-database mr-1"></i>Storage quota: ${formatBytes(m.storageQuotaBytes || MAX_PER_USER_STORAGE_BYTES)}</div>
       </div>
       ${!isActive ? '<span class="badge badge-red flex-shrink-0">Disabled</span>' : ''}
-      ${(!isSelf && currentUserRole==='owner') ? `
+      ${currentUserRole==='owner' ? `
       <div class="flex items-center gap-1.5 flex-shrink-0">
-        <button onclick="sendStaffPasswordReset('${escapeJsAttr(m.email)}')" title="Send password reset" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-bajaj-blue hover:border-bajaj-blue transition-all"><i class="fas fa-key text-xs"></i></button>
-        <button onclick="toggleStaffActive('${m.id}', ${isActive})" title="${isActive?'Disable':'Enable'}" class="w-8 h-8 flex items-center justify-center rounded-lg border ${isActive?'border-red-200 text-red-500 hover:bg-red-50':'border-emerald-200 text-emerald-600 hover:bg-emerald-50'} transition-all"><i class="fas ${isActive?'fa-user-slash':'fa-user-check'} text-xs"></i></button>
+        <button onclick="openMemberQuotaModal('${m.id}')" title="Set storage quota" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-bajaj-blue hover:border-bajaj-blue transition-all"><i class="fas fa-database text-xs"></i></button>
+        ${!isSelf ? `<button onclick="sendStaffPasswordReset('${escapeJsAttr(m.email)}')" title="Send password reset" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-bajaj-blue hover:border-bajaj-blue transition-all"><i class="fas fa-key text-xs"></i></button>
+        <button onclick="toggleStaffActive('${m.id}', ${isActive})" title="${isActive?'Disable':'Enable'}" class="w-8 h-8 flex items-center justify-center rounded-lg border ${isActive?'border-red-200 text-red-500 hover:bg-red-50':'border-emerald-200 text-emerald-600 hover:bg-emerald-50'} transition-all"><i class="fas ${isActive?'fa-user-slash':'fa-user-check'} text-xs"></i></button>` : ''}
       </div>` : ''}
     </div>`;
   }).join('');
@@ -4007,6 +4053,52 @@ window.addTeamMember = async ()=>{
     const msg = friendlyError(e);
     toast('Error: '+msg,'err');
   }
+};
+
+let memberQuotaEditingId = null;
+window.openMemberQuotaModal = (uid)=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can set storage quotas.','err'); return; }
+  const member = teamMembers.find(m=>m.id===uid);
+  if(!member) return;
+  memberQuotaEditingId = uid;
+  document.getElementById('memberQuotaName').textContent = `How much document storage ${member.name||'this person'} can use.`;
+  if(member.storageQuotaBytes){
+    let unit = 'MB', value = member.storageQuotaBytes / BYTE_UNITS.MB;
+    if(value >= 1024){ unit = 'GB'; value = member.storageQuotaBytes / BYTE_UNITS.GB; }
+    if(value < 1){ unit = 'KB'; value = member.storageQuotaBytes / BYTE_UNITS.KB; }
+    document.getElementById('memberQuotaValue').value = Math.round(value*100)/100;
+    document.getElementById('memberQuotaUnit').value = unit;
+  } else {
+    document.getElementById('memberQuotaValue').value = '';
+    document.getElementById('memberQuotaUnit').value = 'MB';
+  }
+  document.getElementById('memberQuotaModal').classList.remove('hidden');
+  document.getElementById('memberQuotaModal').classList.add('flex');
+};
+window.closeMemberQuotaModal = ()=>{
+  document.getElementById('memberQuotaModal').classList.add('hidden');
+  document.getElementById('memberQuotaModal').classList.remove('flex');
+  memberQuotaEditingId = null;
+};
+window.saveMemberQuota = async ()=>{
+  if(!memberQuotaEditingId) return;
+  const value = parseFloat(document.getElementById('memberQuotaValue').value);
+  const unit = document.getElementById('memberQuotaUnit').value;
+  if(!value || value <= 0){ toast('Enter a valid amount, or use "Use Default" to clear it.','err'); return; }
+  const storageQuotaBytes = value * (BYTE_UNITS[unit]||BYTE_UNITS.MB);
+  try{
+    await updateDoc(doc(db,'profiles',memberQuotaEditingId), { storageQuotaBytes });
+    toast('Storage quota updated.');
+    closeMemberQuotaModal();
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+window.clearMemberQuota = async ()=>{
+  if(!memberQuotaEditingId) return;
+  try{
+    await updateDoc(doc(db,'profiles',memberQuotaEditingId), { storageQuotaBytes: null });
+    toast('Now using the team-wide default quota.');
+    closeMemberQuotaModal();
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 window.toggleStaffActive = async (uid, currentlyActive)=>{
@@ -6703,7 +6795,22 @@ window.setDocTypeFilter = (type)=>{
   renderDocumentsPage();
 };
 
+function updateMyStorageWidget(){
+  const ring = document.getElementById('myStorageRing');
+  const ringPct = document.getElementById('myStorageRingPct');
+  const label = document.getElementById('myStorageLabel');
+  if(!ring || !ringPct || !label) return;
+  const myUsed = documents.filter(d=>d.uploadedBy===(currentUserEmail||currentUserName)).reduce((s,d)=>s+(d.sizeBytes||0),0);
+  const myQuota = currentUserStorageQuota || MAX_PER_USER_STORAGE_BYTES;
+  const pct = Math.min(100, (myUsed/myQuota)*100);
+  const ringColor = pct>=90 ? '#EF4444' : pct>=70 ? '#F59E0B' : '#005EA6';
+  ring.style.background = `conic-gradient(${ringColor} ${pct*3.6}deg, #E2E8F0 ${pct*3.6}deg)`;
+  ringPct.textContent = `${Math.round(pct)}%`;
+  label.textContent = `${formatBytes(myUsed)} / ${formatBytes(myQuota)}`;
+}
+
 function renderDocumentsPage(){
+  updateMyStorageWidget();
   const wrap = document.getElementById('docsListWrap');
   if(!wrap) return;
   const filtered = docTypeFilter==='all' ? documents : documents.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes((d.fileExt||'').toLowerCase()));
@@ -6832,10 +6939,11 @@ window.uploadDocument = async ()=>{
   const finish = async (fileData)=>{
     const used = getTotalStorageUsed();
     const myUsed = documents.filter(d=>d.uploadedBy===(currentUserEmail||currentUserName)).reduce((s,d)=>s+(d.sizeBytes||0),0);
-    if(myUsed + fileData.length > MAX_PER_USER_STORAGE_BYTES){
+    const myQuota = currentUserStorageQuota || MAX_PER_USER_STORAGE_BYTES;
+    if(myUsed + fileData.length > myQuota){
       if(btn) btn.disabled = false;
       if(progressWrap) progressWrap.classList.add('hidden');
-      toast(`You've used ${formatBytes(myUsed)} of your ${formatBytes(MAX_PER_USER_STORAGE_BYTES)} personal storage allowance — ask a Master ID to raise it, or remove some older documents.`,'err');
+      toast(`You've used ${formatBytes(myUsed)} of your ${formatBytes(myQuota)} personal storage allowance — ask a Master ID to raise it, or remove some older documents.`,'err');
       return;
     }
     if(used + fileData.length > STORAGE_CAP_BYTES){
