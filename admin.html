@@ -991,6 +991,9 @@
         <button id="navDocs" onclick="switchSec('docs');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-folder-open"></i> Document Vault
         </button>
+        <button id="navStorage" onclick="switchSec('storage');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-chart-pie"></i> Storage
+        </button>
         <div class="sidebar-section-label">Dealership</div>
         <button id="navPrice" onclick="switchSec('price');closeMobileMenu()" class="nav-tab sidebar-link active-tab">
           <i class="fas fa-tags"></i> Price List
@@ -1879,7 +1882,16 @@
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="word" onclick="setDocTypeFilter('word')"><i class="fas fa-file-word mr-1"></i>Word</button>
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="excel" onclick="setDocTypeFilter('excel')"><i class="fas fa-file-excel mr-1"></i>Excel</button>
       </div>
-      <div id="docsListWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"></div>
+      <div id="docsListWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+
+    <!-- ═══ STORAGE ═══ -->
+    <div class="sec-panel" id="secStorage">
+      <div class="mb-6">
+        <div class="eyebrow">Documents</div>
+        <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Storage <span class="text-amber-500">Overview</span></div>
+        <p class="text-sm text-slate-500 mt-1.5 max-w-lg">How everything on the free Firebase plan is being used — documents, price list, inventory, and the rest, all in one place.</p>
+      </div>
 
       <div id="totalStorageWrap" class="hidden yng-card-shell p-6 mb-5 flex flex-col sm:flex-row items-center gap-6">
         <div class="relative flex-shrink-0" style="width:130px;height:130px;">
@@ -3439,8 +3451,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', events:'navEvents', stock:'navStock', history:'navHistory', trash:'navTrash' };
-  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', events:'mNavEvents', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
+  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', history:'navHistory', trash:'navTrash' };
+  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -6612,17 +6624,18 @@ async function updateStorageOverview(){
   if(!grid) return;
   const invCount = await getAccurateTotalInventoryCount();
   const stats = [
-    { label:'Models', used: allMasterBikes.length, max: MAX_BIKES },
-    { label:'All Inventory', used: invCount, max: MAX_TOTAL_INVENTORY_UNITS },
-    { label:'Accessories', used: accessories.length, max: MAX_ACCESSORIES },
-    { label:'Finance Schemes', used: financeSchemes.length, max: MAX_FINANCE_SCHEMES }
+    { label:'Models', used: allMasterBikes.length, max: MAX_BIKES, perRecord: RECORD_SIZE_ESTIMATE.bike },
+    { label:'All Inventory', used: invCount, max: MAX_TOTAL_INVENTORY_UNITS, perRecord: RECORD_SIZE_ESTIMATE.inventoryUnit },
+    { label:'Accessories', used: accessories.length, max: MAX_ACCESSORIES, perRecord: RECORD_SIZE_ESTIMATE.accessory },
+    { label:'Finance Schemes', used: financeSchemes.length, max: MAX_FINANCE_SCHEMES, perRecord: RECORD_SIZE_ESTIMATE.financeScheme }
   ];
   grid.innerHTML = stats.map(s=>{
     const pct = s.max ? Math.min(100, (s.used/s.max)*100) : 0;
     const barColor = pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue';
     return `<div class="bg-slate-50 rounded-lg p-2.5">
       <div class="text-[10px] font-bold text-slate-500 mb-1">${escapeHtml(s.label)}</div>
-      <div class="text-sm font-extrabold text-slate-800 mb-1.5">${s.used} / ${s.max}</div>
+      <div class="text-sm font-extrabold text-slate-800">${s.used} / ${s.max}</div>
+      <div class="text-[10px] text-slate-400 mb-1.5">~${formatBytes(s.used*s.perRecord)}</div>
       <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full ${barColor} rounded-full" style="width:${pct}%"></div></div>
     </div>`;
   }).join('');
@@ -8086,8 +8099,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', events:'Events & Offers', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
-const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', events:'secEvents', stock:'secStock', history:'secHistory', trash:'secTrash' };
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
+const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', history:'secHistory', trash:'secTrash' };
 window.switchSec=(sec)=>{
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
@@ -8110,7 +8123,8 @@ window.switchSec=(sec)=>{
   if(sec==='inv') populateModelDropdown();
   if(sec==='hhinv') populateHHModelDropdown();
   if(sec==='allinv') renderAllInventoryTable();
-  if(sec==='docs'){ renderDocumentsPage(); updateStorageOverview(); }
+  if(sec==='docs') renderDocumentsPage();
+  if(sec==='storage') updateStorageOverview();
   if(sec==='events') renderEventsPage();
   if(sec==='stock') loadStockReportData(true);
   if(sec==='history') renderActivityLog();
