@@ -1006,6 +1006,10 @@
         <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-helmet-safety"></i> Accessories
         </button>
+        <div class="sidebar-section-label">Documents</div>
+        <button id="navDocs" onclick="switchSec('docs');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-folder-open"></i> Document Vault
+        </button>
         <div class="sidebar-section-label">Marketing</div>
         <button id="navEvents" onclick="switchSec('events');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-bullhorn"></i> Events & Offers
@@ -1855,6 +1859,71 @@
       </div>
     </div>
 
+    <!-- ═══ DOCUMENT VAULT ═══ -->
+    <div class="sec-panel" id="secDocs">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="eyebrow">Documents</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Document <span class="text-amber-500">Vault</span></div>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Shared across the whole team — KYC forms, allocation forms, Namsari letters — scanned and stored safely. Photos are compressed automatically; PDF/Word/Excel need to already be under ~700 KB.</p>
+        </div>
+        <button onclick="openDocUploadModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <i class="fas fa-upload"></i> Upload Document
+        </button>
+      </div>
+
+      <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 mb-4 w-fit flex-wrap">
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-type="all" onclick="setDocTypeFilter('all')">All</button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="pdf" onclick="setDocTypeFilter('pdf')"><i class="fas fa-file-pdf mr-1"></i>PDF</button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="photo" onclick="setDocTypeFilter('photo')"><i class="fas fa-file-image mr-1"></i>Photo</button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="word" onclick="setDocTypeFilter('word')"><i class="fas fa-file-word mr-1"></i>Word</button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="excel" onclick="setDocTypeFilter('excel')"><i class="fas fa-file-excel mr-1"></i>Excel</button>
+      </div>
+      <div id="docsListWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"></div>
+
+      <div class="yng-card-shell p-6 mb-5 flex flex-col sm:flex-row items-center gap-6">
+        <div class="relative flex-shrink-0" style="width:130px;height:130px;">
+          <div id="storageRing" class="w-full h-full rounded-full flex items-center justify-center" style="background:conic-gradient(#005EA6 0deg, #E2E8F0 0deg);">
+            <div class="bg-white rounded-full flex flex-col items-center justify-center" style="width:96px;height:96px;">
+              <div id="storageRingPct" class="text-xl font-extrabold text-slate-800">0%</div>
+              <div class="text-[9px] text-slate-400 font-semibold uppercase tracking-wide">used</div>
+            </div>
+          </div>
+        </div>
+        <div class="flex-1 text-center sm:text-left">
+          <div id="totalStorageLabel" class="text-lg font-extrabold text-slate-800 mb-1">0 MB / 0 MB</div>
+          <p class="text-xs text-slate-500 leading-relaxed">Everything combined — documents, inventory, price list, and the rest — stays capped at 90% of the free plan's total, always leaving a safety margin.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+        <div class="yng-card-shell p-5">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="text-xs font-bold text-slate-600"><i class="fas fa-folder-open text-amber-500 mr-1"></i> Document Vault</div>
+            <div class="flex items-center gap-2">
+              <div id="docStorageLabel" class="text-xs font-bold text-slate-500">0 MB / 0 MB</div>
+              <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set storage limit"><i class="fas fa-gear text-xs"></i></button>
+            </div>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div id="docStorageBar" class="h-full bg-bajaj-blue rounded-full transition-all" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="yng-card-shell p-5">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="text-xs font-bold text-slate-600"><i class="fas fa-list-check text-bajaj-blue mr-1"></i> Record Limits</div>
+            <button id="systemLimitsSettingsBtn" onclick="openSystemLimitsModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set record limits"><i class="fas fa-gear text-xs"></i></button>
+          </div>
+          <div id="recordLimitsGrid" class="grid grid-cols-2 gap-2"></div>
+        </div>
+      </div>
+
+      <div id="perUserStorageWrap" class="hidden yng-card-shell p-5">
+        <div class="text-xs font-bold text-slate-600 mb-3"><i class="fas fa-user-lock text-slate-400 mr-1"></i> Storage by Team Member <span class="normal-case font-medium text-slate-300">(visible to Master ID only)</span></div>
+        <div id="perUserStorageList" class="flex flex-col gap-2"></div>
+      </div>
+    </div>
+
     <!-- ═══ EVENTS & OFFERS ═══ -->
     <div class="sec-panel" id="secEvents">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
@@ -2085,56 +2154,16 @@
   </div><!-- /main content -->
 
   <!-- FOOTER -->
-  <footer class="bg-[#0F172A] mt-auto relative overflow-hidden">
-    <div class="top-bar-grad absolute top-0 left-0 right-0 h-[3px]"></div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-6 py-10 max-w-7xl mx-auto">
-      <div>
-        <div class="flex items-center gap-2.5 mb-3">
-          <div class="w-9 h-9 rounded-lg bg-bajaj-blue flex items-center justify-center text-white"><i class="fas fa-motorcycle text-sm"></i></div>
-          <div class="font-display text-xl text-white tracking-widest">BAJAJ <span class="text-amber-500">BIKES</span></div>
-        </div>
-        <p class="text-xs text-slate-400 leading-relaxed max-w-xs mb-4">Your trusted Bajaj dealership. Premium bikes, competitive pricing, complete post-sale support.</p>
-        <div class="flex gap-2">
-          <a href="https://wa.me/9802315425" target="_blank" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400 text-sm hover:-translate-y-0.5 hover:bg-emerald-500 hover:text-white transition-all"><i class="fab fa-whatsapp"></i></a>
-          <a href="mailto:bajaj.phidim@gmail.com" target="_blank" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-red-400 text-sm hover:-translate-y-0.5 hover:bg-red-500 hover:text-white transition-all"><i class="fas fa-envelope"></i></a>
-          <a href="#" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-sky-400 text-sm hover:-translate-y-0.5 hover:bg-sky-500 hover:text-white transition-all"><i class="fa-brands fa-tiktok"></i></a>
-        </div>
+  <footer class="bg-white border-t border-slate-200 mt-auto">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-md bg-bajaj-blue flex items-center justify-center text-white flex-shrink-0"><i class="fas fa-motorcycle text-xs"></i></div>
+        <span class="text-xs font-bold text-slate-500">Samriddhi And Brothers Auto <span class="text-slate-300 font-medium">— Admin Panel</span></span>
       </div>
-      <div>
-        <h5 class="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-4 pb-2 border-b border-white/10">Quick Nav</h5>
-        <ul class="space-y-2">
-          <li onclick="switchSec('price')" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-600"></i> Price List</li>
-          <li onclick="switchSec('inv')" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-600"></i> Inventory</li>
-          <li onclick="switchSec('fin')" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-600"></i> HFL Finance</li>
-          <li onclick="switchSec('acc')" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white cursor-pointer transition-colors"><i class="fas fa-chevron-right text-[9px] text-slate-600"></i> Accessories</li>
-        </ul>
-      </div>
-      <div>
-        <h5 class="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-4 pb-2 border-b border-white/10">Bajaj Models</h5>
-        <ul class="space-y-2">
-          <li class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-circle-dot text-[7px] text-slate-600"></i> Pulsar Series</li>
-          <li class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-circle-dot text-[7px] text-slate-600"></i> Dominar Series</li>
-          <li class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-circle-dot text-[7px] text-slate-600"></i> Chetak Electric</li>
-          <li class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-circle-dot text-[7px] text-slate-600"></i> Platina Series</li>
-          <li class="flex items-center gap-2 text-xs text-slate-400"><i class="fas fa-circle-dot text-[7px] text-slate-600"></i> Avenger Series</li>
-        </ul>
-      </div>
-      <div>
-        <h5 class="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-4 pb-2 border-b border-white/10">Contact Us</h5>
-        <div class="space-y-2.5">
-          <div class="flex items-start gap-2 text-xs text-slate-400"><i class="fab fa-whatsapp text-amber-500 mt-0.5 flex-shrink-0"></i>+977 9802315425</div>
-          <div class="flex items-start gap-2 text-xs text-slate-400"><i class="fas fa-envelope text-amber-500 mt-0.5 flex-shrink-0"></i>bajaj.phidim@gmail.com</div>
-          <div class="flex items-start gap-2 text-xs text-slate-400"><i class="fas fa-location-dot text-amber-500 mt-0.5 flex-shrink-0"></i>Bajaj Showroom, Main Road, BP Park</div>
-          <div class="flex items-start gap-2 text-xs text-slate-400"><i class="fas fa-clock text-amber-500 mt-0.5 flex-shrink-0"></i>Mon–Sat: 9 AM – 7 PM</div>
-        </div>
-      </div>
-    </div>
-    <div class="flex items-center justify-between px-6 py-3 border-t border-white/10 max-w-7xl mx-auto w-full flex-wrap gap-2">
-      <p class="text-xs text-slate-500">&copy; 2026 <span class="text-amber-500 font-semibold">Bajaj Bikes Admin Panel</span>. All rights reserved.</p>
-      <div class="flex gap-4">
-        <a href="#" class="text-xs text-slate-500 hover:text-white transition-colors">Privacy Policy</a>
-        <a href="#" class="text-xs text-slate-500 hover:text-white transition-colors">Terms of Use</a>
-        <a href="#" class="text-xs text-slate-500 hover:text-white transition-colors">Support</a>
+      <div class="flex items-center gap-4 text-xs text-slate-400">
+        <a href="https://wa.me/9802315425" target="_blank" class="hover:text-emerald-600 transition-colors"><i class="fab fa-whatsapp mr-1"></i>9802315425</a>
+        <a href="mailto:bajaj.phidim@gmail.com" class="hover:text-bajaj-blue transition-colors"><i class="fas fa-envelope mr-1"></i>Support</a>
+        <span class="text-slate-300">&copy; 2026</span>
       </div>
     </div>
   </footer>
@@ -2199,6 +2228,152 @@
       <button onclick="closeDuplicateResolver()" class="flex-1 py-3.5 text-sm font-bold text-slate-500 hover:bg-slate-50 transition-colors">Cancel</button>
       <div class="w-px bg-slate-100"></div>
       <button onclick="confirmDeleteDuplicates()" class="flex-1 py-3.5 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors"><i class="fas fa-trash-can mr-1"></i> Delete Selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- DOCUMENT UPLOAD/EDIT MODAL -->
+<div id="docUploadModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);" onclick="if(event.target===this) closeDocUploadModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" style="max-height:90vh; animation:slideIn .2s ease;">
+    <div class="p-5 overflow-y-auto" style="max-height:90vh;">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <div id="docModalTitle" class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-folder-open text-amber-500 text-lg"></i> Upload Document</div>
+        <button onclick="closeDocUploadModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Document Name <span class="text-red-500">*</span></label>
+          <input type="text" id="docName" placeholder="e.g. KYC Form" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Description <span class="normal-case font-medium text-slate-300">(optional)</span></label>
+          <input type="text" id="docDescription" placeholder="e.g. Guarantor's citizenship copy for the Pulsar 150 loan" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+        <div id="docFileNameFieldWrap" class="hidden flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Saved File Name <span class="normal-case font-medium text-slate-300">(keep the extension, e.g. .pdf)</span></label>
+          <input type="text" id="docFileNameInput" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+        <div id="docFileFieldWrap" class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">File <span class="text-red-500">*</span> <span class="normal-case font-medium text-slate-300">(PDF, JPG/PNG, Word, Excel, MP3, MP4)</span></label>
+          <label class="flex items-center gap-3 border-2 border-dashed border-slate-300 bg-slate-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-slate-50 hover:border-bajaj-blue transition-all">
+            <i class="fas fa-cloud-arrow-up text-slate-400 text-lg flex-shrink-0"></i>
+            <span id="docFileLabel" class="text-sm text-slate-500 font-medium truncate">Click to choose a file…</span>
+            <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.mp3,.mp4" id="docFileInput" class="hidden" onchange="handleDocFileSelect(event)"/>
+          </label>
+        </div>
+        <div id="docUploadProgress" class="hidden">
+          <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div id="docUploadProgressBar" class="h-full bg-emerald-500 rounded-full transition-all" style="width:0%"></div>
+          </div>
+        </div>
+        <button id="docUploadBtn" onclick="uploadDocument()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+          <i class="fas fa-upload mr-1"></i> Upload
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DOCUMENT PREVIEW -->
+<div id="docPreviewModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.75);backdrop-filter:blur(3px);" onclick="if(event.target===this) closeDocPreview()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative flex flex-col" style="max-height:92vh;">
+    <div class="flex items-center justify-between gap-2 p-4 border-b border-slate-100 flex-shrink-0">
+      <div class="min-w-0">
+        <div id="docPreviewTitle" class="font-extrabold text-slate-800 text-sm truncate"></div>
+        <div id="docPreviewMeta" class="text-[11px] text-slate-400"></div>
+      </div>
+      <div class="flex items-center gap-1.5 flex-shrink-0">
+        <button id="docPreviewDownloadBtn" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-bajaj-blue hover:border-bajaj-blue flex items-center justify-center transition-all" title="Download"><i class="fas fa-download text-xs"></i></button>
+        <button onclick="closeDocPreview()" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all" title="Close"><i class="fas fa-xmark text-xs"></i></button>
+      </div>
+    </div>
+    <div id="docPreviewBody" class="flex-1 overflow-auto bg-slate-50 flex items-center justify-center p-4" style="min-height:300px;"></div>
+  </div>
+</div>
+
+<!-- STORAGE LIMIT SETTINGS (Master ID only) -->
+<div id="storageCapModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);" onclick="if(event.target===this) closeStorageCapModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style="animation:slideIn .2s ease;">
+    <div class="p-5">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-gear text-amber-500 text-lg"></i> Storage Limit</div>
+        <button onclick="closeStorageCapModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-slate-500 mb-4">Set how much storage the Document Vault is allowed to use before it stops accepting new uploads.</p>
+      <div class="flex gap-2 mb-4">
+        <input type="number" id="storageCapValue" min="1" step="any" placeholder="e.g. 2" class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+        <select id="storageCapUnit" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
+          <option value="KB">KB</option>
+          <option value="MB">MB</option>
+          <option value="GB" selected>GB</option>
+          <option value="TB">TB</option>
+        </select>
+      </div>
+      <p id="storageCapPreview" class="text-[11px] text-slate-400 mb-4"></p>
+      <button onclick="saveStorageCap()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+        <i class="fas fa-check mr-1"></i> Save Limit
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- RECORD LIMITS SETTINGS (Master ID only) -->
+<div id="systemLimitsModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);" onclick="if(event.target===this) closeSystemLimitsModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style="animation:slideIn .2s ease;">
+    <div class="p-5">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-list-check text-amber-500 text-lg"></i> Record Limits</div>
+        <button onclick="closeSystemLimitsModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-slate-500 mb-4">How many of each record type this dealership can have at once — applies to everyone, Master ID included.</p>
+      <div class="flex flex-col gap-3 mb-4">
+        <div class="flex items-center justify-between gap-3">
+          <label class="text-xs font-bold text-slate-600 flex-1">Master Price List models</label>
+          <input type="number" id="limitMaxBikes" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+        <div class="flex items-center justify-between gap-3">
+          <label class="text-xs font-bold text-slate-600 flex-1">All Inventory (combined)</label>
+          <input type="number" id="limitMaxInventory" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+        <div class="flex items-center justify-between gap-3">
+          <label class="text-xs font-bold text-slate-600 flex-1">Accessories</label>
+          <input type="number" id="limitMaxAccessories" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+        <div class="flex items-center justify-between gap-3">
+          <label class="text-xs font-bold text-slate-600 flex-1">Finance Schemes</label>
+          <input type="number" id="limitMaxFinanceSchemes" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+      </div>
+      <button onclick="saveSystemLimits()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+        <i class="fas fa-check mr-1"></i> Save Limits
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- STORAGE FULL — "UPGRADE" POPUP (no real payment backend; always dead-ends
+     back to the Master ID rather than pretending to process a charge) -->
+<div id="docUpgradeModal" class="hidden fixed inset-0 z-[650] items-center justify-center p-4" style="background:rgba(15,23,42,.65);backdrop-filter:blur(3px);" onclick="if(event.target===this) closeDocUpgradeModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative" style="animation:slideIn .2s ease;">
+    <button onclick="closeDocUpgradeModal()" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-all"><i class="fas fa-xmark"></i></button>
+    <div class="p-6" id="docUpgradeContent">
+      <div class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center mb-3"><i class="fas fa-triangle-exclamation text-amber-500 text-lg"></i></div>
+      <div class="section-title text-2xl text-slate-900 mb-1.5">Storage Almost Full</div>
+      <p class="text-xs text-slate-500 mb-4 leading-relaxed">You've reached the safe storage limit on the free plan. Upgrade to Pay-As-You-Go to keep uploading documents.</p>
+      <div class="border border-slate-200 rounded-xl p-4 mb-4">
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Card Details</div>
+        <div class="flex flex-col gap-2.5">
+          <input type="text" placeholder="Card Number" maxlength="19" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all" oninput="this.value=this.value.replace(/\D/g,'').replace(/(.{4})/g,'$1 ').trim()"/>
+          <div class="grid grid-cols-2 gap-2.5">
+            <input type="text" placeholder="MM / YY" maxlength="7" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+            <input type="text" placeholder="CVV" maxlength="4" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+          <input type="text" placeholder="Cardholder Name" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+      </div>
+      <button onclick="attemptFakeSubscribe()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+        <i class="fas fa-lock mr-1"></i> Subscribe — Pay As You Go
+      </button>
     </div>
   </div>
 </div>
@@ -2693,6 +2868,14 @@ window._toggleKebab = (btn, type, id) => {
       { label:'Edit', icon:'fa-pen', onClick:()=>window.openEventFormModal(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('events', id) }
     ]);
+  } else if(type === 'documents'){
+    const docActions = [
+      { label:'Preview', icon:'fa-eye', onClick:()=>window.openDocPreview(id) },
+      { label:'Download', icon:'fa-download', onClick:()=>window.downloadDocument(id) },
+      { label:'Edit', icon:'fa-pen', onClick:()=>window.openDocUploadModal(id) }
+    ];
+    if(currentUserRole === 'owner') docActions.push({ label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('documents', id) });
+    openKebabMenuFor(btn, docActions);
   } else if(type === 'hh_inventory'){
     const s = hhInvData.find(x=>x.id===id);
     const cur = s?.status || 'Available';
@@ -3245,8 +3428,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', events:'navEvents', stock:'navStock', history:'navHistory', trash:'navTrash' };
-  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', events:'mNavEvents', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
+  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', events:'navEvents', stock:'navStock', history:'navHistory', trash:'navTrash' };
+  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', events:'mNavEvents', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -3279,6 +3462,9 @@ onAuthStateChanged(auth, async (user) => {
     loadFinanceSchemes();
     loadAccessories();
     loadEvents();
+    loadDocuments();
+    loadStorageSettings();
+    loadSystemLimits();
     loadStockAreas();
     loadTrash();
     loadActivityLog();
@@ -3839,6 +4025,7 @@ function loadMasterPriceList() {
     renderMasterTable(); updatePriceStats(); populateModelDropdown();
     // Category rows show "N models using this category" — keep that fresh too.
     if(typeof renderFinCategoryChips === 'function') renderFinCategoryChips();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err => {
     console.error('bikes listener failed', err);
     document.getElementById('masterTableBody').innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400">
@@ -4359,6 +4546,7 @@ function loadLiveStock(){
     renderInvTable(getFilteredInv());
     updateInvStats();
     renderInvLoadMore();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err=>{
     console.error('inventory listener failed', err);
     tbody.innerHTML = `<tr><td colspan="9"><div class="py-12 text-center text-slate-400">
@@ -4721,6 +4909,7 @@ function loadHHInventory(){
     renderHHInvTable();
     updateHHInvStats();
     renderHHInvLoadMore();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err=>{
     console.error('hh_inventory listener failed', err);
     tbody.innerHTML = `<tr><td colspan="9"><div class="py-12 text-center text-slate-400">
@@ -5894,6 +6083,7 @@ function loadFinanceSchemes(){
   onSnapshot(collection(db,"finance_schemes"), snap => {
     financeSchemes = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderFinTable();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err => {
     console.error('finance_schemes listener failed', err);
     document.getElementById('finTableBody').innerHTML = `<tr><td colspan="5"><div class="py-12 text-center text-slate-400">
@@ -6020,6 +6210,7 @@ function loadAccessories(){
     // until something else (like opening the popover) re-rendered them.
     if(typeof renderFinCategoryChips === 'function') renderFinCategoryChips();
     if(typeof renderMasterTable === 'function' && allMasterBikes.length) renderMasterTable();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err => {
     console.error('accessories listener failed', err);
     document.getElementById('accTableBody').innerHTML = `<tr><td colspan="3"><div class="py-12 text-center text-slate-400">
@@ -6325,6 +6516,516 @@ window.closeEventPopup = ()=>{
   stopEventPopupCountdowns();
 };
 
+/* ═══════════════════════════════════════════════════════════════════════
+   DOCUMENT VAULT — KYC forms, allocation forms, Namsari letters, etc.
+   Stored as base64 directly in Firestore (not Firebase Storage, which
+   needs the paid Blaze plan). One combined page — the list, the storage
+   ring, and the record-limits grid all live in the same #secDocs section,
+   and every modal is a top-level sibling of <body> rather than nested
+   inside the section, to keep the structure as simple as possible.
+   ═══════════════════════════════════════════════════════════════════════ */
+let documents = [];
+let docTypeFilter = 'all';
+let docEditingId = null;
+let pendingDocFile = null;
+const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','mp3','mp4'];
+const DOC_MAX_FILE_SIZE = 700 * 1024; // ~700KB as base64 text — comfortably under Firestore's 1MB-per-document limit
+const DOC_TYPE_GROUPS = { pdf:['pdf'], photo:['jpg','jpeg','png'], word:['doc','docx'], excel:['xls','xlsx'] };
+const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626'}, doc:{icon:'fa-file-word',color:'#2563EB'}, docx:{icon:'fa-file-word',color:'#2563EB'}, xls:{icon:'fa-file-excel',color:'#059669'}, xlsx:{icon:'fa-file-excel',color:'#059669'}, jpg:{icon:'fa-file-image',color:'#D97706'}, jpeg:{icon:'fa-file-image',color:'#D97706'}, png:{icon:'fa-file-image',color:'#D97706'}, mp3:{icon:'fa-file-audio',color:'#7C3AED'}, mp4:{icon:'fa-file-video',color:'#DB2777'} };
+// Firestore's free (Spark) tier gives ~1 GiB of total stored data for the
+// ENTIRE database. Documents-as-base64 dwarf everything else that lives
+// there (inventory/price-list records are ~1-2KB each, activity log
+// entries ~300 bytes) — so documents get 70% of the full 1 GiB, leaving a
+// genuinely comfortable buffer for everything else. Configurable by a
+// Master ID from the gear icon.
+let STORAGE_CAP_BYTES = 1024 * 1024 * 1024 * 0.7;
+const BYTE_UNITS = { KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 };
+const RECORD_SIZE_ESTIMATE = { bike: 500, inventoryUnit: 1200, accessory: 100, financeScheme: 300 };
+const OTHER_COLLECTIONS_ESTIMATE = 5 * 1024 * 1024; // rough allowance for activity log / trash / events / team photos
+
+function loadDocuments(){
+  onSnapshot(collection(db,"documents"), snap=>{
+    documents = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderDocumentsPage();
+    updateStorageOverview();
+  }, err=>console.error('documents listener failed', err));
+}
+
+function loadStorageSettings(){
+  onSnapshot(doc(db,'settings','storage'), snap=>{
+    if(snap.exists() && snap.data().capBytes) STORAGE_CAP_BYTES = snap.data().capBytes;
+    updateStorageOverview();
+    const gearBtn = document.getElementById('docStorageSettingsBtn');
+    if(gearBtn) gearBtn.classList.toggle('hidden', currentUserRole !== 'owner');
+  }, err=>console.error('storage settings listener failed', err));
+}
+
+function loadSystemLimits(){
+  onSnapshot(doc(db,'settings','limits'), snap=>{
+    if(snap.exists()){
+      const d = snap.data();
+      if(d.maxBikes) MAX_BIKES = d.maxBikes;
+      if(d.maxTotalInventory) MAX_TOTAL_INVENTORY_UNITS = d.maxTotalInventory;
+      if(d.maxAccessories) MAX_ACCESSORIES = d.maxAccessories;
+      if(d.maxFinanceSchemes) MAX_FINANCE_SCHEMES = d.maxFinanceSchemes;
+    }
+    updateStorageOverview();
+    const gearBtn2 = document.getElementById('systemLimitsSettingsBtn');
+    if(gearBtn2) gearBtn2.classList.toggle('hidden', currentUserRole !== 'owner');
+  }, err=>console.error('system limits listener failed', err));
+}
+
+function getTotalStorageUsed(){
+  return documents.reduce((sum,d)=>sum+(d.sizeBytes||0),0);
+}
+function formatBytes(bytes){
+  if(!bytes) return '0 KB';
+  if(bytes < 1024) return bytes+' B';
+  const kb = bytes/1024;
+  if(kb < 1024) return kb.toFixed(kb<10?2:1)+' KB';
+  const mb = kb/1024;
+  if(mb < 1024) return mb.toFixed(mb<10?2:1)+' MB';
+  return (mb/1024).toFixed(2)+' GB';
+}
+
+async function updateStorageOverview(){
+  const grid = document.getElementById('recordLimitsGrid');
+  if(!grid) return;
+  const invCount = await getAccurateTotalInventoryCount();
+  const stats = [
+    { label:'Models', used: allMasterBikes.length, max: MAX_BIKES },
+    { label:'All Inventory', used: invCount, max: MAX_TOTAL_INVENTORY_UNITS },
+    { label:'Accessories', used: accessories.length, max: MAX_ACCESSORIES },
+    { label:'Finance Schemes', used: financeSchemes.length, max: MAX_FINANCE_SCHEMES }
+  ];
+  grid.innerHTML = stats.map(s=>{
+    const pct = s.max ? Math.min(100, (s.used/s.max)*100) : 0;
+    const barColor = pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue';
+    return `<div class="bg-slate-50 rounded-lg p-2.5">
+      <div class="text-[10px] font-bold text-slate-500 mb-1">${escapeHtml(s.label)}</div>
+      <div class="text-sm font-extrabold text-slate-800 mb-1.5">${s.used} / ${s.max}</div>
+      <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full ${barColor} rounded-full" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  const docLabel = document.getElementById('docStorageLabel');
+  const docBar = document.getElementById('docStorageBar');
+  const used = getTotalStorageUsed();
+  if(docLabel && docBar){
+    const pct = Math.min(100, (used/STORAGE_CAP_BYTES)*100);
+    docBar.style.width = pct+'%';
+    docBar.className = 'h-full rounded-full transition-all ' + (pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue');
+    docLabel.textContent = `${formatBytes(used)} / ${formatBytes(STORAGE_CAP_BYTES)}`;
+  }
+
+  const perUserWrap = document.getElementById('perUserStorageWrap');
+  const perUserList = document.getElementById('perUserStorageList');
+  if(perUserWrap && perUserList){
+    const isMaster = currentUserRole === 'owner';
+    perUserWrap.classList.toggle('hidden', !isMaster);
+    if(isMaster){
+      const byUser = {};
+      documents.forEach(d=>{ const who=d.uploadedBy||'Unknown'; byUser[who]=(byUser[who]||0)+(d.sizeBytes||0); });
+      const rows = Object.entries(byUser).sort((a,b)=>b[1]-a[1]);
+      perUserList.innerHTML = rows.length
+        ? rows.map(([who,bytes])=>`<div class="flex items-center justify-between text-xs"><span class="text-slate-600 truncate">${escapeHtml(who)}</span><span class="font-bold text-slate-500 flex-shrink-0 ml-2">${formatBytes(bytes)}</span></div>`).join('')
+        : `<div class="text-xs text-slate-400">No documents uploaded yet.</div>`;
+    }
+  }
+
+  const totalLabel = document.getElementById('totalStorageLabel');
+  const ring = document.getElementById('storageRing');
+  const ringPct = document.getElementById('storageRingPct');
+  if(totalLabel && ring && ringPct){
+    const estimatedOtherBytes = (allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike)
+      + (invCount*RECORD_SIZE_ESTIMATE.inventoryUnit)
+      + (accessories.length*RECORD_SIZE_ESTIMATE.accessory)
+      + (financeSchemes.length*RECORD_SIZE_ESTIMATE.financeScheme)
+      + OTHER_COLLECTIONS_ESTIMATE;
+    const totalEstimated = used + estimatedOtherBytes;
+    const ceiling = 1024*1024*1024 * 0.9; // 90% of Firestore's ~1 GiB free tier
+    const pct = Math.min(100, (totalEstimated/ceiling)*100);
+    const ringColor = pct>=90 ? '#EF4444' : pct>=70 ? '#F59E0B' : '#005EA6';
+    ring.style.background = `conic-gradient(${ringColor} ${pct*3.6}deg, #E2E8F0 ${pct*3.6}deg)`;
+    ringPct.textContent = `${Math.round(pct)}%`;
+    ringPct.className = 'text-xl font-extrabold ' + (pct>=90 ? 'text-red-500' : pct>=70 ? 'text-amber-500' : 'text-slate-800');
+    totalLabel.textContent = `~${formatBytes(totalEstimated)} / ${formatBytes(ceiling)}`;
+  }
+}
+
+window.setDocTypeFilter = (type)=>{
+  docTypeFilter = type;
+  document.querySelectorAll('.doc-type-tab').forEach(t=>t.classList.toggle('active', t.dataset.type===type));
+  renderDocumentsPage();
+};
+
+function renderDocumentsPage(){
+  const wrap = document.getElementById('docsListWrap');
+  if(!wrap) return;
+  const filtered = docTypeFilter==='all' ? documents : documents.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes((d.fileExt||'').toLowerCase()));
+  if(!filtered.length){
+    wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-folder-open text-3xl opacity-25 block mb-2"></i><p class="text-sm">${documents.length ? 'No documents match this filter.' : 'No documents uploaded yet.'}</p></div>`;
+    return;
+  }
+  const sorted = [...filtered].sort((a,b)=>{
+    const at = a.uploadedAt?.toDate ? a.uploadedAt.toDate() : new Date(a.uploadedAt||0);
+    const bt = b.uploadedAt?.toDate ? b.uploadedAt.toDate() : new Date(b.uploadedAt||0);
+    return bt-at;
+  });
+  wrap.innerHTML = sorted.map(d=>{
+    const ext = (d.fileExt||'').toLowerCase();
+    const iconInfo = DOC_FILE_ICONS[ext] || {icon:'fa-file', color:'#64748B'};
+    const at = d.uploadedAt?.toDate ? d.uploadedAt.toDate() : new Date(d.uploadedAt||Date.now());
+    return `<div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="openDocPreview('${d.id}')">
+      <div class="flex items-start justify-between gap-2 mb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${iconInfo.color}15">
+            <i class="fas ${iconInfo.icon} text-lg" style="color:${iconInfo.color}"></i>
+          </div>
+          <span class="text-[10px] font-extrabold tracking-wide px-1.5 py-0.5 rounded" style="background:${iconInfo.color}15;color:${iconInfo.color}">${ext.toUpperCase()||'FILE'}</span>
+        </div>
+        <button type="button" class="kebab-btn flex-shrink-0" onclick="event.stopPropagation(); window._toggleKebab(this,'documents','${d.id}')" aria-label="Document actions"><i class="fas fa-ellipsis-vertical"></i></button>
+      </div>
+      <div class="font-bold text-slate-800 text-sm leading-snug mb-1 truncate" title="${escapeHtml(d.name||'')}">${escapeHtml(d.name||'Untitled')}</div>
+      ${d.description ? `<div class="text-xs text-slate-500 leading-snug line-clamp-2 mb-1">${escapeHtml(d.description)}</div>` : ''}
+      <div class="text-[11px] text-slate-400 flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+        <span>${formatBytes(d.sizeBytes||0)}</span>
+        <span>${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.openDocUploadModal = (id)=>{
+  const d = id ? documents.find(x=>x.id===id) : null;
+  docEditingId = id || null;
+  document.getElementById('docName').value = d?.name || '';
+  document.getElementById('docDescription').value = d?.description || '';
+  document.getElementById('docFileInput').value = '';
+  pendingDocFile = null;
+  const fileFieldWrap = document.getElementById('docFileFieldWrap');
+  const fileNameFieldWrap = document.getElementById('docFileNameFieldWrap');
+  if(d){
+    document.getElementById('docModalTitle').innerHTML = '<i class="fas fa-folder-open text-amber-500 text-lg"></i> Edit Document';
+    document.getElementById('docUploadBtn').innerHTML = '<i class="fas fa-check mr-1"></i> Save Changes';
+    if(fileFieldWrap) fileFieldWrap.classList.add('hidden');
+    if(fileNameFieldWrap){ fileNameFieldWrap.classList.remove('hidden'); document.getElementById('docFileNameInput').value = d.fileName || ''; }
+  } else {
+    document.getElementById('docModalTitle').innerHTML = '<i class="fas fa-folder-open text-amber-500 text-lg"></i> Upload Document';
+    document.getElementById('docUploadBtn').innerHTML = '<i class="fas fa-upload mr-1"></i> Upload';
+    document.getElementById('docFileLabel').textContent = 'Click to choose a file…';
+    if(fileFieldWrap) fileFieldWrap.classList.remove('hidden');
+    if(fileNameFieldWrap) fileNameFieldWrap.classList.add('hidden');
+  }
+  document.getElementById('docUploadProgress').classList.add('hidden');
+  document.getElementById('docUploadModal').classList.remove('hidden');
+  document.getElementById('docUploadModal').classList.add('flex');
+};
+window.closeDocUploadModal = ()=>{
+  document.getElementById('docUploadModal').classList.add('hidden');
+  document.getElementById('docUploadModal').classList.remove('flex');
+  docEditingId = null;
+};
+
+window.handleDocFileSelect = (event)=>{
+  try{
+    const file = event.target.files[0];
+    if(!file) return;
+    const ext = (file.name.split('.').pop()||'').toLowerCase();
+    if(!DOC_ALLOWED_EXT.includes(ext)){
+      toast('Only PDF, JPG/PNG, Word, Excel, MP3, or MP4 files are allowed.','err');
+      event.target.value = '';
+      return;
+    }
+    const isImage = ['jpg','jpeg','png'].includes(ext);
+    const rawLimit = isImage ? 20*1024*1024 : Math.floor(DOC_MAX_FILE_SIZE / 1.37);
+    if(file.size > rawLimit){
+      toast(isImage ? `That photo is too large — try a smaller one (max 20 MB original).` : `File is too large — max ~${formatBytes(rawLimit)} for this file type.`, 'err');
+      event.target.value = '';
+      return;
+    }
+    pendingDocFile = file;
+    const labelEl = document.getElementById('docFileLabel');
+    if(labelEl) labelEl.textContent = file.name;
+  }catch(e){
+    console.error('[docUpload] file selection failed:', e);
+    toast('Could not read that file: '+(e.message||'unknown error'),'err');
+  }
+};
+
+window.uploadDocument = async ()=>{
+ try{
+  const nameEl = document.getElementById('docName');
+  const descriptionEl = document.getElementById('docDescription');
+  const name = nameEl.value.trim();
+  const description = descriptionEl?.value.trim() || '';
+  if(!name){ toast('Document name is required.','err'); return; }
+
+  if(docEditingId){
+    const fileNameInput = document.getElementById('docFileNameInput');
+    const fileName = fileNameInput?.value.trim() || undefined;
+    try{
+      await updateDoc(doc(db,'documents',docEditingId), { name, description, ...(fileName ? {fileName} : {}) });
+      logActivity('Updated', 'documents', { model: name });
+      toast('Document updated.');
+      closeDocUploadModal();
+    }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+    return;
+  }
+
+  if(!pendingDocFile){ toast('Choose a file to upload first.','err'); return; }
+
+  const btn = document.getElementById('docUploadBtn');
+  const progressWrap = document.getElementById('docUploadProgress');
+  const progressBar = document.getElementById('docUploadProgressBar');
+  if(btn) btn.disabled = true;
+  if(progressWrap) progressWrap.classList.remove('hidden');
+  if(progressBar) progressBar.style.width = '30%';
+
+  const ext = (pendingDocFile.name.split('.').pop()||'').toLowerCase();
+  const isImage = ['jpg','jpeg','png'].includes(ext);
+
+  const finish = async (fileData)=>{
+    const used = getTotalStorageUsed();
+    if(used + fileData.length > STORAGE_CAP_BYTES){
+      closeDocUploadModal();
+      openDocUpgradeModal();
+      if(btn) btn.disabled = false;
+      if(progressWrap) progressWrap.classList.add('hidden');
+      return;
+    }
+    if(progressBar) progressBar.style.width = '80%';
+    try{
+      await addDoc(collection(db,'documents'), {
+        name, description, fileExt: ext, fileName: pendingDocFile.name,
+        fileData, sizeBytes: fileData.length,
+        uploadedBy: currentUserEmail || currentUserName || 'Unknown',
+        uploadedAt: new Date()
+      });
+      if(progressBar) progressBar.style.width = '100%';
+      logActivity('Uploaded', 'documents', { model: name });
+      toast('Document uploaded.');
+      closeDocUploadModal();
+    }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+    finally{
+      if(btn) btn.disabled = false;
+      if(progressWrap) progressWrap.classList.add('hidden');
+    }
+  };
+
+  const reader = new FileReader();
+  reader.onerror = ()=>{
+    toast('Could not read that file.','err');
+    if(btn) btn.disabled = false;
+    if(progressWrap) progressWrap.classList.add('hidden');
+  };
+
+  if(isImage){
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const maxDim = 1600;
+        let w = img.width, h = img.height;
+        const scale = Math.min(maxDim/w, maxDim/h, 1);
+        w = Math.round(w*scale); h = Math.round(h*scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        let quality = 0.82;
+        let fileData = canvas.toDataURL('image/jpeg', quality);
+        while(fileData.length > DOC_MAX_FILE_SIZE && quality > 0.3){
+          quality -= 0.1;
+          fileData = canvas.toDataURL('image/jpeg', quality);
+        }
+        if(fileData.length > DOC_MAX_FILE_SIZE){
+          toast(`Even compressed, this photo is too large (max ~${formatBytes(DOC_MAX_FILE_SIZE)}).`,'err');
+          if(btn) btn.disabled = false;
+          if(progressWrap) progressWrap.classList.add('hidden');
+          return;
+        }
+        finish(fileData);
+      };
+      img.onerror = ()=>{ toast('Could not read that image.','err'); if(btn) btn.disabled = false; if(progressWrap) progressWrap.classList.add('hidden'); };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(pendingDocFile);
+  } else {
+    reader.onload = (e)=>{
+      const fileData = e.target.result;
+      if(fileData.length > DOC_MAX_FILE_SIZE){
+        toast(`File is too large once stored (max ~${formatBytes(DOC_MAX_FILE_SIZE)}).`,'err');
+        if(btn) btn.disabled = false;
+        if(progressWrap) progressWrap.classList.add('hidden');
+        return;
+      }
+      finish(fileData);
+    };
+    reader.readAsDataURL(pendingDocFile);
+  }
+ }catch(outerErr){
+   console.error('[docUpload] unexpected error:', outerErr);
+   toast('Something went wrong: '+(outerErr.message||'unknown error'),'err');
+   const btn = document.getElementById('docUploadBtn');
+   const progressWrap = document.getElementById('docUploadProgress');
+   if(btn) btn.disabled = false;
+   if(progressWrap) progressWrap.classList.add('hidden');
+ }
+};
+
+window.downloadDocument = (id)=>{
+  const d = documents.find(x=>x.id===id);
+  if(!d?.fileData) return;
+  let filename = (d.fileName || d.name || 'document').trim();
+  const ext = (d.fileExt||'').toLowerCase();
+  if(ext && !filename.toLowerCase().endsWith('.'+ext)) filename += '.'+ext;
+  const a = document.createElement('a');
+  a.href = d.fileData;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
+
+window.openDocPreview = (id)=>{
+  const d = documents.find(x=>x.id===id);
+  if(!d) return;
+  const ext = (d.fileExt||'').toLowerCase();
+  document.getElementById('docPreviewTitle').textContent = d.name || 'Document';
+  document.getElementById('docPreviewMeta').textContent = `${ext.toUpperCase()} · ${formatBytes(d.sizeBytes||0)}${d.description ? ' · '+d.description : ''}`;
+  document.getElementById('docPreviewDownloadBtn').onclick = ()=>downloadDocument(id);
+  const body = document.getElementById('docPreviewBody');
+  if(['jpg','jpeg','png'].includes(ext)){
+    body.innerHTML = `<img src="${escapeHtml(d.fileData)}" class="max-w-full max-h-[70vh] object-contain rounded-lg">`;
+  } else if(ext==='pdf'){
+    body.innerHTML = `<embed src="${escapeHtml(d.fileData)}" type="application/pdf" class="w-full h-[70vh] rounded-lg">`;
+  } else if(ext==='mp3'){
+    body.innerHTML = `<audio controls class="w-full" src="${escapeHtml(d.fileData)}"></audio>`;
+  } else if(ext==='mp4'){
+    body.innerHTML = `<video controls class="max-w-full max-h-[70vh] rounded-lg" src="${escapeHtml(d.fileData)}"></video>`;
+  } else {
+    const iconInfo = DOC_FILE_ICONS[ext] || {icon:'fa-file', color:'#64748B'};
+    body.innerHTML = `<div class="text-center py-10">
+      <div class="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-3" style="background:${iconInfo.color}15"><i class="fas ${iconInfo.icon} text-3xl" style="color:${iconInfo.color}"></i></div>
+      <p class="text-sm text-slate-500 mb-4">Preview isn't available for this file type — download it to view.</p>
+      <button onclick="downloadDocument('${id}')" class="cta-primary !py-2 !px-4 !text-xs"><i class="fas fa-download"></i> Download</button>
+    </div>`;
+  }
+  const overlay = document.getElementById('docPreviewModal');
+  overlay.classList.remove('hidden');
+  overlay.classList.add('flex');
+};
+window.closeDocPreview = ()=>{
+  const overlay = document.getElementById('docPreviewModal');
+  overlay.classList.add('hidden');
+  overlay.classList.remove('flex');
+  document.getElementById('docPreviewBody').innerHTML = '';
+};
+
+window.openStorageCapModal = ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change the storage limit.','err'); return; }
+  let unit = 'GB', value = STORAGE_CAP_BYTES / BYTE_UNITS.GB;
+  if(value < 1){ unit = 'MB'; value = STORAGE_CAP_BYTES / BYTE_UNITS.MB; }
+  if(value >= 1024){ unit = 'TB'; value = STORAGE_CAP_BYTES / BYTE_UNITS.TB; }
+  document.getElementById('storageCapValue').value = Math.round(value*100)/100;
+  document.getElementById('storageCapUnit').value = unit;
+  updateStorageCapPreview();
+  document.getElementById('storageCapModal').classList.remove('hidden');
+  document.getElementById('storageCapModal').classList.add('flex');
+};
+window.closeStorageCapModal = ()=>{
+  document.getElementById('storageCapModal').classList.add('hidden');
+  document.getElementById('storageCapModal').classList.remove('flex');
+};
+function updateStorageCapPreview(){
+  const value = parseFloat(document.getElementById('storageCapValue').value) || 0;
+  const unit = document.getElementById('storageCapUnit').value;
+  const bytes = value * (BYTE_UNITS[unit]||BYTE_UNITS.MB);
+  const previewEl = document.getElementById('storageCapPreview');
+  if(previewEl) previewEl.textContent = `= ${formatBytes(bytes)}. Currently using ${formatBytes(getTotalStorageUsed())}.`;
+}
+document.getElementById('storageCapValue')?.addEventListener('input', updateStorageCapPreview);
+document.getElementById('storageCapUnit')?.addEventListener('change', updateStorageCapPreview);
+window.saveStorageCap = async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change the storage limit.','err'); return; }
+  const value = parseFloat(document.getElementById('storageCapValue').value);
+  const unit = document.getElementById('storageCapUnit').value;
+  if(!value || value <= 0){ toast('Enter a valid limit.','err'); return; }
+  const capBytes = value * (BYTE_UNITS[unit]||BYTE_UNITS.MB);
+  try{
+    await setDoc(doc(db,'settings','storage'), { capBytes, capValue:value, capUnit:unit }, { merge:true });
+    logActivity('Storage Limit Changed', 'settings', { model: `${value} ${unit}` });
+    toast(`Storage limit set to ${formatBytes(capBytes)}.`);
+    closeStorageCapModal();
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
+window.openSystemLimitsModal = ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change record limits.','err'); return; }
+  document.getElementById('limitMaxBikes').value = MAX_BIKES;
+  document.getElementById('limitMaxInventory').value = MAX_TOTAL_INVENTORY_UNITS;
+  document.getElementById('limitMaxAccessories').value = MAX_ACCESSORIES;
+  document.getElementById('limitMaxFinanceSchemes').value = MAX_FINANCE_SCHEMES;
+  document.getElementById('systemLimitsModal').classList.remove('hidden');
+  document.getElementById('systemLimitsModal').classList.add('flex');
+};
+window.closeSystemLimitsModal = ()=>{
+  document.getElementById('systemLimitsModal').classList.add('hidden');
+  document.getElementById('systemLimitsModal').classList.remove('flex');
+};
+window.saveSystemLimits = async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change record limits.','err'); return; }
+  const maxBikes = parseInt(document.getElementById('limitMaxBikes').value);
+  const maxInventory = parseInt(document.getElementById('limitMaxInventory').value);
+  const maxAccessories = parseInt(document.getElementById('limitMaxAccessories').value);
+  const maxFinanceSchemes = parseInt(document.getElementById('limitMaxFinanceSchemes').value);
+  if(![maxBikes,maxInventory,maxAccessories,maxFinanceSchemes].every(v=>Number.isInteger(v) && v>0)){
+    toast('Enter a valid whole number greater than 0 for each limit.','err');
+    return;
+  }
+  const invCount = await getAccurateTotalInventoryCount(true);
+  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes']];
+  for(const [limit, used, label] of checks){
+    if(limit < used){ toast(`Can't set the ${label} limit below the ${used} already on file.`,'err'); return; }
+  }
+  try{
+    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxAccessories, maxFinanceSchemes }, { merge:true });
+    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Acc:${maxAccessories} Fin:${maxFinanceSchemes}` });
+    toast('Record limits updated.');
+    closeSystemLimitsModal();
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
+window.openDocUpgradeModal = ()=>{
+  document.getElementById('docUpgradeModal').classList.remove('hidden');
+  document.getElementById('docUpgradeModal').classList.add('flex');
+};
+window.closeDocUpgradeModal = ()=>{
+  document.getElementById('docUpgradeModal').classList.add('hidden');
+  document.getElementById('docUpgradeModal').classList.remove('flex');
+};
+window.attemptFakeSubscribe = async ()=>{
+  const contentEl = document.getElementById('docUpgradeContent');
+  contentEl.innerHTML = `<div class="text-center py-4"><i class="fas fa-circle-notch animate-spin text-2xl text-slate-300"></i></div>`;
+  await new Promise(r=>setTimeout(r, 1100));
+  let masterInfo = null;
+  try{
+    const snap = await getDocs(query(collection(db,'profiles'), where('role','==','owner')));
+    if(!snap.empty){ const m = snap.docs[0].data(); masterInfo = { name:m.name||'the Master ID', email:m.email||'', mobile:m.mobile||'' }; }
+  }catch(e){ console.error('could not fetch master ID for contact card', e); }
+  contentEl.innerHTML = `
+    <div class="w-12 h-12 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center mb-3"><i class="fas fa-wifi text-red-500 text-lg"></i></div>
+    <div class="section-title text-2xl text-slate-900 mb-1.5">Not Connected to Server</div>
+    <p class="text-xs text-slate-500 mb-4 leading-relaxed">Couldn't reach the payment server right now. Please contact the account owner directly to arrange an upgrade:</p>
+    <div class="border border-slate-200 rounded-xl p-4 flex flex-col gap-1.5">
+      <div class="font-bold text-slate-800 text-sm">${escapeHtml(masterInfo?.name || 'Master ID')}</div>
+      ${masterInfo?.email ? `<div class="text-xs text-slate-500"><i class="fas fa-envelope text-slate-300 mr-1.5"></i>${escapeHtml(masterInfo.email)}</div>` : ''}
+      ${masterInfo?.mobile ? `<div class="text-xs text-slate-500"><i class="fas fa-phone text-slate-300 mr-1.5"></i>${escapeHtml(masterInfo.mobile)}</div>` : ''}
+      ${!masterInfo ? `<div class="text-xs text-slate-400">Contact info not set up in Team Members yet.</div>` : ''}
+    </div>
+    <button onclick="closeDocUpgradeModal()" class="w-full mt-4 py-2.5 border-2 border-slate-200 text-slate-600 text-sm font-bold rounded-lg hover:border-slate-300 transition-all">Close</button>
+  `;
+};
+
 function renderAccTable(){
   const tbody = document.getElementById('accTableBody');
   document.getElementById('accCount').textContent = accessories.length+' item'+(accessories.length!==1?'s':'');
@@ -6431,13 +7132,17 @@ window._saveSn=async(col,id,val)=>{
 };
 
 window._deleteEntry=async(col,id)=>{
+  if(col==='documents' && currentUserRole !== 'owner'){
+    toast('Only a Master ID can delete documents.','err');
+    return;
+  }
   // Every delete — single row or bulk — waits out a short countdown before
   // the button unlocks. A stray/fast tap can never delete something by
   // accident. Deletes are also soft: the record moves to Trash first (7-day
   // recovery window) before being removed from its live collection.
   const ok = await showDangerousConfirm({
     title: 'Delete this entry?',
-    message: col==='bikes' ? "This will remove the model from your price list (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will remove the finance scheme (recoverable from Trash for 7 days)." : (col==='accessories' ? "This will remove the accessory from the price list (recoverable from Trash for 7 days)." : (col==='events' ? "This will remove the event — it'll stop showing as a popup (recoverable from Trash for 7 days)." : (col==='hh_inventory' ? "This will remove the unit from HH Inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : "This will remove the unit from inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap.")))),
+    message: col==='bikes' ? "This will remove the model from your price list (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will remove the finance scheme (recoverable from Trash for 7 days)." : (col==='accessories' ? "This will remove the accessory from the price list (recoverable from Trash for 7 days)." : (col==='events' ? "This will remove the event — it'll stop showing as a popup (recoverable from Trash for 7 days)." : (col==='documents' ? "This will remove the document (recoverable from Trash for 7 days)." : (col==='hh_inventory' ? "This will remove the unit from HH Inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : "This will remove the unit from inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap."))))),
     okText: 'Delete',
     countdownSec: 3
   });
@@ -6499,7 +7204,7 @@ window._deleteEntry=async(col,id)=>{
       }
       toast('HH unit moved to Trash — S.N renumbered automatically.');
     } else {
-      const srcArr = col==='finance_schemes' ? financeSchemes : (col==='accessories' ? accessories : (col==='events' ? events : []));
+      const srcArr = col==='finance_schemes' ? financeSchemes : (col==='accessories' ? accessories : (col==='events' ? events : (col==='documents' ? documents : [])));
       const target = srcArr.find(x=>x.id===id);
       if(target) await moveToTrash(col, id, target);
       await deleteDoc(doc(db,col,id));
@@ -6515,7 +7220,7 @@ window._deleteEntry=async(col,id)=>{
           catch(e){ console.error('Failed to clean up deleted accessory from category', c.name, e); }
         }
       }
-      toast(col==='finance_schemes' ? 'Finance scheme moved to Trash.' : (col==='events' ? 'Event moved to Trash.' : 'Entry moved to Trash.'));
+      toast(col==='finance_schemes' ? 'Finance scheme moved to Trash.' : (col==='events' ? 'Event moved to Trash.' : (col==='documents' ? 'Document moved to Trash.' : 'Entry moved to Trash.')));
     }
   }catch(e){toast('Delete failed: '+friendlyError(e),'err');}
 };
@@ -6564,7 +7269,7 @@ function daysLeft(deletedAt){
   return Math.max(0, diffDays);
 }
 
-const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event' };
+const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event', documents:'Document' };
 
 function renderTrashTable(){
   const tbody = document.getElementById('trashTableBody');
@@ -7333,8 +8038,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', events:'Events & Offers', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
-const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', events:'secEvents', stock:'secStock', history:'secHistory', trash:'secTrash' };
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', events:'Events & Offers', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
+const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', events:'secEvents', stock:'secStock', history:'secHistory', trash:'secTrash' };
 window.switchSec=(sec)=>{
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
@@ -7357,6 +8062,7 @@ window.switchSec=(sec)=>{
   if(sec==='inv') populateModelDropdown();
   if(sec==='hhinv') populateHHModelDropdown();
   if(sec==='allinv') renderAllInventoryTable();
+  if(sec==='docs') renderDocumentsPage();
   if(sec==='events') renderEventsPage();
   if(sec==='stock') loadStockReportData(true);
   if(sec==='history') renderActivityLog();
