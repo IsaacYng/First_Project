@@ -935,7 +935,7 @@
     </div>
 
     <div class="text-right mb-4">
-      <a href="#" onclick="alert('Contact admin to reset your password');return false;" class="text-xs text-slate-400 hover:text-amber-500 transition-colors">Forgot password?</a>
+      <a href="#" onclick="handleForgotPassword();return false;" class="text-xs text-slate-400 hover:text-amber-500 transition-colors">Forgot password?</a>
     </div>
 
     <!-- Error -->
@@ -1055,10 +1055,18 @@
             <span>Search records…</span>
             <kbd>/</kbd>
           </div>
-          <button class="topbar-icon-btn" aria-label="Notifications">
-            <i class="fas fa-bell text-sm"></i>
-            <span class="topbar-dot"></span>
-          </button>
+          <div class="relative">
+            <button class="topbar-icon-btn" aria-label="Notifications" onclick="toggleNotifMenu(event)">
+              <i class="fas fa-bell text-sm"></i>
+              <span id="notifDot" class="topbar-dot hidden"></span>
+            </button>
+            <div id="notifMenu" class="profile-menu" style="min-width:290px; right:-70px;">
+              <div class="profile-menu-user" style="display:flex; align-items:center; justify-content:space-between;">
+                <div class="nm">Recent Activity</div>
+              </div>
+              <div id="notifList" class="flex flex-col gap-0.5" style="max-height:280px; overflow-y:auto;"></div>
+            </div>
+          </div>
           <div class="relative">
             <button id="profileTrigger" class="topbar-profile" onclick="toggleProfileMenu(event)">
               <div id="navAvatar" class="w-7 h-7 rounded-full bg-bajaj-blue flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">A</div>
@@ -1875,20 +1883,6 @@
         </button>
       </div>
 
-      <div class="yng-card-shell p-4 mb-4 flex items-center gap-4 w-fit">
-        <div class="relative flex-shrink-0" style="width:64px;height:64px;">
-          <div id="myStorageRing" class="w-full h-full rounded-full flex items-center justify-center" style="background:conic-gradient(#005EA6 0deg, #E2E8F0 0deg);">
-            <div class="bg-white rounded-full flex items-center justify-center" style="width:48px;height:48px;">
-              <div id="myStorageRingPct" class="text-[11px] font-extrabold text-slate-800">0%</div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">My Storage</div>
-          <div id="myStorageLabel" class="text-sm font-extrabold text-slate-800">0 MB / 0 MB</div>
-        </div>
-      </div>
-
       <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 mb-4 w-fit flex-wrap">
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-type="all" onclick="setDocTypeFilter('all')">All</button>
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="pdf" onclick="setDocTypeFilter('pdf')"><i class="fas fa-file-pdf mr-1"></i>PDF</button>
@@ -1932,11 +1926,6 @@
         </div>
         <p class="text-[11px] text-slate-400 mb-4">What the Master ID has allowed for each category — and how much is actually being used right now.</p>
         <div id="storageAllocationList" class="flex flex-col gap-4"></div>
-      </div>
-
-      <div id="perUserStorageWrap" class="hidden yng-card-shell p-5">
-        <div class="text-xs font-bold text-slate-600 mb-3"><i class="fas fa-user-lock text-slate-400 mr-1"></i> Storage by Team Member <span class="normal-case font-medium text-slate-300">(visible to Master ID only)</span></div>
-        <div id="perUserStorageList" class="flex flex-col gap-2"></div>
       </div>
     </div>
 
@@ -2309,33 +2298,6 @@
 
 <!-- STORAGE LIMIT SETTINGS (Master ID only) -->
 <!-- PER-MEMBER STORAGE QUOTA (Master ID only) -->
-<div id="memberQuotaModal" class="hidden fixed inset-0 z-[610] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);" onclick="if(event.target===this) closeMemberQuotaModal()">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style="animation:slideIn .2s ease;">
-    <div class="p-5">
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-database text-amber-500 text-lg"></i> Storage Quota</div>
-        <button onclick="closeMemberQuotaModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
-      </div>
-      <p id="memberQuotaName" class="text-xs text-slate-500 mb-4">How much document storage this person can use.</p>
-      <div class="flex gap-2 mb-2">
-        <input type="number" id="memberQuotaValue" min="1" step="any" placeholder="e.g. 100" class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
-        <select id="memberQuotaUnit" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
-          <option value="KB">KB</option>
-          <option value="MB" selected>MB</option>
-          <option value="GB">GB</option>
-        </select>
-      </div>
-      <p class="text-[10.5px] text-slate-400 mb-4">Leave blank to use the team-wide default instead.</p>
-      <div class="flex gap-2">
-        <button onclick="saveMemberQuota()" class="flex-1 py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
-          <i class="fas fa-check mr-1"></i> Save
-        </button>
-        <button onclick="clearMemberQuota()" class="px-4 py-2.5 border-2 border-slate-200 text-slate-600 text-sm font-bold rounded-lg hover:border-slate-300 transition-all">Use Default</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div id="storageCapModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);" onclick="if(event.target===this) closeStorageCapModal()">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style="animation:slideIn .2s ease;">
     <div class="p-5">
@@ -2354,19 +2316,8 @@
         </select>
       </div>
       <p id="storageCapPreview" class="text-[11px] text-slate-400 mb-4"></p>
-      <div class="border-t border-slate-100 pt-4 mb-4">
-        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Per-person limit <span class="normal-case font-medium text-slate-300">(so no one uploader uses it all)</span></label>
-        <div class="flex gap-2">
-          <input type="number" id="perUserCapValue" min="1" step="any" placeholder="e.g. 100" class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
-          <select id="perUserCapUnit" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
-            <option value="KB">KB</option>
-            <option value="MB" selected>MB</option>
-            <option value="GB">GB</option>
-          </select>
-        </div>
-      </div>
       <button onclick="saveStorageCap()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
-        <i class="fas fa-check mr-1"></i> Save Limits
+        <i class="fas fa-check mr-1"></i> Save Limit
       </button>
     </div>
   </div>
@@ -3631,7 +3582,6 @@ window.togglePasswordVisibility = ()=>{
 
 const AVATAR_COLORS = ['#005EA6','#B4740E','#059669','#7C3AED','#DC2626','#0891B2','#DB2777','#4B5563'];
 let currentUserRole = 'owner'; // backward-compatible default — see loadProfile
-let currentUserStorageQuota = null; // this user's individual quota override, if a Master ID has set one
 let currentUserAvatarColor = AVATAR_COLORS[0];
 let currentUserPhoto = ''; // base64 data URL, empty if none set
 let currentUserBio = '';
@@ -3676,7 +3626,6 @@ async function loadProfile(uid) {
     }
     const name = data.name || 'Admin';
     currentUserName = name;
-    currentUserStorageQuota = data.storageQuotaBytes || null;
     if(data.role === undefined){
       // No role recorded — either a pre-existing account from before Team
       // Members existed, or a profile doc that's incomplete. This must
@@ -4003,12 +3952,10 @@ function renderTeamMembersList(){
         <div class="text-sm font-bold text-slate-800 truncate">${escapeHtml(m.name||'Unnamed')} ${isSelf?'<span class="text-[10px] text-slate-400 font-semibold">(you)</span>':''} ${roleBadge}</div>
         <div class="text-[11px] text-slate-400 truncate">${escapeHtml(m.email||'')}${m.mobile?' · '+escapeHtml(m.mobile):''}</div>
         ${m.bio ? `<div class="text-[11px] text-slate-500 italic truncate mt-0.5">${escapeHtml(m.bio)}</div>` : ''}
-        <div class="text-[10px] text-slate-400 mt-0.5"><i class="fas fa-database mr-1"></i>Storage quota: ${formatBytes(m.storageQuotaBytes || MAX_PER_USER_STORAGE_BYTES)}</div>
       </div>
       ${!isActive ? '<span class="badge badge-red flex-shrink-0">Disabled</span>' : ''}
       ${currentUserRole==='owner' ? `
       <div class="flex items-center gap-1.5 flex-shrink-0">
-        <button onclick="openMemberQuotaModal('${m.id}')" title="Set storage quota" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-bajaj-blue hover:border-bajaj-blue transition-all"><i class="fas fa-database text-xs"></i></button>
         ${!isSelf ? `<button onclick="sendStaffPasswordReset('${escapeJsAttr(m.email)}')" title="Send password reset" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-bajaj-blue hover:border-bajaj-blue transition-all"><i class="fas fa-key text-xs"></i></button>
         <button onclick="toggleStaffActive('${m.id}', ${isActive})" title="${isActive?'Disable':'Enable'}" class="w-8 h-8 flex items-center justify-center rounded-lg border ${isActive?'border-red-200 text-red-500 hover:bg-red-50':'border-emerald-200 text-emerald-600 hover:bg-emerald-50'} transition-all"><i class="fas ${isActive?'fa-user-slash':'fa-user-check'} text-xs"></i></button>` : ''}
       </div>` : ''}
@@ -4045,52 +3992,6 @@ window.addTeamMember = async ()=>{
   }
 };
 
-let memberQuotaEditingId = null;
-window.openMemberQuotaModal = (uid)=>{
-  if(currentUserRole !== 'owner'){ toast('Only a Master ID can set storage quotas.','err'); return; }
-  const member = teamMembers.find(m=>m.id===uid);
-  if(!member) return;
-  memberQuotaEditingId = uid;
-  document.getElementById('memberQuotaName').textContent = `How much document storage ${member.name||'this person'} can use.`;
-  if(member.storageQuotaBytes){
-    let unit = 'MB', value = member.storageQuotaBytes / BYTE_UNITS.MB;
-    if(value >= 1024){ unit = 'GB'; value = member.storageQuotaBytes / BYTE_UNITS.GB; }
-    if(value < 1){ unit = 'KB'; value = member.storageQuotaBytes / BYTE_UNITS.KB; }
-    document.getElementById('memberQuotaValue').value = Math.round(value*100)/100;
-    document.getElementById('memberQuotaUnit').value = unit;
-  } else {
-    document.getElementById('memberQuotaValue').value = '';
-    document.getElementById('memberQuotaUnit').value = 'MB';
-  }
-  document.getElementById('memberQuotaModal').classList.remove('hidden');
-  document.getElementById('memberQuotaModal').classList.add('flex');
-};
-window.closeMemberQuotaModal = ()=>{
-  document.getElementById('memberQuotaModal').classList.add('hidden');
-  document.getElementById('memberQuotaModal').classList.remove('flex');
-  memberQuotaEditingId = null;
-};
-window.saveMemberQuota = async ()=>{
-  if(!memberQuotaEditingId) return;
-  const value = parseFloat(document.getElementById('memberQuotaValue').value);
-  const unit = document.getElementById('memberQuotaUnit').value;
-  if(!value || value <= 0){ toast('Enter a valid amount, or use "Use Default" to clear it.','err'); return; }
-  const storageQuotaBytes = value * (BYTE_UNITS[unit]||BYTE_UNITS.MB);
-  try{
-    await updateDoc(doc(db,'profiles',memberQuotaEditingId), { storageQuotaBytes });
-    toast('Storage quota updated.');
-    closeMemberQuotaModal();
-  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
-};
-window.clearMemberQuota = async ()=>{
-  if(!memberQuotaEditingId) return;
-  try{
-    await updateDoc(doc(db,'profiles',memberQuotaEditingId), { storageQuotaBytes: null });
-    toast('Now using the team-wide default quota.');
-    closeMemberQuotaModal();
-  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
-};
-
 window.toggleStaffActive = async (uid, currentlyActive)=>{
   if(currentUserRole !== 'owner'){ toast('Only a Master ID can do that.','err'); return; }
   const member = teamMembers.find(m=>m.id===uid);
@@ -4120,6 +4021,15 @@ window.sendStaffPasswordReset = async (email)=>{
   try{
     await sendPasswordResetEmail(auth, email);
     toast(`Password reset link sent to ${email}.`);
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
+window.handleForgotPassword = async ()=>{
+  const email = document.getElementById('email')?.value.trim();
+  if(!email){ toast('Type your email in the field above first, then tap "Forgot password?" again.','err'); return; }
+  try{
+    await sendPasswordResetEmail(auth, email);
+    toast(`If an account exists for ${email}, a reset link has been sent.`);
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
@@ -6644,10 +6554,6 @@ const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626'}, doc:{icon:'fa
 // genuinely comfortable buffer for everything else. Configurable by a
 // Master ID from the gear icon.
 let STORAGE_CAP_BYTES = 1024 * 1024 * 1024 * 0.7;
-// A per-person ceiling too, so one very active uploader can't quietly use
-// up the entire Document Vault, leaving nothing for everyone else. Default
-// is generous for a small team; a Master ID can adjust it.
-let MAX_PER_USER_STORAGE_BYTES = 100 * 1024 * 1024;
 const BYTE_UNITS = { KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 };
 const RECORD_SIZE_ESTIMATE = { bike: 500, inventoryUnit: 1200, accessory: 100, financeScheme: 300 };
 const OTHER_COLLECTIONS_ESTIMATE = 5 * 1024 * 1024; // rough allowance for activity log / trash / events / team photos
@@ -6662,11 +6568,7 @@ function loadDocuments(){
 
 function loadStorageSettings(){
   onSnapshot(doc(db,'settings','storage'), snap=>{
-    if(snap.exists()){
-      const d = snap.data();
-      if(d.capBytes) STORAGE_CAP_BYTES = d.capBytes;
-      if(d.perUserCapBytes) MAX_PER_USER_STORAGE_BYTES = d.perUserCapBytes;
-    }
+    if(snap.exists() && snap.data().capBytes) STORAGE_CAP_BYTES = snap.data().capBytes;
     updateStorageOverview();
     const gearBtn = document.getElementById('docStorageSettingsBtn');
     if(gearBtn) gearBtn.classList.toggle('hidden', currentUserRole !== 'owner');
@@ -6743,31 +6645,6 @@ async function updateStorageOverview(){
     </div>`;
   }).join('');
 
-  const perUserWrap = document.getElementById('perUserStorageWrap');
-  const perUserList = document.getElementById('perUserStorageList');
-  if(perUserWrap && perUserList){
-    const isMaster = currentUserRole === 'owner';
-    perUserWrap.classList.toggle('hidden', !isMaster);
-    if(isMaster){
-      const byUser = {};
-      documents.forEach(d=>{ const who=d.uploadedBy||'Unknown'; byUser[who]=(byUser[who]||0)+(d.sizeBytes||0); });
-      const rows = Object.entries(byUser).sort((a,b)=>b[1]-a[1]);
-      perUserList.innerHTML = rows.length
-        ? rows.map(([who,bytes])=>{
-            const pct = Math.min(100, (bytes/MAX_PER_USER_STORAGE_BYTES)*100);
-            const barColor = pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue';
-            return `<div class="text-xs">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-slate-600 truncate">${escapeHtml(who)}</span>
-                <span class="font-bold text-slate-500 flex-shrink-0 ml-2">${formatBytes(bytes)} / ${formatBytes(MAX_PER_USER_STORAGE_BYTES)}</span>
-              </div>
-              <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${barColor} rounded-full" style="width:${pct}%"></div></div>
-            </div>`;
-          }).join('')
-        : `<div class="text-xs text-slate-400">No documents uploaded yet.</div>`;
-    }
-  }
-
   const totalWrap = document.getElementById('totalStorageWrap');
   const totalLabel = document.getElementById('totalStorageLabel');
   const ring = document.getElementById('storageRing');
@@ -6796,22 +6673,7 @@ window.setDocTypeFilter = (type)=>{
   renderDocumentsPage();
 };
 
-function updateMyStorageWidget(){
-  const ring = document.getElementById('myStorageRing');
-  const ringPct = document.getElementById('myStorageRingPct');
-  const label = document.getElementById('myStorageLabel');
-  if(!ring || !ringPct || !label) return;
-  const myUsed = documents.filter(d=>d.uploadedBy===(currentUserEmail||currentUserName)).reduce((s,d)=>s+(d.sizeBytes||0),0);
-  const myQuota = currentUserStorageQuota || MAX_PER_USER_STORAGE_BYTES;
-  const pct = Math.min(100, (myUsed/myQuota)*100);
-  const ringColor = pct>=90 ? '#EF4444' : pct>=70 ? '#F59E0B' : '#005EA6';
-  ring.style.background = `conic-gradient(${ringColor} ${pct*3.6}deg, #E2E8F0 ${pct*3.6}deg)`;
-  ringPct.textContent = `${Math.round(pct)}%`;
-  label.textContent = `${formatBytes(myUsed)} / ${formatBytes(myQuota)}`;
-}
-
 function renderDocumentsPage(){
-  updateMyStorageWidget();
   const wrap = document.getElementById('docsListWrap');
   if(!wrap) return;
   const filtered = docTypeFilter==='all' ? documents : documents.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes((d.fileExt||'').toLowerCase()));
@@ -6939,14 +6801,6 @@ window.uploadDocument = async ()=>{
 
   const finish = async (fileData)=>{
     const used = getTotalStorageUsed();
-    const myUsed = documents.filter(d=>d.uploadedBy===(currentUserEmail||currentUserName)).reduce((s,d)=>s+(d.sizeBytes||0),0);
-    const myQuota = currentUserStorageQuota || MAX_PER_USER_STORAGE_BYTES;
-    if(myUsed + fileData.length > myQuota){
-      if(btn) btn.disabled = false;
-      if(progressWrap) progressWrap.classList.add('hidden');
-      toast(`You've used ${formatBytes(myUsed)} of your ${formatBytes(myQuota)} personal storage allowance — ask a Master ID to raise it, or remove some older documents.`,'err');
-      return;
-    }
     if(used + fileData.length > STORAGE_CAP_BYTES){
       closeDocUploadModal();
       openDocUpgradeModal();
@@ -7088,11 +6942,6 @@ window.openStorageCapModal = ()=>{
   if(value >= 1024){ unit = 'TB'; value = STORAGE_CAP_BYTES / BYTE_UNITS.TB; }
   document.getElementById('storageCapValue').value = Math.round(value*100)/100;
   document.getElementById('storageCapUnit').value = unit;
-  let puUnit = 'MB', puValue = MAX_PER_USER_STORAGE_BYTES / BYTE_UNITS.MB;
-  if(puValue >= 1024){ puUnit = 'GB'; puValue = MAX_PER_USER_STORAGE_BYTES / BYTE_UNITS.GB; }
-  if(puValue < 1){ puUnit = 'KB'; puValue = MAX_PER_USER_STORAGE_BYTES / BYTE_UNITS.KB; }
-  document.getElementById('perUserCapValue').value = Math.round(puValue*100)/100;
-  document.getElementById('perUserCapUnit').value = puUnit;
   updateStorageCapPreview();
   document.getElementById('storageCapModal').classList.remove('hidden');
   document.getElementById('storageCapModal').classList.add('flex');
@@ -7114,17 +6963,12 @@ window.saveStorageCap = async ()=>{
   if(currentUserRole !== 'owner'){ toast('Only a Master ID can change the storage limit.','err'); return; }
   const value = parseFloat(document.getElementById('storageCapValue').value);
   const unit = document.getElementById('storageCapUnit').value;
-  const puValue = parseFloat(document.getElementById('perUserCapValue').value);
-  const puUnit = document.getElementById('perUserCapUnit').value;
-  if(!value || value <= 0){ toast('Enter a valid overall limit.','err'); return; }
-  if(!puValue || puValue <= 0){ toast('Enter a valid per-person limit.','err'); return; }
+  if(!value || value <= 0){ toast('Enter a valid limit.','err'); return; }
   const capBytes = value * (BYTE_UNITS[unit]||BYTE_UNITS.MB);
-  const perUserCapBytes = puValue * (BYTE_UNITS[puUnit]||BYTE_UNITS.MB);
-  if(perUserCapBytes > capBytes){ toast("The per-person limit can't be larger than the overall limit.",'err'); return; }
   try{
-    await setDoc(doc(db,'settings','storage'), { capBytes, capValue:value, capUnit:unit, perUserCapBytes, perUserCapValue:puValue, perUserCapUnit:puUnit }, { merge:true });
-    logActivity('Storage Limit Changed', 'settings', { model: `Overall:${value}${unit} PerUser:${puValue}${puUnit}` });
-    toast(`Storage limits updated.`);
+    await setDoc(doc(db,'settings','storage'), { capBytes, capValue:value, capUnit:unit }, { merge:true });
+    logActivity('Storage Limit Changed', 'settings', { model: `${value} ${unit}` });
+    toast(`Storage limit set to ${formatBytes(capBytes)}.`);
     closeStorageCapModal();
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
@@ -7538,12 +7382,58 @@ let historySearchTerm = '';
 
 function loadActivityLog(){
   if(activityLogUnsub) activityLogUnsub();
+  let notifFirstLoadDone = false;
   const q = query(collection(db,"activity_log"), orderBy('at','desc'), limit(500));
   activityLogUnsub = onSnapshot(q, snap=>{
     activityLogData = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderActivityLog();
+    // Only flag as "new" for updates that arrive after the initial load —
+    // the first load is just catching up on history, not a fresh event.
+    if(notifFirstLoadDone){
+      const isMaster = currentUserRole === 'owner';
+      const relevant = isMaster ? activityLogData : activityLogData.filter(a=>a.by===(currentUserEmail||currentUserName));
+      if(relevant.length) document.getElementById('notifDot')?.classList.remove('hidden');
+    }
+    notifFirstLoadDone = true;
+    if(document.getElementById('notifMenu')?.classList.contains('open')) renderNotifDropdown();
   }, err=>console.error('activity_log listener failed', err));
 }
+
+/* ─── Notification dropdown — reuses the Activity Log data that's already
+     loaded at login, so this needs no extra Firestore reads. Master ID
+     sees recent activity across the whole team; a Normal ID sees only
+     their own, matching how the full Activity Log page is Master-only. ─── */
+function renderNotifDropdown(){
+  const list = document.getElementById('notifList');
+  if(!list) return;
+  const isMaster = currentUserRole === 'owner';
+  const relevant = isMaster ? activityLogData : activityLogData.filter(a=>a.by===(currentUserEmail||currentUserName));
+  const recent = relevant.slice(0, 8);
+  list.innerHTML = recent.length ? recent.map(a=>{
+    const at = a.at?.toDate ? a.at.toDate() : new Date(a.at);
+    const style = ACTION_STYLE[a.action] || {icon:'fa-circle-info', cls:'badge-neutral'};
+    const what = a.model || a.chassis || a.customerName || '';
+    return `<div class="flex items-start gap-2 px-2.5 py-2 rounded-lg hover:bg-slate-50 transition-colors">
+      <i class="fas ${style.icon} text-[11px] text-slate-400 mt-0.5 flex-shrink-0"></i>
+      <div class="min-w-0">
+        <div class="text-[12px] text-slate-700 leading-snug"><b>${escapeHtml(a.action||'')}</b>${what?' — '+escapeHtml(what):''}</div>
+        <div class="text-[10.5px] text-slate-400">${isMaster && a.by ? escapeHtml(a.by)+' · ' : ''}${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}, ${at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    </div>`;
+  }).join('') : `<div class="text-[12px] text-slate-400 text-center py-6">No recent activity yet.</div>`;
+}
+window.toggleNotifMenu = (e)=>{
+  e.stopPropagation();
+  renderNotifDropdown();
+  document.getElementById('notifMenu').classList.toggle('open');
+  document.getElementById('notifDot')?.classList.add('hidden'); // seen it now, clear the "new" indicator
+};
+document.addEventListener('click', (e)=>{
+  const menu = document.getElementById('notifMenu');
+  if(menu && menu.classList.contains('open') && !menu.contains(e.target) && !e.target.closest('[aria-label="Notifications"]')){
+    menu.classList.remove('open');
+  }
+});
 
 const ACTION_STYLE = {
   'Deleted': {icon:'fa-trash-can', cls:'badge-red'},
