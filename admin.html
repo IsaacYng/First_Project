@@ -1010,6 +1010,9 @@
         <button id="navDocs" onclick="switchSec('docs');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-folder-open"></i> Document Vault
         </button>
+        <button id="navStorage" onclick="switchSec('storage');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-chart-pie"></i> Storage
+        </button>
         <div class="sidebar-section-label">Marketing</div>
         <button id="navEvents" onclick="switchSec('events');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-bullhorn"></i> Events & Offers
@@ -1867,7 +1870,7 @@
     <div class="sec-panel" id="secDocs">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
         <div>
-          <div class="eyebrow">Dealership</div>
+          <div class="eyebrow">Documents</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Document <span class="text-amber-500">Vault</span></div>
           <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Shared across the whole team — KYC forms, allocation forms, Namsari letters — scanned and stored safely. PDF, photo, Word, or Excel — photos are compressed automatically, PDFs/Word/Excel need to already be under ~700 KB.</p>
         </div>
@@ -1876,37 +1879,6 @@
         </button>
       </div>
 
-      <div class="yng-card-shell p-5 mb-5">
-        <div class="flex items-center justify-between gap-2 mb-2">
-          <div class="text-xs font-bold text-slate-600"><i class="fas fa-chart-pie text-slate-400 mr-1"></i> Total System Usage</div>
-          <div id="totalStorageLabel" class="text-xs font-bold text-slate-500">0 MB / 0 MB</div>
-        </div>
-        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mb-1">
-          <div id="totalStorageBar" class="h-full bg-bajaj-blue rounded-full transition-all" style="width:0%"></div>
-        </div>
-        <p class="text-[10px] text-slate-400 mb-4">Everything combined — documents, inventory, price list, and the rest — stays capped at 90% of the free plan's total.</p>
-
-        <div class="flex items-center justify-between gap-2 mb-2 pt-3 border-t border-slate-100">
-          <div class="text-xs font-bold text-slate-600"><i class="fas fa-database text-slate-400 mr-1"></i> Document Vault</div>
-          <div class="flex items-center gap-2">
-            <div id="docStorageLabel" class="text-xs font-bold text-slate-500">0 MB / 0 MB</div>
-            <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set storage limit"><i class="fas fa-gear text-xs"></i></button>
-          </div>
-        </div>
-        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mb-4">
-          <div id="docStorageBar" class="h-full bg-bajaj-blue rounded-full transition-all" style="width:0%"></div>
-        </div>
-
-        <div class="flex items-center justify-between gap-2 mb-2 pt-3 border-t border-slate-100">
-          <div class="text-xs font-bold text-slate-600"><i class="fas fa-list-check text-slate-400 mr-1"></i> Record Limits</div>
-          <button id="systemLimitsSettingsBtn" onclick="openSystemLimitsModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set record limits"><i class="fas fa-gear text-xs"></i></button>
-        </div>
-        <div id="recordLimitsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
-
-        <div id="perUserStorageWrap" class="hidden mt-3 pt-3 border-t border-slate-100">
-          <div class="text-xs font-bold text-slate-600 mb-2"><i class="fas fa-user-lock text-slate-400 mr-1"></i> Storage by Team Member <span class="normal-case font-medium text-slate-300">(visible to Master ID only)</span></div>
-          <div id="perUserStorageList" class="flex flex-col gap-1.5"></div>
-        </div>
       </div>
 
       <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 mb-4 w-fit flex-wrap">
@@ -1933,15 +1905,8 @@
             <input type="text" id="docName" placeholder="e.g. KYC Form" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Category</label>
-            <select id="docCategory" onchange="updateDocCategoryHint()" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
-              <option>KYC Form</option>
-              <option>Allocation Form</option>
-              <option>Namsari Letter</option>
-              <option>Citizenship / ID</option>
-              <option>Other</option>
-            </select>
-            <p id="docCategoryHint" class="text-[10.5px] text-slate-400 mt-0.5"></p>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Description <span class="normal-case font-medium text-slate-300">(optional)</span></label>
+            <input type="text" id="docDescription" placeholder="e.g. Guarantor's citizenship copy for the Pulsar 150 loan" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
           </div>
           <div id="docFileNameFieldWrap" class="hidden flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Saved File Name <span class="normal-case font-medium text-slate-300">(keep the extension, e.g. .pdf)</span></label>
@@ -2071,6 +2036,57 @@
             <i class="fas fa-lock mr-1"></i> Subscribe — Pay As You Go
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- ═══ STORAGE ═══ -->
+    <div class="sec-panel" id="secStorage">
+      <div class="mb-6">
+        <div class="eyebrow">Documents</div>
+        <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Storage <span class="text-amber-500">Overview</span></div>
+        <p class="text-sm text-slate-500 mt-1.5 max-w-lg">How everything on the free Firebase plan is being used — documents, price list, inventory, and the rest, all in one place.</p>
+      </div>
+
+      <div class="yng-card-shell p-6 mb-5 flex flex-col sm:flex-row items-center gap-6">
+        <div class="relative flex-shrink-0" style="width:150px;height:150px;">
+          <div id="storageRing" class="w-full h-full rounded-full flex items-center justify-center" style="background:conic-gradient(#005EA6 0deg, #E2E8F0 0deg);">
+            <div class="bg-white rounded-full flex flex-col items-center justify-center" style="width:112px;height:112px;">
+              <div id="storageRingPct" class="text-2xl font-extrabold text-slate-800">0%</div>
+              <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">used</div>
+            </div>
+          </div>
+        </div>
+        <div class="flex-1 text-center sm:text-left">
+          <div id="totalStorageLabel" class="text-xl font-extrabold text-slate-800 mb-1">0 MB / 0 MB</div>
+          <p class="text-xs text-slate-500 leading-relaxed">Everything combined — documents, inventory, price list, and the rest — stays capped at 90% of the free plan's total, always leaving a safety margin.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+        <div class="yng-card-shell p-5">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="text-xs font-bold text-slate-600"><i class="fas fa-folder-open text-amber-500 mr-1"></i> Document Vault</div>
+            <div class="flex items-center gap-2">
+              <div id="docStorageLabel" class="text-xs font-bold text-slate-500">0 MB / 0 MB</div>
+              <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set storage limit"><i class="fas fa-gear text-xs"></i></button>
+            </div>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div id="docStorageBar" class="h-full bg-bajaj-blue rounded-full transition-all" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="yng-card-shell p-5">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="text-xs font-bold text-slate-600"><i class="fas fa-list-check text-bajaj-blue mr-1"></i> Record Limits</div>
+            <button id="systemLimitsSettingsBtn" onclick="openSystemLimitsModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set record limits"><i class="fas fa-gear text-xs"></i></button>
+          </div>
+          <div id="recordLimitsGrid" class="grid grid-cols-2 gap-2"></div>
+        </div>
+      </div>
+
+      <div id="perUserStorageWrap" class="hidden yng-card-shell p-5">
+        <div class="text-xs font-bold text-slate-600 mb-3"><i class="fas fa-user-lock text-slate-400 mr-1"></i> Storage by Team Member <span class="normal-case font-medium text-slate-300">(visible to Master ID only)</span></div>
+        <div id="perUserStorageList" class="flex flex-col gap-2"></div>
       </div>
     </div>
 
@@ -3475,8 +3491,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', events:'navEvents', stock:'navStock', history:'navHistory', trash:'navTrash' };
-  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', events:'mNavEvents', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
+  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', history:'navHistory', trash:'navTrash' };
+  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -4403,8 +4419,9 @@ async function updateStorageOverview(){
     }
 
     const totalLabel = document.getElementById('totalStorageLabel');
-    const totalBar = document.getElementById('totalStorageBar');
-    if(totalLabel && totalBar){
+    const ring = document.getElementById('storageRing');
+    const ringPct = document.getElementById('storageRingPct');
+    if(totalLabel && ring && ringPct){
       const docBytes = getTotalStorageUsed();
       const estimatedOtherBytes = (allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike)
         + (invCount*RECORD_SIZE_ESTIMATE.inventoryUnit)
@@ -4415,12 +4432,14 @@ async function updateStorageOverview(){
       const firestoreFreeTotal = 1024*1024*1024; // ~1 GiB, Firestore's Spark-tier total
       const ceiling = firestoreFreeTotal * 0.9; // the 90% ceiling requested — always leaves 10% breathing room
       const pct = Math.min(100, (totalEstimated/ceiling)*100);
-      totalBar.style.width = pct+'%';
-      totalBar.className = 'h-full rounded-full transition-all ' + (pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue');
+      const ringColor = pct>=90 ? '#EF4444' : pct>=70 ? '#F59E0B' : '#005EA6';
+      ring.style.background = `conic-gradient(${ringColor} ${pct*3.6}deg, #E2E8F0 ${pct*3.6}deg)`;
+      ringPct.textContent = `${Math.round(pct)}%`;
+      ringPct.className = 'text-2xl font-extrabold ' + (pct>=90 ? 'text-red-500' : pct>=70 ? 'text-amber-500' : 'text-slate-800');
       totalLabel.textContent = `~${formatBytes(totalEstimated)} / ${formatBytes(ceiling)}`;
 
       // The same figure, visible from every page — not everyone will
-      // naturally think to check the Documents page for this.
+      // naturally think to check the Storage page for this.
       const chipText = document.getElementById('topbarStorageChipText');
       if(chipText){
         chipText.textContent = `${Math.round(pct)}%`;
@@ -6837,13 +6856,16 @@ function renderDocumentsPage(){
     const at = d.uploadedAt?.toDate ? d.uploadedAt.toDate() : new Date(d.uploadedAt||Date.now());
     return `<div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="openDocPreview('${d.id}')">
       <div class="flex items-start justify-between gap-2 mb-3">
-        <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${iconInfo.color}15">
-          <i class="fas ${iconInfo.icon} text-lg" style="color:${iconInfo.color}"></i>
+        <div class="flex items-center gap-2">
+          <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${iconInfo.color}15">
+            <i class="fas ${iconInfo.icon} text-lg" style="color:${iconInfo.color}"></i>
+          </div>
+          <span class="text-[10px] font-extrabold tracking-wide px-1.5 py-0.5 rounded" style="background:${iconInfo.color}15;color:${iconInfo.color}">${ext.toUpperCase()||'FILE'}</span>
         </div>
         <button type="button" class="kebab-btn flex-shrink-0" onclick="event.stopPropagation(); window._toggleKebab(this,'documents','${d.id}')" aria-label="Document actions"><i class="fas fa-ellipsis-vertical"></i></button>
       </div>
       <div class="font-bold text-slate-800 text-sm leading-snug mb-1 truncate" title="${escapeHtml(d.name||'')}">${escapeHtml(d.name||'Untitled')}</div>
-      <span class="badge badge-blue mb-2">${escapeHtml(d.category||'Other')}</span>
+      ${d.description ? `<div class="text-xs text-slate-500 leading-snug line-clamp-2 mb-1">${escapeHtml(d.description)}</div>` : ''}
       <div class="text-[11px] text-slate-400 flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
         <span>${formatBytes(d.sizeBytes||0)}</span>
         <span>${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span>
@@ -6852,26 +6874,13 @@ function renderDocumentsPage(){
   }).join('');
 }
 
-const DOC_CATEGORY_HINTS = {
-  'KYC Form': 'The signed Know-Your-Customer form itself — used to verify identity for a loan/finance application.',
-  'Allocation Form': 'The dealer allocation/booking form confirming which unit is assigned to which customer.',
-  'Namsari Letter': 'The ownership-transfer (Namsari) letter for a bike changing hands.',
-  'Citizenship / ID': 'A scan of citizenship, license, or other official ID used to support an application.',
-  'Other': 'Anything that doesn\'t fit the categories above.'
-};
-window.updateDocCategoryHint = ()=>{
-  const hintEl = document.getElementById('docCategoryHint');
-  const cat = document.getElementById('docCategory')?.value;
-  if(hintEl) hintEl.textContent = DOC_CATEGORY_HINTS[cat] || '';
-};
-
 let docEditingId = null;
 
 window.openDocUploadModal = (id)=>{
   const d = id ? documents.find(x=>x.id===id) : null;
   docEditingId = id || null;
   document.getElementById('docName').value = d?.name || '';
-  document.getElementById('docCategory').value = d?.category || 'KYC Form';
+  document.getElementById('docDescription').value = d?.description || '';
   document.getElementById('docFileInput').value = '';
   pendingDocFile = null;
   const fileFieldWrap = document.getElementById('docFileFieldWrap');
@@ -6895,7 +6904,6 @@ window.openDocUploadModal = (id)=>{
     if(fileNameFieldWrap) fileNameFieldWrap.classList.add('hidden');
   }
   document.getElementById('docUploadProgress').classList.add('hidden');
-  updateDocCategoryHint();
   document.getElementById('docUploadModal').classList.add('open');
 };
 window.closeDocUploadModal = ()=>{
@@ -6942,24 +6950,24 @@ window.uploadDocument = async ()=>{
  try{
   console.log('[docUpload] button clicked');
   const nameEl = document.getElementById('docName');
-  const categoryEl = document.getElementById('docCategory');
-  if(!nameEl || !categoryEl){
+  const descriptionEl = document.getElementById('docDescription');
+  if(!nameEl){
     toast('Upload form did not load correctly — please refresh the page.','err');
-    console.error('[docUpload] missing form elements', {nameEl, categoryEl});
+    console.error('[docUpload] missing form elements', {nameEl});
     return;
   }
   const name = nameEl.value.trim();
-  const category = categoryEl.value;
+  const description = descriptionEl?.value.trim() || '';
   if(!name){ toast('Document name is required.','err'); return; }
 
   // Editing an existing document — just updates the metadata (name,
-  // category, saved file name); the file itself is untouched, so there's
-  // no size/type checks or storage-quota math to redo here.
+  // description, saved file name); the file itself is untouched, so
+  // there's no size/type checks or storage-quota math to redo here.
   if(docEditingId){
     const fileNameInput = document.getElementById('docFileNameInput');
     const fileName = fileNameInput?.value.trim() || undefined;
     try{
-      await updateDoc(doc(db,'documents',docEditingId), { name, category, ...(fileName ? {fileName} : {}) });
+      await updateDoc(doc(db,'documents',docEditingId), { name, description, ...(fileName ? {fileName} : {}) });
       logActivity('Updated', 'documents', { model: name });
       toast('Document updated.');
       closeDocUploadModal();
@@ -7000,7 +7008,7 @@ window.uploadDocument = async ()=>{
     if(progressBar) progressBar.style.width = '80%';
     try{
       await addDoc(collection(db,'documents'), {
-        name, category, fileExt: ext, fileName: pendingDocFile.name,
+        name, description, fileExt: ext, fileName: pendingDocFile.name,
         fileData, sizeBytes: fileData.length,
         uploadedBy: currentUserEmail || currentUserName || 'Unknown',
         uploadedAt: new Date()
@@ -7112,7 +7120,7 @@ window.openDocPreview = (id)=>{
   if(!d) return;
   const ext = (d.fileExt||'').toLowerCase();
   document.getElementById('docPreviewTitle').textContent = d.name || 'Document';
-  document.getElementById('docPreviewMeta').textContent = `${escapeHtml(d.category||'')} · ${formatBytes(d.sizeBytes||0)}`;
+  document.getElementById('docPreviewMeta').textContent = `${(d.fileExt||'').toUpperCase()} · ${formatBytes(d.sizeBytes||0)}${d.description ? ' · '+d.description : ''}`;
   document.getElementById('docPreviewDownloadBtn').onclick = ()=>downloadDocument(id);
 
   const body = document.getElementById('docPreviewBody');
@@ -8201,8 +8209,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Documents', events:'Events & Offers', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
-const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', events:'secEvents', stock:'secStock', history:'secHistory', trash:'secTrash' };
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Documents', storage:'Storage', events:'Events & Offers', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
+const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', history:'secHistory', trash:'secTrash' };
 window.switchSec=(sec)=>{
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
@@ -8217,6 +8225,7 @@ window.switchSec=(sec)=>{
   if(sec==='hhinv') populateHHModelDropdown();
   if(sec==='allinv') renderAllInventoryTable();
   if(sec==='docs') renderDocumentsPage();
+  if(sec==='storage') updateStorageOverview();
   if(sec==='events') renderEventsPage();
   if(sec==='stock') loadStockReportData(true);
   if(sec==='history') renderActivityLog();
