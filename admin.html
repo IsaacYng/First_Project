@@ -1232,10 +1232,6 @@
             <input type="text" id="mImg" placeholder="https://...image.jpg"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
-          <div id="mLegguardWrap" class="flex flex-col gap-1.5 col-span-2 sm:col-span-3 lg:col-span-4 hidden">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Accessory Fitment (this category)</label>
-            <div id="mFitmentGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
-          </div>
         </div>
         <div class="flex gap-2 flex-wrap">
           <button id="saveModelBtn" class="cta-primary">
@@ -2599,7 +2595,6 @@ const secondaryAuth = getAuth(secondaryApp);
 let currentEditId = null;
 // Which accessories (from the model's category) are toggled ON for the bike
 // currently being added/edited — keyed by accessory name, e.g. {'Seat Cover':true}.
-let currentEditBikeFitments = {};
 let currentEditInvId = null;
 let currentEditFinId = null;
 let currentEditAccId = null;
@@ -4062,26 +4057,12 @@ function renderMasterTable() {
   const sorted=[...allMasterBikes].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
   tbody.innerHTML = sorted.map(b=>{
     const category=b.category||'Bike';
-    // Fitments now come from whatever accessories are actually configured
-    // for this bike's category (Category Manager → Accessories) — not a
-    // hardcoded Leg Guard/Seat Cover pair. Bikes saved before this existed
-    // fall back to their old boolean fields for those two specific names.
-    const legacyFit=b.applyLegguardSeatcover!==false;
+    // Every accessory configured for this bike's category (Category Manager
+    // → Accessories) applies to every bike in that category — no per-bike
+    // exceptions anymore, so the chips just mirror the category's list.
     const catAccessoryNames = financeCategories.find(c=>c.name===category)?.accessoryNames || [];
-    // Only the ones that actually fit get shown, as small green chips — a
-    // row of red X's for every accessory this model *doesn't* have looked
-    // like an error state when it's really just neutral information.
-    const fittedNames = catAccessoryNames.filter(name=>{
-      let fits = b.fitments?.[name];
-      if(fits===undefined){
-        if(name==='Leg Guard') fits = b.applyLegguard!==undefined?b.applyLegguard:legacyFit;
-        else if(name==='Seat Cover') fits = b.applySeatcover!==undefined?b.applySeatcover:legacyFit;
-        else fits = false;
-      }
-      return fits;
-    });
-    const fitmentBlock = (catAccessoryNames.length && fittedNames.length)
-      ? `<div class="flex flex-wrap justify-end gap-1">${fittedNames.map(name=>`<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-semibold"><i class="fas fa-check text-[8px]"></i> ${escapeHtml(name)}</span>`).join('')}</div>`
+    const fitmentBlock = catAccessoryNames.length
+      ? `<div class="flex flex-wrap justify-end gap-1">${catAccessoryNames.map(name=>`<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-semibold"><i class="fas fa-check text-[8px]"></i> ${escapeHtml(name)}</span>`).join('')}</div>`
       : '';
     const catBadge=`<div class="flex flex-col items-end gap-1">
       <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">${escapeHtml(category)}</span>
@@ -4150,17 +4131,6 @@ window._editMaster=(id)=>{
   document.getElementById('mFirstPartyIns').value=b.firstPartyInsurance||0;
   document.getElementById('mThirdPartyIns').value=b.thirdPartyInsurance||0;
   document.getElementById('mImg').value=b.img||'';
-  // Fitments come from the new per-model map; bikes saved before this
-  // existed fall back to their old applyLegguard/applySeatcover booleans
-  // (or the even older combined applyLegguardSeatcover flag) for those two
-  // specific accessory names, so nothing that was already set gets lost.
-  const legacyFit = b.applyLegguardSeatcover!==false;
-  currentEditBikeFitments = { ...(b.fitments||{}) };
-  if(currentEditBikeFitments['Leg Guard']===undefined && b.applyLegguard!==undefined) currentEditBikeFitments['Leg Guard'] = b.applyLegguard;
-  else if(currentEditBikeFitments['Leg Guard']===undefined) currentEditBikeFitments['Leg Guard'] = legacyFit;
-  if(currentEditBikeFitments['Seat Cover']===undefined && b.applySeatcover!==undefined) currentEditBikeFitments['Seat Cover'] = b.applySeatcover;
-  else if(currentEditBikeFitments['Seat Cover']===undefined) currentEditBikeFitments['Seat Cover'] = legacyFit;
-  renderModelFitmentToggles();
   currentEditId=id;
   const btn=document.getElementById('saveModelBtn');
   btn.innerHTML='<i class="fas fa-rotate"></i> Update Model Info';
@@ -4180,48 +4150,6 @@ window.cancelMasterEdit=()=>{
   cancel.classList.add('hidden'); cancel.classList.remove('flex');
   closeMasterFormModal();
 };
-
-// Renders one on/off toggle per accessory that's been marked as applicable
-// to the currently-selected category (set up via the Accessories popover on
-// the Category Manager above). Nothing configured for this category? The
-// whole section just stays hidden — there's nothing to toggle.
-function renderModelFitmentToggles(){
-  const wrap = document.getElementById('mLegguardWrap');
-  const grid = document.getElementById('mFitmentGrid');
-  if(!wrap || !grid) return;
-  const catName = document.getElementById('mCategory').value;
-  const cat = financeCategories.find(c=>c.name===catName);
-  const names = cat?.accessoryNames || [];
-  if(!names.length){
-    // Previously this just hid the whole section silently, which read as
-    // "fitments are broken for this category" — it's not broken, nothing's
-    // configured for it yet. Say so, with a direct way to fix it.
-    wrap.classList.remove('hidden');
-    grid.innerHTML = `<div class="col-span-full text-xs text-slate-400 flex items-center gap-2">
-      <i class="fas fa-circle-info"></i> No accessories set up for "${escapeHtml(catName||'this category')}" yet.
-      <button type="button" onclick="openCategoryModal()" class="text-bajaj-blue font-bold hover:underline">Set up in Manage Categories</button>
-    </div>`;
-    return;
-  }
-  wrap.classList.remove('hidden');
-  grid.innerHTML = names.map(name=>{
-    const checked = currentEditBikeFitments[name] || false;
-    const escId = 'mFit_'+name.replace(/[^a-zA-Z0-9]/g,'_');
-    const escName = escapeJsAttr(name);
-    return `<label class="flex items-center gap-2 text-sm text-slate-700 font-medium cursor-pointer">
-      <input type="checkbox" id="${escId}" data-fitment-name="${escapeHtml(name)}" class="model-fitment-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer"
-        ${checked?'checked':''} onchange="currentEditBikeFitments['${escName}']=this.checked">
-      ${escapeHtml(name)}
-    </label>`;
-  }).join('');
-}
-document.getElementById('mCategory').addEventListener('change',()=>{
-  // Switching category resets fitment choices — the accessories applicable
-  // to the OLD category may not even apply to the new one.
-  currentEditBikeFitments = {};
-  renderModelFitmentToggles();
-});
-renderModelFitmentToggles();
 
 // When a new/edited bike is saved at an S.N that's already taken, push every
 // bike from that position onward up by one — like inserting a row in a list —
@@ -4254,17 +4182,7 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
   const [sn, name, price, ins, fin, firstPartyIns, thirdPartyIns] = checks.map(c=>c.value);
   const imgRaw = document.getElementById('mImg').value.trim();
   if(imgRaw && !/^https?:\/\/.+/i.test(imgRaw)){ toast('Image URL must start with http:// or https://','err'); return; }
-  // Build the fitments map from whichever toggles are currently rendered
-  // (driven by the category's configured accessory list), then mirror
-  // "Leg Guard"/"Seat Cover" into the old boolean fields too, since
-  // finance.html still reads those two by name.
-  const fitments = {};
-  document.querySelectorAll('.model-fitment-checkbox').forEach(cb=>{
-    fitments[cb.dataset.fitmentName] = cb.checked;
-  });
-  const applyLegguard = fitments['Leg Guard'] !== undefined ? fitments['Leg Guard'] : true;
-  const applySeatcover = fitments['Seat Cover'] !== undefined ? fitments['Seat Cover'] : true;
-  const data={sn,name,category,price,Insurance:ins,financeInsurance:fin,firstPartyInsurance:firstPartyIns,thirdPartyInsurance:thirdPartyIns,img:imgRaw,fitments,applyLegguard,applySeatcover};
+  const data={sn,name,category,price,Insurance:ins,financeInsurance:fin,firstPartyInsurance:firstPartyIns,thirdPartyInsurance:thirdPartyIns,img:imgRaw};
   try {
     // If this S.N is already taken by a different model, bump that model
     // (and everything after it) up by one first, so the new/edited entry
@@ -4285,8 +4203,6 @@ function clearMasterForm(){
   // whatever category happens to exist first only if Bike isn't set up.
   if(financeCategories.some(c=>c.name==='Bike')) catSel.value = 'Bike';
   else if(financeCategories.length) catSel.value = financeCategories[0].name;
-  currentEditBikeFitments = {};
-  renderModelFitmentToggles();
 }
 
 /* ─── Inventory ─── */
@@ -5844,7 +5760,6 @@ function renderFinCategorySelect(){
     else if(financeCategories.some(c=>c.name==='Bike')) mSel.value = 'Bike';
     else if(financeCategories.length) mSel.value = financeCategories[0].name;
     mSel._csSync?.(); // refresh custom-select trigger label if enhanced
-    renderModelFitmentToggles();
   }
   const sel = document.getElementById('fCategory');
   if(sel){
@@ -5991,9 +5906,6 @@ window.toggleCategoryAccessory = async (id, accName, checked)=>{
   try{
     await updateDoc(doc(db,"finance_categories",id),{accessoryNames:[...current]});
     toast(`${accName} ${checked?'added to':'removed from'} ${escapeHtml(cat.name)}.`);
-    // Live-refresh the fitment grid on the model form in case this category
-    // is the one currently selected there, so it doesn't go stale.
-    if(document.getElementById('mCategory')?.value === cat.name) renderModelFitmentToggles();
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
@@ -7583,12 +7495,10 @@ window.exportPriceListToExcel = ()=>{
     'Finance Insurance': b.financeInsurance||0,
     '1st Party Insurance': b.firstPartyInsurance||0,
     '3rd Party Insurance': b.thirdPartyInsurance||0,
-    'Image URL': b.img||'',
-    'Fits Leg Guard': b.applyLegguard ? 'Yes' : 'No',
-    'Fits Seat Cover': b.applySeatcover ? 'Yes' : 'No'
+    'Image URL': b.img||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:6},{wch:26},{wch:12},{wch:12},{wch:12},{wch:16},{wch:16},{wch:16},{wch:30},{wch:12},{wch:12}];
+  ws['!cols'] = [{wch:6},{wch:26},{wch:12},{wch:12},{wch:12},{wch:16},{wch:16},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Price List');
   XLSX.writeFile(wb, `price_list_export_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -8063,9 +7973,7 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
         financeInsurance: finInsCheck.value,
         firstPartyInsurance: fpInsCheck.value,
         thirdPartyInsurance: tpInsCheck.value,
-        img: row.img || '',
-        applyLegguard: true,
-        applySeatcover: true
+        img: row.img || ''
       });
       seenInBatch.push(row);
       results.success.push(row);
