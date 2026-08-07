@@ -2170,15 +2170,15 @@
       </div>
     </div>
 
-    <!-- IMPORTANT INFO (Master-only: contacts, links, credentials) -->
+    <!-- IMPORTANT INFO (Contacts shared with everyone; Links/Credentials Master-only) -->
     <div class="sec-panel" id="secImportant">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
         <div>
-          <div class="eyebrow">Master Only</div>
+          <div class="eyebrow" id="importantEyebrow">Master Only</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Important <span class="text-amber-500">Info</span></div>
-          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Contacts, links, and login credentials for outside services — visible only to Master IDs.</p>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg" id="importantDesc">Contacts, links, and login credentials for outside services — visible only to Master IDs.</p>
         </div>
-        <button onclick="openImportantFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+        <button id="addImportantBtn" onclick="openImportantFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
           <i class="fas fa-plus"></i> Add Entry
         </button>
       </div>
@@ -3819,10 +3819,12 @@ async function loadProfile(uid) {
     // Only Master ID sees the full combined log.
     const historyNavBtn = document.getElementById('navHistory');
     if(historyNavBtn) historyNavBtn.classList.toggle('hidden', currentUserRole !== 'owner');
+    // Important Info is visible to everyone now — Contacts are shared team
+    // info; Links and Credentials stay Master-only inside the page itself.
     const importantNavBtn = document.getElementById('navImportant');
-    if(importantNavBtn) importantNavBtn.classList.toggle('hidden', currentUserRole !== 'owner');
+    if(importantNavBtn) importantNavBtn.classList.remove('hidden');
     const toolsLabel = document.getElementById('navToolsLabel');
-    if(toolsLabel) toolsLabel.classList.toggle('hidden', currentUserRole !== 'owner');
+    if(toolsLabel) toolsLabel.classList.remove('hidden');
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
 }
 
@@ -7507,11 +7509,17 @@ const IMP_PLACEHOLDERS = { contact:['e.g. Isaac Yonghang','e.g. 9820907795'], li
 const IMP_ICONS = { contact:{icon:'fa-user',bg:'#EFF6FF',fg:'#005EA6'}, link:{icon:'fa-link',bg:'#F0FDF4',fg:'#059669'}, credential:{icon:'fa-key',bg:'#FEF3C7',fg:'#D97706'} };
 
 function loadImportantInfo(){
-  if(currentUserRole !== 'owner') return; // Master-only collection — Normal ID never even queries this
+  // Contacts are shared team info, so everyone's client loads them. Links
+  // and Credentials are filtered out of the snapshot BEFORE they ever land
+  // in importantData for a Normal ID — not just hidden at render time —
+  // so the real URLs/passwords never sit in a staff member's browser
+  // memory where devtools could read them straight off the JS object.
   if(importantUnsub) importantUnsub();
   const q = query(collection(db,"important_info"), orderBy('value1'));
   importantUnsub = onSnapshot(q, snap=>{
-    importantData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const isMaster = currentUserRole === 'owner';
+    const all = snap.docs.map(d=>({id:d.id,...d.data()}));
+    importantData = isMaster ? all : all.filter(a=>a.type==='contact');
     renderImportantList();
   }, err=>console.error('important_info listener failed', err));
 }
@@ -7534,6 +7542,7 @@ document.querySelectorAll('#importantTypeToggle .imp-type-btn').forEach(btn=>{
 });
 
 window.openImportantFormModal = (id)=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can manage entries here.','err'); return; }
   currentEditImportantId = id || null;
   if(id){
     const item = importantData.find(x=>x.id===id);
@@ -7562,6 +7571,7 @@ window.cancelImportantEdit = ()=>{
 };
 
 document.getElementById('saveImportantBtn').addEventListener('click', async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can manage entries here.','err'); return; }
   const v1 = document.getElementById('impVal1').value.trim();
   const v2 = document.getElementById('impVal2').value.trim();
   if(!v1 || !v2){ toast('Please fill both required fields.','err'); return; }
@@ -7584,17 +7594,25 @@ document.getElementById('saveImportantBtn').addEventListener('click', async ()=>
 function renderImportantList(){
   const wrap = document.getElementById('importantList');
   if(!wrap) return;
+  const isMaster = currentUserRole === 'owner';
+  // Contacts are shared team info; Links and Credentials are sensitive
+  // enough (URLs to internal portals, actual passwords) that they stay
+  // Master-only even though the page itself is now open to everyone.
+  const visible = isMaster ? importantData : importantData.filter(a=>a.type==='contact');
   const countEl = document.getElementById('importantCount');
-  if(countEl) countEl.textContent = importantData.length+' item'+(importantData.length!==1?'s':'');
-  if(!importantData.length){
+  if(countEl) countEl.textContent = visible.length+' item'+(visible.length!==1?'s':'');
+  if(!visible.length){
     wrap.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-key text-3xl opacity-25 block mb-2"></i><p class="text-sm">Nothing saved yet.</p></div>`;
     return;
   }
-  wrap.innerHTML = importantData.map(item=>{
+  wrap.innerHTML = visible.map(item=>{
     const ic = IMP_ICONS[item.type] || IMP_ICONS.contact;
     const v2Display = item.type==='credential'
       ? `<span class="imp-secret" id="impMasked_${item.id}" data-revealed="0">••••••••</span> <button type="button" onclick="window._toggleImpReveal('${item.id}')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-eye text-[11px]" id="impEyeIcon_${item.id}"></i></button>`
       : (item.type==='link' ? `<a href="${escapeHtml(item.value2)}" target="_blank" rel="noopener" class="text-bajaj-blue hover:underline">${escapeHtml(item.value2)}</a>` : escapeHtml(item.value2));
+    const actions = isMaster ? `
+      <button onclick="openImportantFormModal('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-pen text-xs"></i></button>
+      <button onclick="window._deleteImportant('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all flex-shrink-0"><i class="fas fa-trash-can text-xs"></i></button>` : '';
     return `<div class="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors">
       <div class="imp-row-icon" style="background:${ic.bg};color:${ic.fg}"><i class="fas ${ic.icon} text-sm"></i></div>
       <div class="min-w-0 flex-1">
@@ -7602,8 +7620,7 @@ function renderImportantList(){
         <div class="text-xs text-slate-500 truncate">${v2Display}</div>
         ${item.note ? `<div class="text-[11px] text-slate-400 mt-0.5 truncate">${escapeHtml(item.note)}</div>` : ''}
       </div>
-      <button onclick="openImportantFormModal('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-pen text-xs"></i></button>
-      <button onclick="window._deleteImportant('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all flex-shrink-0"><i class="fas fa-trash-can text-xs"></i></button>
+      ${actions}
     </div>`;
   }).join('');
 }
@@ -7620,6 +7637,7 @@ window._toggleImpReveal = (id)=>{
 };
 
 window._deleteImportant = async (id)=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can manage entries here.','err'); return; }
   const ok = await showDangerousConfirm({
     title: 'Delete this entry?',
     message: "This will permanently remove the saved contact, link, or credential. This can't be undone.",
@@ -8387,10 +8405,6 @@ window.switchSec=(sec)=>{
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
     sec = 'price';
   }
-  if(sec==='important' && currentUserRole !== 'owner'){
-    toast("Only a Master ID can view Important Info.",'err');
-    sec = 'price';
-  }
   // Belt-and-suspenders: force display via inline style directly, on TOP of
   // the class toggle — inline styles always win regardless of any CSS
   // specificity/cascade conflict that might exist in a given environment,
@@ -8415,6 +8429,17 @@ window.switchSec=(sec)=>{
   if(sec==='history') renderActivityLog();
   if(sec==='trash') renderTrashTable();
   if(sec==='important') renderImportantList();
+  if(sec==='important'){
+    const isMaster = currentUserRole === 'owner';
+    const eyebrow = document.getElementById('importantEyebrow');
+    const desc = document.getElementById('importantDesc');
+    const addBtn = document.getElementById('addImportantBtn');
+    if(eyebrow) eyebrow.textContent = isMaster ? 'Master Only' : 'Team Contacts';
+    if(desc) desc.textContent = isMaster
+      ? 'Contacts, links, and login credentials for outside services — Links and Credentials stay visible only to Master IDs.'
+      : 'Shared contacts for the team. Links and credentials are managed by a Master ID.';
+    if(addBtn) addBtn.classList.toggle('hidden', !isMaster);
+  }
 };
 </script>
 
