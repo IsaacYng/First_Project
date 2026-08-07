@@ -541,7 +541,12 @@
     color:#5B6270; background:#fff; border:1px solid #E7E9EE; cursor:pointer; transition:all .15s ease; position:relative; flex-shrink:0;
   }
   .topbar-icon-btn:hover{ background:#F5F6F8; border-color:#D7DBE3; color:#1F2430; }
-  .topbar-dot{ position:absolute; top:7px; right:7px; width:7px; height:7px; border-radius:50%; background:#F59E0B; box-shadow:0 0 0 2px #fff; }
+  .topbar-dot{
+    position:absolute; top:2px; right:2px; min-width:15px; height:15px; padding:0 3px;
+    border-radius:999px; background:#DC2626; box-shadow:0 0 0 2px #fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:9.5px; font-weight:800; color:#fff; line-height:1; font-family:'DM Sans',sans-serif;
+  }
   .topbar-profile{
     display:flex; align-items:center; gap:8px; padding:5px 10px 5px 5px; border-radius:999px;
     background:#fff; border:1px solid #E7E9EE; cursor:pointer; transition:all .15s ease; flex-shrink:0;
@@ -2212,6 +2217,39 @@
   </div>
 </div>
 
+<!-- LIMIT REACHED WARNING -->
+<div id="limitExceededModal" class="hidden fixed inset-0 z-[700] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style="animation:slideIn .2s ease;">
+    <div class="p-5 flex items-start gap-3.5">
+      <div class="w-11 h-11 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-triangle-exclamation text-amber-500 text-base"></i>
+      </div>
+      <div class="min-w-0 pt-1">
+        <div id="limitModalTitle" class="font-bold text-slate-900 text-[15px] mb-1">Limit Reached</div>
+        <div id="limitModalMsg" class="text-slate-500 text-[13px] leading-relaxed">This limit has been reached.</div>
+      </div>
+    </div>
+    <div class="mx-5 mb-5 rounded-xl bg-slate-50 border border-slate-200 p-3.5">
+      <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">Need a higher limit? Contact</div>
+      <div class="flex items-center gap-2.5 mb-1.5">
+        <i class="fas fa-user text-slate-400 text-xs w-4 flex-shrink-0"></i>
+        <span class="text-[13px] font-semibold text-slate-700">Isaac Yonghang — Developer</span>
+      </div>
+      <div class="flex items-center gap-2.5 mb-1.5">
+        <i class="fas fa-location-dot text-slate-400 text-xs w-4 flex-shrink-0"></i>
+        <span class="text-[13px] text-slate-600">Phidim-1, Panchthar</span>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <i class="fab fa-whatsapp text-emerald-500 text-xs w-4 flex-shrink-0"></i>
+        <a href="https://wa.me/9779820907795" target="_blank" rel="noopener" class="text-[13px] font-semibold text-bajaj-blue hover:underline">+977 982-0907795</a>
+      </div>
+    </div>
+    <div class="border-t border-slate-100">
+      <button onclick="document.getElementById('limitExceededModal').classList.add('hidden');document.getElementById('limitExceededModal').classList.remove('flex')" class="w-full py-3.5 text-sm font-bold text-slate-500 hover:bg-slate-50 transition-colors">Got it</button>
+    </div>
+  </div>
+</div>
+
 <!-- DUPLICATE RESOLVER -->
 <div id="duplicateResolveModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col" style="max-height:85vh; animation:slideIn .2s ease;">
@@ -2537,7 +2575,7 @@ async function moveToTrash(colName, id, data){
 
 // Activity log — a lightweight audit trail: who deleted / sold / restored
 // what, and when. Never blocks the caller if logging fails.
-async function logActivity(action, colName, info){
+async function logActivity(action, colName, info, byOverride){
   try{
     await addDoc(collection(db,'activity_log'), {
       action, collection: colName,
@@ -2545,7 +2583,7 @@ async function logActivity(action, colName, info){
       chassis: info?.chassis || '',
       sn: info?.sn ?? '',
       customerName: info?.customerName || '',
-      by: currentUserEmail || currentUserName || 'Unknown',
+      by: byOverride || currentUserEmail || currentUserName || 'Unknown',
       at: new Date()
     });
   }catch(e){ console.error('logActivity failed', e); }
@@ -2715,6 +2753,20 @@ function showConfirm(opts){
     modal.addEventListener('click', onBackdrop);
   });
 }
+
+// A plain toast is easy to miss and disappears in a couple seconds — when a
+// hard record limit is actually hit, staff need to know it's not a bug and
+// who to reach out to about raising it, so this stays on screen until
+// dismissed.
+function showLimitExceededModal(title, message){
+  const modal = document.getElementById('limitExceededModal');
+  if(!modal) return;
+  document.getElementById('limitModalTitle').textContent = title;
+  document.getElementById('limitModalMsg').textContent = message;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+window.showLimitExceededModal = showLimitExceededModal;
 
 // Same modal, but for very destructive actions (clear everything) — the OK
 // button stays disabled for a countdown so it can't be tapped by accident.
@@ -3554,7 +3606,13 @@ document.getElementById('loginBtn').addEventListener('click', () => {
     document.getElementById('loginErrText').textContent='Please enter email and password.'; return;
   }
   setBtnState(true);
-  signInWithEmailAndPassword(auth, email, pass).catch(e => {
+  signInWithEmailAndPassword(auth, email, pass).then(()=>{
+    // Logged with the email typed at the login box (not currentUserEmail,
+    // which isn't set yet at this point) — a fresh sign-in only, never on
+    // a page-refresh session restore (that path goes through
+    // onAuthStateChanged directly, not through here).
+    logActivity('Login', 'profiles', { model: email }, email);
+  }).catch(e => {
     errEl.classList.remove('hidden'); errEl.classList.add('flex');
     document.getElementById('loginErrText').textContent = friendlyError(e);
     setBtnState(false);
@@ -3827,7 +3885,11 @@ window.changeOwnPassword = async ()=>{
 function renderMyActivity(){
   const wrap = document.getElementById('myActivityList');
   if(!wrap) return;
-  const allMine = (activityLogData||[]).filter(a=>a.by===currentUserEmail);
+  const isMaster = currentUserRole === 'owner';
+  // Login timestamps are Master-only audit data (full picture lives in the
+  // main Activity Log) — a Normal ID's own "My Activity" summary never
+  // includes even their own logins.
+  const allMine = (activityLogData||[]).filter(a=>a.by===currentUserEmail && (isMaster || a.action!=='Login'));
   const statsWrap = document.getElementById('myActivityStats');
   if(statsWrap){
     if(!allMine.length){
@@ -3870,7 +3932,8 @@ function renderMyActivity(){
 }
 
 window.exportMyActivity = ()=>{
-  const mine = (activityLogData||[]).filter(a=>a.by===currentUserEmail);
+  const isMaster = currentUserRole === 'owner';
+  const mine = (activityLogData||[]).filter(a=>a.by===currentUserEmail && (isMaster || a.action!=='Login'));
   if(!mine.length){ toast('No activity to export yet.','warn'); return; }
   const rows = mine.map(a=>{
     const at = a.at?.toDate ? a.at.toDate() : new Date(a.at);
@@ -4178,7 +4241,8 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
   const firstError = checks.find(c=>!c.ok);
   if(firstError){ toast(firstError.error,'err'); return; }
   if(!currentEditId && allMasterBikes.length >= MAX_BIKES){
-    toast(`Model limit reached — the Master Price List is capped at ${MAX_BIKES} models. Remove one first, or ask a Master ID to raise the limit.`,'err');
+    toast(`Model limit reached — capped at ${MAX_BIKES} models.`,'err');
+    showLimitExceededModal('Model Limit Reached', `The Master Price List is capped at ${MAX_BIKES} models. Remove an existing model first, or reach out below to have the limit raised.`);
     return;
   }
   const [sn, name, price, ins, fin, firstPartyIns, thirdPartyIns] = checks.map(c=>c.value);
@@ -4192,8 +4256,15 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
     const collision = allMasterBikes.some(b => Number(b.sn)===sn && b.id!==currentEditId);
     if(collision) await shiftMasterSnUp(sn, currentEditId);
 
-    if(currentEditId){await updateDoc(doc(db,"bikes",currentEditId),data);toast('Model updated!'+(collision?' S.N renumbered automatically.':''));}
-    else{await addDoc(collection(db,"bikes"),data);toast('Model added!'+(collision?' S.N renumbered automatically.':''));}
+    if(currentEditId){
+      await updateDoc(doc(db,"bikes",currentEditId),data);
+      logActivity('Model Updated', 'bikes', { model: name, sn });
+      toast('Model updated!'+(collision?' S.N renumbered automatically.':''));
+    }else{
+      await addDoc(collection(db,"bikes"),data);
+      logActivity('Model Added', 'bikes', { model: name, sn });
+      toast('Model added!'+(collision?' S.N renumbered automatically.':''));
+    }
     window.cancelMasterEdit();
   }catch(e){toast('Error: '+friendlyError(e),'err');}
 });
@@ -4261,7 +4332,8 @@ async function updateStorageUsageChip(){
 
 document.getElementById('saveStockBtn').addEventListener('click',async()=>{
   if(!currentEditInvId && (await getAccurateTotalInventoryCount(true)) >= MAX_TOTAL_INVENTORY_UNITS){
-    toast(`Storage full — Inventory + HH Inventory combined has reached the ${MAX_TOTAL_INVENTORY_UNITS} unit limit. Delete or clear out some units (Trash included) before adding more.`,'err');
+    toast(`Storage full — ${MAX_TOTAL_INVENTORY_UNITS} unit limit reached.`,'err');
+    showLimitExceededModal('Inventory Limit Reached', `Inventory + HH Inventory combined has reached the ${MAX_TOTAL_INVENTORY_UNITS} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
     return;
   }
   const modelTyped=document.getElementById('stockModelSelect').value.trim();
@@ -4311,12 +4383,14 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
       // Status is changed only from the row menu now — not touched here, so
       // editing details never accidentally resets a unit's Sold/Booked state.
       await updateDoc(doc(db,"inventory",currentEditInvId),{model:modelName,chassis,engine,regNo,color});
+      logActivity('Updated', 'inventory', { model: modelName, chassis });
       toast('Unit updated!');
       window.cancelInvEdit();
     } else {
       // Auto S.N — always one more than the current highest S.N in inventory
       const nextSn = invData.length ? Math.max(...invData.map(x=>Number(x.sn)||0)) + 1 : 1;
       await addDoc(collection(db,"inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,status:'Available',addedAt:new Date()});
+      logActivity('Added', 'inventory', { model: modelName, chassis, sn: nextSn });
       ['sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('stockModelSelect').value='';
       toast('Unit added — S.N '+nextSn+' assigned automatically, marked Available.');
@@ -5026,7 +5100,8 @@ window.deleteSelectedHHInvUnits = async ()=>{
 
 document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
   if(!currentEditHHInvId && (await getAccurateTotalInventoryCount(true)) >= MAX_TOTAL_INVENTORY_UNITS){
-    toast(`Storage full — Inventory + HH Inventory combined has reached the ${MAX_TOTAL_INVENTORY_UNITS} unit limit. Delete or clear out some units (Trash included) before adding more.`,'err');
+    toast(`Storage full — ${MAX_TOTAL_INVENTORY_UNITS} unit limit reached.`,'err');
+    showLimitExceededModal('Inventory Limit Reached', `Inventory + HH Inventory combined has reached the ${MAX_TOTAL_INVENTORY_UNITS} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
     return;
   }
   const modelTyped = document.getElementById('hhModelInput').value.trim();
@@ -5073,11 +5148,13 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
   try{
     if(currentEditHHInvId){
       await updateDoc(doc(db,"hh_inventory",currentEditHHInvId),{model:modelName,chassis,engine,regNo,color,eventName});
+      logActivity('Updated', 'hh_inventory', { model: modelName, chassis });
       toast('HH unit updated!');
       window.cancelHHInvEdit();
     } else {
       const nextSn = hhInvData.length ? Math.max(...hhInvData.map(x=>Number(x.sn)||0))+1 : 1;
       await addDoc(collection(db,"hh_inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,eventName,status:'Available',customerName:'',addedAt:new Date()});
+      logActivity('Added', 'hh_inventory', { model: modelName, chassis, sn: nextSn });
       ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('hhModelInput').value='';
       toast('HH unit added — S.N '+nextSn+' assigned, marked Available.');
@@ -6070,7 +6147,8 @@ document.getElementById('saveFinBtn').addEventListener('click', async()=>{
     return;
   }
   if(!currentEditFinId && financeSchemes.length >= MAX_FINANCE_SCHEMES){
-    toast(`Finance scheme limit reached — capped at ${MAX_FINANCE_SCHEMES} schemes. Remove one first, or ask a Master ID to raise the limit.`,'err');
+    toast(`Finance scheme limit reached — capped at ${MAX_FINANCE_SCHEMES} schemes.`,'err');
+    showLimitExceededModal('Finance Scheme Limit Reached', `Finance Schemes are capped at ${MAX_FINANCE_SCHEMES}. Remove an existing scheme first, or reach out below to have the limit raised.`);
     return;
   }
   const downPay = downPayCheck.value, rate = rateCheck.value;
@@ -6985,7 +7063,8 @@ document.getElementById('saveAccBtn').addEventListener('click', async()=>{
   if(!nameCheck.ok){ toast(nameCheck.error,'err'); return; }
   if(!priceCheck.ok){ toast(priceCheck.error,'err'); return; }
   if(!currentEditAccId && accessories.length >= MAX_ACCESSORIES){
-    toast(`Accessory limit reached — capped at ${MAX_ACCESSORIES} accessories. Remove one first, or ask a Master ID to raise the limit.`,'err');
+    toast(`Accessory limit reached — capped at ${MAX_ACCESSORIES} accessories.`,'err');
+    showLimitExceededModal('Accessory Limit Reached', `Accessories are capped at ${MAX_ACCESSORIES}. Remove an existing accessory first, or reach out below to have the limit raised.`);
     return;
   }
   const name = nameCheck.value, price = priceCheck.value;
@@ -7293,20 +7372,57 @@ window.emptyTrash = async ()=>{
 let activityLogData = [];
 let activityLogUnsub = null;
 let historySearchTerm = '';
+let unseenNotifCount = 0;
+const ACTIVITY_LOG_RETENTION_DAYS = 7;
+
+// Same silent-cleanup pattern as Trash — the audit trail doesn't need to
+// grow forever, and a week of history is plenty for day-to-day review.
+// Unlike Trash there's nothing to "restore" here; this is just tidying up.
+async function purgeExpiredActivityLog(){
+  const cutoff = Date.now() - ACTIVITY_LOG_RETENTION_DAYS*24*60*60*1000;
+  const expired = activityLogData.filter(a=>{
+    const at = a.at?.toDate ? a.at.toDate() : new Date(a.at);
+    return at.getTime() < cutoff;
+  });
+  for(const a of expired){
+    try{ await deleteDoc(doc(db,'activity_log',a.id)); }catch(e){ console.error('activity log purge failed', e); }
+  }
+}
+
+function updateNotifBadge(){
+  const badge = document.getElementById('notifDot');
+  if(!badge) return;
+  if(unseenNotifCount > 0){
+    badge.textContent = unseenNotifCount > 9 ? '9+' : String(unseenNotifCount);
+    badge.classList.remove('hidden');
+  }else{
+    badge.textContent = '';
+    badge.classList.add('hidden');
+  }
+}
 
 function loadActivityLog(){
   if(activityLogUnsub) activityLogUnsub();
   let notifFirstLoadDone = false;
   const q = query(collection(db,"activity_log"), orderBy('at','desc'), limit(500));
   activityLogUnsub = onSnapshot(q, snap=>{
+    const previousIds = new Set(activityLogData.map(a=>a.id));
     activityLogData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    purgeExpiredActivityLog();
     renderActivityLog();
     // Only flag as "new" for updates that arrive after the initial load —
     // the first load is just catching up on history, not a fresh event.
+    // Count genuinely new entries (not just re-fired snapshots) so the
+    // badge shows a real unread number, not just an on/off dot.
     if(notifFirstLoadDone){
       const isMaster = currentUserRole === 'owner';
-      const relevant = isMaster ? activityLogData : activityLogData.filter(a=>a.by===(currentUserEmail||currentUserName));
-      if(relevant.length) document.getElementById('notifDot')?.classList.remove('hidden');
+      const base = isMaster ? activityLogData : activityLogData.filter(a=>a.action!=='Login');
+      const relevant = isMaster ? base : base.filter(a=>a.by===(currentUserEmail||currentUserName));
+      const newOnes = relevant.filter(a=>!previousIds.has(a.id));
+      if(newOnes.length){
+        unseenNotifCount += newOnes.length;
+        updateNotifBadge();
+      }
     }
     notifFirstLoadDone = true;
     if(document.getElementById('notifMenu')?.classList.contains('open')) renderNotifDropdown();
@@ -7321,7 +7437,10 @@ function renderNotifDropdown(){
   const list = document.getElementById('notifList');
   if(!list) return;
   const isMaster = currentUserRole === 'owner';
-  const relevant = isMaster ? activityLogData : activityLogData.filter(a=>a.by===(currentUserEmail||currentUserName));
+  // Login activity is Master-only visibility, even for a staff member's own
+  // logins — a Normal ID's notification feed never includes it.
+  const base = isMaster ? activityLogData : activityLogData.filter(a=>a.action!=='Login');
+  const relevant = isMaster ? base : base.filter(a=>a.by===(currentUserEmail||currentUserName));
   const recent = relevant.slice(0, 8);
   list.innerHTML = recent.length ? recent.map(a=>{
     const at = a.at?.toDate ? a.at.toDate() : new Date(a.at);
@@ -7340,7 +7459,8 @@ window.toggleNotifMenu = (e)=>{
   e.stopPropagation();
   renderNotifDropdown();
   document.getElementById('notifMenu').classList.toggle('open');
-  document.getElementById('notifDot')?.classList.add('hidden'); // seen it now, clear the "new" indicator
+  unseenNotifCount = 0;
+  updateNotifBadge(); // seen it now, clear the "new" indicator
 };
 document.addEventListener('click', (e)=>{
   const menu = document.getElementById('notifMenu');
@@ -7361,7 +7481,13 @@ const ACTION_STYLE = {
   'Duplicate Resolved': {icon:'fa-code-compare', cls:'badge-red'},
   'Team Member Added': {icon:'fa-user-plus', cls:'badge-green'},
   'Team Member Disabled': {icon:'fa-user-slash', cls:'badge-red'},
-  'Team Member Enabled': {icon:'fa-user-check', cls:'badge-green'}
+  'Team Member Enabled': {icon:'fa-user-check', cls:'badge-green'},
+  'Model Added': {icon:'fa-motorcycle', cls:'badge-green'},
+  'Model Updated': {icon:'fa-pen', cls:'badge-blue'},
+  'Added': {icon:'fa-circle-plus', cls:'badge-green'},
+  'Updated': {icon:'fa-pen', cls:'badge-blue'},
+  'Uploaded': {icon:'fa-file-arrow-up', cls:'badge-green'},
+  'Login': {icon:'fa-right-to-bracket', cls:'badge-neutral'}
 };
 
 function renderActivityLog(){
