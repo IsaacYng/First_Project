@@ -2170,13 +2170,13 @@
       </div>
     </div>
 
-    <!-- IMPORTANT INFO (Contacts shared with everyone; Links/Credentials Master-only) -->
+    <!-- IMPORTANT INFO (fully shared with the whole team) -->
     <div class="sec-panel" id="secImportant">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
         <div>
-          <div class="eyebrow" id="importantEyebrow">Master Only</div>
+          <div class="eyebrow" id="importantEyebrow">Shared With The Team</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Important <span class="text-amber-500">Info</span></div>
-          <p class="text-sm text-slate-500 mt-1.5 max-w-lg" id="importantDesc">Contacts, links, and login credentials for outside services — visible only to Master IDs.</p>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg" id="importantDesc">Contacts, links, and login credentials for outside services — everyone can add, edit, or remove any entry.</p>
         </div>
         <button id="addImportantBtn" onclick="openImportantFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
           <i class="fas fa-plus"></i> Add Entry
@@ -7537,10 +7537,10 @@ async function purgeExpiredActivityLog(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   IMPORTANT INFO — Master-only reference vault: contacts, links, and
-   login credentials for outside services (dealer portals, bank, etc.).
-   Nothing here is ever shown to a Normal ID — gated both at the nav level
-   (loadProfile) and inside switchSec().
+   IMPORTANT INFO — a shared reference vault for the whole team: contacts,
+   links, and login credentials for outside services (dealer portals, bank,
+   etc.). Everyone can view and manage every entry — this is for team-wide
+   info, not personal/sensitive secrets, per Isaac's call.
    ═══════════════════════════════════════════════════════════════════════ */
 let importantData = [];
 let importantUnsub = null;
@@ -7552,28 +7552,20 @@ const IMP_PLACEHOLDERS = { contact:['e.g. Isaac Yonghang','e.g. 9820907795'], li
 const IMP_ICONS = { contact:{icon:'fa-user',bg:'#EFF6FF',fg:'#005EA6'}, link:{icon:'fa-link',bg:'#F0FDF4',fg:'#059669'}, credential:{icon:'fa-key',bg:'#FEF3C7',fg:'#D97706'} };
 
 function loadImportantInfo(){
-  // Contacts are shared team info, so everyone's client loads them. Links
-  // and Credentials are filtered out of the snapshot BEFORE they ever land
-  // in importantData for a Normal ID — not just hidden at render time —
-  // so the real URLs/passwords never sit in a staff member's browser
-  // memory where devtools could read them straight off the JS object.
+  // Fully shared with everyone now — Contacts, Links, and Credentials.
+  // This collection is meant for team-wide portal logins etc., not
+  // personal/sensitive secrets, per Isaac's call.
   if(importantUnsub) importantUnsub();
   const q = query(collection(db,"important_info"), orderBy('value1'));
   importantUnsub = onSnapshot(q, snap=>{
-    const isMaster = currentUserRole === 'owner';
-    const all = snap.docs.map(d=>({id:d.id,...d.data()}));
-    importantData = isMaster ? all : all.filter(a=>a.type==='contact');
+    importantData = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderImportantList();
   }, err=>console.error('important_info listener failed', err));
 }
 
 function applyImportantTypeUI(type){
-  const isMaster = currentUserRole === 'owner';
   document.querySelectorAll('#importantTypeToggle .imp-type-btn').forEach(b=>{
     b.classList.toggle('active', b.dataset.itype===type);
-    // A Normal ID can only ever add/edit Contacts — Link and Credential
-    // stay Master-only, so those two toggle options are hidden for them.
-    b.classList.toggle('hidden', !isMaster && b.dataset.itype!=='contact');
   });
   const [l1,l2] = IMP_FIELD_LABELS[type];
   const [p1,p2] = IMP_PLACEHOLDERS[type];
@@ -7585,20 +7577,12 @@ function applyImportantTypeUI(type){
 }
 document.querySelectorAll('#importantTypeToggle .imp-type-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
-    if(currentUserRole !== 'owner' && btn.dataset.itype!=='contact') return; // extra guard — button is hidden anyway
     currentImportantType = btn.dataset.itype;
     applyImportantTypeUI(currentImportantType);
   });
 });
 
 window.openImportantFormModal = (id)=>{
-  const isMaster = currentUserRole === 'owner';
-  if(id){
-    const item = importantData.find(x=>x.id===id);
-    // A Normal ID's importantData only ever contains contact-type entries
-    // (filtered out at load time), so this only blocks a stale/tampered id.
-    if(!isMaster && item?.type !== 'contact'){ toast('Only a Master ID can manage that entry.','err'); return; }
-  }
   currentEditImportantId = id || null;
   if(id){
     const item = importantData.find(x=>x.id===id);
@@ -7627,7 +7611,6 @@ window.cancelImportantEdit = ()=>{
 };
 
 document.getElementById('saveImportantBtn').addEventListener('click', async ()=>{
-  if(currentUserRole !== 'owner' && currentImportantType !== 'contact'){ toast('Only a Master ID can manage that.','err'); return; }
   const v1 = document.getElementById('impVal1').value.trim();
   const v2 = document.getElementById('impVal2').value.trim();
   if(!v1 || !v2){ toast('Please fill both required fields.','err'); return; }
@@ -7650,11 +7633,7 @@ document.getElementById('saveImportantBtn').addEventListener('click', async ()=>
 function renderImportantList(){
   const wrap = document.getElementById('importantList');
   if(!wrap) return;
-  const isMaster = currentUserRole === 'owner';
-  // Contacts are shared team info; Links and Credentials are sensitive
-  // enough (URLs to internal portals, actual passwords) that they stay
-  // Master-only even though the page itself is now open to everyone.
-  const visible = isMaster ? importantData : importantData.filter(a=>a.type==='contact');
+  const visible = importantData;
   const countEl = document.getElementById('importantCount');
   if(countEl) countEl.textContent = visible.length+' item'+(visible.length!==1?'s':'');
   if(!visible.length){
@@ -7666,10 +7645,7 @@ function renderImportantList(){
     const v2Display = item.type==='credential'
       ? `<span class="imp-secret" id="impMasked_${item.id}" data-revealed="0">••••••••</span> <button type="button" onclick="window._toggleImpReveal('${item.id}')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-eye text-[11px]" id="impEyeIcon_${item.id}"></i></button>`
       : (item.type==='link' ? `<a href="${escapeHtml(item.value2)}" target="_blank" rel="noopener" class="text-bajaj-blue hover:underline">${escapeHtml(item.value2)}</a>` : escapeHtml(item.value2));
-    // Actions always show — a Normal ID's `visible` list only ever
-    // contains Contacts (filtered above and, more importantly, already
-    // filtered out of importantData itself in loadImportantInfo), which
-    // they're allowed to manage. A Master ID can manage anything.
+    // Fully shared now — everyone can add, edit, or remove any entry.
     const actions = `
       <button onclick="openImportantFormModal('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-pen text-xs"></i></button>
       <button onclick="window._deleteImportant('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all flex-shrink-0"><i class="fas fa-trash-can text-xs"></i></button>`;
@@ -7697,9 +7673,7 @@ window._toggleImpReveal = (id)=>{
 };
 
 window._deleteImportant = async (id)=>{
-  const isMaster = currentUserRole === 'owner';
   const item = importantData.find(x=>x.id===id);
-  if(!isMaster && item?.type !== 'contact'){ toast('Only a Master ID can manage that entry.','err'); return; }
   const ok = await showDangerousConfirm({
     title: 'Delete this entry?',
     message: "This will permanently remove the saved contact, link, or credential. This can't be undone.",
@@ -8491,14 +8465,11 @@ window.switchSec=(sec)=>{
   if(sec==='trash') renderTrashTable();
   if(sec==='important') renderImportantList();
   if(sec==='important'){
-    const isMaster = currentUserRole === 'owner';
     const eyebrow = document.getElementById('importantEyebrow');
     const desc = document.getElementById('importantDesc');
     const addBtn = document.getElementById('addImportantBtn');
-    if(eyebrow) eyebrow.textContent = isMaster ? 'Shared + Master Only' : 'Team Contacts';
-    if(desc) desc.textContent = isMaster
-      ? 'Contacts anyone can add or edit. Links and Credentials stay visible and manageable only by Master IDs.'
-      : 'Shared contacts — everyone can add, edit, or remove one. Links and credentials are managed by a Master ID.';
+    if(eyebrow) eyebrow.textContent = 'Shared With The Team';
+    if(desc) desc.textContent = 'Contacts, links, and login credentials for outside services — everyone can add, edit, or remove any entry.';
     if(addBtn) addBtn.classList.remove('hidden');
   }
 };
