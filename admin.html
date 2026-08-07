@@ -3034,6 +3034,11 @@ window._toggleKebab = (btn, type, id) => {
     const isMine = d?.uploadedBy && (d.uploadedBy===currentUserEmail || d.uploadedBy===currentUserName);
     if(currentUserRole === 'owner' || isMine) docActions.push({ label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('documents', id) });
     openKebabMenuFor(btn, docActions);
+  } else if(type === 'important'){
+    openKebabMenuFor(btn, [
+      { label:'Edit', icon:'fa-pen', onClick:()=>window.openImportantFormModal(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteImportant(id) }
+    ]);
   } else if(type === 'hh_inventory'){
     const s = hhInvData.find(x=>x.id===id);
     const cur = s?.status || 'Available';
@@ -7645,10 +7650,6 @@ function renderImportantList(){
     const v2Display = item.type==='credential'
       ? `<span class="imp-secret" id="impMasked_${item.id}" data-revealed="0">••••••••</span> <button type="button" onclick="window._toggleImpReveal('${item.id}')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-eye text-[11px]" id="impEyeIcon_${item.id}"></i></button>`
       : (item.type==='link' ? `<a href="${escapeHtml(item.value2)}" target="_blank" rel="noopener" class="text-bajaj-blue hover:underline">${escapeHtml(item.value2)}</a>` : escapeHtml(item.value2));
-    // Fully shared now — everyone can add, edit, or remove any entry.
-    const actions = `
-      <button onclick="openImportantFormModal('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-pen text-xs"></i></button>
-      <button onclick="window._deleteImportant('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all flex-shrink-0"><i class="fas fa-trash-can text-xs"></i></button>`;
     return `<div class="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors">
       <div class="imp-row-icon" style="background:${ic.bg};color:${ic.fg}"><i class="fas ${ic.icon} text-sm"></i></div>
       <div class="min-w-0 flex-1">
@@ -7656,7 +7657,7 @@ function renderImportantList(){
         <div class="text-xs text-slate-500 truncate">${v2Display}</div>
         ${item.note ? `<div class="text-[11px] text-slate-400 mt-0.5 truncate">${escapeHtml(item.note)}</div>` : ''}
       </div>
-      ${actions}
+      <button type="button" class="kebab-btn flex-shrink-0" onclick="window._toggleKebab(this,'important','${item.id}')" aria-label="Entry actions"><i class="fas fa-ellipsis-vertical"></i></button>
     </div>`;
   }).join('');
 }
