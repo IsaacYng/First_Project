@@ -762,6 +762,15 @@
   .form-modal-overlay.open{ display:flex; }
   .form-modal-box{ width:100%; max-width:640px; animation:slideIn .16s ease both; }
   .form-modal-box .yng-card-shell{ margin-bottom:0 !important; max-height:88vh; overflow-y:auto; }
+
+  .imp-type-btn{
+    flex:1; text-align:center; background:#F8FAFC; border:1.5px solid #E2E8F0;
+    border-radius:8px; padding:9px 10px; font-size:12px; font-weight:700;
+    color:#64748B; cursor:pointer; transition:all .18s ease; user-select:none;
+  }
+  .imp-type-btn.active{ background:#EFF6FF; border-color:#005EA6; color:#005EA6; }
+  .imp-row-icon{ width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .imp-secret{ font-family:'JetBrains Mono',monospace; letter-spacing:.06em; }
   .spv-head{ display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid rgba(255,255,255,.08); flex-shrink:0; }
   .spv-body{ padding:20px; overflow:auto; -webkit-overflow-scrolling:touch; background:#0F1420; }
   .spv-swipe-hint{ display:none; align-items:center; justify-content:center; gap:7px; color:#94A3B8; font-size:11.5px; font-weight:700; margin-bottom:10px; }
@@ -1031,6 +1040,10 @@
         </button>
         <button id="navTrash" onclick="switchSec('trash');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-trash-can"></i> Trash <span id="trashNavCount" class="hidden ml-auto bg-red-100 text-red-600 text-[10px] font-extrabold rounded-full px-1.5 py-0.5"></span>
+        </button>
+        <div id="navToolsLabel" class="sidebar-section-label hidden">Tools</div>
+        <button id="navImportant" onclick="switchSec('important');closeMobileMenu()" class="nav-tab sidebar-link hidden">
+          <i class="fas fa-key"></i> Important Info
         </button>
       </nav>
 
@@ -2157,7 +2170,80 @@
       </div>
     </div>
 
-  </div><!-- /main content -->
+    <!-- IMPORTANT INFO (Master-only: contacts, links, credentials) -->
+    <div class="sec-panel" id="secImportant">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="eyebrow">Master Only</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Important <span class="text-amber-500">Info</span></div>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Contacts, links, and login credentials for outside services — visible only to Master IDs.</p>
+        </div>
+        <button onclick="openImportantFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <i class="fas fa-plus"></i> Add Entry
+        </button>
+      </div>
+
+      <!-- Form (modal) -->
+      <div id="importantFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelImportantEdit()">
+      <div class="form-modal-box">
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
+            <span id="importantFormTitle">Add Entry</span>
+          </div>
+          <button onclick="cancelImportantEdit()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="flex flex-col gap-1.5 mb-4">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Type</label>
+          <div class="itoggle" id="importantTypeToggle" style="display:flex;gap:6px">
+            <button type="button" data-itype="contact" class="imp-type-btn active">Contact</button>
+            <button type="button" data-itype="link" class="imp-type-btn">Link</button>
+            <button type="button" data-itype="credential" class="imp-type-btn">Credential</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider" id="impLabel1">Name <span class="text-red-400">*</span></label>
+            <input type="text" id="impVal1" placeholder="e.g. Isaac Yonghang"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider" id="impLabel2">Phone / WhatsApp <span class="text-red-400">*</span></label>
+            <input type="text" id="impVal2" placeholder="e.g. 9820907795"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1.5 mb-4">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Note <span class="text-slate-400 font-normal normal-case">(opt.)</span></label>
+          <input type="text" id="impNote" placeholder="e.g. Bajaj dealer portal, renew every March"
+            class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button id="saveImportantBtn" class="cta-primary">
+            <i class="fas fa-floppy-disk"></i> Save Entry
+          </button>
+          <button id="cancelImportantBtn" onclick="cancelImportantEdit()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
+            <i class="fas fa-xmark"></i> Cancel Edit
+          </button>
+        </div>
+      </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /importantFormModal -->
+
+      <!-- List -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-key text-amber-500"></i> Contacts, Links &amp; Credentials</div>
+            <span id="importantCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 items</span>
+          </div>
+        </div>
+        <div id="importantList" class="flex flex-col divide-y divide-slate-100"></div>
+      </div>
+    </div>
+
+    </div><!-- /main content -->
 
   <!-- FOOTER -->
   <footer class="bg-white border-t border-slate-200 mt-auto">
@@ -2927,7 +3013,11 @@ window._toggleKebab = (btn, type, id) => {
       { label:'Download', icon:'fa-download', onClick:()=>window.downloadDocument(id) },
       { label:'Edit', icon:'fa-pen', onClick:()=>window.openDocUploadModal(id) }
     ];
-    if(currentUserRole === 'owner') docActions.push({ label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('documents', id) });
+    // A Normal ID can delete their own upload; anyone else's still needs a
+    // Master ID.
+    const d = documents.find(x=>x.id===id);
+    const isMine = d?.uploadedBy && (d.uploadedBy===currentUserEmail || d.uploadedBy===currentUserName);
+    if(currentUserRole === 'owner' || isMine) docActions.push({ label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('documents', id) });
     openKebabMenuFor(btn, docActions);
   } else if(type === 'hh_inventory'){
     const s = hhInvData.find(x=>x.id===id);
@@ -3481,8 +3571,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', history:'navHistory', trash:'navTrash' };
-  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash' };
+  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', history:'navHistory', trash:'navTrash', important:'navImportant' };
+  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -3521,6 +3611,7 @@ onAuthStateChanged(auth, async (user) => {
     loadStockAreas();
     loadTrash();
     loadActivityLog();
+    loadImportantInfo();
     setBtnState(false);
     startIdleLogoutTimer();
     startActiveStatusCheck();
@@ -3728,6 +3819,10 @@ async function loadProfile(uid) {
     // Only Master ID sees the full combined log.
     const historyNavBtn = document.getElementById('navHistory');
     if(historyNavBtn) historyNavBtn.classList.toggle('hidden', currentUserRole !== 'owner');
+    const importantNavBtn = document.getElementById('navImportant');
+    if(importantNavBtn) importantNavBtn.classList.toggle('hidden', currentUserRole !== 'owner');
+    const toolsLabel = document.getElementById('navToolsLabel');
+    if(toolsLabel) toolsLabel.classList.toggle('hidden', currentUserRole !== 'owner');
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
 }
 
@@ -7140,8 +7235,15 @@ window._saveSn=async(col,id,val)=>{
 
 window._deleteEntry=async(col,id)=>{
   if(col==='documents' && currentUserRole !== 'owner'){
-    toast('Only a Master ID can delete documents.','err');
-    return;
+    // A Normal ID can only delete a document they uploaded themselves —
+    // anyone else's upload still needs a Master ID.
+    const d = documents.find(x=>x.id===id);
+    const uploader = d?.uploadedBy;
+    const isMine = uploader && (uploader===currentUserEmail || uploader===currentUserName);
+    if(!isMine){
+      toast('Only a Master ID (or whoever uploaded this) can delete it.','err');
+      return;
+    }
   }
   // Every delete — single row or bulk — waits out a short countdown before
   // the button unlocks. A stray/fast tap can never delete something by
@@ -7276,7 +7378,7 @@ function daysLeft(deletedAt){
   return Math.max(0, diffDays);
 }
 
-const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event', documents:'Document' };
+const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event', documents:'Document', important_info:'Important Info' };
 
 function renderTrashTable(){
   const tbody = document.getElementById('trashTableBody');
@@ -7388,6 +7490,150 @@ async function purgeExpiredActivityLog(){
     try{ await deleteDoc(doc(db,'activity_log',a.id)); }catch(e){ console.error('activity log purge failed', e); }
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   IMPORTANT INFO — Master-only reference vault: contacts, links, and
+   login credentials for outside services (dealer portals, bank, etc.).
+   Nothing here is ever shown to a Normal ID — gated both at the nav level
+   (loadProfile) and inside switchSec().
+   ═══════════════════════════════════════════════════════════════════════ */
+let importantData = [];
+let importantUnsub = null;
+let currentEditImportantId = null;
+let currentImportantType = 'contact';
+
+const IMP_FIELD_LABELS = { contact:['Name','Phone / WhatsApp'], link:['Label','URL'], credential:['Username / ID','Password'] };
+const IMP_PLACEHOLDERS = { contact:['e.g. Isaac Yonghang','e.g. 9820907795'], link:['e.g. Bajaj Dealer Portal','https://...'], credential:['e.g. dealer@bajaj.com','password'] };
+const IMP_ICONS = { contact:{icon:'fa-user',bg:'#EFF6FF',fg:'#005EA6'}, link:{icon:'fa-link',bg:'#F0FDF4',fg:'#059669'}, credential:{icon:'fa-key',bg:'#FEF3C7',fg:'#D97706'} };
+
+function loadImportantInfo(){
+  if(currentUserRole !== 'owner') return; // Master-only collection — Normal ID never even queries this
+  if(importantUnsub) importantUnsub();
+  const q = query(collection(db,"important_info"), orderBy('value1'));
+  importantUnsub = onSnapshot(q, snap=>{
+    importantData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderImportantList();
+  }, err=>console.error('important_info listener failed', err));
+}
+
+function applyImportantTypeUI(type){
+  document.querySelectorAll('#importantTypeToggle .imp-type-btn').forEach(b=>b.classList.toggle('active', b.dataset.itype===type));
+  const [l1,l2] = IMP_FIELD_LABELS[type];
+  const [p1,p2] = IMP_PLACEHOLDERS[type];
+  document.getElementById('impLabel1').innerHTML = l1+' <span class="text-red-400">*</span>';
+  document.getElementById('impLabel2').innerHTML = l2+' <span class="text-red-400">*</span>';
+  document.getElementById('impVal1').placeholder = p1;
+  document.getElementById('impVal2').placeholder = p2;
+  document.getElementById('impVal2').type = type==='credential' ? 'password' : 'text';
+}
+document.querySelectorAll('#importantTypeToggle .imp-type-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    currentImportantType = btn.dataset.itype;
+    applyImportantTypeUI(currentImportantType);
+  });
+});
+
+window.openImportantFormModal = (id)=>{
+  currentEditImportantId = id || null;
+  if(id){
+    const item = importantData.find(x=>x.id===id);
+    if(!item) return;
+    currentImportantType = item.type || 'contact';
+    document.getElementById('importantFormTitle').textContent = 'Edit Entry';
+    document.getElementById('impVal1').value = item.value1 || '';
+    document.getElementById('impVal2').value = item.value2 || '';
+    document.getElementById('impNote').value = item.note || '';
+    document.getElementById('cancelImportantBtn').classList.remove('hidden');
+    document.getElementById('cancelImportantBtn').classList.add('flex');
+  } else {
+    currentImportantType = 'contact';
+    document.getElementById('importantFormTitle').textContent = 'Add Entry';
+    document.getElementById('impVal1').value = '';
+    document.getElementById('impVal2').value = '';
+    document.getElementById('impNote').value = '';
+    document.getElementById('cancelImportantBtn').classList.add('hidden');
+  }
+  applyImportantTypeUI(currentImportantType);
+  document.getElementById('importantFormModal').classList.add('open');
+};
+window.cancelImportantEdit = ()=>{
+  currentEditImportantId = null;
+  document.getElementById('importantFormModal').classList.remove('open');
+};
+
+document.getElementById('saveImportantBtn').addEventListener('click', async ()=>{
+  const v1 = document.getElementById('impVal1').value.trim();
+  const v2 = document.getElementById('impVal2').value.trim();
+  if(!v1 || !v2){ toast('Please fill both required fields.','err'); return; }
+  const note = document.getElementById('impNote').value.trim();
+  const data = { type: currentImportantType, value1: v1, value2: v2, note };
+  try{
+    if(currentEditImportantId){
+      await updateDoc(doc(db,"important_info",currentEditImportantId), data);
+      logActivity('Updated', 'important_info', { model: v1 });
+      toast('Entry updated!');
+    } else {
+      await addDoc(collection(db,"important_info"), data);
+      logActivity('Added', 'important_info', { model: v1 });
+      toast('Entry added!');
+    }
+    window.cancelImportantEdit();
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+});
+
+function renderImportantList(){
+  const wrap = document.getElementById('importantList');
+  if(!wrap) return;
+  const countEl = document.getElementById('importantCount');
+  if(countEl) countEl.textContent = importantData.length+' item'+(importantData.length!==1?'s':'');
+  if(!importantData.length){
+    wrap.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-key text-3xl opacity-25 block mb-2"></i><p class="text-sm">Nothing saved yet.</p></div>`;
+    return;
+  }
+  wrap.innerHTML = importantData.map(item=>{
+    const ic = IMP_ICONS[item.type] || IMP_ICONS.contact;
+    const v2Display = item.type==='credential'
+      ? `<span class="imp-secret" id="impMasked_${item.id}" data-revealed="0">••••••••</span> <button type="button" onclick="window._toggleImpReveal('${item.id}')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-eye text-[11px]" id="impEyeIcon_${item.id}"></i></button>`
+      : (item.type==='link' ? `<a href="${escapeHtml(item.value2)}" target="_blank" rel="noopener" class="text-bajaj-blue hover:underline">${escapeHtml(item.value2)}</a>` : escapeHtml(item.value2));
+    return `<div class="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors">
+      <div class="imp-row-icon" style="background:${ic.bg};color:${ic.fg}"><i class="fas ${ic.icon} text-sm"></i></div>
+      <div class="min-w-0 flex-1">
+        <div class="text-sm font-bold text-slate-800 truncate">${escapeHtml(item.value1)}</div>
+        <div class="text-xs text-slate-500 truncate">${v2Display}</div>
+        ${item.note ? `<div class="text-[11px] text-slate-400 mt-0.5 truncate">${escapeHtml(item.note)}</div>` : ''}
+      </div>
+      <button onclick="openImportantFormModal('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-pen text-xs"></i></button>
+      <button onclick="window._deleteImportant('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all flex-shrink-0"><i class="fas fa-trash-can text-xs"></i></button>
+    </div>`;
+  }).join('');
+}
+
+window._toggleImpReveal = (id)=>{
+  const item = importantData.find(x=>x.id===id);
+  const el = document.getElementById('impMasked_'+id);
+  const eye = document.getElementById('impEyeIcon_'+id);
+  if(!item || !el || !eye) return;
+  const revealed = el.dataset.revealed === '1';
+  el.textContent = revealed ? '••••••••' : item.value2;
+  el.dataset.revealed = revealed ? '0' : '1';
+  eye.className = revealed ? 'fas fa-eye text-[11px]' : 'fas fa-eye-slash text-[11px]';
+};
+
+window._deleteImportant = async (id)=>{
+  const ok = await showDangerousConfirm({
+    title: 'Delete this entry?',
+    message: "This will permanently remove the saved contact, link, or credential. This can't be undone.",
+    okText: 'Delete',
+    countdownSec: 3
+  });
+  if(!ok) return;
+  try{
+    const item = importantData.find(x=>x.id===id);
+    await deleteDoc(doc(db,'important_info',id));
+    if(item) logActivity('Deleted', 'important_info', { model: item.value1 });
+    toast('Entry deleted.');
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
 
 function updateNotifBadge(){
   const badge = document.getElementById('notifDot');
@@ -8134,11 +8380,15 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', history:'Activity Log', trash:'Trash' };
-const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', history:'secHistory', trash:'secTrash' };
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', history:'Activity Log', trash:'Trash', important:'Important Info' };
+const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', history:'secHistory', trash:'secTrash', important:'secImportant' };
 window.switchSec=(sec)=>{
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
+    sec = 'price';
+  }
+  if(sec==='important' && currentUserRole !== 'owner'){
+    toast("Only a Master ID can view Important Info.",'err');
     sec = 'price';
   }
   // Belt-and-suspenders: force display via inline style directly, on TOP of
@@ -8164,6 +8414,7 @@ window.switchSec=(sec)=>{
   if(sec==='stock') loadStockReportData(true);
   if(sec==='history') renderActivityLog();
   if(sec==='trash') renderTrashTable();
+  if(sec==='important') renderImportantList();
 };
 </script>
 
