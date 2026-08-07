@@ -1934,7 +1934,7 @@
         <div class="flex items-center justify-between gap-2 mb-1">
           <div class="text-xs font-bold text-slate-600"><i class="fas fa-chart-simple text-bajaj-blue mr-1"></i> Storage Allocation</div>
           <div class="flex items-center gap-1">
-            <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set Document Vault limit"><i class="fas fa-gear text-xs"></i></button>
+            <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set Document Vault limits"><i class="fas fa-gear text-xs"></i></button>
             <button id="systemLimitsSettingsBtn" onclick="openSystemLimitsModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set record limits"><i class="fas fa-gear text-xs"></i></button>
           </div>
         </div>
@@ -2422,7 +2422,7 @@
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" style="animation:slideIn .2s ease;">
     <div class="p-5">
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-gear text-amber-500 text-lg"></i> Storage Limit</div>
+        <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-gear text-amber-500 text-lg"></i> Document Vault Limits</div>
         <button onclick="closeStorageCapModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark"></i></button>
       </div>
       <p class="text-xs text-slate-500 mb-4">Set how much storage the Document Vault is allowed to use before it stops accepting new uploads.</p>
@@ -2436,8 +2436,23 @@
         </select>
       </div>
       <p id="storageCapPreview" class="text-[11px] text-slate-400 mb-4"></p>
+
+      <div class="pt-4 mt-1 border-t border-slate-100">
+        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Max size per file</label>
+        <p class="text-xs text-slate-500 mb-3">The limit for a single upload — one photo or PDF at a time, not the whole vault.</p>
+        <div class="flex gap-2 mb-1">
+          <input type="number" id="fileSizeCapValue" min="1" step="any" placeholder="e.g. 400" class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          <select id="fileSizeCapUnit" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
+            <option value="KB" selected>KB</option>
+            <option value="MB">MB</option>
+          </select>
+        </div>
+        <p id="fileSizeCapPreview" class="text-[11px] text-slate-400 mb-1"></p>
+        <p class="text-[10.5px] text-amber-600 mb-3"><i class="fas fa-circle-info mr-1"></i>Firestore hard-caps a single document at 1MB total — going much past ~900KB risks upload failures.</p>
+      </div>
+
       <button onclick="saveStorageCap()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
-        <i class="fas fa-check mr-1"></i> Save Limit
+        <i class="fas fa-check mr-1"></i> Save Limits
       </button>
     </div>
   </div>
@@ -6633,7 +6648,11 @@ let docTypeFilter = 'all';
 let docEditingId = null;
 let pendingDocFile = null;
 const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','mp3','mp4'];
-const DOC_MAX_FILE_SIZE = 900 * 1024; // ~900KB as base64 text — the safe practical ceiling; Firestore hard-caps every single document at 1MB total (including all its other fields), so this is as close to that wall as it's safe to go
+// Master-editable (see Storage settings gear next to Document Vault) —
+// starts at 400KB. Firestore hard-caps every single document at 1MB total
+// (including all its other fields), so going much past ~900KB as base64
+// text risks upload failures regardless of what this is set to.
+let DOC_MAX_FILE_SIZE = 400 * 1024;
 const DOC_TYPE_GROUPS = { pdf:['pdf'], photo:['jpg','jpeg','png'], word:['doc','docx'], excel:['xls','xlsx'] };
 const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626'}, doc:{icon:'fa-file-word',color:'#2563EB'}, docx:{icon:'fa-file-word',color:'#2563EB'}, xls:{icon:'fa-file-excel',color:'#059669'}, xlsx:{icon:'fa-file-excel',color:'#059669'}, jpg:{icon:'fa-file-image',color:'#D97706'}, jpeg:{icon:'fa-file-image',color:'#D97706'}, png:{icon:'fa-file-image',color:'#D97706'}, mp3:{icon:'fa-file-audio',color:'#7C3AED'}, mp4:{icon:'fa-file-video',color:'#DB2777'} };
 // Firestore's free (Spark) tier gives ~1 GiB of total stored data for the
@@ -6657,7 +6676,11 @@ function loadDocuments(){
 
 function loadStorageSettings(){
   onSnapshot(doc(db,'settings','storage'), snap=>{
-    if(snap.exists() && snap.data().capBytes) STORAGE_CAP_BYTES = snap.data().capBytes;
+    if(snap.exists()){
+      const d = snap.data();
+      if(d.capBytes) STORAGE_CAP_BYTES = d.capBytes;
+      if(d.maxFileSizeBytes) DOC_MAX_FILE_SIZE = d.maxFileSizeBytes;
+    }
     updateStorageOverview();
     const gearBtn = document.getElementById('docStorageSettingsBtn');
     if(gearBtn) gearBtn.classList.toggle('hidden', currentUserRole !== 'owner');
@@ -7025,13 +7048,20 @@ window.closeDocPreview = ()=>{
 };
 
 window.openStorageCapModal = ()=>{
-  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change the storage limit.','err'); return; }
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change storage limits.','err'); return; }
   let unit = 'GB', value = STORAGE_CAP_BYTES / BYTE_UNITS.GB;
   if(value < 1){ unit = 'MB'; value = STORAGE_CAP_BYTES / BYTE_UNITS.MB; }
   if(value >= 1024){ unit = 'TB'; value = STORAGE_CAP_BYTES / BYTE_UNITS.TB; }
   document.getElementById('storageCapValue').value = Math.round(value*100)/100;
   document.getElementById('storageCapUnit').value = unit;
   updateStorageCapPreview();
+
+  let fUnit = 'KB', fValue = DOC_MAX_FILE_SIZE / BYTE_UNITS.KB;
+  if(fValue >= 1024){ fUnit = 'MB'; fValue = DOC_MAX_FILE_SIZE / BYTE_UNITS.MB; }
+  document.getElementById('fileSizeCapValue').value = Math.round(fValue*100)/100;
+  document.getElementById('fileSizeCapUnit').value = fUnit;
+  updateFileSizeCapPreview();
+
   document.getElementById('storageCapModal').classList.remove('hidden');
   document.getElementById('storageCapModal').classList.add('flex');
 };
@@ -7048,16 +7078,29 @@ function updateStorageCapPreview(){
 }
 document.getElementById('storageCapValue')?.addEventListener('input', updateStorageCapPreview);
 document.getElementById('storageCapUnit')?.addEventListener('change', updateStorageCapPreview);
+function updateFileSizeCapPreview(){
+  const value = parseFloat(document.getElementById('fileSizeCapValue').value) || 0;
+  const unit = document.getElementById('fileSizeCapUnit').value;
+  const bytes = value * (BYTE_UNITS[unit]||BYTE_UNITS.KB);
+  const previewEl = document.getElementById('fileSizeCapPreview');
+  if(previewEl) previewEl.textContent = `= ${formatBytes(bytes)} per upload.`;
+}
+document.getElementById('fileSizeCapValue')?.addEventListener('input', updateFileSizeCapPreview);
+document.getElementById('fileSizeCapUnit')?.addEventListener('change', updateFileSizeCapPreview);
 window.saveStorageCap = async ()=>{
-  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change the storage limit.','err'); return; }
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change storage limits.','err'); return; }
   const value = parseFloat(document.getElementById('storageCapValue').value);
   const unit = document.getElementById('storageCapUnit').value;
-  if(!value || value <= 0){ toast('Enter a valid limit.','err'); return; }
+  if(!value || value <= 0){ toast('Enter a valid vault storage limit.','err'); return; }
+  const fValue = parseFloat(document.getElementById('fileSizeCapValue').value);
+  const fUnit = document.getElementById('fileSizeCapUnit').value;
+  if(!fValue || fValue <= 0){ toast('Enter a valid per-file size limit.','err'); return; }
   const capBytes = value * (BYTE_UNITS[unit]||BYTE_UNITS.MB);
+  const maxFileSizeBytes = Math.round(fValue * (BYTE_UNITS[fUnit]||BYTE_UNITS.KB));
   try{
-    await setDoc(doc(db,'settings','storage'), { capBytes, capValue:value, capUnit:unit }, { merge:true });
-    logActivity('Storage Limit Changed', 'settings', { model: `${value} ${unit}` });
-    toast(`Storage limit set to ${formatBytes(capBytes)}.`);
+    await setDoc(doc(db,'settings','storage'), { capBytes, capValue:value, capUnit:unit, maxFileSizeBytes, fileSizeValue:fValue, fileSizeUnit:fUnit }, { merge:true });
+    logActivity('Storage Limit Changed', 'settings', { model: `Vault: ${value} ${unit}, Per-file: ${fValue} ${fUnit}` });
+    toast(`Limits saved — vault ${formatBytes(capBytes)}, per-file ${formatBytes(maxFileSizeBytes)}.`);
     closeStorageCapModal();
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
@@ -7525,7 +7568,13 @@ function loadImportantInfo(){
 }
 
 function applyImportantTypeUI(type){
-  document.querySelectorAll('#importantTypeToggle .imp-type-btn').forEach(b=>b.classList.toggle('active', b.dataset.itype===type));
+  const isMaster = currentUserRole === 'owner';
+  document.querySelectorAll('#importantTypeToggle .imp-type-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.itype===type);
+    // A Normal ID can only ever add/edit Contacts — Link and Credential
+    // stay Master-only, so those two toggle options are hidden for them.
+    b.classList.toggle('hidden', !isMaster && b.dataset.itype!=='contact');
+  });
   const [l1,l2] = IMP_FIELD_LABELS[type];
   const [p1,p2] = IMP_PLACEHOLDERS[type];
   document.getElementById('impLabel1').innerHTML = l1+' <span class="text-red-400">*</span>';
@@ -7536,13 +7585,20 @@ function applyImportantTypeUI(type){
 }
 document.querySelectorAll('#importantTypeToggle .imp-type-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
+    if(currentUserRole !== 'owner' && btn.dataset.itype!=='contact') return; // extra guard — button is hidden anyway
     currentImportantType = btn.dataset.itype;
     applyImportantTypeUI(currentImportantType);
   });
 });
 
 window.openImportantFormModal = (id)=>{
-  if(currentUserRole !== 'owner'){ toast('Only a Master ID can manage entries here.','err'); return; }
+  const isMaster = currentUserRole === 'owner';
+  if(id){
+    const item = importantData.find(x=>x.id===id);
+    // A Normal ID's importantData only ever contains contact-type entries
+    // (filtered out at load time), so this only blocks a stale/tampered id.
+    if(!isMaster && item?.type !== 'contact'){ toast('Only a Master ID can manage that entry.','err'); return; }
+  }
   currentEditImportantId = id || null;
   if(id){
     const item = importantData.find(x=>x.id===id);
@@ -7571,7 +7627,7 @@ window.cancelImportantEdit = ()=>{
 };
 
 document.getElementById('saveImportantBtn').addEventListener('click', async ()=>{
-  if(currentUserRole !== 'owner'){ toast('Only a Master ID can manage entries here.','err'); return; }
+  if(currentUserRole !== 'owner' && currentImportantType !== 'contact'){ toast('Only a Master ID can manage that.','err'); return; }
   const v1 = document.getElementById('impVal1').value.trim();
   const v2 = document.getElementById('impVal2').value.trim();
   if(!v1 || !v2){ toast('Please fill both required fields.','err'); return; }
@@ -7610,9 +7666,13 @@ function renderImportantList(){
     const v2Display = item.type==='credential'
       ? `<span class="imp-secret" id="impMasked_${item.id}" data-revealed="0">••••••••</span> <button type="button" onclick="window._toggleImpReveal('${item.id}')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-eye text-[11px]" id="impEyeIcon_${item.id}"></i></button>`
       : (item.type==='link' ? `<a href="${escapeHtml(item.value2)}" target="_blank" rel="noopener" class="text-bajaj-blue hover:underline">${escapeHtml(item.value2)}</a>` : escapeHtml(item.value2));
-    const actions = isMaster ? `
+    // Actions always show — a Normal ID's `visible` list only ever
+    // contains Contacts (filtered above and, more importantly, already
+    // filtered out of importantData itself in loadImportantInfo), which
+    // they're allowed to manage. A Master ID can manage anything.
+    const actions = `
       <button onclick="openImportantFormModal('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-pen text-xs"></i></button>
-      <button onclick="window._deleteImportant('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all flex-shrink-0"><i class="fas fa-trash-can text-xs"></i></button>` : '';
+      <button onclick="window._deleteImportant('${item.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all flex-shrink-0"><i class="fas fa-trash-can text-xs"></i></button>`;
     return `<div class="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors">
       <div class="imp-row-icon" style="background:${ic.bg};color:${ic.fg}"><i class="fas ${ic.icon} text-sm"></i></div>
       <div class="min-w-0 flex-1">
@@ -7637,7 +7697,9 @@ window._toggleImpReveal = (id)=>{
 };
 
 window._deleteImportant = async (id)=>{
-  if(currentUserRole !== 'owner'){ toast('Only a Master ID can manage entries here.','err'); return; }
+  const isMaster = currentUserRole === 'owner';
+  const item = importantData.find(x=>x.id===id);
+  if(!isMaster && item?.type !== 'contact'){ toast('Only a Master ID can manage that entry.','err'); return; }
   const ok = await showDangerousConfirm({
     title: 'Delete this entry?',
     message: "This will permanently remove the saved contact, link, or credential. This can't be undone.",
@@ -7646,7 +7708,6 @@ window._deleteImportant = async (id)=>{
   });
   if(!ok) return;
   try{
-    const item = importantData.find(x=>x.id===id);
     await deleteDoc(doc(db,'important_info',id));
     if(item) logActivity('Deleted', 'important_info', { model: item.value1 });
     toast('Entry deleted.');
@@ -8434,11 +8495,11 @@ window.switchSec=(sec)=>{
     const eyebrow = document.getElementById('importantEyebrow');
     const desc = document.getElementById('importantDesc');
     const addBtn = document.getElementById('addImportantBtn');
-    if(eyebrow) eyebrow.textContent = isMaster ? 'Master Only' : 'Team Contacts';
+    if(eyebrow) eyebrow.textContent = isMaster ? 'Shared + Master Only' : 'Team Contacts';
     if(desc) desc.textContent = isMaster
-      ? 'Contacts, links, and login credentials for outside services — Links and Credentials stay visible only to Master IDs.'
-      : 'Shared contacts for the team. Links and credentials are managed by a Master ID.';
-    if(addBtn) addBtn.classList.toggle('hidden', !isMaster);
+      ? 'Contacts anyone can add or edit. Links and Credentials stay visible and manageable only by Master IDs.'
+      : 'Shared contacts — everyone can add, edit, or remove one. Links and credentials are managed by a Master ID.';
+    if(addBtn) addBtn.classList.remove('hidden');
   }
 };
 </script>
