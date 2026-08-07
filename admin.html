@@ -4055,9 +4055,21 @@ function renderMasterTable() {
     return;
   }
   const sorted=[...allMasterBikes].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
+  // How many bikes currently sit in each category, shown as a % of the
+  // MAX_BIKES model-count limit — so staff can see at a glance how much of
+  // the overall model quota each category is eating into.
+  const categoryCounts = {};
+  allMasterBikes.forEach(bike=>{
+    const c = bike.category||'Bike';
+    categoryCounts[c] = (categoryCounts[c]||0) + 1;
+  });
   tbody.innerHTML = sorted.map(b=>{
     const category=b.category||'Bike';
-    const catBadge=`<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">${escapeHtml(category)}</span>`;
+    const catPct = MAX_BIKES>0 ? Math.round((categoryCounts[category]||0)/MAX_BIKES*100) : 0;
+    const catBadge=`<div class="flex flex-col items-end gap-1">
+      <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">${escapeHtml(category)}</span>
+      <span class="text-[10px] text-slate-400 font-medium">${catPct}% of ${MAX_BIKES}-model limit</span>
+    </div>`;
     return `
     <tr class="border-b border-slate-100" data-label="${escapeHtml(b.name)}">
       <td class="px-4 py-3" data-th="S.N">
