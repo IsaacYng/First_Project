@@ -1898,11 +1898,11 @@
       </div>
 
       <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 mb-4 w-fit flex-wrap">
-        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-type="all" onclick="setDocTypeFilter('all')">All</button>
-        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="pdf" onclick="setDocTypeFilter('pdf')"><i class="fas fa-file-pdf mr-1"></i>PDF</button>
-        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="photo" onclick="setDocTypeFilter('photo')"><i class="fas fa-file-image mr-1"></i>Photo</button>
-        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="word" onclick="setDocTypeFilter('word')"><i class="fas fa-file-word mr-1"></i>Word</button>
-        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="excel" onclick="setDocTypeFilter('excel')"><i class="fas fa-file-excel mr-1"></i>Excel</button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-type="all" onclick="setDocTypeFilter('all')">All <span id="docCountAll" class="opacity-60"></span></button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="pdf" onclick="setDocTypeFilter('pdf')"><i class="fas fa-file-pdf mr-1"></i>PDF <span id="docCountPdf" class="opacity-60"></span></button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="photo" onclick="setDocTypeFilter('photo')"><i class="fas fa-file-image mr-1"></i>Photo <span id="docCountPhoto" class="opacity-60"></span></button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="word" onclick="setDocTypeFilter('word')"><i class="fas fa-file-word mr-1"></i>Word <span id="docCountWord" class="opacity-60"></span></button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="excel" onclick="setDocTypeFilter('excel')"><i class="fas fa-file-excel mr-1"></i>Excel <span id="docCountExcel" class="opacity-60"></span></button>
       </div>
       <div id="docsListWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </div>
@@ -2176,7 +2176,7 @@
         <div>
           <div class="eyebrow" id="importantEyebrow">Shared With The Team</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Important <span class="text-amber-500">Info</span></div>
-          <p class="text-sm text-slate-500 mt-1.5 max-w-lg" id="importantDesc">Contacts, links, and login credentials for outside services — everyone can add, edit, or remove any entry.</p>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg" id="importantDesc">Contacts and links for outside services — everyone can add, edit, or remove any entry.</p>
         </div>
         <button id="addImportantBtn" onclick="openImportantFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
           <i class="fas fa-plus"></i> Add Entry
@@ -2199,7 +2199,6 @@
           <div class="itoggle" id="importantTypeToggle" style="display:flex;gap:6px">
             <button type="button" data-itype="contact" class="imp-type-btn active">Contact</button>
             <button type="button" data-itype="link" class="imp-type-btn">Link</button>
-            <button type="button" data-itype="credential" class="imp-type-btn">Credential</button>
           </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
@@ -2255,8 +2254,15 @@
       <div class="yng-card-shell overflow-hidden">
         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
           <div class="flex items-center gap-2">
-            <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-key text-amber-500"></i> Contacts, Links &amp; Credentials</div>
+            <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-address-book text-amber-500"></i> Contacts &amp; Links</div>
             <span id="importantCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 items</span>
+          </div>
+        </div>
+        <div class="px-5 pt-4">
+          <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 mb-1 w-fit flex-wrap">
+            <button class="doc-type-tab imp-filter-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-type="all" onclick="setImportantTypeFilter('all')">All <span id="impCountAll" class="opacity-60"></span></button>
+            <button class="doc-type-tab imp-filter-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="contact" onclick="setImportantTypeFilter('contact')"><i class="fas fa-user mr-1"></i>Contact <span id="impCountContact" class="opacity-60"></span></button>
+            <button class="doc-type-tab imp-filter-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="link" onclick="setImportantTypeFilter('link')"><i class="fas fa-link mr-1"></i>Link <span id="impCountLink" class="opacity-60"></span></button>
           </div>
         </div>
         <div id="importantList" class="flex flex-col divide-y divide-slate-100"></div>
@@ -6749,11 +6755,16 @@ async function updateStorageOverview(){
   const list = document.getElementById('storageAllocationList');
   if(!list) return;
   const invCount = await getAccurateTotalInventoryCount();
-  const used = getTotalStorageUsed();
+  const docsBytes = documents.reduce((sum,d)=>sum+(d.sizeBytes||0),0);
+  const impAttachItems = importantData.filter(a=>a.attachment);
+  const impBytes = impAttachItems.reduce((sum,a)=>sum+(a.attachment?.sizeBytes||0),0);
+  const used = docsBytes + impBytes; // same total getTotalStorageUsed() computes
 
   const rows = [
-    { icon:'fa-folder-open', color:'#D97706', label:'Document Vault', usedBytes: used, maxBytes: STORAGE_CAP_BYTES,
-      sub: `${formatBytes(used)} used of ${formatBytes(STORAGE_CAP_BYTES)} allowed` },
+    { icon:'fa-folder-open', color:'#D97706', label:'Document Vault', usedBytes: docsBytes, maxBytes: STORAGE_CAP_BYTES,
+      sub: `${documents.length} file${documents.length!==1?'s':''} — ${formatBytes(docsBytes)} of ${formatBytes(STORAGE_CAP_BYTES)} shared vault limit` },
+    { icon:'fa-paperclip', color:'#0EA5E9', label:'Important Info Attachments', usedBytes: impBytes, maxBytes: STORAGE_CAP_BYTES,
+      sub: `${impAttachItems.length} file${impAttachItems.length!==1?'s':''} — ${formatBytes(impBytes)}, shares the same vault limit above` },
     { icon:'fa-tags', color:'#005EA6', label:'Master Price List (Models)', count: allMasterBikes.length, maxCount: MAX_BIKES,
       usedBytes: allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike, maxBytes: MAX_BIKES*RECORD_SIZE_ESTIMATE.bike,
       sub: `${allMasterBikes.length} / ${MAX_BIKES} models — up to ${formatBytes(MAX_BIKES*RECORD_SIZE_ESTIMATE.bike)} at full capacity` },
@@ -6818,6 +6829,16 @@ window.setDocTypeFilter = (type)=>{
 function renderDocumentsPage(){
   const wrap = document.getElementById('docsListWrap');
   if(!wrap) return;
+  // Keep each tab's count in sync with the full (unfiltered) list, not just
+  // whatever's currently showing — otherwise switching filters would make
+  // the numbers drift.
+  const countEls = { all:'docCountAll', pdf:'docCountPdf', photo:'docCountPhoto', word:'docCountWord', excel:'docCountExcel' };
+  Object.entries(countEls).forEach(([key, elId])=>{
+    const el = document.getElementById(elId);
+    if(!el) return;
+    const n = key==='all' ? documents.length : documents.filter(d=>(DOC_TYPE_GROUPS[key]||[]).includes((d.fileExt||'').toLowerCase())).length;
+    el.textContent = n ? `(${n})` : '';
+  });
   const filtered = docTypeFilter==='all' ? documents : documents.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes((d.fileExt||'').toLowerCase()));
   if(!filtered.length){
     wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-folder-open text-3xl opacity-25 block mb-2"></i><p class="text-sm">${documents.length ? 'No documents match this filter.' : 'No documents uploaded yet.'}</p></div>`;
@@ -7575,11 +7596,17 @@ async function purgeExpiredActivityLog(){
 let importantData = [];
 let importantUnsub = null;
 let currentEditImportantId = null;
+let importantTypeFilter = 'all';
+window.setImportantTypeFilter = (type)=>{
+  importantTypeFilter = type;
+  document.querySelectorAll('.imp-filter-tab').forEach(t=>t.classList.toggle('active', t.dataset.type===type));
+  renderImportantList();
+};
 let currentImportantType = 'contact';
 
-const IMP_FIELD_LABELS = { contact:['Name','Phone / WhatsApp'], link:['Label','URL'], credential:['Username / ID','Password'] };
-const IMP_PLACEHOLDERS = { contact:['e.g. Isaac Yonghang','e.g. 9820907795'], link:['e.g. Bajaj Dealer Portal','https://...'], credential:['e.g. dealer@bajaj.com','password'] };
-const IMP_ICONS = { contact:{icon:'fa-user',bg:'#EFF6FF',fg:'#005EA6'}, link:{icon:'fa-link',bg:'#F0FDF4',fg:'#059669'}, credential:{icon:'fa-key',bg:'#FEF3C7',fg:'#D97706'} };
+const IMP_FIELD_LABELS = { contact:['Name','Phone / WhatsApp'], link:['Label','URL'] };
+const IMP_PLACEHOLDERS = { contact:['e.g. Isaac Yonghang','e.g. 9820907795'], link:['e.g. Bajaj Dealer Portal','https://...'] };
+const IMP_ICONS = { contact:{icon:'fa-user',bg:'#EFF6FF',fg:'#005EA6'}, link:{icon:'fa-link',bg:'#F0FDF4',fg:'#059669'} };
 
 function loadImportantInfo(){
   // Each entry can be scoped to specific people by whoever adds/edits it
@@ -7611,7 +7638,7 @@ function applyImportantTypeUI(type){
   document.getElementById('impLabel2').innerHTML = l2+' <span class="text-red-400">*</span>';
   document.getElementById('impVal1').placeholder = p1;
   document.getElementById('impVal2').placeholder = p2;
-  document.getElementById('impVal2').type = type==='credential' ? 'password' : 'text';
+  document.getElementById('impVal2').type = 'text';
 }
 document.querySelectorAll('#importantTypeToggle .imp-type-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -7830,18 +7857,22 @@ document.getElementById('saveImportantBtn').addEventListener('click', async ()=>
 function renderImportantList(){
   const wrap = document.getElementById('importantList');
   if(!wrap) return;
-  const visible = importantData;
+  // Credential type is retired — filter out any pre-existing entries so
+  // they never render, even though the form can't create new ones anymore.
+  const byType = importantData.filter(a=>a.type!=='credential');
+  document.getElementById('impCountAll').textContent = byType.length ? `(${byType.length})` : '';
+  document.getElementById('impCountContact').textContent = (()=>{ const n=byType.filter(a=>a.type==='contact').length; return n?`(${n})`:''; })();
+  document.getElementById('impCountLink').textContent = (()=>{ const n=byType.filter(a=>a.type==='link').length; return n?`(${n})`:''; })();
+  const visible = importantTypeFilter==='all' ? byType : byType.filter(a=>a.type===importantTypeFilter);
   const countEl = document.getElementById('importantCount');
   if(countEl) countEl.textContent = visible.length+' item'+(visible.length!==1?'s':'');
   if(!visible.length){
-    wrap.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-key text-3xl opacity-25 block mb-2"></i><p class="text-sm">Nothing saved yet.</p></div>`;
+    wrap.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-address-book text-3xl opacity-25 block mb-2"></i><p class="text-sm">${byType.length ? 'No matching entries.' : 'Nothing saved yet.'}</p></div>`;
     return;
   }
   wrap.innerHTML = visible.map(item=>{
     const ic = IMP_ICONS[item.type] || IMP_ICONS.contact;
-    const v2Display = item.type==='credential'
-      ? `<span class="imp-secret" id="impMasked_${item.id}" data-revealed="0">••••••••</span> <button type="button" onclick="window._toggleImpReveal('${item.id}')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-eye text-[11px]" id="impEyeIcon_${item.id}"></i></button>`
-      : (item.type==='link' ? `<a href="${escapeHtml(item.value2)}" target="_blank" rel="noopener" class="text-bajaj-blue hover:underline">${escapeHtml(item.value2)}</a>` : escapeHtml(item.value2));
+    const v2Display = item.type==='link' ? `<a href="${escapeHtml(item.value2)}" target="_blank" rel="noopener" class="text-bajaj-blue hover:underline">${escapeHtml(item.value2)}</a>` : escapeHtml(item.value2);
     const visBadge = Array.isArray(item.visibleTo)
       ? `<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-100 rounded-full px-2 py-0.5 ml-1.5 flex-shrink-0" title="Only visible to specific people, plus any Master ID"><i class="fas fa-lock text-[8px]"></i> ${item.visibleTo.length}</span>`
       : '';
@@ -7860,22 +7891,11 @@ function renderImportantList(){
   }).join('');
 }
 
-window._toggleImpReveal = (id)=>{
-  const item = importantData.find(x=>x.id===id);
-  const el = document.getElementById('impMasked_'+id);
-  const eye = document.getElementById('impEyeIcon_'+id);
-  if(!item || !el || !eye) return;
-  const revealed = el.dataset.revealed === '1';
-  el.textContent = revealed ? '••••••••' : item.value2;
-  el.dataset.revealed = revealed ? '0' : '1';
-  eye.className = revealed ? 'fas fa-eye text-[11px]' : 'fas fa-eye-slash text-[11px]';
-};
-
 window._deleteImportant = async (id)=>{
   const item = importantData.find(x=>x.id===id);
   const ok = await showDangerousConfirm({
     title: 'Delete this entry?',
-    message: "This will permanently remove the saved contact, link, or credential. This can't be undone.",
+    message: "This will permanently remove the saved contact or link. This can't be undone.",
     okText: 'Delete',
     countdownSec: 3
   });
@@ -7958,11 +7978,19 @@ function renderNotifDropdown(){
   list.innerHTML = recent.length ? recent.map(a=>{
     const at = a.at?.toDate ? a.at.toDate() : new Date(a.at);
     const style = ACTION_STYLE[a.action] || {icon:'fa-circle-info', cls:'badge-neutral'};
-    const what = a.model || a.chassis || a.customerName || '';
+    // Show everything relevant, not just whichever field happened to be
+    // first — "Added a chassis" is a lot less useful than "Added — Pulsar
+    // NS200 (chassis MD2A...)" when you're trying to tell two updates apart.
+    const bits = [];
+    if(a.model) bits.push(escapeHtml(a.model));
+    if(a.chassis) bits.push(`<span class="font-mono text-slate-500">(${escapeHtml(a.chassis)})</span>`);
+    if(a.customerName) bits.push(escapeHtml(a.customerName));
+    const what = bits.join(' ');
+    const where = TRASH_LABELS[a.collection] || a.collection || '';
     return `<div class="flex items-start gap-2 px-2.5 py-2 rounded-lg hover:bg-slate-50 transition-colors">
       <i class="fas ${style.icon} text-[11px] text-slate-400 mt-0.5 flex-shrink-0"></i>
       <div class="min-w-0">
-        <div class="text-[12px] text-slate-700 leading-snug"><b>${escapeHtml(a.action||'')}</b>${what?' — '+escapeHtml(what):''}</div>
+        <div class="text-[12px] text-slate-700 leading-snug"><b>${escapeHtml(a.action||'')}</b>${where?' <span class="text-slate-400">in '+escapeHtml(where)+'</span>':''}${what?' — '+what:''}</div>
         <div class="text-[10.5px] text-slate-400">${isMaster && a.by ? escapeHtml(a.by)+' · ' : ''}${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}, ${at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</div>
       </div>
     </div>`;
@@ -8683,7 +8711,7 @@ window.switchSec=(sec)=>{
     const desc = document.getElementById('importantDesc');
     const addBtn = document.getElementById('addImportantBtn');
     if(eyebrow) eyebrow.textContent = 'Shared With The Team';
-    if(desc) desc.textContent = 'Contacts, links, and login credentials for outside services — everyone can add, edit, or remove any entry.';
+    if(desc) desc.textContent = 'Contacts and links for outside services — everyone can add, edit, or remove any entry.';
     if(addBtn) addBtn.classList.remove('hidden');
   }
 };
