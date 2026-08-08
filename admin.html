@@ -2228,6 +2228,17 @@
           <div id="impVisibilityPicker" class="hidden flex flex-col gap-1.5 mt-1.5 max-h-36 overflow-y-auto border-2 border-slate-200 rounded-lg p-2.5"></div>
           <p class="text-[10.5px] text-slate-400 mt-0.5">A Master ID can always see and re-adjust every entry, even ones set to specific people.</p>
         </div>
+        <div class="flex flex-col gap-1.5 mb-4">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Attach a File <span class="text-slate-400 font-normal normal-case">(opt.)</span></label>
+          <input type="file" id="impAttachInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+            class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-white file:text-bajaj-blue file:cursor-pointer transition-all w-full"/>
+          <div id="impAttachCurrent" class="hidden items-center gap-2 text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+            <i class="fas fa-paperclip text-slate-400"></i>
+            <span id="impAttachCurrentName" class="flex-1 truncate"></span>
+            <button type="button" onclick="window._removeImpAttachment()" class="text-red-400 hover:text-red-600"><i class="fas fa-xmark"></i></button>
+          </div>
+          <p class="text-[10.5px] text-slate-400" id="impAttachHint">e.g. a signed agreement, ID copy, or portal screenshot.</p>
+        </div>
         <div class="flex gap-2 flex-wrap">
           <button id="saveImportantBtn" class="cta-primary">
             <i class="fas fa-floppy-disk"></i> Save Entry
@@ -3044,10 +3055,12 @@ window._toggleKebab = (btn, type, id) => {
     if(currentUserRole === 'owner' || isMine) docActions.push({ label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('documents', id) });
     openKebabMenuFor(btn, docActions);
   } else if(type === 'important'){
-    openKebabMenuFor(btn, [
-      { label:'Edit', icon:'fa-pen', onClick:()=>window.openImportantFormModal(id) },
-      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteImportant(id) }
-    ]);
+    const impItem = importantData.find(x=>x.id===id);
+    const impActions = [];
+    if(impItem?.attachment) impActions.push({ label:'Download Attachment', icon:'fa-paperclip', onClick:()=>window.downloadImpAttachment(id) });
+    impActions.push({ label:'Edit', icon:'fa-pen', onClick:()=>window.openImportantFormModal(id) });
+    impActions.push({ label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteImportant(id) });
+    openKebabMenuFor(btn, impActions);
   } else if(type === 'hh_inventory'){
     const s = hhInvData.find(x=>x.id===id);
     const cur = s?.status || 'Available';
@@ -6718,7 +6731,9 @@ function loadSystemLimits(){
 }
 
 function getTotalStorageUsed(){
-  return documents.reduce((sum,d)=>sum+(d.sizeBytes||0),0);
+  const docsUsed = documents.reduce((sum,d)=>sum+(d.sizeBytes||0),0);
+  const impUsed = importantData.reduce((sum,a)=>sum+(a.attachment?.sizeBytes||0),0);
+  return docsUsed + impUsed;
 }
 function formatBytes(bytes){
   if(!bytes) return '0 KB';
@@ -7609,6 +7624,74 @@ document.querySelectorAll('#importantTypeToggle .imp-type-btn').forEach(btn=>{
    defaults to Everyone. A Master ID can always see (and re-adjust) every
    entry regardless of this list, for oversight. */
 let currentImpVisibility = 'all'; // 'all' or array of emails
+let pendingImpAttachFile = null; // File object staged for upload, if any
+let currentImpAttachment = null; // {fileName, fileExt, fileData, sizeBytes} already saved on the entry being edited
+let impAttachmentRemoved = false; // true if editing and the user cleared an existing attachment
+
+document.getElementById('impAttachInput')?.addEventListener('change', (e)=>{
+  pendingImpAttachFile = e.target.files?.[0] || null;
+  impAttachmentRemoved = false;
+});
+window._removeImpAttachment = ()=>{
+  pendingImpAttachFile = null;
+  currentImpAttachment = null;
+  impAttachmentRemoved = true;
+  const el = document.getElementById('impAttachInput');
+  if(el) el.value = '';
+  document.getElementById('impAttachCurrent')?.classList.add('hidden');
+  document.getElementById('impAttachCurrent')?.classList.remove('flex');
+};
+
+// Same compress-then-check-size approach as the Document Vault upload —
+// images get downscaled/re-encoded until they fit, everything else just
+// gets a straight size check. Resolves {fileName, fileExt, fileData,
+// sizeBytes} or null if the file couldn't be processed / is too large.
+function processImpAttachment(file){
+  return new Promise((resolve)=>{
+    const ext = (file.name.split('.').pop()||'').toLowerCase();
+    const isImage = ['jpg','jpeg','png'].includes(ext);
+    const reader = new FileReader();
+    reader.onerror = ()=>{ toast('Could not read that file.','err'); resolve(null); };
+    if(isImage){
+      reader.onload = (e)=>{
+        const img = new Image();
+        img.onload = ()=>{
+          const maxDim = 1600;
+          let w = img.width, h = img.height;
+          const scale = Math.min(maxDim/w, maxDim/h, 1);
+          w = Math.round(w*scale); h = Math.round(h*scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          let quality = 0.82;
+          let fileData = canvas.toDataURL('image/jpeg', quality);
+          while(fileData.length > DOC_MAX_FILE_SIZE && quality > 0.3){
+            quality -= 0.1;
+            fileData = canvas.toDataURL('image/jpeg', quality);
+          }
+          if(fileData.length > DOC_MAX_FILE_SIZE){
+            toast(`Even compressed, this photo is too large (max ~${formatBytes(DOC_MAX_FILE_SIZE)}).`,'err');
+            resolve(null); return;
+          }
+          resolve({ fileName:file.name, fileExt:ext, fileData, sizeBytes:fileData.length });
+        };
+        img.onerror = ()=>{ toast('Could not read that image.','err'); resolve(null); };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      reader.onload = (e)=>{
+        const fileData = e.target.result;
+        if(fileData.length > DOC_MAX_FILE_SIZE){
+          toast(`File is too large once stored (max ~${formatBytes(DOC_MAX_FILE_SIZE)}).`,'err');
+          resolve(null); return;
+        }
+        resolve({ fileName:file.name, fileExt:ext, fileData, sizeBytes:fileData.length });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
 
 function renderImpVisibilityPicker(selectedEmails){
   const wrap = document.getElementById('impVisibilityPicker');
@@ -7642,6 +7725,13 @@ document.querySelectorAll('#impVisibilityToggle .imp-type-btn').forEach(btn=>{
 
 window.openImportantFormModal = (id)=>{
   currentEditImportantId = id || null;
+  pendingImpAttachFile = null;
+  impAttachmentRemoved = false;
+  const attachInput = document.getElementById('impAttachInput');
+  if(attachInput) attachInput.value = '';
+  const attachCurrent = document.getElementById('impAttachCurrent');
+  const attachHint = document.getElementById('impAttachHint');
+  if(attachHint) attachHint.textContent = `e.g. a signed agreement, ID copy, or portal screenshot — max ~${formatBytes(DOC_MAX_FILE_SIZE)}.`;
   if(id){
     const item = importantData.find(x=>x.id===id);
     if(!item) return;
@@ -7653,6 +7743,15 @@ window.openImportantFormModal = (id)=>{
     document.getElementById('cancelImportantBtn').classList.remove('hidden');
     document.getElementById('cancelImportantBtn').classList.add('flex');
     currentImpVisibility = Array.isArray(item.visibleTo) ? item.visibleTo : 'all';
+    currentImpAttachment = item.attachment || null;
+    if(currentImpAttachment && attachCurrent){
+      document.getElementById('impAttachCurrentName').textContent = currentImpAttachment.fileName || 'Attached file';
+      attachCurrent.classList.remove('hidden');
+      attachCurrent.classList.add('flex');
+    } else if(attachCurrent){
+      attachCurrent.classList.add('hidden');
+      attachCurrent.classList.remove('flex');
+    }
   } else {
     currentImportantType = 'contact';
     document.getElementById('importantFormTitle').textContent = 'Add Entry';
@@ -7661,6 +7760,8 @@ window.openImportantFormModal = (id)=>{
     document.getElementById('impNote').value = '';
     document.getElementById('cancelImportantBtn').classList.add('hidden');
     currentImpVisibility = 'all';
+    currentImpAttachment = null;
+    if(attachCurrent){ attachCurrent.classList.add('hidden'); attachCurrent.classList.remove('flex'); }
   }
   document.querySelectorAll('#impVisibilityToggle .imp-type-btn').forEach(b=>{
     b.classList.toggle('active', b.dataset.vis === (currentImpVisibility==='all' ? 'all' : 'specific'));
@@ -7692,7 +7793,25 @@ document.getElementById('saveImportantBtn').addEventListener('click', async ()=>
     if(!checked.length){ toast('Pick at least one person, or switch back to Everyone.','err'); return; }
     visibleTo = checked;
   }
-  const data = { type: currentImportantType, value1: v1, value2: v2, note, visibleTo };
+
+  const saveBtn = document.getElementById('saveImportantBtn');
+  saveBtn.disabled = true;
+  let attachment = currentImpAttachment; // carries over unchanged unless replaced/removed below
+  if(pendingImpAttachFile){
+    const used = getTotalStorageUsed();
+    const processed = await processImpAttachment(pendingImpAttachFile);
+    if(!processed){ saveBtn.disabled = false; return; } // processImpAttachment already toasted the reason
+    if(used - (currentImpAttachment?.sizeBytes||0) + processed.sizeBytes > STORAGE_CAP_BYTES){
+      saveBtn.disabled = false;
+      openDocUpgradeModal();
+      return;
+    }
+    attachment = processed;
+  } else if(impAttachmentRemoved){
+    attachment = null;
+  }
+
+  const data = { type: currentImportantType, value1: v1, value2: v2, note, visibleTo, attachment: attachment || null };
   try{
     if(currentEditImportantId){
       await updateDoc(doc(db,"important_info",currentEditImportantId), data);
@@ -7705,6 +7824,7 @@ document.getElementById('saveImportantBtn').addEventListener('click', async ()=>
     }
     window.cancelImportantEdit();
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+  finally{ saveBtn.disabled = false; }
 });
 
 function renderImportantList(){
@@ -7725,10 +7845,13 @@ function renderImportantList(){
     const visBadge = Array.isArray(item.visibleTo)
       ? `<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-100 rounded-full px-2 py-0.5 ml-1.5 flex-shrink-0" title="Only visible to specific people, plus any Master ID"><i class="fas fa-lock text-[8px]"></i> ${item.visibleTo.length}</span>`
       : '';
+    const attachBadge = item.attachment
+      ? `<span class="inline-flex items-center text-[10px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5 ml-1.5 flex-shrink-0" title="${escapeHtml(item.attachment.fileName||'Attached file')}"><i class="fas fa-paperclip text-[8px]"></i></span>`
+      : '';
     return `<div class="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors">
       <div class="imp-row-icon" style="background:${ic.bg};color:${ic.fg}"><i class="fas ${ic.icon} text-sm"></i></div>
       <div class="min-w-0 flex-1">
-        <div class="text-sm font-bold text-slate-800 truncate flex items-center">${escapeHtml(item.value1)}${visBadge}</div>
+        <div class="text-sm font-bold text-slate-800 truncate flex items-center">${escapeHtml(item.value1)}${visBadge}${attachBadge}</div>
         <div class="text-xs text-slate-500 truncate">${v2Display}</div>
         ${item.note ? `<div class="text-[11px] text-slate-400 mt-0.5 truncate">${escapeHtml(item.note)}</div>` : ''}
       </div>
@@ -7762,6 +7885,21 @@ window._deleteImportant = async (id)=>{
     if(item) logActivity('Deleted', 'important_info', { model: item.value1 });
     toast('Entry deleted.');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
+window.downloadImpAttachment = (id)=>{
+  const item = importantData.find(x=>x.id===id);
+  const att = item?.attachment;
+  if(!att?.fileData) return;
+  let filename = (att.fileName || 'attachment').trim();
+  const ext = (att.fileExt||'').toLowerCase();
+  if(ext && !filename.toLowerCase().endsWith('.'+ext)) filename += '.'+ext;
+  const a = document.createElement('a');
+  a.href = att.fileData;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 };
 
 function updateNotifBadge(){
