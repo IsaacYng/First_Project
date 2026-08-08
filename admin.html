@@ -2219,6 +2219,15 @@
           <input type="text" id="impNote" placeholder="e.g. Bajaj dealer portal, renew every March"
             class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
         </div>
+        <div class="flex flex-col gap-1.5 mb-4">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Visible To</label>
+          <div class="itoggle" id="impVisibilityToggle" style="display:flex;gap:6px">
+            <button type="button" data-vis="all" class="imp-type-btn active">Everyone</button>
+            <button type="button" data-vis="specific" class="imp-type-btn">Specific People</button>
+          </div>
+          <div id="impVisibilityPicker" class="hidden flex flex-col gap-1.5 mt-1.5 max-h-36 overflow-y-auto border-2 border-slate-200 rounded-lg p-2.5"></div>
+          <p class="text-[10.5px] text-slate-400 mt-0.5">A Master ID can always see and re-adjust every entry, even ones set to specific people.</p>
+        </div>
         <div class="flex gap-2 flex-wrap">
           <button id="saveImportantBtn" class="cta-primary">
             <i class="fas fa-floppy-disk"></i> Save Entry
@@ -3632,6 +3641,7 @@ onAuthStateChanged(auth, async (user) => {
     loadTrash();
     loadActivityLog();
     loadImportantInfo();
+    loadTeamMembers(); // needed early — Important Info's visibility picker uses teamMembers
     setBtnState(false);
     startIdleLogoutTimer();
     startActiveStatusCheck();
@@ -7557,13 +7567,21 @@ const IMP_PLACEHOLDERS = { contact:['e.g. Isaac Yonghang','e.g. 9820907795'], li
 const IMP_ICONS = { contact:{icon:'fa-user',bg:'#EFF6FF',fg:'#005EA6'}, link:{icon:'fa-link',bg:'#F0FDF4',fg:'#059669'}, credential:{icon:'fa-key',bg:'#FEF3C7',fg:'#D97706'} };
 
 function loadImportantInfo(){
-  // Fully shared with everyone now — Contacts, Links, and Credentials.
-  // This collection is meant for team-wide portal logins etc., not
-  // personal/sensitive secrets, per Isaac's call.
+  // Each entry can be scoped to specific people by whoever adds/edits it
+  // (visibleTo: 'all' or an array of emails) — filtered out of the
+  // snapshot BEFORE it ever lands in importantData for anyone not on that
+  // list, same as the earlier credential-hardening approach, so a
+  // restricted entry's real value never sits in an unauthorized browser's
+  // memory. A Master ID always sees and can re-adjust everything.
   if(importantUnsub) importantUnsub();
   const q = query(collection(db,"important_info"), orderBy('value1'));
   importantUnsub = onSnapshot(q, snap=>{
-    importantData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const isMaster = currentUserRole === 'owner';
+    const all = snap.docs.map(d=>({id:d.id,...d.data()}));
+    importantData = isMaster ? all : all.filter(a=>{
+      const vis = a.visibleTo;
+      return !Array.isArray(vis) || vis.includes(currentUserEmail);
+    });
     renderImportantList();
   }, err=>console.error('important_info listener failed', err));
 }
@@ -7587,6 +7605,41 @@ document.querySelectorAll('#importantTypeToggle .imp-type-btn').forEach(btn=>{
   });
 });
 
+/* Visible To — the person adding/editing an entry picks who can see it;
+   defaults to Everyone. A Master ID can always see (and re-adjust) every
+   entry regardless of this list, for oversight. */
+let currentImpVisibility = 'all'; // 'all' or array of emails
+
+function renderImpVisibilityPicker(selectedEmails){
+  const wrap = document.getElementById('impVisibilityPicker');
+  if(!wrap) return;
+  const sorted = [...teamMembers].sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  if(!sorted.length){
+    wrap.innerHTML = `<p class="text-xs text-slate-400 py-1">No team members loaded yet.</p>`;
+    return;
+  }
+  wrap.innerHTML = sorted.map(m=>{
+    const checked = selectedEmails.includes(m.email) ? 'checked' : '';
+    return `<label class="flex items-center gap-2 text-xs text-slate-700 font-medium cursor-pointer py-0.5">
+      <input type="checkbox" class="imp-vis-checkbox w-3.5 h-3.5 rounded border-slate-300 accent-bajaj-blue cursor-pointer" value="${escapeHtml(m.email||'')}" ${checked}>
+      ${escapeHtml(m.name||m.email||'Unnamed')}${m.role==='owner' ? ' <span class="text-slate-400">(Master)</span>' : ''}
+    </label>`;
+  }).join('');
+}
+
+document.querySelectorAll('#impVisibilityToggle .imp-type-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#impVisibilityToggle .imp-type-btn').forEach(b=>b.classList.toggle('active', b===btn));
+    const picker = document.getElementById('impVisibilityPicker');
+    if(btn.dataset.vis === 'specific'){
+      picker.classList.remove('hidden');
+      renderImpVisibilityPicker(Array.isArray(currentImpVisibility) ? currentImpVisibility : []);
+    } else {
+      picker.classList.add('hidden');
+    }
+  });
+});
+
 window.openImportantFormModal = (id)=>{
   currentEditImportantId = id || null;
   if(id){
@@ -7599,6 +7652,7 @@ window.openImportantFormModal = (id)=>{
     document.getElementById('impNote').value = item.note || '';
     document.getElementById('cancelImportantBtn').classList.remove('hidden');
     document.getElementById('cancelImportantBtn').classList.add('flex');
+    currentImpVisibility = Array.isArray(item.visibleTo) ? item.visibleTo : 'all';
   } else {
     currentImportantType = 'contact';
     document.getElementById('importantFormTitle').textContent = 'Add Entry';
@@ -7606,6 +7660,17 @@ window.openImportantFormModal = (id)=>{
     document.getElementById('impVal2').value = '';
     document.getElementById('impNote').value = '';
     document.getElementById('cancelImportantBtn').classList.add('hidden');
+    currentImpVisibility = 'all';
+  }
+  document.querySelectorAll('#impVisibilityToggle .imp-type-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.vis === (currentImpVisibility==='all' ? 'all' : 'specific'));
+  });
+  const picker = document.getElementById('impVisibilityPicker');
+  if(currentImpVisibility==='all'){
+    picker.classList.add('hidden');
+  } else {
+    picker.classList.remove('hidden');
+    renderImpVisibilityPicker(currentImpVisibility);
   }
   applyImportantTypeUI(currentImportantType);
   document.getElementById('importantFormModal').classList.add('open');
@@ -7620,7 +7685,14 @@ document.getElementById('saveImportantBtn').addEventListener('click', async ()=>
   const v2 = document.getElementById('impVal2').value.trim();
   if(!v1 || !v2){ toast('Please fill both required fields.','err'); return; }
   const note = document.getElementById('impNote').value.trim();
-  const data = { type: currentImportantType, value1: v1, value2: v2, note };
+  const visMode = document.querySelector('#impVisibilityToggle .imp-type-btn.active')?.dataset.vis || 'all';
+  let visibleTo = 'all';
+  if(visMode === 'specific'){
+    const checked = Array.from(document.querySelectorAll('.imp-vis-checkbox:checked')).map(cb=>cb.value).filter(Boolean);
+    if(!checked.length){ toast('Pick at least one person, or switch back to Everyone.','err'); return; }
+    visibleTo = checked;
+  }
+  const data = { type: currentImportantType, value1: v1, value2: v2, note, visibleTo };
   try{
     if(currentEditImportantId){
       await updateDoc(doc(db,"important_info",currentEditImportantId), data);
@@ -7650,10 +7722,13 @@ function renderImportantList(){
     const v2Display = item.type==='credential'
       ? `<span class="imp-secret" id="impMasked_${item.id}" data-revealed="0">••••••••</span> <button type="button" onclick="window._toggleImpReveal('${item.id}')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-eye text-[11px]" id="impEyeIcon_${item.id}"></i></button>`
       : (item.type==='link' ? `<a href="${escapeHtml(item.value2)}" target="_blank" rel="noopener" class="text-bajaj-blue hover:underline">${escapeHtml(item.value2)}</a>` : escapeHtml(item.value2));
+    const visBadge = Array.isArray(item.visibleTo)
+      ? `<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-100 rounded-full px-2 py-0.5 ml-1.5 flex-shrink-0" title="Only visible to specific people, plus any Master ID"><i class="fas fa-lock text-[8px]"></i> ${item.visibleTo.length}</span>`
+      : '';
     return `<div class="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors">
       <div class="imp-row-icon" style="background:${ic.bg};color:${ic.fg}"><i class="fas ${ic.icon} text-sm"></i></div>
       <div class="min-w-0 flex-1">
-        <div class="text-sm font-bold text-slate-800 truncate">${escapeHtml(item.value1)}</div>
+        <div class="text-sm font-bold text-slate-800 truncate flex items-center">${escapeHtml(item.value1)}${visBadge}</div>
         <div class="text-xs text-slate-500 truncate">${v2Display}</div>
         ${item.note ? `<div class="text-[11px] text-slate-400 mt-0.5 truncate">${escapeHtml(item.note)}</div>` : ''}
       </div>
