@@ -2234,26 +2234,6 @@
           <input type="text" id="impNote" placeholder="e.g. Bajaj dealer portal, renew every March"
             class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
         </div>
-        <div class="flex flex-col gap-1.5 mb-4">
-          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Visible To</label>
-          <div class="itoggle" id="impVisibilityToggle" style="display:flex;gap:6px">
-            <button type="button" data-vis="all" class="imp-type-btn active">Everyone</button>
-            <button type="button" data-vis="specific" class="imp-type-btn">Specific People</button>
-          </div>
-          <div id="impVisibilityPicker" class="hidden flex flex-col gap-1.5 mt-1.5 max-h-36 overflow-y-auto border-2 border-slate-200 rounded-lg p-2.5"></div>
-          <p class="text-[10.5px] text-slate-400 mt-0.5">A Master ID can always see and re-adjust every entry, even ones set to specific people.</p>
-        </div>
-        <div class="flex flex-col gap-1.5 mb-4">
-          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Attach a File <span class="text-slate-400 font-normal normal-case">(opt.)</span></label>
-          <input type="file" id="impAttachInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
-            class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-white file:text-bajaj-blue file:cursor-pointer transition-all w-full"/>
-          <div id="impAttachCurrent" class="hidden items-center gap-2 text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-            <i class="fas fa-paperclip text-slate-400"></i>
-            <span id="impAttachCurrentName" class="flex-1 truncate"></span>
-            <button type="button" onclick="window._removeImpAttachment()" class="text-red-400 hover:text-red-600"><i class="fas fa-xmark"></i></button>
-          </div>
-          <p class="text-[10.5px] text-slate-400" id="impAttachHint">e.g. a signed agreement, ID copy, or portal screenshot.</p>
-        </div>
         <div class="flex gap-2 flex-wrap">
           <button id="saveImportantBtn" class="cta-primary">
             <i class="fas fa-floppy-disk"></i> Save Entry
@@ -3077,12 +3057,10 @@ window._toggleKebab = (btn, type, id) => {
     if(currentUserRole === 'owner' || isMine) docActions.push({ label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('documents', id) });
     openKebabMenuFor(btn, docActions);
   } else if(type === 'important'){
-    const impItem = importantData.find(x=>x.id===id);
-    const impActions = [];
-    if(impItem?.attachment) impActions.push({ label:'Download Attachment', icon:'fa-paperclip', onClick:()=>window.downloadImpAttachment(id) });
-    impActions.push({ label:'Edit', icon:'fa-pen', onClick:()=>window.openImportantFormModal(id) });
-    impActions.push({ label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteImportant(id) });
-    openKebabMenuFor(btn, impActions);
+    openKebabMenuFor(btn, [
+      { label:'Edit', icon:'fa-pen', onClick:()=>window.openImportantFormModal(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteImportant(id) }
+    ]);
   } else if(type === 'hh_inventory'){
     const s = hhInvData.find(x=>x.id===id);
     const cur = s?.status || 'Available';
@@ -3676,7 +3654,6 @@ onAuthStateChanged(auth, async (user) => {
     loadTrash();
     loadActivityLog();
     loadImportantInfo();
-    loadTeamMembers(); // needed early — Important Info's visibility picker uses teamMembers
     setBtnState(false);
     startIdleLogoutTimer();
     startActiveStatusCheck();
@@ -6753,9 +6730,7 @@ function loadSystemLimits(){
 }
 
 function getTotalStorageUsed(){
-  const docsUsed = documents.reduce((sum,d)=>sum+(d.sizeBytes||0),0);
-  const impUsed = importantData.reduce((sum,a)=>sum+(a.attachment?.sizeBytes||0),0);
-  return docsUsed + impUsed;
+  return documents.reduce((sum,d)=>sum+(d.sizeBytes||0),0);
 }
 function formatBytes(bytes){
   if(!bytes) return '0 KB';
@@ -6771,16 +6746,11 @@ async function updateStorageOverview(){
   const list = document.getElementById('storageAllocationList');
   if(!list) return;
   const invCount = await getAccurateTotalInventoryCount();
-  const docsBytes = documents.reduce((sum,d)=>sum+(d.sizeBytes||0),0);
-  const impAttachItems = importantData.filter(a=>a.attachment);
-  const impBytes = impAttachItems.reduce((sum,a)=>sum+(a.attachment?.sizeBytes||0),0);
-  const used = docsBytes + impBytes; // same total getTotalStorageUsed() computes
+  const used = getTotalStorageUsed();
 
   const rows = [
-    { icon:'fa-folder-open', color:'#D97706', label:'Document Vault', usedBytes: docsBytes, maxBytes: STORAGE_CAP_BYTES,
-      sub: `${documents.length} file${documents.length!==1?'s':''} — ${formatBytes(docsBytes)} of ${formatBytes(STORAGE_CAP_BYTES)} shared vault limit` },
-    { icon:'fa-paperclip', color:'#0EA5E9', label:'Important Info Attachments', usedBytes: impBytes, maxBytes: STORAGE_CAP_BYTES,
-      sub: `${impAttachItems.length} file${impAttachItems.length!==1?'s':''} — ${formatBytes(impBytes)}, shares the same vault limit above` },
+    { icon:'fa-folder-open', color:'#D97706', label:'Document Vault', usedBytes: used, maxBytes: STORAGE_CAP_BYTES,
+      sub: `${documents.length} file${documents.length!==1?'s':''} — ${formatBytes(used)} of ${formatBytes(STORAGE_CAP_BYTES)} allowed` },
     { icon:'fa-tags', color:'#005EA6', label:'Master Price List (Models)', count: allMasterBikes.length, maxCount: MAX_BIKES,
       usedBytes: allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike, maxBytes: MAX_BIKES*RECORD_SIZE_ESTIMATE.bike,
       sub: `${allMasterBikes.length} / ${MAX_BIKES} models — up to ${formatBytes(MAX_BIKES*RECORD_SIZE_ESTIMATE.bike)} at full capacity` },
@@ -7605,10 +7575,8 @@ async function purgeExpiredActivityLog(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   IMPORTANT INFO — a shared reference vault for the whole team: contacts,
-   links, and login credentials for outside services (dealer portals, bank,
-   etc.). Everyone can view and manage every entry — this is for team-wide
-   info, not personal/sensitive secrets, per Isaac's call.
+   IMPORTANT INFO — a shared reference vault for the whole team: contacts
+   and useful links. Everyone can view and manage every entry.
    ═══════════════════════════════════════════════════════════════════════ */
 let importantData = [];
 let importantUnsub = null;
@@ -7626,27 +7594,13 @@ const IMP_PLACEHOLDERS = { contact:['e.g. Isaac Yonghang','e.g. 9820907795'], li
 const IMP_ICONS = { contact:{icon:'fa-user',bg:'#EFF6FF',fg:'#005EA6'}, link:{icon:'fa-link',bg:'#F0FDF4',fg:'#059669'} };
 
 function loadImportantInfo(){
-  // Each entry can be scoped to specific people by whoever adds/edits it
-  // (visibleTo: 'all' or an array of profile IDs) — filtered out of the
-  // snapshot BEFORE it ever lands in importantData for anyone not on that
-  // list, same as the earlier credential-hardening approach, so a
-  // restricted entry's real value never sits in an unauthorized browser's
-  // memory. A Master ID always sees and can re-adjust everything.
+  // Fully shared — every Contact/Link is visible and manageable by
+  // everyone, no per-entry restrictions.
   if(importantUnsub) importantUnsub();
   const q = query(collection(db,"important_info"), orderBy('value1'));
   importantUnsub = onSnapshot(q, snap=>{
-    const isMaster = currentUserRole === 'owner';
-    const myUid = auth.currentUser?.uid;
-    const all = snap.docs.map(d=>({id:d.id,...d.data()}));
-    importantData = isMaster ? all : all.filter(a=>{
-      const vis = a.visibleTo;
-      return !Array.isArray(vis) || vis.includes(myUid);
-    });
+    importantData = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderImportantList();
-    // Keep the Storage page's numbers live even if it's already open when
-    // an attachment is added/removed elsewhere, instead of only refreshing
-    // the next time someone navigates into Storage.
-    if(document.getElementById('secStorage')?.classList.contains('active')) updateStorageOverview();
   }, err=>console.error('important_info listener failed', err));
 }
 
@@ -7669,122 +7623,8 @@ document.querySelectorAll('#importantTypeToggle .imp-type-btn').forEach(btn=>{
   });
 });
 
-/* Visible To — the person adding/editing an entry picks who can see it;
-   defaults to Everyone. A Master ID can always see (and re-adjust) every
-   entry regardless of this list, for oversight. */
-let currentImpVisibility = 'all'; // 'all' or array of emails
-let pendingImpAttachFile = null; // File object staged for upload, if any
-let currentImpAttachment = null; // {fileName, fileExt, fileData, sizeBytes} already saved on the entry being edited
-let impAttachmentRemoved = false; // true if editing and the user cleared an existing attachment
-
-document.getElementById('impAttachInput')?.addEventListener('change', (e)=>{
-  pendingImpAttachFile = e.target.files?.[0] || null;
-  impAttachmentRemoved = false;
-});
-window._removeImpAttachment = ()=>{
-  pendingImpAttachFile = null;
-  currentImpAttachment = null;
-  impAttachmentRemoved = true;
-  const el = document.getElementById('impAttachInput');
-  if(el) el.value = '';
-  document.getElementById('impAttachCurrent')?.classList.add('hidden');
-  document.getElementById('impAttachCurrent')?.classList.remove('flex');
-};
-
-// Same compress-then-check-size approach as the Document Vault upload —
-// images get downscaled/re-encoded until they fit, everything else just
-// gets a straight size check. Resolves {fileName, fileExt, fileData,
-// sizeBytes} or null if the file couldn't be processed / is too large.
-function processImpAttachment(file){
-  return new Promise((resolve)=>{
-    const ext = (file.name.split('.').pop()||'').toLowerCase();
-    const isImage = ['jpg','jpeg','png'].includes(ext);
-    const reader = new FileReader();
-    reader.onerror = ()=>{ toast('Could not read that file.','err'); resolve(null); };
-    if(isImage){
-      reader.onload = (e)=>{
-        const img = new Image();
-        img.onload = ()=>{
-          const maxDim = 1600;
-          let w = img.width, h = img.height;
-          const scale = Math.min(maxDim/w, maxDim/h, 1);
-          w = Math.round(w*scale); h = Math.round(h*scale);
-          const canvas = document.createElement('canvas');
-          canvas.width = w; canvas.height = h;
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          let quality = 0.82;
-          let fileData = canvas.toDataURL('image/jpeg', quality);
-          while(fileData.length > DOC_MAX_FILE_SIZE && quality > 0.3){
-            quality -= 0.1;
-            fileData = canvas.toDataURL('image/jpeg', quality);
-          }
-          if(fileData.length > DOC_MAX_FILE_SIZE){
-            toast(`Even compressed, this photo is too large (max ~${formatBytes(DOC_MAX_FILE_SIZE)}).`,'err');
-            resolve(null); return;
-          }
-          resolve({ fileName:file.name, fileExt:ext, fileData, sizeBytes:fileData.length });
-        };
-        img.onerror = ()=>{ toast('Could not read that image.','err'); resolve(null); };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    } else {
-      reader.onload = (e)=>{
-        const fileData = e.target.result;
-        if(fileData.length > DOC_MAX_FILE_SIZE){
-          toast(`File is too large once stored (max ~${formatBytes(DOC_MAX_FILE_SIZE)}).`,'err');
-          resolve(null); return;
-        }
-        resolve({ fileName:file.name, fileExt:ext, fileData, sizeBytes:fileData.length });
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-}
-
-function renderImpVisibilityPicker(selectedIds){
-  const wrap = document.getElementById('impVisibilityPicker');
-  if(!wrap) return;
-  const sorted = [...teamMembers].sort((a,b)=>(a.name||'').localeCompare(b.name||''));
-  if(!sorted.length){
-    wrap.innerHTML = `<p class="text-xs text-slate-400 py-1">No team members loaded yet.</p>`;
-    return;
-  }
-  // Uses the profile's own document ID (= their Firebase Auth UID), not
-  // email — a shared/generic staff account (e.g. "Bajaj Showroom") can
-  // have no email on file at all, which made the checkbox silently
-  // contribute nothing even while checked. The doc ID always exists.
-  wrap.innerHTML = sorted.map(m=>{
-    const checked = selectedIds.includes(m.id) ? 'checked' : '';
-    return `<label class="flex items-center gap-2 text-xs text-slate-700 font-medium cursor-pointer py-0.5">
-      <input type="checkbox" class="imp-vis-checkbox w-3.5 h-3.5 rounded border-slate-300 accent-bajaj-blue cursor-pointer" value="${escapeHtml(m.id)}" ${checked}>
-      ${escapeHtml(m.name||m.email||'Unnamed')}${m.role==='owner' ? ' <span class="text-slate-400">(Master)</span>' : ''}
-    </label>`;
-  }).join('');
-}
-
-document.querySelectorAll('#impVisibilityToggle .imp-type-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('#impVisibilityToggle .imp-type-btn').forEach(b=>b.classList.toggle('active', b===btn));
-    const picker = document.getElementById('impVisibilityPicker');
-    if(btn.dataset.vis === 'specific'){
-      picker.classList.remove('hidden');
-      renderImpVisibilityPicker(Array.isArray(currentImpVisibility) ? currentImpVisibility : []);
-    } else {
-      picker.classList.add('hidden');
-    }
-  });
-});
-
 window.openImportantFormModal = (id)=>{
   currentEditImportantId = id || null;
-  pendingImpAttachFile = null;
-  impAttachmentRemoved = false;
-  const attachInput = document.getElementById('impAttachInput');
-  if(attachInput) attachInput.value = '';
-  const attachCurrent = document.getElementById('impAttachCurrent');
-  const attachHint = document.getElementById('impAttachHint');
-  if(attachHint) attachHint.textContent = `e.g. a signed agreement, ID copy, or portal screenshot — max ~${formatBytes(DOC_MAX_FILE_SIZE)}.`;
   if(id){
     const item = importantData.find(x=>x.id===id);
     if(!item) return;
@@ -7795,16 +7635,6 @@ window.openImportantFormModal = (id)=>{
     document.getElementById('impNote').value = item.note || '';
     document.getElementById('cancelImportantBtn').classList.remove('hidden');
     document.getElementById('cancelImportantBtn').classList.add('flex');
-    currentImpVisibility = Array.isArray(item.visibleTo) ? item.visibleTo : 'all';
-    currentImpAttachment = item.attachment || null;
-    if(currentImpAttachment && attachCurrent){
-      document.getElementById('impAttachCurrentName').textContent = currentImpAttachment.fileName || 'Attached file';
-      attachCurrent.classList.remove('hidden');
-      attachCurrent.classList.add('flex');
-    } else if(attachCurrent){
-      attachCurrent.classList.add('hidden');
-      attachCurrent.classList.remove('flex');
-    }
   } else {
     currentImportantType = 'contact';
     document.getElementById('importantFormTitle').textContent = 'Add Entry';
@@ -7812,19 +7642,6 @@ window.openImportantFormModal = (id)=>{
     document.getElementById('impVal2').value = '';
     document.getElementById('impNote').value = '';
     document.getElementById('cancelImportantBtn').classList.add('hidden');
-    currentImpVisibility = 'all';
-    currentImpAttachment = null;
-    if(attachCurrent){ attachCurrent.classList.add('hidden'); attachCurrent.classList.remove('flex'); }
-  }
-  document.querySelectorAll('#impVisibilityToggle .imp-type-btn').forEach(b=>{
-    b.classList.toggle('active', b.dataset.vis === (currentImpVisibility==='all' ? 'all' : 'specific'));
-  });
-  const picker = document.getElementById('impVisibilityPicker');
-  if(currentImpVisibility==='all'){
-    picker.classList.add('hidden');
-  } else {
-    picker.classList.remove('hidden');
-    renderImpVisibilityPicker(currentImpVisibility);
   }
   applyImportantTypeUI(currentImportantType);
   document.getElementById('importantFormModal').classList.add('open');
@@ -7839,32 +7656,10 @@ document.getElementById('saveImportantBtn').addEventListener('click', async ()=>
   const v2 = document.getElementById('impVal2').value.trim();
   if(!v1 || !v2){ toast('Please fill both required fields.','err'); return; }
   const note = document.getElementById('impNote').value.trim();
-  const visMode = document.querySelector('#impVisibilityToggle .imp-type-btn.active')?.dataset.vis || 'all';
-  let visibleTo = 'all';
-  if(visMode === 'specific'){
-    const checked = Array.from(document.querySelectorAll('.imp-vis-checkbox:checked')).map(cb=>cb.value).filter(Boolean);
-    if(!checked.length){ toast('Pick at least one person, or switch back to Everyone.','err'); return; }
-    visibleTo = checked;
-  }
 
   const saveBtn = document.getElementById('saveImportantBtn');
   saveBtn.disabled = true;
-  let attachment = currentImpAttachment; // carries over unchanged unless replaced/removed below
-  if(pendingImpAttachFile){
-    const used = getTotalStorageUsed();
-    const processed = await processImpAttachment(pendingImpAttachFile);
-    if(!processed){ saveBtn.disabled = false; return; } // processImpAttachment already toasted the reason
-    if(used - (currentImpAttachment?.sizeBytes||0) + processed.sizeBytes > STORAGE_CAP_BYTES){
-      saveBtn.disabled = false;
-      openDocUpgradeModal();
-      return;
-    }
-    attachment = processed;
-  } else if(impAttachmentRemoved){
-    attachment = null;
-  }
-
-  const data = { type: currentImportantType, value1: v1, value2: v2, note, visibleTo, attachment: attachment || null };
+  const data = { type: currentImportantType, value1: v1, value2: v2, note };
   try{
     if(currentEditImportantId){
       await updateDoc(doc(db,"important_info",currentEditImportantId), data);
@@ -7907,12 +7702,6 @@ function renderImportantList(){
   wrap.innerHTML = visible.map(item=>{
     const ic = IMP_ICONS[item.type] || IMP_ICONS.contact;
     const v2Display = item.type==='link' ? `<a href="${escapeHtml(item.value2)}" target="_blank" rel="noopener" class="text-bajaj-blue hover:underline" onclick="event.stopPropagation()">${escapeHtml(item.value2)}</a>` : escapeHtml(item.value2);
-    const visBadge = Array.isArray(item.visibleTo)
-      ? `<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-100 rounded-full px-2 py-0.5 flex-shrink-0" title="Only visible to specific people, plus any Master ID"><i class="fas fa-lock text-[8px]"></i> ${item.visibleTo.length}</span>`
-      : '';
-    const attachBadge = item.attachment
-      ? `<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5 flex-shrink-0" title="${escapeHtml(item.attachment.fileName||'Attached file')}"><i class="fas fa-paperclip text-[8px]"></i> 1</span>`
-      : '';
     return `<div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="openImportantFormModal('${item.id}')">
       <div class="flex items-start justify-between gap-2 mb-3">
         <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${ic.bg}">
@@ -7922,8 +7711,7 @@ function renderImportantList(){
       </div>
       <div class="font-bold text-slate-800 text-sm leading-snug mb-1 truncate" title="${escapeHtml(item.value1)}">${escapeHtml(item.value1)}</div>
       <div class="text-xs text-slate-500 leading-snug truncate mb-1">${v2Display}</div>
-      ${item.note ? `<div class="text-[11px] text-slate-400 leading-snug line-clamp-2 mb-1">${escapeHtml(item.note)}</div>` : ''}
-      ${(visBadge || attachBadge) ? `<div class="flex items-center gap-1.5 flex-wrap mt-2 pt-2 border-t border-slate-100">${visBadge}${attachBadge}</div>` : ''}
+      ${item.note ? `<div class="text-[11px] text-slate-400 leading-snug line-clamp-2">${escapeHtml(item.note)}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -7942,21 +7730,6 @@ window._deleteImportant = async (id)=>{
     if(item) logActivity('Deleted', 'important_info', { model: item.value1 });
     toast('Entry deleted.');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
-};
-
-window.downloadImpAttachment = (id)=>{
-  const item = importantData.find(x=>x.id===id);
-  const att = item?.attachment;
-  if(!att?.fileData) return;
-  let filename = (att.fileName || 'attachment').trim();
-  const ext = (att.fileExt||'').toLowerCase();
-  if(ext && !filename.toLowerCase().endsWith('.'+ext)) filename += '.'+ext;
-  const a = document.createElement('a');
-  a.href = att.fileData;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
 };
 
 function updateNotifBadge(){
