@@ -7627,7 +7627,7 @@ const IMP_ICONS = { contact:{icon:'fa-user',bg:'#EFF6FF',fg:'#005EA6'}, link:{ic
 
 function loadImportantInfo(){
   // Each entry can be scoped to specific people by whoever adds/edits it
-  // (visibleTo: 'all' or an array of emails) — filtered out of the
+  // (visibleTo: 'all' or an array of profile IDs) — filtered out of the
   // snapshot BEFORE it ever lands in importantData for anyone not on that
   // list, same as the earlier credential-hardening approach, so a
   // restricted entry's real value never sits in an unauthorized browser's
@@ -7636,12 +7636,17 @@ function loadImportantInfo(){
   const q = query(collection(db,"important_info"), orderBy('value1'));
   importantUnsub = onSnapshot(q, snap=>{
     const isMaster = currentUserRole === 'owner';
+    const myUid = auth.currentUser?.uid;
     const all = snap.docs.map(d=>({id:d.id,...d.data()}));
     importantData = isMaster ? all : all.filter(a=>{
       const vis = a.visibleTo;
-      return !Array.isArray(vis) || vis.includes(currentUserEmail);
+      return !Array.isArray(vis) || vis.includes(myUid);
     });
     renderImportantList();
+    // Keep the Storage page's numbers live even if it's already open when
+    // an attachment is added/removed elsewhere, instead of only refreshing
+    // the next time someone navigates into Storage.
+    if(document.getElementById('secStorage')?.classList.contains('active')) updateStorageOverview();
   }, err=>console.error('important_info listener failed', err));
 }
 
@@ -7737,7 +7742,7 @@ function processImpAttachment(file){
   });
 }
 
-function renderImpVisibilityPicker(selectedEmails){
+function renderImpVisibilityPicker(selectedIds){
   const wrap = document.getElementById('impVisibilityPicker');
   if(!wrap) return;
   const sorted = [...teamMembers].sort((a,b)=>(a.name||'').localeCompare(b.name||''));
@@ -7745,10 +7750,14 @@ function renderImpVisibilityPicker(selectedEmails){
     wrap.innerHTML = `<p class="text-xs text-slate-400 py-1">No team members loaded yet.</p>`;
     return;
   }
+  // Uses the profile's own document ID (= their Firebase Auth UID), not
+  // email — a shared/generic staff account (e.g. "Bajaj Showroom") can
+  // have no email on file at all, which made the checkbox silently
+  // contribute nothing even while checked. The doc ID always exists.
   wrap.innerHTML = sorted.map(m=>{
-    const checked = selectedEmails.includes(m.email) ? 'checked' : '';
+    const checked = selectedIds.includes(m.id) ? 'checked' : '';
     return `<label class="flex items-center gap-2 text-xs text-slate-700 font-medium cursor-pointer py-0.5">
-      <input type="checkbox" class="imp-vis-checkbox w-3.5 h-3.5 rounded border-slate-300 accent-bajaj-blue cursor-pointer" value="${escapeHtml(m.email||'')}" ${checked}>
+      <input type="checkbox" class="imp-vis-checkbox w-3.5 h-3.5 rounded border-slate-300 accent-bajaj-blue cursor-pointer" value="${escapeHtml(m.id)}" ${checked}>
       ${escapeHtml(m.name||m.email||'Unnamed')}${m.role==='owner' ? ' <span class="text-slate-400">(Master)</span>' : ''}
     </label>`;
   }).join('');
