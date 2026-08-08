@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no"/>
 <title>Bajaj Bikes — Admin Panel</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="icon" type="image/png" href="favicon.png">
@@ -809,30 +810,30 @@
   .pv-table tr.grand-total{ background:#FEF6E7 !important; font-weight:bold; }
   .pv-table td.total-cell{ font-weight:bold; }
 
-  /* ── Delivery Chalan — portrait A4, two copies stacked on one page ── */
+  /* ── Delivery Chalan — the wrapper itself just stages the filled-in
+     markup; printing happens in a separate dedicated window (see
+     printChalanNow), so no @media print rules are needed here. This CSS
+     is what the on-screen Preview modal renders with, and is mirrored
+     exactly inside printChalanNow's popup-window stylesheet below so
+     preview and print never drift apart. ── */
   #chalanPrintWrapper{ display:none; }
-  @media print{
-    body>*:not(#chalanPrintWrapper){ display:none !important; }
-    #chalanPrintWrapper{ display:block !important; }
-    html,body{ margin:0 !important; padding:0 !important; background:#fff !important; width:210mm !important; overflow:visible !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    @page{ size:A4 portrait; margin:10mm; }
-  }
-  .chalan-copy{ font-family:'DM Sans',sans-serif; color:#0F172A; padding-bottom:8mm; margin-bottom:8mm; border-bottom:1px dashed #CBD5E1; }
+  .chalan-copy{ font-family:'Times New Roman',Georgia,serif; color:#000; padding-bottom:8mm; margin-bottom:8mm; border-bottom:1px dashed #999; }
   .chalan-copy:last-child{ border-bottom:none; margin-bottom:0; }
-  .chalan-head{ text-align:center; margin-bottom:4mm; }
-  .chalan-company{ font-family:'Bebas Neue',cursive; font-size:1.5rem; letter-spacing:.03em; color:#005EA6; }
-  .chalan-loc{ font-size:11px; color:#64748B; margin-top:1px; }
-  .chalan-title{ font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; margin-top:5px; border-top:1.5px solid #0F172A; border-bottom:1.5px solid #0F172A; display:inline-block; padding:2px 14px; }
-  .chalan-meta{ font-size:11.5px; line-height:1.85; margin-bottom:4mm; }
-  .chalan-meta b{ display:inline-block; min-width:120px; font-weight:700; }
-  .chalan-table{ width:100%; border-collapse:collapse; font-size:10px; margin-bottom:5mm; }
-  .chalan-table th{ background:#005EA6; color:#fff; padding:5px 4px; border:0.75px solid #000; font-weight:700; }
-  .chalan-table td{ padding:5px 4px; border:0.5px solid #000; text-align:center; }
-  .chalan-total-lbl{ text-align:right !important; font-weight:800; }
-  .chalan-total-val{ font-weight:800; background:#FEF6E7; }
-  .chalan-sign-row{ display:flex; justify-content:space-between; gap:20mm; margin-top:10mm; }
-  .chalan-sign-box{ flex:1; font-size:10.5px; color:#64748B; text-align:center; }
-  .chalan-sign-line{ border-top:1px solid #0F172A; margin-top:12mm; padding-top:3px; }
+  .chalan-head{ text-align:center; margin-bottom:3mm; }
+  .chalan-company{ font-size:22px; font-weight:700; }
+  .chalan-loc{ font-size:12px; margin-top:1px; }
+  .chalan-title{ font-size:13px; font-weight:700; margin-top:3px; }
+  .chalan-meta-table{ width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4mm; font-size:12px; }
+  .chalan-meta-table td{ border:1px solid #000; padding:3px 6px; color:#000; }
+  .chalan-bike-table{ width:100%; border-collapse:collapse; border:1px solid #000; font-size:12px; }
+  .chalan-bike-table td{ border:1px solid #000; padding:3px 6px; color:#000; }
+  .cb-sn{ width:8%; text-align:center; }
+  .cb-label{ width:20%; }
+  .cb-colon{ width:3%; text-align:center; }
+  .cb-value{ width:49%; }
+  .cb-amt{ width:20%; text-align:right; padding-right:8px; }
+  .cb-total-lbl{ font-weight:700; }
+  .cb-total-val{ font-weight:700; }
 
   /* ── Simple, clean JPG-exportable report card (not tied to print page size) ── */
   .jpg-report-paper{ font-family:'DM Sans',sans-serif; background:#fff; width:900px; padding:34px 38px; margin:0 auto; box-sizing:border-box; color:#0F172A; flex-shrink:0; }
@@ -2469,42 +2470,28 @@
 <template id="chalanCopyTemplate">
   <div class="chalan-copy">
     <div class="chalan-head">
-      <div class="chalan-company">Sambriddhi And Brothers Auto Pvt. Ltd.</div>
-      <div class="chalan-loc">Phidim, Panchthar</div>
-      <div class="chalan-title">Delivery Chalan</div>
+      <div class="chalan-company">Sambriddhi &amp; Brothers Auto Pvt. Ltd.</div>
+      <div class="chalan-loc">Phidim Panchthar</div>
+      <div class="chalan-title">Delevery Challan</div>
     </div>
-    <div class="chalan-meta">
-      <div><b>Chalan No:</b> <span data-f="chalanNo"></span></div>
-      <div><b>Date Of Delivery:</b> <span data-f="deliveryDate"></span></div>
-      <div><b>Delivered To:</b> <span data-f="custName"></span></div>
-      <div><b>Address:</b> <span data-f="address"></span></div>
-      <div><b>Contact:</b> <span data-f="contact"></span></div>
-    </div>
-    <table class="chalan-table">
-      <thead>
-        <tr><th>S.N</th><th>Bike Model</th><th>Chassis No</th><th>Engine No</th><th>Regd No</th><th>MFD Date</th><th>Bike Price</th><th>Insurance Amt.</th><th>Insurance Type</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td data-f="model"></td>
-          <td data-f="chassis"></td>
-          <td data-f="engine"></td>
-          <td data-f="regNo"></td>
-          <td data-f="mfdDate"></td>
-          <td data-f="price"></td>
-          <td data-f="insAmount"></td>
-          <td data-f="insType"></td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr><td colspan="8" class="chalan-total-lbl">Total</td><td data-f="total" class="chalan-total-val"></td></tr>
-      </tfoot>
+    <table class="chalan-meta-table">
+      <tr><td><b>Chalan No :</b> <span data-f="chalanNo"></span></td></tr>
+      <tr><td><b>Date Of Delevery :</b> <span data-f="deliveryDate"></span></td></tr>
+      <tr><td><b>Deliverd To :</b> <span data-f="custName"></span></td></tr>
+      <tr><td><b>Address :</b> <span data-f="address"></span></td></tr>
+      <tr><td><b>Contact :</b> <span data-f="contact"></span></td></tr>
     </table>
-    <div class="chalan-sign-row">
-      <div class="chalan-sign-box">Delivered By <div class="chalan-sign-line"></div></div>
-      <div class="chalan-sign-box">Received By <div class="chalan-sign-line"></div></div>
-    </div>
+    <table class="chalan-bike-table">
+      <tr><td class="cb-sn">S.N</td><td class="cb-label">Bike Model</td><td class="cb-colon">:</td><td class="cb-value" data-f="model"></td><td class="cb-amt"></td></tr>
+      <tr><td class="cb-sn">1</td><td class="cb-label">Chassis No</td><td class="cb-colon">:</td><td class="cb-value" data-f="chassis"></td><td class="cb-amt"></td></tr>
+      <tr><td class="cb-sn"></td><td class="cb-label">Engine No</td><td class="cb-colon">:</td><td class="cb-value" data-f="engine"></td><td class="cb-amt"></td></tr>
+      <tr><td class="cb-sn"></td><td class="cb-label">Regd No</td><td class="cb-colon">:</td><td class="cb-value" data-f="regNo"></td><td class="cb-amt"></td></tr>
+      <tr><td class="cb-sn"></td><td class="cb-label">MFD Date</td><td class="cb-colon">:</td><td class="cb-value" data-f="mfdDate"></td><td class="cb-amt"></td></tr>
+      <tr><td class="cb-sn"></td><td class="cb-label">Bike Price</td><td class="cb-colon">:</td><td class="cb-value"></td><td class="cb-amt" data-f="price"></td></tr>
+      <tr><td class="cb-sn"></td><td class="cb-label">Insurance Amount</td><td class="cb-colon">:</td><td class="cb-value"></td><td class="cb-amt" data-f="insAmount"></td></tr>
+      <tr><td class="cb-sn"></td><td class="cb-label">Insurance Type</td><td class="cb-colon">:</td><td class="cb-value" data-f="insType"></td><td class="cb-amt"></td></tr>
+      <tr><td class="cb-sn" colspan="3"></td><td class="cb-total-lbl" style="text-align:center">Total</td><td class="cb-amt cb-total-val" data-f="total"></td></tr>
+    </table>
   </div>
 </template>
 
@@ -4803,8 +4790,57 @@ window.closeChalanPreview = ()=>{
   pModal.classList.add('hidden');
   pModal.classList.remove('flex');
 };
+// Printing the current page directly (relying on @media print to hide
+// everything except the wrapper) turned out unreliable — especially on
+// mobile browsers, "print everything except X" can silently come out
+// blank if any sibling doesn't cooperate with being hidden. Opening the
+// chalan content in its own dedicated window with its own minimal
+// stylesheet sidesteps that completely: there's nothing else on the page
+// for anything to go wrong with.
 window.printChalanNow = ()=>{
-  window.print();
+  const content = document.getElementById('chalanPrintWrapper').innerHTML;
+  if(!content){ toast('Nothing to print — generate a preview first.','err'); return; }
+  const win = window.open('', '_blank');
+  if(!win){ toast('Pop-up blocked — allow pop-ups for this site to print.','err'); return; }
+  win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Delivery Chalan</title>
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
+<style>
+  @page{ size:A4 portrait; margin:10mm; }
+  *{ box-sizing:border-box; }
+  body{ font-family:'Times New Roman',Georgia,serif; margin:0; padding:0; color:#000; }
+  .chalan-copy{ padding-bottom:8mm; margin-bottom:8mm; border-bottom:1px dashed #999; }
+  .chalan-copy:last-child{ border-bottom:none; margin-bottom:0; }
+  .chalan-head{ text-align:center; margin-bottom:3mm; }
+  .chalan-company{ font-size:22px; font-weight:700; }
+  .chalan-loc{ font-size:12px; margin-top:1px; }
+  .chalan-title{ font-size:13px; font-weight:700; margin-top:3px; }
+  .chalan-meta-table{ width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4mm; font-size:12px; }
+  .chalan-meta-table td{ border:1px solid #000; padding:3px 6px; color:#000; }
+  .chalan-bike-table{ width:100%; border-collapse:collapse; border:1px solid #000; font-size:12px; }
+  .chalan-bike-table td{ border:1px solid #000; padding:3px 6px; color:#000; }
+  .cb-sn{ width:8%; text-align:center; }
+  .cb-label{ width:20%; }
+  .cb-colon{ width:3%; text-align:center; }
+  .cb-value{ width:49%; }
+  .cb-amt{ width:20%; text-align:right; padding-right:8px; }
+  .cb-total-lbl{ font-weight:700; }
+  .cb-total-val{ font-weight:700; }
+</style>
+</head>
+<body>${content}</body>
+</html>`);
+  win.document.close();
+  let printed = false;
+  const doPrint = () => { if(printed) return; printed = true; win.focus(); win.print(); };
+  win.onload = doPrint;
+  // Some mobile browsers fire onload before fonts/layout are fully
+  // settled — a short fallback timer covers that without relying on
+  // onload alone, guarded so it never double-fires the print dialog.
+  setTimeout(() => { try { doPrint(); } catch(e){} }, 600);
 };
 
 window._setUnitStatus = async (id, status) => {
