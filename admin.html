@@ -819,6 +819,31 @@
   }
   #stockPrintWrapper{ display:none; }
 
+  /* ── Delivery Chalan — portrait A4, two copies stacked on one page ── */
+  #chalanPrintWrapper{ display:none; }
+  @media print{
+    body>*:not(#chalanPrintWrapper){ display:none !important; }
+    #chalanPrintWrapper{ display:block !important; }
+    html,body{ margin:0 !important; padding:0 !important; background:#fff !important; width:210mm !important; overflow:visible !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    @page{ size:A4 portrait; margin:10mm; }
+  }
+  .chalan-copy{ font-family:'DM Sans',sans-serif; color:#0F172A; padding-bottom:8mm; margin-bottom:8mm; border-bottom:1px dashed #CBD5E1; }
+  .chalan-copy:last-child{ border-bottom:none; margin-bottom:0; }
+  .chalan-head{ text-align:center; margin-bottom:4mm; }
+  .chalan-company{ font-family:'Bebas Neue',cursive; font-size:1.5rem; letter-spacing:.03em; color:#005EA6; }
+  .chalan-loc{ font-size:11px; color:#64748B; margin-top:1px; }
+  .chalan-title{ font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; margin-top:5px; border-top:1.5px solid #0F172A; border-bottom:1.5px solid #0F172A; display:inline-block; padding:2px 14px; }
+  .chalan-meta{ font-size:11.5px; line-height:1.85; margin-bottom:4mm; }
+  .chalan-meta b{ display:inline-block; min-width:120px; font-weight:700; }
+  .chalan-table{ width:100%; border-collapse:collapse; font-size:10px; margin-bottom:5mm; }
+  .chalan-table th{ background:#005EA6; color:#fff; padding:5px 4px; border:0.75px solid #000; font-weight:700; }
+  .chalan-table td{ padding:5px 4px; border:0.5px solid #000; text-align:center; }
+  .chalan-total-lbl{ text-align:right !important; font-weight:800; }
+  .chalan-total-val{ font-weight:800; background:#FEF6E7; }
+  .chalan-sign-row{ display:flex; justify-content:space-between; gap:20mm; margin-top:10mm; }
+  .chalan-sign-box{ flex:1; font-size:10.5px; color:#64748B; text-align:center; }
+  .chalan-sign-line{ border-top:1px solid #0F172A; margin-top:12mm; padding-top:3px; }
+
   /* ── Simple, clean JPG-exportable report card (not tied to print page size) ── */
   .jpg-report-paper{ font-family:'DM Sans',sans-serif; background:#fff; width:900px; padding:34px 38px; margin:0 auto; box-sizing:border-box; color:#0F172A; flex-shrink:0; }
   .jrp-head{ text-align:center; border-bottom:3px solid #005EA6; padding-bottom:14px; }
@@ -2358,6 +2383,125 @@
   </div>
 </div>
 
+<!-- DELIVERY CHALAN -->
+<div id="chalanFormModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);" onclick="if(event.target===this) window.closeChalanModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col" style="animation:slideIn .2s ease;">
+    <div class="p-5 flex items-center justify-between border-b border-slate-100 flex-shrink-0">
+      <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-file-invoice text-amber-500 text-lg"></i> Delivery Chalan</div>
+      <button onclick="window.closeChalanModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="p-5 overflow-y-auto">
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-4">
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">This Unit</div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div><span class="text-slate-400">Model:</span> <span id="chalanModelDisp" class="font-semibold text-slate-700"></span></div>
+          <div><span class="text-slate-400">Chassis:</span> <span id="chalanChassisDisp" class="font-mono text-slate-700"></span></div>
+          <div><span class="text-slate-400">Engine:</span> <span id="chalanEngineDisp" class="font-mono text-slate-700"></span></div>
+          <div><span class="text-slate-400">Regd No:</span> <span id="chalanRegNoDisp" class="font-mono text-slate-700"></span></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">MFD Date</label>
+          <input type="text" id="chalanMfdDate" placeholder="e.g. 2081/05" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Bike Price (Rs.)</label>
+          <input type="number" id="chalanPrice" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Insurance Type</label>
+          <select id="chalanInsType" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full">
+            <option value="Comprehensive">Comprehensive</option>
+            <option value="1st Party">1st Party</option>
+            <option value="3rd Party">3rd Party</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Insurance Amount (Rs.)</label>
+          <input type="number" id="chalanInsAmount" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Chalan No.</label>
+          <input type="text" id="chalanNo" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Date of Delivery</label>
+          <input type="text" id="chalanDeliveryDate" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5 mb-3">
+        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Delivered To (Customer Name) <span class="text-red-400">*</span></label>
+        <input type="text" id="chalanCustName" placeholder="e.g. Ram Bahadur Rai" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-1">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Address</label>
+          <input type="text" id="chalanAddress" placeholder="e.g. Phidim-1, Panchthar" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Contact</label>
+          <input type="text" id="chalanContact" placeholder="98XXXXXXXX" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+        </div>
+      </div>
+    </div>
+    <div class="p-5 pt-3 border-t border-slate-100 flex-shrink-0">
+      <button onclick="window.generateChalanPrint()" class="cta-primary w-full !justify-center">
+        <i class="fas fa-print"></i> Generate &amp; Print
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="chalanPrintWrapper"></div>
+
+<!-- Print-only template for one Delivery Chalan copy -->
+<template id="chalanCopyTemplate">
+  <div class="chalan-copy">
+    <div class="chalan-head">
+      <div class="chalan-company">Sambriddhi And Brothers Auto Pvt. Ltd.</div>
+      <div class="chalan-loc">Phidim, Panchthar</div>
+      <div class="chalan-title">Delivery Chalan</div>
+    </div>
+    <div class="chalan-meta">
+      <div><b>Chalan No:</b> <span data-f="chalanNo"></span></div>
+      <div><b>Date Of Delivery:</b> <span data-f="deliveryDate"></span></div>
+      <div><b>Delivered To:</b> <span data-f="custName"></span></div>
+      <div><b>Address:</b> <span data-f="address"></span></div>
+      <div><b>Contact:</b> <span data-f="contact"></span></div>
+    </div>
+    <table class="chalan-table">
+      <thead>
+        <tr><th>S.N</th><th>Bike Model</th><th>Chassis No</th><th>Engine No</th><th>Regd No</th><th>MFD Date</th><th>Bike Price</th><th>Insurance Amt.</th><th>Insurance Type</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td data-f="model"></td>
+          <td data-f="chassis"></td>
+          <td data-f="engine"></td>
+          <td data-f="regNo"></td>
+          <td data-f="mfdDate"></td>
+          <td data-f="price"></td>
+          <td data-f="insAmount"></td>
+          <td data-f="insType"></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr><td colspan="8" class="chalan-total-lbl">Total</td><td data-f="total" class="chalan-total-val"></td></tr>
+      </tfoot>
+    </table>
+    <div class="chalan-sign-row">
+      <div class="chalan-sign-box">Delivered By <div class="chalan-sign-line"></div></div>
+      <div class="chalan-sign-box">Received By <div class="chalan-sign-line"></div></div>
+    </div>
+  </div>
+</template>
+
 <!-- DUPLICATE RESOLVER -->
 <div id="duplicateResolveModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col" style="max-height:85vh; animation:slideIn .2s ease;">
@@ -3107,6 +3251,7 @@ window._toggleKebab = (btn, type, id) => {
       { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('inventory', id) },
       ...statusActions,
       ...hhActions,
+      { label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id) },
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editInventory(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('inventory', id) }
     ]);
@@ -4553,6 +4698,90 @@ window._editInventory=(id)=>{
   cancel.classList.remove('hidden'); cancel.classList.add('flex');
   openInvFormModal();
   toast('Unit loaded for editing');
+};
+
+/* ═══ DELIVERY CHALAN ═══ */
+let currentChalanUnitId = null;
+
+window.openChalanModal = (id)=>{
+  const s = invData.find(x=>x.id===id);
+  if(!s){ toast('Unit not found.','err'); return; }
+  currentChalanUnitId = id;
+  document.getElementById('chalanModelDisp').textContent = s.model || '—';
+  document.getElementById('chalanChassisDisp').textContent = s.chassis || '—';
+  document.getElementById('chalanEngineDisp').textContent = s.engine || '—';
+  document.getElementById('chalanRegNoDisp').textContent = s.regNo || '—';
+
+  const bike = allMasterBikes.find(b=>b.name===s.model);
+  document.getElementById('chalanPrice').value = bike?.price || '';
+  document.getElementById('chalanMfdDate').value = '';
+  document.getElementById('chalanInsType').value = 'Comprehensive';
+  document.getElementById('chalanInsAmount').value = bike?.Insurance || '';
+  document.getElementById('chalanNo').value = '';
+  document.getElementById('chalanDeliveryDate').value = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('chalanCustName').value = '';
+  document.getElementById('chalanAddress').value = '';
+  document.getElementById('chalanContact').value = '';
+
+  const modal = document.getElementById('chalanFormModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+};
+window.closeChalanModal = ()=>{
+  const modal = document.getElementById('chalanFormModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  currentChalanUnitId = null;
+};
+
+// Switching Insurance Type re-fills the amount from whichever rate the
+// bike model has on file for that type — still editable afterward, this
+// is just a sensible starting point instead of a blank field.
+document.getElementById('chalanInsType')?.addEventListener('change', (e)=>{
+  const s = invData.find(x=>x.id===currentChalanUnitId);
+  const bike = s ? allMasterBikes.find(b=>b.name===s.model) : null;
+  if(!bike) return;
+  const map = { 'Comprehensive':bike.Insurance, '1st Party':bike.firstPartyInsurance, '3rd Party':bike.thirdPartyInsurance };
+  const amt = map[e.target.value];
+  if(amt !== undefined && amt !== null) document.getElementById('chalanInsAmount').value = amt;
+});
+
+window.generateChalanPrint = ()=>{
+  const s = invData.find(x=>x.id===currentChalanUnitId);
+  if(!s){ toast('Unit not found.','err'); return; }
+  const custName = document.getElementById('chalanCustName').value.trim();
+  if(!custName){ toast('Customer name (Delivered To) is required.','err'); return; }
+
+  const price = parseFloat(document.getElementById('chalanPrice').value) || 0;
+  const insAmount = parseFloat(document.getElementById('chalanInsAmount').value) || 0;
+  const fields = {
+    model: s.model || '', chassis: s.chassis || '', engine: s.engine || '', regNo: s.regNo || '',
+    mfdDate: document.getElementById('chalanMfdDate').value.trim(),
+    price: price ? 'Rs. '+price.toLocaleString('en-IN') : '',
+    insAmount: insAmount ? 'Rs. '+insAmount.toLocaleString('en-IN') : '',
+    insType: document.getElementById('chalanInsType').value,
+    total: 'Rs. '+(price+insAmount).toLocaleString('en-IN'),
+    chalanNo: document.getElementById('chalanNo').value.trim(),
+    deliveryDate: document.getElementById('chalanDeliveryDate').value.trim(),
+    custName, address: document.getElementById('chalanAddress').value.trim(),
+    contact: document.getElementById('chalanContact').value.trim()
+  };
+
+  const tpl = document.getElementById('chalanCopyTemplate');
+  const wrap = document.getElementById('chalanPrintWrapper');
+  wrap.innerHTML = '';
+  // Two copies on one page — customer's copy and the office file copy.
+  for(let i=0; i<2; i++){
+    const copy = tpl.content.cloneNode(true);
+    copy.querySelectorAll('[data-f]').forEach(el=>{
+      el.textContent = fields[el.dataset.f] ?? '';
+    });
+    wrap.appendChild(copy);
+  }
+
+  logActivity('Chalan Generated', 'inventory', { model: s.model, chassis: s.chassis, customerName: custName });
+  window.closeChalanModal();
+  setTimeout(()=>window.print(), 100);
 };
 
 window._setUnitStatus = async (id, status) => {
@@ -7838,7 +8067,8 @@ const ACTION_STYLE = {
   'Added': {icon:'fa-circle-plus', cls:'badge-green'},
   'Updated': {icon:'fa-pen', cls:'badge-blue'},
   'Uploaded': {icon:'fa-file-arrow-up', cls:'badge-green'},
-  'Login': {icon:'fa-right-to-bracket', cls:'badge-neutral'}
+  'Login': {icon:'fa-right-to-bracket', cls:'badge-neutral'},
+  'Chalan Generated': {icon:'fa-file-invoice', cls:'badge-blue'}
 };
 
 function renderActivityLog(){
