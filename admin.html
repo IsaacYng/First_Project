@@ -716,6 +716,23 @@
   .doc-type-tab{ color:#7C8494; display:inline-flex; align-items:center; }
   .doc-type-tab:hover{ color:#1F2430; }
   .doc-type-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
+  /* Filter tab rows scroll horizontally on narrow screens instead of
+     wrapping — a tab dropping to its own second line looked broken, and a
+     sideways swipe is a more natural mobile gesture than a wrapped grid. */
+  .filter-scroll{
+    display:flex; align-items:center; gap:4px; flex-wrap:nowrap;
+    overflow-x:auto; -webkit-overflow-scrolling:touch;
+    scrollbar-width:none; -ms-overflow-style:none;
+  }
+  .filter-scroll::-webkit-scrollbar{ display:none; }
+  .filter-scroll .doc-type-tab{ flex-shrink:0; white-space:nowrap; }
+  .filter-count-badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:16px; height:16px; padding:0 4px; border-radius:999px;
+    background:rgba(15,23,42,.08); color:inherit; font-size:9.5px; font-weight:800;
+    margin-left:5px; line-height:1;
+  }
+  .doc-type-tab.active .filter-count-badge{ background:rgba(0,94,166,.12); }
   /* Custom model-filter dropdown — native <select> option lists can't be
      restyled consistently across browsers (Android shows a plain blue-
      highlight system list), so this is a fully custom button+menu instead,
@@ -769,7 +786,6 @@
     color:#64748B; cursor:pointer; transition:all .18s ease; user-select:none;
   }
   .imp-type-btn.active{ background:#EFF6FF; border-color:#005EA6; color:#005EA6; }
-  .imp-row-icon{ width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .imp-secret{ font-family:'JetBrains Mono',monospace; letter-spacing:.06em; }
   .spv-head{ display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid rgba(255,255,255,.08); flex-shrink:0; }
   .spv-body{ padding:20px; overflow:auto; -webkit-overflow-scrolling:touch; background:#0F1420; }
@@ -1897,12 +1913,12 @@
         </button>
       </div>
 
-      <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 mb-4 w-fit flex-wrap">
-        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-type="all" onclick="setDocTypeFilter('all')">All <span id="docCountAll" class="opacity-60"></span></button>
-        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="pdf" onclick="setDocTypeFilter('pdf')"><i class="fas fa-file-pdf mr-1"></i>PDF <span id="docCountPdf" class="opacity-60"></span></button>
-        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="photo" onclick="setDocTypeFilter('photo')"><i class="fas fa-file-image mr-1"></i>Photo <span id="docCountPhoto" class="opacity-60"></span></button>
-        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="word" onclick="setDocTypeFilter('word')"><i class="fas fa-file-word mr-1"></i>Word <span id="docCountWord" class="opacity-60"></span></button>
-        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="excel" onclick="setDocTypeFilter('excel')"><i class="fas fa-file-excel mr-1"></i>Excel <span id="docCountExcel" class="opacity-60"></span></button>
+      <div class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 mb-4 max-w-full">
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-type="all" onclick="setDocTypeFilter('all')">All <span id="docCountAll" class="filter-count-badge"></span></button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="pdf" onclick="setDocTypeFilter('pdf')"><i class="fas fa-file-pdf mr-1"></i>PDF <span id="docCountPdf" class="filter-count-badge"></span></button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="photo" onclick="setDocTypeFilter('photo')"><i class="fas fa-file-image mr-1"></i>Photo <span id="docCountPhoto" class="filter-count-badge"></span></button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="word" onclick="setDocTypeFilter('word')"><i class="fas fa-file-word mr-1"></i>Word <span id="docCountWord" class="filter-count-badge"></span></button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="excel" onclick="setDocTypeFilter('excel')"><i class="fas fa-file-excel mr-1"></i>Excel <span id="docCountExcel" class="filter-count-badge"></span></button>
       </div>
       <div id="docsListWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </div>
@@ -2259,13 +2275,13 @@
           </div>
         </div>
         <div class="px-5 pt-4">
-          <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 mb-1 w-fit flex-wrap">
-            <button class="doc-type-tab imp-filter-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-type="all" onclick="setImportantTypeFilter('all')">All <span id="impCountAll" class="opacity-60"></span></button>
-            <button class="doc-type-tab imp-filter-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="contact" onclick="setImportantTypeFilter('contact')"><i class="fas fa-user mr-1"></i>Contact <span id="impCountContact" class="opacity-60"></span></button>
-            <button class="doc-type-tab imp-filter-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="link" onclick="setImportantTypeFilter('link')"><i class="fas fa-link mr-1"></i>Link <span id="impCountLink" class="opacity-60"></span></button>
+          <div class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 mb-1 max-w-full">
+            <button class="doc-type-tab imp-filter-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-type="all" onclick="setImportantTypeFilter('all')">All <span id="impCountAll" class="filter-count-badge"></span></button>
+            <button class="doc-type-tab imp-filter-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="contact" onclick="setImportantTypeFilter('contact')"><i class="fas fa-user mr-1"></i>Contact <span id="impCountContact" class="filter-count-badge"></span></button>
+            <button class="doc-type-tab imp-filter-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="link" onclick="setImportantTypeFilter('link')"><i class="fas fa-link mr-1"></i>Link <span id="impCountLink" class="filter-count-badge"></span></button>
           </div>
         </div>
-        <div id="importantList" class="flex flex-col divide-y divide-slate-100"></div>
+        <div id="importantList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-5"></div>
       </div>
     </div>
 
@@ -6837,7 +6853,8 @@ function renderDocumentsPage(){
     const el = document.getElementById(elId);
     if(!el) return;
     const n = key==='all' ? documents.length : documents.filter(d=>(DOC_TYPE_GROUPS[key]||[]).includes((d.fileExt||'').toLowerCase())).length;
-    el.textContent = n ? `(${n})` : '';
+    el.textContent = n ? String(n) : '';
+    el.classList.toggle('hidden', !n);
   });
   const filtered = docTypeFilter==='all' ? documents : documents.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes((d.fileExt||'').toLowerCase()));
   if(!filtered.length){
@@ -7860,33 +7877,44 @@ function renderImportantList(){
   // Credential type is retired — filter out any pre-existing entries so
   // they never render, even though the form can't create new ones anymore.
   const byType = importantData.filter(a=>a.type!=='credential');
-  document.getElementById('impCountAll').textContent = byType.length ? `(${byType.length})` : '';
-  document.getElementById('impCountContact').textContent = (()=>{ const n=byType.filter(a=>a.type==='contact').length; return n?`(${n})`:''; })();
-  document.getElementById('impCountLink').textContent = (()=>{ const n=byType.filter(a=>a.type==='link').length; return n?`(${n})`:''; })();
+  const impAllCount = document.getElementById('impCountAll');
+  impAllCount.textContent = byType.length ? String(byType.length) : '';
+  impAllCount.classList.toggle('hidden', !byType.length);
+  const impContactN = byType.filter(a=>a.type==='contact').length;
+  const impContactCount = document.getElementById('impCountContact');
+  impContactCount.textContent = impContactN ? String(impContactN) : '';
+  impContactCount.classList.toggle('hidden', !impContactN);
+  const impLinkN = byType.filter(a=>a.type==='link').length;
+  const impLinkCount = document.getElementById('impCountLink');
+  impLinkCount.textContent = impLinkN ? String(impLinkN) : '';
+  impLinkCount.classList.toggle('hidden', !impLinkN);
   const visible = importantTypeFilter==='all' ? byType : byType.filter(a=>a.type===importantTypeFilter);
   const countEl = document.getElementById('importantCount');
   if(countEl) countEl.textContent = visible.length+' item'+(visible.length!==1?'s':'');
   if(!visible.length){
-    wrap.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-address-book text-3xl opacity-25 block mb-2"></i><p class="text-sm">${byType.length ? 'No matching entries.' : 'Nothing saved yet.'}</p></div>`;
+    wrap.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400"><i class="fas fa-address-book text-3xl opacity-25 block mb-2"></i><p class="text-sm">${byType.length ? 'No matching entries.' : 'Nothing saved yet.'}</p></div>`;
     return;
   }
   wrap.innerHTML = visible.map(item=>{
     const ic = IMP_ICONS[item.type] || IMP_ICONS.contact;
-    const v2Display = item.type==='link' ? `<a href="${escapeHtml(item.value2)}" target="_blank" rel="noopener" class="text-bajaj-blue hover:underline">${escapeHtml(item.value2)}</a>` : escapeHtml(item.value2);
+    const v2Display = item.type==='link' ? `<a href="${escapeHtml(item.value2)}" target="_blank" rel="noopener" class="text-bajaj-blue hover:underline" onclick="event.stopPropagation()">${escapeHtml(item.value2)}</a>` : escapeHtml(item.value2);
     const visBadge = Array.isArray(item.visibleTo)
-      ? `<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-100 rounded-full px-2 py-0.5 ml-1.5 flex-shrink-0" title="Only visible to specific people, plus any Master ID"><i class="fas fa-lock text-[8px]"></i> ${item.visibleTo.length}</span>`
+      ? `<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-100 rounded-full px-2 py-0.5 flex-shrink-0" title="Only visible to specific people, plus any Master ID"><i class="fas fa-lock text-[8px]"></i> ${item.visibleTo.length}</span>`
       : '';
     const attachBadge = item.attachment
-      ? `<span class="inline-flex items-center text-[10px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5 ml-1.5 flex-shrink-0" title="${escapeHtml(item.attachment.fileName||'Attached file')}"><i class="fas fa-paperclip text-[8px]"></i></span>`
+      ? `<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5 flex-shrink-0" title="${escapeHtml(item.attachment.fileName||'Attached file')}"><i class="fas fa-paperclip text-[8px]"></i> 1</span>`
       : '';
-    return `<div class="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors">
-      <div class="imp-row-icon" style="background:${ic.bg};color:${ic.fg}"><i class="fas ${ic.icon} text-sm"></i></div>
-      <div class="min-w-0 flex-1">
-        <div class="text-sm font-bold text-slate-800 truncate flex items-center">${escapeHtml(item.value1)}${visBadge}${attachBadge}</div>
-        <div class="text-xs text-slate-500 truncate">${v2Display}</div>
-        ${item.note ? `<div class="text-[11px] text-slate-400 mt-0.5 truncate">${escapeHtml(item.note)}</div>` : ''}
+    return `<div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="openImportantFormModal('${item.id}')">
+      <div class="flex items-start justify-between gap-2 mb-3">
+        <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${ic.bg}">
+          <i class="fas ${ic.icon} text-lg" style="color:${ic.fg}"></i>
+        </div>
+        <button type="button" class="kebab-btn flex-shrink-0" onclick="event.stopPropagation(); window._toggleKebab(this,'important','${item.id}')" aria-label="Entry actions"><i class="fas fa-ellipsis-vertical"></i></button>
       </div>
-      <button type="button" class="kebab-btn flex-shrink-0" onclick="window._toggleKebab(this,'important','${item.id}')" aria-label="Entry actions"><i class="fas fa-ellipsis-vertical"></i></button>
+      <div class="font-bold text-slate-800 text-sm leading-snug mb-1 truncate" title="${escapeHtml(item.value1)}">${escapeHtml(item.value1)}</div>
+      <div class="text-xs text-slate-500 leading-snug truncate mb-1">${v2Display}</div>
+      ${item.note ? `<div class="text-[11px] text-slate-400 leading-snug line-clamp-2 mb-1">${escapeHtml(item.note)}</div>` : ''}
+      ${(visBadge || attachBadge) ? `<div class="flex items-center gap-1.5 flex-wrap mt-2 pt-2 border-t border-slate-100">${visBadge}${attachBadge}</div>` : ''}
     </div>`;
   }).join('');
 }
