@@ -4713,13 +4713,16 @@ window.openChalanModal = (id)=>{
   document.getElementById('chalanRegNoDisp').textContent = s.regNo || '—';
 
   const bike = allMasterBikes.find(b=>b.name===s.model);
+  if(!bike) toast(`"${s.model}" isn't in the Master Price List anymore — fill Price/Insurance in manually.`,'warn');
   document.getElementById('chalanPrice').value = bike?.price || '';
   document.getElementById('chalanMfdDate').value = '';
   document.getElementById('chalanInsType').value = 'Comprehensive';
   document.getElementById('chalanInsAmount').value = bike?.Insurance || '';
   document.getElementById('chalanNo').value = '';
   document.getElementById('chalanDeliveryDate').value = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  document.getElementById('chalanCustName').value = '';
+  // If this unit was already marked Sold, the buyer's name was captured
+  // then — no reason to make staff type it out a second time here.
+  document.getElementById('chalanCustName').value = s.customerName || '';
   document.getElementById('chalanAddress').value = '';
   document.getElementById('chalanContact').value = '';
 
