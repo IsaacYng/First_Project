@@ -1067,6 +1067,9 @@
         <button id="navStock" onclick="switchSec('stock');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-file-lines"></i> Stock Report
         </button>
+        <button id="navChalans" onclick="switchSec('chalans');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-file-invoice"></i> Chalan Records
+        </button>
         <button id="navHistory" onclick="switchSec('history');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-clock-rotate-left"></i> Activity Log
         </button>
@@ -2202,6 +2205,38 @@
       </div>
     </div>
 
+    <!-- CHALAN RECORDS -->
+    <div class="sec-panel" id="secChalans">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="eyebrow">Reports</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Chalan <span class="text-amber-500">Records</span></div>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Every Delivery Chalan generated from Inventory — kept for 1 year, then cleared automatically.</p>
+        </div>
+        <button id="deleteSelectedChalanBtn" onclick="window.deleteSelectedChalans()" class="hidden items-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 border-2 border-red-200 rounded-xl text-xs font-bold hover:bg-red-100 transition-all flex-shrink-0">
+          <i class="fas fa-trash-can"></i> Delete Selected
+        </button>
+      </div>
+      <div class="yng-card-shell overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm" id="chalanTable">
+            <thead>
+              <tr class="border-b border-slate-100 text-left">
+                <th class="px-4 py-3 w-10"><input type="checkbox" id="chalanSelectAll" onchange="window.toggleSelectAllChalans(this.checked)"></th>
+                <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Date</th>
+                <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Model</th>
+                <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Chassis</th>
+                <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Customer</th>
+                <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Chalan No</th>
+                <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="chalanTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- IMPORTANT INFO (fully shared with the whole team) -->
     <div class="sec-panel" id="secImportant">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
@@ -2392,8 +2427,8 @@
       </div>
       <div class="grid grid-cols-2 gap-3 mb-3">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">MFD Date</label>
-          <input type="text" id="chalanMfdDate" placeholder="e.g. 2081/05" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Make Year</label>
+          <input type="number" id="chalanMfdDate" placeholder="e.g. 2026" min="2000" max="2100" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Bike Price (Rs.)</label>
@@ -2404,7 +2439,6 @@
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Insurance Type</label>
           <select id="chalanInsType" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full">
-            <option value="Comprehensive">Comprehensive</option>
             <option value="1st Party">1st Party</option>
             <option value="3rd Party">3rd Party</option>
           </select>
@@ -2412,6 +2446,16 @@
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Insurance Amount (Rs.)</label>
           <input type="number" id="chalanInsAmount" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Commission (Rs.)</label>
+          <input type="number" id="chalanCommission" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price After Commission (Rs.)</label>
+          <input type="text" id="chalanPriceAfterCom" readonly class="bg-slate-100 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full text-slate-500 font-semibold"/>
         </div>
       </div>
       <div class="grid grid-cols-2 gap-3 mb-3">
@@ -2642,6 +2686,24 @@
         <div class="flex items-center justify-between gap-3">
           <label class="text-xs font-bold text-slate-600 flex-1">Finance Schemes</label>
           <input type="number" id="limitMaxFinanceSchemes" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+        <div class="flex items-center justify-between gap-3">
+          <label class="text-xs font-bold text-slate-600 flex-1">Chalan Records</label>
+          <input type="number" id="limitMaxChalans" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+      </div>
+      <div class="pt-4 mt-1 border-t border-slate-100">
+        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Default Commission (Rs.)</label>
+        <p class="text-xs text-slate-500 mb-3">Auto-fills on every new Chalan by insurance type — still editable per Chalan if a specific sale needs a different amount.</p>
+        <div class="flex flex-col gap-3 mb-4">
+          <div class="flex items-center justify-between gap-3">
+            <label class="text-xs font-bold text-slate-600 flex-1">1st Party</label>
+            <input type="number" id="limitCom1stParty" min="0" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <label class="text-xs font-bold text-slate-600 flex-1">3rd Party</label>
+            <input type="number" id="limitCom3rdParty" min="0" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
         </div>
       </div>
       <button onclick="saveSystemLimits()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
@@ -3763,8 +3825,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', history:'navHistory', trash:'navTrash', important:'navImportant' };
-  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant' };
+  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant' };
+  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -3804,6 +3866,8 @@ onAuthStateChanged(auth, async (user) => {
     loadTrash();
     loadActivityLog();
     loadImportantInfo();
+    loadChalans();
+    autoArchiveOldSoldUnits();
     setBtnState(false);
     startIdleLogoutTimer();
     startActiveStatusCheck();
@@ -4582,6 +4646,9 @@ let MAX_TOTAL_INVENTORY_UNITS = 2000;
 let MAX_BIKES = 50;
 let MAX_ACCESSORIES = 20;
 let MAX_FINANCE_SCHEMES = 20;
+let MAX_CHALANS = 2000;
+let COMMISSION_1ST_PARTY = 1200;
+let COMMISSION_3RD_PARTY = 200;
 
 let cachedTotalUnitCount = null;
 let cachedTotalUnitCountAt = 0;
@@ -4707,6 +4774,102 @@ window._editInventory=(id)=>{
 
 /* ═══ DELIVERY CHALAN ═══ */
 let currentChalanUnitId = null;
+let chalanData = [];
+let chalanUnsub = null;
+const CHALAN_RETENTION_DAYS = 365;
+
+function loadChalans(){
+  if(chalanUnsub) chalanUnsub();
+  chalanUnsub = onSnapshot(query(collection(db,"chalans"), orderBy('createdAt','desc')), snap=>{
+    chalanData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    purgeExpiredChalans();
+    renderChalanTable();
+    updateStorageOverview();
+  }, err=>console.error('chalans listener failed', err));
+}
+
+// Same silent-cleanup pattern as Activity Log/Trash — a year of chalan
+// history is plenty for day-to-day review, and this keeps the record from
+// growing forever. Straight delete, not routed through Trash — a chalan by
+// itself isn't something anyone would need to "undo" a year later.
+async function purgeExpiredChalans(){
+  const cutoff = Date.now() - CHALAN_RETENTION_DAYS*24*60*60*1000;
+  const expired = chalanData.filter(c=>{
+    const at = c.createdAt?.toDate ? c.createdAt.toDate() : new Date(c.createdAt);
+    return at.getTime() < cutoff;
+  });
+  for(const c of expired){
+    try{ await deleteDoc(doc(db,'chalans',c.id)); }catch(e){ console.error('chalan purge failed', e); }
+  }
+}
+
+let selectedChalanIds = new Set();
+function renderChalanTable(){
+  const tbody = document.getElementById('chalanTableBody');
+  if(!tbody) return;
+  if(!chalanData.length){
+    tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-12 text-center text-slate-400"><i class="fas fa-file-invoice text-3xl opacity-25 block mb-2"></i>No Chalans generated yet.</td></tr>`;
+    updateDeleteSelectedChalanBtn();
+    return;
+  }
+  tbody.innerHTML = chalanData.map(c=>{
+    const at = c.createdAt?.toDate ? c.createdAt.toDate() : new Date(c.createdAt);
+    return `<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+      <td class="px-4 py-3"><input type="checkbox" class="chalan-row-checkbox" data-id="${c.id}" ${selectedChalanIds.has(c.id)?'checked':''} onchange="window.toggleSelectChalan('${c.id}', this.checked)"></td>
+      <td class="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</td>
+      <td class="px-4 py-3 text-sm font-semibold text-slate-700">${escapeHtml(c.model||'—')}</td>
+      <td class="px-4 py-3 text-xs font-mono text-slate-500">${escapeHtml(c.chassis||'—')}</td>
+      <td class="px-4 py-3 text-sm text-slate-600">${escapeHtml(c.custName||'—')}</td>
+      <td class="px-4 py-3 text-xs font-mono text-slate-500">${escapeHtml(c.chalanNo||'—')}</td>
+      <td class="px-4 py-3 text-right"><button onclick="window._deleteChalan('${c.id}')" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all"><i class="fas fa-trash-can text-xs"></i></button></td>
+    </tr>`;
+  }).join('');
+  updateDeleteSelectedChalanBtn();
+}
+window.toggleSelectChalan = (id, checked)=>{
+  if(checked) selectedChalanIds.add(id); else selectedChalanIds.delete(id);
+  updateDeleteSelectedChalanBtn();
+};
+window.toggleSelectAllChalans = (checked)=>{
+  selectedChalanIds = checked ? new Set(chalanData.map(c=>c.id)) : new Set();
+  document.querySelectorAll('.chalan-row-checkbox').forEach(cb=>cb.checked = checked);
+  updateDeleteSelectedChalanBtn();
+};
+function updateDeleteSelectedChalanBtn(){
+  const btn = document.getElementById('deleteSelectedChalanBtn');
+  if(!btn) return;
+  btn.classList.toggle('hidden', selectedChalanIds.size===0);
+  btn.classList.toggle('flex', selectedChalanIds.size>0);
+  if(selectedChalanIds.size>0) btn.innerHTML = `<i class="fas fa-trash-can"></i> Delete Selected (${selectedChalanIds.size})`;
+}
+window._deleteChalan = async (id)=>{
+  const ok = await showDangerousConfirm({
+    title: 'Delete this Chalan record?',
+    message: "This will permanently remove this Chalan record. This can't be undone.",
+    okText: 'Delete', countdownSec: 3
+  });
+  if(!ok) return;
+  try{
+    await deleteDoc(doc(db,'chalans',id));
+    selectedChalanIds.delete(id);
+    toast('Chalan record deleted.');
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+window.deleteSelectedChalans = async ()=>{
+  if(!selectedChalanIds.size) return;
+  const ok = await showDangerousConfirm({
+    title: `Delete ${selectedChalanIds.size} Chalan record${selectedChalanIds.size!==1?'s':''}?`,
+    message: "This will permanently remove the selected Chalan records. This can't be undone.",
+    okText: 'Delete All', countdownSec: 3
+  });
+  if(!ok) return;
+  try{
+    for(const id of selectedChalanIds){ await deleteDoc(doc(db,'chalans',id)); }
+    logActivity('Bulk Deleted', 'chalans', { model: `${selectedChalanIds.size} chalan record(s)` });
+    selectedChalanIds.clear();
+    toast('Selected Chalan records deleted.');
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
 
 window.openChalanModal = (id)=>{
   const s = invData.find(x=>x.id===id);
@@ -4720,9 +4883,14 @@ window.openChalanModal = (id)=>{
   const bike = allMasterBikes.find(b=>b.name===s.model);
   if(!bike) toast(`"${s.model}" isn't in the Master Price List anymore — fill Price/Insurance in manually.`,'warn');
   document.getElementById('chalanPrice').value = bike?.price || '';
-  document.getElementById('chalanMfdDate').value = '';
-  document.getElementById('chalanInsType').value = 'Comprehensive';
-  document.getElementById('chalanInsAmount').value = bike?.Insurance || '';
+  // Make Year defaults to the current year — still a plain number field,
+  // so it's a one-tap change for a leftover-stock unit made the year before.
+  document.getElementById('chalanMfdDate').value = new Date().getFullYear();
+  document.getElementById('chalanInsType').value = '1st Party';
+  document.getElementById('chalanInsType')?._csSync?.();
+  document.getElementById('chalanInsAmount').value = bike?.firstPartyInsurance || '';
+  document.getElementById('chalanCommission').value = COMMISSION_1ST_PARTY;
+  updateChalanPriceAfterCom();
   document.getElementById('chalanNo').value = '';
   document.getElementById('chalanDeliveryDate').value = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
   // If this unit was already marked Sold, the buyer's name was captured
@@ -4742,37 +4910,64 @@ window.closeChalanModal = ()=>{
   currentChalanUnitId = null;
 };
 
-// Switching Insurance Type re-fills the amount from whichever rate the
-// bike model has on file for that type — still editable afterward, this
-// is just a sensible starting point instead of a blank field.
+function updateChalanPriceAfterCom(){
+  const ins = parseFloat(document.getElementById('chalanInsAmount').value) || 0;
+  const com = parseFloat(document.getElementById('chalanCommission').value) || 0;
+  const net = ins - com;
+  document.getElementById('chalanPriceAfterCom').value = 'Rs. '+net.toLocaleString('en-IN');
+}
+document.getElementById('chalanInsAmount')?.addEventListener('input', updateChalanPriceAfterCom);
+document.getElementById('chalanCommission')?.addEventListener('input', updateChalanPriceAfterCom);
+
+// Switching Insurance Type re-fills both the insurance amount (from
+// whichever rate the bike model has on file) and the commission (from the
+// Master-set default for that type) — both stay editable afterward, this
+// is just a sensible starting point instead of blank fields every time.
 document.getElementById('chalanInsType')?.addEventListener('change', (e)=>{
   const s = invData.find(x=>x.id===currentChalanUnitId);
   const bike = s ? allMasterBikes.find(b=>b.name===s.model) : null;
-  if(!bike) return;
-  const map = { 'Comprehensive':bike.Insurance, '1st Party':bike.firstPartyInsurance, '3rd Party':bike.thirdPartyInsurance };
-  const amt = map[e.target.value];
-  if(amt !== undefined && amt !== null) document.getElementById('chalanInsAmount').value = amt;
+  const comMap = { '1st Party':COMMISSION_1ST_PARTY, '3rd Party':COMMISSION_3RD_PARTY };
+  document.getElementById('chalanCommission').value = comMap[e.target.value] ?? '';
+  if(bike){
+    const insMap = { '1st Party':bike.firstPartyInsurance, '3rd Party':bike.thirdPartyInsurance };
+    const amt = insMap[e.target.value];
+    if(amt !== undefined && amt !== null) document.getElementById('chalanInsAmount').value = amt;
+  }
+  updateChalanPriceAfterCom();
 });
 
-window.previewChalan = ()=>{
+window.previewChalan = async ()=>{
   const s = invData.find(x=>x.id===currentChalanUnitId);
   if(!s){ toast('Unit not found.','err'); return; }
   const custName = document.getElementById('chalanCustName').value.trim();
   if(!custName){ toast('Customer name (Delivered To) is required.','err'); return; }
+  if(chalanData.length >= MAX_CHALANS){
+    showLimitExceededModal('Chalan Limit Reached', `Chalan records are capped at ${MAX_CHALANS}. Delete old ones first, or reach out below to have the limit raised.`);
+    return;
+  }
 
   const price = parseFloat(document.getElementById('chalanPrice').value) || 0;
   const insAmount = parseFloat(document.getElementById('chalanInsAmount').value) || 0;
+  const commission = parseFloat(document.getElementById('chalanCommission').value) || 0;
+  const priceAfterCom = insAmount - commission;
+  const makeYear = document.getElementById('chalanMfdDate').value.trim();
+  const insType = document.getElementById('chalanInsType').value;
+  const chalanNo = document.getElementById('chalanNo').value.trim();
+  const deliveryDate = document.getElementById('chalanDeliveryDate').value.trim();
+  const address = document.getElementById('chalanAddress').value.trim();
+  const contact = document.getElementById('chalanContact').value.trim();
+
+  // The figure that goes on the actual paperwork is the price AFTER
+  // commission, not the raw insurance rate — that's the number that
+  // matters for what's really changing hands.
   const fields = {
     model: s.model || '', chassis: s.chassis || '', engine: s.engine || '', regNo: s.regNo || '',
-    mfdDate: document.getElementById('chalanMfdDate').value.trim(),
+    mfdDate: makeYear,
     price: price ? 'Rs. '+price.toLocaleString('en-IN') : '',
-    insAmount: insAmount ? 'Rs. '+insAmount.toLocaleString('en-IN') : '',
-    insType: document.getElementById('chalanInsType').value,
-    total: 'Rs. '+(price+insAmount).toLocaleString('en-IN'),
-    chalanNo: document.getElementById('chalanNo').value.trim(),
-    deliveryDate: document.getElementById('chalanDeliveryDate').value.trim(),
-    custName, address: document.getElementById('chalanAddress').value.trim(),
-    contact: document.getElementById('chalanContact').value.trim()
+    insAmount: 'Rs. '+priceAfterCom.toLocaleString('en-IN'),
+    insType,
+    total: 'Rs. '+(price+priceAfterCom).toLocaleString('en-IN'),
+    chalanNo, deliveryDate, custName, address, contact
   };
 
   const tpl = document.getElementById('chalanCopyTemplate');
@@ -4790,6 +4985,17 @@ window.previewChalan = ()=>{
   // print, so what you see really is what you get — no separate template
   // to drift out of sync with the print version.
   document.getElementById('chalanPreviewBody').innerHTML = wrap.innerHTML;
+
+  // Chalans get their own record, separate from the general activity log,
+  // so they can be reviewed/searched/bulk-cleared on their own later.
+  try{
+    await addDoc(collection(db,'chalans'), {
+      unitId: currentChalanUnitId, model: s.model||'', chassis: s.chassis||'', engine: s.engine||'', regNo: s.regNo||'',
+      makeYear, price, insType, insAmount, commission, priceAfterCom,
+      chalanNo, deliveryDate, custName, address, contact,
+      createdAt: new Date()
+    });
+  }catch(e){ console.error('Failed to save chalan record', e); }
 
   logActivity('Chalan Generated', 'inventory', { model: s.model, chassis: s.chassis, customerName: custName });
   window.closeChalanModal();
@@ -4878,7 +5084,11 @@ window._setUnitStatus = async (id, status) => {
   // DOM node is still there (only hidden), and nothing else touches it yet.
   const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : '';
   try{
-    await updateDoc(doc(db,"inventory",id),{status, customerName});
+    const payload = {status, customerName};
+    // Timestamp used to auto-archive Sold units to Trash after 6 months —
+    // only set (or refreshed) when actually landing on Sold.
+    if(status==='Sold') payload.soldAt = new Date();
+    await updateDoc(doc(db,"inventory",id),payload);
     logActivity(status==='Sold' ? 'Marked Sold' : 'Status: '+status, 'inventory', {...s, customerName});
     toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
@@ -6990,7 +7200,7 @@ const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626',label:'PDF'}, d
 // Master ID from the gear icon.
 let STORAGE_CAP_BYTES = 1024 * 1024 * 1024 * 0.7;
 const BYTE_UNITS = { KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 };
-const RECORD_SIZE_ESTIMATE = { bike: 500, inventoryUnit: 1200, accessory: 100, financeScheme: 300 };
+const RECORD_SIZE_ESTIMATE = { bike: 500, inventoryUnit: 1200, accessory: 100, financeScheme: 300, chalan: 500 };
 const OTHER_COLLECTIONS_ESTIMATE = 5 * 1024 * 1024; // rough allowance for activity log / trash / events / team photos
 
 function loadDocuments(){
@@ -7022,6 +7232,9 @@ function loadSystemLimits(){
       if(d.maxTotalInventory) MAX_TOTAL_INVENTORY_UNITS = d.maxTotalInventory;
       if(d.maxAccessories) MAX_ACCESSORIES = d.maxAccessories;
       if(d.maxFinanceSchemes) MAX_FINANCE_SCHEMES = d.maxFinanceSchemes;
+      if(d.maxChalans) MAX_CHALANS = d.maxChalans;
+      if(d.commission1stParty !== undefined) COMMISSION_1ST_PARTY = d.commission1stParty;
+      if(d.commission3rdParty !== undefined) COMMISSION_3RD_PARTY = d.commission3rdParty;
     }
     updateStorageOverview();
     const gearBtn2 = document.getElementById('systemLimitsSettingsBtn');
@@ -7062,7 +7275,10 @@ async function updateStorageOverview(){
       sub: `${accessories.length} / ${MAX_ACCESSORIES} items — up to ${formatBytes(MAX_ACCESSORIES*RECORD_SIZE_ESTIMATE.accessory)} at full capacity` },
     { icon:'fa-percent', color:'#DB2777', label:'Finance Schemes', count: financeSchemes.length, maxCount: MAX_FINANCE_SCHEMES,
       usedBytes: financeSchemes.length*RECORD_SIZE_ESTIMATE.financeScheme, maxBytes: MAX_FINANCE_SCHEMES*RECORD_SIZE_ESTIMATE.financeScheme,
-      sub: `${financeSchemes.length} / ${MAX_FINANCE_SCHEMES} schemes — up to ${formatBytes(MAX_FINANCE_SCHEMES*RECORD_SIZE_ESTIMATE.financeScheme)} at full capacity` }
+      sub: `${financeSchemes.length} / ${MAX_FINANCE_SCHEMES} schemes — up to ${formatBytes(MAX_FINANCE_SCHEMES*RECORD_SIZE_ESTIMATE.financeScheme)} at full capacity` },
+    { icon:'fa-file-invoice', color:'#0EA5E9', label:'Chalan Records', count: chalanData.length, maxCount: MAX_CHALANS,
+      usedBytes: chalanData.length*RECORD_SIZE_ESTIMATE.chalan, maxBytes: MAX_CHALANS*RECORD_SIZE_ESTIMATE.chalan,
+      sub: `${chalanData.length} / ${MAX_CHALANS} records — auto-clears after 1 year` }
   ];
 
   list.innerHTML = rows.map(r=>{
@@ -7449,6 +7665,9 @@ window.openSystemLimitsModal = ()=>{
   document.getElementById('limitMaxInventory').value = MAX_TOTAL_INVENTORY_UNITS;
   document.getElementById('limitMaxAccessories').value = MAX_ACCESSORIES;
   document.getElementById('limitMaxFinanceSchemes').value = MAX_FINANCE_SCHEMES;
+  document.getElementById('limitMaxChalans').value = MAX_CHALANS;
+  document.getElementById('limitCom1stParty').value = COMMISSION_1ST_PARTY;
+  document.getElementById('limitCom3rdParty').value = COMMISSION_3RD_PARTY;
   document.getElementById('systemLimitsModal').classList.remove('hidden');
   document.getElementById('systemLimitsModal').classList.add('flex');
 };
@@ -7462,18 +7681,25 @@ window.saveSystemLimits = async ()=>{
   const maxInventory = parseInt(document.getElementById('limitMaxInventory').value);
   const maxAccessories = parseInt(document.getElementById('limitMaxAccessories').value);
   const maxFinanceSchemes = parseInt(document.getElementById('limitMaxFinanceSchemes').value);
-  if(![maxBikes,maxInventory,maxAccessories,maxFinanceSchemes].every(v=>Number.isInteger(v) && v>0)){
+  const maxChalans = parseInt(document.getElementById('limitMaxChalans').value);
+  const com1stParty = parseInt(document.getElementById('limitCom1stParty').value);
+  const com3rdParty = parseInt(document.getElementById('limitCom3rdParty').value);
+  if(![maxBikes,maxInventory,maxAccessories,maxFinanceSchemes,maxChalans].every(v=>Number.isInteger(v) && v>0)){
     toast('Enter a valid whole number greater than 0 for each limit.','err');
     return;
   }
+  if(![com1stParty,com3rdParty].every(v=>Number.isInteger(v) && v>=0)){
+    toast('Enter a valid commission amount (0 or more) for each type.','err');
+    return;
+  }
   const invCount = await getAccurateTotalInventoryCount(true);
-  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes']];
+  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes'], [maxChalans, chalanData.length, 'chalan records']];
   for(const [limit, used, label] of checks){
     if(limit < used){ toast(`Can't set the ${label} limit below the ${used} already on file.`,'err'); return; }
   }
   try{
-    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxAccessories, maxFinanceSchemes }, { merge:true });
-    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Acc:${maxAccessories} Fin:${maxFinanceSchemes}` });
+    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxAccessories, maxFinanceSchemes, maxChalans, commission1stParty:com1stParty, commission3rdParty:com3rdParty }, { merge:true });
+    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Acc:${maxAccessories} Fin:${maxFinanceSchemes} Chalan:${maxChalans}` });
     toast('Record limits updated.');
     closeSystemLimitsModal();
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
@@ -7753,6 +7979,39 @@ async function purgeExpiredTrash(){
       await deleteDoc(doc(db,'trash',t.id));
     }catch(e){ console.error('purge failed', e); }
   }
+}
+
+const SOLD_UNIT_ARCHIVE_DAYS = 182; // ~6 months
+
+// Sold units older than 6 months move to Trash automatically — same 7-day
+// recovery window as any manual delete (purgeExpiredTrash above handles
+// the "not restored in time -> gone for good" half of this on its own,
+// nothing extra needed here). Keeps Live Inventory from slowly filling up
+// with units that finished their business months ago, without losing the
+// record outright — it's just sitting in Trash instead of center stage.
+async function autoArchiveOldSoldUnits(){
+  try{
+    const cutoff = Date.now() - SOLD_UNIT_ARCHIVE_DAYS*24*60*60*1000;
+    const snap = await getDocs(query(collection(db,'inventory'), where('status','==','Sold')));
+    const stale = snap.docs
+      .map(d=>({id:d.id, ...d.data()}))
+      .filter(u=>{
+        const soldAt = u.soldAt?.toDate ? u.soldAt.toDate() : (u.soldAt ? new Date(u.soldAt) : null);
+        return soldAt && soldAt.getTime() < cutoff;
+      });
+    if(!stale.length) return;
+    for(const u of stale){
+      await moveToTrash('inventory', u.id, u);
+      await deleteDoc(doc(db,'inventory', u.id));
+    }
+    const names = stale.slice(0,5).map(u=>u.model||'Unit').join(', ') + (stale.length>5 ? ` +${stale.length-5} more` : '');
+    // Logged rather than just toasted — a Master ID sees this in their
+    // notification feed regardless of which staff member's login happened
+    // to trigger the sweep, so it's never missed just because Isaac wasn't
+    // the one signed in at the time.
+    logActivity('Auto-Archived', 'inventory', { model: `${stale.length} sold unit(s) — ${names}` });
+    toast(`${stale.length} Sold unit${stale.length!==1?'s':''} (6+ months old) moved to Trash: ${names}`, 'warn');
+  }catch(e){ console.error('autoArchiveOldSoldUnits failed', e); }
 }
 
 function daysLeft(deletedAt){
@@ -8139,7 +8398,8 @@ const ACTION_STYLE = {
   'Updated': {icon:'fa-pen', cls:'badge-blue'},
   'Uploaded': {icon:'fa-file-arrow-up', cls:'badge-green'},
   'Login': {icon:'fa-right-to-bracket', cls:'badge-neutral'},
-  'Chalan Generated': {icon:'fa-file-invoice', cls:'badge-blue'}
+  'Chalan Generated': {icon:'fa-file-invoice', cls:'badge-blue'},
+  'Auto-Archived': {icon:'fa-box-archive', cls:'badge-neutral'}
 };
 
 function renderActivityLog(){
@@ -8786,8 +9046,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', history:'Activity Log', trash:'Trash', important:'Important Info' };
-const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', history:'secHistory', trash:'secTrash', important:'secImportant' };
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info' };
+const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant' };
 window.switchSec=(sec)=>{
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
@@ -8814,6 +9074,7 @@ window.switchSec=(sec)=>{
   if(sec==='storage') updateStorageOverview();
   if(sec==='events') renderEventsPage();
   if(sec==='stock') loadStockReportData(true);
+  if(sec==='chalans') renderChalanTable();
   if(sec==='history') renderActivityLog();
   if(sec==='trash') renderTrashTable();
   if(sec==='important') renderImportantList();
