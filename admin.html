@@ -2454,8 +2454,8 @@
       <div class="flex items-center gap-2 section-title text-xl"><i class="fas fa-eye text-amber-500"></i> Preview</div>
       <button onclick="window.closeChalanPreview()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
     </div>
-    <div class="overflow-y-auto p-6 bg-slate-100" style="flex:1">
-      <div id="chalanPreviewBody" class="bg-white shadow-md mx-auto" style="max-width:210mm;padding:10mm;box-sizing:border-box"></div>
+    <div class="overflow-auto p-6 bg-slate-100" style="flex:1">
+      <div id="chalanPreviewBody" class="bg-white shadow-md mx-auto" style="width:210mm;min-width:210mm;padding:10mm;box-sizing:border-box"></div>
     </div>
     <div class="p-4 border-t border-slate-100 flex-shrink-0 flex gap-2">
       <button onclick="window.closeChalanPreview()" class="flex-1 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-slate-300 transition-all">Close</button>
@@ -3223,28 +3223,40 @@ window._toggleKebab = (btn, type, id) => {
     //  HH Sales -> counts in OUR stock, reported to HH as sold
     //  HH Hide  -> does NOT count in our stock, held back from HH's report
     //           (functionally the bike is really sold — same as Mark Sold)
-    // Once an HH flag is active, plain status changes (Available/Booked/Sold)
-    // are hidden — only "Undo HH ..." shows. This stops a unit ending up in
-    // a contradictory state, e.g. "Booked" while also HH Hide (which really
-    // means already sold). Undo the flag first, then change status if needed.
-    const statusActions = hh ? [] : ['Available','Booked','Sold']
-      .filter(st => st !== cur)
-      .map(st => ({
-        label: 'Mark '+st,
-        icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
-        onClick: () => window._setUnitStatus(id, st)
-      }));
-    const hhActions = hh
-      ? [{ label: 'Undo HH '+hh, icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, null) }]
-      : [
-          { label:'Make HH Sales', icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, 'Sales') },
-          { label:'Make HH Hide', icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, 'Hide') }
-        ];
+    // "Finalized" = the unit has actually gone out the door (Sold, or HH
+    // Hide which is functionally the same thing) — once there, Booked/HH
+    // toggles stop making sense; only an undo-back-to-Available and the
+    // Delivery Challan belong in the menu.
+    const isFinalized = !!hh || cur === 'Sold';
+    let statusActions;
+    if(hh){
+      statusActions = [{ label: 'Undo HH '+hh, icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, null) }];
+    } else if(cur === 'Sold'){
+      statusActions = [{ label:'Mark Available', icon:'fa-rotate-left', onClick:()=>window._setUnitStatus(id, 'Available') }];
+    } else {
+      statusActions = ['Available','Booked','Sold']
+        .filter(st => st !== cur)
+        .map(st => ({
+          label: 'Mark '+st,
+          icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
+          onClick: () => window._setUnitStatus(id, st)
+        }));
+    }
+    const hhActions = isFinalized ? [] : [
+      { label:'Make HH Sales', icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, 'Sales') },
+      { label:'Make HH Hide', icon:'fa-bullseye', onClick:()=>window._setHHFlag(id, 'Hide') }
+    ];
+    // Only a unit that's actually been delivered needs a Delivery Challan —
+    // there's no insurance/handover to paper for one still sitting on
+    // the floor as Available or Booked.
+    const chalanAction = isFinalized
+      ? [{ label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id) }]
+      : [];
     openKebabMenuFor(btn, [
       { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('inventory', id) },
       ...statusActions,
       ...hhActions,
-      { label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id) },
+      ...chalanAction,
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editInventory(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('inventory', id) }
     ]);
@@ -4766,14 +4778,14 @@ window.previewChalan = ()=>{
   const tpl = document.getElementById('chalanCopyTemplate');
   const wrap = document.getElementById('chalanPrintWrapper');
   wrap.innerHTML = '';
-  // Two copies on one page — customer's copy and the office file copy.
-  for(let i=0; i<2; i++){
-    const copy = tpl.content.cloneNode(true);
-    copy.querySelectorAll('[data-f]').forEach(el=>{
-      el.textContent = fields[el.dataset.f] ?? '';
-    });
-    wrap.appendChild(copy);
-  }
+  // Single copy per print — the original template had two stacked on one
+  // page (customer + office copies together), but that's not needed here;
+  // print again separately if a second copy is ever wanted.
+  const copy = tpl.content.cloneNode(true);
+  copy.querySelectorAll('[data-f]').forEach(el=>{
+    el.textContent = fields[el.dataset.f] ?? '';
+  });
+  wrap.appendChild(copy);
   // The on-screen preview reuses the exact same filled markup that will
   // print, so what you see really is what you get — no separate template
   // to drift out of sync with the print version.
@@ -8979,6 +8991,7 @@ function enhanceNativeSelect(select, opts={}){
 
 function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('mCategory'), { placeholder:'Category' });
+  enhanceNativeSelect(document.getElementById('chalanInsType'), { placeholder:'Insurance Type' });
 }
 document.addEventListener('DOMContentLoaded', initCustomSelects);
 </script>
