@@ -809,16 +809,6 @@
   .pv-table tr.grand-total{ background:#FEF6E7 !important; font-weight:bold; }
   .pv-table td.total-cell{ font-weight:bold; }
 
-  @media print{
-    body>*:not(#stockPrintWrapper){ display:none !important; }
-    #stockPrintWrapper{ display:block !important; }
-    html,body{ margin:0 !important; padding:0 !important; background:#fff !important; width:297mm !important; overflow:visible !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .print-page{ width:297mm !important; min-height:210mm !important; height:210mm !important; padding:9mm 10mm !important; margin:0 auto !important; box-sizing:border-box !important; page-break-after:always !important; }
-    .print-page:last-child{ page-break-after:avoid !important; }
-    @page{ size:A4 landscape; margin:0; }
-  }
-  #stockPrintWrapper{ display:none; }
-
   /* ── Delivery Chalan — portrait A4, two copies stacked on one page ── */
   #chalanPrintWrapper{ display:none; }
   @media print{
@@ -2328,7 +2318,6 @@
     </div>
   </div>
 </div>
-<div id="stockPrintWrapper"></div>
 
 <!-- CONFIRM MODAL -->
 <div id="confirmModal" class="hidden fixed inset-0 z-[700] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);">
@@ -2450,9 +2439,26 @@
       </div>
     </div>
     <div class="p-5 pt-3 border-t border-slate-100 flex-shrink-0">
-      <button onclick="window.generateChalanPrint()" class="cta-primary w-full !justify-center">
-        <i class="fas fa-print"></i> Generate &amp; Print
+      <button onclick="window.previewChalan()" class="cta-primary w-full !justify-center">
+        <i class="fas fa-eye"></i> Preview
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- CHALAN PREVIEW (screen) -->
+<div id="chalanPreviewModal" class="hidden fixed inset-0 z-[650] items-center justify-center p-4" style="background:rgba(15,23,42,.65);backdrop-filter:blur(3px);" onclick="if(event.target===this) window.closeChalanPreview()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[92vh] flex flex-col" style="animation:slideIn .2s ease;">
+    <div class="p-4 flex items-center justify-between border-b border-slate-100 flex-shrink-0">
+      <div class="flex items-center gap-2 section-title text-xl"><i class="fas fa-eye text-amber-500"></i> Preview</div>
+      <button onclick="window.closeChalanPreview()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="overflow-y-auto p-6 bg-slate-100" style="flex:1">
+      <div id="chalanPreviewBody" class="bg-white shadow-md mx-auto" style="max-width:210mm;padding:10mm;box-sizing:border-box"></div>
+    </div>
+    <div class="p-4 border-t border-slate-100 flex-shrink-0 flex gap-2">
+      <button onclick="window.closeChalanPreview()" class="flex-1 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-slate-300 transition-all">Close</button>
+      <button onclick="window.printChalanNow()" class="flex-1 cta-primary !justify-center"><i class="fas fa-print"></i> Print</button>
     </div>
   </div>
 </div>
@@ -4749,7 +4755,7 @@ document.getElementById('chalanInsType')?.addEventListener('change', (e)=>{
   if(amt !== undefined && amt !== null) document.getElementById('chalanInsAmount').value = amt;
 });
 
-window.generateChalanPrint = ()=>{
+window.previewChalan = ()=>{
   const s = invData.find(x=>x.id===currentChalanUnitId);
   if(!s){ toast('Unit not found.','err'); return; }
   const custName = document.getElementById('chalanCustName').value.trim();
@@ -4781,10 +4787,24 @@ window.generateChalanPrint = ()=>{
     });
     wrap.appendChild(copy);
   }
+  // The on-screen preview reuses the exact same filled markup that will
+  // print, so what you see really is what you get — no separate template
+  // to drift out of sync with the print version.
+  document.getElementById('chalanPreviewBody').innerHTML = wrap.innerHTML;
 
   logActivity('Chalan Generated', 'inventory', { model: s.model, chassis: s.chassis, customerName: custName });
   window.closeChalanModal();
-  setTimeout(()=>window.print(), 100);
+  const pModal = document.getElementById('chalanPreviewModal');
+  pModal.classList.remove('hidden');
+  pModal.classList.add('flex');
+};
+window.closeChalanPreview = ()=>{
+  const pModal = document.getElementById('chalanPreviewModal');
+  pModal.classList.add('hidden');
+  pModal.classList.remove('flex');
+};
+window.printChalanNow = ()=>{
+  window.print();
 };
 
 window._setUnitStatus = async (id, status) => {
