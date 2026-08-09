@@ -2215,10 +2215,15 @@
 
     <!-- MODEL ALIASES (Master-only) -->
     <div class="sec-panel" id="secModelAliases">
-      <div class="mb-6">
-        <div class="eyebrow">Tools · Master Only</div>
-        <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Model <span class="text-amber-500">Aliases</span></div>
-        <p class="text-sm text-slate-500 mt-1.5 max-w-lg">When the same bike gets typed differently across records — like "150 SD" and "150 DTS-i" — link them here so price/insurance lookups (Chalan, etc.) still find the right model.</p>
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="eyebrow">Tools · Master Only</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Model <span class="text-amber-500">Aliases</span></div>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">When the same bike gets typed differently across records — like "150 SD" and "150 DTS-i" — link them here so price/insurance lookups (Chalan, etc.) still find the right model.</p>
+        </div>
+        <button onclick="window.openAliasFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <i class="fas fa-plus"></i> Add Alias
+        </button>
       </div>
 
       <div class="yng-card-shell overflow-hidden mb-5">
@@ -2234,22 +2239,36 @@
         <div id="modelMismatchList"></div>
       </div>
 
+      <!-- Add/Edit Alias (modal) -->
+      <div id="aliasFormModal" class="form-modal-overlay" onclick="if(event.target===this) window.closeAliasFormModal()">
+      <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
-        <div class="flex items-center gap-2 section-title text-2xl mb-4"><i class="fas fa-link text-amber-500"></i> Add an Alias</div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Typed As <span class="text-red-400">*</span></label>
-            <input type="text" id="aliasRawInput" placeholder="e.g. 150 SD" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-link text-amber-500 text-lg"></i>
+            <span id="aliasFormTitle">Add Alias</span>
           </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Actually Means <span class="text-red-400">*</span></label>
-            <select id="aliasCanonicalSelect" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full">
-              <option value="">Select a model…</option>
-            </select>
-          </div>
+          <button onclick="window.closeAliasFormModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
         </div>
-        <button onclick="window.addModelAlias()" class="cta-primary !py-2 !px-4 !text-xs"><i class="fas fa-plus"></i> Add Alias</button>
+        <div class="flex flex-col gap-1.5 mb-4">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Typed As <span class="text-red-400">*</span></label>
+          <input type="text" id="aliasRawInput" placeholder="e.g. 150 SD" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+        </div>
+        <div class="flex flex-col gap-1.5 mb-4">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Actually Means <span class="text-red-400">*</span></label>
+          <select id="aliasCanonicalSelect" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full">
+            <option value="">Select a model…</option>
+          </select>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="window.addModelAlias()" class="cta-primary"><i class="fas fa-floppy-disk"></i> Save Alias</button>
+          <button id="cancelAliasBtn" onclick="window.closeAliasFormModal()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
+            <i class="fas fa-xmark"></i> Cancel
+          </button>
+        </div>
       </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /aliasFormModal -->
 
       <div class="yng-card-shell overflow-hidden">
         <div class="px-5 py-4 border-b border-slate-100">
@@ -3335,6 +3354,11 @@ window._toggleKebab = (btn, type, id) => {
     const isMine = d?.uploadedBy && (d.uploadedBy===currentUserEmail || d.uploadedBy===currentUserName);
     if(currentUserRole === 'owner' || isMine) docActions.push({ label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('documents', id) });
     openKebabMenuFor(btn, docActions);
+  } else if(type === 'model_aliases'){
+    openKebabMenuFor(btn, [
+      { label:'Edit', icon:'fa-pen', onClick:()=>window.openAliasFormModal(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteModelAlias(id) }
+    ]);
   } else if(type === 'chalans'){
     openKebabMenuFor(btn, [
       { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('chalans', id) },
@@ -5059,7 +5083,7 @@ function renderModelAliasesPage(){
           <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#EFF6FF">
             <i class="fas fa-code-compare text-lg" style="color:#005EA6"></i>
           </div>
-          <button type="button" onclick="window._deleteModelAlias('${a.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all" aria-label="Remove alias"><i class="fas fa-trash-can text-xs"></i></button>
+          <button type="button" class="kebab-btn flex-shrink-0" onclick="window._toggleKebab(this,'model_aliases','${a.id}')" aria-label="Alias actions"><i class="fas fa-ellipsis-vertical"></i></button>
         </div>
         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Typed As</div>
         <div class="font-bold text-slate-800 text-sm leading-snug mb-2 truncate" title="${escapeHtml(a.alias)}">${escapeHtml(a.alias)}</div>
@@ -5070,11 +5094,42 @@ function renderModelAliasesPage(){
   }
 }
 
-window.openAliasFormFor = (rawModel)=>{
-  const input = document.getElementById('aliasRawInput');
-  if(input){ input.value = rawModel; input.scrollIntoView({behavior:'smooth', block:'center'}); input.focus(); }
+let currentEditAliasId = null;
+
+window.openAliasFormModal = (id)=>{
+  currentEditAliasId = id || null;
+  if(id){
+    const a = modelAliasesData.find(x=>x.id===id);
+    if(!a) return;
+    document.getElementById('aliasFormTitle').textContent = 'Edit Alias';
+    document.getElementById('aliasRawInput').value = a.alias || '';
+    document.getElementById('aliasCanonicalSelect').value = a.canonical || '';
+    document.getElementById('aliasCanonicalSelect')?._csSync?.();
+    document.getElementById('cancelAliasBtn').classList.remove('hidden');
+    document.getElementById('cancelAliasBtn').classList.add('flex');
+  } else {
+    document.getElementById('aliasFormTitle').textContent = 'Add Alias';
+    document.getElementById('aliasRawInput').value = '';
+    document.getElementById('aliasCanonicalSelect').value = '';
+    document.getElementById('aliasCanonicalSelect')?._csSync?.();
+    document.getElementById('cancelAliasBtn').classList.add('hidden');
+  }
+  document.getElementById('aliasFormModal').classList.add('open');
+};
+window.closeAliasFormModal = ()=>{
+  currentEditAliasId = null;
+  document.getElementById('aliasFormModal').classList.remove('open');
 };
 
+// Pre-fills and opens the modal for a flagged unmatched name, rather than
+// just dropping a value into a field the person then has to go find.
+window.openAliasFormFor = (rawModel)=>{
+  window.openAliasFormModal();
+  document.getElementById('aliasRawInput').value = rawModel;
+};
+
+// The one-tap "Yes, same bike" on an auto-suggested match — skips the
+// modal entirely since there's nothing left to fill in.
 window.confirmModelAlias = async (alias, canonical)=>{
   if(modelAliasesData.length >= MAX_MODEL_ALIASES){
     showLimitExceededModal('Model Alias Limit Reached', `Model Aliases are capped at ${MAX_MODEL_ALIASES}. Remove one first, or reach out below to have the limit raised.`);
@@ -5091,9 +5146,22 @@ window.addModelAlias = async ()=>{
   const alias = document.getElementById('aliasRawInput').value.trim();
   const canonical = document.getElementById('aliasCanonicalSelect').value;
   if(!alias || !canonical){ toast('Fill in both fields.','err'); return; }
-  await window.confirmModelAlias(alias, canonical);
-  document.getElementById('aliasRawInput').value = '';
-  document.getElementById('aliasCanonicalSelect').value = '';
+  try{
+    if(currentEditAliasId){
+      await updateDoc(doc(db,'model_aliases',currentEditAliasId), { alias, canonical });
+      logActivity('Updated', 'model_aliases', { model: `${alias} → ${canonical}` });
+      toast('Alias updated.');
+    } else {
+      if(modelAliasesData.length >= MAX_MODEL_ALIASES){
+        showLimitExceededModal('Model Alias Limit Reached', `Model Aliases are capped at ${MAX_MODEL_ALIASES}. Remove one first, or reach out below to have the limit raised.`);
+        return;
+      }
+      await addDoc(collection(db,'model_aliases'), { alias, canonical, createdAt: new Date() });
+      logActivity('Added', 'model_aliases', { model: `${alias} → ${canonical}` });
+      toast(`"${alias}" will now match "${canonical}".`);
+    }
+    window.closeAliasFormModal();
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 window._deleteModelAlias = async (id)=>{
@@ -9641,6 +9709,7 @@ function enhanceNativeSelect(select, opts={}){
 function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('mCategory'), { placeholder:'Category' });
   enhanceNativeSelect(document.getElementById('chalanInsType'), { placeholder:'Insurance Type' });
+  enhanceNativeSelect(document.getElementById('aliasCanonicalSelect'), { placeholder:'Select a model…', searchable:true });
 }
 document.addEventListener('DOMContentLoaded', initCustomSelects);
 </script>
