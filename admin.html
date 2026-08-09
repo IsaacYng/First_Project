@@ -160,7 +160,7 @@
        reveals it) should sit as a flex row like every other cell, not the
        desktop table-cell display used above 640px. !important guarantees
        this wins over the ID-scoped desktop rule at this breakpoint. */
-    #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col { display: flex !important; justify-content: flex-end !important; }
+    #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col { display: flex !important; justify-content: flex-end !important; }
   }
 
   /* ═══════════ INDEX.HTML DESIGN SYSTEM — CTAs, badges, cards ═══════════ */
@@ -300,16 +300,16 @@
   /* Select/checkbox column stays hidden until "Select" is tapped from a
      row's action menu (or the bulk bar is otherwise engaged) — keeps the
      table clean day-to-day instead of always showing tick-boxes. */
-  #stockTable .sel-col, #hhInvTable .sel-col{ display:none; }
-  #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col{ display:table-cell; }
+  #stockTable .sel-col, #hhInvTable .sel-col, #chalanTable .sel-col{ display:none; }
+  #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col{ display:table-cell; }
   /* Selected-row glow — Bajaj blue tint so a ticked unit is obvious at a
      glance, not just a tiny checkmark easy to lose track of. */
-  #stockTable.select-mode tbody tr.row-selected, #hhInvTable.select-mode tbody tr.row-selected {
+  #stockTable.select-mode tbody tr.row-selected, #hhInvTable.select-mode tbody tr.row-selected, #chalanTable.select-mode tbody tr.row-selected {
     background: #EAF3FB !important;
     box-shadow: inset 3px 0 0 #005EA6;
     transition: background .15s ease;
   }
-  #stockTable.select-mode tbody tr, #hhInvTable.select-mode tbody tr { transition: background .15s ease; }
+  #stockTable.select-mode tbody tr, #hhInvTable.select-mode tbody tr, #chalanTable.select-mode tbody tr { transition: background .15s ease; }
   .kebab-menu{
     position:fixed; z-index:550; min-width:150px; background:#fff; border-radius:12px;
     border:1px solid #E2E8F0; box-shadow:0 10px 30px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.06);
@@ -834,6 +834,7 @@
   .cb-amt{ width:20%; text-align:right; padding-right:8px; }
   .cb-total-lbl{ font-weight:700; }
   .cb-total-val{ font-weight:700; }
+  .chalan-bike-table tbody tr:nth-child(even), .chalan-bike-table tr:nth-child(even){ background:#F8FAFC; }
 
   /* ── Simple, clean JPG-exportable report card (not tied to print page size) ── */
   .jpg-report-paper{ font-family:'DM Sans',sans-serif; background:#fff; width:900px; padding:34px 38px; margin:0 auto; box-sizing:border-box; color:#0F172A; flex-shrink:0; }
@@ -1961,7 +1962,7 @@
         </div>
         <div class="flex-1 text-center sm:text-left">
           <div id="totalStorageLabel" class="text-lg font-extrabold text-slate-800 mb-1">0 MB / 0 MB</div>
-          <p class="text-xs text-slate-500 leading-relaxed">Everything combined — documents, inventory, price list, and the rest — stays capped at 90% of the free plan's total, always leaving a safety margin.</p>
+          <p class="text-xs text-slate-500 leading-relaxed">Everything combined — documents, inventory, price list, and the rest — stays capped at the free plan's full total.</p>
         </div>
       </div>
 
@@ -2213,9 +2214,14 @@
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Chalan <span class="text-amber-500">Records</span></div>
           <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Every Delivery Chalan generated from Inventory — kept for 1 year, then cleared automatically.</p>
         </div>
-        <button id="deleteSelectedChalanBtn" onclick="window.deleteSelectedChalans()" class="hidden items-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 border-2 border-red-200 rounded-xl text-xs font-bold hover:bg-red-100 transition-all flex-shrink-0">
-          <i class="fas fa-trash-can"></i> Delete Selected
-        </button>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <button id="cancelChalanSelectBtn" onclick="window.setChalanSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-2.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-xl hover:bg-slate-100 transition-all">
+            <i class="fas fa-xmark"></i> Cancel
+          </button>
+          <button id="deleteSelectedChalanBtn" onclick="window.deleteSelectedChalans()" class="hidden items-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 border-2 border-red-200 rounded-xl text-xs font-bold hover:bg-red-100 transition-all">
+            <i class="fas fa-trash-can"></i> Delete Selected
+          </button>
+        </div>
       </div>
       <div class="relative mb-4 max-w-sm">
         <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
@@ -2227,7 +2233,7 @@
           <table class="w-full text-sm responsive-table" id="chalanTable">
             <thead>
               <tr class="border-b border-slate-100 text-left">
-                <th class="px-4 py-3 w-10"><input type="checkbox" id="chalanSelectAll" onchange="window.toggleSelectAllChalans(this.checked)"></th>
+                <th class="px-4 py-3 w-10 sel-col"><input type="checkbox" id="chalanSelectAll" onchange="window.toggleSelectAllChalans(this.checked)"></th>
                 <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Date</th>
                 <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Model</th>
                 <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Chassis</th>
@@ -2536,8 +2542,7 @@
       <tr><td class="cb-sn"></td><td class="cb-label">Engine No</td><td class="cb-colon">:</td><td class="cb-value" data-f="engine"></td><td class="cb-amt"></td></tr>
       <tr><td class="cb-sn"></td><td class="cb-label">Regd No</td><td class="cb-colon">:</td><td class="cb-value" data-f="regNo"></td><td class="cb-amt"></td></tr>
       <tr><td class="cb-sn"></td><td class="cb-label">MFD Date</td><td class="cb-colon">:</td><td class="cb-value" data-f="mfdDate"></td><td class="cb-amt"></td></tr>
-      <tr><td class="cb-sn"></td><td class="cb-label">Bike Price</td><td class="cb-colon">:</td><td class="cb-value"></td><td class="cb-amt" data-f="price"></td></tr>
-      <tr><td class="cb-sn"></td><td class="cb-label">Insurance Amount</td><td class="cb-colon">:</td><td class="cb-value"></td><td class="cb-amt" data-f="insAmount"></td></tr>
+      <tr><td class="cb-sn"></td><td class="cb-label">Bike Price / Insurance</td><td class="cb-colon">:</td><td class="cb-value" data-f="price"></td><td class="cb-amt" data-f="insAmount"></td></tr>
       <tr><td class="cb-sn"></td><td class="cb-label">Insurance Type</td><td class="cb-colon">:</td><td class="cb-value" data-f="insType"></td><td class="cb-amt"></td></tr>
       <tr><td class="cb-sn" colspan="3"></td><td class="cb-total-lbl" style="text-align:center">Total</td><td class="cb-amt cb-total-val" data-f="total"></td></tr>
     </table>
@@ -3266,6 +3271,7 @@ window._toggleKebab = (btn, type, id) => {
     openKebabMenuFor(btn, docActions);
   } else if(type === 'chalans'){
     openKebabMenuFor(btn, [
+      { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('chalans', id) },
       { label:'Re-print', icon:'fa-print', onClick:()=>window.reprintChalan(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteChalan(id) }
     ]);
@@ -3367,6 +3373,15 @@ window.setHHInvSelectMode = (on)=>{
   if(!on) selectedHHInvIds.clear();
   updateDeleteSelectedHHBtn();
 };
+window.setChalanSelectMode = (on)=>{
+  const table = document.getElementById('chalanTable');
+  if(table) table.classList.toggle('select-mode', on);
+  if(!on) selectedChalanIds.clear();
+  const cancelBtn = document.getElementById('cancelChalanSelectBtn');
+  if(cancelBtn){ cancelBtn.classList.toggle('hidden', !on); cancelBtn.classList.toggle('flex', on); }
+  updateDeleteSelectedChalanBtn();
+  renderChalanTable();
+};
 window._selectRow = (type, id)=>{
   if(type==='inventory'){
     window.setInvSelectMode(true);
@@ -3378,6 +3393,11 @@ window._selectRow = (type, id)=>{
     toggleSelectHHInvUnit(id, true);
     const cb = document.querySelector(`.hhinv-row-checkbox[data-id="${id}"]`);
     if(cb){ cb.checked = true; cb.scrollIntoView({behavior:'smooth', block:'center'}); }
+  } else if(type==='chalans'){
+    window.setChalanSelectMode(true);
+    window.toggleSelectChalan(id, true);
+    const cb = document.querySelector(`.chalan-row-checkbox[data-id="${id}"]`);
+    if(cb){ cb.checked = true; cb.closest('tr')?.classList.add('row-selected'); cb.scrollIntoView({behavior:'smooth', block:'center'}); }
   }
 };
 
@@ -4845,8 +4865,8 @@ function renderChalanTable(){
   }
   tbody.innerHTML = visible.map(c=>{
     const at = c.createdAt?.toDate ? c.createdAt.toDate() : new Date(c.createdAt);
-    return `<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-      <td class="px-4 py-3" data-th=""><input type="checkbox" class="chalan-row-checkbox" data-id="${c.id}" ${selectedChalanIds.has(c.id)?'checked':''} onchange="window.toggleSelectChalan('${c.id}', this.checked)"></td>
+    return `<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors ${selectedChalanIds.has(c.id)?'row-selected':''}">
+      <td class="px-4 py-3 sel-col" data-th=""><input type="checkbox" class="chalan-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${c.id}" ${selectedChalanIds.has(c.id)?'checked':''} onchange="window.toggleSelectChalan('${c.id}', this.checked); this.closest('tr').classList.toggle('row-selected', this.checked)"></td>
       <td class="px-4 py-3 text-xs text-slate-500 whitespace-nowrap" data-th="Date">${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</td>
       <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Model">${escapeHtml(c.model||'—')}</td>
       <td class="px-4 py-3 text-xs font-mono text-slate-500" data-th="Chassis">${escapeHtml(c.chassis||'—')}</td>
@@ -5110,6 +5130,7 @@ window.printChalanNow = async ()=>{
   .cb-amt{ width:20%; text-align:right; padding-right:8px; }
   .cb-total-lbl{ font-weight:700; }
   .cb-total-val{ font-weight:700; }
+  .chalan-bike-table tbody tr:nth-child(even), .chalan-bike-table tr:nth-child(even){ background:#F8FAFC; }
 </style>
 </head>
 <body>${content}</body>
@@ -5123,6 +5144,21 @@ window.printChalanNow = async ()=>{
   // onload alone, guarded so it never double-fires the print dialog.
   setTimeout(() => { try { doPrint(); } catch(e){} }, 600);
 };
+
+// Shown right after a unit lands on Sold (or HH Hide, which is functionally
+// the same thing) — the paperwork is usually needed at that exact moment,
+// so offering it immediately beats making staff hunt for it in the kebab
+// menu a few taps later.
+async function maybePromptChalan(id, sourceCol){
+  const wantsChalan = await showConfirm({
+    title: 'Generate Delivery Chalan?',
+    message: "This unit is now Sold. Generate the Delivery Chalan for it now?",
+    okText: 'Yes, Generate',
+    okColorClass: 'text-bajaj-blue hover:bg-blue-50',
+    iconClass: 'fa-file-invoice', iconColor: '#005EA6', iconBg: '#EAF3FB'
+  });
+  if(wantsChalan) window.openChalanModal(id, sourceCol);
+}
 
 window._setUnitStatus = async (id, status) => {
   const s = invData.find(x=>x.id===id);
@@ -5154,6 +5190,7 @@ window._setUnitStatus = async (id, status) => {
     await updateDoc(doc(db,"inventory",id),payload);
     logActivity(status==='Sold' ? 'Marked Sold' : 'Status: '+status, 'inventory', {...s, customerName});
     toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
+    if(status==='Sold') maybePromptChalan(id, 'inventory');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
@@ -5192,6 +5229,7 @@ window._setHHFlag = async (id, hhFlag) => {
     if(hhFlag==='Sales') toast('Marked as HH Sales — counted in our stock, reported to HH.');
     else if(hhFlag==='Hide') toast('Marked as HH Hide'+(customerName?' — '+customerName:'')+' — NOT counted in our stock, held back from HH\'s report.');
     else toast('HH flag cleared.');
+    if(hhFlag==='Hide') maybePromptChalan(id, 'inventory');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
@@ -5933,6 +5971,7 @@ window._setHHInvStatus = async (id, status) => {
     await updateDoc(doc(db,"hh_inventory",id),{status, customerName});
     logActivity(status==='Sold' ? 'Marked Sold' : 'Status: '+status, 'hh_inventory', {...s, customerName});
     toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
+    if(status==='Sold') maybePromptChalan(id, 'hh_inventory');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
@@ -7379,7 +7418,7 @@ async function updateStorageOverview(){
       + (financeSchemes.length*RECORD_SIZE_ESTIMATE.financeScheme)
       + OTHER_COLLECTIONS_ESTIMATE;
     const totalEstimated = used + estimatedOtherBytes;
-    const ceiling = 1024*1024*1024 * 0.9; // 90% of Firestore's ~1 GiB free tier
+    const ceiling = 1024*1024*1024; // full ~1 GiB Firestore free tier — no safety margin held back
     const pct = Math.min(100, (totalEstimated/ceiling)*100);
     const ringColor = pct>=90 ? '#EF4444' : pct>=70 ? '#F59E0B' : '#005EA6';
     ring.style.background = `conic-gradient(${ringColor} ${pct*3.6}deg, #E2E8F0 ${pct*3.6}deg)`;
