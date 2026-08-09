@@ -1038,7 +1038,7 @@
       </div>
 
       <nav class="sidebar-nav">
-        <button id="navDashboard" onclick="switchSec('dashboard');closeMobileMenu()" class="nav-tab sidebar-link active-tab">
+        <button id="navDashboard" onclick="switchSec('dashboard');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-gauge-high"></i> Dashboard
         </button>
         <div class="sidebar-section-label">Documents</div>
@@ -4069,7 +4069,7 @@ document.querySelectorAll('.mobile-tab').forEach(t=>t.classList.add('border'));
 // once upfront too, so the very first paint is never dependent on the
 // class-based CSS rule alone.
 document.querySelectorAll('.sec-panel').forEach(p=>{ p.style.display = p.classList.contains('active') ? 'block' : 'none'; });
-setActiveTab('price');
+setActiveTab('dashboard');
 
 /* ─── Auth ─── */
 onAuthStateChanged(auth, async (user) => {
@@ -5695,13 +5695,17 @@ window.transferToHH = async (id) => {
   });
   if(!ok) return;
   try{
+    // Missing this made the transferred unit vanish from view entirely —
+    // the table's query orders by S.N, and Firestore silently excludes any
+    // document that doesn't have the field being ordered on.
+    const nextSn = hhInvData.length ? Math.max(...hhInvData.map(x=>Number(x.sn)||0)) + 1 : 1;
     await addDoc(collection(db,'hh_inventory'), {
-      model: s.model||'', chassis: s.chassis||'', engine: s.engine||'', regNo: s.regNo||'', color: s.color||'',
+      sn: nextSn, model: s.model||'', chassis: s.chassis||'', engine: s.engine||'', regNo: s.regNo||'', color: s.color||'',
       eventName: '', status: 'Available', customerName: '', addedAt: new Date()
     });
     await deleteDoc(doc(db,'inventory', id));
     logActivity('Transferred to HH Inventory', 'inventory', { model: s.model, chassis: s.chassis });
-    toast(`"${s.model}" moved to HH Inventory.`);
+    toast(`"${s.model}" moved to HH Inventory — S.N ${nextSn} assigned.`);
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
