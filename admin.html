@@ -2217,9 +2217,14 @@
           <i class="fas fa-trash-can"></i> Delete Selected
         </button>
       </div>
+      <div class="relative mb-4 max-w-sm">
+        <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
+        <input type="text" id="chalanSearchInput" oninput="window.setChalanSearch(this.value)" placeholder="Search model, chassis, customer, chalan no…"
+          class="w-full pl-9 pr-3 py-2.5 bg-white border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-bajaj-blue transition-all"/>
+      </div>
       <div class="yng-card-shell overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-sm" id="chalanTable">
+          <table class="w-full text-sm responsive-table" id="chalanTable">
             <thead>
               <tr class="border-b border-slate-100 text-left">
                 <th class="px-4 py-3 w-10"><input type="checkbox" id="chalanSelectAll" onchange="window.toggleSelectAllChalans(this.checked)"></th>
@@ -2454,7 +2459,7 @@
           <input type="number" id="chalanCommission" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price After Commission (Rs.)</label>
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">After Comm. (Rs.)</label>
           <input type="text" id="chalanPriceAfterCom" readonly class="bg-slate-100 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full text-slate-500 font-semibold"/>
         </div>
       </div>
@@ -2690,6 +2695,10 @@
         <div class="flex items-center justify-between gap-3">
           <label class="text-xs font-bold text-slate-600 flex-1">Chalan Records</label>
           <input type="number" id="limitMaxChalans" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+        <div class="flex items-center justify-between gap-3">
+          <label class="text-xs font-bold text-slate-600 flex-1">Important Info (Contacts/Links)</label>
+          <input type="number" id="limitMaxImportant" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
         </div>
       </div>
       <div class="pt-4 mt-1 border-t border-slate-100">
@@ -3255,6 +3264,11 @@ window._toggleKebab = (btn, type, id) => {
     const isMine = d?.uploadedBy && (d.uploadedBy===currentUserEmail || d.uploadedBy===currentUserName);
     if(currentUserRole === 'owner' || isMine) docActions.push({ label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('documents', id) });
     openKebabMenuFor(btn, docActions);
+  } else if(type === 'chalans'){
+    openKebabMenuFor(btn, [
+      { label:'Re-print', icon:'fa-print', onClick:()=>window.reprintChalan(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteChalan(id) }
+    ]);
   } else if(type === 'important'){
     openKebabMenuFor(btn, [
       { label:'Edit', icon:'fa-pen', onClick:()=>window.openImportantFormModal(id) },
@@ -3270,9 +3284,13 @@ window._toggleKebab = (btn, type, id) => {
         icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
         onClick: () => window._setHHInvStatus(id, st)
       }));
+    const chalanAction = cur === 'Sold'
+      ? [{ label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id, 'hh_inventory') }]
+      : [];
     openKebabMenuFor(btn, [
       { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('hh_inventory', id) },
       ...statusActions,
+      ...chalanAction,
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editHHInv(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('hh_inventory', id) }
     ]);
@@ -3312,7 +3330,7 @@ window._toggleKebab = (btn, type, id) => {
     // there's no insurance/handover to paper for one still sitting on
     // the floor as Available or Booked.
     const chalanAction = isFinalized
-      ? [{ label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id) }]
+      ? [{ label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id, 'inventory') }]
       : [];
     openKebabMenuFor(btn, [
       { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('inventory', id) },
@@ -4647,6 +4665,7 @@ let MAX_BIKES = 50;
 let MAX_ACCESSORIES = 20;
 let MAX_FINANCE_SCHEMES = 20;
 let MAX_CHALANS = 2000;
+let MAX_IMPORTANT_INFO = 200;
 let COMMISSION_1ST_PARTY = 1200;
 let COMMISSION_3RD_PARTY = 200;
 
@@ -4804,24 +4823,36 @@ async function purgeExpiredChalans(){
 }
 
 let selectedChalanIds = new Set();
+let chalanSearchTerm = '';
+window.setChalanSearch = (v)=>{
+  chalanSearchTerm = v.trim().toLowerCase();
+  renderChalanTable();
+};
 function renderChalanTable(){
   const tbody = document.getElementById('chalanTableBody');
   if(!tbody) return;
-  if(!chalanData.length){
-    tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-12 text-center text-slate-400"><i class="fas fa-file-invoice text-3xl opacity-25 block mb-2"></i>No Chalans generated yet.</td></tr>`;
+  const q = chalanSearchTerm;
+  const visible = !q ? chalanData : chalanData.filter(c=>
+    (c.model||'').toLowerCase().includes(q) ||
+    (c.chassis||'').toLowerCase().includes(q) ||
+    (c.custName||'').toLowerCase().includes(q) ||
+    (c.chalanNo||'').toLowerCase().includes(q)
+  );
+  if(!visible.length){
+    tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-12 text-center text-slate-400"><i class="fas fa-file-invoice text-3xl opacity-25 block mb-2"></i>${chalanData.length ? 'No matching Chalans.' : 'No Chalans generated yet.'}</td></tr>`;
     updateDeleteSelectedChalanBtn();
     return;
   }
-  tbody.innerHTML = chalanData.map(c=>{
+  tbody.innerHTML = visible.map(c=>{
     const at = c.createdAt?.toDate ? c.createdAt.toDate() : new Date(c.createdAt);
     return `<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-      <td class="px-4 py-3"><input type="checkbox" class="chalan-row-checkbox" data-id="${c.id}" ${selectedChalanIds.has(c.id)?'checked':''} onchange="window.toggleSelectChalan('${c.id}', this.checked)"></td>
-      <td class="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</td>
-      <td class="px-4 py-3 text-sm font-semibold text-slate-700">${escapeHtml(c.model||'—')}</td>
-      <td class="px-4 py-3 text-xs font-mono text-slate-500">${escapeHtml(c.chassis||'—')}</td>
-      <td class="px-4 py-3 text-sm text-slate-600">${escapeHtml(c.custName||'—')}</td>
-      <td class="px-4 py-3 text-xs font-mono text-slate-500">${escapeHtml(c.chalanNo||'—')}</td>
-      <td class="px-4 py-3 text-right"><button onclick="window._deleteChalan('${c.id}')" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all"><i class="fas fa-trash-can text-xs"></i></button></td>
+      <td class="px-4 py-3" data-th=""><input type="checkbox" class="chalan-row-checkbox" data-id="${c.id}" ${selectedChalanIds.has(c.id)?'checked':''} onchange="window.toggleSelectChalan('${c.id}', this.checked)"></td>
+      <td class="px-4 py-3 text-xs text-slate-500 whitespace-nowrap" data-th="Date">${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</td>
+      <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Model">${escapeHtml(c.model||'—')}</td>
+      <td class="px-4 py-3 text-xs font-mono text-slate-500" data-th="Chassis">${escapeHtml(c.chassis||'—')}</td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Customer">${escapeHtml(c.custName||'—')}</td>
+      <td class="px-4 py-3 text-xs font-mono text-slate-500" data-th="Chalan No">${escapeHtml(c.chalanNo||'—')}</td>
+      <td class="px-4 py-3 text-right" data-th="Actions"><button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'chalans','${c.id}')" aria-label="Chalan actions"><i class="fas fa-ellipsis-vertical"></i></button></td>
     </tr>`;
   }).join('');
   updateDeleteSelectedChalanBtn();
@@ -4871,8 +4902,10 @@ window.deleteSelectedChalans = async ()=>{
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
-window.openChalanModal = (id)=>{
-  const s = invData.find(x=>x.id===id);
+let currentChalanSourceCol = 'inventory';
+window.openChalanModal = (id, sourceCol='inventory')=>{
+  currentChalanSourceCol = sourceCol;
+  const s = (sourceCol==='hh_inventory' ? hhInvData : invData).find(x=>x.id===id);
   if(!s){ toast('Unit not found.','err'); return; }
   currentChalanUnitId = id;
   document.getElementById('chalanModelDisp').textContent = s.model || '—';
@@ -4924,7 +4957,7 @@ document.getElementById('chalanCommission')?.addEventListener('input', updateCha
 // Master-set default for that type) — both stay editable afterward, this
 // is just a sensible starting point instead of blank fields every time.
 document.getElementById('chalanInsType')?.addEventListener('change', (e)=>{
-  const s = invData.find(x=>x.id===currentChalanUnitId);
+  const s = (currentChalanSourceCol==='hh_inventory' ? hhInvData : invData).find(x=>x.id===currentChalanUnitId);
   const bike = s ? allMasterBikes.find(b=>b.name===s.model) : null;
   const comMap = { '1st Party':COMMISSION_1ST_PARTY, '3rd Party':COMMISSION_3RD_PARTY };
   document.getElementById('chalanCommission').value = comMap[e.target.value] ?? '';
@@ -4936,8 +4969,10 @@ document.getElementById('chalanInsType')?.addEventListener('change', (e)=>{
   updateChalanPriceAfterCom();
 });
 
-window.previewChalan = async ()=>{
-  const s = invData.find(x=>x.id===currentChalanUnitId);
+let pendingChalanRecord = null; // staged by Preview, only written to Firestore once Print is actually pressed
+
+window.previewChalan = ()=>{
+  const s = (currentChalanSourceCol==='hh_inventory' ? hhInvData : invData).find(x=>x.id===currentChalanUnitId);
   if(!s){ toast('Unit not found.','err'); return; }
   const custName = document.getElementById('chalanCustName').value.trim();
   if(!custName){ toast('Customer name (Delivered To) is required.','err'); return; }
@@ -4957,52 +4992,69 @@ window.previewChalan = async ()=>{
   const address = document.getElementById('chalanAddress').value.trim();
   const contact = document.getElementById('chalanContact').value.trim();
 
-  // The figure that goes on the actual paperwork is the price AFTER
-  // commission, not the raw insurance rate — that's the number that
-  // matters for what's really changing hands.
-  const fields = {
+  renderChalanIntoWrappers({
     model: s.model || '', chassis: s.chassis || '', engine: s.engine || '', regNo: s.regNo || '',
-    mfdDate: makeYear,
-    price: price ? 'Rs. '+price.toLocaleString('en-IN') : '',
-    insAmount: 'Rs. '+priceAfterCom.toLocaleString('en-IN'),
-    insType,
-    total: 'Rs. '+(price+priceAfterCom).toLocaleString('en-IN'),
+    makeYear, price, insAmount: priceAfterCom, insType,
+    chalanNo, deliveryDate, custName, address, contact
+  });
+
+  // Staged, not saved yet — Print (below) is what actually commits this to
+  // Firestore. Previewing (and re-previewing after tweaking a field) never
+  // creates a record on its own, so there's no clutter from someone who
+  // previewed a few times before getting the details right.
+  pendingChalanRecord = {
+    unitId: currentChalanUnitId, model: s.model||'', chassis: s.chassis||'', engine: s.engine||'', regNo: s.regNo||'',
+    makeYear, price, insType, insAmount, commission, priceAfterCom,
     chalanNo, deliveryDate, custName, address, contact
   };
 
-  const tpl = document.getElementById('chalanCopyTemplate');
-  const wrap = document.getElementById('chalanPrintWrapper');
-  wrap.innerHTML = '';
-  // Single copy per print — the original template had two stacked on one
-  // page (customer + office copies together), but that's not needed here;
-  // print again separately if a second copy is ever wanted.
-  const copy = tpl.content.cloneNode(true);
-  copy.querySelectorAll('[data-f]').forEach(el=>{
-    el.textContent = fields[el.dataset.f] ?? '';
-  });
-  wrap.appendChild(copy);
-  // The on-screen preview reuses the exact same filled markup that will
-  // print, so what you see really is what you get — no separate template
-  // to drift out of sync with the print version.
-  document.getElementById('chalanPreviewBody').innerHTML = wrap.innerHTML;
-
-  // Chalans get their own record, separate from the general activity log,
-  // so they can be reviewed/searched/bulk-cleared on their own later.
-  try{
-    await addDoc(collection(db,'chalans'), {
-      unitId: currentChalanUnitId, model: s.model||'', chassis: s.chassis||'', engine: s.engine||'', regNo: s.regNo||'',
-      makeYear, price, insType, insAmount, commission, priceAfterCom,
-      chalanNo, deliveryDate, custName, address, contact,
-      createdAt: new Date()
-    });
-  }catch(e){ console.error('Failed to save chalan record', e); }
-
-  logActivity('Chalan Generated', 'inventory', { model: s.model, chassis: s.chassis, customerName: custName });
   window.closeChalanModal();
   const pModal = document.getElementById('chalanPreviewModal');
   pModal.classList.remove('hidden');
   pModal.classList.add('flex');
 };
+
+// Shared by both a fresh Preview and a Re-print of an already-saved
+// record — fills the same template the same way either way, so there's
+// only one place that knows how a Chalan is laid out.
+function renderChalanIntoWrappers(f){
+  const fields = {
+    model: f.model, chassis: f.chassis, engine: f.engine, regNo: f.regNo,
+    mfdDate: f.makeYear,
+    price: f.price ? 'Rs. '+f.price.toLocaleString('en-IN') : '',
+    insAmount: 'Rs. '+(f.insAmount||0).toLocaleString('en-IN'),
+    insType: f.insType,
+    total: 'Rs. '+((f.price||0)+(f.insAmount||0)).toLocaleString('en-IN'),
+    chalanNo: f.chalanNo, deliveryDate: f.deliveryDate, custName: f.custName, address: f.address, contact: f.contact
+  };
+  const tpl = document.getElementById('chalanCopyTemplate');
+  const wrap = document.getElementById('chalanPrintWrapper');
+  wrap.innerHTML = '';
+  const copy = tpl.content.cloneNode(true);
+  copy.querySelectorAll('[data-f]').forEach(el=>{
+    el.textContent = fields[el.dataset.f] ?? '';
+  });
+  wrap.appendChild(copy);
+  document.getElementById('chalanPreviewBody').innerHTML = wrap.innerHTML;
+}
+
+// Re-print pulls a previously-saved record straight from Chalan Records —
+// no unit lookup needed since everything that was on the paper is already
+// sitting in the saved fields.
+window.reprintChalan = (id)=>{
+  const c = chalanData.find(x=>x.id===id);
+  if(!c){ toast('Chalan record not found.','err'); return; }
+  pendingChalanRecord = null; // already saved — printing again must not create a duplicate
+  renderChalanIntoWrappers({
+    model:c.model, chassis:c.chassis, engine:c.engine, regNo:c.regNo,
+    makeYear:c.makeYear, price:c.price, insAmount:c.priceAfterCom, insType:c.insType,
+    chalanNo:c.chalanNo, deliveryDate:c.deliveryDate, custName:c.custName, address:c.address, contact:c.contact
+  });
+  const pModal = document.getElementById('chalanPreviewModal');
+  pModal.classList.remove('hidden');
+  pModal.classList.add('flex');
+};
+
 window.closeChalanPreview = ()=>{
   const pModal = document.getElementById('chalanPreviewModal');
   pModal.classList.add('hidden');
@@ -5015,9 +5067,20 @@ window.closeChalanPreview = ()=>{
 // chalan content in its own dedicated window with its own minimal
 // stylesheet sidesteps that completely: there's nothing else on the page
 // for anything to go wrong with.
-window.printChalanNow = ()=>{
+window.printChalanNow = async ()=>{
   const content = document.getElementById('chalanPrintWrapper').innerHTML;
   if(!content){ toast('Nothing to print — generate a preview first.','err'); return; }
+
+  // The actual commit point — a fresh Chalan only becomes a saved record
+  // once Print is pressed, never just from previewing it.
+  if(pendingChalanRecord){
+    try{
+      await addDoc(collection(db,'chalans'), { ...pendingChalanRecord, createdAt: new Date() });
+      logActivity('Chalan Generated', 'inventory', { model: pendingChalanRecord.model, chassis: pendingChalanRecord.chassis, customerName: pendingChalanRecord.custName });
+    }catch(e){ console.error('Failed to save chalan record', e); }
+    pendingChalanRecord = null;
+  }
+
   const win = window.open('', '_blank');
   if(!win){ toast('Pop-up blocked — allow pop-ups for this site to print.','err'); return; }
   win.document.write(`<!DOCTYPE html>
@@ -7233,6 +7296,7 @@ function loadSystemLimits(){
       if(d.maxAccessories) MAX_ACCESSORIES = d.maxAccessories;
       if(d.maxFinanceSchemes) MAX_FINANCE_SCHEMES = d.maxFinanceSchemes;
       if(d.maxChalans) MAX_CHALANS = d.maxChalans;
+      if(d.maxImportantInfo) MAX_IMPORTANT_INFO = d.maxImportantInfo;
       if(d.commission1stParty !== undefined) COMMISSION_1ST_PARTY = d.commission1stParty;
       if(d.commission3rdParty !== undefined) COMMISSION_3RD_PARTY = d.commission3rdParty;
     }
@@ -7278,7 +7342,10 @@ async function updateStorageOverview(){
       sub: `${financeSchemes.length} / ${MAX_FINANCE_SCHEMES} schemes — up to ${formatBytes(MAX_FINANCE_SCHEMES*RECORD_SIZE_ESTIMATE.financeScheme)} at full capacity` },
     { icon:'fa-file-invoice', color:'#0EA5E9', label:'Chalan Records', count: chalanData.length, maxCount: MAX_CHALANS,
       usedBytes: chalanData.length*RECORD_SIZE_ESTIMATE.chalan, maxBytes: MAX_CHALANS*RECORD_SIZE_ESTIMATE.chalan,
-      sub: `${chalanData.length} / ${MAX_CHALANS} records — auto-clears after 1 year` }
+      sub: `${chalanData.length} / ${MAX_CHALANS} records — auto-clears after 1 year` },
+    { icon:'fa-address-book', color:'#059669', label:'Important Info (Contacts/Links)', count: importantData.length, maxCount: MAX_IMPORTANT_INFO,
+      usedBytes: importantData.length*RECORD_SIZE_ESTIMATE.chalan, maxBytes: MAX_IMPORTANT_INFO*RECORD_SIZE_ESTIMATE.chalan,
+      sub: `${importantData.length} / ${MAX_IMPORTANT_INFO} entries` }
   ];
 
   list.innerHTML = rows.map(r=>{
@@ -7666,6 +7733,7 @@ window.openSystemLimitsModal = ()=>{
   document.getElementById('limitMaxAccessories').value = MAX_ACCESSORIES;
   document.getElementById('limitMaxFinanceSchemes').value = MAX_FINANCE_SCHEMES;
   document.getElementById('limitMaxChalans').value = MAX_CHALANS;
+  document.getElementById('limitMaxImportant').value = MAX_IMPORTANT_INFO;
   document.getElementById('limitCom1stParty').value = COMMISSION_1ST_PARTY;
   document.getElementById('limitCom3rdParty').value = COMMISSION_3RD_PARTY;
   document.getElementById('systemLimitsModal').classList.remove('hidden');
@@ -7682,9 +7750,10 @@ window.saveSystemLimits = async ()=>{
   const maxAccessories = parseInt(document.getElementById('limitMaxAccessories').value);
   const maxFinanceSchemes = parseInt(document.getElementById('limitMaxFinanceSchemes').value);
   const maxChalans = parseInt(document.getElementById('limitMaxChalans').value);
+  const maxImportant = parseInt(document.getElementById('limitMaxImportant').value);
   const com1stParty = parseInt(document.getElementById('limitCom1stParty').value);
   const com3rdParty = parseInt(document.getElementById('limitCom3rdParty').value);
-  if(![maxBikes,maxInventory,maxAccessories,maxFinanceSchemes,maxChalans].every(v=>Number.isInteger(v) && v>0)){
+  if(![maxBikes,maxInventory,maxAccessories,maxFinanceSchemes,maxChalans,maxImportant].every(v=>Number.isInteger(v) && v>0)){
     toast('Enter a valid whole number greater than 0 for each limit.','err');
     return;
   }
@@ -7693,13 +7762,13 @@ window.saveSystemLimits = async ()=>{
     return;
   }
   const invCount = await getAccurateTotalInventoryCount(true);
-  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes'], [maxChalans, chalanData.length, 'chalan records']];
+  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes'], [maxChalans, chalanData.length, 'chalan records'], [maxImportant, importantData.length, 'important info entries']];
   for(const [limit, used, label] of checks){
     if(limit < used){ toast(`Can't set the ${label} limit below the ${used} already on file.`,'err'); return; }
   }
   try{
-    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxAccessories, maxFinanceSchemes, maxChalans, commission1stParty:com1stParty, commission3rdParty:com3rdParty }, { merge:true });
-    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Acc:${maxAccessories} Fin:${maxFinanceSchemes} Chalan:${maxChalans}` });
+    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxAccessories, maxFinanceSchemes, maxChalans, maxImportantInfo:maxImportant, commission1stParty:com1stParty, commission3rdParty:com3rdParty }, { merge:true });
+    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Acc:${maxAccessories} Fin:${maxFinanceSchemes} Chalan:${maxChalans} Info:${maxImportant}` });
     toast('Record limits updated.');
     closeSystemLimitsModal();
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
@@ -8214,6 +8283,10 @@ document.getElementById('saveImportantBtn').addEventListener('click', async ()=>
   const v1 = document.getElementById('impVal1').value.trim();
   const v2 = document.getElementById('impVal2').value.trim();
   if(!v1 || !v2){ toast('Please fill both required fields.','err'); return; }
+  if(!currentEditImportantId && importantData.length >= MAX_IMPORTANT_INFO){
+    showLimitExceededModal('Important Info Limit Reached', `Contacts/Links are capped at ${MAX_IMPORTANT_INFO}. Remove an existing entry first, or reach out below to have the limit raised.`);
+    return;
+  }
   const note = document.getElementById('impNote').value.trim();
 
   const saveBtn = document.getElementById('saveImportantBtn');
