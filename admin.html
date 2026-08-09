@@ -1085,6 +1085,9 @@
         <button id="navImportant" onclick="switchSec('important');closeMobileMenu()" class="nav-tab sidebar-link hidden">
           <i class="fas fa-key"></i> Important Info
         </button>
+        <button id="navModelAliases" onclick="switchSec('modelAliases');closeMobileMenu()" class="nav-tab sidebar-link hidden">
+          <i class="fas fa-code-compare"></i> Model Aliases <span id="modelMismatchNavCount" class="hidden ml-auto bg-amber-100 text-amber-600 text-[10px] font-extrabold rounded-full px-1.5 py-0.5"></span>
+        </button>
       </nav>
 
       <div class="sidebar-foot">
@@ -2210,6 +2213,59 @@
       </div>
     </div>
 
+    <!-- MODEL ALIASES (Master-only) -->
+    <div class="sec-panel" id="secModelAliases">
+      <div class="mb-6">
+        <div class="eyebrow">Tools · Master Only</div>
+        <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Model <span class="text-amber-500">Aliases</span></div>
+        <p class="text-sm text-slate-500 mt-1.5 max-w-lg">When the same bike gets typed differently across records — like "150 SD" and "150 DTS-i" — link them here so price/insurance lookups (Chalan, etc.) still find the right model.</p>
+      </div>
+
+      <div class="yng-card-shell overflow-hidden mb-5">
+        <div class="px-5 py-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-triangle-exclamation text-amber-500"></i> Unmatched Model Names</div>
+          <p class="text-xs text-slate-500 mt-1">Spotted in Inventory/HH Inventory but don't exactly match anything in the Master Price List.</p>
+        </div>
+        <div id="modelMismatchList"></div>
+      </div>
+
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center gap-2 section-title text-2xl mb-4"><i class="fas fa-link text-amber-500"></i> Add an Alias</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Typed As <span class="text-red-400">*</span></label>
+            <input type="text" id="aliasRawInput" placeholder="e.g. 150 SD" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Actually Means <span class="text-red-400">*</span></label>
+            <select id="aliasCanonicalSelect" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full">
+              <option value="">Select a model…</option>
+            </select>
+          </div>
+        </div>
+        <button onclick="window.addModelAlias()" class="cta-primary !py-2 !px-4 !text-xs"><i class="fas fa-plus"></i> Add Alias</button>
+      </div>
+
+      <div class="yng-card-shell overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-list text-amber-500"></i> Existing Aliases</div>
+          <span id="aliasCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm responsive-table">
+            <thead>
+              <tr class="border-b border-slate-100 text-left">
+                <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Typed As</th>
+                <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Actually Means</th>
+                <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="modelAliasesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- CHALAN RECORDS -->
     <div class="sec-panel" id="secChalans">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
@@ -2709,6 +2765,10 @@
         <div class="flex items-center justify-between gap-3">
           <label class="text-xs font-bold text-slate-600 flex-1">Important Info (Contacts/Links)</label>
           <input type="number" id="limitMaxImportant" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+        <div class="flex items-center justify-between gap-3">
+          <label class="text-xs font-bold text-slate-600 flex-1">Model Aliases</label>
+          <input type="number" id="limitMaxAliases" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
         </div>
       </div>
       <div class="pt-4 mt-1 border-t border-slate-100">
@@ -3873,8 +3933,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant' };
-  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant' };
+  const NAV_IDS = { price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
+  const MNAV_IDS = { price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -3916,6 +3976,7 @@ onAuthStateChanged(auth, async (user) => {
     loadImportantInfo();
     loadChalans();
     autoArchiveOldSoldUnits();
+    loadModelAliases();
     setBtnState(false);
     startIdleLogoutTimer();
     startActiveStatusCheck();
@@ -4127,6 +4188,11 @@ async function loadProfile(uid) {
     // info; Links and Credentials stay Master-only inside the page itself.
     const importantNavBtn = document.getElementById('navImportant');
     if(importantNavBtn) importantNavBtn.classList.remove('hidden');
+    // Model Aliases affects price/insurance lookups app-wide, so only a
+    // Master ID manages it — staff shouldn't casually link two models
+    // together without oversight.
+    const modelAliasNavBtn = document.getElementById('navModelAliases');
+    if(modelAliasNavBtn) modelAliasNavBtn.classList.toggle('hidden', currentUserRole !== 'owner');
     const toolsLabel = document.getElementById('navToolsLabel');
     if(toolsLabel) toolsLabel.classList.remove('hidden');
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
@@ -4684,6 +4750,7 @@ let MAX_ACCESSORIES = 20;
 let MAX_FINANCE_SCHEMES = 20;
 let MAX_CHALANS = 2000;
 let MAX_IMPORTANT_INFO = 200;
+let MAX_MODEL_ALIASES = 200;
 let COMMISSION_1ST_PARTY = 1200;
 let COMMISSION_3RD_PARTY = 200;
 
@@ -4840,6 +4907,165 @@ async function purgeExpiredChalans(){
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   MODEL ALIASES — the same bike often gets typed differently across
+   records ("150 SD" vs "150 DTS-i"), which silently breaks any lookup by
+   exact name (price/insurance on a Chalan, etc.). This lets a Master ID
+   declare "these are the same bike" once, and every lookup through
+   resolveModelName() honours it from then on. Unmatched names get
+   auto-flagged for review instead of failing quietly.
+   ═══════════════════════════════════════════════════════════════════════ */
+let modelAliasesData = [];
+let modelAliasesUnsub = null;
+let modelMismatches = [];
+
+function loadModelAliases(){
+  if(modelAliasesUnsub) modelAliasesUnsub();
+  modelAliasesUnsub = onSnapshot(collection(db,"model_aliases"), snap=>{
+    modelAliasesData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    computeModelMismatches();
+  }, err=>console.error('model_aliases listener failed', err));
+}
+
+function normalizeModelForCompare(name){
+  return (name||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+}
+
+// The one function anything doing a by-name bike lookup should call
+// instead of comparing raw strings directly — folds in whatever aliases
+// are on file so "150 SD" and "150 DTS-i" (or however it got typed) both
+// resolve to the same Master Price List entry.
+function resolveModelName(rawName){
+  if(!rawName) return rawName;
+  const norm = rawName.trim().toLowerCase();
+  const hit = modelAliasesData.find(a => (a.alias||'').trim().toLowerCase() === norm);
+  return hit ? hit.canonical : rawName;
+}
+
+// Scans whatever Inventory/HH Inventory pages are currently loaded (same
+// practical limit as the existing duplicate-detection check elsewhere) for
+// model names that don't exactly match the Master Price List and don't
+// already have an alias — each gets a same-page "does this look like X?"
+// suggestion via loose normalized comparison, or a manual pick if nothing
+// looks close.
+function computeModelMismatches(){
+  const masterNames = allMasterBikes.map(b=>b.name);
+  const masterSet = new Set(masterNames);
+  const aliasSet = new Set(modelAliasesData.map(a=>(a.alias||'').trim().toLowerCase()));
+  const allUnits = [...invData, ...hhInvData];
+  const seen = new Set();
+  const mismatches = [];
+  for(const u of allUnits){
+    const raw = (u.model||'').trim();
+    if(!raw || seen.has(raw)) continue;
+    seen.add(raw);
+    if(masterSet.has(raw)) continue;
+    if(aliasSet.has(raw.toLowerCase())) continue;
+    const normRaw = normalizeModelForCompare(raw);
+    let suggestion = null;
+    if(normRaw){
+      for(const mn of masterNames){
+        const normM = normalizeModelForCompare(mn);
+        if(normM && (normM===normRaw || normM.includes(normRaw) || normRaw.includes(normM))){
+          suggestion = mn; break;
+        }
+      }
+    }
+    mismatches.push({ rawModel: raw, suggestion });
+  }
+  modelMismatches = mismatches;
+  const navCount = document.getElementById('modelMismatchNavCount');
+  if(navCount){
+    if(mismatches.length){ navCount.textContent = mismatches.length; navCount.classList.remove('hidden'); }
+    else navCount.classList.add('hidden');
+  }
+  if(document.getElementById('secModelAliases')?.classList.contains('active')) renderModelAliasesPage();
+}
+
+function renderModelAliasesPage(){
+  const banner = document.getElementById('modelMismatchList');
+  if(banner){
+    if(!modelMismatches.length){
+      banner.innerHTML = `<div class="text-center py-8 text-slate-400"><i class="fas fa-circle-check text-2xl opacity-40 block mb-2"></i><p class="text-sm">No unmatched model names right now — nice and clean.</p></div>`;
+    } else {
+      banner.innerHTML = modelMismatches.map(m=>`
+        <div class="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-50 last:border-0 flex-wrap">
+          <div class="min-w-0">
+            <div class="text-sm font-bold text-slate-800">${escapeHtml(m.rawModel)}</div>
+            ${m.suggestion ? `<div class="text-xs text-slate-500">Looks like it might be <b class="text-slate-700">${escapeHtml(m.suggestion)}</b>?</div>` : `<div class="text-xs text-amber-600">No close match found — pick the right model below.</div>`}
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            ${m.suggestion ? `<button onclick="window.confirmModelAlias('${escapeJsAttr(m.rawModel)}','${escapeJsAttr(m.suggestion)}')" class="px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">Yes, same bike</button>` : ''}
+            <button onclick="window.openAliasFormFor('${escapeJsAttr(m.rawModel)}')" class="px-3 py-1.5 border-2 border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">Pick model</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+  const canonicalSelect = document.getElementById('aliasCanonicalSelect');
+  if(canonicalSelect){
+    const cur = canonicalSelect.value;
+    canonicalSelect.innerHTML = '<option value="">Select a model…</option>' +
+      allMasterBikes.map(b=>`<option value="${escapeHtml(b.name)}">${escapeHtml(b.name)}</option>`).join('');
+    if(cur) canonicalSelect.value = cur;
+  }
+  const countEl = document.getElementById('aliasCount');
+  if(countEl) countEl.textContent = String(modelAliasesData.length);
+  const tbody = document.getElementById('modelAliasesTableBody');
+  if(tbody){
+    if(!modelAliasesData.length){
+      tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-10 text-center text-slate-400"><i class="fas fa-code-compare text-2xl opacity-25 block mb-2"></i>No aliases set up yet.</td></tr>`;
+    } else {
+      tbody.innerHTML = modelAliasesData.map(a=>`
+        <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+          <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Typed As">${escapeHtml(a.alias)}</td>
+          <td class="px-4 py-3 text-sm text-slate-600" data-th="Actually Means">${escapeHtml(a.canonical)}</td>
+          <td class="px-4 py-3 text-right" data-th="Actions"><button onclick="window._deleteModelAlias('${a.id}')" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all"><i class="fas fa-trash-can text-xs"></i></button></td>
+        </tr>
+      `).join('');
+    }
+  }
+}
+
+window.openAliasFormFor = (rawModel)=>{
+  const input = document.getElementById('aliasRawInput');
+  if(input){ input.value = rawModel; input.scrollIntoView({behavior:'smooth', block:'center'}); input.focus(); }
+};
+
+window.confirmModelAlias = async (alias, canonical)=>{
+  if(modelAliasesData.length >= MAX_MODEL_ALIASES){
+    showLimitExceededModal('Model Alias Limit Reached', `Model Aliases are capped at ${MAX_MODEL_ALIASES}. Remove one first, or reach out below to have the limit raised.`);
+    return;
+  }
+  try{
+    await addDoc(collection(db,'model_aliases'), { alias, canonical, createdAt: new Date() });
+    logActivity('Added', 'model_aliases', { model: `${alias} → ${canonical}` });
+    toast(`"${alias}" will now match "${canonical}".`);
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
+window.addModelAlias = async ()=>{
+  const alias = document.getElementById('aliasRawInput').value.trim();
+  const canonical = document.getElementById('aliasCanonicalSelect').value;
+  if(!alias || !canonical){ toast('Fill in both fields.','err'); return; }
+  await window.confirmModelAlias(alias, canonical);
+  document.getElementById('aliasRawInput').value = '';
+  document.getElementById('aliasCanonicalSelect').value = '';
+};
+
+window._deleteModelAlias = async (id)=>{
+  const ok = await showDangerousConfirm({
+    title: 'Remove this alias?',
+    message: "That model spelling will stop auto-matching until a new alias is added for it.",
+    okText: 'Remove', countdownSec: 3
+  });
+  if(!ok) return;
+  try{
+    await deleteDoc(doc(db,'model_aliases',id));
+    toast('Alias removed.');
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
 let selectedChalanIds = new Set();
 let chalanSearchTerm = '';
 window.setChalanSearch = (v)=>{
@@ -4931,7 +5157,7 @@ window.openChalanModal = (id, sourceCol='inventory')=>{
   document.getElementById('chalanEngineDisp').textContent = s.engine || '—';
   document.getElementById('chalanRegNoDisp').textContent = s.regNo || '—';
 
-  const bike = allMasterBikes.find(b=>b.name===s.model);
+  const bike = allMasterBikes.find(b=>b.name===resolveModelName(s.model));
   if(!bike) toast(`"${s.model}" isn't in the Master Price List anymore — fill Price/Insurance in manually.`,'warn');
   document.getElementById('chalanPrice').value = bike?.price || '';
   // Make Year defaults to the current year — still a plain number field,
@@ -4976,7 +5202,7 @@ document.getElementById('chalanCommission')?.addEventListener('input', updateCha
 // is just a sensible starting point instead of blank fields every time.
 document.getElementById('chalanInsType')?.addEventListener('change', (e)=>{
   const s = (currentChalanSourceCol==='hh_inventory' ? hhInvData : invData).find(x=>x.id===currentChalanUnitId);
-  const bike = s ? allMasterBikes.find(b=>b.name===s.model) : null;
+  const bike = s ? allMasterBikes.find(b=>b.name===resolveModelName(s.model)) : null;
   const comMap = { '1st Party':COMMISSION_1ST_PARTY, '3rd Party':COMMISSION_3RD_PARTY };
   document.getElementById('chalanCommission').value = comMap[e.target.value] ?? '';
   if(bike){
@@ -7332,6 +7558,7 @@ function loadSystemLimits(){
       if(d.maxFinanceSchemes) MAX_FINANCE_SCHEMES = d.maxFinanceSchemes;
       if(d.maxChalans) MAX_CHALANS = d.maxChalans;
       if(d.maxImportantInfo) MAX_IMPORTANT_INFO = d.maxImportantInfo;
+      if(d.maxModelAliases) MAX_MODEL_ALIASES = d.maxModelAliases;
       if(d.commission1stParty !== undefined) COMMISSION_1ST_PARTY = d.commission1stParty;
       if(d.commission3rdParty !== undefined) COMMISSION_3RD_PARTY = d.commission3rdParty;
     }
@@ -7380,7 +7607,10 @@ async function updateStorageOverview(){
       sub: `${chalanData.length} / ${MAX_CHALANS} records — auto-clears after 1 year` },
     { icon:'fa-address-book', color:'#059669', label:'Important Info (Contacts/Links)', count: importantData.length, maxCount: MAX_IMPORTANT_INFO,
       usedBytes: importantData.length*RECORD_SIZE_ESTIMATE.chalan, maxBytes: MAX_IMPORTANT_INFO*RECORD_SIZE_ESTIMATE.chalan,
-      sub: `${importantData.length} / ${MAX_IMPORTANT_INFO} entries` }
+      sub: `${importantData.length} / ${MAX_IMPORTANT_INFO} entries` },
+    { icon:'fa-code-compare', color:'#7C3AED', label:'Model Aliases', count: modelAliasesData.length, maxCount: MAX_MODEL_ALIASES,
+      usedBytes: modelAliasesData.length*RECORD_SIZE_ESTIMATE.chalan, maxBytes: MAX_MODEL_ALIASES*RECORD_SIZE_ESTIMATE.chalan,
+      sub: `${modelAliasesData.length} / ${MAX_MODEL_ALIASES} aliases` }
   ];
 
   list.innerHTML = rows.map(r=>{
@@ -7769,6 +7999,7 @@ window.openSystemLimitsModal = ()=>{
   document.getElementById('limitMaxFinanceSchemes').value = MAX_FINANCE_SCHEMES;
   document.getElementById('limitMaxChalans').value = MAX_CHALANS;
   document.getElementById('limitMaxImportant').value = MAX_IMPORTANT_INFO;
+  document.getElementById('limitMaxAliases').value = MAX_MODEL_ALIASES;
   document.getElementById('limitCom1stParty').value = COMMISSION_1ST_PARTY;
   document.getElementById('limitCom3rdParty').value = COMMISSION_3RD_PARTY;
   document.getElementById('systemLimitsModal').classList.remove('hidden');
@@ -7786,9 +8017,10 @@ window.saveSystemLimits = async ()=>{
   const maxFinanceSchemes = parseInt(document.getElementById('limitMaxFinanceSchemes').value);
   const maxChalans = parseInt(document.getElementById('limitMaxChalans').value);
   const maxImportant = parseInt(document.getElementById('limitMaxImportant').value);
+  const maxAliases = parseInt(document.getElementById('limitMaxAliases').value);
   const com1stParty = parseInt(document.getElementById('limitCom1stParty').value);
   const com3rdParty = parseInt(document.getElementById('limitCom3rdParty').value);
-  if(![maxBikes,maxInventory,maxAccessories,maxFinanceSchemes,maxChalans,maxImportant].every(v=>Number.isInteger(v) && v>0)){
+  if(![maxBikes,maxInventory,maxAccessories,maxFinanceSchemes,maxChalans,maxImportant,maxAliases].every(v=>Number.isInteger(v) && v>0)){
     toast('Enter a valid whole number greater than 0 for each limit.','err');
     return;
   }
@@ -7797,13 +8029,13 @@ window.saveSystemLimits = async ()=>{
     return;
   }
   const invCount = await getAccurateTotalInventoryCount(true);
-  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes'], [maxChalans, chalanData.length, 'chalan records'], [maxImportant, importantData.length, 'important info entries']];
+  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes'], [maxChalans, chalanData.length, 'chalan records'], [maxImportant, importantData.length, 'important info entries'], [maxAliases, modelAliasesData.length, 'model aliases']];
   for(const [limit, used, label] of checks){
     if(limit < used){ toast(`Can't set the ${label} limit below the ${used} already on file.`,'err'); return; }
   }
   try{
-    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxAccessories, maxFinanceSchemes, maxChalans, maxImportantInfo:maxImportant, commission1stParty:com1stParty, commission3rdParty:com3rdParty }, { merge:true });
-    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Acc:${maxAccessories} Fin:${maxFinanceSchemes} Chalan:${maxChalans} Info:${maxImportant}` });
+    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxAccessories, maxFinanceSchemes, maxChalans, maxImportantInfo:maxImportant, maxModelAliases:maxAliases, commission1stParty:com1stParty, commission3rdParty:com3rdParty }, { merge:true });
+    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Acc:${maxAccessories} Fin:${maxFinanceSchemes} Chalan:${maxChalans} Info:${maxImportant} Alias:${maxAliases}` });
     toast('Record limits updated.');
     closeSystemLimitsModal();
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
@@ -9154,11 +9386,15 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info' };
-const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant' };
+const SEC_TITLES = { price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
+const SEC_IDS = { price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
 window.switchSec=(sec)=>{
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
+    sec = 'price';
+  }
+  if(sec==='modelAliases' && currentUserRole !== 'owner'){
+    toast("Only a Master ID can manage Model Aliases.",'err');
     sec = 'price';
   }
   // Belt-and-suspenders: force display via inline style directly, on TOP of
@@ -9183,6 +9419,7 @@ window.switchSec=(sec)=>{
   if(sec==='events') renderEventsPage();
   if(sec==='stock') loadStockReportData(true);
   if(sec==='chalans') renderChalanTable();
+  if(sec==='modelAliases') computeModelMismatches();
   if(sec==='history') renderActivityLog();
   if(sec==='trash') renderTrashTable();
   if(sec==='important') renderImportantList();
