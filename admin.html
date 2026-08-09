@@ -834,7 +834,6 @@
   .cb-amt{ width:20%; text-align:right; padding-right:8px; }
   .cb-total-lbl{ font-weight:700; }
   .cb-total-val{ font-weight:700; }
-  .chalan-bike-table tbody tr:nth-child(even), .chalan-bike-table tr:nth-child(even){ background:#F8FAFC; }
 
   /* ── Simple, clean JPG-exportable report card (not tied to print page size) ── */
   .jpg-report-paper{ font-family:'DM Sans',sans-serif; background:#fff; width:900px; padding:34px 38px; margin:0 auto; box-sizing:border-box; color:#0F172A; flex-shrink:0; }
@@ -2537,14 +2536,15 @@
       <tr><td><b>Contact :</b> <span data-f="contact"></span></td></tr>
     </table>
     <table class="chalan-bike-table">
-      <tr><td class="cb-sn">S.N</td><td class="cb-label">Bike Model</td><td class="cb-colon">:</td><td class="cb-value" data-f="model"></td><td class="cb-amt"></td></tr>
+      <tr><td class="cb-sn">S.N</td><td class="cb-label">Bike Model</td><td class="cb-colon">:</td><td class="cb-value" data-f="model"></td><td class="cb-amt">1</td></tr>
       <tr><td class="cb-sn">1</td><td class="cb-label">Chassis No</td><td class="cb-colon">:</td><td class="cb-value" data-f="chassis"></td><td class="cb-amt"></td></tr>
       <tr><td class="cb-sn"></td><td class="cb-label">Engine No</td><td class="cb-colon">:</td><td class="cb-value" data-f="engine"></td><td class="cb-amt"></td></tr>
       <tr><td class="cb-sn"></td><td class="cb-label">Regd No</td><td class="cb-colon">:</td><td class="cb-value" data-f="regNo"></td><td class="cb-amt"></td></tr>
       <tr><td class="cb-sn"></td><td class="cb-label">MFD Date</td><td class="cb-colon">:</td><td class="cb-value" data-f="mfdDate"></td><td class="cb-amt"></td></tr>
-      <tr><td class="cb-sn"></td><td class="cb-label">Bike Price / Insurance</td><td class="cb-colon">:</td><td class="cb-value" data-f="price"></td><td class="cb-amt" data-f="insAmount"></td></tr>
+      <tr><td class="cb-sn"></td><td class="cb-label">Bike Price</td><td class="cb-colon">:</td><td class="cb-value" data-f="price"></td><td class="cb-amt"></td></tr>
+      <tr><td class="cb-sn"></td><td class="cb-label">Insurance Amount</td><td class="cb-colon">:</td><td class="cb-value" data-f="insAmount"></td><td class="cb-amt"></td></tr>
       <tr><td class="cb-sn"></td><td class="cb-label">Insurance Type</td><td class="cb-colon">:</td><td class="cb-value" data-f="insType"></td><td class="cb-amt"></td></tr>
-      <tr><td class="cb-sn" colspan="3"></td><td class="cb-total-lbl" style="text-align:center">Total</td><td class="cb-amt cb-total-val" data-f="total"></td></tr>
+      <tr><td class="cb-sn" colspan="3"></td><td class="cb-total-lbl" style="text-align:center">Total</td><td class="cb-amt cb-total-val">1</td></tr>
     </table>
   </div>
 </template>
@@ -3283,13 +3283,18 @@ window._toggleKebab = (btn, type, id) => {
   } else if(type === 'hh_inventory'){
     const s = hhInvData.find(x=>x.id===id);
     const cur = s?.status || 'Available';
-    const statusActions = ['Available','Booked','Sold']
-      .filter(st => st !== cur)
-      .map(st => ({
-        label: 'Mark '+st,
-        icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
-        onClick: () => window._setHHInvStatus(id, st)
-      }));
+    // Once Sold, Booked doesn't make sense anymore — only offer the undo
+    // back to Available, matching the same simplification regular
+    // Inventory already has.
+    const statusActions = cur === 'Sold'
+      ? [{ label:'Mark Available', icon:'fa-rotate-left', onClick:()=>window._setHHInvStatus(id, 'Available') }]
+      : ['Available','Booked','Sold']
+          .filter(st => st !== cur)
+          .map(st => ({
+            label: 'Mark '+st,
+            icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
+            onClick: () => window._setHHInvStatus(id, st)
+          }));
     const chalanAction = cur === 'Sold'
       ? [{ label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id, 'hh_inventory') }]
       : [];
@@ -4509,21 +4514,9 @@ function renderMasterTable() {
     return;
   }
   const sorted=[...allMasterBikes].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
-  // How many bikes currently sit in each category, shown as a % of the
-  // MAX_BIKES model-count limit — so staff can see at a glance how much of
-  // the overall model quota each category is eating into.
-  const categoryCounts = {};
-  allMasterBikes.forEach(bike=>{
-    const c = bike.category||'Bike';
-    categoryCounts[c] = (categoryCounts[c]||0) + 1;
-  });
   tbody.innerHTML = sorted.map(b=>{
     const category=b.category||'Bike';
-    const catPct = MAX_BIKES>0 ? Math.round((categoryCounts[category]||0)/MAX_BIKES*100) : 0;
-    const catBadge=`<div class="flex flex-col items-end gap-1">
-      <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">${escapeHtml(category)}</span>
-      <span class="text-[10px] text-slate-400 font-medium">${catPct}% of ${MAX_BIKES}-model limit</span>
-    </div>`;
+    const catBadge=`<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">${escapeHtml(category)}</span>`;
     return `
     <tr class="border-b border-slate-100" data-label="${escapeHtml(b.name)}">
       <td class="px-4 py-3" data-th="S.N">
@@ -5044,7 +5037,6 @@ function renderChalanIntoWrappers(f){
     price: f.price ? 'Rs. '+f.price.toLocaleString('en-IN') : '',
     insAmount: 'Rs. '+(f.insAmount||0).toLocaleString('en-IN'),
     insType: f.insType,
-    total: 'Rs. '+((f.price||0)+(f.insAmount||0)).toLocaleString('en-IN'),
     chalanNo: f.chalanNo, deliveryDate: f.deliveryDate, custName: f.custName, address: f.address, contact: f.contact
   };
   const tpl = document.getElementById('chalanCopyTemplate');
@@ -5130,7 +5122,6 @@ window.printChalanNow = async ()=>{
   .cb-amt{ width:20%; text-align:right; padding-right:8px; }
   .cb-total-lbl{ font-weight:700; }
   .cb-total-val{ font-weight:700; }
-  .chalan-bike-table tbody tr:nth-child(even), .chalan-bike-table tr:nth-child(even){ background:#F8FAFC; }
 </style>
 </head>
 <body>${content}</body>
