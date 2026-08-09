@@ -724,9 +724,14 @@
     display:flex; align-items:center; gap:4px; flex-wrap:nowrap;
     overflow-x:auto; -webkit-overflow-scrolling:touch;
     scrollbar-width:none; -ms-overflow-style:none;
+    mask-image:linear-gradient(to right, #000 calc(100% - 22px), transparent 100%);
+    -webkit-mask-image:linear-gradient(to right, #000 calc(100% - 22px), transparent 100%);
   }
   .filter-scroll::-webkit-scrollbar{ display:none; }
-  .filter-scroll .doc-type-tab{ flex-shrink:0; white-space:nowrap; }
+  .filter-scroll > *{ flex-shrink:0; white-space:nowrap; }
+  @media (min-width:900px){
+    .filter-scroll{ mask-image:none; -webkit-mask-image:none; }
+  }
   .filter-count-badge{
     display:inline-flex; align-items:center; justify-content:center;
     min-width:16px; height:16px; padding:0 4px; border-radius:999px;
@@ -1646,7 +1651,7 @@
           <span id="selectModeHintHH" class="hidden items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-bajaj-blue">
             <i class="fas fa-hand-pointer text-[10px]"></i> Select mode — tap rows to add
           </span>
-          <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
+          <div class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setHHInvStatusFilter('all')">All <span class="pill-count" id="pcHHAll">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Available" onclick="setHHInvStatusFilter('Available')">Available <span class="pill-count" id="pcHHAvailable">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Booked" onclick="setHHInvStatusFilter('Booked')">Booked <span class="pill-count" id="pcHHBooked">0</span></button>
