@@ -2223,8 +2223,13 @@
 
       <div class="yng-card-shell overflow-hidden mb-5">
         <div class="px-5 py-4 border-b border-slate-100">
-          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-triangle-exclamation text-amber-500"></i> Unmatched Model Names</div>
-          <p class="text-xs text-slate-500 mt-1">Spotted in Inventory/HH Inventory but don't exactly match anything in the Master Price List.</p>
+          <div class="flex items-center gap-2 section-title text-2xl mb-1"><i class="fas fa-triangle-exclamation text-amber-500"></i> Unmatched Model Names</div>
+          <p class="text-xs text-slate-500 mb-3">Spotted in Inventory/HH Inventory but don't exactly match anything in the Master Price List.</p>
+          <div class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
+            <button class="doc-type-tab model-mismatch-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-filter="all" onclick="window.setModelMismatchFilter('all')">All <span id="mmCountAll" class="filter-count-badge"></span></button>
+            <button class="doc-type-tab model-mismatch-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-filter="suggested" onclick="window.setModelMismatchFilter('suggested')"><i class="fas fa-wand-magic-sparkles mr-1"></i>Auto-Suggested <span id="mmCountSuggested" class="filter-count-badge"></span></button>
+            <button class="doc-type-tab model-mismatch-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-filter="review" onclick="window.setModelMismatchFilter('review')"><i class="fas fa-magnifying-glass mr-1"></i>Needs Review <span id="mmCountReview" class="filter-count-badge"></span></button>
+          </div>
         </div>
         <div id="modelMismatchList"></div>
       </div>
@@ -2247,22 +2252,18 @@
       </div>
 
       <div class="yng-card-shell overflow-hidden">
-        <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-list text-amber-500"></i> Existing Aliases</div>
-          <span id="aliasCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0</span>
+        <div class="px-5 py-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-code-compare text-amber-500"></i> Existing Aliases</div>
+            <span id="aliasCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0</span>
+          </div>
+          <div class="relative max-w-sm">
+            <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
+            <input type="text" id="aliasSearchInput" oninput="window.setAliasSearch(this.value)" placeholder="Search typed-as or model name…"
+              class="w-full pl-9 pr-3 py-2.5 bg-white border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          </div>
         </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm responsive-table">
-            <thead>
-              <tr class="border-b border-slate-100 text-left">
-                <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Typed As</th>
-                <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Actually Means</th>
-                <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wide text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="modelAliasesTableBody"></tbody>
-          </table>
-        </div>
+        <div id="aliasesListWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-5"></div>
       </div>
     </div>
 
@@ -4982,17 +4983,47 @@ function computeModelMismatches(){
   if(document.getElementById('secModelAliases')?.classList.contains('active')) renderModelAliasesPage();
 }
 
+let modelMismatchFilter = 'all';
+window.setModelMismatchFilter = (f)=>{
+  modelMismatchFilter = f;
+  document.querySelectorAll('.model-mismatch-tab').forEach(t=>t.classList.toggle('active', t.dataset.filter===f));
+  renderModelAliasesPage();
+};
+let aliasSearchTerm = '';
+window.setAliasSearch = (v)=>{
+  aliasSearchTerm = v.trim().toLowerCase();
+  renderModelAliasesPage();
+};
+
 function renderModelAliasesPage(){
+  const suggestedCount = modelMismatches.filter(m=>m.suggestion).length;
+  const reviewCount = modelMismatches.length - suggestedCount;
+  const setBadge = (id, n)=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = n ? String(n) : '';
+    el.classList.toggle('hidden', !n);
+  };
+  setBadge('mmCountAll', modelMismatches.length);
+  setBadge('mmCountSuggested', suggestedCount);
+  setBadge('mmCountReview', reviewCount);
+
   const banner = document.getElementById('modelMismatchList');
   if(banner){
-    if(!modelMismatches.length){
-      banner.innerHTML = `<div class="text-center py-8 text-slate-400"><i class="fas fa-circle-check text-2xl opacity-40 block mb-2"></i><p class="text-sm">No unmatched model names right now — nice and clean.</p></div>`;
+    const visible = modelMismatchFilter==='all' ? modelMismatches
+      : modelMismatchFilter==='suggested' ? modelMismatches.filter(m=>m.suggestion)
+      : modelMismatches.filter(m=>!m.suggestion);
+    if(!visible.length){
+      banner.innerHTML = `<div class="text-center py-8 text-slate-400"><i class="fas fa-circle-check text-2xl opacity-40 block mb-2"></i><p class="text-sm">${modelMismatches.length ? 'Nothing in this filter.' : 'No unmatched model names right now — nice and clean.'}</p></div>`;
     } else {
-      banner.innerHTML = modelMismatches.map(m=>`
+      banner.innerHTML = visible.map(m=>`
         <div class="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-50 last:border-0 flex-wrap">
-          <div class="min-w-0">
-            <div class="text-sm font-bold text-slate-800">${escapeHtml(m.rawModel)}</div>
-            ${m.suggestion ? `<div class="text-xs text-slate-500">Looks like it might be <b class="text-slate-700">${escapeHtml(m.suggestion)}</b>?</div>` : `<div class="text-xs text-amber-600">No close match found — pick the right model below.</div>`}
+          <div class="min-w-0 flex items-center gap-2.5">
+            <i class="fas ${m.suggestion?'fa-wand-magic-sparkles text-bajaj-blue':'fa-magnifying-glass text-amber-500'} text-xs flex-shrink-0"></i>
+            <div>
+              <div class="text-sm font-bold text-slate-800">${escapeHtml(m.rawModel)}</div>
+              ${m.suggestion ? `<div class="text-xs text-slate-500">Looks like it might be <b class="text-slate-700">${escapeHtml(m.suggestion)}</b>?</div>` : `<div class="text-xs text-amber-600">No close match found — pick the right model below.</div>`}
+            </div>
           </div>
           <div class="flex items-center gap-2 flex-shrink-0">
             ${m.suggestion ? `<button onclick="window.confirmModelAlias('${escapeJsAttr(m.rawModel)}','${escapeJsAttr(m.suggestion)}')" class="px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">Yes, same bike</button>` : ''}
@@ -5002,6 +5033,7 @@ function renderModelAliasesPage(){
       `).join('');
     }
   }
+
   const canonicalSelect = document.getElementById('aliasCanonicalSelect');
   if(canonicalSelect){
     const cur = canonicalSelect.value;
@@ -5009,21 +5041,32 @@ function renderModelAliasesPage(){
       allMasterBikes.map(b=>`<option value="${escapeHtml(b.name)}">${escapeHtml(b.name)}</option>`).join('');
     if(cur) canonicalSelect.value = cur;
   }
+
   const countEl = document.getElementById('aliasCount');
   if(countEl) countEl.textContent = String(modelAliasesData.length);
-  const tbody = document.getElementById('modelAliasesTableBody');
-  if(tbody){
-    if(!modelAliasesData.length){
-      tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-10 text-center text-slate-400"><i class="fas fa-code-compare text-2xl opacity-25 block mb-2"></i>No aliases set up yet.</td></tr>`;
-    } else {
-      tbody.innerHTML = modelAliasesData.map(a=>`
-        <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-          <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Typed As">${escapeHtml(a.alias)}</td>
-          <td class="px-4 py-3 text-sm text-slate-600" data-th="Actually Means">${escapeHtml(a.canonical)}</td>
-          <td class="px-4 py-3 text-right" data-th="Actions"><button onclick="window._deleteModelAlias('${a.id}')" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all"><i class="fas fa-trash-can text-xs"></i></button></td>
-        </tr>
-      `).join('');
+  const wrap = document.getElementById('aliasesListWrap');
+  if(wrap){
+    const q = aliasSearchTerm;
+    const visibleAliases = !q ? modelAliasesData : modelAliasesData.filter(a=>
+      (a.alias||'').toLowerCase().includes(q) || (a.canonical||'').toLowerCase().includes(q));
+    if(!visibleAliases.length){
+      wrap.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400"><i class="fas fa-code-compare text-3xl opacity-25 block mb-2"></i><p class="text-sm">${modelAliasesData.length ? 'No matching aliases.' : 'No aliases set up yet.'}</p></div>`;
+      return;
     }
+    wrap.innerHTML = visibleAliases.map(a=>`
+      <div class="yng-card-shell p-4">
+        <div class="flex items-start justify-between gap-2 mb-3">
+          <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#EFF6FF">
+            <i class="fas fa-code-compare text-lg" style="color:#005EA6"></i>
+          </div>
+          <button type="button" onclick="window._deleteModelAlias('${a.id}')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all" aria-label="Remove alias"><i class="fas fa-trash-can text-xs"></i></button>
+        </div>
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Typed As</div>
+        <div class="font-bold text-slate-800 text-sm leading-snug mb-2 truncate" title="${escapeHtml(a.alias)}">${escapeHtml(a.alias)}</div>
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Actually Means</div>
+        <div class="text-sm text-slate-600 leading-snug truncate" title="${escapeHtml(a.canonical)}">${escapeHtml(a.canonical)}</div>
+      </div>
+    `).join('');
   }
 }
 
