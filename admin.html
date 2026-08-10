@@ -5584,6 +5584,34 @@ window.openAliasFormFor = (rawModel)=>{
 
 // The one-tap "Yes, same bike" on an auto-suggested match — skips the
 // modal entirely since there's nothing left to fill in.
+// Confirming/adding an alias only recorded the alias/translation itself —
+// it never touched the Inventory/HH Inventory documents that actually
+// carry the mismatched spelling. That's the gap: the alias existed, but
+// existing units kept showing the raw typed-in name instead of the
+// canonical one. This retroactively renames every matching unit's `model`
+// field so the fix is immediately visible, not just recorded for future
+// matching.
+async function applyAliasToExistingUnits(alias, canonical){
+  if(!alias || !canonical || alias===canonical) return 0;
+  const invMatches = invData.filter(u=>(u.model||'').trim()===alias).map(u=>({id:u.id, col:'inventory'}));
+  const hhMatches = hhInvData.filter(u=>(u.model||'').trim()===alias).map(u=>({id:u.id, col:'hh_inventory'}));
+  const all = [...invMatches, ...hhMatches];
+  if(!all.length) return 0;
+  try{
+    const chunks = [];
+    for(let i=0;i<all.length;i+=400) chunks.push(all.slice(i,i+400));
+    for(const chunk of chunks){
+      const batch = writeBatch(db);
+      chunk.forEach(u=>batch.update(doc(db,u.col,u.id),{model:canonical}));
+      await batch.commit();
+    }
+    return all.length;
+  }catch(e){
+    console.error('applyAliasToExistingUnits failed', e);
+    return 0;
+  }
+}
+
 window.confirmModelAlias = async (alias, canonical)=>{
   if(modelAliasesData.length >= MAX_MODEL_ALIASES){
     showLimitExceededModal('Model Alias Limit Reached', `Model Aliases are capped at ${MAX_MODEL_ALIASES}. Remove one first, or reach out below to have the limit raised.`);
@@ -5592,7 +5620,8 @@ window.confirmModelAlias = async (alias, canonical)=>{
   try{
     await addDoc(collection(db,'model_aliases'), { alias, canonical, createdAt: new Date() });
     logActivity('Added', 'model_aliases', { model: `${alias} → ${canonical}` });
-    toast(`"${alias}" will now match "${canonical}".`);
+    const renamed = await applyAliasToExistingUnits(alias, canonical);
+    toast(renamed ? `"${alias}" → "${canonical}" confirmed — ${renamed} existing unit(s) updated.` : `"${alias}" will now match "${canonical}".`);
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
@@ -5604,7 +5633,8 @@ window.addModelAlias = async ()=>{
     if(currentEditAliasId){
       await updateDoc(doc(db,'model_aliases',currentEditAliasId), { alias, canonical });
       logActivity('Updated', 'model_aliases', { model: `${alias} → ${canonical}` });
-      toast('Alias updated.');
+      const renamed = await applyAliasToExistingUnits(alias, canonical);
+      toast(renamed ? `Alias updated — ${renamed} existing unit(s) updated.` : 'Alias updated.');
     } else {
       if(modelAliasesData.length >= MAX_MODEL_ALIASES){
         showLimitExceededModal('Model Alias Limit Reached', `Model Aliases are capped at ${MAX_MODEL_ALIASES}. Remove one first, or reach out below to have the limit raised.`);
@@ -5612,7 +5642,8 @@ window.addModelAlias = async ()=>{
       }
       await addDoc(collection(db,'model_aliases'), { alias, canonical, createdAt: new Date() });
       logActivity('Added', 'model_aliases', { model: `${alias} → ${canonical}` });
-      toast(`"${alias}" will now match "${canonical}".`);
+      const renamed = await applyAliasToExistingUnits(alias, canonical);
+      toast(renamed ? `"${alias}" → "${canonical}" confirmed — ${renamed} existing unit(s) updated.` : `"${alias}" will now match "${canonical}".`);
     }
     window.closeAliasFormModal();
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
@@ -8229,6 +8260,10 @@ document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
       window.cancelExchangeEdit();
       toast('Exchange unit added — S.N '+nextSn+' assigned, marked In Stock.');
     }
+    // Belt-and-suspenders: force the modal shut after a successful save
+    // regardless of anything above, so a partial DOM-reset hiccup can
+    // never leave the popup stuck open when the save actually went through.
+    document.getElementById('exchangeFormModal')?.classList.remove('open');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 });
 
