@@ -4133,12 +4133,12 @@ function renderAllInventoryTable(){
   const q = allInvSearchTerm.toLowerCase().trim();
   if(q){
     combined = combined.filter(s=>
-      (s.model||'').toLowerCase().includes(q) ||
-      (s.chassis||'').toLowerCase().includes(q) ||
-      (s.engine||'').toLowerCase().includes(q) ||
-      (s.regNo||'').toLowerCase().includes(q) ||
-      (s.color||'').toLowerCase().includes(q) ||
-      (s.customerName||'').toLowerCase().includes(q)
+      String(s.model||'').toLowerCase().includes(q) ||
+      String(s.chassis||'').toLowerCase().includes(q) ||
+      String(s.engine||'').toLowerCase().includes(q) ||
+      String(s.regNo||'').toLowerCase().includes(q) ||
+      String(s.color||'').toLowerCase().includes(q) ||
+      String(s.customerName||'').toLowerCase().includes(q)
     );
   }
   document.getElementById('allInvCount').textContent = combined.length+' unit'+(combined.length!==1?'s':'');
@@ -5565,7 +5565,7 @@ function loadModelAliases(){
 }
 
 function normalizeModelForCompare(name){
-  return (name||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  return String(name||'').toLowerCase().replace(/[^a-z0-9]/g,'');
 }
 
 // The one function anything doing a by-name bike lookup should call
@@ -5685,7 +5685,7 @@ function renderModelAliasesPage(){
   if(wrap){
     const q = aliasSearchTerm;
     const visibleAliases = !q ? modelAliasesData : modelAliasesData.filter(a=>
-      (a.alias||'').toLowerCase().includes(q) || (a.canonical||'').toLowerCase().includes(q));
+      String(a.alias||'').toLowerCase().includes(q) || String(a.canonical||'').toLowerCase().includes(q));
     if(!visibleAliases.length){
       wrap.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400"><i class="fas fa-code-compare text-3xl opacity-25 block mb-2"></i><p class="text-sm">${modelAliasesData.length ? 'No matching aliases.' : 'No aliases set up yet.'}</p></div>`;
       return;
@@ -5832,10 +5832,10 @@ function renderChalanTable(){
   if(!tbody) return;
   const q = chalanSearchTerm;
   const visible = !q ? chalanData : chalanData.filter(c=>
-    (c.model||'').toLowerCase().includes(q) ||
-    (c.chassis||'').toLowerCase().includes(q) ||
-    (c.custName||'').toLowerCase().includes(q) ||
-    (c.chalanNo||'').toLowerCase().includes(q)
+    String(c.model||'').toLowerCase().includes(q) ||
+    String(c.chassis||'').toLowerCase().includes(q) ||
+    String(c.custName||'').toLowerCase().includes(q) ||
+    String(c.chalanNo||'').toLowerCase().includes(q)
   );
   if(!visible.length){
     tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-12 text-center text-slate-400"><i class="fas fa-file-invoice text-3xl opacity-25 block mb-2"></i>${chalanData.length ? 'No matching Chalans.' : 'No Chalans generated yet.'}</td></tr>`;
@@ -6609,12 +6609,12 @@ function getFilteredInv(){
   if(!invSearchTerm) return base;
   const q = invSearchTerm.toLowerCase().trim();
   return base.filter(s=>{
-    return (s.model||'').toLowerCase().includes(q)
-        || (s.chassis||'').toLowerCase().includes(q)
-        || (s.engine||'').toLowerCase().includes(q)
-        || (s.regNo||'').toLowerCase().includes(q)
-        || (s.color||'').toLowerCase().includes(q)
-        || (s.customerName||'').toLowerCase().includes(q);
+    return String(s.model||'').toLowerCase().includes(q)
+        || String(s.chassis||'').toLowerCase().includes(q)
+        || String(s.engine||'').toLowerCase().includes(q)
+        || String(s.regNo||'').toLowerCase().includes(q)
+        || String(s.color||'').toLowerCase().includes(q)
+        || String(s.customerName||'').toLowerCase().includes(q);
   });
 }
 
@@ -6837,13 +6837,13 @@ window.setHHInvStatusFilter = (status)=>{
 };
 
 function hhSearchMatches(s, q){
-  return (s.model||'').toLowerCase().includes(q)
-      || (s.chassis||'').toLowerCase().includes(q)
-      || (s.engine||'').toLowerCase().includes(q)
-      || (s.regNo||'').toLowerCase().includes(q)
-      || (s.color||'').toLowerCase().includes(q)
-      || (s.eventName||'').toLowerCase().includes(q)
-      || (s.customerName||'').toLowerCase().includes(q);
+  return String(s.model||'').toLowerCase().includes(q)
+      || String(s.chassis||'').toLowerCase().includes(q)
+      || String(s.engine||'').toLowerCase().includes(q)
+      || String(s.regNo||'').toLowerCase().includes(q)
+      || String(s.color||'').toLowerCase().includes(q)
+      || String(s.eventName||'').toLowerCase().includes(q)
+      || String(s.customerName||'').toLowerCase().includes(q);
 }
 function getFilteredHHInv(){
   let base = hhInvData;
@@ -7441,7 +7441,7 @@ window.addStockArea = async ()=>{
   const input = document.getElementById('newAreaInput');
   const name = (input.value||'').trim();
   if(!name){ toast('Please enter an area name.','warn'); return; }
-  if(stockAreas.some(a=>(a.name||'').toLowerCase()===name.toLowerCase())){ toast('This area already exists.','warn'); return; }
+  if(stockAreas.some(a=>String(a.name||'').toLowerCase()===name.toLowerCase())){ toast('This area already exists.','warn'); return; }
   if(stockAreas.length >= MAX_STOCK_AREAS){
     showLimitExceededModal('Storage Area Limit Reached', `Storage Areas are capped at ${MAX_STOCK_AREAS}. Remove one first, or reach out below to have the limit raised.`);
     return;
@@ -7643,7 +7643,7 @@ const invSearchDropdown = document.getElementById('invSearchDropdown');
 const invSearchClear = document.getElementById('invSearchClear');
 
 function matchScore(field, q){
-  field = (field||'').toLowerCase();
+  field = String(field||'').toLowerCase();
   if(!field) return -1;
   if(field === q) return 100;
   if(field.endsWith(q)) return 80;      // matches by trailing/last digits — most common lookup
@@ -7948,7 +7948,7 @@ window.startCategoryRename = async (id)=>{
   const input = document.getElementById('confirmCategoryRenameInput');
   const newName = input?.value.trim();
   if(!newName){ toast('Category name cannot be empty.','err'); return; }
-  if(newName!==cat.name && financeCategories.some(c=>c.id!==id && (c.name||'').toLowerCase()===newName.toLowerCase())){
+  if(newName!==cat.name && financeCategories.some(c=>c.id!==id && String(c.name||'').toLowerCase()===newName.toLowerCase())){
     toast('Another category already has that name.','err'); return;
   }
   if(newName===cat.name) return;
@@ -7974,7 +7974,7 @@ window.addFinanceCategory = async ()=>{
   const nameInput = document.getElementById('newFinCatName');
   const name = nameInput.value.trim();
   if(!name){ toast('Category name required (e.g. 3 Wheeler)','err'); return; }
-  if(financeCategories.some(c=>(c.name||'').toLowerCase()===name.toLowerCase())){ toast('This category already exists.','err'); return; }
+  if(financeCategories.some(c=>String(c.name||'').toLowerCase()===name.toLowerCase())){ toast('This category already exists.','err'); return; }
   if(financeCategories.length >= MAX_FINANCE_CATEGORIES){
     showLimitExceededModal('Finance Category Limit Reached', `Finance Categories are capped at ${MAX_FINANCE_CATEGORIES}. Remove one first, or reach out below to have the limit raised.`);
     return;
@@ -8179,11 +8179,11 @@ window.setExchangeSendToFilter = (sendTo)=>{
 };
 
 function exSearchMatches(s,q){
-  return (s.model||'').toLowerCase().includes(q)
-      || (s.regNo||'').toLowerCase().includes(q)
-      || (s.customerName||'').toLowerCase().includes(q)
-      || (s.remarks||'').toLowerCase().includes(q)
-      || (s.sendTo||'').toLowerCase().includes(q)
+  return String(s.model||'').toLowerCase().includes(q)
+      || String(s.regNo||'').toLowerCase().includes(q)
+      || String(s.customerName||'').toLowerCase().includes(q)
+      || String(s.remarks||'').toLowerCase().includes(q)
+      || String(s.sendTo||'').toLowerCase().includes(q)
       || (s.makeYear||'').toString().toLowerCase().includes(q);
 }
 function getFilteredExchange(){
@@ -9355,11 +9355,11 @@ function renderDocumentsPage(){
   Object.entries(countEls).forEach(([key, elId])=>{
     const el = document.getElementById(elId);
     if(!el) return;
-    const n = key==='all' ? documents.length : documents.filter(d=>(DOC_TYPE_GROUPS[key]||[]).includes((d.fileExt||'').toLowerCase())).length;
+    const n = key==='all' ? documents.length : documents.filter(d=>(DOC_TYPE_GROUPS[key]||[]).includes(String(d.fileExt||'').toLowerCase())).length;
     el.textContent = n ? String(n) : '';
     el.classList.toggle('hidden', !n);
   });
-  const filtered = docTypeFilter==='all' ? documents : documents.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes((d.fileExt||'').toLowerCase()));
+  const filtered = docTypeFilter==='all' ? documents : documents.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes(String(d.fileExt||'').toLowerCase()));
   if(!filtered.length){
     wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-folder-open text-3xl opacity-25 block mb-2"></i><p class="text-sm">${documents.length ? 'No documents match this filter.' : 'No documents uploaded yet.'}</p></div>`;
     return;
@@ -9370,7 +9370,7 @@ function renderDocumentsPage(){
     return bt-at;
   });
   wrap.innerHTML = sorted.map(d=>{
-    const ext = (d.fileExt||'').toLowerCase();
+    const ext = String(d.fileExt||'').toLowerCase();
     const iconInfo = DOC_FILE_ICONS[ext] || {icon:'fa-file', color:'#64748B', label:(ext||'FILE').slice(0,3).toUpperCase()};
     const at = d.uploadedAt?.toDate ? d.uploadedAt.toDate() : new Date(d.uploadedAt||Date.now());
     return `<div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="openDocPreview('${d.id}')">
@@ -9573,7 +9573,7 @@ window.downloadDocument = (id)=>{
   const d = documents.find(x=>x.id===id);
   if(!d?.fileData) return;
   let filename = (d.fileName || d.name || 'document').trim();
-  const ext = (d.fileExt||'').toLowerCase();
+  const ext = String(d.fileExt||'').toLowerCase();
   if(ext && !filename.toLowerCase().endsWith('.'+ext)) filename += '.'+ext;
   const a = document.createElement('a');
   a.href = d.fileData;
@@ -9586,7 +9586,7 @@ window.downloadDocument = (id)=>{
 window.openDocPreview = (id)=>{
   const d = documents.find(x=>x.id===id);
   if(!d) return;
-  const ext = (d.fileExt||'').toLowerCase();
+  const ext = String(d.fileExt||'').toLowerCase();
   document.getElementById('docPreviewTitle').textContent = d.name || 'Document';
   document.getElementById('docPreviewMeta').textContent = `${ext.toUpperCase()} · ${formatBytes(d.sizeBytes||0)}${d.description ? ' · '+d.description : ''}`;
   document.getElementById('docPreviewDownloadBtn').onclick = ()=>downloadDocument(id);
@@ -10461,11 +10461,11 @@ function renderActivityLog(){
   if(!tbody) return;
   const q = historySearchTerm.toLowerCase().trim();
   const list = q ? activityLogData.filter(a=>
-    (a.action||'').toLowerCase().includes(q) ||
-    (a.model||'').toLowerCase().includes(q) ||
-    (a.chassis||'').toLowerCase().includes(q) ||
-    (a.customerName||'').toLowerCase().includes(q) ||
-    (a.by||'').toLowerCase().includes(q)
+    String(a.action||'').toLowerCase().includes(q) ||
+    String(a.model||'').toLowerCase().includes(q) ||
+    String(a.chassis||'').toLowerCase().includes(q) ||
+    String(a.customerName||'').toLowerCase().includes(q) ||
+    String(a.by||'').toLowerCase().includes(q)
   ) : activityLogData;
   document.getElementById('historyCount').textContent = list.length+' entr'+(list.length!==1?'ies':'y');
   if(!list.length){
@@ -10551,9 +10551,9 @@ window.exportAllInventoryToExcel = ()=>{
   const q = allInvSearchTerm.toLowerCase().trim();
   if(q){
     combined = combined.filter(s=>
-      (s.model||'').toLowerCase().includes(q) || (s.chassis||'').toLowerCase().includes(q) ||
-      (s.engine||'').toLowerCase().includes(q) || (s.regNo||'').toLowerCase().includes(q) ||
-      (s.color||'').toLowerCase().includes(q) || (s.customerName||'').toLowerCase().includes(q)
+      String(s.model||'').toLowerCase().includes(q) || String(s.chassis||'').toLowerCase().includes(q) ||
+      String(s.engine||'').toLowerCase().includes(q) || String(s.regNo||'').toLowerCase().includes(q) ||
+      String(s.color||'').toLowerCase().includes(q) || String(s.customerName||'').toLowerCase().includes(q)
     );
   }
   if(!combined.length){ toast('Nothing to export in the current view.','warn'); return; }
@@ -11064,7 +11064,7 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
     // set up on this page; falls back to the first available category
     // rather than rejecting the row outright, since a near-miss spelling
     // shouldn't block an otherwise-good price list row.
-    const catMatch = financeCategories.find(c=>(c.name||'').toLowerCase()===row.category.toLowerCase());
+    const catMatch = financeCategories.find(c=>String(c.name||'').toLowerCase()===row.category.toLowerCase());
     const category = catMatch ? catMatch.name : (financeCategories[0]?.name || 'Bike');
 
     const modelNorm = normModelName(row.model);
@@ -11221,7 +11221,14 @@ window.runGlobalSearch = (q)=>{
     resultsEl.innerHTML = `<div class="py-10 text-center text-slate-400 text-sm"><i class="fas fa-keyboard text-2xl opacity-30 block mb-2"></i>Start typing to search everything…</div>`;
     return;
   }
-  const matches = s => (s||'').toLowerCase().includes(query);
+  // String(...) instead of a bare (s||'') — some older records (especially
+  // anything that came in through an Excel import where a cell like a
+  // purely-numeric Reg No or Chalan No got read back as a JS number
+  // instead of text) would otherwise crash this line entirely — a number
+  // has no .toLowerCase() method, so the whole search would throw and
+  // silently leave the results panel stuck on its very first "Start
+  // typing…" state no matter what was typed afterward.
+  const matches = s => String(s??'').toLowerCase().includes(query);
   const MAX_PER_GROUP = 5;
   let html = '';
   let total = 0;
