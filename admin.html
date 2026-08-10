@@ -1072,6 +1072,9 @@
         <button id="navExchange" onclick="switchSec('exchange');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-right-left"></i> Exchange Stock
         </button>
+        <button id="navCustomers" onclick="switchSec('customers');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-address-card"></i> Customers
+        </button>
         <button id="navFin" onclick="switchSec('fin');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-percent"></i> HFL Finance
         </button>
@@ -1232,6 +1235,17 @@
           </div>
           <div class="text-3xl font-black text-slate-800" id="dashMismatchCount">0</div>
         </div>
+      </div>
+
+      <div class="yng-card-shell overflow-hidden mb-4">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-chart-column text-teal-600"></i>
+            <div class="section-title text-xl">Sales Trend — Last 6 Months</div>
+          </div>
+          <span id="dashTopModelChip" class="text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-3 py-1"></span>
+        </div>
+        <div id="dashSalesTrendChart" class="p-5"></div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -2065,6 +2079,37 @@
       </div>
     </div>
 
+    <!-- ═══ CUSTOMERS (computed from Inventory/HH/Chalan/Exchange — no separate collection) ═══ -->
+    <div class="sec-panel" id="secCustomers">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Relationships ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Customer <span class="text-amber-500">History</span></div>
+        </div>
+        <span id="customersTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500 flex-shrink-0">0 customers</span>
+      </div>
+      <p class="text-xs text-slate-400 -mt-4 mb-5"><i class="fas fa-circle-info mr-1"></i>Built automatically from every Sold unit, Chalan, and Exchange record — grouped by the name typed in each. No separate data entry needed; if a name is spelled two different ways it'll show as two separate customers.</p>
+
+      <div class="relative mb-5 max-w-md">
+        <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" id="customerSearch" autocomplete="off" placeholder="Search customer name…"
+          class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+      </div>
+
+      <div id="customersListWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+
+    <!-- Customer detail modal -->
+    <div id="customerDetailModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4" style="background:rgba(15,23,42,.55);backdrop-filter:blur(2px);" onclick="if(event.target===this) closeCustomerDetail()">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-address-card text-amber-500"></i> <span id="customerDetailName">Customer</span></div>
+          <button onclick="closeCustomerDetail()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div id="customerDetailBody" class="p-5"></div>
+      </div>
+    </div>
+
     <!-- ═══ HFL FINANCE ═══ -->
     <div class="sec-panel" id="secFin">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
@@ -2282,6 +2327,17 @@
         </div>
         <p class="text-[11px] text-slate-400 mb-4">What the Master ID has allowed for each category — and how much is actually being used right now.</p>
         <div id="storageAllocationList" class="flex flex-col gap-4"></div>
+      </div>
+
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center gap-2 mb-1">
+          <i class="fas fa-cloud-arrow-down text-emerald-500"></i>
+          <div class="text-xs font-bold text-slate-600">Full Data Backup</div>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-4">One Excel file, one sheet per section (Inventory, HH Inventory, Exchange Stock, Price List, Accessories, Finance Schemes, Chalans, Customers, Important Info, Model Aliases, Events) — a snapshot to keep on your own device, separate from Firebase.</p>
+        <button id="fullBackupBtn" onclick="downloadFullBackup()" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all">
+          <i class="fas fa-download"></i> Download Full Backup
+        </button>
       </div>
     </div>
 
@@ -4334,8 +4390,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
-  const MNAV_IDS = { dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
+  const NAV_IDS = { dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
+  const MNAV_IDS = { dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -5320,6 +5376,7 @@ function loadChalans(){
     renderChalanTable();
     updateStorageOverview();
     if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
+    if(document.getElementById('secCustomers')?.classList.contains('active')) renderCustomersPage();
   }, err=>console.error('chalans listener failed', err));
 }
 
@@ -5354,6 +5411,53 @@ let modelMismatches = [];
 // five different sections. Reuses whatever data's already loaded elsewhere
 // (Master Price List, Inventory, Chalans, Activity Log) rather than firing
 // off its own separate queries.
+// Dependency-free bar chart — no charting library is loaded in this app,
+// and pulling one in just for six bars isn't worth the extra network
+// request. Plain flexbox bars sized by percentage height do the job and
+// match the app's own visual style instead of a generic library look.
+function renderSalesTrendChart(){
+  const el = document.getElementById('dashSalesTrendChart');
+  if(!el) return;
+  const now = new Date();
+  const months = [];
+  for(let i=5; i>=0; i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({ year:d.getFullYear(), month:d.getMonth(), label:d.toLocaleDateString('en-GB',{month:'short'}), count:0 });
+  }
+  const modelTally = {};
+  [...invData, ...hhInvData].forEach(u=>{
+    if(u.status!=='Sold' || !u.soldAt) return;
+    const at = u.soldAt?.toDate ? u.soldAt.toDate() : new Date(u.soldAt);
+    const bucket = months.find(m=>m.year===at.getFullYear() && m.month===at.getMonth());
+    if(bucket){
+      bucket.count++;
+      if(u.model) modelTally[u.model] = (modelTally[u.model]||0)+1;
+    }
+  });
+
+  const topModelEntry = Object.entries(modelTally).sort((a,b)=>b[1]-a[1])[0];
+  const chip = document.getElementById('dashTopModelChip');
+  if(chip) chip.innerHTML = topModelEntry ? `<i class="fas fa-crown text-amber-500 mr-1"></i>Top: ${escapeHtml(topModelEntry[0])} (${topModelEntry[1]})` : '';
+
+  const max = Math.max(1, ...months.map(m=>m.count));
+  const total = months.reduce((s,m)=>s+m.count,0);
+  if(!total){
+    el.innerHTML = `<div class="py-8 text-center text-slate-400 text-sm"><i class="fas fa-chart-column text-2xl opacity-25 block mb-2"></i>No sales recorded in the last 6 months yet.</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="flex items-end justify-between gap-2 sm:gap-4" style="height:140px">` +
+    months.map(m=>{
+      const pct = Math.round((m.count/max)*100);
+      const isCurrentMonth = m.year===now.getFullYear() && m.month===now.getMonth();
+      return `
+      <div class="flex-1 flex flex-col items-center justify-end h-full gap-1.5">
+        <span class="text-xs font-black text-slate-700">${m.count||''}</span>
+        <div class="w-full rounded-t-md ${isCurrentMonth?'bg-bajaj-blue':'bg-blue-200'} transition-all" style="height:${Math.max(pct,m.count?4:0)}%; min-height:${m.count?'4px':'0'}"></div>
+        <span class="text-[10px] font-bold ${isCurrentMonth?'text-bajaj-blue':'text-slate-400'} uppercase">${m.label}</span>
+      </div>`;
+    }).join('') + `</div>`;
+}
+
 function renderDashboard(){
   const modelsEl = document.getElementById('dashModelsCount');
   if(modelsEl) modelsEl.textContent = allMasterBikes.length;
@@ -5381,6 +5485,8 @@ function renderDashboard(){
   }).length;
   const soldMonthEl = document.getElementById('dashSoldMonthCount');
   if(soldMonthEl) soldMonthEl.textContent = soldThisMonth;
+
+  renderSalesTrendChart();
 
   const exchangeInStockEl = document.getElementById('dashExchangeCount');
   if(exchangeInStockEl) exchangeInStockEl.textContent = exchangeData.filter(u=>(u.status||'In Stock')==='In Stock').length;
@@ -6337,6 +6443,7 @@ function loadLiveStock(){
     renderInvLoadMore();
     if(typeof updateStorageOverview === 'function') updateStorageOverview();
     if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
+    if(document.getElementById('secCustomers')?.classList.contains('active')) renderCustomersPage();
   }, err=>{
     console.error('inventory listener failed', err);
     tbody.innerHTML = `<tr><td colspan="9"><div class="py-12 text-center text-slate-400">
@@ -6701,6 +6808,7 @@ function loadHHInventory(){
     renderHHInvLoadMore();
     if(typeof updateStorageOverview === 'function') updateStorageOverview();
     if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
+    if(document.getElementById('secCustomers')?.classList.contains('active')) renderCustomersPage();
   }, err=>{
     console.error('hh_inventory listener failed', err);
     tbody.innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400">
@@ -8046,6 +8154,7 @@ function loadExchangeStock(){
     selectedExchangeIds.forEach(id=>{ if(!liveIds.has(id)) selectedExchangeIds.delete(id); });
     renderExchangeTable();
     if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
+    if(document.getElementById('secCustomers')?.classList.contains('active')) renderCustomersPage();
     if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err=>{
     console.error('exchange_stock listener failed', err);
@@ -8540,6 +8649,132 @@ document.getElementById('exImportExcelBtn').addEventListener('click', async ()=>
   document.getElementById('exExcelFileInput').value = '';
   document.getElementById('exExcelFileLabel').textContent = 'Click to choose Excel / CSV file…';
 });
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CUSTOMERS — a computed view, not a stored collection. Built fresh on
+   every render from whatever's already loaded in Inventory, HH Inventory,
+   Chalans, and Exchange Stock, grouped by the customer name typed into
+   each record. No new Firestore collection, no extra storage cost, no
+   separate "add customer" step to remember — it just reflects what's
+   already on file.
+   ═══════════════════════════════════════════════════════════════════════ */
+let customerSearchTerm = '';
+
+function toDateSafe(v){
+  if(!v) return null;
+  if(v?.toDate) return v.toDate();
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function buildCustomerIndex(){
+  const map = new Map(); // key: normalized name -> record
+  const touch = (rawName)=>{
+    const name = (rawName||'').trim();
+    if(!name) return null;
+    const key = name.toLowerCase();
+    if(!map.has(key)) map.set(key, { name, purchases:[], chalans:[], exchanges:[], lastActivity:null, contact:'', address:'' });
+    return map.get(key);
+  };
+  const bump = (rec, date)=>{ if(date && (!rec.lastActivity || date > rec.lastActivity)) rec.lastActivity = date; };
+
+  [...invData, ...hhInvData].filter(u=>u.status==='Sold' && u.customerName).forEach(u=>{
+    const rec = touch(u.customerName); if(!rec) return;
+    const date = toDateSafe(u.soldAt);
+    rec.purchases.push({ model:u.model, chassis:u.chassis, regNo:u.regNo, date });
+    bump(rec, date);
+  });
+  chalanData.forEach(c=>{
+    const rec = touch(c.custName); if(!rec) return;
+    const date = toDateSafe(c.createdAt);
+    rec.chalans.push({ model:c.model, chalanNo:c.chalanNo, deliveryDate:c.deliveryDate, date, id:c.id });
+    if(c.contact) rec.contact = c.contact;
+    if(c.address) rec.address = c.address;
+    bump(rec, date);
+  });
+  exchangeData.forEach(e=>{
+    const rec = touch(e.customerName); if(!rec) return;
+    const date = toDateSafe(e.addedAt);
+    rec.exchanges.push({ model:e.model, regNo:e.regNo, valuation:e.valuation, date });
+    bump(rec, date);
+  });
+
+  return [...map.values()].sort((a,b)=>{
+    const at = a.lastActivity?.getTime()||0, bt = b.lastActivity?.getTime()||0;
+    return bt - at;
+  });
+}
+
+function renderCustomersPage(){
+  const wrap = document.getElementById('customersListWrap');
+  if(!wrap) return;
+  const all = buildCustomerIndex();
+  const q = customerSearchTerm.toLowerCase().trim();
+  const list = q ? all.filter(c=>c.name.toLowerCase().includes(q)) : all;
+
+  document.getElementById('customersTotalChip').textContent = `${all.length} customer${all.length!==1?'s':''}`;
+
+  if(!list.length){
+    wrap.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400"><i class="fas fa-address-card text-3xl opacity-25 block mb-2"></i><p class="text-sm">${all.length ? 'No matching customers.' : 'No customer activity on file yet — Sold units, Chalans, and Exchanges will show up here automatically.'}</p></div>`;
+    return;
+  }
+
+  wrap.innerHTML = list.map(c=>{
+    const initials = c.name.split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()||'').join('');
+    const lastLabel = c.lastActivity ? c.lastActivity.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+    return `
+    <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="openCustomerDetail('${escapeJsAttr(c.name)}')">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-11 h-11 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0 font-black text-amber-600 text-sm">${escapeHtml(initials||'?')}</div>
+        <div class="min-w-0">
+          <div class="font-bold text-slate-800 text-sm truncate" title="${escapeHtml(c.name)}">${escapeHtml(c.name)}</div>
+          <div class="text-[11px] text-slate-400">Last activity: ${lastLabel}</div>
+        </div>
+      </div>
+      <div class="flex gap-2 flex-wrap text-[11px] font-bold">
+        <span class="px-2 py-1 rounded-md bg-emerald-50 text-emerald-600"><i class="fas fa-motorcycle mr-1"></i>${c.purchases.length} bought</span>
+        <span class="px-2 py-1 rounded-md bg-blue-50 text-bajaj-blue"><i class="fas fa-file-invoice mr-1"></i>${c.chalans.length} chalan</span>
+        <span class="px-2 py-1 rounded-md bg-orange-50 text-orange-600"><i class="fas fa-right-left mr-1"></i>${c.exchanges.length} exchange</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('customerSearch')?.addEventListener('input', function(){
+  customerSearchTerm = this.value;
+  renderCustomersPage();
+});
+
+window.openCustomerDetail = (name)=>{
+  const all = buildCustomerIndex();
+  const c = all.find(x=>x.name===name);
+  if(!c){ toast('Customer not found.','err'); return; }
+  document.getElementById('customerDetailName').textContent = c.name;
+  const fmt = d => d ? d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+  const section = (title, icon, items, renderItem) => !items.length ? '' : `
+    <div class="mb-5">
+      <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1.5"><i class="fas ${icon}"></i> ${title} (${items.length})</div>
+      <div class="space-y-2">${items.sort((a,b)=>(b.date?.getTime()||0)-(a.date?.getTime()||0)).map(renderItem).join('')}</div>
+    </div>`;
+  const body = document.getElementById('customerDetailBody');
+  body.innerHTML = `
+    ${(c.contact || c.address) ? `<div class="mb-5 p-3 bg-slate-50 rounded-xl text-sm text-slate-600">
+      ${c.contact ? `<div class="flex items-center gap-2 mb-1"><i class="fas fa-phone text-slate-400 text-xs"></i>${escapeHtml(c.contact)}</div>` : ''}
+      ${c.address ? `<div class="flex items-center gap-2"><i class="fas fa-location-dot text-slate-400 text-xs"></i>${escapeHtml(c.address)}</div>` : ''}
+    </div>` : ''}
+    ${section('Purchases', 'fa-motorcycle', c.purchases, p=>`<div class="flex items-center justify-between px-3 py-2 bg-emerald-50/50 rounded-lg text-sm"><span class="font-semibold text-slate-700">${escapeHtml(p.model||'—')}</span><span class="text-slate-400 text-xs">${fmt(p.date)}</span></div>`)}
+    ${section('Chalans', 'fa-file-invoice', c.chalans, ch=>`<div class="flex items-center justify-between px-3 py-2 bg-blue-50/50 rounded-lg text-sm"><span class="font-semibold text-slate-700">${escapeHtml(ch.model||'—')} ${ch.chalanNo?'#'+escapeHtml(ch.chalanNo):''}</span><span class="text-slate-400 text-xs">${fmt(ch.date)}</span></div>`)}
+    ${section('Exchanges', 'fa-right-left', c.exchanges, e=>`<div class="flex items-center justify-between px-3 py-2 bg-orange-50/50 rounded-lg text-sm"><span class="font-semibold text-slate-700">${escapeHtml(e.model||'—')}</span><span class="text-slate-400 text-xs">${e.valuation?'Rs. '+Number(e.valuation).toLocaleString('en-IN'):''} · ${fmt(e.date)}</span></div>`)}
+  `;
+  const modal = document.getElementById('customerDetailModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+};
+window.closeCustomerDetail = ()=>{
+  const modal = document.getElementById('customerDetailModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+};
 
 /* ─── Accessories Inventory ─── */
 function loadAccessories(){
@@ -9040,6 +9275,69 @@ async function updateStorageOverview(){
     totalLabel.textContent = `~${formatBytes(totalEstimated)} / ${formatBytes(ceiling)}`;
   }
 }
+
+// A snapshot backup, separate from Firebase — every section gets its own
+// sheet in one workbook, using the same field names staff already see in
+// each section's own Export button, so a backup is just as readable as
+// what they're used to.
+window.downloadFullBackup = ()=>{
+  const btn = document.getElementById('fullBackupBtn');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Preparing…'; }
+  try{
+    const wb = XLSX.utils.book_new();
+    const addSheet = (name, rows, cols) => {
+      if(!rows || !rows.length) return;
+      const ws = XLSX.utils.json_to_sheet(rows);
+      if(cols) ws['!cols'] = cols;
+      XLSX.utils.book_append_sheet(wb, ws, name.slice(0,31)); // Excel sheet-name limit
+    };
+
+    addSheet('Inventory', invData.map(s=>({
+      'S.N':s.sn||'', 'Model':s.model||'', 'Chassis':s.chassis||'', 'Engine':s.engine||'', 'RegNo':s.regNo||'',
+      'Colour':s.color||'', 'Status':s.status||'', 'Customer':s.customerName||'', 'HH Flag':s.hhFlag||''
+    })));
+    addSheet('HH Inventory', hhInvData.map(s=>({
+      'S.N':s.sn||'', 'Model':s.model||'', 'Chassis':s.chassis||'', 'Engine':s.engine||'', 'RegNo':s.regNo||'',
+      'Colour':s.color||'', 'Event':s.eventName||'', 'Owner':s.owner==='other'?(s.ownerName||'Other'):(s.owner==='hh'?'HH':'Dealer'),
+      'Status':s.status||'', 'Customer':s.customerName||''
+    })));
+    addSheet('Exchange Stock', exchangeData.map(s=>({
+      'S.N':s.sn||'', 'Model':s.model||'', 'Make Year':s.makeYear||'', 'RegNo':s.regNo||'', 'Valuation':s.valuation||0,
+      'Blue Book':s.blueBook==='yes'?'Yes':'No', 'Key':s.key==='yes'?'Yes':'No', 'File':s.file==='yes'?'Yes':'No',
+      'Customer':s.customerName||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||''
+    })));
+    addSheet('Price List', allMasterBikes.map(b=>({
+      'Model':b.name||'', 'Category':b.category||'', 'Price':b.price||0,
+      '1st Party Insurance':b.firstPartyInsurance||0, '3rd Party Insurance':b.thirdPartyInsurance||0
+    })));
+    addSheet('Accessories', accessories.map(a=>({ 'Name':a.name||'', 'Price':a.price||0 })));
+    addSheet('Finance Schemes', financeSchemes.map(f=>({
+      'Category':f.category||'', 'Down Payment %':f.downPay||'', 'Interest Rate %':f.rate||'', 'Tenures (months)':(f.tenures||[]).join(', ')
+    })));
+    addSheet('Chalans', chalanData.map(c=>({
+      'Chalan No':c.chalanNo||'', 'Model':c.model||'', 'Chassis':c.chassis||'', 'RegNo':c.regNo||'',
+      'Customer':c.custName||'', 'Contact':c.contact||'', 'Address':c.address||'', 'Delivery Date':c.deliveryDate||'',
+      'Price':c.price||0, 'Insurance Type':c.insType||'', 'Price After Commission':c.priceAfterCom||0
+    })));
+    addSheet('Customers', buildCustomerIndex().map(c=>({
+      'Name':c.name, 'Contact':c.contact||'', 'Address':c.address||'',
+      'Purchases':c.purchases.length, 'Chalans':c.chalans.length, 'Exchanges':c.exchanges.length,
+      'Last Activity': c.lastActivity ? c.lastActivity.toLocaleDateString('en-GB') : ''
+    })));
+    addSheet('Important Info', importantData.map(i=>({ 'Type':i.type||'', 'Value 1':i.value1||'', 'Value 2':i.value2||'', 'Note':i.note||'' })));
+    addSheet('Model Aliases', modelAliasesData.map(a=>({ 'Typed As':a.alias||'', 'Actually Means':a.canonical||'' })));
+    addSheet('Events', events.map(e=>({ 'Title':e.title||'', 'Start':e.startDate||'', 'End':e.endDate||'', 'Location':e.location||'' })));
+
+    if(!wb.SheetNames.length){ toast('Nothing to back up yet.','warn'); return; }
+    XLSX.writeFile(wb, `admin_full_backup_${new Date().toISOString().slice(0,10)}.xlsx`);
+    logActivity('Full Backup Downloaded', 'settings', { model: `${wb.SheetNames.length} sheet(s)` });
+    toast(`Backup downloaded — ${wb.SheetNames.length} sheet(s).`);
+  }catch(e){
+    toast('Backup failed: '+friendlyError(e),'err');
+  }finally{
+    if(btn){ btn.disabled = false; btn.innerHTML = '<i class="fas fa-download"></i> Download Full Backup'; }
+  }
+};
 
 window.setDocTypeFilter = (type)=>{
   docTypeFilter = type;
@@ -10820,8 +11118,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Exchange Stock (Old Bikes)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
-const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
+const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Exchange Stock (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
+const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
 window.switchSec=(sec)=>{
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
@@ -10849,6 +11147,7 @@ window.switchSec=(sec)=>{
   if(sec==='hhinv') populateHHModelDropdown();
   if(sec==='allinv') renderAllInventoryTable();
   if(sec==='exchange') renderExchangeTable();
+  if(sec==='customers') renderCustomersPage();
   if(sec==='docs') renderDocumentsPage();
   if(sec==='storage') updateStorageOverview();
   if(sec==='events') renderEventsPage();
