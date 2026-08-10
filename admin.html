@@ -1661,8 +1661,20 @@
             <input type="text" id="hhEventName" placeholder="e.g. Phidim Mela 2026"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Unit Owner</label>
+            <select id="hhOwnerSelect" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="dealer_hh">Dealer / HH</option>
+              <option value="other">Other (Consignment)</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5" id="hhOwnerNameWrap" style="display:none;">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Owner Name</label>
+            <input type="text" id="hhOwnerName" placeholder="e.g. Ramesh Traders"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
         </div>
-        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units are added as <b>Available</b> by default — change status later from the row menu if needed.</p>
+        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units are added as <b>Available</b> by default — change status later from the row menu if needed. <b>Unit Owner</b> marks whether the bike on stall belongs to us (Dealer/HH) or someone else (Other) — useful when a mela stall carries mixed stock.</p>
         <div class="flex gap-2 flex-wrap">
           <button id="saveHHInvBtn" class="cta-primary">
             <i class="fas fa-floppy-disk"></i> Save Unit
@@ -1680,7 +1692,7 @@
         <div class="flex items-center gap-2 section-title text-2xl mb-1">
           <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
         </div>
-        <p class="text-xs text-slate-500 mb-4">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, Chassis, Engine, RegNo, Color, Event</b>. S.N fills in automatically.</p>
+        <p class="text-xs text-slate-500 mb-4">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, Chassis, Engine, RegNo, Color, Event, Owner</b> (Owner is optional — leave blank or "Dealer/HH" for our own stock, or type the other party's name). S.N fills in automatically.</p>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all">
             <i class="fas fa-cloud-arrow-up text-emerald-500 text-lg flex-shrink-0"></i>
@@ -1709,6 +1721,9 @@
           <span id="hhInvCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
           <span id="hhInvDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-0.5 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
           <button id="resolveDupBtnHH" onclick="openDuplicateResolver()" class="hidden items-center gap-1.5 px-2.5 py-1 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all"><i class="fas fa-code-compare text-[10px]"></i> Resolve Duplicates</button>
+          <button id="fixHHSnBtn" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-bajaj-blue text-bajaj-blue text-xs font-bold rounded-lg hover:bg-bajaj-blue hover:text-white transition-all">
+            <i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering
+          </button>
           <button onclick="exportHHInventoryToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
             <i class="fas fa-file-excel text-[11px]"></i> Export
           </button>
@@ -3472,9 +3487,11 @@ window._toggleKebab = (btn, type, id) => {
     const chalanAction = cur === 'Sold'
       ? [{ label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id, 'hh_inventory') }]
       : [];
-    const transferAction = cur === 'Sold'
-      ? []
-      : [{ label:'Transfer to Inventory', icon:'fa-right-left', onClick:()=>window.transferToInventory(id) }];
+    // Sold units transfer too — a mela sale still needs to land in the
+    // main showroom Inventory records (that's where dealership-wide sales
+    // reporting lives), so the transfer option stays available regardless
+    // of status. transferToInventory() below carries status/customer over.
+    const transferAction = [{ label: cur==='Sold' ? 'Transfer Sale to Inventory' : 'Transfer to Inventory', icon:'fa-right-left', onClick:()=>window.transferToInventory(id) }];
     openKebabMenuFor(btn, [
       { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('hh_inventory', id) },
       ...statusActions,
@@ -3521,12 +3538,10 @@ window._toggleKebab = (btn, type, id) => {
     const chalanAction = isFinalized
       ? [{ label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id, 'inventory') }]
       : [];
-    // Only a unit still sitting on the showroom floor makes sense to
-    // physically move to a mela/outdoor stall — once Sold or HH Hide,
-    // it's already gone, so there's nothing left to transfer.
-    const transferAction = isFinalized
-      ? []
-      : [{ label:'Transfer to HH Inventory', icon:'fa-right-left', onClick:()=>window.transferToHH(id) }];
+    // Sold/HH-Hide units can still be transferred — e.g. a unit sold out of
+    // the showroom that actually needs to be recorded against a mela/HH
+    // stall's books. transferToHH() below carries status/customer over.
+    const transferAction = [{ label: isFinalized ? 'Transfer Sale to HH Inventory' : 'Transfer to HH Inventory', icon:'fa-right-left', onClick:()=>window.transferToHH(id) }];
     openKebabMenuFor(btn, [
       { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('inventory', id) },
       ...statusActions,
@@ -3832,7 +3847,15 @@ function renderAllInventoryTable(){
     return;
   }
   const sorted = combined.sort((a,b)=> (a.__source===b.__source ? (Number(a.sn)||9999)-(Number(b.sn)||9999) : (a.__source==='inventory'?-1:1)));
-  tbody.innerHTML = sorted.map(s=>{
+  tbody.innerHTML = sorted.map((s,idx)=>{
+    // Inventory and HH Inventory each keep their own S.N sequence, so a
+    // combined/filtered view of both mixes two independently-numbered
+    // lists — e.g. 1,1,2,4,6 rather than a clean 1,2,3… Showing a running
+    // row number here (recalculated for whatever's currently filtered)
+    // keeps this table readable, while the real per-collection S.N is
+    // still shown underneath in small text for cross-referencing against
+    // the Inventory / HH Inventory tab it actually lives in.
+    const displaySn = idx+1;
     const isHH = s.__source==='hh_inventory';
     const sourceBadge = isHH
       ? `<span class="badge badge-amber"><i class="fas fa-tents"></i> HH</span>`
@@ -3852,7 +3875,7 @@ function renderAllInventoryTable(){
     }
     return `<tr class="border-b ${s.__isDup?'border-red-100 bg-red-50/40':'border-slate-100'}">
       <td class="px-4 py-3" data-th="Source">${sourceBadge}</td>
-      <td class="px-4 py-3 font-mono text-xs text-slate-500" data-th="S.N">${s.sn||'—'}</td>
+      <td class="px-4 py-3 font-mono text-xs text-slate-500" data-th="S.N">${displaySn}<div class="text-[9px] text-slate-300 font-sans">${isHH?'HH':'Inv'} #${s.sn||'—'}</div></td>
       <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">
         ${escapeHtml(s.model||'—')}
         ${s.__isDup ? `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 text-red-600 text-[9px] font-extrabold uppercase tracking-wide align-middle"><i class="fas fa-triangle-exclamation text-[8px]"></i> Duplicate</span>` : ''}
@@ -5705,9 +5728,12 @@ async function getAccurateNextSn(colName){
 window.transferToHH = async (id) => {
   const s = invData.find(x=>x.id===id);
   if(!s){ toast('Unit not found.','err'); return; }
+  const isSold = s.status==='Sold' || s.hhFlag==='Hide';
   const ok = await showConfirm({
-    title: 'Transfer to HH Inventory?',
-    message: `Move "${s.model}" (${s.chassis}) from showroom Inventory to HH Inventory (mela/outdoor stock)? It'll show up there as Available.`,
+    title: isSold ? 'Transfer this sale to HH Inventory?' : 'Transfer to HH Inventory?',
+    message: isSold
+      ? `Move "${s.model}" (${s.chassis}) from showroom Inventory to HH Inventory? It's Sold${s.customerName?' to '+escapeHtml(s.customerName):''} — that status and customer carry over, it won't reset to Available.`
+      : `Move "${s.model}" (${s.chassis}) from showroom Inventory to HH Inventory (mela/outdoor stock)? It'll show up there as Available.`,
     okText: 'Yes, Transfer',
     okColorClass: 'text-bajaj-blue hover:bg-blue-50',
     iconClass: 'fa-right-left', iconColor: '#005EA6', iconBg: '#EAF3FB'
@@ -5715,13 +5741,16 @@ window.transferToHH = async (id) => {
   if(!ok) return;
   try{
     const nextSn = await getAccurateNextSn('hh_inventory');
-    await addDoc(collection(db,'hh_inventory'), {
+    const payload = {
       sn: nextSn, model: s.model||'', chassis: s.chassis||'', engine: s.engine||'', regNo: s.regNo||'', color: s.color||'',
-      eventName: '', status: 'Available', customerName: '', addedAt: new Date()
-    });
+      eventName: '', owner: 'dealer_hh', ownerName: '',
+      status: isSold ? 'Sold' : 'Available', customerName: isSold ? (s.customerName||'') : '', addedAt: new Date()
+    };
+    if(isSold) payload.soldAt = s.soldAt || new Date();
+    await addDoc(collection(db,'hh_inventory'), payload);
     await deleteDoc(doc(db,'inventory', id));
-    logActivity('Transferred to HH Inventory', 'inventory', { model: s.model, chassis: s.chassis });
-    toast(`"${s.model}" moved to HH Inventory — S.N ${nextSn} assigned.`);
+    logActivity('Transferred to HH Inventory', 'inventory', { model: s.model, chassis: s.chassis, customerName: s.customerName });
+    toast(`"${s.model}" moved to HH Inventory — S.N ${nextSn} assigned${isSold?' (Sold carried over)':''}.`);
     // A brand-new unit always lands with the highest S.N, which the
     // ascending, page-limited HH Inventory query can push past the
     // default page — bump the limit enough to cover it and jump straight
@@ -5735,9 +5764,12 @@ window.transferToHH = async (id) => {
 window.transferToInventory = async (id) => {
   const s = hhInvData.find(x=>x.id===id);
   if(!s){ toast('Unit not found.','err'); return; }
+  const isSold = s.status==='Sold';
   const ok = await showConfirm({
-    title: 'Transfer to Showroom Inventory?',
-    message: `Move "${s.model}" (${s.chassis}) from HH Inventory back to showroom Inventory? It'll show up there as Available.`,
+    title: isSold ? 'Transfer this sale to showroom Inventory?' : 'Transfer to Showroom Inventory?',
+    message: isSold
+      ? `Move "${s.model}" (${s.chassis}) from HH Inventory back to showroom Inventory? It's Sold${s.customerName?' to '+escapeHtml(s.customerName):''} — that status and customer carry over, it won't reset to Available.`
+      : `Move "${s.model}" (${s.chassis}) from HH Inventory back to showroom Inventory? It'll show up there as Available.`,
     okText: 'Yes, Transfer',
     okColorClass: 'text-bajaj-blue hover:bg-blue-50',
     iconClass: 'fa-right-left', iconColor: '#005EA6', iconBg: '#EAF3FB'
@@ -5745,13 +5777,15 @@ window.transferToInventory = async (id) => {
   if(!ok) return;
   try{
     const nextSn = await getAccurateNextSn('inventory');
-    await addDoc(collection(db,'inventory'), {
+    const payload = {
       sn: nextSn, model: s.model||'', chassis: s.chassis||'', engine: s.engine||'', regNo: s.regNo||'', color: s.color||'',
-      status: 'Available', customerName: '', addedAt: new Date()
-    });
+      status: isSold ? 'Sold' : 'Available', customerName: isSold ? (s.customerName||'') : '', addedAt: new Date()
+    };
+    if(isSold) payload.soldAt = s.soldAt || new Date();
+    await addDoc(collection(db,'inventory'), payload);
     await deleteDoc(doc(db,'hh_inventory', id));
-    logActivity('Transferred to Inventory', 'hh_inventory', { model: s.model, chassis: s.chassis });
-    toast(`"${s.model}" moved back to showroom Inventory — S.N ${nextSn} assigned.`);
+    logActivity('Transferred to Inventory', 'hh_inventory', { model: s.model, chassis: s.chassis, customerName: s.customerName });
+    toast(`"${s.model}" moved back to showroom Inventory — S.N ${nextSn} assigned${isSold?' (Sold carried over)':''}.`);
     invPageLimit = Math.max(invPageLimit, nextSn + 5);
     loadLiveStock();
     window.switchSec('inv');
@@ -5874,6 +5908,42 @@ document.getElementById('fixSnBtn').addEventListener('click', async ()=>{
       const correctSn = i+1;
       if(Number(s.sn) !== correctSn){
         batch.update(doc(db,'inventory',s.id), { sn: correctSn });
+        opsInBatch++; changed++;
+        if(opsInBatch===450){ chunks.push(batch); batch = writeBatch(db); opsInBatch = 0; }
+      }
+    });
+    if(opsInBatch>0) chunks.push(batch);
+    for(const b of chunks) await b.commit();
+    toast(changed ? `Renumbered ${changed} unit(s) — no more gaps.` : 'Numbering was already correct.');
+  }catch(e){
+    toast('Renumber failed: '+friendlyError(e),'err');
+  }finally{
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering';
+  }
+});
+
+document.getElementById('fixHHSnBtn').addEventListener('click', async ()=>{
+  if(!hhInvData.length){ toast('No HH inventory to renumber.','warn'); return; }
+  const ok = await showConfirm({
+    title: 'Fix S.N numbering?',
+    message: `This will resequence all <b>${hhInvData.length}</b> HH Inventory units to S.N 1, 2, 3… in their current order, closing any gaps left by earlier deletions/transfers. This can't be undone.`,
+    okText: 'Renumber All',
+    okColorClass: 'text-blue-600 hover:bg-blue-50',
+    iconClass: 'fa-arrow-down-1-9', iconColor:'#005EA6', iconBg:'#E8F2FB'
+  });
+  if(!ok) return;
+  const btn = document.getElementById('fixHHSnBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-[11px]"></i> Renumbering…';
+  try{
+    const sorted = [...hhInvData].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999) || (a.id>b.id?1:-1));
+    const chunks = [];
+    let batch = writeBatch(db), opsInBatch = 0, changed = 0;
+    sorted.forEach((s,i)=>{
+      const correctSn = i+1;
+      if(Number(s.sn) !== correctSn){
+        batch.update(doc(db,'hh_inventory',s.id), { sn: correctSn });
         opsInBatch++; changed++;
         if(opsInBatch===450){ chunks.push(batch); batch = writeBatch(db); opsInBatch = 0; }
       }
@@ -6356,7 +6426,12 @@ function renderHHInvTable(){
       <td class="px-4 py-3 font-mono text-xs text-slate-500" data-th="Engine No">${escapeHtml(s.engine||'—')}</td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
       <td class="px-4 py-3" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(s.color||'')}"></span>${escapeHtml(s.color||'—')}</span></td>
-      <td class="px-4 py-3 text-sm text-slate-600" data-th="Event / Mela">${escapeHtml(s.eventName||'—')}</td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Event / Mela">
+        ${escapeHtml(s.eventName||'—')}
+        <div class="mt-0.5">${s.owner==='other'
+          ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[9px] font-extrabold uppercase tracking-wide"><i class="fas fa-user-tag text-[8px]"></i> ${escapeHtml(s.ownerName||'Other')}</span>`
+          : `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 text-bajaj-blue text-[9px] font-extrabold uppercase tracking-wide"><i class="fas fa-store text-[8px]"></i> Dealer/HH</span>`}</div>
+      </td>
       <td class="px-4 py-3" data-th="Status">
         <div class="flex flex-col items-end gap-1">
         <div class="flex flex-wrap justify-end items-center gap-1.5">
@@ -6449,6 +6524,11 @@ window.deleteSelectedHHInvUnits = async ()=>{
   }catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
 };
 
+document.getElementById('hhOwnerSelect')?.addEventListener('change', function(){
+  const wrap = document.getElementById('hhOwnerNameWrap');
+  if(this.value==='other'){ wrap.style.display='flex'; } else { wrap.style.display='none'; document.getElementById('hhOwnerName').value=''; }
+});
+
 document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
   if(!currentEditHHInvId && (await getAccurateTotalInventoryCount(true)) >= MAX_TOTAL_INVENTORY_UNITS){
     toast(`Storage full — ${MAX_TOTAL_INVENTORY_UNITS} unit limit reached.`,'err');
@@ -6469,6 +6549,9 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
   if(firstErr){ toast(firstErr.error,'err'); return; }
   if(!regNoCheck.ok){ toast(regNoCheck.error,'err'); return; }
   const chassis = chassisCheck.value, engine = engineCheck.value, color = colorCheck.value, regNo = regNoCheck.value, eventName = eventCheck.value;
+  const owner = document.getElementById('hhOwnerSelect').value === 'other' ? 'other' : 'dealer_hh';
+  const ownerName = owner==='other' ? document.getElementById('hhOwnerName').value.trim() : '';
+  if(owner==='other' && !ownerName){ toast('Enter the owner\'s name for an "Other" unit.','err'); return; }
 
   const dup = hhInvData.find(x=>x.id!==currentEditHHInvId && (normId(x.chassis)===normId(chassis) || normId(x.engine)===normId(engine)));
   if(dup){
@@ -6498,16 +6581,18 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
 
   try{
     if(currentEditHHInvId){
-      await updateDoc(doc(db,"hh_inventory",currentEditHHInvId),{model:modelName,chassis,engine,regNo,color,eventName});
+      await updateDoc(doc(db,"hh_inventory",currentEditHHInvId),{model:modelName,chassis,engine,regNo,color,eventName,owner,ownerName});
       logActivity('Updated', 'hh_inventory', { model: modelName, chassis });
       toast('HH unit updated!');
       window.cancelHHInvEdit();
     } else {
       const nextSn = hhInvData.length ? Math.max(...hhInvData.map(x=>Number(x.sn)||0))+1 : 1;
-      await addDoc(collection(db,"hh_inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,eventName,status:'Available',customerName:'',addedAt:new Date()});
+      await addDoc(collection(db,"hh_inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,eventName,owner,ownerName,status:'Available',customerName:'',addedAt:new Date()});
       logActivity('Added', 'hh_inventory', { model: modelName, chassis, sn: nextSn });
-      ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName'].forEach(id=>document.getElementById(id).value='');
+      ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName','hhOwnerName'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('hhModelInput').value='';
+      document.getElementById('hhOwnerSelect').value='dealer_hh';
+      document.getElementById('hhOwnerNameWrap').style.display='none';
       toast('HH unit added — S.N '+nextSn+' assigned, marked Available.');
     }
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
@@ -6528,6 +6613,9 @@ window._editHHInv = (id)=>{
   document.getElementById('hhRegNo').value = s.regNo||'';
   document.getElementById('hhColor').value = s.color||'';
   document.getElementById('hhEventName').value = s.eventName||'';
+  document.getElementById('hhOwnerSelect').value = s.owner==='other' ? 'other' : 'dealer_hh';
+  document.getElementById('hhOwnerName').value = s.ownerName||'';
+  document.getElementById('hhOwnerNameWrap').style.display = s.owner==='other' ? 'flex' : 'none';
   currentEditHHInvId = id;
   const btn = document.getElementById('saveHHInvBtn');
   btn.innerHTML = '<i class="fas fa-rotate"></i> Update Unit';
@@ -6540,8 +6628,10 @@ window._editHHInv = (id)=>{
 
 window.cancelHHInvEdit = ()=>{
   currentEditHHInvId = null;
-  ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName'].forEach(id=>document.getElementById(id).value='');
+  ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName','hhOwnerName'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('hhModelInput').value='';
+  document.getElementById('hhOwnerSelect').value='dealer_hh';
+  document.getElementById('hhOwnerNameWrap').style.display='none';
   const btn = document.getElementById('saveHHInvBtn');
   btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Unit';
   document.getElementById('hhInvFormTitle').textContent = 'Add HH Inventory Unit';
@@ -9199,11 +9289,12 @@ window.exportHHInventoryToExcel = ()=>{
     'Reg. No': s.regNo||'',
     'Colour': s.color||'',
     'Event / Mela': s.eventName||'',
+    'Owner': s.owner==='other' ? (s.ownerName||'Other') : 'Dealer/HH',
     'Status': s.status||'Available',
     'Customer': s.customerName||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:6},{wch:26},{wch:20},{wch:18},{wch:16},{wch:20},{wch:12},{wch:22}];
+  ws['!cols'] = [{wch:6},{wch:26},{wch:20},{wch:18},{wch:16},{wch:20},{wch:18},{wch:12},{wch:22}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'HH Inventory');
   XLSX.writeFile(wb, `hh_inventory_export_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -9228,9 +9319,10 @@ window.exportAllInventoryToExcel = ()=>{
   }
   if(!combined.length){ toast('Nothing to export in the current view.','warn'); return; }
   const sorted = combined.sort((a,b)=> (a.__source===b.__source ? (Number(a.sn)||9999)-(Number(b.sn)||9999) : (a.__source==='Inventory'?-1:1)));
-  const rows = sorted.map(s=>({
+  const rows = sorted.map((s,idx)=>({
     'Source': s.__source,
-    'S.N': s.sn||'',
+    'S.N': idx+1,
+    'Source S.N': s.sn||'',
     'Model': s.model||'',
     'Chassis No': s.chassis||'',
     'Engine No': s.engine||'',
@@ -9241,7 +9333,7 @@ window.exportAllInventoryToExcel = ()=>{
     'Duplicate': s.__isDup ? 'Yes' : ''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:12},{wch:6},{wch:26},{wch:20},{wch:16},{wch:18},{wch:16},{wch:18},{wch:22},{wch:10}];
+  ws['!cols'] = [{wch:12},{wch:6},{wch:10},{wch:26},{wch:20},{wch:16},{wch:18},{wch:16},{wch:18},{wch:22},{wch:10}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'All Inventory');
   XLSX.writeFile(wb, `all_inventory_export_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -9480,7 +9572,8 @@ document.getElementById('hhExcelFileInput').addEventListener('change', function(
         engine:  findCol(['enginenumber','engine']),
         regNo:   findCol(['registrationnumber','regno','regd','registration']),
         color:   findCol(['color','colour']),
-        event:   findCol(['eventname','event','mela'])
+        event:   findCol(['eventname','event','mela']),
+        owner:   findCol(['owner','ownername'])
       };
 
       if(colIdx.model===-1 || colIdx.chassis===-1){
@@ -9488,14 +9581,20 @@ document.getElementById('hhExcelFileInput').addEventListener('change', function(
         return;
       }
 
-      hhExcelParsedRows = aoa.slice(1).map(r=>({
-        model:   colIdx.model!==-1   ? (r[colIdx.model]||'').toString().trim()   : '',
-        chassis: colIdx.chassis!==-1 ? (r[colIdx.chassis]||'').toString().trim() : '',
-        engine:  colIdx.engine!==-1  ? (r[colIdx.engine]||'').toString().trim()  : '',
-        regNo:   colIdx.regNo!==-1   ? (r[colIdx.regNo]||'').toString().trim()   : '',
-        color:   colIdx.color!==-1   ? (r[colIdx.color]||'').toString().trim()   : '',
-        eventName: colIdx.event!==-1 ? (r[colIdx.event]||'').toString().trim()   : ''
-      })).filter(r=>r.model || r.chassis || r.engine);
+      hhExcelParsedRows = aoa.slice(1).map(r=>{
+        const ownerRaw = colIdx.owner!==-1 ? (r[colIdx.owner]||'').toString().trim() : '';
+        const isOther = ownerRaw && !/^(dealer|hh|dealer\/?hh|dealer_hh)$/i.test(ownerRaw);
+        return {
+          model:   colIdx.model!==-1   ? (r[colIdx.model]||'').toString().trim()   : '',
+          chassis: colIdx.chassis!==-1 ? (r[colIdx.chassis]||'').toString().trim() : '',
+          engine:  colIdx.engine!==-1  ? (r[colIdx.engine]||'').toString().trim()  : '',
+          regNo:   colIdx.regNo!==-1   ? (r[colIdx.regNo]||'').toString().trim()   : '',
+          color:   colIdx.color!==-1   ? (r[colIdx.color]||'').toString().trim()   : '',
+          eventName: colIdx.event!==-1 ? (r[colIdx.event]||'').toString().trim()   : '',
+          owner: isOther ? 'other' : 'dealer_hh',
+          ownerName: isOther ? ownerRaw : ''
+        };
+      }).filter(r=>r.model || r.chassis || r.engine);
 
       if(!hhExcelParsedRows.length){ toast('No data rows found in file.','err'); return; }
       importBtn.disabled = false;
@@ -9509,11 +9608,12 @@ document.getElementById('hhExcelFileInput').addEventListener('change', function(
 
 document.getElementById('hhDownloadTemplateBtn').addEventListener('click', ()=>{
   const wsData = [
-    ['Model','Chassis','Engine','RegNo','Color','Event'],
-    ['Pulsar N150','MD2A12EY000001','BSVI2024000001','BA2PA1234','Fiery Orange','Phidim Mela 2026'],
-    ['Pulsar NS200','MD2A12EY000002','BSVI2024000002','','Racing Red','Phidim Mela 2026']
+    ['Model','Chassis','Engine','RegNo','Color','Event','Owner'],
+    ['Pulsar N150','MD2A12EY000001','BSVI2024000001','BA2PA1234','Fiery Orange','Phidim Mela 2026','Dealer/HH'],
+    ['Pulsar NS200','MD2A12EY000002','BSVI2024000002','','Racing Red','Phidim Mela 2026','Ramesh Traders']
   ];
   const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [{wch:22},{wch:20},{wch:18},{wch:16},{wch:16},{wch:20},{wch:18}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'HH Inventory');
   XLSX.writeFile(wb, 'hh_inventory_import_template.xlsx');
@@ -9568,6 +9668,8 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
         regNo: row.regNo || '',
         color: row.color,
         eventName: row.eventName || '',
+        owner: row.owner || 'dealer_hh',
+        ownerName: row.ownerName || '',
         status: 'Available',
         customerName: '',
         addedAt: new Date()
