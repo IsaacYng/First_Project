@@ -2720,7 +2720,6 @@
         <a href="https://wa.me/9802315425" target="_blank" class="hover:text-emerald-600 transition-colors"><i class="fab fa-whatsapp mr-1"></i>9802315425</a>
         <a href="mailto:bajaj.phidim@gmail.com" class="hover:text-bajaj-blue transition-colors"><i class="fas fa-envelope mr-1"></i>Support</a>
         <span class="text-slate-300">&copy; 2026</span>
-        <span class="text-slate-300 font-mono" title="Confirms which build is actually live — check this after every deploy">build 2026-08-10-01</span>
       </div>
     </div>
   </footer>
@@ -5913,7 +5912,6 @@ window.previewChalan = ()=>{
 // record — fills the same template the same way either way, so there's
 // only one place that knows how a Chalan is laid out.
 function renderChalanIntoWrappers(f){
-  const grandTotal = (Number(f.price)||0) + (Number(f.insAmount)||0);
   const fields = {
     model: f.model, chassis: f.chassis, engine: f.engine, regNo: f.regNo,
     mfdDate: f.makeYear,
@@ -5922,7 +5920,10 @@ function renderChalanIntoWrappers(f){
     insType: f.insType,
     chalanNo: f.chalanNo, deliveryDate: f.deliveryDate, custName: f.custName, address: f.address, contact: f.contact,
     qty: '1',
-    total: 'Rs. '+grandTotal.toLocaleString('en-IN')
+    // Total = Insurance Amount — this is the figure actually paid to the
+    // insurance company, not bike price + insurance (which would double
+    // count and confuse the paperwork).
+    total: 'Rs. '+(f.insAmount||0).toLocaleString('en-IN')
   };
   const tpl = document.getElementById('chalanCopyTemplate');
   const wrap = document.getElementById('chalanPrintWrapper');
