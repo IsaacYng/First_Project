@@ -1216,13 +1216,6 @@
       <div id="dashAttentionWrap" class="hidden mb-6">
         <div class="text-xs font-extrabold text-amber-600 uppercase tracking-wide mb-2 flex items-center gap-1.5"><i class="fas fa-bell"></i> Needs Attention</div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div id="dashLowStockAlertCard" class="hidden yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow border-2 border-amber-200 bg-amber-50/40" onclick="window.switchSec('inv')">
-            <div class="flex items-center gap-2.5 mb-1.5">
-              <div class="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0"><i class="fas fa-triangle-exclamation text-amber-600 text-sm"></i></div>
-              <span class="text-[11px] font-bold text-amber-700 uppercase tracking-wide">Low Stock Models</span>
-            </div>
-            <div class="text-3xl font-black text-slate-800" id="dashLowStockCount">0</div>
-          </div>
           <div id="dashMismatchAlertCard" class="hidden yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow border-2 border-amber-200 bg-amber-50/40" onclick="window.switchSec('modelAliases')">
             <div class="flex items-center gap-2.5 mb-1.5">
               <div class="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0"><i class="fas fa-code-compare text-amber-600 text-sm"></i></div>
@@ -1275,13 +1268,19 @@
         </div>
       </div>
 
+      <!-- Business Summary — the actual "hisab" (accounts) a dealership
+           owner wants at a glance: what's the stock worth, what's the
+           month worth so far, what's sitting in exchange. A stock-level
+           list like "Low Stock" doesn't belong here — it's a working list
+           for the Inventory page, not a landing-page summary — so this
+           replaces it with real rupee totals instead. -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="yng-card-shell overflow-hidden">
           <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-            <i class="fas fa-triangle-exclamation text-red-500"></i>
-            <div class="section-title text-xl">Low Stock</div>
+            <i class="fas fa-sack-dollar text-emerald-600"></i>
+            <div class="section-title text-xl">Business Summary</div>
           </div>
-          <div id="dashLowStockList"></div>
+          <div id="dashBusinessSummary" class="p-5 flex flex-col gap-3"></div>
         </div>
         <div class="yng-card-shell overflow-hidden">
           <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
@@ -2585,7 +2584,10 @@
         </div>
         <div class="flex flex-col gap-1.5 mb-4">
           <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Typed As <span class="text-red-400">*</span></label>
-          <input type="text" id="aliasRawInput" placeholder="e.g. 150 SD" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full"/>
+          <select id="aliasRawInput" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm w-full">
+            <option value="">Select a model name from Inventory…</option>
+          </select>
+          <p class="text-[11px] text-slate-400">Pulled straight from what's actually typed on Inventory/HH Inventory units — pick the misspelled/inconsistent one you want to fix.</p>
         </div>
         <div class="flex flex-col gap-1.5 mb-4">
           <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Actually Means <span class="text-red-400">*</span></label>
@@ -5419,35 +5421,12 @@ function renderDashboard(){
   const exchangeInStockEl = document.getElementById('dashExchangeCount');
   if(exchangeInStockEl) exchangeInStockEl.textContent = exchangeData.filter(u=>(u.status||'In Stock')==='In Stock').length;
 
-  // "Low stock" = 2 or fewer Available units left for a model — counts
-  // only regular Inventory (HH stock is a separate, event-based pool that
-  // doesn't reflect showroom-floor availability the same way).
-  const modelCounts = {};
-  invData.forEach(u=>{
-    if(u.status==='Available' && !u.hhFlag) modelCounts[u.model] = (modelCounts[u.model]||0)+1;
-  });
-  const lowStock = allMasterBikes
-    .map(b=>({ name:b.name, count: modelCounts[b.name]||0 }))
-    .filter(b=>b.count<=2)
-    .sort((a,b)=>a.count-b.count);
-  const lowCountEl = document.getElementById('dashLowStockCount');
-  if(lowCountEl) lowCountEl.textContent = lowStock.length;
-  const lowStockAlertCard = document.getElementById('dashLowStockAlertCard');
-  if(lowStockAlertCard) lowStockAlertCard.classList.toggle('hidden', !lowStock.length);
-
-  const lowStockList = document.getElementById('dashLowStockList');
-  if(lowStockList){
-    if(!lowStock.length){
-      lowStockList.innerHTML = `<div class="py-10 text-center text-slate-400"><i class="fas fa-circle-check text-2xl opacity-30 block mb-2"></i><p class="text-sm">Nothing low on stock.</p></div>`;
-    } else {
-      lowStockList.innerHTML = lowStock.slice(0,8).map(b=>`
-        <div class="flex items-center justify-between px-5 py-3 border-b border-slate-50 last:border-0">
-          <span class="text-sm font-semibold text-slate-700 truncate">${escapeHtml(b.name)}</span>
-          <span class="text-xs font-bold ${b.count===0?'text-red-500':'text-amber-600'} flex-shrink-0 ml-2">${b.count} left</span>
-        </div>
-      `).join('');
-    }
-  }
+  // "Low stock" as a dashboard-level alert card was more noise than
+  // signal — with lots of models in the price list and only a handful
+  // ever actually stocked, nearly everything reads "0 left" all the time,
+  // which isn't useful information at a glance. Low Stock still lives as
+  // a working view inside the Inventory page itself; the dashboard now
+  // shows real business numbers instead (see Business Summary below).
 
   // Model Mismatches ties the Model Aliases tool into the landing page —
   // Master-only, same as the page itself, so it's just hidden rather than
@@ -5462,8 +5441,47 @@ function renderDashboard(){
 
   const attentionWrap = document.getElementById('dashAttentionWrap');
   if(attentionWrap){
-    const hasAttention = lowStock.length>0 || (isMaster && modelMismatches.length>0);
-    attentionWrap.classList.toggle('hidden', !hasAttention);
+    attentionWrap.classList.toggle('hidden', !(isMaster && modelMismatches.length>0));
+  }
+
+  // Business Summary — real rupee totals rather than unit counts, since
+  // this is the "important hisab" (accounts) a dashboard should actually
+  // lead with: what the current floor stock is worth, what's sold so far
+  // this month, and what's tied up in exchange units waiting to be
+  // resold.
+  const summaryEl = document.getElementById('dashBusinessSummary');
+  if(summaryEl){
+    const priceOf = model => allMasterBikes.find(b=>b.name===resolveModelName(model))?.price || 0;
+    const stockValue = [...invData, ...hhInvData]
+      .filter(u=>u.status==='Available')
+      .reduce((sum,u)=>sum + priceOf(u.model), 0);
+    const soldValueThisMonth = [...invData, ...hhInvData]
+      .filter(u=>{
+        if(u.status!=='Sold' || !u.soldAt) return false;
+        const at = u.soldAt?.toDate ? u.soldAt.toDate() : new Date(u.soldAt);
+        return at.getMonth()===now.getMonth() && at.getFullYear()===now.getFullYear();
+      })
+      .reduce((sum,u)=>sum + priceOf(u.model), 0);
+    const exchangeValue = exchangeData
+      .filter(u=>(u.status||'In Stock')==='In Stock')
+      .reduce((sum,u)=>sum + (Number(u.valuation)||0), 0);
+    const rows = [
+      { label:'Current Stock Value', sub:`${[...invData, ...hhInvData].filter(u=>u.status==='Available').length} units available`, value:stockValue, icon:'fa-warehouse', color:'#005EA6' },
+      { label:'Sold This Month', sub:`${soldThisMonth} unit${soldThisMonth!==1?'s':''} sold`, value:soldValueThisMonth, icon:'fa-chart-line', color:'#059669' },
+      { label:'Exchange Stock Value', sub:`${exchangeData.filter(u=>(u.status||'In Stock')==='In Stock').length} old bikes in stock`, value:exchangeValue, icon:'fa-right-left', color:'#EA580C' },
+    ];
+    summaryEl.innerHTML = rows.map(r=>`
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${r.color}15"><i class="fas ${r.icon} text-sm" style="color:${r.color}"></i></div>
+          <div class="min-w-0">
+            <div class="text-sm font-bold text-slate-700 truncate">${r.label}</div>
+            <div class="text-[11px] text-slate-400">${r.sub}</div>
+          </div>
+        </div>
+        <div class="text-lg font-black text-slate-800 flex-shrink-0">Rs. ${r.value.toLocaleString('en-IN')}</div>
+      </div>
+    `).join('');
   }
 
   const recentList = document.getElementById('dashRecentActivity');
@@ -5647,20 +5665,39 @@ function renderModelAliasesPage(){
 
 let currentEditAliasId = null;
 
+// Builds the "Typed As" dropdown fresh from whatever model names actually
+// exist on Inventory/HH Inventory units right now — so picking one is
+// guaranteed to be a real, currently-in-use spelling instead of whatever
+// someone free-typed (and possibly mistyped a second time).
+function populateAliasRawOptions(preserveValue){
+  const select = document.getElementById('aliasRawInput');
+  if(!select) return;
+  const names = new Set();
+  [...invData, ...hhInvData].forEach(u=>{ const m = (u.model||'').trim(); if(m) names.add(m); });
+  if(preserveValue) names.add(preserveValue);
+  const sorted = [...names].sort((a,b)=>a.localeCompare(b));
+  select.innerHTML = '<option value="">Select a model name from Inventory…</option>' +
+    sorted.map(n=>`<option value="${escapeJsAttr(n)}">${escapeHtml(n)}</option>`).join('');
+}
+
 window.openAliasFormModal = (id)=>{
   currentEditAliasId = id || null;
   if(id){
     const a = modelAliasesData.find(x=>x.id===id);
     if(!a) return;
     document.getElementById('aliasFormTitle').textContent = 'Edit Alias';
+    populateAliasRawOptions(a.alias || '');
     document.getElementById('aliasRawInput').value = a.alias || '';
+    document.getElementById('aliasRawInput')?._csSync?.();
     document.getElementById('aliasCanonicalSelect').value = a.canonical || '';
     document.getElementById('aliasCanonicalSelect')?._csSync?.();
     document.getElementById('cancelAliasBtn').classList.remove('hidden');
     document.getElementById('cancelAliasBtn').classList.add('flex');
   } else {
     document.getElementById('aliasFormTitle').textContent = 'Add Alias';
+    populateAliasRawOptions();
     document.getElementById('aliasRawInput').value = '';
+    document.getElementById('aliasRawInput')?._csSync?.();
     document.getElementById('aliasCanonicalSelect').value = '';
     document.getElementById('aliasCanonicalSelect')?._csSync?.();
     document.getElementById('cancelAliasBtn').classList.add('hidden');
@@ -5676,7 +5713,9 @@ window.closeAliasFormModal = ()=>{
 // just dropping a value into a field the person then has to go find.
 window.openAliasFormFor = (rawModel)=>{
   window.openAliasFormModal();
+  populateAliasRawOptions(rawModel);
   document.getElementById('aliasRawInput').value = rawModel;
+  document.getElementById('aliasRawInput')?._csSync?.();
 };
 
 // The one-tap "Yes, same bike" on an auto-suggested match — skips the
@@ -11199,6 +11238,7 @@ function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('mCategory'), { placeholder:'Category' });
   enhanceNativeSelect(document.getElementById('chalanInsType'), { placeholder:'Insurance Type' });
   enhanceNativeSelect(document.getElementById('aliasCanonicalSelect'), { placeholder:'Select a model…', searchable:true });
+  enhanceNativeSelect(document.getElementById('aliasRawInput'), { placeholder:'Select a model name from Inventory…', searchable:true });
   enhanceNativeSelect(document.getElementById('hhOwnerSelect'), { placeholder:'Unit Owner' });
   enhanceNativeSelect(document.getElementById('exBlueBook'), { placeholder:'Blue Book' });
   enhanceNativeSelect(document.getElementById('exKey'), { placeholder:'Key' });
