@@ -1182,34 +1182,48 @@
         <p class="text-sm text-slate-500 mt-1.5">Everything at a glance.</p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-5">
-        <div class="yng-card-shell p-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-5">
+        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('price')">
           <div class="flex items-center gap-2.5 mb-2">
             <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-tags text-bajaj-blue text-sm"></i></div>
             <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Models</span>
           </div>
           <div class="text-3xl font-black text-slate-800" id="dashModelsCount">0</div>
         </div>
-        <div class="yng-card-shell p-4">
+        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('inv')">
           <div class="flex items-center gap-2.5 mb-2">
             <div class="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-warehouse text-emerald-600 text-sm"></i></div>
             <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Available Units</span>
           </div>
           <div class="text-3xl font-black text-slate-800" id="dashAvailableCount">0</div>
         </div>
-        <div class="yng-card-shell p-4">
+        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('inv')">
+          <div class="flex items-center gap-2.5 mb-2">
+            <div class="w-9 h-9 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-chart-line text-teal-600 text-sm"></i></div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Sold This Month</span>
+          </div>
+          <div class="text-3xl font-black text-slate-800" id="dashSoldMonthCount">0</div>
+        </div>
+        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('chalans')">
           <div class="flex items-center gap-2.5 mb-2">
             <div class="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-file-invoice text-amber-600 text-sm"></i></div>
             <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Chalans This Month</span>
           </div>
           <div class="text-3xl font-black text-slate-800" id="dashChalanMonthCount">0</div>
         </div>
-        <div class="yng-card-shell p-4">
+        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('inv')">
           <div class="flex items-center gap-2.5 mb-2">
             <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-triangle-exclamation text-red-500 text-sm"></i></div>
             <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Low Stock Models</span>
           </div>
           <div class="text-3xl font-black text-slate-800" id="dashLowStockCount">0</div>
+        </div>
+        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('exchange')">
+          <div class="flex items-center gap-2.5 mb-2">
+            <div class="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-right-left text-orange-500 text-sm"></i></div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Exchange In Stock</span>
+          </div>
+          <div class="text-3xl font-black text-slate-800" id="dashExchangeCount">0</div>
         </div>
         <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" id="dashMismatchCard" onclick="window.switchSec('modelAliases')">
           <div class="flex items-center gap-2.5 mb-2">
@@ -5258,6 +5272,20 @@ function renderDashboard(){
   const chalanEl = document.getElementById('dashChalanMonthCount');
   if(chalanEl) chalanEl.textContent = thisMonthChalans;
 
+  // Sold This Month — a straightforward sales KPI dealership admins expect
+  // on a landing page, counted across both Inventory and HH Inventory
+  // (mela sales count too) using each unit's soldAt timestamp.
+  const soldThisMonth = [...invData, ...hhInvData].filter(u=>{
+    if(u.status!=='Sold' || !u.soldAt) return false;
+    const at = u.soldAt?.toDate ? u.soldAt.toDate() : new Date(u.soldAt);
+    return at.getMonth()===now.getMonth() && at.getFullYear()===now.getFullYear();
+  }).length;
+  const soldMonthEl = document.getElementById('dashSoldMonthCount');
+  if(soldMonthEl) soldMonthEl.textContent = soldThisMonth;
+
+  const exchangeInStockEl = document.getElementById('dashExchangeCount');
+  if(exchangeInStockEl) exchangeInStockEl.textContent = exchangeData.filter(u=>(u.status||'In Stock')==='In Stock').length;
+
   // "Low stock" = 2 or fewer Available units left for a model — counts
   // only regular Inventory (HH stock is a separate, event-based pool that
   // doesn't reflect showroom-floor availability the same way).
@@ -7842,6 +7870,7 @@ function loadExchangeStock(){
   exchangeUnsub = onSnapshot(query(collection(db,'exchange_stock'), orderBy('sn','asc')), snap=>{
     exchangeData = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderExchangeTable();
+    if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
   }, err=>{
     console.error('exchange_stock listener failed', err);
     if(tbody) tbody.innerHTML = `<tr><td colspan="9"><div class="py-12 text-center text-slate-400">
