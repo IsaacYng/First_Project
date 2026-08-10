@@ -5145,8 +5145,10 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
       toast('Unit updated!');
       window.cancelInvEdit();
     } else {
-      // Auto S.N — always one more than the current highest S.N in inventory
-      const nextSn = invData.length ? Math.max(...invData.map(x=>Number(x.sn)||0)) + 1 : 1;
+      // Auto S.N — queried fresh from Firestore (not the locally-cached
+      // page) so two quick adds, or a dealership with more stock than one
+      // page holds, can never both land on the same S.N.
+      const nextSn = await getAccurateNextSn('inventory');
       await addDoc(collection(db,"inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,status:'Available',addedAt:new Date()});
       logActivity('Added', 'inventory', { model: modelName, chassis, sn: nextSn });
       ['sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
@@ -5874,7 +5876,7 @@ async function getAccurateNextSn(colName){
     return (Number(snap.docs[0].data().sn) || 0) + 1;
   }catch(e){
     console.error('getAccurateNextSn failed, falling back to loaded-page max', e);
-    const arr = colName==='hh_inventory' ? hhInvData : invData;
+    const arr = colName==='hh_inventory' ? hhInvData : (colName==='exchange_stock' ? exchangeData : invData);
     return arr.length ? Math.max(...arr.map(x=>Number(x.sn)||0)) + 1 : 1;
   }
 }
@@ -6742,7 +6744,7 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
       toast('HH unit updated!');
       window.cancelHHInvEdit();
     } else {
-      const nextSn = hhInvData.length ? Math.max(...hhInvData.map(x=>Number(x.sn)||0))+1 : 1;
+      const nextSn = await getAccurateNextSn('hh_inventory');
       await addDoc(collection(db,"hh_inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,eventName,owner,ownerName,status:'Available',customerName:'',addedAt:new Date()});
       logActivity('Added', 'hh_inventory', { model: modelName, chassis, sn: nextSn });
       ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName','hhOwnerName'].forEach(id=>document.getElementById(id).value='');
@@ -8016,7 +8018,7 @@ document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
       toast('Exchange unit updated!');
       window.cancelExchangeEdit();
     } else {
-      const nextSn = exchangeData.length ? Math.max(...exchangeData.map(x=>Number(x.sn)||0))+1 : 1;
+      const nextSn = await getAccurateNextSn('exchange_stock');
       await addDoc(collection(db,'exchange_stock'), {...payload, sn:nextSn, status:'In Stock', addedAt:new Date()});
       logActivity('Added', 'exchange_stock', {...payload, sn:nextSn});
       window.cancelExchangeEdit();
@@ -9859,8 +9861,9 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
   btn.disabled = true;
   btnText.textContent = 'Importing…';
 
-  // Start SN after current max SN in inventory
-  let nextSn = invData.length ? Math.max(...invData.map(x=>Number(x.sn)||0)) + 1 : 1;
+  // Start SN after current max SN in inventory — queried fresh from
+  // Firestore so an import never collides with units beyond the loaded page.
+  let nextSn = await getAccurateNextSn('inventory');
 
   const results = { success:[], failed:[] };
   const seenInBatch = []; // track chassis/engine already added within this same import run
@@ -10044,7 +10047,7 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
   btn.disabled = true;
   btnText.textContent = 'Importing…';
 
-  let nextSn = hhInvData.length ? Math.max(...hhInvData.map(x=>Number(x.sn)||0)) + 1 : 1;
+  let nextSn = await getAccurateNextSn('hh_inventory');
   const results = { success:[], failed:[] };
   const seenInBatch = [];
   let runningTotal = await getAccurateTotalInventoryCount(true);
