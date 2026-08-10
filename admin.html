@@ -160,7 +160,7 @@
        reveals it) should sit as a flex row like every other cell, not the
        desktop table-cell display used above 640px. !important guarantees
        this wins over the ID-scoped desktop rule at this breakpoint. */
-    #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col { display: flex !important; justify-content: flex-end !important; }
+    #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col, #exchangeTable.select-mode .sel-col { display: flex !important; justify-content: flex-end !important; }
   }
 
   /* ═══════════ INDEX.HTML DESIGN SYSTEM — CTAs, badges, cards ═══════════ */
@@ -300,16 +300,16 @@
   /* Select/checkbox column stays hidden until "Select" is tapped from a
      row's action menu (or the bulk bar is otherwise engaged) — keeps the
      table clean day-to-day instead of always showing tick-boxes. */
-  #stockTable .sel-col, #hhInvTable .sel-col, #chalanTable .sel-col{ display:none; }
-  #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col{ display:table-cell; }
+  #stockTable .sel-col, #hhInvTable .sel-col, #chalanTable .sel-col, #exchangeTable .sel-col{ display:none; }
+  #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col, #exchangeTable.select-mode .sel-col{ display:table-cell; }
   /* Selected-row glow — Bajaj blue tint so a ticked unit is obvious at a
      glance, not just a tiny checkmark easy to lose track of. */
-  #stockTable.select-mode tbody tr.row-selected, #hhInvTable.select-mode tbody tr.row-selected, #chalanTable.select-mode tbody tr.row-selected {
+  #stockTable.select-mode tbody tr.row-selected, #hhInvTable.select-mode tbody tr.row-selected, #chalanTable.select-mode tbody tr.row-selected, #exchangeTable.select-mode tbody tr.row-selected {
     background: #EAF3FB !important;
     box-shadow: inset 3px 0 0 #005EA6;
     transition: background .15s ease;
   }
-  #stockTable.select-mode tbody tr, #hhInvTable.select-mode tbody tr, #chalanTable.select-mode tbody tr { transition: background .15s ease; }
+  #stockTable.select-mode tbody tr, #hhInvTable.select-mode tbody tr, #chalanTable.select-mode tbody tr, #exchangeTable.select-mode tbody tr { transition: background .15s ease; }
   .kebab-menu{
     position:fixed; z-index:550; min-width:150px; background:#fff; border-radius:12px;
     border:1px solid #E2E8F0; box-shadow:0 10px 30px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.06);
@@ -1973,6 +1973,33 @@
       </div><!-- /form-modal-box -->
       </div><!-- /exchangeFormModal -->
 
+      <!-- Excel Bulk Import -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center gap-2 section-title text-2xl mb-1">
+          <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
+        </div>
+        <p class="text-xs text-slate-500 mb-4">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, MakeYear, RegNo, Valuation, BlueBook, Key, File, Customer, SendTo, Remarks</b> (only Model, MakeYear, RegNo, Valuation are required — rest are optional, BlueBook/Key/File accept Yes/No, SendTo defaults to Showroom). S.N fills in automatically.</p>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all">
+            <i class="fas fa-cloud-arrow-up text-emerald-500 text-lg flex-shrink-0"></i>
+            <span id="exExcelFileLabel" class="text-sm text-slate-600 font-medium truncate">Click to choose Excel / CSV file…</span>
+            <input type="file" id="exExcelFileInput" accept=".xlsx,.xls,.csv" class="hidden"/>
+          </label>
+          <button id="exDownloadTemplateBtn" class="cta-secondary whitespace-nowrap">
+            <i class="fas fa-download"></i> Sample Template
+          </button>
+          <button id="exImportExcelBtn" disabled class="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 whitespace-nowrap">
+            <i class="fas fa-upload"></i> <span id="exImportExcelBtnText">Import Rows</span>
+          </button>
+        </div>
+        <div id="exImportSummary" class="hidden mt-4 rounded-xl border border-slate-200 overflow-hidden">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-wrap">
+            <span id="exImportSummaryHead" class="text-xs font-bold text-slate-600"></span>
+          </div>
+          <div id="exImportSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
+        </div>
+      </div>
+
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
@@ -1984,6 +2011,15 @@
           <button onclick="exportExchangeToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
             <i class="fas fa-file-excel text-[11px]"></i> Export
           </button>
+          <button id="deleteSelectedExBtn" onclick="deleteSelectedExchangeUnits()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all">
+            <i class="fas fa-trash-can text-[11px]"></i> Delete Selected (<span id="deleteSelectedExCount">0</span>)
+          </button>
+          <button id="cancelSelectExBtn" onclick="setExchangeSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
+            <i class="fas fa-xmark text-[11px]"></i> Cancel Select
+          </button>
+          <span id="selectModeHintEx" class="hidden items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-bajaj-blue">
+            <i class="fas fa-hand-pointer text-[10px]"></i> Select mode — tap rows to add
+          </span>
           <div class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
             <button class="ex-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setExchangeStatusFilter('all')">All <span class="pill-count" id="pcExAll">0</span></button>
             <button class="ex-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="In Stock" onclick="setExchangeStatusFilter('In Stock')">In Stock <span class="pill-count" id="pcExInStock">0</span></button>
@@ -2005,6 +2041,9 @@
           <table class="w-full border-collapse responsive-table" id="exchangeTable">
             <thead>
               <tr class="bg-slate-50">
+                <th class="px-3 py-3 text-left border-b border-slate-200 w-8 sel-col">
+                  <input type="checkbox" id="exSelectAll" onchange="toggleSelectAllExchange(this.checked)" class="w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer">
+                </th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Year</th>
@@ -2017,7 +2056,7 @@
               </tr>
             </thead>
             <tbody id="exchangeTableBody">
-              <tr><td colspan="9" class="px-4 py-12 text-center text-slate-400">
+              <tr><td colspan="10" class="px-4 py-12 text-center text-slate-400">
                 <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading exchange stock…
               </td></tr>
             </tbody>
@@ -3732,6 +3771,7 @@ window._toggleKebab = (btn, type, id) => {
       ? [{ label:'Mark In Stock', icon:'fa-rotate-left', onClick:()=>window._setExchangeStatus(id, 'In Stock') }]
       : [{ label:'Mark Sold', icon:'fa-tag', onClick:()=>window._setExchangeStatus(id, 'Sold') }];
     openKebabMenuFor(btn, [
+      { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('exchange_stock', id) },
       ...statusAction,
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editExchange(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('exchange_stock', id) }
@@ -3788,6 +3828,12 @@ window._selectRow = (type, id)=>{
     window.toggleSelectChalan(id, true);
     const cb = document.querySelector(`.chalan-row-checkbox[data-id="${id}"]`);
     if(cb){ cb.checked = true; cb.closest('tr')?.classList.add('row-selected'); cb.scrollIntoView({behavior:'smooth', block:'center'}); }
+  } else if(type==='exchange_stock'){
+    window.setExchangeSelectMode(true);
+    window.toggleSelectExchangeUnit(id, true);
+    renderExchangeTable();
+    const cb = document.querySelector(`.ex-row-checkbox[data-id="${id}"]`);
+    if(cb){ cb.scrollIntoView({behavior:'smooth', block:'center'}); }
   }
 };
 
@@ -6632,7 +6678,7 @@ function renderHHInvTable(){
         <div class="mt-0.5">${s.owner==='other'
           ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[9px] font-extrabold uppercase tracking-wide"><i class="fas fa-user-tag text-[8px]"></i> ${escapeHtml(s.ownerName||'Other')}</span>`
           : s.owner==='hh'
-          ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-600 text-[9px] font-extrabold uppercase tracking-wide"><i class="fas fa-building text-[8px]"></i> HH</span>`
+          ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600 text-[9px] font-extrabold uppercase tracking-wide"><i class="fas fa-building text-[8px]"></i> HH</span>`
           : `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 text-bajaj-blue text-[9px] font-extrabold uppercase tracking-wide"><i class="fas fa-store text-[8px]"></i> Dealer</span>`}</div>
       </td>
       <td class="px-4 py-3" data-th="Status">
@@ -7869,11 +7915,13 @@ function loadExchangeStock(){
   const tbody = document.getElementById('exchangeTableBody');
   exchangeUnsub = onSnapshot(query(collection(db,'exchange_stock'), orderBy('sn','asc')), snap=>{
     exchangeData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const liveIds = new Set(exchangeData.map(s=>s.id));
+    selectedExchangeIds.forEach(id=>{ if(!liveIds.has(id)) selectedExchangeIds.delete(id); });
     renderExchangeTable();
     if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
   }, err=>{
     console.error('exchange_stock listener failed', err);
-    if(tbody) tbody.innerHTML = `<tr><td colspan="9"><div class="py-12 text-center text-slate-400">
+    if(tbody) tbody.innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400">
       <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
       <p class="text-sm mb-3">Couldn't load exchange stock — check your connection.</p>
       <button onclick="loadExchangeStock()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
@@ -7945,13 +7993,17 @@ function renderExchangeTable(){
   const pc = { pcExAll:total, pcExInStock:inStock, pcExSold:sold };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
   if(!list.length){
-    tbody.innerHTML = `<tr><td colspan="9"><div class="py-12 text-center text-slate-400"><i class="fas fa-right-left text-3xl opacity-25 block mb-2"></i><p class="text-sm">${exchangeSearchTerm?'No units match your search.':'No exchange stock yet. Add a unit above.'}</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400"><i class="fas fa-right-left text-3xl opacity-25 block mb-2"></i><p class="text-sm">${exchangeSearchTerm?'No units match your search.':'No exchange stock yet. Add a unit above.'}</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map(s=>{
     const valuation = s.valuation ? 'Rs. '+Number(s.valuation).toLocaleString('en-IN') : '—';
+    const isSel = selectedExchangeIds.has(s.id);
     return `
-    <tr class="border-b border-slate-100" data-row-id="${s.id}">
+    <tr class="border-b border-slate-100 ${isSel?'row-selected':''}" data-row-id="${s.id}">
+      <td class="px-3 py-3 sel-col" data-th="">
+        <input type="checkbox" class="ex-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${isSel?'checked':''} onchange="toggleSelectExchangeUnit('${s.id}', this.checked); this.closest('tr').classList.toggle('row-selected', this.checked)">
+      </td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${s.sn||'—'}</td>
       <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">${escapeHtml(s.model||'—')}
         ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
@@ -7971,7 +8023,85 @@ function renderExchangeTable(){
       </td>
     </tr>`;
   }).join('');
+  updateDeleteSelectedExBtn();
 }
+
+/* ─── Multi-select + bulk delete (Exchange Stock) ─── */
+let selectedExchangeIds = new Set();
+
+function updateDeleteSelectedExBtn(){
+  const btn = document.getElementById('deleteSelectedExBtn');
+  const countEl = document.getElementById('deleteSelectedExCount');
+  const cancelBtn = document.getElementById('cancelSelectExBtn');
+  const hint = document.getElementById('selectModeHintEx');
+  if(!btn || !countEl) return;
+  const inSelectMode = document.getElementById('exchangeTable')?.classList.contains('select-mode');
+  countEl.textContent = selectedExchangeIds.size;
+  if(selectedExchangeIds.size>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); }
+  else { btn.classList.add('hidden'); btn.classList.remove('flex'); }
+  if(cancelBtn){
+    if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
+    else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
+  }
+  if(hint){
+    if(inSelectMode && selectedExchangeIds.size===0){ hint.classList.remove('hidden'); hint.classList.add('flex'); }
+    else { hint.classList.add('hidden'); hint.classList.remove('flex'); }
+  }
+  const selectAll = document.getElementById('exSelectAll');
+  if(selectAll){
+    const visibleIds = getFilteredExchange().map(s=>s.id);
+    const allChecked = visibleIds.length>0 && visibleIds.every(id=>selectedExchangeIds.has(id));
+    selectAll.checked = allChecked;
+    selectAll.indeterminate = !allChecked && visibleIds.some(id=>selectedExchangeIds.has(id));
+  }
+}
+
+window.setExchangeSelectMode = (on)=>{
+  const table = document.getElementById('exchangeTable');
+  if(table) table.classList.toggle('select-mode', on);
+  if(!on) selectedExchangeIds.clear();
+  updateDeleteSelectedExBtn();
+};
+
+window.toggleSelectExchangeUnit = (id, checked)=>{
+  if(checked) selectedExchangeIds.add(id); else selectedExchangeIds.delete(id);
+  updateDeleteSelectedExBtn();
+};
+
+window.toggleSelectAllExchange = (checked)=>{
+  const visibleIds = getFilteredExchange().map(s=>s.id);
+  if(checked) visibleIds.forEach(id=>selectedExchangeIds.add(id));
+  else visibleIds.forEach(id=>selectedExchangeIds.delete(id));
+  renderExchangeTable();
+};
+
+window.deleteSelectedExchangeUnits = async ()=>{
+  if(!selectedExchangeIds.size) return;
+  const ids = [...selectedExchangeIds];
+  const proceed = await showDangerousConfirm({
+    title: `Delete ${ids.length} selected unit${ids.length!==1?'s':''}?`,
+    message: `This will <b>permanently delete ${ids.length} selected unit${ids.length!==1?'s':''}</b> from Exchange Stock. This cannot be undone.<br><br>The button unlocks in 5 seconds — please make sure this is really what you want.`,
+    okText: 'Delete Selected'
+  });
+  if(!proceed) return;
+  try{
+    const targets = ids.map(id=>exchangeData.find(x=>x.id===id)).filter(Boolean);
+    for(const t of targets) await moveToTrash('exchange_stock', t.id, t);
+    const chunks = [];
+    for(let i=0;i<ids.length;i+=400) chunks.push(ids.slice(i,i+400));
+    for(const chunk of chunks){
+      const batch = writeBatch(db);
+      chunk.forEach(id=>batch.delete(doc(db,'exchange_stock',id)));
+      await batch.commit();
+    }
+    logActivity('Bulk Deleted', 'exchange_stock', { model: `${targets.length} unit(s)`, sn: '' });
+    toast(`${ids.length} unit(s) moved to Trash. Tap "Fix Numbering" to close any S.N gaps.`);
+    selectedExchangeIds.clear();
+    document.getElementById('exchangeTable')?.classList.remove('select-mode');
+    updateDeleteSelectedExBtn();
+  }catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
+};
+
 
 document.getElementById('fixExchangeSnBtn').addEventListener('click', async ()=>{
   if(!exchangeData.length){ toast('No exchange stock to renumber.','warn'); return; }
@@ -8120,6 +8250,153 @@ window.exportExchangeToExcel = ()=>{
 };
 
 window.loadExchangeStock = loadExchangeStock;
+
+/* ─── Exchange Stock Bulk Import (same pattern as Inventory/HH Inventory) ─── */
+let exExcelParsedRows = [];
+
+document.getElementById('exExcelFileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const importBtn = document.getElementById('exImportExcelBtn');
+  const label = document.getElementById('exExcelFileLabel');
+  const summary = document.getElementById('exImportSummary');
+  summary.classList.add('hidden');
+  exExcelParsedRows = [];
+  importBtn.disabled = true;
+
+  if(!file){ label.textContent='Click to choose Excel / CSV file…'; return; }
+  label.textContent = file.name;
+
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const aoa = XLSX.utils.sheet_to_json(sheet, {header:1, defval:'', blankrows:false});
+      if(!aoa.length){ toast('File appears empty.','err'); return; }
+
+      const rawHeaders = aoa[0].map(h=>h.toString().trim().toLowerCase().replace(/[^a-z]/g,''));
+      function findCol(keywords){
+        for(let i=0;i<rawHeaders.length;i++){
+          if(keywords.some(kw=>rawHeaders[i].includes(kw))) return i;
+        }
+        return -1;
+      }
+      const colIdx = {
+        model:      findCol(['modelname','model']),
+        makeYear:   findCol(['makeyear','year']),
+        regNo:      findCol(['registrationnumber','regno','regd','registration']),
+        valuation:  findCol(['valuation','value','price']),
+        blueBook:   findCol(['bluebook']),
+        key:        findCol(['key']),
+        file:       findCol(['file']),
+        customer:   findCol(['customername','customer']),
+        sendTo:     findCol(['sendto','destination']),
+        remarks:    findCol(['remarks','notes','note'])
+      };
+
+      if(colIdx.model===-1 || colIdx.regNo===-1){
+        toast('Could not find Model / RegNo columns in the header row.','err');
+        return;
+      }
+
+      function parseYesNo(v){
+        const s = (v||'').toString().trim().toLowerCase();
+        return (s==='no' || s==='n' || s==='0' || s==='false') ? 'no' : 'yes';
+      }
+
+      exExcelParsedRows = aoa.slice(1).map(r=>({
+        model:      colIdx.model!==-1     ? (r[colIdx.model]||'').toString().trim()     : '',
+        makeYear:   colIdx.makeYear!==-1  ? (r[colIdx.makeYear]||'').toString().trim()  : '',
+        regNo:      colIdx.regNo!==-1     ? (r[colIdx.regNo]||'').toString().trim()     : '',
+        valuation:  colIdx.valuation!==-1 ? Number(r[colIdx.valuation])||0              : 0,
+        blueBook:   colIdx.blueBook!==-1  ? parseYesNo(r[colIdx.blueBook])              : 'yes',
+        key:        colIdx.key!==-1       ? parseYesNo(r[colIdx.key])                   : 'yes',
+        file:       colIdx.file!==-1      ? parseYesNo(r[colIdx.file])                  : 'yes',
+        customerName: colIdx.customer!==-1 ? (r[colIdx.customer]||'').toString().trim() : '',
+        sendTo:     colIdx.sendTo!==-1    ? (r[colIdx.sendTo]||'').toString().trim() || 'Showroom' : 'Showroom',
+        remarks:    colIdx.remarks!==-1   ? (r[colIdx.remarks]||'').toString().trim()   : ''
+      })).filter(r=>r.model || r.regNo);
+
+      if(!exExcelParsedRows.length){ toast('No data rows found in file.','err'); return; }
+      importBtn.disabled = false;
+      toast(exExcelParsedRows.length+' row(s) detected. Review & click Import.');
+    }catch(err){
+      toast('Could not read file: '+err.message,'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('exDownloadTemplateBtn').addEventListener('click', ()=>{
+  const wsData = [
+    ['Model','MakeYear','RegNo','Valuation','BlueBook','Key','File','Customer','SendTo','Remarks'],
+    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','Yes','Yes','No','Santosh Gahatraj Kami','Showroom','Minor scratch on tank'],
+    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','No','Yes','Yes','','Workshop','']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:16},{wch:30}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
+  XLSX.writeFile(wb, 'exchange_stock_import_template.xlsx');
+});
+
+document.getElementById('exImportExcelBtn').addEventListener('click', async ()=>{
+  if(!exExcelParsedRows.length) return;
+  const btn = document.getElementById('exImportExcelBtn');
+  const btnText = document.getElementById('exImportExcelBtnText');
+  btn.disabled = true;
+  btnText.textContent = 'Importing…';
+
+  let nextSn = await getAccurateNextSn('exchange_stock');
+  const results = { success:[], failed:[] };
+
+  for(const row of exExcelParsedRows){
+    if(!row.model || !row.makeYear || !row.regNo || !row.valuation){
+      results.failed.push({row, reason:'Missing required field (Model/MakeYear/RegNo/Valuation)'});
+      continue;
+    }
+    const modelCheck = Validate.text(row.model, { label:'Model', max:80 });
+    const yearCheck = Validate.text(row.makeYear, { label:'Make Year', max:10 });
+    const regNoCheck = Validate.text(row.regNo, { label:'Reg No', max:40 });
+    const badField = [modelCheck, yearCheck, regNoCheck].find(c=>!c.ok);
+    if(badField){ results.failed.push({row, reason: badField.error}); continue; }
+    if(isNaN(row.valuation) || row.valuation<0){ results.failed.push({row, reason:'Invalid Valuation amount'}); continue; }
+    try{
+      await addDoc(collection(db,'exchange_stock'), {
+        sn: nextSn,
+        model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
+        valuation: row.valuation, blueBook: row.blueBook, key: row.key, file: row.file,
+        customerName: row.customerName || '', sendTo: row.sendTo || 'Showroom', remarks: row.remarks || '',
+        status: 'In Stock', addedAt: new Date()
+      });
+      results.success.push(row);
+      nextSn++;
+    }catch(e){
+      results.failed.push({row, reason:friendlyError(e)});
+    }
+  }
+
+  const summary = document.getElementById('exImportSummary');
+  const head = document.getElementById('exImportSummaryHead');
+  const body = document.getElementById('exImportSummaryBody');
+  head.innerHTML = `<span class="text-emerald-600"><i class="fas fa-circle-check"></i> ${results.success.length} imported</span>` +
+    (results.failed.length ? ` &nbsp;·&nbsp; <span class="text-red-500"><i class="fas fa-circle-xmark"></i> ${results.failed.length} failed</span>` : '');
+  body.innerHTML = results.failed.map(f=>`
+    <div class="px-4 py-2 flex items-center justify-between gap-3">
+      <span class="text-slate-600 truncate">${escapeHtml(f.row.model || '(no model)')} — ${escapeHtml(f.row.regNo || '(no reg no)')}</span>
+      <span class="text-red-500 font-medium whitespace-nowrap">${f.reason}</span>
+    </div>`).join('') || `<div class="px-4 py-3 text-slate-400">All rows imported successfully.</div>`;
+  summary.classList.remove('hidden');
+
+  toast(`Import done: ${results.success.length} added, ${results.failed.length} failed`, results.failed.length ? 'err' : 'ok');
+
+  btn.disabled = true;
+  btnText.textContent = 'Import Rows';
+  exExcelParsedRows = [];
+  document.getElementById('exExcelFileInput').value = '';
+  document.getElementById('exExcelFileLabel').textContent = 'Click to choose Excel / CSV file…';
+});
 
 /* ─── Accessories Inventory ─── */
 function loadAccessories(){
@@ -10506,6 +10783,12 @@ window.runGlobalSearch = (q)=>{
     html += impMatches.map(a => globalSearchResultRow(a.type==='link'?'fa-link':'fa-user','#005EA6', escapeHtml(a.value1||'—'), escapeHtml(a.value2||''), `window.jumpToSearchResult('important','${a.id}')`)).join('');
     total += impMatches.length;
   }
+  const exMatches = exchangeData.filter(s => matches(s.model)||matches(s.regNo)||matches(s.customerName)||matches(s.remarks)||matches(s.sendTo)).slice(0, MAX_PER_GROUP);
+  if(exMatches.length){
+    html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Exchange Stock</div>`;
+    html += exMatches.map(s => globalSearchResultRow('fa-right-left','#EA580C', escapeHtml(s.model||'—'), `${escapeHtml(s.regNo||'')} · ${escapeHtml(s.status||'In Stock')}`, `window.jumpToSearchResult('exchange_stock','${s.id}')`)).join('');
+    total += exMatches.length;
+  }
 
   resultsEl.innerHTML = total ? html : `<div class="py-10 text-center text-slate-400 text-sm"><i class="fas fa-magnifying-glass text-2xl opacity-30 block mb-2"></i>No matches for "${escapeHtml(q)}".</div>`;
 };
@@ -10514,6 +10797,7 @@ window.jumpToSearchResult = (type, id)=>{
   window.closeGlobalSearch();
   if(type==='inventory'){ window.switchSec('inv'); setTimeout(()=>window._selectRow('inventory', id), 150); }
   else if(type==='hh_inventory'){ window.switchSec('hhinv'); setTimeout(()=>window._selectRow('hh_inventory', id), 150); }
+  else if(type==='exchange_stock'){ window.switchSec('exchange'); setTimeout(()=>window._selectRow('exchange_stock', id), 150); }
   else if(type==='chalans'){ window.switchSec('chalans'); setTimeout(()=>window._selectRow('chalans', id), 150); }
   else if(type==='important'){ window.switchSec('important'); }
   else if(type==='price'){ window.switchSec('price'); }
