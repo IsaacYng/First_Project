@@ -717,6 +717,14 @@
   .doc-type-tab{ color:#7C8494; display:inline-flex; align-items:center; }
   .doc-type-tab:hover{ color:#1F2430; }
   .doc-type-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
+  .ex-status-tab{ color:#7C8494; display:inline-flex; align-items:center; gap:5px; }
+  .ex-status-tab:hover{ color:#1F2430; }
+  .ex-status-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
+  .ex-status-tab.active .pill-count{ background:#005EA6; color:#fff; }
+  .ex-sendto-tab{ color:#7C8494; display:inline-flex; align-items:center; gap:5px; }
+  .ex-sendto-tab:hover{ color:#1F2430; }
+  .ex-sendto-tab.active{ background:#fff; color:#B45309; box-shadow:0 1px 3px rgba(15,23,42,.1); }
+  .ex-sendto-tab.active .pill-count{ background:#F59E0B; color:#fff; }
   /* Filter tab rows scroll horizontally on narrow screens instead of
      wrapping — a tab dropping to its own second line looked broken, and a
      sideways swipe is a more natural mobile gesture than a wrapped grid. */
@@ -1966,6 +1974,9 @@
             <button class="ex-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setExchangeStatusFilter('all')">All <span class="pill-count" id="pcExAll">0</span></button>
             <button class="ex-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="In Stock" onclick="setExchangeStatusFilter('In Stock')">In Stock <span class="pill-count" id="pcExInStock">0</span></button>
             <button class="ex-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setExchangeStatusFilter('Sold')">Sold <span class="pill-count" id="pcExSold">0</span></button>
+          </div>
+          <div id="exchangeSendToFilterWrap" class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
+            <!-- Send To pills injected dynamically — one per distinct value in exchange_stock, with live counts -->
           </div>
           <div class="relative ml-auto w-full sm:w-64">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -7822,6 +7833,7 @@ let exchangeData = [];
 let exchangeUnsub = null;
 let currentEditExchangeId = null;
 let exchangeStatusFilter = 'all';
+let exchangeSendToFilter = 'all';
 let exchangeSearchTerm = '';
 
 function loadExchangeStock(){
@@ -7847,6 +7859,11 @@ window.setExchangeStatusFilter = (status)=>{
   renderExchangeTable();
 };
 
+window.setExchangeSendToFilter = (sendTo)=>{
+  exchangeSendToFilter = sendTo;
+  renderExchangeTable();
+};
+
 function exSearchMatches(s,q){
   return (s.model||'').toLowerCase().includes(q)
       || (s.regNo||'').toLowerCase().includes(q)
@@ -7858,6 +7875,7 @@ function exSearchMatches(s,q){
 function getFilteredExchange(){
   let base = exchangeData;
   if(exchangeStatusFilter !== 'all') base = base.filter(s=>(s.status||'In Stock')===exchangeStatusFilter);
+  if(exchangeSendToFilter !== 'all') base = base.filter(s=>(s.sendTo||'Showroom')===exchangeSendToFilter);
   if(!exchangeSearchTerm) return base;
   const q = exchangeSearchTerm.toLowerCase().trim();
   return base.filter(s=>exSearchMatches(s,q));
@@ -7880,6 +7898,21 @@ function renderExchangeTable(){
   const sold = total - inStock;
   document.getElementById('exchangeTotalChip').textContent = total+' unit'+(total!==1?'s':'')+' total  ·  '+inStock+' in stock  ·  '+sold+' sold';
   document.getElementById('exchangeCount').textContent = list.length+' unit'+(list.length!==1?'s':'');
+
+  // Send To pills — one per distinct value actually in use, counted against
+  // whatever the Status tab currently shows, so switching to "Sold" also
+  // updates how many of each destination are sold.
+  const statusScoped = exchangeStatusFilter==='all' ? exchangeData : exchangeData.filter(s=>(s.status||'In Stock')===exchangeStatusFilter);
+  const sendToCounts = {};
+  statusScoped.forEach(s=>{ const k = s.sendTo || 'Showroom'; sendToCounts[k] = (sendToCounts[k]||0)+1; });
+  const sendToKeys = Object.keys(sendToCounts).sort((a,b)=> a==='Showroom' ? -1 : b==='Showroom' ? 1 : sendToCounts[b]-sendToCounts[a]);
+  if(!sendToKeys.includes(exchangeSendToFilter) && exchangeSendToFilter!=='all') exchangeSendToFilter = 'all';
+  const wrap = document.getElementById('exchangeSendToFilterWrap');
+  if(wrap){
+    const allBtn = `<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeSendToFilter==='all'?' active':''}" onclick="setExchangeSendToFilter('all')">All Destinations <span class="pill-count">${statusScoped.length}</span></button>`;
+    const pills = sendToKeys.map(k=>`<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeSendToFilter===k?' active':''}" onclick="setExchangeSendToFilter('${k.replace(/'/g,"\\'")}')">${escapeHtml(k)} <span class="pill-count">${sendToCounts[k]}</span></button>`).join('');
+    wrap.innerHTML = allBtn + pills;
+  }
   const pc = { pcExAll:total, pcExInStock:inStock, pcExSold:sold };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
   if(!list.length){
