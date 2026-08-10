@@ -1061,6 +1061,9 @@
         <button id="navAllInv" onclick="switchSec('allinv');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-layer-group"></i> All Inventory
         </button>
+        <button id="navExchange" onclick="switchSec('exchange');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-right-left"></i> Exchange Stock
+        </button>
         <button id="navFin" onclick="switchSec('fin');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-percent"></i> HFL Finance
         </button>
@@ -1664,8 +1667,9 @@
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Unit Owner</label>
             <select id="hhOwnerSelect" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
-              <option value="dealer_hh">Dealer / HH</option>
-              <option value="other">Other (Consignment)</option>
+              <option value="dealer">Dealer</option>
+              <option value="hh">HH</option>
+              <option value="other">Other</option>
             </select>
           </div>
           <div class="flex flex-col gap-1.5" id="hhOwnerNameWrap" style="display:none;">
@@ -1674,7 +1678,7 @@
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
         </div>
-        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units are added as <b>Available</b> by default — change status later from the row menu if needed. <b>Unit Owner</b> marks whether the bike on stall belongs to us (Dealer/HH) or someone else (Other) — useful when a mela stall carries mixed stock.</p>
+        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units are added as <b>Available</b> by default — change status later from the row menu if needed. <b>Unit Owner</b> marks whose bike is on the stall — <b>Dealer</b> (our own stock), <b>HH</b> (distributor-owned), or <b>Other</b> (someone else's, e.g. another dealer's consignment).</p>
         <div class="flex gap-2 flex-wrap">
           <button id="saveHHInvBtn" class="cta-primary">
             <i class="fas fa-floppy-disk"></i> Save Unit
@@ -1692,7 +1696,7 @@
         <div class="flex items-center gap-2 section-title text-2xl mb-1">
           <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
         </div>
-        <p class="text-xs text-slate-500 mb-4">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, Chassis, Engine, RegNo, Color, Event, Owner</b> (Owner is optional — leave blank or "Dealer/HH" for our own stock, or type the other party's name). S.N fills in automatically.</p>
+        <p class="text-xs text-slate-500 mb-4">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, Chassis, Engine, RegNo, Color, Event, Owner</b> (Owner is optional — leave blank or "Dealer"/"HH" for our own or the distributor's stock, or type the other party's name). S.N fills in automatically.</p>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all">
             <i class="fas fa-cloud-arrow-up text-emerald-500 text-lg flex-shrink-0"></i>
@@ -1845,6 +1849,145 @@
             <tbody id="allInvTableBody">
               <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">
                 <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading combined inventory…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ EXCHANGE STOCK (OLD BIKES TAKEN IN TRADE) ═══ -->
+    <div class="sec-panel" id="secExchange">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Stock Management ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Exchange <span class="text-amber-500">Stock</span></div>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap flex-shrink-0">
+          <span id="exchangeTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500">0 units total</span>
+        </div>
+      </div>
+      <p class="text-xs text-slate-400 -mt-4 mb-5"><i class="fas fa-circle-info mr-1"></i>Old bikes taken in exchange from customers — tracked separately with valuation and document status (Blue Book / Key / File), so nothing gets lost between trade-in and resale.</p>
+
+      <!-- Add Unit (modal) -->
+      <div id="exchangeFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelExchangeEdit()">
+      <div class="form-modal-box">
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
+            <span id="exchangeFormTitle">Add Exchange Unit</span>
+          </div>
+          <button onclick="cancelExchangeEdit()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-1.5">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Model Name <span class="text-red-400">*</span></label>
+            <input type="text" id="exModel" autocomplete="off" placeholder="e.g. Honda Shine 125 (any brand)"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Make Year <span class="text-red-400">*</span></label>
+            <input type="text" id="exMakeYear" placeholder="e.g. 2019 / 2076"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Registration No <span class="text-red-400">*</span></label>
+            <input type="text" id="exRegNo" placeholder="Koshi Pra-02-061Pa0675"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Valuation (NPR) <span class="text-red-400">*</span></label>
+            <input type="number" id="exValuation" min="0" placeholder="e.g. 85000"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Customer Name</label>
+            <input type="text" id="exCustomerName" placeholder="e.g. Santosh Gahatraj Kami"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Blue Book</label>
+            <select id="exBlueBook" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="yes">Yes — received</option>
+              <option value="no">No — missing</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Key</label>
+            <select id="exKey" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="yes">Yes — received</option>
+              <option value="no">No — missing</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">File</label>
+            <select id="exFile" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="yes">Yes — received</option>
+              <option value="no">No — missing</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5 sm:col-span-3">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Remarks</label>
+            <textarea id="exRemarks" rows="2" placeholder="e.g. Minor scratch on tank, owner's father is the registered owner…"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full resize-none"></textarea>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units are added as <b>In Stock</b> by default — mark <b>Sold</b> from the row menu once it's resold.</p>
+        <div class="flex gap-2 flex-wrap">
+          <button id="saveExchangeBtn" class="cta-primary">
+            <i class="fas fa-floppy-disk"></i> Save Unit
+          </button>
+          <button id="cancelExchangeBtn" onclick="cancelExchangeEdit()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
+            <i class="fas fa-xmark"></i> Cancel Edit
+          </button>
+        </div>
+      </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /exchangeFormModal -->
+
+      <!-- Table -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-right-left text-amber-500"></i> Exchange Register</div>
+          <span id="exchangeCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+          <button id="fixExchangeSnBtn" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-bajaj-blue text-bajaj-blue text-xs font-bold rounded-lg hover:bg-bajaj-blue hover:text-white transition-all">
+            <i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering
+          </button>
+          <button onclick="exportExchangeToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+            <i class="fas fa-file-excel text-[11px]"></i> Export
+          </button>
+          <div class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
+            <button class="ex-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setExchangeStatusFilter('all')">All <span class="pill-count" id="pcExAll">0</span></button>
+            <button class="ex-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="In Stock" onclick="setExchangeStatusFilter('In Stock')">In Stock <span class="pill-count" id="pcExInStock">0</span></button>
+            <button class="ex-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setExchangeStatusFilter('Sold')">Sold <span class="pill-count" id="pcExSold">0</span></button>
+          </div>
+          <div class="relative ml-auto w-full sm:w-64">
+            <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="exchangeSearch" autocomplete="off" placeholder="Search model, reg no, customer…"
+              class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+          </div>
+          <button onclick="openExchangeFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+            <i class="fas fa-plus"></i> Add Unit
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse responsive-table" id="exchangeTable">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Year</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Reg. No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Valuation</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Documents</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="exchangeTableBody">
+              <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading exchange stock…
               </td></tr>
             </tbody>
           </table>
@@ -3551,6 +3694,17 @@ window._toggleKebab = (btn, type, id) => {
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editInventory(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('inventory', id) }
     ]);
+  } else if(type === 'exchange_stock'){
+    const s = exchangeData.find(x=>x.id===id);
+    const cur = s?.status || 'In Stock';
+    const statusAction = cur === 'Sold'
+      ? [{ label:'Mark In Stock', icon:'fa-rotate-left', onClick:()=>window._setExchangeStatus(id, 'In Stock') }]
+      : [{ label:'Mark Sold', icon:'fa-tag', onClick:()=>window._setExchangeStatus(id, 'Sold') }];
+    openKebabMenuFor(btn, [
+      ...statusAction,
+      { label:'Edit', icon:'fa-pen', onClick:()=>window._editExchange(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('exchange_stock', id) }
+    ]);
   } else if(type === 'finance_schemes'){
     openKebabMenuFor(btn, [
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editFinance(id) },
@@ -4076,8 +4230,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
-  const MNAV_IDS = { dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
+  const NAV_IDS = { dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
+  const MNAV_IDS = { dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -4106,7 +4260,7 @@ onAuthStateChanged(auth, async (user) => {
     loadMasterPriceList();
     loadLiveStock();
     loadHHInventory();
-    loadFinanceCategories();
+    loadExchangeStock();
     loadFinanceSchemes();
     loadAccessories();
     loadEvents();
@@ -5743,7 +5897,7 @@ window.transferToHH = async (id) => {
     const nextSn = await getAccurateNextSn('hh_inventory');
     const payload = {
       sn: nextSn, model: s.model||'', chassis: s.chassis||'', engine: s.engine||'', regNo: s.regNo||'', color: s.color||'',
-      eventName: '', owner: 'dealer_hh', ownerName: '',
+      eventName: '', owner: 'dealer', ownerName: '',
       status: isSold ? 'Sold' : 'Available', customerName: isSold ? (s.customerName||'') : '', addedAt: new Date()
     };
     if(isSold) payload.soldAt = s.soldAt || new Date();
@@ -6430,7 +6584,9 @@ function renderHHInvTable(){
         ${escapeHtml(s.eventName||'—')}
         <div class="mt-0.5">${s.owner==='other'
           ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[9px] font-extrabold uppercase tracking-wide"><i class="fas fa-user-tag text-[8px]"></i> ${escapeHtml(s.ownerName||'Other')}</span>`
-          : `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 text-bajaj-blue text-[9px] font-extrabold uppercase tracking-wide"><i class="fas fa-store text-[8px]"></i> Dealer/HH</span>`}</div>
+          : s.owner==='hh'
+          ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-600 text-[9px] font-extrabold uppercase tracking-wide"><i class="fas fa-building text-[8px]"></i> HH</span>`
+          : `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 text-bajaj-blue text-[9px] font-extrabold uppercase tracking-wide"><i class="fas fa-store text-[8px]"></i> Dealer</span>`}</div>
       </td>
       <td class="px-4 py-3" data-th="Status">
         <div class="flex flex-col items-end gap-1">
@@ -6549,7 +6705,7 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
   if(firstErr){ toast(firstErr.error,'err'); return; }
   if(!regNoCheck.ok){ toast(regNoCheck.error,'err'); return; }
   const chassis = chassisCheck.value, engine = engineCheck.value, color = colorCheck.value, regNo = regNoCheck.value, eventName = eventCheck.value;
-  const owner = document.getElementById('hhOwnerSelect').value === 'other' ? 'other' : 'dealer_hh';
+  const owner = ['dealer','hh','other'].includes(document.getElementById('hhOwnerSelect').value) ? document.getElementById('hhOwnerSelect').value : 'dealer';
   const ownerName = owner==='other' ? document.getElementById('hhOwnerName').value.trim() : '';
   if(owner==='other' && !ownerName){ toast('Enter the owner\'s name for an "Other" unit.','err'); return; }
 
@@ -6591,7 +6747,7 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
       logActivity('Added', 'hh_inventory', { model: modelName, chassis, sn: nextSn });
       ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName','hhOwnerName'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('hhModelInput').value='';
-      document.getElementById('hhOwnerSelect').value='dealer_hh';
+      document.getElementById('hhOwnerSelect').value='dealer';
       document.getElementById('hhOwnerNameWrap').style.display='none';
       toast('HH unit added — S.N '+nextSn+' assigned, marked Available.');
     }
@@ -6613,7 +6769,7 @@ window._editHHInv = (id)=>{
   document.getElementById('hhRegNo').value = s.regNo||'';
   document.getElementById('hhColor').value = s.color||'';
   document.getElementById('hhEventName').value = s.eventName||'';
-  document.getElementById('hhOwnerSelect').value = s.owner==='other' ? 'other' : 'dealer_hh';
+  document.getElementById('hhOwnerSelect').value = ['dealer','hh','other'].includes(s.owner) ? s.owner : 'dealer';
   document.getElementById('hhOwnerName').value = s.ownerName||'';
   document.getElementById('hhOwnerNameWrap').style.display = s.owner==='other' ? 'flex' : 'none';
   currentEditHHInvId = id;
@@ -6630,7 +6786,7 @@ window.cancelHHInvEdit = ()=>{
   currentEditHHInvId = null;
   ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName','hhOwnerName'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('hhModelInput').value='';
-  document.getElementById('hhOwnerSelect').value='dealer_hh';
+  document.getElementById('hhOwnerSelect').value='dealer';
   document.getElementById('hhOwnerNameWrap').style.display='none';
   const btn = document.getElementById('saveHHInvBtn');
   btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Unit';
@@ -7647,6 +7803,246 @@ window.cancelFinEdit=()=>{
   cancel.classList.add('hidden'); cancel.classList.remove('flex');
   closeFinFormModal();
 };
+
+/* ═══════════════════════════════════════════════════════════════════════
+   EXCHANGE STOCK — old bikes taken in trade from customers. Tracked
+   separately from Inventory/HH Inventory since these aren't Bajaj/master-
+   price-list models and carry their own paperwork status (Blue Book/Key/
+   File) that matters for resale readiness.
+   ═══════════════════════════════════════════════════════════════════════ */
+let exchangeData = [];
+let exchangeUnsub = null;
+let currentEditExchangeId = null;
+let exchangeStatusFilter = 'all';
+let exchangeSearchTerm = '';
+
+function loadExchangeStock(){
+  if(exchangeUnsub) exchangeUnsub();
+  const tbody = document.getElementById('exchangeTableBody');
+  exchangeUnsub = onSnapshot(query(collection(db,'exchange_stock'), orderBy('sn','asc')), snap=>{
+    exchangeData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderExchangeTable();
+  }, err=>{
+    console.error('exchange_stock listener failed', err);
+    if(tbody) tbody.innerHTML = `<tr><td colspan="8"><div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load exchange stock — check your connection.</p>
+      <button onclick="loadExchangeStock()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div></td></tr>`;
+    toast('Exchange stock sync failed: '+friendlyError(err),'err');
+  });
+}
+
+window.setExchangeStatusFilter = (status)=>{
+  exchangeStatusFilter = status;
+  document.querySelectorAll('.ex-status-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===status));
+  renderExchangeTable();
+};
+
+function exSearchMatches(s,q){
+  return (s.model||'').toLowerCase().includes(q)
+      || (s.regNo||'').toLowerCase().includes(q)
+      || (s.customerName||'').toLowerCase().includes(q)
+      || (s.remarks||'').toLowerCase().includes(q)
+      || (s.makeYear||'').toString().toLowerCase().includes(q);
+}
+function getFilteredExchange(){
+  let base = exchangeData;
+  if(exchangeStatusFilter !== 'all') base = base.filter(s=>(s.status||'In Stock')===exchangeStatusFilter);
+  if(!exchangeSearchTerm) return base;
+  const q = exchangeSearchTerm.toLowerCase().trim();
+  return base.filter(s=>exSearchMatches(s,q));
+}
+document.getElementById('exchangeSearch')?.addEventListener('input', function(){
+  exchangeSearchTerm = this.value;
+  renderExchangeTable();
+});
+
+function exDocBadge(label, ok){
+  return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wide ${ok?'bg-emerald-50 text-emerald-600':'bg-red-50 text-red-500'}"><i class="fas ${ok?'fa-check':'fa-xmark'} text-[8px]"></i> ${label}</span>`;
+}
+
+function renderExchangeTable(){
+  const tbody = document.getElementById('exchangeTableBody');
+  if(!tbody) return;
+  const list = getFilteredExchange();
+  const total = exchangeData.length;
+  const inStock = exchangeData.filter(s=>(s.status||'In Stock')==='In Stock').length;
+  const sold = total - inStock;
+  document.getElementById('exchangeTotalChip').textContent = total+' unit'+(total!==1?'s':'')+' total  ·  '+inStock+' in stock  ·  '+sold+' sold';
+  document.getElementById('exchangeCount').textContent = list.length+' unit'+(list.length!==1?'s':'');
+  const pc = { pcExAll:total, pcExInStock:inStock, pcExSold:sold };
+  Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
+  if(!list.length){
+    tbody.innerHTML = `<tr><td colspan="8"><div class="py-12 text-center text-slate-400"><i class="fas fa-right-left text-3xl opacity-25 block mb-2"></i><p class="text-sm">${exchangeSearchTerm?'No units match your search.':'No exchange stock yet. Add a unit above.'}</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map(s=>{
+    const valuation = s.valuation ? 'Rs. '+Number(s.valuation).toLocaleString('en-IN') : '—';
+    return `
+    <tr class="border-b border-slate-100" data-row-id="${s.id}">
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${s.sn||'—'}</td>
+      <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">${escapeHtml(s.model||'—')}
+        ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
+      </td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Year">${escapeHtml(s.makeYear||'—')}</td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
+      <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Valuation">${valuation}</td>
+      <td class="px-4 py-3" data-th="Documents"><div class="flex flex-wrap gap-1">${exDocBadge('Blue Book', s.blueBook==='yes')}${exDocBadge('Key', s.key==='yes')}${exDocBadge('File', s.file==='yes')}</div>
+        ${s.remarks ? `<div class="text-[11px] text-slate-400 mt-1 max-w-[220px] truncate" title="${escapeHtml(s.remarks)}"><i class="fas fa-note-sticky text-slate-300 text-[9px] mr-1"></i>${escapeHtml(s.remarks)}</div>` : ''}
+      </td>
+      <td class="px-4 py-3" data-th="Status">
+        ${s.status==='Sold' ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>` : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> In Stock</span>`}
+      </td>
+      <td class="px-4 py-3" data-th="Actions">
+        <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'exchange_stock','${s.id}')"><i class="fas fa-ellipsis-vertical"></i></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('fixExchangeSnBtn').addEventListener('click', async ()=>{
+  if(!exchangeData.length){ toast('No exchange stock to renumber.','warn'); return; }
+  const ok = await showConfirm({
+    title: 'Fix S.N numbering?',
+    message: `This will resequence all <b>${exchangeData.length}</b> exchange units to S.N 1, 2, 3… in their current order, closing any gaps left by earlier deletions. This can't be undone.`,
+    okText: 'Renumber All',
+    okColorClass: 'text-blue-600 hover:bg-blue-50',
+    iconClass: 'fa-arrow-down-1-9', iconColor:'#005EA6', iconBg:'#E8F2FB'
+  });
+  if(!ok) return;
+  const btn = document.getElementById('fixExchangeSnBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-[11px]"></i> Renumbering…';
+  try{
+    const sorted = [...exchangeData].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999) || (a.id>b.id?1:-1));
+    const chunks = [];
+    let batch = writeBatch(db), opsInBatch = 0, changed = 0;
+    sorted.forEach((s,i)=>{
+      const correctSn = i+1;
+      if(Number(s.sn) !== correctSn){
+        batch.update(doc(db,'exchange_stock',s.id), { sn: correctSn });
+        opsInBatch++; changed++;
+        if(opsInBatch===450){ chunks.push(batch); batch = writeBatch(db); opsInBatch = 0; }
+      }
+    });
+    if(opsInBatch>0) chunks.push(batch);
+    for(const b of chunks) await b.commit();
+    toast(changed ? `Renumbered ${changed} unit(s) — no more gaps.` : 'Numbering was already correct.');
+  }catch(e){
+    toast('Renumber failed: '+friendlyError(e),'err');
+  }finally{
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering';
+  }
+});
+
+window.openExchangeFormModal = ()=>{ document.getElementById('exchangeFormModal').classList.add('open'); };
+window.closeExchangeFormModal = ()=>{ document.getElementById('exchangeFormModal').classList.remove('open'); };
+
+window.cancelExchangeEdit = ()=>{
+  currentEditExchangeId = null;
+  ['exModel','exMakeYear','exRegNo','exValuation','exCustomerName','exRemarks'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('exBlueBook').value='yes';
+  document.getElementById('exKey').value='yes';
+  document.getElementById('exFile').value='yes';
+  const btn = document.getElementById('saveExchangeBtn');
+  btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Unit';
+  document.getElementById('exchangeFormTitle').textContent = 'Add Exchange Unit';
+  const cancel = document.getElementById('cancelExchangeBtn');
+  cancel.classList.add('hidden'); cancel.classList.remove('flex');
+  closeExchangeFormModal();
+};
+
+window._editExchange = (id)=>{
+  const s = exchangeData.find(x=>x.id===id); if(!s) return;
+  document.getElementById('exModel').value = s.model||'';
+  document.getElementById('exMakeYear').value = s.makeYear||'';
+  document.getElementById('exRegNo').value = s.regNo||'';
+  document.getElementById('exValuation').value = s.valuation??'';
+  document.getElementById('exCustomerName').value = s.customerName||'';
+  document.getElementById('exBlueBook').value = s.blueBook==='no' ? 'no' : 'yes';
+  document.getElementById('exKey').value = s.key==='no' ? 'no' : 'yes';
+  document.getElementById('exFile').value = s.file==='no' ? 'no' : 'yes';
+  document.getElementById('exRemarks').value = s.remarks||'';
+  currentEditExchangeId = id;
+  const btn = document.getElementById('saveExchangeBtn');
+  btn.innerHTML = '<i class="fas fa-rotate"></i> Update Unit';
+  document.getElementById('exchangeFormTitle').textContent = 'Edit Exchange Unit';
+  const cancel = document.getElementById('cancelExchangeBtn');
+  cancel.classList.remove('hidden'); cancel.classList.add('flex');
+  openExchangeFormModal();
+};
+
+window._setExchangeStatus = async (id, status) => {
+  const s = exchangeData.find(x=>x.id===id);
+  const modelLabel = s ? escapeHtml(s.model||'this unit') : 'this unit';
+  const proceed = await showConfirm({
+    title: 'Mark as '+status+'?',
+    message: `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`,
+    okText:'Confirm',
+    okColorClass:'text-bajaj-blue hover:bg-blue-50',
+    iconClass:'fa-rotate', iconColor:'#005EA6', iconBg:'#EAF3FB'
+  });
+  if(!proceed) return;
+  try{
+    await updateDoc(doc(db,'exchange_stock',id),{status});
+    logActivity(status==='Sold' ? 'Marked Sold' : 'Marked In Stock', 'exchange_stock', s);
+    toast('Unit marked as '+status+'.');
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
+document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
+  const modelCheck = Validate.text(document.getElementById('exModel').value, { label:'Model Name', max:80 });
+  const yearCheck = Validate.text(document.getElementById('exMakeYear').value, { label:'Make Year', max:10 });
+  const regNoCheck = Validate.text(document.getElementById('exRegNo').value, { label:'Registration No', max:40 });
+  const valuationRaw = document.getElementById('exValuation').value;
+  const remarksCheck = Validate.text(document.getElementById('exRemarks').value, { min:0, max:500, label:'Remarks' });
+  const firstErr = [modelCheck, yearCheck, regNoCheck, remarksCheck].find(c=>!c.ok);
+  if(firstErr){ toast(firstErr.error,'err'); return; }
+  if(valuationRaw==='' || isNaN(Number(valuationRaw)) || Number(valuationRaw)<0){ toast('Enter a valid Valuation amount.','err'); return; }
+  const customerName = document.getElementById('exCustomerName').value.trim();
+  const blueBook = document.getElementById('exBlueBook').value==='no' ? 'no' : 'yes';
+  const key = document.getElementById('exKey').value==='no' ? 'no' : 'yes';
+  const file = document.getElementById('exFile').value==='no' ? 'no' : 'yes';
+  const payload = {
+    model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
+    valuation: Number(valuationRaw), customerName, blueBook, key, file, remarks: remarksCheck.value
+  };
+  try{
+    if(currentEditExchangeId){
+      await updateDoc(doc(db,'exchange_stock',currentEditExchangeId), payload);
+      logActivity('Updated', 'exchange_stock', payload);
+      toast('Exchange unit updated!');
+      window.cancelExchangeEdit();
+    } else {
+      const nextSn = exchangeData.length ? Math.max(...exchangeData.map(x=>Number(x.sn)||0))+1 : 1;
+      await addDoc(collection(db,'exchange_stock'), {...payload, sn:nextSn, status:'In Stock', addedAt:new Date()});
+      logActivity('Added', 'exchange_stock', {...payload, sn:nextSn});
+      window.cancelExchangeEdit();
+      toast('Exchange unit added — S.N '+nextSn+' assigned, marked In Stock.');
+    }
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+});
+
+window.exportExchangeToExcel = ()=>{
+  const list = getFilteredExchange();
+  if(!list.length){ toast('Nothing to export in the current view.','warn'); return; }
+  const sorted = [...list].sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0));
+  const rows = sorted.map(s=>({
+    'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg. No': s.regNo||'',
+    'Valuation': s.valuation||0, 'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
+    'File': s.file==='yes'?'Yes':'No', 'Customer': s.customerName||'', 'Status': s.status||'In Stock', 'Remarks': s.remarks||''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:10},{wch:30}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
+  XLSX.writeFile(wb, `exchange_stock_export_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast(`Exported ${rows.length} unit(s).`);
+};
+
+window.loadExchangeStock = loadExchangeStock;
 
 /* ─── Accessories Inventory ─── */
 function loadAccessories(){
@@ -8668,7 +9064,7 @@ window._deleteEntry=async(col,id)=>{
   // recovery window) before being removed from its live collection.
   const ok = await showDangerousConfirm({
     title: 'Delete this entry?',
-    message: col==='bikes' ? "This will remove the model from your price list (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will remove the finance scheme (recoverable from Trash for 7 days)." : (col==='accessories' ? "This will remove the accessory from the price list (recoverable from Trash for 7 days)." : (col==='events' ? "This will remove the event — it'll stop showing as a popup (recoverable from Trash for 7 days)." : (col==='documents' ? "This will remove the document (recoverable from Trash for 7 days)." : (col==='hh_inventory' ? "This will remove the unit from HH Inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : "This will remove the unit from inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap."))))),
+    message: col==='bikes' ? "This will remove the model from your price list (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : (col==='finance_schemes' ? "This will remove the finance scheme (recoverable from Trash for 7 days)." : (col==='accessories' ? "This will remove the accessory from the price list (recoverable from Trash for 7 days)." : (col==='events' ? "This will remove the event — it'll stop showing as a popup (recoverable from Trash for 7 days)." : (col==='documents' ? "This will remove the document (recoverable from Trash for 7 days)." : (col==='hh_inventory' ? "This will remove the unit from HH Inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : (col==='exchange_stock' ? "This will remove the unit from Exchange Stock (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap." : "This will remove the unit from inventory (recoverable from Trash for 7 days). Remaining S.N numbers will shift up to close the gap.")))))),
     okText: 'Delete',
     countdownSec: 3
   });
@@ -8729,6 +9125,23 @@ window._deleteEntry=async(col,id)=>{
         }
       }
       toast('HH unit moved to Trash — S.N renumbered automatically.');
+    } else if(col==='exchange_stock'){
+      const target = exchangeData.find(x=>x.id===id);
+      const deletedSn = target ? Number(target.sn)||0 : 0;
+
+      if(target) await moveToTrash('exchange_stock', id, target);
+      await deleteDoc(doc(db,col,id));
+      if(target) logActivity('Deleted', 'exchange_stock', target);
+
+      if(deletedSn){
+        const toShift = exchangeData.filter(x=>x.id!==id && Number(x.sn)>deletedSn);
+        if(toShift.length){
+          const batch = writeBatch(db);
+          toShift.forEach(x=>batch.update(doc(db,'exchange_stock',x.id),{sn:Number(x.sn)-1}));
+          await batch.commit();
+        }
+      }
+      toast('Exchange unit moved to Trash — S.N renumbered automatically.');
     } else {
       const srcArr = col==='finance_schemes' ? financeSchemes : (col==='accessories' ? accessories : (col==='events' ? events : (col==='documents' ? documents : [])));
       const target = srcArr.find(x=>x.id===id);
@@ -8828,7 +9241,7 @@ function daysLeft(deletedAt){
   return Math.max(0, diffDays);
 }
 
-const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event', documents:'Document', important_info:'Important Info', chalans:'Chalan Records', model_aliases:'Model Aliases' };
+const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', exchange_stock:'Exchange Stock', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event', documents:'Document', important_info:'Important Info', chalans:'Chalan Records', model_aliases:'Model Aliases' };
 
 function renderTrashTable(){
   const tbody = document.getElementById('trashTableBody');
@@ -9289,7 +9702,7 @@ window.exportHHInventoryToExcel = ()=>{
     'Reg. No': s.regNo||'',
     'Colour': s.color||'',
     'Event / Mela': s.eventName||'',
-    'Owner': s.owner==='other' ? (s.ownerName||'Other') : 'Dealer/HH',
+    'Owner': s.owner==='other' ? (s.ownerName||'Other') : (s.owner==='hh' ? 'HH' : 'Dealer'),
     'Status': s.status||'Available',
     'Customer': s.customerName||''
   }));
@@ -9583,7 +9996,12 @@ document.getElementById('hhExcelFileInput').addEventListener('change', function(
 
       hhExcelParsedRows = aoa.slice(1).map(r=>{
         const ownerRaw = colIdx.owner!==-1 ? (r[colIdx.owner]||'').toString().trim() : '';
-        const isOther = ownerRaw && !/^(dealer|hh|dealer\/?hh|dealer_hh)$/i.test(ownerRaw);
+        let owner = 'dealer', ownerName = '';
+        if(ownerRaw){
+          if(/^hh$/i.test(ownerRaw)) owner = 'hh';
+          else if(/^dealer$/i.test(ownerRaw)) owner = 'dealer';
+          else { owner = 'other'; ownerName = ownerRaw; }
+        }
         return {
           model:   colIdx.model!==-1   ? (r[colIdx.model]||'').toString().trim()   : '',
           chassis: colIdx.chassis!==-1 ? (r[colIdx.chassis]||'').toString().trim() : '',
@@ -9591,8 +10009,7 @@ document.getElementById('hhExcelFileInput').addEventListener('change', function(
           regNo:   colIdx.regNo!==-1   ? (r[colIdx.regNo]||'').toString().trim()   : '',
           color:   colIdx.color!==-1   ? (r[colIdx.color]||'').toString().trim()   : '',
           eventName: colIdx.event!==-1 ? (r[colIdx.event]||'').toString().trim()   : '',
-          owner: isOther ? 'other' : 'dealer_hh',
-          ownerName: isOther ? ownerRaw : ''
+          owner, ownerName
         };
       }).filter(r=>r.model || r.chassis || r.engine);
 
@@ -9609,8 +10026,9 @@ document.getElementById('hhExcelFileInput').addEventListener('change', function(
 document.getElementById('hhDownloadTemplateBtn').addEventListener('click', ()=>{
   const wsData = [
     ['Model','Chassis','Engine','RegNo','Color','Event','Owner'],
-    ['Pulsar N150','MD2A12EY000001','BSVI2024000001','BA2PA1234','Fiery Orange','Phidim Mela 2026','Dealer/HH'],
-    ['Pulsar NS200','MD2A12EY000002','BSVI2024000002','','Racing Red','Phidim Mela 2026','Ramesh Traders']
+    ['Pulsar N150','MD2A12EY000001','BSVI2024000001','BA2PA1234','Fiery Orange','Phidim Mela 2026','Dealer'],
+    ['Pulsar NS200','MD2A12EY000002','BSVI2024000002','','Racing Red','Phidim Mela 2026','HH'],
+    ['Discover 125','MD2A12EY000003','BSVI2024000003','','Ebony Black','Phidim Mela 2026','Ramesh Traders']
   ];
   const ws = XLSX.utils.aoa_to_sheet(wsData);
   ws['!cols'] = [{wch:22},{wch:20},{wch:18},{wch:16},{wch:16},{wch:20},{wch:18}];
@@ -9668,7 +10086,7 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
         regNo: row.regNo || '',
         color: row.color,
         eventName: row.eventName || '',
-        owner: row.owner || 'dealer_hh',
+        owner: row.owner || 'dealer',
         ownerName: row.ownerName || '',
         status: 'Available',
         customerName: '',
@@ -9873,8 +10291,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
-const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
+const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Exchange Stock (Old Bikes)', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
+const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
 window.switchSec=(sec)=>{
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
@@ -9901,6 +10319,7 @@ window.switchSec=(sec)=>{
   if(sec==='inv') populateModelDropdown();
   if(sec==='hhinv') populateHHModelDropdown();
   if(sec==='allinv') renderAllInventoryTable();
+  if(sec==='exchange') renderExchangeTable();
   if(sec==='docs') renderDocumentsPage();
   if(sec==='storage') updateStorageOverview();
   if(sec==='events') renderEventsPage();
@@ -10180,6 +10599,10 @@ function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('mCategory'), { placeholder:'Category' });
   enhanceNativeSelect(document.getElementById('chalanInsType'), { placeholder:'Insurance Type' });
   enhanceNativeSelect(document.getElementById('aliasCanonicalSelect'), { placeholder:'Select a model…', searchable:true });
+  enhanceNativeSelect(document.getElementById('hhOwnerSelect'), { placeholder:'Unit Owner' });
+  enhanceNativeSelect(document.getElementById('exBlueBook'), { placeholder:'Blue Book' });
+  enhanceNativeSelect(document.getElementById('exKey'), { placeholder:'Key' });
+  enhanceNativeSelect(document.getElementById('exFile'), { placeholder:'File' });
 }
 document.addEventListener('DOMContentLoaded', initCustomSelects);
 </script>
