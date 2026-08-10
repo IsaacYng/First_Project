@@ -3083,6 +3083,10 @@
           <input type="number" id="limitMaxInventory" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
         </div>
         <div class="flex items-center justify-between gap-3">
+          <label class="text-xs font-bold text-slate-600 flex-1">Exchange Stock</label>
+          <input type="number" id="limitMaxExchange" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+        <div class="flex items-center justify-between gap-3">
           <label class="text-xs font-bold text-slate-600 flex-1">Accessories</label>
           <input type="number" id="limitMaxAccessories" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
         </div>
@@ -5131,6 +5135,7 @@ function clearMasterForm(){
 // when it matters most. This asks Firestore directly for the true document
 // counts instead of trusting whatever happens to be loaded locally.
 let MAX_TOTAL_INVENTORY_UNITS = 2000;
+let MAX_EXCHANGE_STOCK = 2000;
 let MAX_BIKES = 50;
 let MAX_ACCESSORIES = 20;
 let MAX_FINANCE_SCHEMES = 20;
@@ -5174,6 +5179,28 @@ async function updateStorageUsageChip(){
   else { cls = 'bg-slate-100 border-slate-200 text-slate-500'; icon = 'fa-database'; }
   chip.className = `items-center gap-1 border rounded-md px-2 py-0.5 text-xs font-mono flex ${cls}`;
   chip.innerHTML = `<i class="fas ${icon} text-[10px]"></i> ${used} / ${MAX_TOTAL_INVENTORY_UNITS} storage used`;
+}
+
+// Exchange Stock is tracked and capped independently of the Inventory +
+// HH Inventory combined count — it's a genuinely separate collection with
+// its own document budget, same reasoning as Chalans/Model Aliases having
+// their own caps rather than being folded into the main inventory number.
+let cachedExchangeCount = null;
+let cachedExchangeCountAt = 0;
+async function getAccurateExchangeCount(forceRefresh){
+  const now = Date.now();
+  if(!forceRefresh && cachedExchangeCount!==null && (now-cachedExchangeCountAt) < TOTAL_COUNT_CACHE_MS){
+    return cachedExchangeCount;
+  }
+  try{
+    const snap = await getCountFromServer(collection(db,'exchange_stock'));
+    cachedExchangeCount = snap.data().count;
+  }catch(e){
+    console.error('Accurate exchange_stock count fetch failed — falling back to loaded-data estimate', e);
+    cachedExchangeCount = exchangeData.length;
+  }
+  cachedExchangeCountAt = now;
+  return cachedExchangeCount;
 }
 
 document.getElementById('saveStockBtn').addEventListener('click',async()=>{
@@ -7994,6 +8021,7 @@ function loadExchangeStock(){
     selectedExchangeIds.forEach(id=>{ if(!liveIds.has(id)) selectedExchangeIds.delete(id); });
     renderExchangeTable();
     if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err=>{
     console.error('exchange_stock listener failed', err);
     if(tbody) tbody.innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400">
@@ -8272,6 +8300,11 @@ window._setExchangeStatus = async (id, status) => {
 };
 
 document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
+  if(!currentEditExchangeId && (await getAccurateExchangeCount(true)) >= MAX_EXCHANGE_STOCK){
+    toast(`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached.`,'err');
+    showLimitExceededModal('Exchange Stock Limit Reached', `Exchange Stock has reached the ${MAX_EXCHANGE_STOCK} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
+    return;
+  }
   const modelCheck = Validate.text(document.getElementById('exModel').value, { label:'Model Name', max:80 });
   const yearCheck = Validate.text(document.getElementById('exMakeYear').value, { label:'Make Year', max:10 });
   const regNoCheck = Validate.text(document.getElementById('exRegNo').value, { label:'Registration No', max:40 });
@@ -8429,8 +8462,13 @@ document.getElementById('exImportExcelBtn').addEventListener('click', async ()=>
 
   let nextSn = await getAccurateNextSn('exchange_stock');
   const results = { success:[], failed:[] };
+  let runningTotal = await getAccurateExchangeCount(true); // real Firestore count, not just what's paginated locally
 
   for(const row of exExcelParsedRows){
+    if(runningTotal >= MAX_EXCHANGE_STOCK){
+      results.failed.push({row, reason:`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached`});
+      continue;
+    }
     if(!row.model || !row.makeYear || !row.regNo || !row.valuation){
       results.failed.push({row, reason:'Missing required field (Model/MakeYear/RegNo/Valuation)'});
       continue;
@@ -8451,6 +8489,7 @@ document.getElementById('exImportExcelBtn').addEventListener('click', async ()=>
       });
       results.success.push(row);
       nextSn++;
+      runningTotal++;
     }catch(e){
       results.failed.push({row, reason:friendlyError(e)});
     }
@@ -8822,7 +8861,7 @@ const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626',label:'PDF'}, d
 // Master ID from the gear icon.
 let STORAGE_CAP_BYTES = 1024 * 1024 * 1024 * 0.7;
 const BYTE_UNITS = { KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 };
-const RECORD_SIZE_ESTIMATE = { bike: 500, inventoryUnit: 1200, accessory: 100, financeScheme: 300, chalan: 500 };
+const RECORD_SIZE_ESTIMATE = { bike: 500, inventoryUnit: 1200, exchangeUnit: 700, accessory: 100, financeScheme: 300, chalan: 500 };
 const OTHER_COLLECTIONS_ESTIMATE = 5 * 1024 * 1024; // rough allowance for activity log / trash / events / team photos
 
 function loadDocuments(){
@@ -8852,6 +8891,7 @@ function loadSystemLimits(){
       const d = snap.data();
       if(d.maxBikes) MAX_BIKES = d.maxBikes;
       if(d.maxTotalInventory) MAX_TOTAL_INVENTORY_UNITS = d.maxTotalInventory;
+      if(d.maxExchangeStock) MAX_EXCHANGE_STOCK = d.maxExchangeStock;
       if(d.maxAccessories) MAX_ACCESSORIES = d.maxAccessories;
       if(d.maxFinanceSchemes) MAX_FINANCE_SCHEMES = d.maxFinanceSchemes;
       if(d.maxChalans) MAX_CHALANS = d.maxChalans;
@@ -8883,6 +8923,7 @@ async function updateStorageOverview(){
   const list = document.getElementById('storageAllocationList');
   if(!list) return;
   const invCount = await getAccurateTotalInventoryCount();
+  const exCount = await getAccurateExchangeCount();
   const used = getTotalStorageUsed();
 
   const rows = [
@@ -8894,6 +8935,9 @@ async function updateStorageOverview(){
     { icon:'fa-warehouse', color:'#059669', label:'All Inventory', count: invCount, maxCount: MAX_TOTAL_INVENTORY_UNITS,
       usedBytes: invCount*RECORD_SIZE_ESTIMATE.inventoryUnit, maxBytes: MAX_TOTAL_INVENTORY_UNITS*RECORD_SIZE_ESTIMATE.inventoryUnit,
       sub: `${invCount} / ${MAX_TOTAL_INVENTORY_UNITS} units — up to ${formatBytes(MAX_TOTAL_INVENTORY_UNITS*RECORD_SIZE_ESTIMATE.inventoryUnit)} at full capacity` },
+    { icon:'fa-right-left', color:'#EA580C', label:'Exchange Stock', count: exCount, maxCount: MAX_EXCHANGE_STOCK,
+      usedBytes: exCount*RECORD_SIZE_ESTIMATE.exchangeUnit, maxBytes: MAX_EXCHANGE_STOCK*RECORD_SIZE_ESTIMATE.exchangeUnit,
+      sub: `${exCount} / ${MAX_EXCHANGE_STOCK} units — up to ${formatBytes(MAX_EXCHANGE_STOCK*RECORD_SIZE_ESTIMATE.exchangeUnit)} at full capacity` },
     { icon:'fa-helmet-safety', color:'#7C3AED', label:'Accessories', count: accessories.length, maxCount: MAX_ACCESSORIES,
       usedBytes: accessories.length*RECORD_SIZE_ESTIMATE.accessory, maxBytes: MAX_ACCESSORIES*RECORD_SIZE_ESTIMATE.accessory,
       sub: `${accessories.length} / ${MAX_ACCESSORIES} items — up to ${formatBytes(MAX_ACCESSORIES*RECORD_SIZE_ESTIMATE.accessory)} at full capacity` },
@@ -9296,6 +9340,7 @@ window.openSystemLimitsModal = ()=>{
   if(currentUserRole !== 'owner'){ toast('Only a Master ID can change record limits.','err'); return; }
   document.getElementById('limitMaxBikes').value = MAX_BIKES;
   document.getElementById('limitMaxInventory').value = MAX_TOTAL_INVENTORY_UNITS;
+  document.getElementById('limitMaxExchange').value = MAX_EXCHANGE_STOCK;
   document.getElementById('limitMaxAccessories').value = MAX_ACCESSORIES;
   document.getElementById('limitMaxFinanceSchemes').value = MAX_FINANCE_SCHEMES;
   document.getElementById('limitMaxChalans').value = MAX_CHALANS;
@@ -9314,6 +9359,7 @@ window.saveSystemLimits = async ()=>{
   if(currentUserRole !== 'owner'){ toast('Only a Master ID can change record limits.','err'); return; }
   const maxBikes = parseInt(document.getElementById('limitMaxBikes').value);
   const maxInventory = parseInt(document.getElementById('limitMaxInventory').value);
+  const maxExchange = parseInt(document.getElementById('limitMaxExchange').value);
   const maxAccessories = parseInt(document.getElementById('limitMaxAccessories').value);
   const maxFinanceSchemes = parseInt(document.getElementById('limitMaxFinanceSchemes').value);
   const maxChalans = parseInt(document.getElementById('limitMaxChalans').value);
@@ -9321,7 +9367,7 @@ window.saveSystemLimits = async ()=>{
   const maxAliases = parseInt(document.getElementById('limitMaxAliases').value);
   const com1stParty = parseInt(document.getElementById('limitCom1stParty').value);
   const com3rdParty = parseInt(document.getElementById('limitCom3rdParty').value);
-  if(![maxBikes,maxInventory,maxAccessories,maxFinanceSchemes,maxChalans,maxImportant,maxAliases].every(v=>Number.isInteger(v) && v>0)){
+  if(![maxBikes,maxInventory,maxExchange,maxAccessories,maxFinanceSchemes,maxChalans,maxImportant,maxAliases].every(v=>Number.isInteger(v) && v>0)){
     toast('Enter a valid whole number greater than 0 for each limit.','err');
     return;
   }
@@ -9330,13 +9376,14 @@ window.saveSystemLimits = async ()=>{
     return;
   }
   const invCount = await getAccurateTotalInventoryCount(true);
-  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes'], [maxChalans, chalanData.length, 'chalan records'], [maxImportant, importantData.length, 'important info entries'], [maxAliases, modelAliasesData.length, 'model aliases']];
+  const exCount = await getAccurateExchangeCount(true);
+  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxExchange, exCount, 'exchange stock units'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes'], [maxChalans, chalanData.length, 'chalan records'], [maxImportant, importantData.length, 'important info entries'], [maxAliases, modelAliasesData.length, 'model aliases']];
   for(const [limit, used, label] of checks){
     if(limit < used){ toast(`Can't set the ${label} limit below the ${used} already on file.`,'err'); return; }
   }
   try{
-    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxAccessories, maxFinanceSchemes, maxChalans, maxImportantInfo:maxImportant, maxModelAliases:maxAliases, commission1stParty:com1stParty, commission3rdParty:com3rdParty }, { merge:true });
-    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Acc:${maxAccessories} Fin:${maxFinanceSchemes} Chalan:${maxChalans} Info:${maxImportant} Alias:${maxAliases}` });
+    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxExchangeStock:maxExchange, maxAccessories, maxFinanceSchemes, maxChalans, maxImportantInfo:maxImportant, maxModelAliases:maxAliases, commission1stParty:com1stParty, commission3rdParty:com3rdParty }, { merge:true });
+    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Exchange:${maxExchange} Acc:${maxAccessories} Fin:${maxFinanceSchemes} Chalan:${maxChalans} Info:${maxImportant} Alias:${maxAliases}` });
     toast('Record limits updated.');
     closeSystemLimitsModal();
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
