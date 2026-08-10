@@ -1177,13 +1177,67 @@
 
     <!-- ═══ DASHBOARD ═══ -->
     <div class="sec-panel active" id="secDashboard">
+      <div id="greetingBanner" class="mb-5 flex items-center gap-3 bg-gradient-to-r from-blue-50 to-transparent border border-blue-100 rounded-xl px-4 py-3">
+        <div id="greetingIcon" class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-amber-500 text-base flex-shrink-0 shadow-sm"><i class="fas fa-sun"></i></div>
+        <div>
+          <div id="greetingText" class="text-sm font-extrabold text-slate-800">Good Morning, Admin!</div>
+          <div id="greetingDate" class="text-[11px] text-slate-400 font-semibold"></div>
+        </div>
+      </div>
+
       <div class="mb-6">
         <div class="eyebrow">Overview</div>
         <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Dashboard</div>
         <p class="text-sm text-slate-500 mt-1.5">Everything at a glance.</p>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-5">
+      <!-- Quick Actions — the handful of things staff open this app to do
+           every single day, one tap away instead of a page navigation. -->
+      <div class="flex gap-2.5 flex-wrap mb-6">
+        <button onclick="window.switchSec('inv');window.openInvFormModal&&window.openInvFormModal()" class="flex items-center gap-2 px-4 py-2.5 bg-bajaj-blue text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all">
+          <i class="fas fa-plus"></i> Add Unit
+        </button>
+        <button onclick="window.switchSec('exchange');window.openExchangeFormModal&&window.openExchangeFormModal()" class="flex items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
+          <i class="fas fa-right-left"></i> Add Exchange Unit
+        </button>
+        <button onclick="window.switchSec('chalans')" class="flex items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
+          <i class="fas fa-file-invoice"></i> Chalan Records
+        </button>
+        <button onclick="window.switchSec('customers')" class="flex items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
+          <i class="fas fa-address-card"></i> Customers
+        </button>
+      </div>
+
+      <!-- Needs Attention — the two things on this dashboard that actually
+           call for staff to DO something, pulled out from the general
+           stats and given a consistent amber "alert" treatment so they
+           don't get lost in a wall of same-weight numbers. Only shows if
+           there's actually something to act on. -->
+      <div id="dashAttentionWrap" class="hidden mb-6">
+        <div class="text-xs font-extrabold text-amber-600 uppercase tracking-wide mb-2 flex items-center gap-1.5"><i class="fas fa-bell"></i> Needs Attention</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div id="dashLowStockAlertCard" class="hidden yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow border-2 border-amber-200 bg-amber-50/40" onclick="window.switchSec('inv')">
+            <div class="flex items-center gap-2.5 mb-1.5">
+              <div class="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0"><i class="fas fa-triangle-exclamation text-amber-600 text-sm"></i></div>
+              <span class="text-[11px] font-bold text-amber-700 uppercase tracking-wide">Low Stock Models</span>
+            </div>
+            <div class="text-3xl font-black text-slate-800" id="dashLowStockCount">0</div>
+          </div>
+          <div id="dashMismatchAlertCard" class="hidden yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow border-2 border-amber-200 bg-amber-50/40" onclick="window.switchSec('modelAliases')">
+            <div class="flex items-center gap-2.5 mb-1.5">
+              <div class="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0"><i class="fas fa-code-compare text-amber-600 text-sm"></i></div>
+              <span class="text-[11px] font-bold text-amber-700 uppercase tracking-wide">Model Mismatches</span>
+            </div>
+            <div class="text-3xl font-black text-slate-800" id="dashMismatchCount">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informational stats — deliberately restrained to two colours
+           (brand blue for counts, teal for the one "growth" metric) rather
+           than a different colour per card, so the eye doesn't have to
+           work to figure out what's actually important vs just a number. -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('price')">
           <div class="flex items-center gap-2.5 mb-2">
             <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-tags text-bajaj-blue text-sm"></i></div>
@@ -1193,7 +1247,7 @@
         </div>
         <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('inv')">
           <div class="flex items-center gap-2.5 mb-2">
-            <div class="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-warehouse text-emerald-600 text-sm"></i></div>
+            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-warehouse text-bajaj-blue text-sm"></i></div>
             <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Available Units</span>
           </div>
           <div class="text-3xl font-black text-slate-800" id="dashAvailableCount">0</div>
@@ -1207,31 +1261,17 @@
         </div>
         <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('chalans')">
           <div class="flex items-center gap-2.5 mb-2">
-            <div class="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-file-invoice text-amber-600 text-sm"></i></div>
+            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-file-invoice text-bajaj-blue text-sm"></i></div>
             <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Chalans This Month</span>
           </div>
           <div class="text-3xl font-black text-slate-800" id="dashChalanMonthCount">0</div>
         </div>
-        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('inv')">
-          <div class="flex items-center gap-2.5 mb-2">
-            <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-triangle-exclamation text-red-500 text-sm"></i></div>
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Low Stock Models</span>
-          </div>
-          <div class="text-3xl font-black text-slate-800" id="dashLowStockCount">0</div>
-        </div>
         <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('exchange')">
           <div class="flex items-center gap-2.5 mb-2">
-            <div class="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-right-left text-orange-500 text-sm"></i></div>
+            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-right-left text-bajaj-blue text-sm"></i></div>
             <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Exchange In Stock</span>
           </div>
           <div class="text-3xl font-black text-slate-800" id="dashExchangeCount">0</div>
-        </div>
-        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" id="dashMismatchCard" onclick="window.switchSec('modelAliases')">
-          <div class="flex items-center gap-2.5 mb-2">
-            <div class="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-code-compare text-violet-600 text-sm"></i></div>
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Model Mismatches</span>
-          </div>
-          <div class="text-3xl font-black text-slate-800" id="dashMismatchCount">0</div>
         </div>
       </div>
 
@@ -1255,13 +1295,6 @@
 
     <!-- ═══ PRICE LIST ═══ -->
     <div class="sec-panel" id="secPrice">
-      <div id="greetingBanner" class="mb-5 flex items-center gap-3 bg-gradient-to-r from-blue-50 to-transparent border border-blue-100 rounded-xl px-4 py-3">
-        <div id="greetingIcon" class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-amber-500 text-base flex-shrink-0 shadow-sm"><i class="fas fa-sun"></i></div>
-        <div>
-          <div id="greetingText" class="text-sm font-extrabold text-slate-800">Good Morning, Admin!</div>
-          <div id="greetingDate" class="text-[11px] text-slate-400 font-semibold"></div>
-        </div>
-      </div>
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
         <div>
           <div class="section-label">Management ·</div>
@@ -5399,6 +5432,8 @@ function renderDashboard(){
     .sort((a,b)=>a.count-b.count);
   const lowCountEl = document.getElementById('dashLowStockCount');
   if(lowCountEl) lowCountEl.textContent = lowStock.length;
+  const lowStockAlertCard = document.getElementById('dashLowStockAlertCard');
+  if(lowStockAlertCard) lowStockAlertCard.classList.toggle('hidden', !lowStock.length);
 
   const lowStockList = document.getElementById('dashLowStockList');
   if(lowStockList){
@@ -5416,12 +5451,20 @@ function renderDashboard(){
 
   // Model Mismatches ties the Model Aliases tool into the landing page —
   // Master-only, same as the page itself, so it's just hidden rather than
-  // shown with a dead-end click for a Normal ID.
-  const mismatchCard = document.getElementById('dashMismatchCard');
+  // shown with a dead-end click for a Normal ID. Only surfaces as an
+  // "attention" item when there's actually something to resolve — an
+  // alert card sitting at 0 doesn't need anyone's attention.
   const isMaster = currentUserRole === 'owner';
-  if(mismatchCard) mismatchCard.classList.toggle('hidden', !isMaster);
+  const mismatchAlertCard = document.getElementById('dashMismatchAlertCard');
+  if(mismatchAlertCard) mismatchAlertCard.classList.toggle('hidden', !(isMaster && modelMismatches.length));
   const mismatchCountEl = document.getElementById('dashMismatchCount');
   if(mismatchCountEl) mismatchCountEl.textContent = modelMismatches.length;
+
+  const attentionWrap = document.getElementById('dashAttentionWrap');
+  if(attentionWrap){
+    const hasAttention = lowStock.length>0 || (isMaster && modelMismatches.length>0);
+    attentionWrap.classList.toggle('hidden', !hasAttention);
+  }
 
   const recentList = document.getElementById('dashRecentActivity');
   if(recentList){
