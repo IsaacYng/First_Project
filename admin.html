@@ -3697,8 +3697,14 @@ window._toggleKebab = (btn, type, id) => {
             icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
             onClick: () => window._setHHInvStatus(id, st)
           }));
+    // If this exact unit already has a Chalan on file, offer Re-print
+    // instead of opening a fresh form — that form would otherwise let
+    // staff generate a second, duplicate Chalan record for the same bike.
+    const existingChalanHH = chalanData.find(c=>c.unitId===id);
     const chalanAction = cur === 'Sold'
-      ? [{ label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id, 'hh_inventory') }]
+      ? [existingChalanHH
+          ? { label:'Re-print Delivery Challan', icon:'fa-print', onClick:()=>window.reprintChalan(existingChalanHH.id) }
+          : { label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id, 'hh_inventory') }]
       : [];
     // Sold units transfer too — a mela sale still needs to land in the
     // main showroom Inventory records (that's where dealership-wide sales
@@ -3748,8 +3754,13 @@ window._toggleKebab = (btn, type, id) => {
     // Only a unit that's actually been delivered needs a Delivery Challan —
     // there's no insurance/handover to paper for one still sitting on
     // the floor as Available or Booked.
+    // Same duplicate-prevention as HH Inventory — if a Chalan already
+    // exists for this unit, jump straight to reprinting it.
+    const existingChalanInv = chalanData.find(c=>c.unitId===id);
     const chalanAction = isFinalized
-      ? [{ label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id, 'inventory') }]
+      ? [existingChalanInv
+          ? { label:'Re-print Delivery Challan', icon:'fa-print', onClick:()=>window.reprintChalan(existingChalanInv.id) }
+          : { label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id, 'inventory') }]
       : [];
     // Sold/HH-Hide units can still be transferred — e.g. a unit sold out of
     // the showroom that actually needs to be recorded against a mela/HH
@@ -5906,9 +5917,24 @@ window.closeChalanPreview = ()=>{
 // chalan content in its own dedicated window with its own minimal
 // stylesheet sidesteps that completely: there's nothing else on the page
 // for anything to go wrong with.
+let isPrintingChalan = false;
 window.printChalanNow = async ()=>{
+  if(isPrintingChalan) return; // guards against a fast double-tap saving two Chalan records
   const content = document.getElementById('chalanPrintWrapper').innerHTML;
   if(!content){ toast('Nothing to print — generate a preview first.','err'); return; }
+  isPrintingChalan = true;
+
+  // Open the print window FIRST, synchronously, before any `await`. Most
+  // mobile browsers only treat window.open() as user-initiated if it runs
+  // inside the click handler with nothing async ahead of it — once an
+  // `await` (like the Firestore save below) has run, that permission is
+  // gone and the browser silently blocks the popup, which is exactly what
+  // showed up as a blank tab. Opening it first and filling it in after
+  // sidesteps that completely.
+  const win = window.open('', '_blank');
+  if(!win){ toast('Pop-up blocked — allow pop-ups for this site to print.','err'); isPrintingChalan = false; return; }
+  win.document.write('<!DOCTYPE html><html><head><title>Delivery Chalan</title></head><body style="font-family:sans-serif;color:#94a3b8;padding:40px;text-align:center;">Preparing your Chalan…</body></html>');
+  win.document.close();
 
   // The actual commit point — a fresh Chalan only becomes a saved record
   // once Print is pressed, never just from previewing it.
@@ -5920,8 +5946,8 @@ window.printChalanNow = async ()=>{
     pendingChalanRecord = null;
   }
 
-  const win = window.open('', '_blank');
-  if(!win){ toast('Pop-up blocked — allow pop-ups for this site to print.','err'); return; }
+  if(win.closed){ toast('Print window was closed before it could load — please try again.','err'); isPrintingChalan = false; return; }
+  win.document.open();
   win.document.write(`<!DOCTYPE html>
 <html>
 <head>
@@ -5955,12 +5981,30 @@ window.printChalanNow = async ()=>{
 </html>`);
   win.document.close();
   let printed = false;
-  const doPrint = () => { if(printed) return; printed = true; win.focus(); win.print(); };
+  const doPrint = () => {
+    if(printed) return;
+    printed = true;
+    win.focus();
+    win.print();
+    // Auto-return to the app after the print dialog is dismissed (whether
+    // actually printed or cancelled) instead of leaving a spare tab open
+    // that has to be closed by hand every single time.
+    win.onafterprint = () => { try{ win.close(); }catch(e){} };
+    // Not every mobile browser fires onafterprint reliably — a fallback
+    // check a few seconds later closes the tab anyway if it's still just
+    // sitting there idle after the print dialog would have appeared.
+    setTimeout(() => { try{ if(!win.closed) win.close(); }catch(e){} }, 4000);
+  };
   win.onload = doPrint;
   // Some mobile browsers fire onload before fonts/layout are fully
   // settled — a short fallback timer covers that without relying on
   // onload alone, guarded so it never double-fires the print dialog.
   setTimeout(() => { try { doPrint(); } catch(e){} }, 600);
+  // Bring focus back to the main app tab right away so staff land back
+  // where they were instead of being stuck looking at the print tab.
+  window.focus();
+  window.closeChalanPreview();
+  isPrintingChalan = false;
 };
 
 // Shown right after a unit lands on Sold (or HH Hide, which is functionally
