@@ -6238,14 +6238,24 @@ function updateChalanPreviewFrame(){
     loader.classList.remove('hidden');
     loader.classList.add('flex');
   }
-  iframe.onload = hideLoader;
-  iframe.srcdoc = buildChalanDocumentHtml(wrap.innerHTML, chalanPrintPosition);
-  // srcdoc's `load` event doesn't fire reliably on every mobile browser,
-  // especially when it gets reassigned again right after (as happens
-  // here — the modal-open flow rebuilds the frame a second time
-  // immediately to reset the Top/Bottom choice). A short fallback means
-  // the spinner can never get stuck forever even if `load` never comes.
-  setTimeout(hideLoader, 500);
+  // Writing straight into the iframe's own document — the exact same
+  // technique the actual print window already uses successfully — instead
+  // of the `srcdoc` attribute, which turned out not to render reliably
+  // here. contentDocument is available immediately (no navigation/`load`
+  // event to wait on), so the loader can just come straight off right
+  // after writing instead of depending on an event that wasn't firing.
+  try{
+    const idoc = iframe.contentDocument || iframe.contentWindow.document;
+    idoc.open();
+    idoc.write(buildChalanDocumentHtml(wrap.innerHTML, chalanPrintPosition));
+    idoc.close();
+  }catch(e){
+    console.error('Chalan preview frame write failed', e);
+  }
+  hideLoader();
+  // Belt-and-suspenders in case contentDocument wasn't ready yet on some
+  // browser and the write above silently did nothing.
+  setTimeout(hideLoader, 400);
 }
 
 function renderChalanIntoWrappers(f){
