@@ -3007,8 +3007,14 @@
       <div class="flex items-center gap-2 section-title text-xl"><i class="fas fa-eye text-amber-500"></i> Preview</div>
       <button onclick="window.closeChalanPreview()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
     </div>
-    <div class="overflow-auto p-6 bg-slate-100" style="flex:1">
-      <div id="chalanPreviewBody" class="bg-white shadow-md mx-auto" style="width:210mm;min-width:210mm;padding:10mm;box-sizing:border-box"></div>
+    <!-- The whole A4 page, scaled down to fit here in one glance — same
+         idea as a browser's own print-preview pane, so what's shown is
+         literally the full page (including any blank Top/Bottom space),
+         never just the portion that happens to fit before scrolling. -->
+    <div id="chalanPreviewViewport" class="overflow-hidden p-5 bg-slate-100 flex items-center justify-center" style="flex:1">
+      <div id="chalanPreviewPage" style="transform-origin:center center;">
+        <div id="chalanPreviewBody" class="bg-white shadow-md" style="width:210mm;height:281mm;padding:10mm;box-sizing:border-box;overflow:hidden"></div>
+      </div>
     </div>
     <div class="p-4 border-t border-slate-100 flex-shrink-0 flex flex-col gap-3">
       <div class="flex items-center gap-2 flex-wrap">
@@ -3017,7 +3023,7 @@
           <button id="chalanPosTopBtn" onclick="window.setChalanPrintPosition('top')" class="chalan-pos-tab px-3 py-1 rounded-full text-xs font-bold transition-all active">Top Half</button>
           <button id="chalanPosBottomBtn" onclick="window.setChalanPrintPosition('bottom')" class="chalan-pos-tab px-3 py-1 rounded-full text-xs font-bold transition-all">Bottom Half</button>
         </div>
-        <span class="text-[11px] text-slate-400">Print Top first, then feed the same sheet back in and print Bottom for a second Chalan — one page, two Chalans.</span>
+        <span class="text-[11px] text-slate-400">Print Top, then feed the same sheet back in and print Bottom — one page, two Chalans.</span>
       </div>
       <div class="flex gap-2">
         <button onclick="window.closeChalanPreview()" class="flex-1 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-slate-300 transition-all">Close</button>
@@ -6169,10 +6175,10 @@ window.previewChalan = ()=>{
   };
 
   window.closeChalanModal();
-  window.setChalanPrintPosition('top');
   const pModal = document.getElementById('chalanPreviewModal');
   pModal.classList.remove('hidden');
   pModal.classList.add('flex');
+  window.setChalanPrintPosition('top');
 };
 
 // Shared by both a fresh Preview and a Re-print of an already-saved
@@ -6215,10 +6221,10 @@ window.reprintChalan = (id)=>{
     makeYear:c.makeYear, price:c.price, insAmount:c.priceAfterCom, insType:c.insType,
     chalanNo:c.chalanNo, deliveryDate:c.deliveryDate, custName:c.custName, address:c.address, contact:c.contact
   });
-  window.setChalanPrintPosition('top');
   const pModal = document.getElementById('chalanPreviewModal');
   pModal.classList.remove('hidden');
   pModal.classList.add('flex');
+  window.setChalanPrintPosition('top');
 };
 
 window.closeChalanPreview = ()=>{
@@ -6235,6 +6241,30 @@ window.closeChalanPreview = ()=>{
 // for anything to go wrong with.
 let isPrintingChalan = false;
 let chalanPrintPosition = 'top';
+// Scales the whole A4 page down to fit inside the Preview panel in one
+// glance — same idea as a browser's native print-preview thumbnail —
+// instead of showing it at true size and forcing a scroll to see the
+// rest. Re-run whenever the page's content or the modal's own size
+// changes, since the right scale factor depends on both.
+function fitChalanPreviewToViewport(){
+  const viewport = document.getElementById('chalanPreviewViewport');
+  const page = document.getElementById('chalanPreviewPage');
+  const body = document.getElementById('chalanPreviewBody');
+  if(!viewport || !page || !body) return;
+  page.style.transform = 'none';
+  const availW = viewport.clientWidth - 16;
+  const availH = viewport.clientHeight - 16;
+  const pageW = body.offsetWidth;
+  const pageH = body.offsetHeight;
+  if(!pageW || !pageH) return;
+  const scale = Math.min(availW/pageW, availH/pageH, 1);
+  page.style.transform = `scale(${scale})`;
+}
+window.addEventListener('resize', ()=>{
+  const modal = document.getElementById('chalanPreviewModal');
+  if(modal && modal.classList.contains('flex')) fitChalanPreviewToViewport();
+});
+
 window.setChalanPrintPosition = (pos)=>{
   chalanPrintPosition = pos;
   document.getElementById('chalanPosTopBtn')?.classList.toggle('active', pos==='top');
@@ -6255,6 +6285,7 @@ window.setChalanPrintPosition = (pos)=>{
       spacer.remove();
     }
   }
+  fitChalanPreviewToViewport();
 };
 window.printChalanNow = async ()=>{
   if(isPrintingChalan) return; // guards against a fast double-tap saving two Chalan records
