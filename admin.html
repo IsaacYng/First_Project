@@ -3001,8 +3001,8 @@
 </div>
 
 <!-- CHALAN PREVIEW (screen) -->
-<div id="chalanPreviewModal" class="hidden fixed inset-0 z-[650] items-center justify-center" style="background:rgba(15,23,42,.65);">
-  <div class="bg-white w-full h-full overflow-hidden flex flex-col" style="animation:slideIn .2s ease;">
+<div id="chalanPreviewModal" class="hidden fixed inset-0 z-[650] items-center justify-center p-4" style="background:rgba(15,23,42,.65);backdrop-filter:blur(3px);" onclick="if(event.target===this) window.closeChalanPreview()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[92vh] flex flex-col" style="animation:slideIn .2s ease;">
     <div class="p-4 flex items-center justify-between border-b border-slate-100 flex-shrink-0">
       <div class="flex items-center gap-2 section-title text-xl"><i class="fas fa-eye text-amber-500"></i> Preview</div>
       <button onclick="window.closeChalanPreview()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
