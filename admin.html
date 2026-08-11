@@ -6228,14 +6228,24 @@ function updateChalanPreviewFrame(){
   const wrap = document.getElementById('chalanPrintWrapper');
   const loader = document.getElementById('chalanPreviewLoader');
   if(!iframe || !wrap) return;
+  let loaderHidden = false;
+  const hideLoader = ()=>{
+    if(loaderHidden) return;
+    loaderHidden = true;
+    if(loader){ loader.classList.add('hidden'); loader.classList.remove('flex'); }
+  };
   if(loader){
     loader.classList.remove('hidden');
     loader.classList.add('flex');
   }
-  iframe.onload = ()=>{
-    if(loader){ loader.classList.add('hidden'); loader.classList.remove('flex'); }
-  };
+  iframe.onload = hideLoader;
   iframe.srcdoc = buildChalanDocumentHtml(wrap.innerHTML, chalanPrintPosition);
+  // srcdoc's `load` event doesn't fire reliably on every mobile browser,
+  // especially when it gets reassigned again right after (as happens
+  // here — the modal-open flow rebuilds the frame a second time
+  // immediately to reset the Top/Bottom choice). A short fallback means
+  // the spinner can never get stuck forever even if `load` never comes.
+  setTimeout(hideLoader, 500);
 }
 
 function renderChalanIntoWrappers(f){
@@ -6260,7 +6270,13 @@ function renderChalanIntoWrappers(f){
     el.textContent = fields[el.dataset.f] ?? '';
   });
   wrap.appendChild(copy);
-  updateChalanPreviewFrame();
+  // Not calling updateChalanPreviewFrame() here on purpose — every caller
+  // of this function shows the modal and immediately calls
+  // setChalanPrintPosition('top') right after, which builds the frame
+  // itself. Building it here too meant the iframe's srcdoc got set twice
+  // back-to-back (once while the modal was still hidden, again right as
+  // it became visible), and that double-navigation is exactly what made
+  // the `load` event unreliable and left the spinner stuck.
 }
 
 // Re-print pulls a previously-saved record straight from Chalan Records —
