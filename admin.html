@@ -848,7 +848,10 @@
   .cb-amt{ width:20%; text-align:right; padding-right:10px; }
   .cb-total-lbl{ font-weight:700; font-size:15.5px; }
   .cb-total-val{ font-weight:700; font-size:15.5px; }
-
+  .chalan-sign-table{ width:100%; border-collapse:collapse; margin-top:14mm; font-size:13px; }
+  .chalan-sign-table td.cs-line{ border-top:1px solid #000; width:42%; }
+  .chalan-sign-table td.cs-gap{ width:16%; }
+  .chalan-sign-table td.cs-label{ text-align:center; padding-top:3px; color:#000; }
   /* ── Simple, clean JPG-exportable report card (not tied to print page size) ── */
   .jpg-report-paper{ font-family:'DM Sans',sans-serif; background:#fff; width:900px; padding:34px 38px; margin:0 auto; box-sizing:border-box; color:#0F172A; flex-shrink:0; }
   .jrp-head{ text-align:center; border-bottom:3px solid #005EA6; padding-bottom:14px; }
@@ -2371,7 +2374,7 @@
           <div class="text-xs font-bold text-slate-600">Full Data Backup</div>
         </div>
         <p class="text-[11px] text-slate-400 mb-4">One Excel file, one sheet per section (Inventory, HH Inventory, Exchange Stock, Price List, Accessories, Finance Schemes, Chalans, Customers, Important Info, Model Aliases, Events) — a snapshot to keep on your own device, separate from Firebase.</p>
-        <button id="fullBackupBtn" onclick="downloadFullBackup()" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all">
+        <button id="fullBackupBtn" onclick="downloadFullBackup()" class="hidden items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all">
           <i class="fas fa-download"></i> Download Full Backup
         </button>
       </div>
@@ -2578,7 +2581,7 @@
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
           <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-trash-can text-amber-500"></i> Deleted Items</div>
           <span id="trashCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 items</span>
-          <button onclick="emptyTrash()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all">
+          <button id="emptyTrashBtn" onclick="emptyTrash()" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all">
             <i class="fas fa-trash-can text-[11px]"></i> Empty Trash Permanently
           </button>
         </div>
@@ -3038,6 +3041,18 @@
       <tr><td class="cb-sn"></td><td class="cb-label">Insurance Amount</td><td class="cb-colon">:</td><td class="cb-value" data-f="insAmount"></td><td class="cb-amt"></td></tr>
       <tr><td class="cb-sn"></td><td class="cb-label">Insurance Type</td><td class="cb-colon">:</td><td class="cb-value" data-f="insType"></td><td class="cb-amt"></td></tr>
       <tr><td class="cb-sn" colspan="3"></td><td class="cb-total-lbl" style="text-align:center">Total</td><td class="cb-amt cb-total-val" data-f="total"></td></tr>
+    </table>
+    <table class="chalan-sign-table">
+      <tr>
+        <td class="cs-line"></td>
+        <td class="cs-gap"></td>
+        <td class="cs-line"></td>
+      </tr>
+      <tr>
+        <td class="cs-label">Customer's Signature</td>
+        <td class="cs-gap"></td>
+        <td class="cs-label">Authorized Signature</td>
+      </tr>
     </table>
   </div>
 </template>
@@ -4194,7 +4209,7 @@ function renderAllInventoryTable(){
   if(dupChip){
     if(totalDups>0){
       dupChip.classList.remove('hidden'); dupChip.classList.add('flex'); dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${totalDups} duplicate${totalDups!==1?'s':''} found`;
-      if(resolveBtn){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
+      if(resolveBtn && currentUserRole==='owner'){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
     } else {
       dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
       if(resolveBtn){ resolveBtn.classList.add('hidden'); resolveBtn.classList.remove('flex'); }
@@ -4295,6 +4310,7 @@ function computeAllDuplicateGroups(){
 }
 
 window.openDuplicateResolver = ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can resolve duplicates.','err'); return; }
   const groups = computeAllDuplicateGroups();
   if(!groups.length){ toast('No duplicates found.'); return; }
   renderDuplicateResolver(groups);
@@ -4694,6 +4710,15 @@ async function loadProfile(uid) {
     // together without oversight.
     const modelAliasNavBtn = document.getElementById('navModelAliases');
     if(modelAliasNavBtn) modelAliasNavBtn.classList.toggle('hidden', currentUserRole !== 'owner');
+    // Fix Numbering / Resolve Duplicates are data-repair tools, not day-to-
+    // day sales work — a mis-click doesn't destroy anything (both confirm
+    // first), but they're clutter for staff whose job is Add/Sell/Chalan,
+    // so keep them Master-only to keep the toolbar focused on what staff
+    // actually need.
+    ['fixSnBtn','fixHHSnBtn','fixExchangeSnBtn','resolveDupBtnInv','resolveDupBtnHH','resolveDupBtnAll'].forEach(id=>{
+      const btn = document.getElementById(id);
+      if(btn) btn.classList.toggle('hidden', currentUserRole !== 'owner');
+    });
     const toolsLabel = document.getElementById('navToolsLabel');
     if(toolsLabel) toolsLabel.classList.remove('hidden');
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
@@ -6263,6 +6288,10 @@ window.printChalanNow = async ()=>{
   .cb-amt{ width:20%; text-align:right; padding-right:10px; }
   .cb-total-lbl{ font-weight:700; font-size:15.5px; }
   .cb-total-val{ font-weight:700; font-size:15.5px; }
+  .chalan-sign-table{ width:100%; border-collapse:collapse; margin-top:14mm; font-size:13px; }
+  .chalan-sign-table td.cs-line{ border-top:1px solid #000; width:42%; }
+  .chalan-sign-table td.cs-gap{ width:16%; }
+  .chalan-sign-table td.cs-label{ text-align:center; padding-top:3px; color:#000; }
 </style>
 </head>
 <body>${content}</body>
@@ -6495,6 +6524,7 @@ window.cancelInvEdit=()=>{
 };
 
 document.getElementById('fixSnBtn').addEventListener('click', async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can renumber Inventory.','err'); return; }
   if(!invData.length){ toast('No inventory to renumber.','warn'); return; }
   const ok = await showConfirm({
     title: 'Fix S.N numbering?',
@@ -6534,6 +6564,7 @@ document.getElementById('fixSnBtn').addEventListener('click', async ()=>{
 });
 
 document.getElementById('fixHHSnBtn').addEventListener('click', async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can renumber HH Inventory.','err'); return; }
   if(!hhInvData.length){ toast('No HH inventory to renumber.','warn'); return; }
   const ok = await showConfirm({
     title: 'Fix S.N numbering?',
@@ -6773,7 +6804,7 @@ function renderInvTable(list){
   if(dupIds.size>0){
     dupChip.classList.remove('hidden'); dupChip.classList.add('flex');
     dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${dupIds.size} duplicate${dupIds.size!==1?'s':''} found`;
-    if(resolveBtn){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
+    if(resolveBtn && currentUserRole==='owner'){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
   } else {
     dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
     if(resolveBtn){ resolveBtn.classList.add('hidden'); resolveBtn.classList.remove('flex'); }
@@ -7010,7 +7041,7 @@ function renderHHInvTable(){
     if(dupIds.size>0){
       dupChip.classList.remove('hidden'); dupChip.classList.add('flex');
       dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${dupIds.size} duplicate${dupIds.size!==1?'s':''} found`;
-      if(resolveBtn){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
+      if(resolveBtn && currentUserRole==='owner'){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
     } else {
       dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
       if(resolveBtn){ resolveBtn.classList.add('hidden'); resolveBtn.classList.remove('flex'); }
@@ -8507,6 +8538,7 @@ window.deleteSelectedExchangeUnits = async ()=>{
 
 
 document.getElementById('fixExchangeSnBtn').addEventListener('click', async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can renumber Exchange Stock.','err'); return; }
   if(!exchangeData.length){ toast('No exchange stock to renumber.','warn'); return; }
   const ok = await showConfirm({
     title: 'Fix S.N numbering?',
@@ -9422,6 +9454,12 @@ async function updateStorageOverview(){
   const ring = document.getElementById('storageRing');
   const ringPct = document.getElementById('storageRingPct');
   if(totalWrap) totalWrap.classList.toggle('hidden', currentUserRole !== 'owner');
+  const backupBtn = document.getElementById('fullBackupBtn');
+  if(backupBtn){
+    const isMaster = currentUserRole === 'owner';
+    backupBtn.classList.toggle('hidden', !isMaster);
+    backupBtn.classList.toggle('flex', isMaster);
+  }
   if(totalLabel && ring && ringPct && currentUserRole === 'owner'){
     const estimatedOtherBytes = (allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike)
       + (invCount*RECORD_SIZE_ESTIMATE.inventoryUnit)
@@ -9447,6 +9485,7 @@ async function updateStorageOverview(){
 // each section's own Export button, so a backup is just as readable as
 // what they're used to.
 window.downloadFullBackup = ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can download the full backup.','err'); return; }
   const btn = document.getElementById('fullBackupBtn');
   if(btn){ btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Preparing…'; }
   try{
@@ -10239,6 +10278,9 @@ function renderTrashTable(){
   const tbody = document.getElementById('trashTableBody');
   if(!tbody) return;
   document.getElementById('trashCount').textContent = trashData.length+' item'+(trashData.length!==1?'s':'');
+  const isMaster = currentUserRole === 'owner';
+  const emptyBtn = document.getElementById('emptyTrashBtn');
+  if(emptyBtn){ emptyBtn.classList.toggle('hidden', !isMaster); emptyBtn.classList.toggle('flex', isMaster); }
   if(!trashData.length){
     tbody.innerHTML = `<tr><td colspan="6"><div class="py-12 text-center text-slate-400"><i class="fas fa-trash-can text-3xl opacity-25 block mb-2"></i><p class="text-sm">Trash is empty.</p></div></td></tr>`;
     return;
@@ -10261,7 +10303,7 @@ function renderTrashTable(){
       <td class="px-4 py-3" data-th="Actions">
         <div class="flex items-center gap-2 justify-end sm:justify-start">
           <button onclick="restoreFromTrash('${t.id}')" class="flex items-center gap-1 px-2.5 py-1 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all"><i class="fas fa-clock-rotate-left text-[10px]"></i> Restore</button>
-          <button onclick="permanentlyDeleteTrashItem('${t.id}')" class="flex items-center gap-1 px-2.5 py-1 border-2 border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"><i class="fas fa-xmark text-[10px]"></i> Delete Forever</button>
+          ${isMaster ? `<button onclick="permanentlyDeleteTrashItem('${t.id}')" class="flex items-center gap-1 px-2.5 py-1 border-2 border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"><i class="fas fa-xmark text-[10px]"></i> Delete Forever</button>` : ''}
         </div>
       </td>
     </tr>`;
@@ -10288,6 +10330,7 @@ window.restoreFromTrash = async (trashId)=>{
 };
 
 window.permanentlyDeleteTrashItem = async (trashId)=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can permanently delete — restoring is fine for everyone.','err'); return; }
   const t = trashData.find(x=>x.id===trashId);
   const ok = await showDangerousConfirm({
     title: 'Delete forever?',
@@ -10303,6 +10346,7 @@ window.permanentlyDeleteTrashItem = async (trashId)=>{
 };
 
 window.emptyTrash = async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can empty Trash permanently.','err'); return; }
   if(!trashData.length){ toast('Trash is already empty.'); return; }
   const ok = await showDangerousConfirm({
     title: `Empty Trash — ${trashData.length} item${trashData.length!==1?'s':''}?`,
