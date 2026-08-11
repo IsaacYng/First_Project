@@ -1817,6 +1817,7 @@
           <div class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setHHInvStatusFilter('all')">All <span class="pill-count" id="pcHHAll">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Available" onclick="setHHInvStatusFilter('Available')">Available <span class="pill-count" id="pcHHAvailable">0</span></button>
+            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Hold" onclick="setHHInvStatusFilter('Hold')">On Hold <span class="pill-count" id="pcHHHold">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Booked" onclick="setHHInvStatusFilter('Booked')">Booked <span class="pill-count" id="pcHHBooked">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setHHInvStatusFilter('Sold')">Sold <span class="pill-count" id="pcHHSold">0</span></button>
           </div>
@@ -2372,10 +2373,34 @@
           <i class="fas fa-cloud-arrow-down text-emerald-500"></i>
           <div class="text-xs font-bold text-slate-600">Full Data Backup</div>
         </div>
-        <p class="text-[11px] text-slate-400 mb-4">One Excel file, one sheet per section (Inventory, HH Inventory, Exchange Stock, Price List, Accessories, Finance Schemes, Chalans, Customers, Important Info, Model Aliases, Events) — a snapshot to keep on your own device, separate from Firebase.</p>
+        <p class="text-[11px] text-slate-400 mb-4">One Excel file, one sheet per section (Inventory, HH Inventory, Exchange Stock, Price List, Accessories, Finance Schemes, Finance Categories, Chalans, Customers, Important Info, Model Aliases, Events, Storage Areas) — a snapshot to keep on your own device, separate from Firebase. Anyone can download this — it's read-only and never touches live data.</p>
         <button id="fullBackupBtn" onclick="downloadFullBackup()" class="hidden items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all">
           <i class="fas fa-download"></i> Download Full Backup
         </button>
+      </div>
+
+      <div id="restoreBackupCard" class="hidden yng-card-shell p-5 mb-5">
+        <div class="flex items-center gap-2 mb-1">
+          <i class="fas fa-cloud-arrow-up text-bajaj-blue"></i>
+          <div class="text-xs font-bold text-slate-600">Restore From Backup <span class="ml-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 text-[9px] font-extrabold uppercase align-middle">Master Only</span></div>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-4">Upload a Full Backup <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> file to add its records back in. This only <b>adds</b> — it never deletes or overwrites anything already here, so restoring a backup is safe to do more than once (though re-adding the same rows twice will create duplicates, so only restore what's actually missing).</p>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-blue-300 bg-blue-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition-all">
+            <i class="fas fa-cloud-arrow-up text-bajaj-blue text-lg flex-shrink-0"></i>
+            <span id="restoreFileLabel" class="text-sm text-slate-600 font-medium truncate">Click to choose a backup .xlsx file…</span>
+            <input type="file" id="restoreFileInput" accept=".xlsx,.xls" class="hidden"/>
+          </label>
+          <button id="restoreBackupBtn" disabled class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 whitespace-nowrap">
+            <i class="fas fa-upload"></i> <span id="restoreBackupBtnText">Restore</span>
+          </button>
+        </div>
+        <div id="restoreSummary" class="hidden mt-4 rounded-xl border border-slate-200 overflow-hidden">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+            <span id="restoreSummaryHead" class="text-xs font-bold text-slate-600"></span>
+          </div>
+          <div id="restoreSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
+        </div>
       </div>
     </div>
 
@@ -3826,11 +3851,11 @@ window._toggleKebab = (btn, type, id) => {
     // Inventory already has.
     const statusActions = cur === 'Sold'
       ? [{ label:'Mark Available', icon:'fa-rotate-left', onClick:()=>window._setHHInvStatus(id, 'Available') }]
-      : ['Available','Booked','Sold']
+      : ['Available','Hold','Booked','Sold']
           .filter(st => st !== cur)
           .map(st => ({
-            label: 'Mark '+st,
-            icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
+            label: 'Mark '+(st==='Hold' ? 'On Hold' : st),
+            icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : (st==='Hold' ? 'fa-pause' : 'fa-rotate-left')),
             onClick: () => window._setHHInvStatus(id, st)
           }));
     // If this exact unit already has a Chalan on file, offer Re-print
@@ -6503,11 +6528,22 @@ window._setUnitStatus = async (id, status) => {
   const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const needsCustomer = (status==='Booked' || status==='Sold');
   const existingName = escapeHtml(s?.customerName||'');
+  const existingSoldFrom = s?.soldFrom || 'Showroom';
+  // "Sold From" exists because a unit's physical sale location and which
+  // collection its record happens to sit in aren't the same thing — a
+  // showroom sale transferred into HH Inventory for record-keeping
+  // shouldn't quietly get counted as a mela sale, and vice versa.
+  const soldFromField = status==='Sold' ? `<br><br>
+       <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Sold From</label>
+       <select id="confirmSoldFromInput" style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">
+         <option value="Showroom" ${existingSoldFrom==='Showroom'?'selected':''}>Showroom</option>
+         <option value="Mela/Event" ${existingSoldFrom==='Mela/Event'?'selected':''}>Mela / Event</option>
+       </select>` : '';
   const message = needsCustomer
     ? `<b>${modelLabel}</b> will be marked <b>${status}</b>.<br><br>
        <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
        <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
-         style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">`
+         style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">${soldFromField}`
     : `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`;
   const proceed = await showConfirm({
     title: 'Mark as '+status+'?',
@@ -6520,11 +6556,12 @@ window._setUnitStatus = async (id, status) => {
   // Read the embedded input's value right after the modal resolves — the
   // DOM node is still there (only hidden), and nothing else touches it yet.
   const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : '';
+  const soldFrom = status==='Sold' ? (document.getElementById('confirmSoldFromInput')?.value || 'Showroom') : undefined;
   try{
     const payload = {status, customerName};
     // Timestamp used to auto-archive Sold units to Trash after 6 months —
     // only set (or refreshed) when actually landing on Sold.
-    if(status==='Sold') payload.soldAt = new Date();
+    if(status==='Sold'){ payload.soldAt = new Date(); payload.soldFrom = soldFrom; }
     await updateDoc(doc(db,"inventory",id),payload);
     logActivity(status==='Sold' ? 'Marked Sold' : 'Status: '+status, 'inventory', {...s, customerName});
     toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
@@ -6916,6 +6953,7 @@ function renderInvTable(list){
           ${s.hhFlag==='Hide' ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> HH Hide (not in stock)</span>` : ''}
         </div>
         ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
+        ${s.status==='Sold' && s.soldFrom ? `<div class="text-[10px] text-slate-400 flex items-center gap-1"><i class="fas ${s.soldFrom==='Showroom'?'fa-store':'fa-tents'} text-[8px]"></i>${escapeHtml(s.soldFrom)}</div>` : ''}
         </div>
       </td>
       <td class="px-4 py-3" data-th="Actions">
@@ -7061,9 +7099,10 @@ function loadHHInventory(){
 function updateHHInvStats(){
   const sold = hhInvData.filter(s=>s.status==='Sold').length;
   const booked = hhInvData.filter(s=>s.status==='Booked').length;
-  const available = hhInvData.length - sold - booked;
-  document.getElementById('hhInvTotalChip').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold';
-  const pc = { pcHHAll:hhInvData.length, pcHHAvailable:available, pcHHBooked:booked, pcHHSold:sold };
+  const hold = hhInvData.filter(s=>s.status==='Hold').length;
+  const available = hhInvData.length - sold - booked - hold;
+  document.getElementById('hhInvTotalChip').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+hold+' on hold  ·  '+booked+' booked  ·  '+sold+' sold';
+  const pc = { pcHHAll:hhInvData.length, pcHHAvailable:available, pcHHHold:hold, pcHHBooked:booked, pcHHSold:sold };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
 }
 
@@ -7151,9 +7190,12 @@ function renderHHInvTable(){
             ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>`
             : s.status==='Booked'
             ? `<span class="badge badge-amber"><i class="fas fa-bookmark"></i> Booked</span>`
+            : s.status==='Hold'
+            ? `<span class="badge badge-neutral"><i class="fas fa-pause"></i> On Hold</span>`
             : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`}
         </div>
         ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
+        ${s.status==='Sold' && s.soldFrom ? `<div class="text-[10px] text-slate-400 flex items-center gap-1"><i class="fas ${s.soldFrom==='Showroom'?'fa-store':'fa-tents'} text-[8px]"></i>${escapeHtml(s.soldFrom)}</div>` : ''}
         </div>
       </td>
       <td class="px-4 py-3" data-th="Actions">
@@ -7357,11 +7399,18 @@ window._setHHInvStatus = async (id, status) => {
   const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const needsCustomer = (status==='Booked' || status==='Sold');
   const existingName = escapeHtml(s?.customerName||'');
+  const existingSoldFrom = s?.soldFrom || 'Mela/Event';
+  const soldFromField = status==='Sold' ? `<br><br>
+       <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Sold From</label>
+       <select id="confirmSoldFromInput" style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">
+         <option value="Showroom" ${existingSoldFrom==='Showroom'?'selected':''}>Showroom</option>
+         <option value="Mela/Event" ${existingSoldFrom==='Mela/Event'?'selected':''}>Mela / Event</option>
+       </select>` : '';
   const message = needsCustomer
     ? `<b>${modelLabel}</b> will be marked <b>${status}</b>.<br><br>
        <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
        <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
-         style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">`
+         style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">${soldFromField}`
     : `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`;
   const proceed = await showConfirm({
     title:'Mark as '+status+'?', message, okText:'Confirm',
@@ -7370,8 +7419,11 @@ window._setHHInvStatus = async (id, status) => {
   });
   if(!proceed) return;
   const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : '';
+  const soldFrom = status==='Sold' ? (document.getElementById('confirmSoldFromInput')?.value || 'Mela/Event') : undefined;
   try{
-    await updateDoc(doc(db,"hh_inventory",id),{status, customerName});
+    const payload = {status, customerName};
+    if(status==='Sold'){ payload.soldAt = new Date(); payload.soldFrom = soldFrom; }
+    await updateDoc(doc(db,"hh_inventory",id),payload);
     logActivity(status==='Sold' ? 'Marked Sold' : 'Status: '+status, 'hh_inventory', {...s, customerName});
     toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
     if(status==='Sold') maybePromptChalan(id, 'hh_inventory');
@@ -9521,12 +9573,13 @@ async function updateStorageOverview(){
   const ring = document.getElementById('storageRing');
   const ringPct = document.getElementById('storageRingPct');
   if(totalWrap) totalWrap.classList.toggle('hidden', currentUserRole !== 'owner');
+  const restoreCard = document.getElementById('restoreBackupCard');
+  if(restoreCard) restoreCard.classList.toggle('hidden', currentUserRole !== 'owner');
+  // Downloading a backup is safe for any staff to do (it's read-only,
+  // doesn't touch live data) — only *restoring* one back into Firestore
+  // needs to be Master-only, so this button stays visible for everyone.
   const backupBtn = document.getElementById('fullBackupBtn');
-  if(backupBtn){
-    const isMaster = currentUserRole === 'owner';
-    backupBtn.classList.toggle('hidden', !isMaster);
-    backupBtn.classList.toggle('flex', isMaster);
-  }
+  if(backupBtn){ backupBtn.classList.remove('hidden'); backupBtn.classList.add('flex'); }
   if(totalLabel && ring && ringPct && currentUserRole === 'owner'){
     const estimatedOtherBytes = (allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike)
       + (invCount*RECORD_SIZE_ESTIMATE.inventoryUnit)
@@ -9552,7 +9605,6 @@ async function updateStorageOverview(){
 // each section's own Export button, so a backup is just as readable as
 // what they're used to.
 window.downloadFullBackup = ()=>{
-  if(currentUserRole !== 'owner'){ toast('Only a Master ID can download the full backup.','err'); return; }
   const btn = document.getElementById('fullBackupBtn');
   if(btn){ btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Preparing…'; }
   try{
@@ -9563,20 +9615,24 @@ window.downloadFullBackup = ()=>{
       if(cols) ws['!cols'] = cols;
       XLSX.utils.book_append_sheet(wb, ws, name.slice(0,31)); // Excel sheet-name limit
     };
+    const fmtDate = d => { if(!d) return ''; const dt = d?.toDate ? d.toDate() : new Date(d); return isNaN(dt.getTime()) ? '' : dt.toLocaleDateString('en-GB'); };
 
     addSheet('Inventory', invData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Chassis':s.chassis||'', 'Engine':s.engine||'', 'RegNo':s.regNo||'',
-      'Colour':s.color||'', 'Status':s.status||'', 'Customer':s.customerName||'', 'HH Flag':s.hhFlag||''
+      'Colour':s.color||'', 'Status':s.status||'', 'Customer':s.customerName||'', 'Sold From':s.soldFrom||'',
+      'Sold Date':fmtDate(s.soldAt), 'Added Date':fmtDate(s.addedAt), 'HH Flag':s.hhFlag||''
     })));
     addSheet('HH Inventory', hhInvData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Chassis':s.chassis||'', 'Engine':s.engine||'', 'RegNo':s.regNo||'',
-      'Colour':s.color||'', 'Event':s.eventName||'', 'Owner':s.owner==='other'?(s.ownerName||'Other'):(s.owner==='hh'?'HH':'Dealer'),
-      'Status':s.status||'', 'Customer':s.customerName||''
+      'Colour':s.color||'', 'Event':s.eventName||'', 'Owner':s.owner==='other'?'Other':(s.owner==='hh'?'HH':'Dealer'),
+      'Owner Name':s.owner==='other'?(s.ownerName||''):'', 'Status':s.status||'', 'Customer':s.customerName||'',
+      'Sold From':s.soldFrom||'', 'Sold Date':fmtDate(s.soldAt), 'Added Date':fmtDate(s.addedAt)
     })));
     addSheet('Exchange Stock', exchangeData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Make Year':s.makeYear||'', 'RegNo':s.regNo||'', 'Valuation':s.valuation||0,
       'Blue Book':s.blueBook==='yes'?'Yes':'No', 'Key':s.key==='yes'?'Yes':'No', 'File':s.file==='yes'?'Yes':'No',
-      'Customer':s.customerName||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||''
+      'Customer':s.customerName||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
+      'Added Date':fmtDate(s.addedAt)
     })));
     addSheet('Price List', allMasterBikes.map(b=>({
       'Model':b.name||'', 'Category':b.category||'', 'Price':b.price||0,
@@ -9586,10 +9642,16 @@ window.downloadFullBackup = ()=>{
     addSheet('Finance Schemes', financeSchemes.map(f=>({
       'Category':f.category||'', 'Down Payment %':f.downPay||'', 'Interest Rate %':f.rate||'', 'Tenures (months)':(f.tenures||[]).join(', ')
     })));
+    addSheet('Finance Categories', financeCategories.map(c=>({ 'Name':c.name||'', 'Accessory Names':(c.accessoryNames||[]).join(', ') })));
+    // Every field that actually exists on a saved Chalan record — the
+    // earlier version of this export dropped Engine/MFD Date/Insurance
+    // Amount/Commission, which is exactly the kind of silent gap a
+    // "full" backup can't afford to have.
     addSheet('Chalans', chalanData.map(c=>({
-      'Chalan No':c.chalanNo||'', 'Model':c.model||'', 'Chassis':c.chassis||'', 'RegNo':c.regNo||'',
-      'Customer':c.custName||'', 'Contact':c.contact||'', 'Address':c.address||'', 'Delivery Date':c.deliveryDate||'',
-      'Price':c.price||0, 'Insurance Type':c.insType||'', 'Price After Commission':c.priceAfterCom||0
+      'Chalan No':c.chalanNo||'', 'Model':c.model||'', 'Chassis':c.chassis||'', 'Engine':c.engine||'', 'RegNo':c.regNo||'',
+      'MFD Date':c.makeYear||'', 'Customer':c.custName||'', 'Contact':c.contact||'', 'Address':c.address||'',
+      'Delivery Date':c.deliveryDate||'', 'Price':c.price||0, 'Insurance Type':c.insType||'', 'Insurance Amount':c.insAmount||0,
+      'Commission':c.commission||0, 'Price After Commission':c.priceAfterCom||0
     })));
     addSheet('Customers', buildCustomerIndex().map(c=>({
       'Name':c.name, 'Contact':c.contact||'', 'Address':c.address||'',
@@ -9599,6 +9661,7 @@ window.downloadFullBackup = ()=>{
     addSheet('Important Info', importantData.map(i=>({ 'Type':i.type||'', 'Value 1':i.value1||'', 'Value 2':i.value2||'', 'Note':i.note||'' })));
     addSheet('Model Aliases', modelAliasesData.map(a=>({ 'Typed As':a.alias||'', 'Actually Means':a.canonical||'' })));
     addSheet('Events', events.map(e=>({ 'Title':e.title||'', 'Start':e.startDate||'', 'End':e.endDate||'', 'Location':e.location||'' })));
+    addSheet('Storage Areas', stockAreas.map(a=>({ 'Name':a.name||'' })));
 
     if(!wb.SheetNames.length){ toast('Nothing to back up yet.','warn'); return; }
     XLSX.writeFile(wb, `admin_full_backup_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -9610,6 +9673,165 @@ window.downloadFullBackup = ()=>{
     if(btn){ btn.disabled = false; btn.innerHTML = '<i class="fas fa-download"></i> Download Full Backup'; }
   }
 };
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESTORE FROM BACKUP — Master-only. Reads a Full Backup .xlsx file and
+   re-adds each sheet's rows into the matching Firestore collection.
+   Deliberately ADDITIVE ONLY (addDoc, never a delete/overwrite pass) —
+   restoring is meant for "put back what's missing after data loss," not
+   for syncing/replacing what's already there, so there's no destructive
+   path here at all to accidentally trigger.
+   ═══════════════════════════════════════════════════════════════════════ */
+let restoreParsedWorkbook = null;
+
+document.getElementById('restoreFileInput')?.addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const btn = document.getElementById('restoreBackupBtn');
+  const label = document.getElementById('restoreFileLabel');
+  const summary = document.getElementById('restoreSummary');
+  summary.classList.add('hidden');
+  restoreParsedWorkbook = null;
+  btn.disabled = true;
+  if(!file){ label.textContent = 'Click to choose a backup .xlsx file…'; return; }
+  label.textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      if(!wb.SheetNames.length){ toast('File appears empty.','err'); return; }
+      restoreParsedWorkbook = wb;
+      btn.disabled = false;
+      toast(`${wb.SheetNames.length} sheet(s) detected. Review & click Restore.`);
+    }catch(err){
+      toast('Could not read file: '+err.message,'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('restoreBackupBtn')?.addEventListener('click', async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can restore a backup.','err'); return; }
+  if(!restoreParsedWorkbook) return;
+  const btn = document.getElementById('restoreBackupBtn');
+  const btnText = document.getElementById('restoreBackupBtnText');
+  btn.disabled = true;
+  btnText.textContent = 'Restoring…';
+
+  const wb = restoreParsedWorkbook;
+  const sheetRows = (name) => {
+    const ws = wb.Sheets[name];
+    return ws ? XLSX.utils.sheet_to_json(ws, {defval:''}) : [];
+  };
+  const results = []; // {sheet, added, failed}
+  const yn = v => String(v||'').trim().toLowerCase()==='yes' ? 'yes' : 'no';
+
+  // S.N-bearing collections need a running counter seeded from Firestore
+  // (not the local cache) so a restore never collides with S.N already
+  // in use — same reasoning as every other bulk-import in this app.
+  async function importSnCollection(sheetName, colName, mapRow, limitCheck){
+    const rows = sheetRows(sheetName);
+    if(!rows.length) return;
+    let nextSn = await getAccurateNextSn(colName);
+    let added = 0, failed = 0;
+    for(const row of rows){
+      if(limitCheck && !limitCheck()){ failed += rows.length - added - failed; break; }
+      try{
+        await addDoc(collection(db, colName), {...mapRow(row), sn: nextSn, addedAt: new Date()});
+        nextSn++; added++;
+      }catch(e){ failed++; }
+    }
+    results.push({ sheet: sheetName, added, failed });
+  }
+  async function importPlainCollection(sheetName, colName, mapRow, limitCheck){
+    const rows = sheetRows(sheetName);
+    if(!rows.length) return;
+    let added = 0, failed = 0;
+    for(const row of rows){
+      if(limitCheck && !limitCheck()){ failed += rows.length - added - failed; break; }
+      try{ await addDoc(collection(db, colName), mapRow(row)); added++; }
+      catch(e){ failed++; }
+    }
+    results.push({ sheet: sheetName, added, failed });
+  }
+
+  try{
+    await importSnCollection('Inventory', 'inventory', r => ({
+      model:String(r['Model']||''), chassis:String(r['Chassis']||''), engine:String(r['Engine']||''), regNo:String(r['RegNo']||''),
+      color:String(r['Colour']||''), status:String(r['Status']||'Available'), customerName:String(r['Customer']||''),
+      soldFrom:String(r['Sold From']||'')
+    }), ()=>invData.length < MAX_TOTAL_INVENTORY_UNITS);
+
+    await importSnCollection('HH Inventory', 'hh_inventory', r => ({
+      model:String(r['Model']||''), chassis:String(r['Chassis']||''), engine:String(r['Engine']||''), regNo:String(r['RegNo']||''),
+      color:String(r['Colour']||''), eventName:String(r['Event']||''),
+      owner: String(r['Owner']||'').toLowerCase()==='hh' ? 'hh' : (String(r['Owner']||'').toLowerCase()==='other' ? 'other' : 'dealer'),
+      ownerName:String(r['Owner Name']||''), status:String(r['Status']||'Available'), customerName:String(r['Customer']||''),
+      soldFrom:String(r['Sold From']||'')
+    }), ()=>hhInvData.length < MAX_TOTAL_INVENTORY_UNITS);
+
+    await importSnCollection('Exchange Stock', 'exchange_stock', r => ({
+      model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), customerName:String(r['Customer']||''),
+      sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
+    }), ()=>exchangeData.length < MAX_EXCHANGE_STOCK);
+
+    await importPlainCollection('Price List', 'bikes', r => ({
+      name:String(r['Model']||''), category:String(r['Category']||''), price:Number(r['Price'])||0,
+      firstPartyInsurance:Number(r['1st Party Insurance'])||0, thirdPartyInsurance:Number(r['3rd Party Insurance'])||0
+    }), ()=>allMasterBikes.length < MAX_BIKES);
+    await importPlainCollection('Accessories', 'accessories', r => ({ name:String(r['Name']||''), price:Number(r['Price'])||0, createdAt:new Date() }), ()=>accessories.length < MAX_ACCESSORIES);
+    await importPlainCollection('Finance Schemes', 'finance_schemes', r => ({
+      category:String(r['Category']||''), downPay:String(r['Down Payment %']||''), rate:String(r['Interest Rate %']||''),
+      tenures:String(r['Tenures (months)']||'').split(',').map(s=>s.trim()).filter(Boolean)
+    }), ()=>financeSchemes.length < MAX_FINANCE_SCHEMES);
+    await importPlainCollection('Finance Categories', 'finance_categories', r => ({
+      name:String(r['Name']||''), accessoryNames:String(r['Accessory Names']||'').split(',').map(s=>s.trim()).filter(Boolean)
+    }), ()=>financeCategories.length < MAX_FINANCE_CATEGORIES);
+    await importPlainCollection('Chalans', 'chalans', r => ({
+      chalanNo:String(r['Chalan No']||''), model:String(r['Model']||''), chassis:String(r['Chassis']||''), engine:String(r['Engine']||''),
+      regNo:String(r['RegNo']||''), makeYear:String(r['MFD Date']||''), custName:String(r['Customer']||''), contact:String(r['Contact']||''),
+      address:String(r['Address']||''), deliveryDate:String(r['Delivery Date']||''), price:Number(r['Price'])||0,
+      insType:String(r['Insurance Type']||''), insAmount:Number(r['Insurance Amount'])||0, commission:Number(r['Commission'])||0,
+      priceAfterCom:Number(r['Price After Commission'])||0, createdAt:new Date()
+    }), ()=>chalanData.length < MAX_CHALANS);
+    await importPlainCollection('Important Info', 'important_info', r => ({
+      type:String(r['Type']||''), value1:String(r['Value 1']||''), value2:String(r['Value 2']||''), note:String(r['Note']||'')
+    }), ()=>importantData.length < MAX_IMPORTANT_INFO);
+    await importPlainCollection('Model Aliases', 'model_aliases', r => ({
+      alias:String(r['Typed As']||''), canonical:String(r['Actually Means']||''), createdAt:new Date()
+    }), ()=>modelAliasesData.length < MAX_MODEL_ALIASES);
+    await importPlainCollection('Events', 'events', r => ({
+      title:String(r['Title']||''), startDate:String(r['Start']||''), endDate:String(r['End']||''), location:String(r['Location']||'')
+    }), ()=>events.length < MAX_EVENTS);
+    await importPlainCollection('Storage Areas', 'stock_areas', r => ({ name:String(r['Name']||'') }), ()=>stockAreas.length < MAX_STOCK_AREAS);
+
+    const summary = document.getElementById('restoreSummary');
+    const head = document.getElementById('restoreSummaryHead');
+    const body = document.getElementById('restoreSummaryBody');
+    const totalAdded = results.reduce((s,r)=>s+r.added,0);
+    const totalFailed = results.reduce((s,r)=>s+r.failed,0);
+    head.innerHTML = `<span class="text-emerald-600"><i class="fas fa-circle-check"></i> ${totalAdded} record(s) restored</span>` +
+      (totalFailed ? ` &nbsp;·&nbsp; <span class="text-red-500"><i class="fas fa-circle-xmark"></i> ${totalFailed} failed</span>` : '');
+    body.innerHTML = results.length ? results.map(r=>`
+      <div class="px-4 py-2 flex items-center justify-between gap-3">
+        <span class="text-slate-600">${escapeHtml(r.sheet)}</span>
+        <span class="font-medium whitespace-nowrap">${r.added} added${r.failed?`, <span class="text-red-500">${r.failed} failed</span>`:''}</span>
+      </div>`).join('') : `<div class="px-4 py-3 text-slate-400">No recognized sheets found in this file.</div>`;
+    summary.classList.remove('hidden');
+
+    logActivity('Backup Restored', 'settings', { model: `${totalAdded} record(s) across ${results.length} sheet(s)` });
+    toast(`Restore done: ${totalAdded} added${totalFailed?`, ${totalFailed} failed`:''}.`, totalFailed ? 'err' : 'ok');
+  }catch(e){
+    toast('Restore failed: '+friendlyError(e),'err');
+  }finally{
+    btn.disabled = true;
+    btnText.textContent = 'Restore';
+    restoreParsedWorkbook = null;
+    document.getElementById('restoreFileInput').value = '';
+    document.getElementById('restoreFileLabel').textContent = 'Click to choose a backup .xlsx file…';
+  }
+});
 
 window.setDocTypeFilter = (type)=>{
   docTypeFilter = type;
