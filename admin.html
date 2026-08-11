@@ -827,34 +827,15 @@
   .pv-table tr.grand-total{ background:#FEF6E7 !important; font-weight:bold; }
   .pv-table td.total-cell{ font-weight:bold; }
 
-  /* ── Delivery Chalan — the wrapper itself just stages the filled-in
-     markup; printing happens in a separate dedicated window (see
-     printChalanNow), so no @media print rules are needed here. This CSS
-     is what the on-screen Preview modal renders with, and is mirrored
-     exactly inside printChalanNow's popup-window stylesheet below so
-     preview and print never drift apart. ── */
+  /* ── Delivery Chalan — chalanPrintWrapper is a hidden staging area
+     where the template gets filled in; nothing here needs to render
+     visually, since both the live iframe Preview and the actual print
+     window get their complete, self-contained stylesheet from
+     buildChalanDocumentHtml() instead. Keeping the Chalan's own styling
+     in exactly one place (that function) instead of duplicated here
+     means preview and print can never quietly drift apart from each
+     other. ── */
   #chalanPrintWrapper{ display:none; }
-  .chalan-copy{ font-family:'Times New Roman',Georgia,serif; color:#000; padding-bottom:6mm; margin-bottom:6mm; border-bottom:1px dashed #999; }
-  .chalan-copy:last-child{ border-bottom:none; margin-bottom:0; }
-  .chalan-head{ text-align:center; margin-bottom:4mm; }
-  .chalan-company{ font-size:23px; font-weight:700; }
-  .chalan-loc{ font-size:13px; margin-top:2px; }
-  .chalan-title{ font-size:16px; font-weight:700; margin-top:4px; text-decoration:underline; }
-  .chalan-meta-table{ width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4mm; font-size:14.5px; }
-  .chalan-meta-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
-  .chalan-bike-table{ width:100%; border-collapse:collapse; border:1px solid #000; font-size:14.5px; }
-  .chalan-bike-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
-  .cb-sn{ width:7%; text-align:center; }
-  .cb-label{ width:24%; white-space:nowrap; }
-  .cb-colon{ width:3%; text-align:center; }
-  .cb-value{ width:46%; }
-  .cb-amt{ width:20%; text-align:right; padding-right:10px; }
-  .cb-total-lbl{ font-weight:700; font-size:15.5px; }
-  .cb-total-val{ font-weight:700; font-size:15.5px; }
-  /* The on-screen Preview mirrors this height so what's shown here is
-     exactly what prints — no more guessing "is this actually going to
-     the bottom half or not" and printing the wrong half by mistake. */
-  .chalan-position-spacer{ height:140mm; }
   /* ── Simple, clean JPG-exportable report card (not tied to print page size) ── */
   .jpg-report-paper{ font-family:'DM Sans',sans-serif; background:#fff; width:900px; padding:34px 38px; margin:0 auto; box-sizing:border-box; color:#0F172A; flex-shrink:0; }
   .jrp-head{ text-align:center; border-bottom:3px solid #005EA6; padding-bottom:14px; }
@@ -3007,14 +2988,16 @@
       <div class="flex items-center gap-2 section-title text-xl"><i class="fas fa-eye text-amber-500"></i> Preview</div>
       <button onclick="window.closeChalanPreview()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
     </div>
-    <!-- Full size A4 page, scrollable both ways — shrinking it to fit made
-         the text too small to actually read on a phone screen, so instead
-         this renders at true size and lets you pan around it, same as
-         viewing any large page/PDF on mobile. -->
-    <div id="chalanPreviewViewport" class="overflow-auto p-5 bg-slate-100" style="flex:1">
-      <div id="chalanPreviewPage" class="mx-auto" style="width:min-content;">
-        <div id="chalanPreviewBody" class="bg-white shadow-md" style="width:210mm;padding:10mm;box-sizing:border-box"></div>
+    <!-- Rendered in a real iframe with the exact same HTML that goes to
+         print — same idea as this app's own tab-frames (index.html):
+         the browser handles scroll/zoom/layout natively instead of a
+         hand-rolled div simulating a page, so what's shown here is
+         guaranteed pixel-identical to what actually prints. -->
+    <div class="frame-wrap-chalan" style="flex:1; position:relative; min-height:0; background:#F1F5F9;">
+      <div id="chalanPreviewLoader" class="hidden" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#F1F5F9; flex-direction:column; gap:14px; z-index:2;">
+        <div style="width:30px;height:30px;border-radius:50%;border:3px solid #E2E8F0;border-top-color:#005EA6;animation:spin .7s linear infinite;"></div>
       </div>
+      <iframe id="chalanPreviewFrame" title="Chalan Preview" style="position:absolute; inset:0; width:100%; height:100%; border:0; background:#fff;"></iframe>
     </div>
     <div class="p-4 border-t border-slate-100 flex-shrink-0 flex flex-col gap-3">
       <div class="flex items-center gap-2 flex-wrap">
@@ -6184,6 +6167,77 @@ window.previewChalan = ()=>{
 // Shared by both a fresh Preview and a Re-print of an already-saved
 // record — fills the same template the same way either way, so there's
 // only one place that knows how a Chalan is laid out.
+// The one place the actual printable Chalan markup + stylesheet gets
+// built — used identically by the live iframe Preview and the real print
+// window, so there's exactly one design to keep in sync instead of two
+// copies quietly drifting apart from each other.
+function buildChalanDocumentHtml(content, position){
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Delivery Chalan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
+<style>
+  @page{ size:A4 portrait; margin:8mm; }
+  *{ box-sizing:border-box; }
+  body{ font-family:'Times New Roman',Georgia,serif; margin:0; padding:8mm; color:#000; background:#fff; }
+  /* The 8mm body padding above is only for on-screen preview, so the
+     content doesn't sit flush against the iframe's edges — @page already
+     handles the real margin when actually printing, so doubling it here
+     too would push everything in by 16mm on paper. */
+  @media print{ body{ padding:0; } }
+  .chalan-copy{ padding-bottom:6mm; margin-bottom:6mm; border-bottom:1px dashed #999; }
+  .chalan-copy:last-child{ border-bottom:none; margin-bottom:0; }
+  .chalan-head{ text-align:center; margin-bottom:4mm; }
+  .chalan-company{ font-size:23px; font-weight:700; }
+  .chalan-loc{ font-size:13px; margin-top:2px; }
+  .chalan-title{ font-size:16px; font-weight:700; margin-top:4px; text-decoration:underline; }
+  .chalan-meta-table{ width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4mm; font-size:14.5px; }
+  .chalan-meta-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
+  .chalan-bike-table{ width:100%; border-collapse:collapse; border:1px solid #000; font-size:14.5px; }
+  .chalan-bike-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
+  .cb-sn{ width:7%; text-align:center; }
+  .cb-label{ width:24%; white-space:nowrap; }
+  .cb-colon{ width:3%; text-align:center; }
+  .cb-value{ width:46%; }
+  .cb-amt{ width:20%; text-align:right; padding-right:10px; }
+  .cb-total-lbl{ font-weight:700; font-size:15.5px; }
+  .cb-total-val{ font-weight:700; font-size:15.5px; }
+  /* Top/Bottom print position — an A4 sheet is ~297mm tall and one Chalan
+     copy only needs about half of that, so printing the same physical
+     sheet twice (once for the top half, once for the bottom half after
+     it's fed back in) gets two Chalans out of one piece of paper instead
+     of wasting a full sheet per Chalan. This spacer just pushes the
+     content down when "Bottom" is selected; "Top" prints exactly where
+     it always has. */
+  .chalan-position-spacer{ height:140mm; }
+</style>
+</head>
+<body>${position==='bottom' ? '<div class="chalan-position-spacer"></div>' : ''}${content}</body>
+</html>`;
+}
+
+// Pushes the freshly-built Chalan HTML into the live preview iframe —
+// this is the exact same document buildChalanDocumentHtml() would hand
+// to the print window, so the iframe is a true, native-scrollable,
+// native-zoomable preview rather than an approximation of one.
+function updateChalanPreviewFrame(){
+  const iframe = document.getElementById('chalanPreviewFrame');
+  const wrap = document.getElementById('chalanPrintWrapper');
+  const loader = document.getElementById('chalanPreviewLoader');
+  if(!iframe || !wrap) return;
+  if(loader){
+    loader.classList.remove('hidden');
+    loader.classList.add('flex');
+  }
+  iframe.onload = ()=>{
+    if(loader){ loader.classList.add('hidden'); loader.classList.remove('flex'); }
+  };
+  iframe.srcdoc = buildChalanDocumentHtml(wrap.innerHTML, chalanPrintPosition);
+}
+
 function renderChalanIntoWrappers(f){
   const fields = {
     model: f.model, chassis: f.chassis, engine: f.engine, regNo: f.regNo,
@@ -6206,7 +6260,7 @@ function renderChalanIntoWrappers(f){
     el.textContent = fields[el.dataset.f] ?? '';
   });
   wrap.appendChild(copy);
-  document.getElementById('chalanPreviewBody').innerHTML = wrap.innerHTML;
+  updateChalanPreviewFrame();
 }
 
 // Re-print pulls a previously-saved record straight from Chalan Records —
@@ -6245,27 +6299,10 @@ window.setChalanPrintPosition = (pos)=>{
   chalanPrintPosition = pos;
   document.getElementById('chalanPosTopBtn')?.classList.toggle('active', pos==='top');
   document.getElementById('chalanPosBottomBtn')?.classList.toggle('active', pos==='bottom');
-  // Mirror the choice in the on-screen Preview itself — seeing the blank
-  // gap before the Chalan (or not) is what actually prevents printing to
-  // the wrong half by mistake; the toggle buttons alone aren't enough.
-  const previewBody = document.getElementById('chalanPreviewBody');
-  if(previewBody){
-    let spacer = previewBody.querySelector('.chalan-position-spacer');
-    if(pos==='bottom'){
-      if(!spacer){
-        spacer = document.createElement('div');
-        spacer.className = 'chalan-position-spacer';
-        previewBody.insertBefore(spacer, previewBody.firstChild);
-      }
-    } else if(spacer){
-      spacer.remove();
-    }
-  }
-  // Jump the scroll back to the very top of the page whenever the choice
-  // changes, so switching to Bottom doesn't leave the view sitting
-  // wherever it happened to be scrolled to before.
-  const viewport = document.getElementById('chalanPreviewViewport');
-  if(viewport) viewport.scrollTop = 0;
+  // Rebuild the iframe with the new position — it's the exact same
+  // document the print window gets, so the blank gap (or lack of one)
+  // shown here is exactly what's about to print, not an approximation.
+  updateChalanPreviewFrame();
 };
 window.printChalanNow = async ()=>{
   if(isPrintingChalan) return; // guards against a fast double-tap saving two Chalan records
@@ -6297,45 +6334,7 @@ window.printChalanNow = async ()=>{
 
   if(win.closed){ toast('Print window was closed before it could load — please try again.','err'); isPrintingChalan = false; return; }
   win.document.open();
-  win.document.write(`<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Delivery Chalan</title>
-<meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
-<style>
-  @page{ size:A4 portrait; margin:8mm; }
-  *{ box-sizing:border-box; }
-  body{ font-family:'Times New Roman',Georgia,serif; margin:0; padding:0; color:#000; }
-  .chalan-copy{ padding-bottom:6mm; margin-bottom:6mm; border-bottom:1px dashed #999; }
-  .chalan-copy:last-child{ border-bottom:none; margin-bottom:0; }
-  .chalan-head{ text-align:center; margin-bottom:4mm; }
-  .chalan-company{ font-size:23px; font-weight:700; }
-  .chalan-loc{ font-size:13px; margin-top:2px; }
-  .chalan-title{ font-size:16px; font-weight:700; margin-top:4px; text-decoration:underline; }
-  .chalan-meta-table{ width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4mm; font-size:14.5px; }
-  .chalan-meta-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
-  .chalan-bike-table{ width:100%; border-collapse:collapse; border:1px solid #000; font-size:14.5px; }
-  .chalan-bike-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
-  .cb-sn{ width:7%; text-align:center; }
-  .cb-label{ width:24%; white-space:nowrap; }
-  .cb-colon{ width:3%; text-align:center; }
-  .cb-value{ width:46%; }
-  .cb-amt{ width:20%; text-align:right; padding-right:10px; }
-  .cb-total-lbl{ font-weight:700; font-size:15.5px; }
-  .cb-total-val{ font-weight:700; font-size:15.5px; }
-  /* Top/Bottom print position — an A4 sheet is ~297mm tall and one Chalan
-     copy only needs about half of that, so printing the same physical
-     sheet twice (once for the top half, once for the bottom half after
-     it's fed back in) gets two Chalans out of one piece of paper instead
-     of wasting a full sheet per Chalan. This spacer just pushes the
-     content down when "Bottom" is selected; "Top" prints exactly where
-     it always has. */
-  .chalan-position-spacer{ height:140mm; }
-</style>
-</head>
-<body>${chalanPrintPosition==='bottom' ? '<div class="chalan-position-spacer"></div>' : ''}${content}</body>
-</html>`);
+  win.document.write(buildChalanDocumentHtml(content, chalanPrintPosition));
   win.document.close();
   let printed = false;
   const doPrint = () => {
