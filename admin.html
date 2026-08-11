@@ -3851,13 +3851,24 @@ window._toggleKebab = (btn, type, id) => {
     // Inventory already has.
     const statusActions = cur === 'Sold'
       ? [{ label:'Mark Available', icon:'fa-rotate-left', onClick:()=>window._setHHInvStatus(id, 'Available') }]
-      : ['Available','Hold','Booked','Sold']
+      : ['Available','Booked','Sold']
           .filter(st => st !== cur)
           .map(st => ({
-            label: 'Mark '+(st==='Hold' ? 'On Hold' : st),
-            icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : (st==='Hold' ? 'fa-pause' : 'fa-rotate-left')),
+            label: 'Mark '+st,
+            icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
             onClick: () => window._setHHInvStatus(id, st)
           }));
+    // On Hold — same idea, same mechanism as Inventory's own HH Sales/HH
+    // Hide flag: a standalone toggle sitting alongside status rather than
+    // its own status value, so a multi-day mela's "not on display today,
+    // back out tomorrow" units don't need their own status branch
+    // everywhere status is checked. Only makes sense on units that aren't
+    // already Sold.
+    const holdAction = cur === 'Sold' ? [] : [
+      s?.hold
+        ? { label:'Take Off Hold', icon:'fa-play', onClick:()=>window._setHHInvHold(id, false) }
+        : { label:'Put On Hold', icon:'fa-pause', onClick:()=>window._setHHInvHold(id, true) }
+    ];
     // If this exact unit already has a Chalan on file, offer Re-print
     // instead of opening a fresh form — that form would otherwise let
     // staff generate a second, duplicate Chalan record for the same bike.
@@ -3875,6 +3886,7 @@ window._toggleKebab = (btn, type, id) => {
     openKebabMenuFor(btn, [
       { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('hh_inventory', id) },
       ...statusActions,
+      ...holdAction,
       ...chalanAction,
       ...transferAction,
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editHHInv(id) },
@@ -6477,7 +6489,7 @@ window.transferToHH = async (id) => {
       eventName: '', owner: 'dealer', ownerName: '',
       status: isSold ? 'Sold' : 'Available', customerName: isSold ? (s.customerName||'') : '', addedAt: new Date()
     };
-    if(isSold) payload.soldAt = s.soldAt || new Date();
+    if(isSold){ payload.soldAt = s.soldAt || new Date(); payload.soldFrom = s.soldFrom || 'Showroom'; }
     await addDoc(collection(db,'hh_inventory'), payload);
     await deleteDoc(doc(db,'inventory', id));
     logActivity('Transferred to HH Inventory', 'inventory', { model: s.model, chassis: s.chassis, customerName: s.customerName });
@@ -6512,7 +6524,7 @@ window.transferToInventory = async (id) => {
       sn: nextSn, model: s.model||'', chassis: s.chassis||'', engine: s.engine||'', regNo: s.regNo||'', color: s.color||'',
       status: isSold ? 'Sold' : 'Available', customerName: isSold ? (s.customerName||'') : '', addedAt: new Date()
     };
-    if(isSold) payload.soldAt = s.soldAt || new Date();
+    if(isSold){ payload.soldAt = s.soldAt || new Date(); payload.soldFrom = s.soldFrom || 'Mela/Event'; }
     await addDoc(collection(db,'inventory'), payload);
     await deleteDoc(doc(db,'hh_inventory', id));
     logActivity('Transferred to Inventory', 'hh_inventory', { model: s.model, chassis: s.chassis, customerName: s.customerName });
@@ -6528,22 +6540,15 @@ window._setUnitStatus = async (id, status) => {
   const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const needsCustomer = (status==='Booked' || status==='Sold');
   const existingName = escapeHtml(s?.customerName||'');
-  const existingSoldFrom = s?.soldFrom || 'Showroom';
-  // "Sold From" exists because a unit's physical sale location and which
-  // collection its record happens to sit in aren't the same thing — a
-  // showroom sale transferred into HH Inventory for record-keeping
-  // shouldn't quietly get counted as a mela sale, and vice versa.
-  const soldFromField = status==='Sold' ? `<br><br>
-       <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Sold From</label>
-       <select id="confirmSoldFromInput" style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">
-         <option value="Showroom" ${existingSoldFrom==='Showroom'?'selected':''}>Showroom</option>
-         <option value="Mela/Event" ${existingSoldFrom==='Mela/Event'?'selected':''}>Mela / Event</option>
-       </select>` : '';
+  // No "Sold From" here — main Inventory is showroom stock only (that's
+  // the whole distinction from HH Inventory's mela/event stock), so
+  // asking where a sale came from would just be asking a question with
+  // only one possible answer.
   const message = needsCustomer
     ? `<b>${modelLabel}</b> will be marked <b>${status}</b>.<br><br>
        <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
        <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
-         style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">${soldFromField}`
+         style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">`
     : `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`;
   const proceed = await showConfirm({
     title: 'Mark as '+status+'?',
@@ -6556,12 +6561,12 @@ window._setUnitStatus = async (id, status) => {
   // Read the embedded input's value right after the modal resolves — the
   // DOM node is still there (only hidden), and nothing else touches it yet.
   const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : '';
-  const soldFrom = status==='Sold' ? (document.getElementById('confirmSoldFromInput')?.value || 'Showroom') : undefined;
   try{
     const payload = {status, customerName};
     // Timestamp used to auto-archive Sold units to Trash after 6 months —
-    // only set (or refreshed) when actually landing on Sold.
-    if(status==='Sold'){ payload.soldAt = new Date(); payload.soldFrom = soldFrom; }
+    // only set (or refreshed) when actually landing on Sold. Always
+    // Showroom for main Inventory, so it's set directly rather than asked.
+    if(status==='Sold'){ payload.soldAt = new Date(); payload.soldFrom = 'Showroom'; }
     await updateDoc(doc(db,"inventory",id),payload);
     logActivity(status==='Sold' ? 'Marked Sold' : 'Status: '+status, 'inventory', {...s, customerName});
     toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
@@ -6953,7 +6958,6 @@ function renderInvTable(list){
           ${s.hhFlag==='Hide' ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> HH Hide (not in stock)</span>` : ''}
         </div>
         ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
-        ${s.status==='Sold' && s.soldFrom ? `<div class="text-[10px] text-slate-400 flex items-center gap-1"><i class="fas ${s.soldFrom==='Showroom'?'fa-store':'fa-tents'} text-[8px]"></i>${escapeHtml(s.soldFrom)}</div>` : ''}
         </div>
       </td>
       <td class="px-4 py-3" data-th="Actions">
@@ -7099,8 +7103,11 @@ function loadHHInventory(){
 function updateHHInvStats(){
   const sold = hhInvData.filter(s=>s.status==='Sold').length;
   const booked = hhInvData.filter(s=>s.status==='Booked').length;
-  const hold = hhInvData.filter(s=>s.status==='Hold').length;
-  const available = hhInvData.length - sold - booked - hold;
+  // Hold is a flag on top of status (like HH Sales/HH Hide on Inventory),
+  // not its own status — a held unit is still "Available" underneath, so
+  // it isn't subtracted out of the base status counts here.
+  const hold = hhInvData.filter(s=>s.hold).length;
+  const available = hhInvData.length - sold - booked;
   document.getElementById('hhInvTotalChip').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+hold+' on hold  ·  '+booked+' booked  ·  '+sold+' sold';
   const pc = { pcHHAll:hhInvData.length, pcHHAvailable:available, pcHHHold:hold, pcHHBooked:booked, pcHHSold:sold };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
@@ -7124,7 +7131,11 @@ function hhSearchMatches(s, q){
 }
 function getFilteredHHInv(){
   let base = hhInvData;
-  if(hhInvStatusFilter !== 'all') base = base.filter(s=>(s.status||'Available')===hhInvStatusFilter);
+  // "Hold" is a flag (like Inventory's HH Sales/HH Hide), not a status
+  // value, so it needs its own branch here rather than a plain status
+  // equality check.
+  if(hhInvStatusFilter === 'Hold') base = base.filter(s=>!!s.hold);
+  else if(hhInvStatusFilter !== 'all') base = base.filter(s=>(s.status||'Available')===hhInvStatusFilter);
   if(hhInvModelFilter !== 'all') base = base.filter(s=>s.model===hhInvModelFilter);
   if(!hhInvSearchTerm) return base;
   const q = hhInvSearchTerm.toLowerCase().trim();
@@ -7190,9 +7201,8 @@ function renderHHInvTable(){
             ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>`
             : s.status==='Booked'
             ? `<span class="badge badge-amber"><i class="fas fa-bookmark"></i> Booked</span>`
-            : s.status==='Hold'
-            ? `<span class="badge badge-neutral"><i class="fas fa-pause"></i> On Hold</span>`
             : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`}
+          ${s.hold ? `<span class="badge badge-neutral"><i class="fas fa-pause"></i> On Hold</span>` : ''}
         </div>
         ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
         ${s.status==='Sold' && s.soldFrom ? `<div class="text-[10px] text-slate-400 flex items-center gap-1"><i class="fas ${s.soldFrom==='Showroom'?'fa-store':'fa-tents'} text-[8px]"></i>${escapeHtml(s.soldFrom)}</div>` : ''}
@@ -7400,18 +7410,34 @@ window._setHHInvStatus = async (id, status) => {
   const needsCustomer = (status==='Booked' || status==='Sold');
   const existingName = escapeHtml(s?.customerName||'');
   const existingSoldFrom = s?.soldFrom || 'Mela/Event';
+  const isKnownSoldFrom = existingSoldFrom==='Showroom' || existingSoldFrom==='Mela/Event';
+  // Others + a manual box — a mela unit doesn't only ever sell at the
+  // mela or the showroom; it could go out through some other channel
+  // entirely (another dealer's stall, a referral, etc.), so this isn't
+  // locked to just two options.
   const soldFromField = status==='Sold' ? `<br><br>
        <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Sold From</label>
-       <select id="confirmSoldFromInput" style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">
+       <select id="confirmSoldFromInput" onchange="document.getElementById('confirmSoldFromOtherWrap').style.display=this.value==='Other'?'block':'none'" style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">
          <option value="Showroom" ${existingSoldFrom==='Showroom'?'selected':''}>Showroom</option>
          <option value="Mela/Event" ${existingSoldFrom==='Mela/Event'?'selected':''}>Mela / Event</option>
-       </select>` : '';
+         <option value="Other" ${!isKnownSoldFrom?'selected':''}>Other</option>
+       </select>
+       <div id="confirmSoldFromOtherWrap" style="${isKnownSoldFrom?'display:none;':'display:block;'}margin-top:8px;">
+         <input id="confirmSoldFromOtherInput" type="text" value="${!isKnownSoldFrom?escapeHtml(existingSoldFrom):''}" placeholder="e.g. Another dealer's stall"
+           style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">
+       </div>` : '';
   const message = needsCustomer
     ? `<b>${modelLabel}</b> will be marked <b>${status}</b>.<br><br>
        <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
        <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
          style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">${soldFromField}`
     : `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`;
+  // The confirm modal's HTML (including the select above) is inserted
+  // synchronously by showConfirm() before it returns its pending Promise,
+  // so scheduling this for the very next tick is enough to catch it
+  // already in the DOM and give it the same smooth dropdown styling used
+  // everywhere else in the app, instead of the bare native <select> look.
+  if(status==='Sold') setTimeout(()=>enhanceNativeSelect(document.getElementById('confirmSoldFromInput'), { placeholder:'Sold From' }), 0);
   const proceed = await showConfirm({
     title:'Mark as '+status+'?', message, okText:'Confirm',
     okColorClass:'text-bajaj-blue hover:bg-blue-50',
@@ -7419,7 +7445,11 @@ window._setHHInvStatus = async (id, status) => {
   });
   if(!proceed) return;
   const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : '';
-  const soldFrom = status==='Sold' ? (document.getElementById('confirmSoldFromInput')?.value || 'Mela/Event') : undefined;
+  let soldFrom;
+  if(status==='Sold'){
+    const picked = document.getElementById('confirmSoldFromInput')?.value || 'Mela/Event';
+    soldFrom = picked==='Other' ? (document.getElementById('confirmSoldFromOtherInput')?.value.trim() || 'Other') : picked;
+  }
   try{
     const payload = {status, customerName};
     if(status==='Sold'){ payload.soldAt = new Date(); payload.soldFrom = soldFrom; }
@@ -7427,6 +7457,31 @@ window._setHHInvStatus = async (id, status) => {
     logActivity(status==='Sold' ? 'Marked Sold' : 'Status: '+status, 'hh_inventory', {...s, customerName});
     toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
     if(status==='Sold') maybePromptChalan(id, 'hh_inventory');
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
+// On Hold — mechanically the same as Inventory's own HH Sales/HH Hide
+// flag: a standalone boolean sitting alongside status, toggled
+// independently, rather than a status value of its own. Used for
+// multi-day melas where a unit shouldn't show as on-display today but
+// will again tomorrow.
+window._setHHInvHold = async (id, hold) => {
+  const s = hhInvData.find(x=>x.id===id);
+  const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
+  const proceed = await showConfirm({
+    title: hold ? 'Put on Hold?' : 'Take off Hold?',
+    message: hold
+      ? `<b>${modelLabel}</b> will be marked <b>On Hold</b> — not shown as on display today, without changing its Available status. Bring it back with "Take Off Hold" whenever it's shown again.`
+      : `<b>${modelLabel}</b> will come off Hold and show as on display again. Confirm?`,
+    okText:'Confirm',
+    okColorClass:'text-bajaj-blue hover:bg-blue-50',
+    iconClass:'fa-pause', iconColor:'#005EA6', iconBg:'#EAF3FB'
+  });
+  if(!proceed) return;
+  try{
+    await updateDoc(doc(db,"hh_inventory",id), { hold: hold || null });
+    logActivity(hold ? 'Put On Hold' : 'Took Off Hold', 'hh_inventory', s);
+    toast(hold ? 'Unit put on Hold.' : 'Unit taken off Hold.');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
@@ -8998,7 +9053,7 @@ function buildCustomerIndex(){
   [...invData, ...hhInvData].filter(u=>u.status==='Sold' && u.customerName).forEach(u=>{
     const rec = touch(u.customerName); if(!rec) return;
     const date = toDateSafe(u.soldAt);
-    rec.purchases.push({ model:u.model, chassis:u.chassis, regNo:u.regNo, date });
+    rec.purchases.push({ model:u.model, chassis:u.chassis, regNo:u.regNo, date, soldFrom:u.soldFrom });
     bump(rec, date);
   });
   chalanData.forEach(c=>{
@@ -9079,7 +9134,7 @@ window.openCustomerDetail = (name)=>{
       ${c.contact ? `<div class="flex items-center gap-2 mb-1"><i class="fas fa-phone text-slate-400 text-xs"></i>${escapeHtml(c.contact)}</div>` : ''}
       ${c.address ? `<div class="flex items-center gap-2"><i class="fas fa-location-dot text-slate-400 text-xs"></i>${escapeHtml(c.address)}</div>` : ''}
     </div>` : ''}
-    ${section('Purchases', 'fa-motorcycle', c.purchases, p=>`<div class="flex items-center justify-between px-3 py-2 bg-emerald-50/50 rounded-lg text-sm"><span class="font-semibold text-slate-700">${escapeHtml(p.model||'—')}</span><span class="text-slate-400 text-xs">${fmt(p.date)}</span></div>`)}
+    ${section('Purchases', 'fa-motorcycle', c.purchases, p=>`<div class="flex items-center justify-between px-3 py-2 bg-emerald-50/50 rounded-lg text-sm"><span class="font-semibold text-slate-700">${escapeHtml(p.model||'—')}${p.soldFrom?` <span class="text-[10px] text-slate-400 font-normal">· ${escapeHtml(p.soldFrom)}</span>`:''}</span><span class="text-slate-400 text-xs">${fmt(p.date)}</span></div>`)}
     ${section('Chalans', 'fa-file-invoice', c.chalans, ch=>`<div class="flex items-center justify-between px-3 py-2 bg-blue-50/50 rounded-lg text-sm"><span class="font-semibold text-slate-700">${escapeHtml(ch.model||'—')} ${ch.chalanNo?'#'+escapeHtml(ch.chalanNo):''}</span><span class="text-slate-400 text-xs">${fmt(ch.date)}</span></div>`)}
     ${section('Exchanges', 'fa-right-left', c.exchanges, e=>`<div class="flex items-center justify-between px-3 py-2 bg-orange-50/50 rounded-lg text-sm"><span class="font-semibold text-slate-700">${escapeHtml(e.model||'—')}</span><span class="text-slate-400 text-xs">${e.valuation?'Rs. '+Number(e.valuation).toLocaleString('en-IN'):''} · ${fmt(e.date)}</span></div>`)}
   `;
@@ -9625,7 +9680,7 @@ window.downloadFullBackup = ()=>{
     addSheet('HH Inventory', hhInvData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Chassis':s.chassis||'', 'Engine':s.engine||'', 'RegNo':s.regNo||'',
       'Colour':s.color||'', 'Event':s.eventName||'', 'Owner':s.owner==='other'?'Other':(s.owner==='hh'?'HH':'Dealer'),
-      'Owner Name':s.owner==='other'?(s.ownerName||''):'', 'Status':s.status||'', 'Customer':s.customerName||'',
+      'Owner Name':s.owner==='other'?(s.ownerName||''):'', 'Status':s.status||'', 'On Hold':s.hold?'Yes':'No', 'Customer':s.customerName||'',
       'Sold From':s.soldFrom||'', 'Sold Date':fmtDate(s.soldAt), 'Added Date':fmtDate(s.addedAt)
     })));
     addSheet('Exchange Stock', exchangeData.map(s=>({
@@ -9766,8 +9821,9 @@ document.getElementById('restoreBackupBtn')?.addEventListener('click', async ()=
       model:String(r['Model']||''), chassis:String(r['Chassis']||''), engine:String(r['Engine']||''), regNo:String(r['RegNo']||''),
       color:String(r['Colour']||''), eventName:String(r['Event']||''),
       owner: String(r['Owner']||'').toLowerCase()==='hh' ? 'hh' : (String(r['Owner']||'').toLowerCase()==='other' ? 'other' : 'dealer'),
-      ownerName:String(r['Owner Name']||''), status:String(r['Status']||'Available'), customerName:String(r['Customer']||''),
-      soldFrom:String(r['Sold From']||'')
+      ownerName:String(r['Owner Name']||''), status:String(r['Status']||'Available'),
+      hold: String(r['On Hold']||'').toLowerCase()==='yes' ? true : null,
+      customerName:String(r['Customer']||''), soldFrom:String(r['Sold From']||'')
     }), ()=>hhInvData.length < MAX_TOTAL_INVENTORY_UNITS);
 
     await importSnCollection('Exchange Stock', 'exchange_stock', r => ({
