@@ -833,21 +833,22 @@
   #chalanPrintWrapper{ display:none; }
   .chalan-copy{ font-family:'Times New Roman',Georgia,serif; color:#000; padding-bottom:6mm; margin-bottom:6mm; border-bottom:1px dashed #999; }
   .chalan-copy:last-child{ border-bottom:none; margin-bottom:0; }
-  .chalan-head{ text-align:center; margin-bottom:4mm; }
+  .chalan-head{ text-align:center; margin-bottom:2mm; }
   .chalan-company{ font-size:23px; font-weight:700; }
   .chalan-loc{ font-size:13px; margin-top:2px; }
   .chalan-title{ font-size:16px; font-weight:700; margin-top:4px; text-decoration:underline; }
-  .chalan-meta-table{ width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4mm; font-size:14.5px; }
-  .chalan-meta-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
-  .chalan-bike-table{ width:100%; border-collapse:collapse; border:1px solid #000; font-size:14.5px; }
-  .chalan-bike-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
-  .cb-sn{ width:7%; text-align:center; }
-  .cb-label{ width:24%; white-space:nowrap; }
-  .cb-colon{ width:3%; text-align:center; }
-  .cb-value{ width:46%; }
-  .cb-amt{ width:20%; text-align:right; padding-right:10px; }
-  .cb-total-lbl{ font-weight:700; font-size:15.5px; }
-  .cb-total-val{ font-weight:700; font-size:15.5px; }
+  .chalan-rule{ border-top:1.5px solid #000; margin:4mm 0; }
+  .chalan-rule-thin{ border-top:1px solid #000; margin:5mm 0 3mm; }
+  .chalan-section-head{ font-size:14.5px; font-weight:700; margin:4mm 0 2mm; }
+  .chalan-fieldlist{ list-style:none; margin:0; padding:0; font-size:14.5px; }
+  .chalan-fieldlist li{ display:flex; align-items:baseline; gap:6px; padding:2.5px 0; }
+  .chalan-fieldlist li::before{ content:'•'; margin-right:2px; }
+  .cf-label{ flex:0 0 165px; }
+  .cf-colon{ flex:0 0 12px; }
+  .cf-value{ flex:1; }
+  .cf-bold{ font-weight:700; }
+  .chalan-total-row{ display:flex; justify-content:space-between; font-size:15.5px; font-weight:700; border-top:1px solid #000; margin-top:3mm; padding-top:2.5mm; }
+  .chalan-declaration{ font-size:12.5px; color:#333; line-height:1.5; }
   .chalan-sign-table{ width:100%; border-collapse:collapse; margin-top:14mm; font-size:13px; }
   .chalan-sign-table td.cs-line{ border-top:1px solid #000; width:42%; }
   .chalan-sign-table td.cs-gap{ width:16%; }
@@ -3000,16 +3001,15 @@
 <!-- CHALAN PREVIEW (screen) -->
 <div id="chalanPreviewModal" class="hidden fixed inset-0 z-[650] items-center justify-center p-4" style="background:rgba(15,23,42,.65);backdrop-filter:blur(3px);" onclick="if(event.target===this) window.closeChalanPreview()">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[92vh] flex flex-col" style="animation:slideIn .2s ease;">
-    <div class="p-4 flex items-center justify-between border-b border-slate-100 flex-shrink-0">
+    <div class="p-4 flex items-center justify-between gap-3 border-b border-slate-100 flex-shrink-0 flex-wrap">
       <div class="flex items-center gap-2 section-title text-xl"><i class="fas fa-eye text-amber-500"></i> Preview</div>
-      <button onclick="window.closeChalanPreview()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+      <div class="flex items-center gap-2">
+        <button onclick="window.printChalanNow()" class="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-xl text-sm font-bold hover:bg-amber-600 transition-all"><i class="fas fa-print"></i> Print</button>
+        <button onclick="window.closeChalanPreview()" class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+      </div>
     </div>
     <div class="overflow-auto p-6 bg-slate-100" style="flex:1">
       <div id="chalanPreviewBody" class="bg-white shadow-md mx-auto" style="width:210mm;min-width:210mm;padding:10mm;box-sizing:border-box"></div>
-    </div>
-    <div class="p-4 border-t border-slate-100 flex-shrink-0 flex gap-2">
-      <button onclick="window.closeChalanPreview()" class="flex-1 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-slate-300 transition-all">Close</button>
-      <button onclick="window.printChalanNow()" class="flex-1 cta-primary !justify-center"><i class="fas fa-print"></i> Print</button>
     </div>
   </div>
 </div>
@@ -3024,24 +3024,33 @@
       <div class="chalan-loc">Phidim Panchthar</div>
       <div class="chalan-title">Delevery Challan</div>
     </div>
-    <table class="chalan-meta-table">
-      <tr><td><b>Chalan No :</b> <span data-f="chalanNo"></span></td></tr>
-      <tr><td><b>Date Of Delevery :</b> <span data-f="deliveryDate"></span></td></tr>
-      <tr><td><b>Deliverd To :</b> <span data-f="custName"></span></td></tr>
-      <tr><td><b>Address :</b> <span data-f="address"></span></td></tr>
-      <tr><td><b>Contact :</b> <span data-f="contact"></span></td></tr>
-    </table>
-    <table class="chalan-bike-table">
-      <tr><td class="cb-sn">S.N</td><td class="cb-label">Bike Model</td><td class="cb-colon">:</td><td class="cb-value" data-f="model"></td><td class="cb-amt" data-f="qty"></td></tr>
-      <tr><td class="cb-sn">1</td><td class="cb-label">Chassis No</td><td class="cb-colon">:</td><td class="cb-value" data-f="chassis"></td><td class="cb-amt"></td></tr>
-      <tr><td class="cb-sn"></td><td class="cb-label">Engine No</td><td class="cb-colon">:</td><td class="cb-value" data-f="engine"></td><td class="cb-amt"></td></tr>
-      <tr><td class="cb-sn"></td><td class="cb-label">Regd No</td><td class="cb-colon">:</td><td class="cb-value" data-f="regNo"></td><td class="cb-amt"></td></tr>
-      <tr><td class="cb-sn"></td><td class="cb-label">MFD Date</td><td class="cb-colon">:</td><td class="cb-value" data-f="mfdDate"></td><td class="cb-amt"></td></tr>
-      <tr><td class="cb-sn"></td><td class="cb-label">Bike Price</td><td class="cb-colon">:</td><td class="cb-value" data-f="price"></td><td class="cb-amt"></td></tr>
-      <tr><td class="cb-sn"></td><td class="cb-label">Insurance Amount</td><td class="cb-colon">:</td><td class="cb-value" data-f="insAmount"></td><td class="cb-amt"></td></tr>
-      <tr><td class="cb-sn"></td><td class="cb-label">Insurance Type</td><td class="cb-colon">:</td><td class="cb-value" data-f="insType"></td><td class="cb-amt"></td></tr>
-      <tr><td class="cb-sn" colspan="3"></td><td class="cb-total-lbl" style="text-align:center">Total</td><td class="cb-amt cb-total-val" data-f="total"></td></tr>
-    </table>
+    <div class="chalan-rule"></div>
+
+    <div class="chalan-section-head">Customer &amp; Vehicle Information</div>
+    <ul class="chalan-fieldlist">
+      <li><span class="cf-label">Chalan No</span><span class="cf-colon">:</span><span class="cf-value" data-f="chalanNo"></span></li>
+      <li><span class="cf-label">Date Of Delivery</span><span class="cf-colon">:</span><span class="cf-value" data-f="deliveryDate"></span></li>
+      <li><span class="cf-label">Delivered To</span><span class="cf-colon">:</span><span class="cf-value cf-bold" data-f="custName"></span></li>
+      <li><span class="cf-label">Address</span><span class="cf-colon">:</span><span class="cf-value" data-f="address"></span></li>
+      <li><span class="cf-label">Contact</span><span class="cf-colon">:</span><span class="cf-value" data-f="contact"></span></li>
+      <li><span class="cf-label">Bike Model</span><span class="cf-colon">:</span><span class="cf-value cf-bold" data-f="model"></span></li>
+    </ul>
+
+    <div class="chalan-section-head">Financial Details</div>
+    <ul class="chalan-fieldlist">
+      <li><span class="cf-label">Chassis No</span><span class="cf-colon">:</span><span class="cf-value" data-f="chassis"></span></li>
+      <li><span class="cf-label">Engine No</span><span class="cf-colon">:</span><span class="cf-value" data-f="engine"></span></li>
+      <li><span class="cf-label">Regd No</span><span class="cf-colon">:</span><span class="cf-value" data-f="regNo"></span></li>
+      <li><span class="cf-label">MFD Date</span><span class="cf-colon">:</span><span class="cf-value" data-f="mfdDate"></span></li>
+      <li><span class="cf-label">Bike Price</span><span class="cf-colon">:</span><span class="cf-value" data-f="price"></span></li>
+      <li><span class="cf-label">Insurance Amount</span><span class="cf-colon">:</span><span class="cf-value" data-f="insAmount"></span></li>
+      <li><span class="cf-label">Insurance Type</span><span class="cf-colon">:</span><span class="cf-value" data-f="insType"></span></li>
+    </ul>
+    <div class="chalan-total-row"><span>Total</span><span data-f="total"></span></div>
+
+    <div class="chalan-rule chalan-rule-thin"></div>
+    <div class="chalan-declaration">We confirm that the information provided above is accurate, and it has been reviewed and acknowledged by both parties.</div>
+
     <table class="chalan-sign-table">
       <tr>
         <td class="cs-line"></td>
@@ -6273,21 +6282,22 @@ window.printChalanNow = async ()=>{
   body{ font-family:'Times New Roman',Georgia,serif; margin:0; padding:0; color:#000; }
   .chalan-copy{ padding-bottom:6mm; margin-bottom:6mm; border-bottom:1px dashed #999; }
   .chalan-copy:last-child{ border-bottom:none; margin-bottom:0; }
-  .chalan-head{ text-align:center; margin-bottom:4mm; }
+  .chalan-head{ text-align:center; margin-bottom:2mm; }
   .chalan-company{ font-size:23px; font-weight:700; }
   .chalan-loc{ font-size:13px; margin-top:2px; }
   .chalan-title{ font-size:16px; font-weight:700; margin-top:4px; text-decoration:underline; }
-  .chalan-meta-table{ width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4mm; font-size:14.5px; }
-  .chalan-meta-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
-  .chalan-bike-table{ width:100%; border-collapse:collapse; border:1px solid #000; font-size:14.5px; }
-  .chalan-bike-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
-  .cb-sn{ width:7%; text-align:center; }
-  .cb-label{ width:24%; white-space:nowrap; }
-  .cb-colon{ width:3%; text-align:center; }
-  .cb-value{ width:46%; }
-  .cb-amt{ width:20%; text-align:right; padding-right:10px; }
-  .cb-total-lbl{ font-weight:700; font-size:15.5px; }
-  .cb-total-val{ font-weight:700; font-size:15.5px; }
+  .chalan-rule{ border-top:1.5px solid #000; margin:4mm 0; }
+  .chalan-rule-thin{ border-top:1px solid #000; margin:5mm 0 3mm; }
+  .chalan-section-head{ font-size:14.5px; font-weight:700; margin:4mm 0 2mm; }
+  .chalan-fieldlist{ list-style:none; margin:0; padding:0; font-size:14.5px; }
+  .chalan-fieldlist li{ display:flex; align-items:baseline; gap:6px; padding:2.5px 0; }
+  .chalan-fieldlist li::before{ content:'•'; margin-right:2px; }
+  .cf-label{ flex:0 0 165px; }
+  .cf-colon{ flex:0 0 12px; }
+  .cf-value{ flex:1; }
+  .cf-bold{ font-weight:700; }
+  .chalan-total-row{ display:flex; justify-content:space-between; font-size:15.5px; font-weight:700; border-top:1px solid #000; margin-top:3mm; padding-top:2.5mm; }
+  .chalan-declaration{ font-size:12.5px; color:#333; line-height:1.5; }
   .chalan-sign-table{ width:100%; border-collapse:collapse; margin-top:14mm; font-size:13px; }
   .chalan-sign-table td.cs-line{ border-top:1px solid #000; width:42%; }
   .chalan-sign-table td.cs-gap{ width:16%; }
