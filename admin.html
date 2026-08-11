@@ -851,8 +851,10 @@
   .cb-amt{ width:20%; text-align:right; padding-right:10px; }
   .cb-total-lbl{ font-weight:700; font-size:15.5px; }
   .cb-total-val{ font-weight:700; font-size:15.5px; }
-  .chalan-stamp-wrap{ display:flex; justify-content:flex-end; margin-top:10mm; }
-  .chalan-stamp-box{ width:40mm; height:26mm; border:1.5px dashed #999; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#999; font-size:11px; letter-spacing:.05em; text-transform:uppercase; }
+  /* The on-screen Preview mirrors this height so what's shown here is
+     exactly what prints — no more guessing "is this actually going to
+     the bottom half or not" and printing the wrong half by mistake. */
+  .chalan-position-spacer{ height:140mm; }
   /* ── Simple, clean JPG-exportable report card (not tied to print page size) ── */
   .jpg-report-paper{ font-family:'DM Sans',sans-serif; background:#fff; width:900px; padding:34px 38px; margin:0 auto; box-sizing:border-box; color:#0F172A; flex-shrink:0; }
   .jrp-head{ text-align:center; border-bottom:3px solid #005EA6; padding-bottom:14px; }
@@ -3053,9 +3055,6 @@
       <tr><td class="cb-sn"></td><td class="cb-label">Insurance Type</td><td class="cb-colon">:</td><td class="cb-value" data-f="insType"></td><td class="cb-amt"></td></tr>
       <tr><td class="cb-sn" colspan="3"></td><td class="cb-total-lbl" style="text-align:center">Total</td><td class="cb-amt cb-total-val" data-f="total"></td></tr>
     </table>
-    <div class="chalan-stamp-wrap">
-      <div class="chalan-stamp-box">Stamp</div>
-    </div>
   </div>
 </template>
 
@@ -6240,6 +6239,22 @@ window.setChalanPrintPosition = (pos)=>{
   chalanPrintPosition = pos;
   document.getElementById('chalanPosTopBtn')?.classList.toggle('active', pos==='top');
   document.getElementById('chalanPosBottomBtn')?.classList.toggle('active', pos==='bottom');
+  // Mirror the choice in the on-screen Preview itself — seeing the blank
+  // gap before the Chalan (or not) is what actually prevents printing to
+  // the wrong half by mistake; the toggle buttons alone aren't enough.
+  const previewBody = document.getElementById('chalanPreviewBody');
+  if(previewBody){
+    let spacer = previewBody.querySelector('.chalan-position-spacer');
+    if(pos==='bottom'){
+      if(!spacer){
+        spacer = document.createElement('div');
+        spacer.className = 'chalan-position-spacer';
+        previewBody.insertBefore(spacer, previewBody.firstChild);
+      }
+    } else if(spacer){
+      spacer.remove();
+    }
+  }
 };
 window.printChalanNow = async ()=>{
   if(isPrintingChalan) return; // guards against a fast double-tap saving two Chalan records
@@ -6298,8 +6313,6 @@ window.printChalanNow = async ()=>{
   .cb-amt{ width:20%; text-align:right; padding-right:10px; }
   .cb-total-lbl{ font-weight:700; font-size:15.5px; }
   .cb-total-val{ font-weight:700; font-size:15.5px; }
-  .chalan-stamp-wrap{ display:flex; justify-content:flex-end; margin-top:10mm; }
-  .chalan-stamp-box{ width:40mm; height:26mm; border:1.5px dashed #999; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#999; font-size:11px; letter-spacing:.05em; text-transform:uppercase; }
   /* Top/Bottom print position — an A4 sheet is ~297mm tall and one Chalan
      copy only needs about half of that, so printing the same physical
      sheet twice (once for the top half, once for the bottom half after
