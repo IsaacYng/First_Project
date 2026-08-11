@@ -4063,6 +4063,17 @@ function normModelName(v){
 function findMasterBikeByName(name){
   const target = normModelName(name);
   if(!target) return null;
+  // 0) Alias check first — an explicitly-confirmed alias (Model Aliases
+  // page) represents a deliberate human correction, so it should always
+  // win over guessing by fuzzy text similarity. Without this, a unit
+  // whose alias was just confirmed would still fail to save/re-save with
+  // "Model not found", since the raw typed text still doesn't textually
+  // resemble the master name it's mapped to.
+  const aliasHit = modelAliasesData.find(a => normModelName(a.alias) === target);
+  if(aliasHit){
+    const viaAlias = allMasterBikes.find(b => normModelName(b.name) === normModelName(aliasHit.canonical));
+    if(viaAlias) return viaAlias;
+  }
   // 1) Exact match (case/space/punctuation-insensitive) — preferred.
   const exact = allMasterBikes.find(b => normModelName(b.name) === target);
   if(exact) return exact;
