@@ -7550,6 +7550,7 @@ function updateInvStats(){
   const invLoadedLabel = invHasMore ? invData.length+' loaded' : invData.length+' unit'+(invData.length!==1?'s':'')+' total';
   document.getElementById('invTotalChip').textContent = invLoadedLabel+'  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+hhSalesCount+' HH Sales  ·  '+hhHideCount+' HH Hide';
   if(invHasMore) refreshPagedTotalChip('inventory', 'invTotalChip', invData.length);
+  checkForHiddenUnits('inventory', invData.length, invHasMore, 'stockTable');
   const pc = { pcAll:invData.length, pcAvailable:available, pcBooked:booked, pcSold:sold, pcHHSales:hhSalesCount, pcHHHide:hhHideCount };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
 }
@@ -7626,6 +7627,68 @@ async function refreshPagedTotalChip(collectionName, chipElId, loadedCount){
   }catch(e){ console.error('paged total chip refresh failed for '+collectionName, e); }
 }
 
+// Firestore's orderBy silently DROPS any document that doesn't have the
+// field being ordered on. Both stock tables order by 'sn', so a unit
+// saved without an S.N (an older record, an interrupted import, a
+// restore) becomes completely invisible in the register — it can't be
+// seen, edited, sold or deleted — while the Stock Report (which reads the
+// collection with no orderBy) still counts it. That's exactly how the
+// register and the report end up disagreeing. This compares the true
+// server count against what actually loaded and surfaces the gap instead
+// of letting it stay silent.
+async function checkForHiddenUnits(colName, loadedCount, hasMore, tableId){
+  const bannerId = tableId + '-hiddenWarning';
+  const removeBanner = ()=>{ document.getElementById(bannerId)?.remove(); };
+  if(hasMore){ removeBanner(); return; } // still paginating — can't conclude anything yet
+  try{
+    const snap = await getCountFromServer(collection(db, colName));
+    const total = snap.data().count;
+    const hidden = total - loadedCount;
+    if(hidden <= 0){ removeBanner(); return; }
+    const table = document.getElementById(tableId);
+    if(!table) return;
+    const host = table.closest('.overflow-x-auto') || table.parentElement;
+    if(!host) return;
+    let banner = document.getElementById(bannerId);
+    if(!banner){
+      banner = document.createElement('div');
+      banner.id = bannerId;
+      banner.className = 'mx-4 my-3 p-3 rounded-xl border-2 border-amber-200 bg-amber-50 flex items-start gap-3';
+      host.parentElement.insertBefore(banner, host);
+    }
+    banner.innerHTML = `
+      <i class="fas fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-bold text-slate-800">${hidden} unit${hidden!==1?'s are':' is'} hidden from this list</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">${hidden===1?'It has':'They have'} no S.N, so ${hidden===1?'it does':'they do'} not show up here — but ${hidden===1?'it still counts':'they still count'} in the Stock Report, which is why the two totals disagree. Repairing assigns the missing S.N so ${hidden===1?'it appears':'they appear'} normally.</div>
+      </div>
+      <button onclick="repairMissingSn('${colName}')" class="flex-shrink-0 px-3 py-1.5 bg-amber-500 text-white text-xs font-bold rounded-lg hover:bg-amber-600 transition-all">Repair</button>`;
+  }catch(e){ console.error('hidden-unit check failed for '+colName, e); }
+}
+
+// Assigns an S.N to every document that's missing one, so nothing stays
+// invisible behind the orderBy. Additive only — records that already have
+// an S.N are left exactly as they are.
+window.repairMissingSn = async (colName)=>{
+  if(blockIfReconditionOnly()) return;
+  try{
+    toast('Checking for hidden units…');
+    const snap = await getDocs(collection(db, colName));
+    const all = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    const hasSn = x => x.sn !== undefined && x.sn !== null && x.sn !== '' && Number.isFinite(Number(x.sn));
+    const missing = all.filter(x=>!hasSn(x));
+    if(!missing.length){ toast('Nothing to repair — every unit already has an S.N.'); return; }
+    let next = all.filter(hasSn).reduce((m,x)=>Math.max(m, Number(x.sn)), 0) + 1;
+    for(let i=0;i<missing.length;i+=400){
+      const batch = writeBatch(db);
+      missing.slice(i,i+400).forEach(x=>batch.update(doc(db,colName,x.id), { sn: next++ }));
+      await batch.commit();
+    }
+    logActivity('Repaired Missing S.N', colName, { model: `${missing.length} unit(s)` });
+    toast(`${missing.length} hidden unit(s) repaired — they'll appear in the list now.`);
+  }catch(e){ toast('Repair failed: '+friendlyError(e),'err'); }
+};
+
 function updateHHInvStats(){
   const sold = hhInvData.filter(s=>s.status==='Sold').length;
   const booked = hhInvData.filter(s=>s.status==='Booked').length;
@@ -7643,6 +7706,7 @@ function updateHHInvStats(){
   const hhLoadedLabel = hhHasMore ? hhInvData.length+' loaded' : hhInvData.length+' unit'+(hhInvData.length!==1?'s':'')+' total';
   document.getElementById('hhInvTotalChip').textContent = hhLoadedLabel+'  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+hhSalesCount+' HH Sales  ·  '+hhHideCount+' HH Hide';
   if(hhHasMore) refreshPagedTotalChip('hh_inventory', 'hhInvTotalChip', hhInvData.length);
+  checkForHiddenUnits('hh_inventory', hhInvData.length, hhHasMore, 'hhInvTable');
   const pc = { pcHHAll:hhInvData.length, pcHHAvailable:available, pcHHBooked:booked, pcHHSold:sold, pcHHInvSales:hhSalesCount, pcHHInvHide:hhHideCount };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
 }
