@@ -2736,13 +2736,16 @@
       </div>
 
       <!-- Stat tiles -->
-      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
-        <div class="stock-tile"><div class="k">Available Stock</div><div class="v" id="stkTotalUnits">—</div></div>
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+        <div class="stock-tile"><div class="k">In Stock (incl. Booked)</div><div class="v" id="stkTotalUnits">—</div></div>
+        <div class="stock-tile"><div class="k">Available (Unbooked)</div><div class="v" id="stkAvailable">—</div></div>
+        <div class="stock-tile"><div class="k">Booked</div><div class="v" id="stkBooked">—</div></div>
         <div class="stock-tile"><div class="k">Models In Stock</div><div class="v" id="stkModels">—</div></div>
         <div class="stock-tile"><div class="k">Colours</div><div class="v" id="stkColours">—</div></div>
         <div class="stock-tile"><div class="k">Sold (Not In Stock)</div><div class="v" id="stkSold">—</div></div>
         <div class="stock-tile"><div class="k">Report Date</div><div class="v text-lg" id="stkDate">—</div></div>
       </div>
+      <p class="text-[11px] text-slate-400 -mt-3 mb-5"><i class="fas fa-circle-info mr-1"></i>A booked bike is still physically in the showroom, so it counts toward In Stock. The Inventory page's "Available" pill shows the unbooked figure — that's why the two can differ.</p>
 
       <!-- Category-wise totals: simple, big numbers, easy to read at a glance -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5" id="stkCategoryWrap">
@@ -2811,13 +2814,16 @@
       </div>
 
       <!-- Stat tiles -->
-      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
-        <div class="stock-tile"><div class="k">Available Stock</div><div class="v" id="hhstkTotalUnits">—</div></div>
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+        <div class="stock-tile"><div class="k">In Stock (incl. Booked)</div><div class="v" id="hhstkTotalUnits">—</div></div>
+        <div class="stock-tile"><div class="k">Available (Unbooked)</div><div class="v" id="hhstkAvailable">—</div></div>
+        <div class="stock-tile"><div class="k">Booked</div><div class="v" id="hhstkBooked">—</div></div>
         <div class="stock-tile"><div class="k">Models In Stock</div><div class="v" id="hhstkModels">—</div></div>
         <div class="stock-tile"><div class="k">Colours</div><div class="v" id="hhstkColours">—</div></div>
         <div class="stock-tile"><div class="k">Sold (Not In Stock)</div><div class="v" id="hhstkSold">—</div></div>
         <div class="stock-tile"><div class="k">Report Date</div><div class="v text-lg" id="hhstkDate">—</div></div>
       </div>
+      <p class="text-[11px] text-slate-400 -mt-3 mb-5"><i class="fas fa-circle-info mr-1"></i>A booked bike is still physically on the stall, so it counts toward In Stock. The HH Inventory page's "Available" pill shows the unbooked figure — that's why the two can differ.</p>
 
       <!-- Category-wise totals -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5" id="hhstkCategoryWrap">
@@ -7541,7 +7547,9 @@ function updateInvStats(){
   // really gone (even if its raw status field still says Available), so it
   // must not be counted here even though it isn't Sold/Booked either.
   const available = invData.filter(s=>(s.status||'Available')==='Available' && s.hhFlag!=='Hide').length;
-  document.getElementById('invTotalChip').textContent = invData.length+' unit'+(invData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+hhSalesCount+' HH Sales  ·  '+hhHideCount+' HH Hide';
+  const invLoadedLabel = invHasMore ? invData.length+' loaded' : invData.length+' unit'+(invData.length!==1?'s':'')+' total';
+  document.getElementById('invTotalChip').textContent = invLoadedLabel+'  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+hhSalesCount+' HH Sales  ·  '+hhHideCount+' HH Hide';
+  if(invHasMore) refreshPagedTotalChip('inventory', 'invTotalChip', invData.length);
   const pc = { pcAll:invData.length, pcAvailable:available, pcBooked:booked, pcSold:sold, pcHHSales:hhSalesCount, pcHHHide:hhHideCount };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
 }
@@ -7592,6 +7600,32 @@ function loadHHInventory(){
   });
 }
 
+// Fills in the true collection size on a paginated table's summary chip.
+// The pill counts beside it still describe only the loaded rows (getting
+// per-status server counts would mean a query per status), so this just
+// appends an honest "of N in total" rather than pretending the loaded
+// page is everything. Failures are silent — a missing suffix is fine,
+// a broken chip is not.
+const pagedTotalChipCache = {};
+async function refreshPagedTotalChip(collectionName, chipElId, loadedCount){
+  try{
+    const cached = pagedTotalChipCache[collectionName];
+    let total;
+    if(cached && (Date.now() - cached.at) < TOTAL_COUNT_CACHE_MS){
+      total = cached.count;
+    } else {
+      const snap = await getCountFromServer(collection(db, collectionName));
+      total = snap.data().count;
+      pagedTotalChipCache[collectionName] = { count: total, at: Date.now() };
+    }
+    const el = document.getElementById(chipElId);
+    if(!el || total <= loadedCount) return;
+    if(el.textContent.startsWith(loadedCount+' loaded')){
+      el.textContent = el.textContent.replace(loadedCount+' loaded', `${loadedCount} of ${total} loaded`);
+    }
+  }catch(e){ console.error('paged total chip refresh failed for '+collectionName, e); }
+}
+
 function updateHHInvStats(){
   const sold = hhInvData.filter(s=>s.status==='Sold').length;
   const booked = hhInvData.filter(s=>s.status==='Booked').length;
@@ -7601,7 +7635,14 @@ function updateHHInvStats(){
   // is really gone (even if its raw status field still says Available),
   // so it must not be counted here even though it isn't Sold/Booked either.
   const available = hhInvData.filter(s=>(s.status||'Available')==='Available' && s.hhFlag!=='Hide').length;
-  document.getElementById('hhInvTotalChip').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+hhSalesCount+' HH Sales  ·  '+hhHideCount+' HH Hide';
+  // The table is paginated, so these counts describe what's LOADED, not
+  // the whole collection — saying "total" when a later page hasn't loaded
+  // yet was reporting a number that simply wasn't true (and disagreed with
+  // the Stock Report, which reads every document). refreshPagedTotalChip()
+  // fills in the real figure right after.
+  const hhLoadedLabel = hhHasMore ? hhInvData.length+' loaded' : hhInvData.length+' unit'+(hhInvData.length!==1?'s':'')+' total';
+  document.getElementById('hhInvTotalChip').textContent = hhLoadedLabel+'  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+hhSalesCount+' HH Sales  ·  '+hhHideCount+' HH Hide';
+  if(hhHasMore) refreshPagedTotalChip('hh_inventory', 'hhInvTotalChip', hhInvData.length);
   const pc = { pcHHAll:hhInvData.length, pcHHAvailable:available, pcHHBooked:booked, pcHHSold:sold, pcHHInvSales:hhSalesCount, pcHHInvHide:hhHideCount };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
 }
@@ -8094,6 +8135,12 @@ function renderStockDashboard(){
   models.forEach(m=>Object.keys(byModel[m].colours).forEach(c=>allColours.add(c)));
 
   document.getElementById('stkTotalUnits').textContent = stockReportTotalUnits;
+  // Booked units are part of In Stock (still physically here) but not
+  // 'Available' — showing both makes the report reconcile with the
+  // Inventory page's own Available pill instead of silently disagreeing.
+  const stkBookedCount = stockReportAllUnits.filter(s=>s.status==='Booked' && s.hhFlag!=='Hide').length;
+  document.getElementById('stkBooked').textContent = stkBookedCount;
+  document.getElementById('stkAvailable').textContent = Math.max(0, stockReportTotalUnits - stkBookedCount);
   document.getElementById('stkModels').textContent = models.length;
   document.getElementById('stkColours').textContent = allColours.size;
   document.getElementById('stkSold').textContent = stockReportSoldUnits;
@@ -8365,6 +8412,9 @@ function renderHHStockDashboard(){
   models.forEach(m=>Object.keys(byModel[m].colours).forEach(c=>allColours.add(c)));
 
   document.getElementById('hhstkTotalUnits').textContent = hhStockReportTotalUnits;
+  const hhstkBookedCount = hhStockReportAllUnits.filter(s=>s.status==='Booked' && s.hhFlag!=='Hide').length;
+  document.getElementById('hhstkBooked').textContent = hhstkBookedCount;
+  document.getElementById('hhstkAvailable').textContent = Math.max(0, hhStockReportTotalUnits - hhstkBookedCount);
   document.getElementById('hhstkModels').textContent = models.length;
   document.getElementById('hhstkColours').textContent = allColours.size;
   document.getElementById('hhstkSold').textContent = hhStockReportSoldUnits;
