@@ -1738,8 +1738,10 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Mela / Event Name <span class="text-red-400">*</span></label>
-            <input type="text" id="hhEventName" placeholder="e.g. Phidim Mela 2026"
+            <input type="text" id="hhEventName" list="hhEventNameOptions" placeholder="e.g. Phidim Mela 2026"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+            <datalist id="hhEventNameOptions"></datalist>
+            <p class="text-[10px] text-slate-400">Tap the field to see events already used — or type a new one.</p>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Unit Owner</label>
@@ -2027,8 +2029,10 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Send To</label>
-            <input type="text" id="exSendTo" placeholder="e.g. Showroom, HH Mela, Workshop…"
+            <input type="text" id="exSendTo" list="exSendToOptions" placeholder="e.g. Showroom, HH Mela, Workshop…"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+            <datalist id="exSendToOptions"></datalist>
+            <p class="text-[10px] text-slate-400">Tap the field to see places already used — or type a new one.</p>
           </div>
           <div class="flex flex-col gap-1.5 sm:col-span-3">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Remarks</label>
@@ -2236,8 +2240,10 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Send To</label>
-            <input type="text" id="exSrSendTo" placeholder="e.g. Showroom, HH Mela, Workshop…"
+            <input type="text" id="exSrSendTo" list="exSrSendToOptions" placeholder="e.g. Showroom, HH Mela, Workshop…"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+            <datalist id="exSrSendToOptions"></datalist>
+            <p class="text-[10px] text-slate-400">Tap the field to see places already used — or type a new one.</p>
           </div>
           <div class="flex flex-col gap-1.5 sm:col-span-3">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Remarks</label>
@@ -7754,7 +7760,18 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 });
 
+// Suggestion list for Mela/Event Name — built fresh from whatever's
+// already been typed on other HH Inventory units, so the same event
+// doesn't end up spelled two different ways across records.
+function populateEventNameDatalist(){
+  const names = new Set();
+  hhInvData.forEach(s=>{ const v=(s.eventName||'').trim(); if(v) names.add(v); });
+  const dl = document.getElementById('hhEventNameOptions');
+  if(dl) dl.innerHTML = [...names].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${escapeHtml(v)}"></option>`).join('');
+}
+
 window.openHHInvFormModal = ()=>{
+  populateEventNameDatalist();
   document.getElementById('hhInvFormModal').classList.add('open');
 };
 window.closeHHInvFormModal = ()=>{
@@ -9538,7 +9555,22 @@ document.getElementById('fixExchangeSnBtn').addEventListener('click', async ()=>
   }
 });
 
-window.openExchangeFormModal = ()=>{ document.getElementById('exchangeFormModal').classList.add('open'); };
+// Both Send To fields (Mela + Showroom Exchange) share one suggestion
+// list, built fresh from whatever's actually been typed across both
+// collections — so a destination used in one shows up as a suggestion in
+// the other too, instead of staff re-typing (and risking a slightly
+// different spelling for) the same place twice.
+function populateSendToDatalist(){
+  const allSendTo = new Set();
+  [...exchangeData, ...exchangeSrData].forEach(s=>{ const v=(s.sendTo||'').trim(); if(v) allSendTo.add(v); });
+  const optionsHtml = [...allSendTo].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${escapeHtml(v)}"></option>`).join('');
+  const dl1 = document.getElementById('exSendToOptions');
+  const dl2 = document.getElementById('exSrSendToOptions');
+  if(dl1) dl1.innerHTML = optionsHtml;
+  if(dl2) dl2.innerHTML = optionsHtml;
+}
+
+window.openExchangeFormModal = ()=>{ populateSendToDatalist(); document.getElementById('exchangeFormModal').classList.add('open'); };
 window.closeExchangeFormModal = ()=>{ document.getElementById('exchangeFormModal').classList.remove('open'); };
 
 window.cancelExchangeEdit = ()=>{
@@ -10255,7 +10287,7 @@ document.getElementById('fixExchangeSrSnBtn').addEventListener('click', async ()
   }
 });
 
-window.openExchangeSrFormModal = ()=>{ document.getElementById('exchangeSrFormModal').classList.add('open'); };
+window.openExchangeSrFormModal = ()=>{ populateSendToDatalist(); document.getElementById('exchangeSrFormModal').classList.add('open'); };
 window.closeExchangeSrFormModal = ()=>{ document.getElementById('exchangeSrFormModal').classList.remove('open'); };
 
 window.cancelExchangeSrEdit = ()=>{
