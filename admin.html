@@ -722,6 +722,30 @@
   .chalan-pos-tab{ color:#7C8494; }
   .chalan-pos-tab:hover{ color:#1F2430; }
   .chalan-pos-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
+  /* ── Recondition ID: view-only sections ──────────────────────────────
+     These pages are visible to a Recondition ID for reference, but every
+     control that would change something is removed rather than left to
+     fail on tap. The JS guards (blockIfReconditionOnly / _deleteEntry)
+     still run underneath — this is the visual half of the same rule, not
+     the security boundary on its own. Exchange Stock and Blue Book files
+     are deliberately NOT in this list: those they fully control. */
+  body.role-recondition #secPrice .kebab-btn,
+  body.role-recondition #secPrice .cta-primary,
+  body.role-recondition #secFin .kebab-btn,
+  body.role-recondition #secFin .cta-primary,
+  body.role-recondition #secEvents .kebab-btn,
+  body.role-recondition #secEvents .cta-primary,
+  body.role-recondition #secStorage .cta-primary,
+  body.role-recondition #secStorage button[onclick*="openSystemLimits"],
+  body.role-recondition #secStorage #fullBackupBtn,
+  body.role-recondition #secStorage #restoreBackupCard,
+  body.role-recondition #secTrash button[onclick*="emptyTrash"],
+  body.role-recondition #secTrash button[onclick*="permanentlyDelete"],
+  body.role-recondition #secTrash button[onclick*="restoreFromTrash"],
+  body.role-recondition #secDocs .cta-primary,
+  body.role-recondition #secDocs button[onclick*="uploadDocument"]{
+    display: none !important;
+  }
   .ex-status-tab:hover{ color:#1F2430; }
   .ex-status-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
   .ex-status-tab.active .pill-count{ background:#005EA6; color:#fff; }
@@ -1565,8 +1589,21 @@
             <input type="text" id="sColor" placeholder="e.g. Black Ink Blue"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status</label>
+            <select id="sStatus" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="Available">Available</option>
+              <option value="Booked">Booked</option>
+              <option value="Sold">Sold</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Customer Name</label>
+            <input type="text" id="sCustomerName" placeholder="e.g. Santosh Gahatraj"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
         </div>
-        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units are added as <b>Available</b> by default — change status later from the row menu if needed.</p>
+        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units default to <b>Available</b>. Status and Customer Name are editable here too, so a mistake can be corrected directly instead of only through the row menu. Main Inventory is showroom stock, so sales from here are always recorded as <b>Sold From: Showroom</b>.</p>
         <div class="flex gap-2 flex-wrap">
           <button id="saveStockBtn" class="cta-primary">
             <i class="fas fa-floppy-disk"></i> Save Unit
@@ -1756,8 +1793,30 @@
             <input type="text" id="hhOwnerName" placeholder="e.g. Ramesh Traders"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status</label>
+            <select id="hhStatus" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="Available">Available</option>
+              <option value="Booked">Booked</option>
+              <option value="Sold">Sold</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Customer Name</label>
+            <input type="text" id="hhCustomerName" placeholder="e.g. Santosh Gahatraj"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Sold From</label>
+            <input type="text" id="hhSoldFrom" list="hhSoldFromOptions" placeholder="e.g. Mela/Event"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+            <datalist id="hhSoldFromOptions">
+              <option value="Showroom"></option>
+              <option value="Mela/Event"></option>
+            </datalist>
+          </div>
         </div>
-        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units are added as <b>Available</b> by default — change status later from the row menu if needed. <b>Unit Owner</b> marks whose bike is on the stall — <b>Dealer</b> (our own stock), <b>HH</b> (distributor-owned), or <b>Other</b> (someone else's, e.g. another dealer's consignment).</p>
+        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units default to <b>Available</b>. Status, Customer Name and Sold From are editable here too, so a mistake can be corrected directly instead of only through the row menu. <b>Unit Owner</b> marks whose bike is on the stall — <b>Dealer</b> (our own stock), <b>HH</b> (distributor-owned), or <b>Other</b> (someone else's, e.g. another dealer's consignment).</p>
         <div class="flex gap-2 flex-wrap">
           <button id="saveHHInvBtn" class="cta-primary">
             <i class="fas fa-floppy-disk"></i> Save Unit
@@ -5207,11 +5266,22 @@ async function loadProfile(uid) {
       docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock',
       chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases'
     };
+    // Recondition ID gets full control of the two Exchange lists and the
+    // Blue Book files attached to them, plus VIEW-ONLY access to the
+    // reference pages they need while reconditioning (what a model costs,
+    // finance options, upcoming melas, storage headroom, and Trash to
+    // check something they removed). Everything else stays hidden.
+    const RECON_FULL = ['exchange','exchangeSr'];
+    const RECON_READONLY = ['docs','storage','price','fin','events','trash'];
     Object.entries(RECON_NAV_MAP).forEach(([key,id])=>{
-      const keep = key==='exchange' || key==='exchangeSr';
+      const keep = RECON_FULL.includes(key) || RECON_READONLY.includes(key);
       const el = document.getElementById(id);
       if(el) el.classList.toggle('hidden', isRecondition && !keep);
     });
+    // Drives the CSS below that strips Add/Edit/Delete controls out of the
+    // read-only sections, so those pages genuinely look view-only rather
+    // than showing buttons that just error out when tapped.
+    document.body.classList.toggle('role-recondition', isRecondition);
     // Section labels ("Reports", "Stock Management", etc.) would otherwise
     // sit above an empty group with nothing left visible under them.
     document.querySelectorAll('.sidebar-section-label').forEach(el=>el.classList.toggle('hidden', isRecondition));
@@ -5937,9 +6007,17 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
 
   try {
     if(currentEditInvId){
-      // Status is changed only from the row menu now — not touched here, so
-      // editing details never accidentally resets a unit's Sold/Booked state.
-      await updateDoc(doc(db,"inventory",currentEditInvId),{model:modelName,chassis,engine,regNo,color});
+      // Status and Customer Name are editable here as well as from the row
+      // menu, so a wrong entry can be corrected in one place instead of
+      // needing a second trip through Mark Sold.
+      const prev = invData.find(x=>x.id===currentEditInvId) || {};
+      const newStatus = document.getElementById('sStatus').value || 'Available';
+      const newCustomer = document.getElementById('sCustomerName').value.trim();
+      const invPayload = {model:modelName,chassis,engine,regNo,color,status:newStatus,customerName:newCustomer};
+      // Stamp the sale only on the transition into Sold, so re-saving an
+      // already-sold unit never rewrites its original sale date.
+      if(newStatus==='Sold' && prev.status!=='Sold'){ invPayload.soldAt = new Date(); invPayload.soldFrom = prev.soldFrom || 'Showroom'; }
+      await updateDoc(doc(db,"inventory",currentEditInvId), invPayload);
       logActivity('Updated', 'inventory', { model: modelName, chassis });
       toast('Unit updated!');
       window.cancelInvEdit();
@@ -5948,9 +6026,15 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
       // page) so two quick adds, or a dealership with more stock than one
       // page holds, can never both land on the same S.N.
       const nextSn = await getAccurateNextSn('inventory');
-      await addDoc(collection(db,"inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,status:'Available',addedAt:new Date()});
+      const addStatus = document.getElementById('sStatus').value || 'Available';
+      const addCustomer = document.getElementById('sCustomerName').value.trim();
+      const newDoc = {sn:nextSn,model:modelName,chassis,engine,regNo,color,status:addStatus,customerName:addCustomer,addedAt:new Date()};
+      if(addStatus==='Sold'){ newDoc.soldAt = new Date(); newDoc.soldFrom = 'Showroom'; }
+      await addDoc(collection(db,"inventory"), newDoc);
       logActivity('Added', 'inventory', { model: modelName, chassis, sn: nextSn });
-      ['sRegNo','sChassis','sEngine','sColor'].forEach(id=>document.getElementById(id).value='');
+      ['sRegNo','sChassis','sEngine','sColor','sCustomerName'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('sStatus').value='Available';
+      document.getElementById('sStatus')?._csSync?.();
       document.getElementById('stockModelSelect').value='';
       toast('Unit added — S.N '+nextSn+' assigned automatically, marked Available.');
     }
@@ -5965,6 +6049,9 @@ window._editInventory=(id)=>{
   document.getElementById('sEngine').value=s.engine||'';
   document.getElementById('sRegNo').value=s.regNo||'';
   document.getElementById('sColor').value=s.color||'';
+  document.getElementById('sStatus').value=s.status||'Available';
+  document.getElementById('sStatus')?._csSync?.();
+  document.getElementById('sCustomerName').value=s.customerName||'';
   currentEditInvId=id;
   const btn=document.getElementById('saveStockBtn');
   btn.innerHTML='<i class="fas fa-rotate"></i> Update Unit';
@@ -7950,15 +8037,33 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
 
   try{
     if(currentEditHHInvId){
-      await updateDoc(doc(db,"hh_inventory",currentEditHHInvId),{model:modelName,chassis,engine,regNo,color,eventName,owner,ownerName});
+      const prevHH = hhInvData.find(x=>x.id===currentEditHHInvId) || {};
+      const hhNewStatus = document.getElementById('hhStatus').value || 'Available';
+      const hhNewCustomer = document.getElementById('hhCustomerName').value.trim();
+      const hhNewSoldFrom = document.getElementById('hhSoldFrom').value.trim();
+      const hhPayload = {model:modelName,chassis,engine,regNo,color,eventName,owner,ownerName,status:hhNewStatus,customerName:hhNewCustomer};
+      // Sold From is only meaningful on a sold unit; stamp the date only on
+      // the transition into Sold so re-saving never rewrites the original.
+      if(hhNewStatus==='Sold'){
+        hhPayload.soldFrom = hhNewSoldFrom || prevHH.soldFrom || 'Mela/Event';
+        if(prevHH.status!=='Sold') hhPayload.soldAt = new Date();
+      }
+      await updateDoc(doc(db,"hh_inventory",currentEditHHInvId), hhPayload);
       logActivity('Updated', 'hh_inventory', { model: modelName, chassis });
       toast('HH unit updated!');
       window.cancelHHInvEdit();
     } else {
       const nextSn = await getAccurateNextSn('hh_inventory');
-      await addDoc(collection(db,"hh_inventory"),{sn:nextSn,model:modelName,chassis,engine,regNo,color,eventName,owner,ownerName,status:'Available',customerName:'',addedAt:new Date()});
+      const hhAddStatus = document.getElementById('hhStatus').value || 'Available';
+      const hhAddCustomer = document.getElementById('hhCustomerName').value.trim();
+      const hhAddSoldFrom = document.getElementById('hhSoldFrom').value.trim();
+      const hhNewDoc = {sn:nextSn,model:modelName,chassis,engine,regNo,color,eventName,owner,ownerName,status:hhAddStatus,customerName:hhAddCustomer,addedAt:new Date()};
+      if(hhAddStatus==='Sold'){ hhNewDoc.soldAt = new Date(); hhNewDoc.soldFrom = hhAddSoldFrom || 'Mela/Event'; }
+      await addDoc(collection(db,"hh_inventory"), hhNewDoc);
       logActivity('Added', 'hh_inventory', { model: modelName, chassis, sn: nextSn });
-      ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName','hhOwnerName'].forEach(id=>document.getElementById(id).value='');
+      ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName','hhOwnerName','hhCustomerName','hhSoldFrom'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('hhStatus').value='Available';
+      document.getElementById('hhStatus')?._csSync?.();
       document.getElementById('hhModelInput').value='';
       document.getElementById('hhOwnerSelect').value='hh';
       document.getElementById('hhOwnerNameWrap').style.display='none';
@@ -7996,6 +8101,10 @@ window._editHHInv = (id)=>{
   document.getElementById('hhOwnerSelect').value = ['dealer','hh','other'].includes(s.owner) ? s.owner : 'dealer';
   document.getElementById('hhOwnerName').value = s.ownerName||'';
   document.getElementById('hhOwnerNameWrap').style.display = s.owner==='other' ? 'flex' : 'none';
+  document.getElementById('hhStatus').value = s.status||'Available';
+  document.getElementById('hhStatus')?._csSync?.();
+  document.getElementById('hhCustomerName').value = s.customerName||'';
+  document.getElementById('hhSoldFrom').value = s.soldFrom||'';
   currentEditHHInvId = id;
   const btn = document.getElementById('saveHHInvBtn');
   btn.innerHTML = '<i class="fas fa-rotate"></i> Update Unit';
@@ -11612,6 +11721,12 @@ window.setDocTypeFilter = (type)=>{
 function renderDocumentsPage(){
   const wrap = document.getElementById('docsListWrap');
   if(!wrap) return;
+  // A Recondition ID's Document Vault is just the Blue Books — the rest of
+  // the vault (bank letters, licences, staff paperwork) isn't theirs to
+  // see. Filtering the source list here means every count, tab and card
+  // below is automatically limited too, rather than needing a check in
+  // each place.
+  const docsView = currentUserRole === 'recondition' ? documents.filter(d=>d.category === 'Blue Book') : documents;
   // Keep each tab's count in sync with the full (unfiltered) list, not just
   // whatever's currently showing — otherwise switching filters would make
   // the numbers drift.
@@ -11619,21 +11734,21 @@ function renderDocumentsPage(){
   Object.entries(countEls).forEach(([key, elId])=>{
     const el = document.getElementById(elId);
     if(!el) return;
-    const n = key==='all' ? documents.length : documents.filter(d=>(DOC_TYPE_GROUPS[key]||[]).includes(String(d.fileExt||'').toLowerCase())).length;
+    const n = key==='all' ? docsView.length : docsView.filter(d=>(DOC_TYPE_GROUPS[key]||[]).includes(String(d.fileExt||'').toLowerCase())).length;
     el.textContent = n ? String(n) : '';
     el.classList.toggle('hidden', !n);
   });
   const blueBookCountEl = document.getElementById('docCountBlueBook');
   if(blueBookCountEl){
-    const n = documents.filter(d=>d.category==='Blue Book').length;
+    const n = docsView.filter(d=>d.category==='Blue Book').length;
     blueBookCountEl.textContent = n ? String(n) : '';
     blueBookCountEl.classList.toggle('hidden', !n);
   }
-  const filtered = docTypeFilter==='all' ? documents
-    : docTypeFilter==='bluebook' ? documents.filter(d=>d.category==='Blue Book')
-    : documents.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes(String(d.fileExt||'').toLowerCase()));
+  const filtered = docTypeFilter==='all' ? docsView
+    : docTypeFilter==='bluebook' ? docsView.filter(d=>d.category==='Blue Book')
+    : docsView.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes(String(d.fileExt||'').toLowerCase()));
   if(!filtered.length){
-    wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-folder-open text-3xl opacity-25 block mb-2"></i><p class="text-sm">${documents.length ? 'No documents match this filter.' : 'No documents uploaded yet.'}</p></div>`;
+    wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-folder-open text-3xl opacity-25 block mb-2"></i><p class="text-sm">${docsView.length ? 'No documents match this filter.' : 'No documents uploaded yet.'}</p></div>`;
     return;
   }
   const sorted = [...filtered].sort((a,b)=>{
@@ -12178,12 +12293,18 @@ function blockIfReconditionOnly(){
 }
 
 window._deleteEntry=async(col,id)=>{
-  const RECONDITION_ALLOWED_COLLECTIONS = ['exchange_stock','exchange_stock_showroom'];
-  if(currentUserRole === 'recondition' && !RECONDITION_ALLOWED_COLLECTIONS.includes(col)){
-    toast('Recondition ID can only edit Exchange Stock — everything else here is view-only.','err');
-    return;
+  if(currentUserRole === 'recondition'){
+    const RECONDITION_ALLOWED_COLLECTIONS = ['exchange_stock','exchange_stock_showroom'];
+    // Blue Book files belong to the Exchange units they're attached to, so
+    // a Recondition ID manages those too — but only Blue Books, never the
+    // rest of the Document Vault.
+    const isOwnBlueBook = col === 'documents' && documents.find(d=>d.id===id)?.category === 'Blue Book';
+    if(!RECONDITION_ALLOWED_COLLECTIONS.includes(col) && !isOwnBlueBook){
+      toast('Recondition ID can only change Exchange Stock and Blue Book files — everything else is view-only.','err');
+      return;
+    }
   }
-  if(col==='documents' && currentUserRole !== 'owner'){
+  if(col==='documents' && currentUserRole !== 'owner' && currentUserRole !== 'recondition'){
     // A Normal ID can only delete a document they uploaded themselves —
     // anyone else's upload still needs a Master ID.
     const d = documents.find(x=>x.id===id);
@@ -13474,8 +13595,9 @@ window.switchSec=(sec)=>{
   // finances) that isn't their job to see, so every section but the two
   // Exchange ones redirects back here regardless of how the navigation
   // was triggered.
-  if(currentUserRole === 'recondition' && sec !== 'exchange' && sec !== 'exchangeSr'){
-    toast("Recondition ID only has access to Exchange Stock.",'err');
+  const RECON_ALLOWED_SECTIONS = ['exchange','exchangeSr','docs','storage','price','fin','events','trash'];
+  if(currentUserRole === 'recondition' && !RECON_ALLOWED_SECTIONS.includes(sec)){
+    toast("Recondition ID doesn't have access to that section.",'err');
     sec = 'exchange';
   }
   if(sec==='history' && currentUserRole !== 'owner'){
@@ -13810,6 +13932,10 @@ function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('aliasCanonicalSelect'), { placeholder:'Select a model…', searchable:true });
   enhanceNativeSelect(document.getElementById('aliasRawInput'), { placeholder:'Select a model name from Inventory…', searchable:true });
   enhanceNativeSelect(document.getElementById('hhOwnerSelect'), { placeholder:'Unit Owner' });
+  enhanceNativeSelect(document.getElementById('sStatus'), { placeholder:'Status' });
+  enhanceNativeSelect(document.getElementById('hhStatus'), { placeholder:'Status' });
+  enhanceNativeSelect(document.getElementById('exInspection'), { placeholder:'Inspection' });
+  enhanceNativeSelect(document.getElementById('exSrInspection'), { placeholder:'Inspection' });
   enhanceNativeSelect(document.getElementById('newStaffRole'), { placeholder:'Role' });
   enhanceNativeSelect(document.getElementById('exBlueBook'), { placeholder:'Blue Book' });
   enhanceNativeSelect(document.getElementById('exKey'), { placeholder:'Key' });
