@@ -5144,36 +5144,16 @@ async function loadProfile(uid) {
       pmRole.className = 'badge badge-neutral';
       pmRole.style.cssText = 'font-size:9px;padding:1px 6px;vertical-align:middle;';
     }
-    // Built locally rather than reusing setActiveTab()'s NAV_IDS/MNAV_IDS —
-    // those are declared inside that function's own scope, not accessible
-    // from here. Explicit map, not a derived-from-key guess — several IDs
-    // (navHHInv, navAllInv, navHHStock) don't follow a simple capitalize
-    // pattern.
-    const RECON_NAV_MAP = {
-      dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv',
-      exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc',
-      docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock',
-      chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases'
-    };
-    const RECON_MNAV_MAP = {
-      dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv',
-      exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc',
-      docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', hhstock:'mNavHHStock',
-      chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases'
-    };
-    Object.entries(RECON_NAV_MAP).forEach(([key,id])=>{
-      const keep = key==='exchange' || key==='exchangeSr';
-      const el = document.getElementById(id);
-      if(el) el.classList.toggle('hidden', isRecondition && !keep);
-    });
-    Object.entries(RECON_MNAV_MAP).forEach(([key,id])=>{
-      const keep = key==='exchange' || key==='exchangeSr';
-      const el = document.getElementById(id);
-      if(el) el.classList.toggle('hidden', isRecondition && !keep);
-    });
-    // Section labels ("Reports", "Stock Management", etc.) would otherwise
-    // sit above an empty group with nothing left visible under them.
-    document.querySelectorAll('.sidebar-section-label').forEach(el=>el.classList.toggle('hidden', isRecondition));
+    // Recondition ID can browse most of the app for context (what a
+    // trade-in is worth, what's already sold, etc.) but only ever change
+    // Exchange Stock — see blockIfReconditionOnly() for the write-side of
+    // this. Important Info is the one section hidden outright rather than
+    // shown read-only, since it holds contacts/links/credentials that
+    // aren't relevant to reconditioning work.
+    const importantNavBtn2 = document.getElementById('navImportant');
+    if(importantNavBtn2) importantNavBtn2.classList.toggle('hidden', isRecondition);
+    const mImportantNavBtn = document.getElementById('mNavImportant');
+    if(mImportantNavBtn) mImportantNavBtn.classList.toggle('hidden', isRecondition);
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
 }
 
@@ -5667,6 +5647,7 @@ async function shiftMasterSnUp(fromSn, excludeId=null){
 }
 
 document.getElementById('saveModelBtn').addEventListener('click',async()=>{
+  if(blockIfReconditionOnly()) return;
   const category=document.getElementById('mCategory').value;
   const checks = [
     Validate.positiveNumber(document.getElementById('mSn').value, { label:'S.N' }),
@@ -5844,6 +5825,7 @@ async function getAccurateCombinedExchangeCount(forceRefresh){
 }
 
 document.getElementById('saveStockBtn').addEventListener('click',async()=>{
+  if(blockIfReconditionOnly()) return;
   if(!currentEditInvId && (await getAccurateTotalInventoryCount(true)) >= MAX_TOTAL_INVENTORY_UNITS){
     toast(`Storage full — ${MAX_TOTAL_INVENTORY_UNITS} unit limit reached.`,'err');
     showLimitExceededModal('Inventory Limit Reached', `Inventory + HH Inventory combined has reached the ${MAX_TOTAL_INVENTORY_UNITS} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
@@ -6401,6 +6383,7 @@ window.confirmModelAlias = async (alias, canonical)=>{
 };
 
 window.addModelAlias = async ()=>{
+  if(blockIfReconditionOnly()) return;
   const alias = document.getElementById('aliasRawInput').value.trim();
   const canonical = document.getElementById('aliasCanonicalSelect').value;
   if(!alias || !canonical){ toast('Fill in both fields.','err'); return; }
@@ -6546,6 +6529,7 @@ window._deleteChalan = async (id)=>{
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 window.deleteSelectedChalans = async ()=>{
+  if(blockIfReconditionOnly()) return;
   if(!selectedChalanIds.size) return;
   const ok = await showDangerousConfirm({
     title: `Delete ${selectedChalanIds.size} Chalan record${selectedChalanIds.size!==1?'s':''}?`,
@@ -6916,6 +6900,7 @@ async function getAccurateNextSn(colName){
 }
 
 window.transferToHH = async (id) => {
+  if(blockIfReconditionOnly()) return;
   const s = invData.find(x=>x.id===id);
   if(!s){ toast('Unit not found.','err'); return; }
   const isSold = s.status==='Sold' || s.hhFlag==='Hide';
@@ -6952,6 +6937,7 @@ window.transferToHH = async (id) => {
 };
 
 window.transferToInventory = async (id) => {
+  if(blockIfReconditionOnly()) return;
   const s = hhInvData.find(x=>x.id===id);
   if(!s){ toast('Unit not found.','err'); return; }
   const isSold = s.status==='Sold';
@@ -6983,6 +6969,7 @@ window.transferToInventory = async (id) => {
 };
 
 window._setUnitStatus = async (id, status) => {
+  if(blockIfReconditionOnly()) return;
   const s = invData.find(x=>x.id===id);
   const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const needsCustomer = (status==='Booked' || status==='Sold');
@@ -7022,6 +7009,7 @@ window._setUnitStatus = async (id, status) => {
 };
 
 window._setHHFlag = async (id, hhFlag) => {
+  if(blockIfReconditionOnly()) return;
   const s = invData.find(x=>x.id===id);
   const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const existingName = escapeHtml(s?.customerName||'');
@@ -7461,6 +7449,7 @@ window.toggleSelectAllInv = (checked)=>{
 };
 
 window.deleteSelectedInvUnits = async ()=>{
+  if(blockIfReconditionOnly()) return;
   if(!selectedInvIds.size) return;
   const ids = [...selectedInvIds];
   const proceed = await showDangerousConfirm({
@@ -7715,6 +7704,7 @@ window.toggleSelectAllHHInv = (checked)=>{
 };
 
 window.deleteSelectedHHInvUnits = async ()=>{
+  if(blockIfReconditionOnly()) return;
   if(!selectedHHInvIds.size) return;
   const ids = [...selectedHHInvIds];
   const proceed = await showDangerousConfirm({
@@ -7747,6 +7737,7 @@ document.getElementById('hhOwnerSelect')?.addEventListener('change', function(){
 });
 
 document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
+  if(blockIfReconditionOnly()) return;
   if(!currentEditHHInvId && (await getAccurateTotalInventoryCount(true)) >= MAX_TOTAL_INVENTORY_UNITS){
     toast(`Storage full — ${MAX_TOTAL_INVENTORY_UNITS} unit limit reached.`,'err');
     showLimitExceededModal('Inventory Limit Reached', `Inventory + HH Inventory combined has reached the ${MAX_TOTAL_INVENTORY_UNITS} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
@@ -7869,6 +7860,7 @@ window.cancelHHInvEdit = ()=>{
 };
 
 window._setHHInvStatus = async (id, status) => {
+  if(blockIfReconditionOnly()) return;
   const s = hhInvData.find(x=>x.id===id);
   const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const needsCustomer = (status==='Booked' || status==='Sold');
@@ -7934,6 +7926,7 @@ window._setHHInvStatus = async (id, status) => {
 // collections instead of a separate "Hold" concept that needed its own
 // explanation.
 window._setHHInvFlag = async (id, hhFlag) => {
+  if(blockIfReconditionOnly()) return;
   const s = hhInvData.find(x=>x.id===id);
   const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const existingName = escapeHtml(s?.customerName||'');
@@ -8541,6 +8534,7 @@ function loadStockAreas(){
 }
 
 window.addStockArea = async ()=>{
+  if(blockIfReconditionOnly()) return;
   const input = document.getElementById('newAreaInput');
   const name = (input.value||'').trim();
   if(!name){ toast('Please enter an area name.','warn'); return; }
@@ -9074,6 +9068,7 @@ window.startCategoryRename = async (id)=>{
 };
 
 window.addFinanceCategory = async ()=>{
+  if(blockIfReconditionOnly()) return;
   const nameInput = document.getElementById('newFinCatName');
   const name = nameInput.value.trim();
   if(!name){ toast('Category name required (e.g. 3 Wheeler)','err'); return; }
@@ -9159,6 +9154,7 @@ function renderFinTable(){
 }
 
 document.getElementById('saveFinBtn').addEventListener('click', async()=>{
+  if(blockIfReconditionOnly()) return;
   const category = document.getElementById('fCategory').value;
   if(!category){ toast('Add a category above first (Bike/Scooter/...).','err'); return; }
 
@@ -10832,6 +10828,7 @@ window.handleEventBgImageSelect = (event)=>{
 };
 
 window.saveEvent = async ()=>{
+  if(blockIfReconditionOnly()) return;
   const title = document.getElementById('evTitle').value.trim();
   const startDate = document.getElementById('evStartDate').value;
   const endDate = document.getElementById('evEndDate').value;
@@ -11141,9 +11138,15 @@ async function updateStorageOverview(){
   if(restoreCard) restoreCard.classList.toggle('hidden', currentUserRole !== 'owner');
   // Downloading a backup is safe for any staff to do (it's read-only,
   // doesn't touch live data) — only *restoring* one back into Firestore
-  // needs to be Master-only, so this button stays visible for everyone.
+  // needs to be Master-only. Recondition ID is the one exception: a full
+  // backup contains every collection, not just Exchange Stock, so it's
+  // outside what they're meant to have access to.
   const backupBtn = document.getElementById('fullBackupBtn');
-  if(backupBtn){ backupBtn.classList.remove('hidden'); backupBtn.classList.add('flex'); }
+  if(backupBtn){
+    const canDownloadBackup = currentUserRole !== 'recondition';
+    backupBtn.classList.toggle('hidden', !canDownloadBackup);
+    backupBtn.classList.toggle('flex', canDownloadBackup);
+  }
   if(totalLabel && ring && ringPct && currentUserRole === 'owner'){
     const estimatedOtherBytes = (allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike)
       + (invCount*RECORD_SIZE_ESTIMATE.inventoryUnit)
@@ -11169,6 +11172,7 @@ async function updateStorageOverview(){
 // each section's own Export button, so a backup is just as readable as
 // what they're used to.
 window.downloadFullBackup = ()=>{
+  if(currentUserRole === 'recondition'){ toast('Recondition ID can only download Exchange Stock / Blue Book files.','err'); return; }
   const btn = document.getElementById('fullBackupBtn');
   if(btn){ btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Preparing…'; }
   try{
@@ -11541,6 +11545,7 @@ window.handleDocFileSelect = (event)=>{
 };
 
 window.uploadDocument = async ()=>{
+  if(currentUserRole === 'recondition'){ toast('Recondition ID can only upload Blue Book files, from inside an Exchange Stock unit.','err'); return; }
  try{
   const nameEl = document.getElementById('docName');
   const descriptionEl = document.getElementById('docDescription');
@@ -11662,6 +11667,10 @@ window.uploadDocument = async ()=>{
 window.downloadDocument = (id)=>{
   const d = documents.find(x=>x.id===id);
   if(!d?.fileData) return;
+  if(currentUserRole === 'recondition' && d.category !== 'Blue Book'){
+    toast('Recondition ID can only download Blue Book files.','err');
+    return;
+  }
   let filename = (d.fileName || d.name || 'document').trim();
   const ext = String(d.fileExt||'').toLowerCase();
   if(ext && !filename.toLowerCase().endsWith('.'+ext)) filename += '.'+ext;
@@ -11881,6 +11890,7 @@ function renderAccTable(){
 }
 
 document.getElementById('saveAccBtn').addEventListener('click', async()=>{
+  if(blockIfReconditionOnly()) return;
   const nameCheck = Validate.text(document.getElementById('aName').value, { label:'Accessory name', max:60 });
   const priceCheck = Validate.positiveNumber(document.getElementById('aPrice').value, { label:'Price' });
 
@@ -11962,7 +11972,24 @@ window._saveSn=async(col,id,val)=>{
   }catch(e){ toast('Failed: '+friendlyError(e),'err'); }
 };
 
+// Recondition ID can see everything (so they have context on what a
+// trade-in bike is worth, what's already sold, etc.) but can only ever
+// change Exchange Stock records — every other mutating action in the app
+// runs through this same check.
+function blockIfReconditionOnly(){
+  if(currentUserRole === 'recondition'){
+    toast('Recondition ID can view this, but only Exchange Stock can be edited.','err');
+    return true;
+  }
+  return false;
+}
+
 window._deleteEntry=async(col,id)=>{
+  const RECONDITION_ALLOWED_COLLECTIONS = ['exchange_stock','exchange_stock_showroom'];
+  if(currentUserRole === 'recondition' && !RECONDITION_ALLOWED_COLLECTIONS.includes(col)){
+    toast('Recondition ID can only edit Exchange Stock — everything else here is view-only.','err');
+    return;
+  }
   if(col==='documents' && currentUserRole !== 'owner'){
     // A Normal ID can only delete a document they uploaded themselves —
     // anyone else's upload still needs a Master ID.
@@ -12198,6 +12225,10 @@ function renderTrashTable(){
 window.restoreFromTrash = async (trashId)=>{
   const t = trashData.find(x=>x.id===trashId);
   if(!t) return;
+  if(currentUserRole === 'recondition' && t.originalCollection!=='exchange_stock' && t.originalCollection!=='exchange_stock_showroom'){
+    toast('Recondition ID can only restore Exchange Stock items.','err');
+    return;
+  }
   const label = TRASH_LABELS[t.originalCollection] || t.originalCollection;
   const ok = await showConfirm({
     title: 'Restore this item?',
@@ -12353,6 +12384,7 @@ window.cancelImportantEdit = ()=>{
 };
 
 document.getElementById('saveImportantBtn').addEventListener('click', async ()=>{
+  if(blockIfReconditionOnly()) return;
   const v1 = document.getElementById('impVal1').value.trim();
   const v2 = document.getElementById('impVal2').value.trim();
   if(!v1 || !v2){ toast('Please fill both required fields.','err'); return; }
@@ -13216,14 +13248,13 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', hhstock:'HH Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
 const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
 window.switchSec=(sec)=>{
-  // A Recondition ID exists to work with old-bike trade-ins and their
-  // Blue Books specifically — sending them anywhere else in the app
-  // exposes business data (pricing, other customers' records, dealership
-  // finances) that isn't their job to see, so every section but the two
-  // Exchange ones redirects back here regardless of how the navigation
-  // was triggered.
-  if(currentUserRole === 'recondition' && sec !== 'exchange' && sec !== 'exchangeSr'){
-    toast("Recondition ID only has access to Exchange Stock.",'err');
+  // A Recondition ID can browse most sections for context (what a
+  // trade-in bike is worth, what's already sold, etc.) but Important
+  // Info holds contacts/links/credentials that aren't relevant to
+  // reconditioning work, so that one page stays fully off-limits —
+  // everything else is handled on the write side (blockIfReconditionOnly).
+  if(currentUserRole === 'recondition' && sec === 'important'){
+    toast("Recondition ID doesn't have access to Important Info.",'err');
     sec = 'exchange';
   }
   if(sec==='history' && currentUserRole !== 'owner'){
