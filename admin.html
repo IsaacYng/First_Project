@@ -3864,6 +3864,14 @@ let currentEditAccId = null;
 let allMasterBikes = [];
 let invData = [];
 let invUnsub = null;
+// Unsubscribe handles for the remaining collection listeners, so
+// teardownAllListenersAndData() below can stop every one of them on
+// sign-out rather than leaving them streaming into a dead session.
+let bikesUnsub = null;
+let finCatsUnsub = null;
+let finSchemesUnsub = null;
+let accessoriesUnsub = null;
+let documentsUnsub = null;
 let invSearchTerm = '';
 let financeSchemes = [];
 let financeCategories = []; // dynamic list, e.g. Bike (60mo max), Scooter (36mo max), 3 Wheeler...
@@ -4874,6 +4882,34 @@ document.querySelectorAll('.sec-panel').forEach(p=>{ p.style.display = p.classLi
 setActiveTab('dashboard');
 
 /* ─── Auth ─── */
+// Stops every live Firestore listener and clears the in-memory caches.
+// Called on sign-out so the next person to use this device starts from a
+// genuinely clean slate — no leftover records visible in the split second
+// before their own (possibly narrower) listeners load, and no reads still
+// billing against a session that's over.
+function teardownAllListenersAndData(){
+  [invUnsub, hhInvUnsub, exchangeUnsub, exchangeSrUnsub, chalanUnsub, modelAliasesUnsub,
+   trashUnsub, activityLogUnsub, importantUnsub, bikesUnsub, finCatsUnsub, finSchemesUnsub,
+   accessoriesUnsub, documentsUnsub].forEach(u=>{ try{ if(typeof u === 'function') u(); }catch(e){ console.error('listener teardown failed', e); } });
+  invUnsub = hhInvUnsub = exchangeUnsub = exchangeSrUnsub = chalanUnsub = modelAliasesUnsub =
+    trashUnsub = activityLogUnsub = importantUnsub = bikesUnsub = finCatsUnsub = finSchemesUnsub =
+    accessoriesUnsub = documentsUnsub = null;
+
+  invData = []; hhInvData = []; exchangeData = []; exchangeSrData = [];
+  allMasterBikes = []; accessories = []; financeSchemes = []; financeCategories = [];
+  documents = []; events = []; chalanData = []; trashData = []; importantData = [];
+  modelAliasesData = []; stockAreas = []; teamMembers = [];
+
+  // Cached server-side counts belong to the session that fetched them.
+  cachedTotalUnitCount = null; cachedExchangeCount = null;
+  cachedExchangeSrCount = null; cachedCombinedExchangeCount = null;
+
+  // Report snapshots too — these are plain page-level caches, but they'd
+  // otherwise still show the previous user's numbers.
+  stockReportGrouped = null; stockReportAllUnits = []; stockReportTotalUnits = 0; stockReportSoldUnits = 0;
+  hhStockReportGrouped = null; hhStockReportAllUnits = []; hhStockReportTotalUnits = 0; hhStockReportSoldUnits = 0;
+}
+
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUserEmail = user.email || '';
@@ -4909,6 +4945,14 @@ onAuthStateChanged(auth, async (user) => {
     startIdleLogoutTimer();
     startActiveStatusCheck();
   } else {
+    // Tear down every live Firestore listener and wipe the in-memory
+    // caches on sign-out. Without this, the previous user's listeners
+    // keep streaming and their data stays in memory — so the next person
+    // to sign in on the same device (a Recondition ID, say) could briefly
+    // see records their role isn't allowed to see, before their own
+    // narrower listeners replace them. It also stops Firestore reads
+    // billing against a session nobody is using anymore.
+    teardownAllListenersAndData();
     document.getElementById('login-section').style.display = 'flex';
     document.getElementById('admin-section').style.display = 'none';
     document.body.classList.remove('app-active');
@@ -5144,16 +5188,27 @@ async function loadProfile(uid) {
       pmRole.className = 'badge badge-neutral';
       pmRole.style.cssText = 'font-size:9px;padding:1px 6px;vertical-align:middle;';
     }
-    // Recondition ID can browse most of the app for context (what a
-    // trade-in is worth, what's already sold, etc.) but only ever change
-    // Exchange Stock — see blockIfReconditionOnly() for the write-side of
-    // this. Important Info is the one section hidden outright rather than
-    // shown read-only, since it holds contacts/links/credentials that
-    // aren't relevant to reconditioning work.
-    const importantNavBtn2 = document.getElementById('navImportant');
-    if(importantNavBtn2) importantNavBtn2.classList.toggle('hidden', isRecondition);
-    const mImportantNavBtn = document.getElementById('mNavImportant');
-    if(mImportantNavBtn) mImportantNavBtn.classList.toggle('hidden', isRecondition);
+    // Recondition ID sees Exchange Stock (Mela + Showroom) and nothing
+    // else — every other nav item is hidden outright rather than shown
+    // read-only. Explicit map, not a derived-from-key guess — several IDs
+    // (navHHInv, navAllInv, navHHStock) don't follow a simple capitalize
+    // pattern. blockIfReconditionOnly() stays in place on every write
+    // path too, as defense-in-depth in case a section is ever reached
+    // some other way.
+    const RECON_NAV_MAP = {
+      dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv',
+      exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc',
+      docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock',
+      chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases'
+    };
+    Object.entries(RECON_NAV_MAP).forEach(([key,id])=>{
+      const keep = key==='exchange' || key==='exchangeSr';
+      const el = document.getElementById(id);
+      if(el) el.classList.toggle('hidden', isRecondition && !keep);
+    });
+    // Section labels ("Reports", "Stock Management", etc.) would otherwise
+    // sit above an empty group with nothing left visible under them.
+    document.querySelectorAll('.sidebar-section-label').forEach(el=>el.classList.toggle('hidden', isRecondition));
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
 }
 
@@ -5523,7 +5578,8 @@ window.handleForgotPassword = async ()=>{
 
 /* ─── Master Price List ─── */
 function loadMasterPriceList() {
-  onSnapshot(collection(db,"bikes"), snap => {
+  if(bikesUnsub) bikesUnsub();
+  bikesUnsub = onSnapshot(collection(db,"bikes"), snap => {
     allMasterBikes = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderMasterTable(); updatePriceStats(); populateModelDropdown();
     // Category rows show "N models using this category" — keep that fresh too.
@@ -8833,7 +8889,8 @@ async function seedDefaultFinanceCategories(){
 }
 
 function loadFinanceCategories(){
-  onSnapshot(collection(db,"finance_categories"), snap=>{
+  if(finCatsUnsub) finCatsUnsub();
+  finCatsUnsub = onSnapshot(collection(db,"finance_categories"), snap=>{
     financeCategories = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
     if(!financeCategories.length) seedDefaultFinanceCategories();
     renderFinCategoryChips();
@@ -9110,7 +9167,8 @@ window.removeFinanceCategory = async (id, name)=>{
 
 
 function loadFinanceSchemes(){
-  onSnapshot(collection(db,"finance_schemes"), snap => {
+  if(finSchemesUnsub) finSchemesUnsub();
+  finSchemesUnsub = onSnapshot(collection(db,"finance_schemes"), snap => {
     financeSchemes = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderFinTable();
     if(typeof updateStorageOverview === 'function') updateStorageOverview();
@@ -9553,6 +9611,9 @@ window.deleteSelectedExchangeUnits = async ()=>{
   try{
     const targets = ids.map(id=>exchangeData.find(x=>x.id===id)).filter(Boolean);
     for(const t of targets) await moveToTrash('exchange_stock', t.id, t);
+    // Linked Blue Book files follow their units into Trash too — same as
+    // the single-unit delete path.
+    for(const t of targets){ if(t.blueBookDocId) await trashLinkedBlueBook(t.blueBookDocId); }
     const chunks = [];
     for(let i=0;i<ids.length;i+=400) chunks.push(ids.slice(i,i+400));
     for(const chunk of chunks){
@@ -10285,6 +10346,7 @@ window.deleteSelectedExchangeSrUnits = async ()=>{
   try{
     const targets = ids.map(id=>exchangeSrData.find(x=>x.id===id)).filter(Boolean);
     for(const t of targets) await moveToTrash('exchange_stock_showroom', t.id, t);
+    for(const t of targets){ if(t.blueBookDocId) await trashLinkedBlueBook(t.blueBookDocId); }
     const chunks = [];
     for(let i=0;i<ids.length;i+=400) chunks.push(ids.slice(i,i+400));
     for(const chunk of chunks){
@@ -10654,7 +10716,8 @@ document.getElementById('exSrImportExcelBtn').addEventListener('click', async ()
 
 /* ─── Accessories Inventory ─── */
 function loadAccessories(){
-  onSnapshot(collection(db,"accessories"), snap => {
+  if(accessoriesUnsub) accessoriesUnsub();
+  accessoriesUnsub = onSnapshot(collection(db,"accessories"), snap => {
     accessories = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderAccTable();
     // Category cards show which accessories are selected, filtered against
@@ -11007,7 +11070,8 @@ const RECORD_SIZE_ESTIMATE = { bike: 500, inventoryUnit: 1200, exchangeUnit: 700
 const OTHER_COLLECTIONS_ESTIMATE = 5 * 1024 * 1024; // rough allowance for activity log / trash / events / team photos
 
 function loadDocuments(){
-  onSnapshot(collection(db,"documents"), snap=>{
+  if(documentsUnsub) documentsUnsub();
+  documentsUnsub = onSnapshot(collection(db,"documents"), snap=>{
     documents = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderDocumentsPage();
     updateStorageOverview();
@@ -11976,6 +12040,21 @@ window._saveSn=async(col,id,val)=>{
 // trade-in bike is worth, what's already sold, etc.) but can only ever
 // change Exchange Stock records — every other mutating action in the app
 // runs through this same check.
+// When an Exchange unit is deleted, its Blue Book file in Document Vault
+// has nothing pointing at it anymore — so it follows the unit into Trash
+// (same 7-day window) instead of quietly occupying storage forever.
+// Failures here are logged but never block the unit's own deletion.
+async function trashLinkedBlueBook(docId){
+  try{
+    const d = documents.find(x=>x.id===docId);
+    if(!d) return;
+    await moveToTrash('documents', docId, d);
+    await deleteDoc(doc(db,'documents',docId));
+  }catch(e){
+    console.error('Blue Book cleanup failed for doc', docId, e);
+  }
+}
+
 function blockIfReconditionOnly(){
   if(currentUserRole === 'recondition'){
     toast('Recondition ID can view this, but only Exchange Stock can be edited.','err');
@@ -12075,6 +12154,11 @@ window._deleteEntry=async(col,id)=>{
       if(target) await moveToTrash('exchange_stock', id, target);
       await deleteDoc(doc(db,col,id));
       if(target) logActivity('Deleted', 'exchange_stock', target);
+      // The unit's Blue Book file goes to Trash with it, rather than
+      // sitting in Document Vault forever with nothing pointing at it.
+      // Same 7-day recovery window, so restoring the unit and re-linking
+      // the file is still possible.
+      if(target?.blueBookDocId) await trashLinkedBlueBook(target.blueBookDocId);
 
       if(deletedSn){
         const toShift = exchangeData.filter(x=>x.id!==id && Number(x.sn)>deletedSn);
@@ -12085,6 +12169,28 @@ window._deleteEntry=async(col,id)=>{
         }
       }
       toast('Exchange unit moved to Trash — S.N renumbered automatically.');
+    } else if(col==='exchange_stock_showroom'){
+      // Showroom Exchange needs its own branch, exactly like Mela
+      // Exchange above — falling through to the generic `else` meant its
+      // records were deleted with no Trash copy (unrecoverable) and no
+      // S.N renumbering, unlike every other collection in the app.
+      const target = exchangeSrData.find(x=>x.id===id);
+      const deletedSn = target ? Number(target.sn)||0 : 0;
+
+      if(target) await moveToTrash('exchange_stock_showroom', id, target);
+      await deleteDoc(doc(db,col,id));
+      if(target) logActivity('Deleted', 'exchange_stock_showroom', target);
+      if(target?.blueBookDocId) await trashLinkedBlueBook(target.blueBookDocId);
+
+      if(deletedSn){
+        const toShift = exchangeSrData.filter(x=>x.id!==id && Number(x.sn)>deletedSn);
+        if(toShift.length){
+          const batch = writeBatch(db);
+          toShift.forEach(x=>batch.update(doc(db,'exchange_stock_showroom',x.id),{sn:Number(x.sn)-1}));
+          await batch.commit();
+        }
+      }
+      toast('Showroom exchange unit moved to Trash — S.N renumbered automatically.');
     } else {
       const srcArr = col==='finance_schemes' ? financeSchemes : (col==='accessories' ? accessories : (col==='events' ? events : (col==='documents' ? documents : [])));
       const target = srcArr.find(x=>x.id===id);
@@ -12184,7 +12290,7 @@ function daysLeft(deletedAt){
   return Math.max(0, diffDays);
 }
 
-const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', exchange_stock:'Exchange Stock', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event', documents:'Document', important_info:'Important Info', chalans:'Chalan Records', model_aliases:'Model Aliases' };
+const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', exchange_stock:'Mela Exchange', exchange_stock_showroom:'Showroom Exchange', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event', documents:'Document', important_info:'Important Info', chalans:'Chalan Records', model_aliases:'Model Aliases' };
 
 function renderTrashTable(){
   const tbody = document.getElementById('trashTableBody');
@@ -13248,13 +13354,14 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', hhstock:'HH Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
 const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
 window.switchSec=(sec)=>{
-  // A Recondition ID can browse most sections for context (what a
-  // trade-in bike is worth, what's already sold, etc.) but Important
-  // Info holds contacts/links/credentials that aren't relevant to
-  // reconditioning work, so that one page stays fully off-limits —
-  // everything else is handled on the write side (blockIfReconditionOnly).
-  if(currentUserRole === 'recondition' && sec === 'important'){
-    toast("Recondition ID doesn't have access to Important Info.",'err');
+  // A Recondition ID exists to work with old-bike trade-ins and their
+  // Blue Books specifically — sending them anywhere else in the app
+  // exposes business data (pricing, other customers' records, dealership
+  // finances) that isn't their job to see, so every section but the two
+  // Exchange ones redirects back here regardless of how the navigation
+  // was triggered.
+  if(currentUserRole === 'recondition' && sec !== 'exchange' && sec !== 'exchangeSr'){
+    toast("Recondition ID only has access to Exchange Stock.",'err');
     sec = 'exchange';
   }
   if(sec==='history' && currentUserRole !== 'owner'){
