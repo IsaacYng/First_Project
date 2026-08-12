@@ -161,7 +161,7 @@
        reveals it) should sit as a flex row like every other cell, not the
        desktop table-cell display used above 640px. !important guarantees
        this wins over the ID-scoped desktop rule at this breakpoint. */
-    #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col, #exchangeTable.select-mode .sel-col { display: flex !important; justify-content: flex-end !important; }
+    #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col, #exchangeTable.select-mode .sel-col, #exchangeSrTable.select-mode .sel-col { display: flex !important; justify-content: flex-end !important; }
   }
 
   /* ═══════════ INDEX.HTML DESIGN SYSTEM — CTAs, badges, cards ═══════════ */
@@ -301,16 +301,16 @@
   /* Select/checkbox column stays hidden until "Select" is tapped from a
      row's action menu (or the bulk bar is otherwise engaged) — keeps the
      table clean day-to-day instead of always showing tick-boxes. */
-  #stockTable .sel-col, #hhInvTable .sel-col, #chalanTable .sel-col, #exchangeTable .sel-col{ display:none; }
-  #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col, #exchangeTable.select-mode .sel-col{ display:table-cell; }
+  #stockTable .sel-col, #hhInvTable .sel-col, #chalanTable .sel-col, #exchangeTable .sel-col, #exchangeSrTable .sel-col{ display:none; }
+  #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col, #exchangeTable.select-mode .sel-col, #exchangeSrTable.select-mode .sel-col{ display:table-cell; }
   /* Selected-row glow — Bajaj blue tint so a ticked unit is obvious at a
      glance, not just a tiny checkmark easy to lose track of. */
-  #stockTable.select-mode tbody tr.row-selected, #hhInvTable.select-mode tbody tr.row-selected, #chalanTable.select-mode tbody tr.row-selected, #exchangeTable.select-mode tbody tr.row-selected {
+  #stockTable.select-mode tbody tr.row-selected, #hhInvTable.select-mode tbody tr.row-selected, #chalanTable.select-mode tbody tr.row-selected, #exchangeTable.select-mode tbody tr.row-selected, #exchangeSrTable.select-mode tbody tr.row-selected {
     background: #EAF3FB !important;
     box-shadow: inset 3px 0 0 #005EA6;
     transition: background .15s ease;
   }
-  #stockTable.select-mode tbody tr, #hhInvTable.select-mode tbody tr, #chalanTable.select-mode tbody tr, #exchangeTable.select-mode tbody tr { transition: background .15s ease; }
+  #stockTable.select-mode tbody tr, #hhInvTable.select-mode tbody tr, #chalanTable.select-mode tbody tr, #exchangeTable.select-mode tbody tr, #exchangeSrTable.select-mode tbody tr { transition: background .15s ease; }
   .kebab-menu{
     position:fixed; z-index:550; min-width:150px; background:#fff; border-radius:12px;
     border:1px solid #E2E8F0; box-shadow:0 10px 30px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.06);
@@ -1073,7 +1073,10 @@
           <i class="fas fa-layer-group"></i> All Inventory
         </button>
         <button id="navExchange" onclick="switchSec('exchange');closeMobileMenu()" class="nav-tab sidebar-link">
-          <i class="fas fa-right-left"></i> Exchange Stock
+          <i class="fas fa-right-left"></i> Mela Exchange
+        </button>
+        <button id="navExchangeSr" onclick="switchSec('exchangeSr');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-shop"></i> Showroom Exchange
         </button>
         <button id="navCustomers" onclick="switchSec('customers');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-address-card"></i> Customers
@@ -1817,7 +1820,8 @@
           <div class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setHHInvStatusFilter('all')">All <span class="pill-count" id="pcHHAll">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Available" onclick="setHHInvStatusFilter('Available')">Available <span class="pill-count" id="pcHHAvailable">0</span></button>
-            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Hold" onclick="setHHInvStatusFilter('Hold')">On Hold <span class="pill-count" id="pcHHHold">0</span></button>
+            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="HHSales" onclick="setHHInvStatusFilter('HHSales')">HH Sales <span class="pill-count" id="pcHHInvSales">0</span></button>
+            <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="HHHide" onclick="setHHInvStatusFilter('HHHide')">HH Hide <span class="pill-count" id="pcHHInvHide">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Booked" onclick="setHHInvStatusFilter('Booked')">Booked <span class="pill-count" id="pcHHBooked">0</span></button>
             <button class="hh-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setHHInvStatusFilter('Sold')">Sold <span class="pill-count" id="pcHHSold">0</span></button>
           </div>
@@ -1928,18 +1932,18 @@
       </div>
     </div>
 
-    <!-- ═══ EXCHANGE STOCK (OLD BIKES TAKEN IN TRADE) ═══ -->
+    <!-- ═══ MELA EXCHANGE (OLD BIKES TAKEN IN TRADE AT A MELA/EVENT) ═══ -->
     <div class="sec-panel" id="secExchange">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
         <div>
           <div class="section-label">Stock Management ·</div>
-          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Exchange <span class="text-amber-500">Stock</span></div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Mela <span class="text-amber-500">Exchange</span></div>
         </div>
         <div class="flex items-center gap-2 flex-wrap flex-shrink-0">
           <span id="exchangeTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500">0 units total</span>
         </div>
       </div>
-      <p class="text-xs text-slate-400 -mt-4 mb-5"><i class="fas fa-circle-info mr-1"></i>Old bikes taken in exchange from customers — tracked separately with valuation and document status (Blue Book / Key / File), so nothing gets lost between trade-in and resale.</p>
+      <p class="text-xs text-slate-400 -mt-4 mb-5"><i class="fas fa-circle-info mr-1"></i>Old bikes taken in exchange <b>at a mela/event</b> — tracked separately with valuation and document status (Blue Book / Key / File), so nothing gets lost between trade-in and resale. Showroom trade-ins have their own list — see Showroom Exchange.</p>
 
       <!-- Add Unit (modal) -->
       <div id="exchangeFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelExchangeEdit()">
@@ -2053,7 +2057,7 @@
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
-          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-right-left text-amber-500"></i> Exchange Register</div>
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-right-left text-amber-500"></i> Mela Exchange Register</div>
           <span id="exchangeCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
           <button id="fixExchangeSnBtn" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-bajaj-blue text-bajaj-blue text-xs font-bold rounded-lg hover:bg-bajaj-blue hover:text-white transition-all">
             <i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering
@@ -2109,6 +2113,196 @@
               </tr>
             </thead>
             <tbody id="exchangeTableBody">
+              <tr><td colspan="10" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading exchange stock…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SHOWROOM EXCHANGE (OLD BIKES TAKEN IN TRADE AT THE SHOWROOM) ═══ -->
+    <div class="sec-panel" id="secExchangeSr">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Stock Management ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Showroom <span class="text-amber-500">Exchange</span></div>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap flex-shrink-0">
+          <span id="exchangeSrTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500">0 units total</span>
+        </div>
+      </div>
+      <p class="text-xs text-slate-400 -mt-4 mb-5"><i class="fas fa-circle-info mr-1"></i>Old bikes taken in exchange <b>at the showroom</b> — same tracking as Mela Exchange (valuation, Blue Book / Key / File), kept in its own list since a showroom trade-in and a mela trade-in are different conversations with different customers.</p>
+
+      <!-- Add Unit (modal) -->
+      <div id="exchangeSrFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelExchangeSrEdit()">
+      <div class="form-modal-box">
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
+            <span id="exchangeSrFormTitle">Add Showroom Exchange Unit</span>
+          </div>
+          <button onclick="cancelExchangeSrEdit()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-1.5">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Model Name <span class="text-red-400">*</span></label>
+            <input type="text" id="exSrModel" autocomplete="off" placeholder="e.g. Honda Shine 125 (any brand)"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Make Year <span class="text-red-400">*</span></label>
+            <input type="text" id="exSrMakeYear" placeholder="e.g. 2019 / 2076"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Registration No <span class="text-red-400">*</span></label>
+            <input type="text" id="exSrRegNo" placeholder="Koshi Pra-02-061Pa0675"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Valuation (NPR) <span class="text-red-400">*</span></label>
+            <input type="number" id="exSrValuation" min="0" placeholder="e.g. 85000"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Customer Name</label>
+            <input type="text" id="exSrCustomerName" placeholder="e.g. Santosh Gahatraj Kami"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Blue Book</label>
+            <select id="exSrBlueBook" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="yes">Yes — received</option>
+              <option value="no">No — missing</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Key</label>
+            <select id="exSrKey" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="yes">Yes — received</option>
+              <option value="no">No — missing</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">File</label>
+            <select id="exSrFile" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="yes">Yes — received</option>
+              <option value="no">No — missing</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Send To</label>
+            <input type="text" id="exSrSendTo" placeholder="e.g. Showroom, HH Mela, Workshop…"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5 sm:col-span-3">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Remarks</label>
+            <textarea id="exSrRemarks" rows="2" placeholder="e.g. Minor scratch on tank, owner's father is the registered owner…"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full resize-none"></textarea>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units are added as <b>In Stock</b> by default, <b>Send To</b> defaults to <b>Showroom</b> — type wherever it actually goes (HH Mela, Workshop, etc.). Mark <b>Sold</b> from the row menu once it's resold.</p>
+        <div class="flex gap-2 flex-wrap">
+          <button id="saveExchangeSrBtn" class="cta-primary">
+            <i class="fas fa-floppy-disk"></i> Save Unit
+          </button>
+          <button id="cancelExchangeSrBtn" onclick="cancelExchangeSrEdit()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
+            <i class="fas fa-xmark"></i> Cancel Edit
+          </button>
+        </div>
+      </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /exchangeSrFormModal -->
+
+      <!-- Excel Bulk Import -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center gap-2 section-title text-2xl mb-1">
+          <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
+        </div>
+        <p class="text-xs text-slate-500 mb-4">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, MakeYear, RegNo, Valuation, BlueBook, Key, File, Customer, SendTo, Remarks</b> (only Model, MakeYear, RegNo, Valuation are required — rest are optional, BlueBook/Key/File accept Yes/No, SendTo defaults to Showroom). S.N fills in automatically.</p>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all">
+            <i class="fas fa-cloud-arrow-up text-emerald-500 text-lg flex-shrink-0"></i>
+            <span id="exSrExcelFileLabel" class="text-sm text-slate-600 font-medium truncate">Click to choose Excel / CSV file…</span>
+            <input type="file" id="exSrExcelFileInput" accept=".xlsx,.xls,.csv" class="hidden"/>
+          </label>
+          <button id="exSrDownloadTemplateBtn" class="cta-secondary whitespace-nowrap">
+            <i class="fas fa-download"></i> Sample Template
+          </button>
+          <button id="exSrImportExcelBtn" disabled class="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 whitespace-nowrap">
+            <i class="fas fa-upload"></i> <span id="exSrImportExcelBtnText">Import Rows</span>
+          </button>
+        </div>
+        <div id="exSrImportSummary" class="hidden mt-4 rounded-xl border border-slate-200 overflow-hidden">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-wrap">
+            <span id="exSrImportSummaryHead" class="text-xs font-bold text-slate-600"></span>
+          </div>
+          <div id="exSrImportSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-right-left text-amber-500"></i> Showroom Exchange Register</div>
+          <span id="exchangeSrCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
+          <button id="fixExchangeSrSnBtn" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-bajaj-blue text-bajaj-blue text-xs font-bold rounded-lg hover:bg-bajaj-blue hover:text-white transition-all">
+            <i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering
+          </button>
+          <button onclick="exportExchangeSrToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+            <i class="fas fa-file-excel text-[11px]"></i> Export
+          </button>
+          <button id="deleteSelectedExSrBtn" onclick="deleteSelectedExchangeSrUnits()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all">
+            <i class="fas fa-trash-can text-[11px]"></i> Delete Selected (<span id="deleteSelectedExSrCount">0</span>)
+          </button>
+          <button id="cancelSelectExSrBtn" onclick="setExchangeSrSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
+            <i class="fas fa-xmark text-[11px]"></i> Cancel Select
+          </button>
+          <span id="selectModeHintExSr" class="hidden items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-bajaj-blue">
+            <i class="fas fa-hand-pointer text-[10px]"></i> Select mode — tap rows to add
+          </span>
+          <div class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
+            <button class="ex-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setExchangeSrStatusFilter('all')">All <span class="pill-count" id="pcExSrAll">0</span></button>
+            <button class="ex-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="In Stock" onclick="setExchangeSrStatusFilter('In Stock')">In Stock <span class="pill-count" id="pcExSrInStock">0</span></button>
+            <button class="ex-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setExchangeSrStatusFilter('Sold')">Sold <span class="pill-count" id="pcExSrSold">0</span></button>
+          </div>
+          <div id="exchangeSrSendToFilterWrap" class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
+            <!-- Send To pills injected dynamically — one per distinct value in exchange_stock, with live counts -->
+          </div>
+          <div id="exchangeSrModelFilterWrap" class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
+            <!-- Model pills injected dynamically — one per distinct model actually on file (Exchange models are free-text/any-brand, so a fixed dropdown wouldn't fit; pills that only show what's really there do) -->
+          </div>
+          <div class="relative ml-auto w-full sm:w-64">
+            <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="exchangeSrSearch" autocomplete="off" placeholder="Search model, reg no, customer…"
+              class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+          </div>
+          <button onclick="openExchangeSrFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+            <i class="fas fa-plus"></i> Add Unit
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse responsive-table" id="exchangeSrTable">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="px-3 py-3 text-left border-b border-slate-200 w-8 sel-col">
+                  <input type="checkbox" id="exSrSelectAll" onchange="toggleSelectAllExchangeSr(this.checked)" class="w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer">
+                </th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Year</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Reg. No</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Valuation</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Documents</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Send To</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="exchangeSrTableBody">
               <tr><td colspan="10" class="px-4 py-12 text-center text-slate-400">
                 <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading exchange stock…
               </td></tr>
@@ -3228,8 +3422,12 @@
           <input type="number" id="limitMaxInventory" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
         </div>
         <div class="flex items-center justify-between gap-3">
-          <label class="text-xs font-bold text-slate-600 flex-1">Exchange Stock</label>
+          <label class="text-xs font-bold text-slate-600 flex-1">Exchange Stock (Mela)</label>
           <input type="number" id="limitMaxExchange" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
+        </div>
+        <div class="flex items-center justify-between gap-3">
+          <label class="text-xs font-bold text-slate-600 flex-1">Exchange Stock (Showroom)</label>
+          <input type="number" id="limitMaxExchangeSr" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
         </div>
         <div class="flex items-center justify-between gap-3">
           <label class="text-xs font-bold text-slate-600 flex-1">Accessories</label>
@@ -3846,34 +4044,37 @@ window._toggleKebab = (btn, type, id) => {
   } else if(type === 'hh_inventory'){
     const s = hhInvData.find(x=>x.id===id);
     const cur = s?.status || 'Available';
-    // Once Sold, Booked doesn't make sense anymore — only offer the undo
-    // back to Available, matching the same simplification regular
-    // Inventory already has.
-    const statusActions = cur === 'Sold'
-      ? [{ label:'Mark Available', icon:'fa-rotate-left', onClick:()=>window._setHHInvStatus(id, 'Available') }]
-      : ['Available','Booked','Sold']
-          .filter(st => st !== cur)
-          .map(st => ({
-            label: 'Mark '+st,
-            icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
-            onClick: () => window._setHHInvStatus(id, st)
-          }));
-    // On Hold — same idea, same mechanism as Inventory's own HH Sales/HH
-    // Hide flag: a standalone toggle sitting alongside status rather than
-    // its own status value, so a multi-day mela's "not on display today,
-    // back out tomorrow" units don't need their own status branch
-    // everywhere status is checked. Only makes sense on units that aren't
-    // already Sold.
-    const holdAction = cur === 'Sold' ? [] : [
-      s?.hold
-        ? { label:'Take Off Hold', icon:'fa-play', onClick:()=>window._setHHInvHold(id, false) }
-        : { label:'Put On Hold', icon:'fa-pause', onClick:()=>window._setHHInvHold(id, true) }
+    const hh = s?.hhFlag || null; // 'Sales' | 'Hide' | null — same field, same meaning as Inventory's own flag
+    // "Finalized" = the unit has actually gone out the door (Sold, or HH
+    // Hide which is functionally the same thing) — once there, Booked/HH
+    // toggles stop making sense; only an undo-back-to-Available and the
+    // Delivery Challan belong in the menu. Mirrors Inventory's own logic
+    // exactly, on request — one flag system across both, not two
+    // different concepts to keep straight.
+    const isFinalized = !!hh || cur === 'Sold';
+    let statusActions;
+    if(hh){
+      statusActions = [{ label: 'Undo HH '+hh, icon:'fa-bullseye', onClick:()=>window._setHHInvFlag(id, null) }];
+    } else if(cur === 'Sold'){
+      statusActions = [{ label:'Mark Available', icon:'fa-rotate-left', onClick:()=>window._setHHInvStatus(id, 'Available') }];
+    } else {
+      statusActions = ['Available','Booked','Sold']
+        .filter(st => st !== cur)
+        .map(st => ({
+          label: 'Mark '+st,
+          icon: st==='Sold' ? 'fa-tag' : (st==='Booked' ? 'fa-bookmark' : 'fa-rotate-left'),
+          onClick: () => window._setHHInvStatus(id, st)
+        }));
+    }
+    const hhActions = isFinalized ? [] : [
+      { label:'Make HH Sales', icon:'fa-bullseye', onClick:()=>window._setHHInvFlag(id, 'Sales') },
+      { label:'Make HH Hide', icon:'fa-bullseye', onClick:()=>window._setHHInvFlag(id, 'Hide') }
     ];
     // If this exact unit already has a Chalan on file, offer Re-print
     // instead of opening a fresh form — that form would otherwise let
     // staff generate a second, duplicate Chalan record for the same bike.
     const existingChalanHH = chalanData.find(c=>c.unitId===id);
-    const chalanAction = cur === 'Sold'
+    const chalanAction = isFinalized
       ? [existingChalanHH
           ? { label:'Re-print Delivery Challan', icon:'fa-print', onClick:()=>window.reprintChalan(existingChalanHH.id) }
           : { label:'Delivery Challan', icon:'fa-file-invoice', onClick:()=>window.openChalanModal(id, 'hh_inventory') }]
@@ -3882,11 +4083,11 @@ window._toggleKebab = (btn, type, id) => {
     // main showroom Inventory records (that's where dealership-wide sales
     // reporting lives), so the transfer option stays available regardless
     // of status. transferToInventory() below carries status/customer over.
-    const transferAction = [{ label: cur==='Sold' ? 'Transfer Sale to Inventory' : 'Transfer to Inventory', icon:'fa-right-left', onClick:()=>window.transferToInventory(id) }];
+    const transferAction = [{ label: isFinalized ? 'Transfer Sale to Inventory' : 'Transfer to Inventory', icon:'fa-right-left', onClick:()=>window.transferToInventory(id) }];
     openKebabMenuFor(btn, [
       { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('hh_inventory', id) },
       ...statusActions,
-      ...holdAction,
+      ...hhActions,
       ...chalanAction,
       ...transferAction,
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editHHInv(id) },
@@ -3960,6 +4161,18 @@ window._toggleKebab = (btn, type, id) => {
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editExchange(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('exchange_stock', id) }
     ]);
+  } else if(type === 'exchange_stock_showroom'){
+    const s = exchangeSrData.find(x=>x.id===id);
+    const cur = s?.status || 'In Stock';
+    const statusAction = cur === 'Sold'
+      ? [{ label:'Mark In Stock', icon:'fa-rotate-left', onClick:()=>window._setExchangeSrStatus(id, 'In Stock') }]
+      : [{ label:'Mark Sold', icon:'fa-tag', onClick:()=>window._setExchangeSrStatus(id, 'Sold') }];
+    openKebabMenuFor(btn, [
+      { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('exchange_stock_showroom', id) },
+      ...statusAction,
+      { label:'Edit', icon:'fa-pen', onClick:()=>window._editExchangeSr(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('exchange_stock_showroom', id) }
+    ]);
   } else if(type === 'finance_schemes'){
     openKebabMenuFor(btn, [
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editFinance(id) },
@@ -4017,6 +4230,12 @@ window._selectRow = (type, id)=>{
     window.toggleSelectExchangeUnit(id, true);
     renderExchangeTable();
     const cb = document.querySelector(`.ex-row-checkbox[data-id="${id}"]`);
+    if(cb){ cb.scrollIntoView({behavior:'smooth', block:'center'}); }
+  } else if(type==='exchange_stock_showroom'){
+    window.setExchangeSrSelectMode(true);
+    window.toggleSelectExchangeSrUnit(id, true);
+    renderExchangeSrTable();
+    const cb = document.querySelector(`.ex-sr-row-checkbox[data-id="${id}"]`);
     if(cb){ cb.scrollIntoView({behavior:'smooth', block:'center'}); }
   }
 };
@@ -4503,8 +4722,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
-  const MNAV_IDS = { dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
+  const NAV_IDS = { dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
+  const MNAV_IDS = { dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -4534,6 +4753,7 @@ onAuthStateChanged(auth, async (user) => {
     loadLiveStock();
     loadHHInventory();
     loadExchangeStock();
+    loadExchangeSrStock();
     loadFinanceSchemes();
     loadAccessories();
     loadEvents();
@@ -5326,6 +5546,7 @@ function clearMasterForm(){
 // counts instead of trusting whatever happens to be loaded locally.
 let MAX_TOTAL_INVENTORY_UNITS = 2000;
 let MAX_EXCHANGE_STOCK = 2000;
+let MAX_EXCHANGE_STOCK_SR = 2000;
 let MAX_EVENTS = 50;
 let MAX_FINANCE_CATEGORIES = 20;
 let MAX_STOCK_AREAS = 20;
@@ -5394,6 +5615,24 @@ async function getAccurateExchangeCount(forceRefresh){
   }
   cachedExchangeCountAt = now;
   return cachedExchangeCount;
+}
+
+let cachedExchangeSrCount = null;
+let cachedExchangeSrCountAt = 0;
+async function getAccurateExchangeSrCount(forceRefresh){
+  const now = Date.now();
+  if(!forceRefresh && cachedExchangeSrCount!==null && (now-cachedExchangeSrCountAt) < TOTAL_COUNT_CACHE_MS){
+    return cachedExchangeSrCount;
+  }
+  try{
+    const snap = await getCountFromServer(collection(db,'exchange_stock_showroom'));
+    cachedExchangeSrCount = snap.data().count;
+  }catch(e){
+    console.error('Accurate exchange_stock_showroom count fetch failed — falling back to loaded-data estimate', e);
+    cachedExchangeSrCount = exchangeSrData.length;
+  }
+  cachedExchangeSrCountAt = now;
+  return cachedExchangeSrCount;
 }
 
 document.getElementById('saveStockBtn').addEventListener('click',async()=>{
@@ -5611,7 +5850,7 @@ function renderDashboard(){
   renderSalesTrendChart();
 
   const exchangeInStockEl = document.getElementById('dashExchangeCount');
-  if(exchangeInStockEl) exchangeInStockEl.textContent = exchangeData.filter(u=>(u.status||'In Stock')==='In Stock').length;
+  if(exchangeInStockEl) exchangeInStockEl.textContent = [...exchangeData, ...exchangeSrData].filter(u=>(u.status||'In Stock')==='In Stock').length;
 
   // "Low stock" as a dashboard-level alert card was more noise than
   // signal — with lots of models in the price list and only a handful
@@ -5654,13 +5893,13 @@ function renderDashboard(){
         return at.getMonth()===now.getMonth() && at.getFullYear()===now.getFullYear();
       })
       .reduce((sum,u)=>sum + priceOf(u.model), 0);
-    const exchangeValue = exchangeData
+    const exchangeValue = [...exchangeData, ...exchangeSrData]
       .filter(u=>(u.status||'In Stock')==='In Stock')
       .reduce((sum,u)=>sum + (Number(u.valuation)||0), 0);
     const rows = [
       { label:'Current Stock Value', sub:`${[...invData, ...hhInvData].filter(u=>u.status==='Available').length} units available`, value:stockValue, icon:'fa-warehouse', color:'#005EA6' },
       { label:'Sold This Month', sub:`${soldThisMonth} unit${soldThisMonth!==1?'s':''} sold`, value:soldValueThisMonth, icon:'fa-chart-line', color:'#059669' },
-      { label:'Exchange Stock Value', sub:`${exchangeData.filter(u=>(u.status||'In Stock')==='In Stock').length} old bikes in stock`, value:exchangeValue, icon:'fa-right-left', color:'#EA580C' },
+      { label:'Exchange Stock Value', sub:`${[...exchangeData, ...exchangeSrData].filter(u=>(u.status||'In Stock')==='In Stock').length} old bikes in stock (Mela + Showroom)`, value:exchangeValue, icon:'fa-right-left', color:'#EA580C' },
     ];
     summaryEl.innerHTML = rows.map(r=>`
       <div class="flex items-center justify-between gap-3">
@@ -7103,13 +7342,14 @@ function loadHHInventory(){
 function updateHHInvStats(){
   const sold = hhInvData.filter(s=>s.status==='Sold').length;
   const booked = hhInvData.filter(s=>s.status==='Booked').length;
-  // Hold is a flag on top of status (like HH Sales/HH Hide on Inventory),
-  // not its own status — a held unit is still "Available" underneath, so
-  // it isn't subtracted out of the base status counts here.
-  const hold = hhInvData.filter(s=>s.hold).length;
-  const available = hhInvData.length - sold - booked;
-  document.getElementById('hhInvTotalChip').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+hold+' on hold  ·  '+booked+' booked  ·  '+sold+' sold';
-  const pc = { pcHHAll:hhInvData.length, pcHHAvailable:available, pcHHHold:hold, pcHHBooked:booked, pcHHSold:sold };
+  const hhSalesCount = hhInvData.filter(s=>s.hhFlag==='Sales').length;
+  const hhHideCount = hhInvData.filter(s=>s.hhFlag==='Hide').length;
+  // "Available" means truly on display right now — a unit marked HH Hide
+  // is really gone (even if its raw status field still says Available),
+  // so it must not be counted here even though it isn't Sold/Booked either.
+  const available = hhInvData.filter(s=>(s.status||'Available')==='Available' && s.hhFlag!=='Hide').length;
+  document.getElementById('hhInvTotalChip').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'')+' total  ·  '+available+' available  ·  '+booked+' booked  ·  '+sold+' sold  ·  '+hhSalesCount+' HH Sales  ·  '+hhHideCount+' HH Hide';
+  const pc = { pcHHAll:hhInvData.length, pcHHAvailable:available, pcHHBooked:booked, pcHHSold:sold, pcHHInvSales:hhSalesCount, pcHHInvHide:hhHideCount };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
 }
 
@@ -7131,11 +7371,15 @@ function hhSearchMatches(s, q){
 }
 function getFilteredHHInv(){
   let base = hhInvData;
-  // "Hold" is a flag (like Inventory's HH Sales/HH Hide), not a status
-  // value, so it needs its own branch here rather than a plain status
-  // equality check.
-  if(hhInvStatusFilter === 'Hold') base = base.filter(s=>!!s.hold);
-  else if(hhInvStatusFilter !== 'all') base = base.filter(s=>(s.status||'Available')===hhInvStatusFilter);
+  if(hhInvStatusFilter === 'HHSales'){
+    base = base.filter(s => s.hhFlag==='Sales');
+  } else if(hhInvStatusFilter === 'HHHide'){
+    base = base.filter(s => s.hhFlag==='Hide');
+  } else if(hhInvStatusFilter === 'Available'){
+    base = base.filter(s => (s.status||'Available')==='Available' && s.hhFlag!=='Hide');
+  } else if(hhInvStatusFilter !== 'all'){
+    base = base.filter(s=>(s.status||'Available')===hhInvStatusFilter);
+  }
   if(hhInvModelFilter !== 'all') base = base.filter(s=>s.model===hhInvModelFilter);
   if(!hhInvSearchTerm) return base;
   const q = hhInvSearchTerm.toLowerCase().trim();
@@ -7202,7 +7446,8 @@ function renderHHInvTable(){
             : s.status==='Booked'
             ? `<span class="badge badge-amber"><i class="fas fa-bookmark"></i> Booked</span>`
             : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> Available</span>`}
-          ${s.hold ? `<span class="badge badge-neutral"><i class="fas fa-pause"></i> On Hold</span>` : ''}
+          ${s.hhFlag==='Sales' ? `<span class="badge badge-blue"><i class="fas fa-bullseye"></i> HH Sales</span>` : ''}
+          ${s.hhFlag==='Hide' ? `<span class="badge badge-neutral"><i class="fas fa-bullseye"></i> HH Hide (not in stock)</span>` : ''}
         </div>
         ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
         ${s.status==='Sold' && s.soldFrom ? `<div class="text-[10px] text-slate-400 flex items-center gap-1"><i class="fas ${s.soldFrom==='Showroom'?'fa-store':'fa-tents'} text-[8px]"></i>${escapeHtml(s.soldFrom)}</div>` : ''}
@@ -7465,23 +7710,46 @@ window._setHHInvStatus = async (id, status) => {
 // independently, rather than a status value of its own. Used for
 // multi-day melas where a unit shouldn't show as on-display today but
 // will again tomorrow.
-window._setHHInvHold = async (id, hold) => {
+// Same flag, same meaning, same UI as Inventory's own _setHHFlag — on
+// request, one consistent HH Sales/HH Hide system across both
+// collections instead of a separate "Hold" concept that needed its own
+// explanation.
+window._setHHInvFlag = async (id, hhFlag) => {
   const s = hhInvData.find(x=>x.id===id);
   const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
+  const existingName = escapeHtml(s?.customerName||'');
+  const customerField = `<br><br>
+    <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
+    <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
+      style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">`;
+  let title, message;
+  if(hhFlag==='Sales'){
+    title = 'Mark as HH Sales?';
+    message = `<b>${modelLabel}</b> will be counted in our stock and reported to HH as sold. Confirm?`;
+  } else if(hhFlag==='Hide'){
+    title = 'Mark as HH Hide?';
+    // HH Hide means the bike is really sold — capture who it went to, same as Mark Sold does.
+    message = `<b>${modelLabel}</b> will be removed from our stock count and held back from HH's report.${customerField}`;
+  } else {
+    title = 'Undo HH flag?';
+    message = `Remove the HH flag from <b>${modelLabel}</b> and go back to normal status-based counting. Confirm?`;
+  }
   const proceed = await showConfirm({
-    title: hold ? 'Put on Hold?' : 'Take off Hold?',
-    message: hold
-      ? `<b>${modelLabel}</b> will be marked <b>On Hold</b> — not shown as on display today, without changing its Available status. Bring it back with "Take Off Hold" whenever it's shown again.`
-      : `<b>${modelLabel}</b> will come off Hold and show as on display again. Confirm?`,
-    okText:'Confirm',
+    title, message, okText:'Confirm',
     okColorClass:'text-bajaj-blue hover:bg-blue-50',
-    iconClass:'fa-pause', iconColor:'#005EA6', iconBg:'#EAF3FB'
+    iconClass:'fa-bullseye', iconColor:'#005EA6', iconBg:'#EAF3FB'
   });
   if(!proceed) return;
+  const customerName = hhFlag==='Hide' ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : undefined;
   try{
-    await updateDoc(doc(db,"hh_inventory",id), { hold: hold || null });
-    logActivity(hold ? 'Put On Hold' : 'Took Off Hold', 'hh_inventory', s);
-    toast(hold ? 'Unit put on Hold.' : 'Unit taken off Hold.');
+    const payload = { hhFlag: hhFlag || null };
+    if(customerName !== undefined) payload.customerName = customerName;
+    await updateDoc(doc(db,"hh_inventory",id), payload);
+    logActivity(hhFlag==='Sales' ? 'HH Sales' : (hhFlag==='Hide' ? 'HH Hide (Sold)' : 'HH Flag Undone'), 'hh_inventory', {...s, customerName: customerName!==undefined?customerName:s?.customerName});
+    if(hhFlag==='Sales') toast('Marked as HH Sales — counted in our stock, reported to HH.');
+    else if(hhFlag==='Hide') toast('Marked as HH Hide'+(customerName?' — '+customerName:'')+' — NOT counted in our stock, held back from HH\'s report.');
+    else toast('HH flag cleared.');
+    if(hhFlag==='Hide') maybePromptChalan(id, 'hh_inventory');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
@@ -8515,7 +8783,7 @@ function loadExchangeStock(){
 
 window.setExchangeStatusFilter = (status)=>{
   exchangeStatusFilter = status;
-  document.querySelectorAll('.ex-status-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===status));
+  document.querySelectorAll('#secExchange .ex-status-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===status));
   renderExchangeTable();
 };
 
@@ -9064,7 +9332,7 @@ function buildCustomerIndex(){
     if(c.address) rec.address = c.address;
     bump(rec, date);
   });
-  exchangeData.forEach(e=>{
+  [...exchangeData, ...exchangeSrData].forEach(e=>{
     const rec = touch(e.customerName); if(!rec) return;
     const date = toDateSafe(e.addedAt);
     rec.exchanges.push({ model:e.model, regNo:e.regNo, valuation:e.valuation, date });
@@ -9147,6 +9415,553 @@ window.closeCustomerDetail = ()=>{
   modal.classList.add('hidden');
   modal.classList.remove('flex');
 };
+
+/* ═══════════════════════════════════════════════════════════════════════
+   EXCHANGE STOCK — old bikes taken in trade from customers. Tracked
+   separately from Inventory/HH Inventory since these aren't Bajaj/master-
+   price-list models and carry their own paperwork status (Blue Book/Key/
+   File) that matters for resale readiness.
+   ═══════════════════════════════════════════════════════════════════════ */
+let exchangeSrData = [];
+let exchangeSrUnsub = null;
+let currentEditExchangeSrId = null;
+let exchangeSrStatusFilter = 'all';
+let exchangeSrSendToFilter = 'all';
+let exchangeSrModelFilter = 'all';
+let exchangeSrSearchTerm = '';
+
+function loadExchangeSrStock(){
+  if(exchangeSrUnsub) exchangeSrUnsub();
+  const tbody = document.getElementById('exchangeSrTableBody');
+  exchangeSrUnsub = onSnapshot(query(collection(db,'exchange_stock_showroom'), orderBy('sn','asc')), snap=>{
+    exchangeSrData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const liveIds = new Set(exchangeSrData.map(s=>s.id));
+    selectedExchangeSrIds.forEach(id=>{ if(!liveIds.has(id)) selectedExchangeSrIds.delete(id); });
+    renderExchangeSrTable();
+    if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
+    if(document.getElementById('secCustomers')?.classList.contains('active')) renderCustomersPage();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
+  }, err=>{
+    console.error('exchange_stock listener failed', err);
+    if(tbody) tbody.innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load exchange stock — check your connection.</p>
+      <button onclick="loadExchangeSrStock()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div></td></tr>`;
+    toast('Exchange stock sync failed: '+friendlyError(err),'err');
+  });
+}
+
+window.setExchangeSrStatusFilter = (status)=>{
+  exchangeSrStatusFilter = status;
+  document.querySelectorAll('#secExchangeSr .ex-status-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===status));
+  renderExchangeSrTable();
+};
+
+window.setExchangeSrSendToFilter = (sendTo)=>{
+  exchangeSrSendToFilter = sendTo;
+  renderExchangeSrTable();
+};
+
+window.setExchangeSrModelFilter = (model)=>{
+  exchangeSrModelFilter = model;
+  renderExchangeSrTable();
+};
+
+function exSrSearchMatches(s,q){
+  return String(s.model||'').toLowerCase().includes(q)
+      || String(s.regNo||'').toLowerCase().includes(q)
+      || String(s.customerName||'').toLowerCase().includes(q)
+      || String(s.remarks||'').toLowerCase().includes(q)
+      || String(s.sendTo||'').toLowerCase().includes(q)
+      || (s.makeYear||'').toString().toLowerCase().includes(q);
+}
+function getFilteredExchangeSr(){
+  let base = exchangeSrData;
+  if(exchangeSrStatusFilter !== 'all') base = base.filter(s=>(s.status||'In Stock')===exchangeSrStatusFilter);
+  if(exchangeSrSendToFilter !== 'all') base = base.filter(s=>(s.sendTo||'Showroom')===exchangeSrSendToFilter);
+  if(exchangeSrModelFilter !== 'all') base = base.filter(s=>(s.model||'')===exchangeSrModelFilter);
+  if(!exchangeSrSearchTerm) return base;
+  const q = exchangeSrSearchTerm.toLowerCase().trim();
+  return base.filter(s=>exSrSearchMatches(s,q));
+}
+document.getElementById('exchangeSrSearch')?.addEventListener('input', function(){
+  exchangeSrSearchTerm = this.value;
+  renderExchangeSrTable();
+});
+
+function exSrDocBadge(label, ok){
+  return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wide ${ok?'bg-emerald-50 text-emerald-600':'bg-red-50 text-red-500'}"><i class="fas ${ok?'fa-check':'fa-xmark'} text-[8px]"></i> ${label}</span>`;
+}
+
+function renderExchangeSrTable(){
+  const tbody = document.getElementById('exchangeSrTableBody');
+  if(!tbody) return;
+  const list = getFilteredExchangeSr();
+  const total = exchangeSrData.length;
+  const inStock = exchangeSrData.filter(s=>(s.status||'In Stock')==='In Stock').length;
+  const sold = total - inStock;
+  document.getElementById('exchangeSrTotalChip').textContent = total+' unit'+(total!==1?'s':'')+' total  ·  '+inStock+' in stock  ·  '+sold+' sold';
+  document.getElementById('exchangeSrCount').textContent = list.length+' unit'+(list.length!==1?'s':'');
+
+  // Send To pills — one per distinct value actually in use, counted against
+  // whatever the Status tab currently shows, so switching to "Sold" also
+  // updates how many of each destination are sold.
+  const statusScoped = exchangeSrStatusFilter==='all' ? exchangeSrData : exchangeSrData.filter(s=>(s.status||'In Stock')===exchangeSrStatusFilter);
+  const sendToCounts = {};
+  statusScoped.forEach(s=>{ const k = s.sendTo || 'Showroom'; sendToCounts[k] = (sendToCounts[k]||0)+1; });
+  const sendToKeys = Object.keys(sendToCounts).sort((a,b)=> a==='Showroom' ? -1 : b==='Showroom' ? 1 : sendToCounts[b]-sendToCounts[a]);
+  if(!sendToKeys.includes(exchangeSrSendToFilter) && exchangeSrSendToFilter!=='all') exchangeSrSendToFilter = 'all';
+  const wrap = document.getElementById('exchangeSrSendToFilterWrap');
+  if(wrap){
+    const allBtn = `<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeSrSendToFilter==='all'?' active':''}" onclick="setExchangeSrSendToFilter('all')">All Destinations <span class="pill-count">${statusScoped.length}</span></button>`;
+    const pills = sendToKeys.map(k=>`<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeSrSendToFilter===k?' active':''}" onclick="setExchangeSrSendToFilter('${k.replace(/'/g,"\\'")}')">${escapeHtml(k)} <span class="pill-count">${sendToCounts[k]}</span></button>`).join('');
+    wrap.innerHTML = allBtn + pills;
+  }
+
+  // Model pills — same dynamic approach as Send To. Exchange models are
+  // free text (any brand, not the master price list), so a fixed dropdown
+  // doesn't fit here the way it does for Inventory/HH Inventory; pills
+  // built from whatever's actually on file always match reality.
+  const modelCounts = {};
+  statusScoped.forEach(s=>{ const k = (s.model||'').trim(); if(k) modelCounts[k] = (modelCounts[k]||0)+1; });
+  const modelKeys = Object.keys(modelCounts).sort((a,b)=>modelCounts[b]-modelCounts[a]);
+  if(!modelKeys.includes(exchangeSrModelFilter) && exchangeSrModelFilter!=='all') exchangeSrModelFilter = 'all';
+  const modelWrap = document.getElementById('exchangeSrModelFilterWrap');
+  if(modelWrap){
+    if(modelKeys.length <= 1){
+      modelWrap.innerHTML = ''; // nothing to filter by with 0-1 distinct models
+    } else {
+      const allModelBtn = `<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeSrModelFilter==='all'?' active':''}" onclick="setExchangeSrModelFilter('all')">All Models <span class="pill-count">${statusScoped.length}</span></button>`;
+      const modelPills = modelKeys.map(k=>`<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeSrModelFilter===k?' active':''}" onclick="setExchangeSrModelFilter('${k.replace(/'/g,"\\'")}')">${escapeHtml(k)} <span class="pill-count">${modelCounts[k]}</span></button>`).join('');
+      modelWrap.innerHTML = allModelBtn + modelPills;
+    }
+  }
+  const pc = { pcExSrAll:total, pcExSrInStock:inStock, pcExSrSold:sold };
+  Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
+  if(!list.length){
+    tbody.innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400"><i class="fas fa-right-left text-3xl opacity-25 block mb-2"></i><p class="text-sm">${exchangeSrSearchTerm?'No units match your search.':'No exchange stock yet. Add a unit above.'}</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map(s=>{
+    const valuation = s.valuation ? 'Rs. '+Number(s.valuation).toLocaleString('en-IN') : '—';
+    const isSel = selectedExchangeSrIds.has(s.id);
+    return `
+    <tr class="border-b border-slate-100 ${isSel?'row-selected':''}" data-row-id="${s.id}">
+      <td class="px-3 py-3 sel-col" data-th="">
+        <input type="checkbox" class="ex-sr-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${isSel?'checked':''} onchange="toggleSelectExchangeSrUnit('${s.id}', this.checked); this.closest('tr').classList.toggle('row-selected', this.checked)">
+      </td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${s.sn||'—'}</td>
+      <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">${escapeHtml(s.model||'—')}
+        ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
+      </td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Year">${escapeHtml(s.makeYear||'—')}</td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
+      <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Valuation">${valuation}</td>
+      <td class="px-4 py-3" data-th="Documents"><div class="flex flex-wrap gap-1">${exSrDocBadge('Blue Book', s.blueBook==='yes')}${exSrDocBadge('Key', s.key==='yes')}${exSrDocBadge('File', s.file==='yes')}</div>
+        ${s.remarks ? `<div class="text-[11px] text-slate-400 mt-1 max-w-[220px] truncate" title="${escapeHtml(s.remarks)}"><i class="fas fa-note-sticky text-slate-300 text-[9px] mr-1"></i>${escapeHtml(s.remarks)}</div>` : ''}
+      </td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Send To"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide"><i class="fas fa-location-dot text-[8px]"></i> ${escapeHtml(s.sendTo||'Showroom')}</span></td>
+      <td class="px-4 py-3" data-th="Status">
+        ${s.status==='Sold' ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>` : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> In Stock</span>`}
+      </td>
+      <td class="px-4 py-3" data-th="Actions">
+        <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'exchange_stock_showroom','${s.id}')"><i class="fas fa-ellipsis-vertical"></i></button>
+      </td>
+    </tr>`;
+  }).join('');
+  updateDeleteSelectedExSrBtn();
+}
+
+/* ─── Multi-select + bulk delete (Exchange Stock) ─── */
+let selectedExchangeSrIds = new Set();
+
+function updateDeleteSelectedExSrBtn(){
+  const btn = document.getElementById('deleteSelectedExSrBtn');
+  const countEl = document.getElementById('deleteSelectedExSrCount');
+  const cancelBtn = document.getElementById('cancelSelectExSrBtn');
+  const hint = document.getElementById('selectModeHintExSr');
+  if(!btn || !countEl) return;
+  const inSelectMode = document.getElementById('exchangeSrTable')?.classList.contains('select-mode');
+  countEl.textContent = selectedExchangeSrIds.size;
+  if(selectedExchangeSrIds.size>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); }
+  else { btn.classList.add('hidden'); btn.classList.remove('flex'); }
+  if(cancelBtn){
+    if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
+    else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
+  }
+  if(hint){
+    if(inSelectMode && selectedExchangeSrIds.size===0){ hint.classList.remove('hidden'); hint.classList.add('flex'); }
+    else { hint.classList.add('hidden'); hint.classList.remove('flex'); }
+  }
+  const selectAll = document.getElementById('exSrSelectAll');
+  if(selectAll){
+    const visibleIds = getFilteredExchangeSr().map(s=>s.id);
+    const allChecked = visibleIds.length>0 && visibleIds.every(id=>selectedExchangeSrIds.has(id));
+    selectAll.checked = allChecked;
+    selectAll.indeterminate = !allChecked && visibleIds.some(id=>selectedExchangeSrIds.has(id));
+  }
+}
+
+window.setExchangeSrSelectMode = (on)=>{
+  const table = document.getElementById('exchangeSrTable');
+  if(table) table.classList.toggle('select-mode', on);
+  if(!on) selectedExchangeSrIds.clear();
+  updateDeleteSelectedExSrBtn();
+};
+
+window.toggleSelectExchangeSrUnit = (id, checked)=>{
+  if(checked) selectedExchangeSrIds.add(id); else selectedExchangeSrIds.delete(id);
+  updateDeleteSelectedExSrBtn();
+};
+
+window.toggleSelectAllExchangeSr = (checked)=>{
+  const visibleIds = getFilteredExchangeSr().map(s=>s.id);
+  if(checked) visibleIds.forEach(id=>selectedExchangeSrIds.add(id));
+  else visibleIds.forEach(id=>selectedExchangeSrIds.delete(id));
+  renderExchangeSrTable();
+};
+
+window.deleteSelectedExchangeSrUnits = async ()=>{
+  if(!selectedExchangeSrIds.size) return;
+  const ids = [...selectedExchangeSrIds];
+  const proceed = await showDangerousConfirm({
+    title: `Delete ${ids.length} selected unit${ids.length!==1?'s':''}?`,
+    message: `This will <b>permanently delete ${ids.length} selected unit${ids.length!==1?'s':''}</b> from Exchange Stock. This cannot be undone.<br><br>The button unlocks in 5 seconds — please make sure this is really what you want.`,
+    okText: 'Delete Selected'
+  });
+  if(!proceed) return;
+  try{
+    const targets = ids.map(id=>exchangeSrData.find(x=>x.id===id)).filter(Boolean);
+    for(const t of targets) await moveToTrash('exchange_stock_showroom', t.id, t);
+    const chunks = [];
+    for(let i=0;i<ids.length;i+=400) chunks.push(ids.slice(i,i+400));
+    for(const chunk of chunks){
+      const batch = writeBatch(db);
+      chunk.forEach(id=>batch.delete(doc(db,'exchange_stock_showroom',id)));
+      await batch.commit();
+    }
+    logActivity('Bulk Deleted', 'exchange_stock_showroom', { model: `${targets.length} unit(s)`, sn: '' });
+    toast(`${ids.length} unit(s) moved to Trash. Tap "Fix Numbering" to close any S.N gaps.`);
+    selectedExchangeSrIds.clear();
+    document.getElementById('exchangeSrTable')?.classList.remove('select-mode');
+    updateDeleteSelectedExSrBtn();
+  }catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
+};
+
+
+document.getElementById('fixExchangeSrSnBtn').addEventListener('click', async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can renumber Exchange Stock.','err'); return; }
+  if(!exchangeSrData.length){ toast('No exchange stock to renumber.','warn'); return; }
+  const ok = await showConfirm({
+    title: 'Fix S.N numbering?',
+    message: `This will resequence all <b>${exchangeSrData.length}</b> exchange units to S.N 1, 2, 3… in their current order, closing any gaps left by earlier deletions. This can't be undone.`,
+    okText: 'Renumber All',
+    okColorClass: 'text-blue-600 hover:bg-blue-50',
+    iconClass: 'fa-arrow-down-1-9', iconColor:'#005EA6', iconBg:'#E8F2FB'
+  });
+  if(!ok) return;
+  const btn = document.getElementById('fixExchangeSrSnBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin text-[11px]"></i> Renumbering…';
+  try{
+    const sorted = [...exchangeSrData].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999) || (a.id>b.id?1:-1));
+    const chunks = [];
+    let batch = writeBatch(db), opsInBatch = 0, changed = 0;
+    sorted.forEach((s,i)=>{
+      const correctSn = i+1;
+      if(Number(s.sn) !== correctSn){
+        batch.update(doc(db,'exchange_stock_showroom',s.id), { sn: correctSn });
+        opsInBatch++; changed++;
+        if(opsInBatch===450){ chunks.push(batch); batch = writeBatch(db); opsInBatch = 0; }
+      }
+    });
+    if(opsInBatch>0) chunks.push(batch);
+    for(const b of chunks) await b.commit();
+    toast(changed ? `Renumbered ${changed} unit(s) — no more gaps.` : 'Numbering was already correct.');
+  }catch(e){
+    toast('Renumber failed: '+friendlyError(e),'err');
+  }finally{
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering';
+  }
+});
+
+window.openExchangeSrFormModal = ()=>{ document.getElementById('exchangeSrFormModal').classList.add('open'); };
+window.closeExchangeSrFormModal = ()=>{ document.getElementById('exchangeSrFormModal').classList.remove('open'); };
+
+window.cancelExchangeSrEdit = ()=>{
+  currentEditExchangeSrId = null;
+  ['exSrModel','exSrMakeYear','exSrRegNo','exSrValuation','exSrCustomerName','exSrRemarks'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('exSrBlueBook').value='yes';
+  document.getElementById('exSrKey').value='yes';
+  document.getElementById('exSrFile').value='yes';
+  document.getElementById('exSrSendTo').value='Showroom';
+  const btn = document.getElementById('saveExchangeSrBtn');
+  btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Unit';
+  document.getElementById('exchangeSrFormTitle').textContent = 'Add Exchange Unit';
+  const cancel = document.getElementById('cancelExchangeSrBtn');
+  cancel.classList.add('hidden'); cancel.classList.remove('flex');
+  closeExchangeSrFormModal();
+};
+
+window._editExchangeSr = (id)=>{
+  const s = exchangeSrData.find(x=>x.id===id); if(!s) return;
+  document.getElementById('exSrModel').value = s.model||'';
+  document.getElementById('exSrMakeYear').value = s.makeYear||'';
+  document.getElementById('exSrRegNo').value = s.regNo||'';
+  document.getElementById('exSrValuation').value = s.valuation??'';
+  document.getElementById('exSrCustomerName').value = s.customerName||'';
+  document.getElementById('exSrBlueBook').value = s.blueBook==='no' ? 'no' : 'yes';
+  document.getElementById('exSrKey').value = s.key==='no' ? 'no' : 'yes';
+  document.getElementById('exSrFile').value = s.file==='no' ? 'no' : 'yes';
+  document.getElementById('exSrRemarks').value = s.remarks||'';
+  document.getElementById('exSrSendTo').value = s.sendTo || 'Showroom';
+  currentEditExchangeSrId = id;
+  const btn = document.getElementById('saveExchangeSrBtn');
+  btn.innerHTML = '<i class="fas fa-rotate"></i> Update Unit';
+  document.getElementById('exchangeSrFormTitle').textContent = 'Edit Exchange Unit';
+  const cancel = document.getElementById('cancelExchangeSrBtn');
+  cancel.classList.remove('hidden'); cancel.classList.add('flex');
+  openExchangeSrFormModal();
+};
+
+window._setExchangeSrStatus = async (id, status) => {
+  const s = exchangeSrData.find(x=>x.id===id);
+  const modelLabel = s ? escapeHtml(s.model||'this unit') : 'this unit';
+  const proceed = await showConfirm({
+    title: 'Mark as '+status+'?',
+    message: `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`,
+    okText:'Confirm',
+    okColorClass:'text-bajaj-blue hover:bg-blue-50',
+    iconClass:'fa-rotate', iconColor:'#005EA6', iconBg:'#EAF3FB'
+  });
+  if(!proceed) return;
+  try{
+    await updateDoc(doc(db,'exchange_stock_showroom',id),{status});
+    logActivity(status==='Sold' ? 'Marked Sold' : 'Marked In Stock', 'exchange_stock_showroom', s);
+    toast('Unit marked as '+status+'.');
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
+document.getElementById('saveExchangeSrBtn').addEventListener('click', async ()=>{
+  if(!currentEditExchangeSrId && (await getAccurateExchangeSrCount(true)) >= MAX_EXCHANGE_STOCK_SR){
+    toast(`Storage full — ${MAX_EXCHANGE_STOCK_SR} unit limit reached.`,'err');
+    showLimitExceededModal('Exchange Stock Limit Reached', `Exchange Stock has reached the ${MAX_EXCHANGE_STOCK_SR} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
+    return;
+  }
+  const modelCheck = Validate.text(document.getElementById('exSrModel').value, { label:'Model Name', max:80 });
+  const yearCheck = Validate.text(document.getElementById('exSrMakeYear').value, { label:'Make Year', max:10 });
+  const regNoCheck = Validate.text(document.getElementById('exSrRegNo').value, { label:'Registration No', max:40 });
+  const valuationRaw = document.getElementById('exSrValuation').value;
+  const remarksCheck = Validate.text(document.getElementById('exSrRemarks').value, { min:0, max:500, label:'Remarks' });
+  const firstErr = [modelCheck, yearCheck, regNoCheck, remarksCheck].find(c=>!c.ok);
+  if(firstErr){ toast(firstErr.error,'err'); return; }
+  if(valuationRaw==='' || isNaN(Number(valuationRaw)) || Number(valuationRaw)<0){ toast('Enter a valid Valuation amount.','err'); return; }
+  const customerName = document.getElementById('exSrCustomerName').value.trim();
+  const blueBook = document.getElementById('exSrBlueBook').value==='no' ? 'no' : 'yes';
+  const key = document.getElementById('exSrKey').value==='no' ? 'no' : 'yes';
+  const file = document.getElementById('exSrFile').value==='no' ? 'no' : 'yes';
+  const sendToCheck = Validate.text(document.getElementById('exSrSendTo').value, { min:0, max:60, label:'Send To' });
+  if(!sendToCheck.ok){ toast(sendToCheck.error,'err'); return; }
+  const sendTo = sendToCheck.value || 'Showroom';
+  const payload = {
+    model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
+    valuation: Number(valuationRaw), customerName, blueBook, key, file, remarks: remarksCheck.value, sendTo
+  };
+  try{
+    if(currentEditExchangeSrId){
+      await updateDoc(doc(db,'exchange_stock_showroom',currentEditExchangeSrId), payload);
+      logActivity('Updated', 'exchange_stock_showroom', payload);
+      toast('Exchange unit updated!');
+      window.cancelExchangeSrEdit();
+    } else {
+      const nextSn = await getAccurateNextSn('exchange_stock_showroom');
+      await addDoc(collection(db,'exchange_stock_showroom'), {...payload, sn:nextSn, status:'In Stock', addedAt:new Date()});
+      logActivity('Added', 'exchange_stock_showroom', {...payload, sn:nextSn});
+      window.cancelExchangeSrEdit();
+      toast('Exchange unit added — S.N '+nextSn+' assigned, marked In Stock.');
+    }
+    // Belt-and-suspenders: force the modal shut after a successful save
+    // regardless of anything above, so a partial DOM-reset hiccup can
+    // never leave the popup stuck open when the save actually went through.
+    document.getElementById('exchangeSrFormModal')?.classList.remove('open');
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+});
+
+window.exportExchangeSrToExcel = ()=>{
+  const list = getFilteredExchangeSr();
+  if(!list.length){ toast('Nothing to export in the current view.','warn'); return; }
+  const sorted = [...list].sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0));
+  const rows = sorted.map(s=>({
+    'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg. No': s.regNo||'',
+    'Valuation': s.valuation||0, 'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
+    'File': s.file==='yes'?'Yes':'No', 'Customer': s.customerName||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:10},{wch:16},{wch:30}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
+  XLSX.writeFile(wb, `exchange_stock_export_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast(`Exported ${rows.length} unit(s).`);
+};
+
+window.loadExchangeSrStock = loadExchangeSrStock;
+
+/* ─── Exchange Stock Bulk Import (same pattern as Inventory/HH Inventory) ─── */
+let exSrExcelParsedRows = [];
+
+document.getElementById('exSrExcelFileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const importBtn = document.getElementById('exSrImportExcelBtn');
+  const label = document.getElementById('exSrExcelFileLabel');
+  const summary = document.getElementById('exSrImportSummary');
+  summary.classList.add('hidden');
+  exSrExcelParsedRows = [];
+  importBtn.disabled = true;
+
+  if(!file){ label.textContent='Click to choose Excel / CSV file…'; return; }
+  label.textContent = file.name;
+
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const aoa = XLSX.utils.sheet_to_json(sheet, {header:1, defval:'', blankrows:false});
+      if(!aoa.length){ toast('File appears empty.','err'); return; }
+
+      const rawHeaders = aoa[0].map(h=>h.toString().trim().toLowerCase().replace(/[^a-z]/g,''));
+      function findCol(keywords){
+        for(let i=0;i<rawHeaders.length;i++){
+          if(keywords.some(kw=>rawHeaders[i].includes(kw))) return i;
+        }
+        return -1;
+      }
+      const colIdx = {
+        model:      findCol(['modelname','model']),
+        makeYear:   findCol(['makeyear','year']),
+        regNo:      findCol(['registrationnumber','regno','regd','registration']),
+        valuation:  findCol(['valuation','value','price']),
+        blueBook:   findCol(['bluebook']),
+        key:        findCol(['key']),
+        file:       findCol(['file']),
+        customer:   findCol(['customername','customer']),
+        sendTo:     findCol(['sendto','destination']),
+        remarks:    findCol(['remarks','notes','note'])
+      };
+
+      if(colIdx.model===-1 || colIdx.regNo===-1){
+        toast('Could not find Model / RegNo columns in the header row.','err');
+        return;
+      }
+
+      function parseYesNo(v){
+        const s = (v||'').toString().trim().toLowerCase();
+        return (s==='no' || s==='n' || s==='0' || s==='false') ? 'no' : 'yes';
+      }
+
+      exSrExcelParsedRows = aoa.slice(1).map(r=>({
+        model:      colIdx.model!==-1     ? (r[colIdx.model]||'').toString().trim()     : '',
+        makeYear:   colIdx.makeYear!==-1  ? (r[colIdx.makeYear]||'').toString().trim()  : '',
+        regNo:      colIdx.regNo!==-1     ? (r[colIdx.regNo]||'').toString().trim()     : '',
+        valuation:  colIdx.valuation!==-1 ? Number(r[colIdx.valuation])||0              : 0,
+        blueBook:   colIdx.blueBook!==-1  ? parseYesNo(r[colIdx.blueBook])              : 'yes',
+        key:        colIdx.key!==-1       ? parseYesNo(r[colIdx.key])                   : 'yes',
+        file:       colIdx.file!==-1      ? parseYesNo(r[colIdx.file])                  : 'yes',
+        customerName: colIdx.customer!==-1 ? (r[colIdx.customer]||'').toString().trim() : '',
+        sendTo:     colIdx.sendTo!==-1    ? (r[colIdx.sendTo]||'').toString().trim() || 'Showroom' : 'Showroom',
+        remarks:    colIdx.remarks!==-1   ? (r[colIdx.remarks]||'').toString().trim()   : ''
+      })).filter(r=>r.model || r.regNo);
+
+      if(!exSrExcelParsedRows.length){ toast('No data rows found in file.','err'); return; }
+      importBtn.disabled = false;
+      toast(exSrExcelParsedRows.length+' row(s) detected. Review & click Import.');
+    }catch(err){
+      toast('Could not read file: '+err.message,'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('exSrDownloadTemplateBtn').addEventListener('click', ()=>{
+  const wsData = [
+    ['Model','MakeYear','RegNo','Valuation','BlueBook','Key','File','Customer','SendTo','Remarks'],
+    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','Yes','Yes','No','Santosh Gahatraj Kami','Showroom','Minor scratch on tank'],
+    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','No','Yes','Yes','','Workshop','']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:16},{wch:30}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
+  XLSX.writeFile(wb, 'exchange_stock_import_template.xlsx');
+});
+
+document.getElementById('exSrImportExcelBtn').addEventListener('click', async ()=>{
+  if(!exSrExcelParsedRows.length) return;
+  const btn = document.getElementById('exSrImportExcelBtn');
+  const btnText = document.getElementById('exSrImportExcelBtnText');
+  btn.disabled = true;
+  btnText.textContent = 'Importing…';
+
+  let nextSn = await getAccurateNextSn('exchange_stock_showroom');
+  const results = { success:[], failed:[] };
+  let runningTotal = await getAccurateExchangeSrCount(true); // real Firestore count, not just what's paginated locally
+
+  for(const row of exSrExcelParsedRows){
+    if(runningTotal >= MAX_EXCHANGE_STOCK_SR){
+      results.failed.push({row, reason:`Storage full — ${MAX_EXCHANGE_STOCK_SR} unit limit reached`});
+      continue;
+    }
+    if(!row.model || !row.makeYear || !row.regNo || !row.valuation){
+      results.failed.push({row, reason:'Missing required field (Model/MakeYear/RegNo/Valuation)'});
+      continue;
+    }
+    const modelCheck = Validate.text(row.model, { label:'Model', max:80 });
+    const yearCheck = Validate.text(row.makeYear, { label:'Make Year', max:10 });
+    const regNoCheck = Validate.text(row.regNo, { label:'Reg No', max:40 });
+    const badField = [modelCheck, yearCheck, regNoCheck].find(c=>!c.ok);
+    if(badField){ results.failed.push({row, reason: badField.error}); continue; }
+    if(isNaN(row.valuation) || row.valuation<0){ results.failed.push({row, reason:'Invalid Valuation amount'}); continue; }
+    try{
+      await addDoc(collection(db,'exchange_stock_showroom'), {
+        sn: nextSn,
+        model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
+        valuation: row.valuation, blueBook: row.blueBook, key: row.key, file: row.file,
+        customerName: row.customerName || '', sendTo: row.sendTo || 'Showroom', remarks: row.remarks || '',
+        status: 'In Stock', addedAt: new Date()
+      });
+      results.success.push(row);
+      nextSn++;
+      runningTotal++;
+    }catch(e){
+      results.failed.push({row, reason:friendlyError(e)});
+    }
+  }
+
+  const summary = document.getElementById('exSrImportSummary');
+  const head = document.getElementById('exSrImportSummaryHead');
+  const body = document.getElementById('exSrImportSummaryBody');
+  head.innerHTML = `<span class="text-emerald-600"><i class="fas fa-circle-check"></i> ${results.success.length} imported</span>` +
+    (results.failed.length ? ` &nbsp;·&nbsp; <span class="text-red-500"><i class="fas fa-circle-xmark"></i> ${results.failed.length} failed</span>` : '');
+  body.innerHTML = results.failed.map(f=>`
+    <div class="px-4 py-2 flex items-center justify-between gap-3">
+      <span class="text-slate-600 truncate">${escapeHtml(f.row.model || '(no model)')} — ${escapeHtml(f.row.regNo || '(no reg no)')}</span>
+      <span class="text-red-500 font-medium whitespace-nowrap">${f.reason}</span>
+    </div>`).join('') || `<div class="px-4 py-3 text-slate-400">All rows imported successfully.</div>`;
+  summary.classList.remove('hidden');
+
+  toast(`Import done: ${results.success.length} added, ${results.failed.length} failed`, results.failed.length ? 'err' : 'ok');
+
+  btn.disabled = true;
+  btnText.textContent = 'Import Rows';
+  exSrExcelParsedRows = [];
+  document.getElementById('exSrExcelFileInput').value = '';
+  document.getElementById('exSrExcelFileLabel').textContent = 'Click to choose Excel / CSV file…';
+});
+
+
 
 /* ─── Accessories Inventory ─── */
 function loadAccessories(){
@@ -9529,6 +10344,7 @@ function loadSystemLimits(){
       if(d.maxBikes) MAX_BIKES = d.maxBikes;
       if(d.maxTotalInventory) MAX_TOTAL_INVENTORY_UNITS = d.maxTotalInventory;
       if(d.maxExchangeStock) MAX_EXCHANGE_STOCK = d.maxExchangeStock;
+      if(d.maxExchangeStockSr) MAX_EXCHANGE_STOCK_SR = d.maxExchangeStockSr;
       if(d.maxEvents) MAX_EVENTS = d.maxEvents;
       if(d.maxFinanceCategories) MAX_FINANCE_CATEGORIES = d.maxFinanceCategories;
       if(d.maxStockAreas) MAX_STOCK_AREAS = d.maxStockAreas;
@@ -9564,6 +10380,7 @@ async function updateStorageOverview(){
   if(!list) return;
   const invCount = await getAccurateTotalInventoryCount();
   const exCount = await getAccurateExchangeCount();
+  const exSrCount = await getAccurateExchangeSrCount();
   const used = getTotalStorageUsed();
 
   const rows = [
@@ -9575,9 +10392,12 @@ async function updateStorageOverview(){
     { icon:'fa-warehouse', color:'#059669', label:'All Inventory', count: invCount, maxCount: MAX_TOTAL_INVENTORY_UNITS,
       usedBytes: invCount*RECORD_SIZE_ESTIMATE.inventoryUnit, maxBytes: MAX_TOTAL_INVENTORY_UNITS*RECORD_SIZE_ESTIMATE.inventoryUnit,
       sub: `${invCount} / ${MAX_TOTAL_INVENTORY_UNITS} units — up to ${formatBytes(MAX_TOTAL_INVENTORY_UNITS*RECORD_SIZE_ESTIMATE.inventoryUnit)} at full capacity` },
-    { icon:'fa-right-left', color:'#EA580C', label:'Exchange Stock', count: exCount, maxCount: MAX_EXCHANGE_STOCK,
+    { icon:'fa-right-left', color:'#EA580C', label:'Exchange Stock (Mela)', count: exCount, maxCount: MAX_EXCHANGE_STOCK,
       usedBytes: exCount*RECORD_SIZE_ESTIMATE.exchangeUnit, maxBytes: MAX_EXCHANGE_STOCK*RECORD_SIZE_ESTIMATE.exchangeUnit,
       sub: `${exCount} / ${MAX_EXCHANGE_STOCK} units — up to ${formatBytes(MAX_EXCHANGE_STOCK*RECORD_SIZE_ESTIMATE.exchangeUnit)} at full capacity` },
+    { icon:'fa-shop', color:'#EA580C', label:'Exchange Stock (Showroom)', count: exSrCount, maxCount: MAX_EXCHANGE_STOCK_SR,
+      usedBytes: exSrCount*RECORD_SIZE_ESTIMATE.exchangeUnit, maxBytes: MAX_EXCHANGE_STOCK_SR*RECORD_SIZE_ESTIMATE.exchangeUnit,
+      sub: `${exSrCount} / ${MAX_EXCHANGE_STOCK_SR} units — up to ${formatBytes(MAX_EXCHANGE_STOCK_SR*RECORD_SIZE_ESTIMATE.exchangeUnit)} at full capacity` },
     { icon:'fa-helmet-safety', color:'#7C3AED', label:'Accessories', count: accessories.length, maxCount: MAX_ACCESSORIES,
       usedBytes: accessories.length*RECORD_SIZE_ESTIMATE.accessory, maxBytes: MAX_ACCESSORIES*RECORD_SIZE_ESTIMATE.accessory,
       sub: `${accessories.length} / ${MAX_ACCESSORIES} items — up to ${formatBytes(MAX_ACCESSORIES*RECORD_SIZE_ESTIMATE.accessory)} at full capacity` },
@@ -9680,10 +10500,16 @@ window.downloadFullBackup = ()=>{
     addSheet('HH Inventory', hhInvData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Chassis':s.chassis||'', 'Engine':s.engine||'', 'RegNo':s.regNo||'',
       'Colour':s.color||'', 'Event':s.eventName||'', 'Owner':s.owner==='other'?'Other':(s.owner==='hh'?'HH':'Dealer'),
-      'Owner Name':s.owner==='other'?(s.ownerName||''):'', 'Status':s.status||'', 'On Hold':s.hold?'Yes':'No', 'Customer':s.customerName||'',
+      'Owner Name':s.owner==='other'?(s.ownerName||''):'', 'Status':s.status||'', 'HH Flag':s.hhFlag||'', 'Customer':s.customerName||'',
       'Sold From':s.soldFrom||'', 'Sold Date':fmtDate(s.soldAt), 'Added Date':fmtDate(s.addedAt)
     })));
-    addSheet('Exchange Stock', exchangeData.map(s=>({
+    addSheet('Exchange Stock (Mela)', exchangeData.map(s=>({
+      'S.N':s.sn||'', 'Model':s.model||'', 'Make Year':s.makeYear||'', 'RegNo':s.regNo||'', 'Valuation':s.valuation||0,
+      'Blue Book':s.blueBook==='yes'?'Yes':'No', 'Key':s.key==='yes'?'Yes':'No', 'File':s.file==='yes'?'Yes':'No',
+      'Customer':s.customerName||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
+      'Added Date':fmtDate(s.addedAt)
+    })));
+    addSheet('Exchange Stock (Showroom)', exchangeSrData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Make Year':s.makeYear||'', 'RegNo':s.regNo||'', 'Valuation':s.valuation||0,
       'Blue Book':s.blueBook==='yes'?'Yes':'No', 'Key':s.key==='yes'?'Yes':'No', 'File':s.file==='yes'?'Yes':'No',
       'Customer':s.customerName||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
@@ -9814,7 +10640,7 @@ document.getElementById('restoreBackupBtn')?.addEventListener('click', async ()=
     await importSnCollection('Inventory', 'inventory', r => ({
       model:String(r['Model']||''), chassis:String(r['Chassis']||''), engine:String(r['Engine']||''), regNo:String(r['RegNo']||''),
       color:String(r['Colour']||''), status:String(r['Status']||'Available'), customerName:String(r['Customer']||''),
-      soldFrom:String(r['Sold From']||'')
+      soldFrom:String(r['Sold From']||''), hhFlag: (r['HH Flag']==='Sales'||r['HH Flag']==='Hide') ? r['HH Flag'] : null
     }), ()=>invData.length < MAX_TOTAL_INVENTORY_UNITS);
 
     await importSnCollection('HH Inventory', 'hh_inventory', r => ({
@@ -9822,10 +10648,25 @@ document.getElementById('restoreBackupBtn')?.addEventListener('click', async ()=
       color:String(r['Colour']||''), eventName:String(r['Event']||''),
       owner: String(r['Owner']||'').toLowerCase()==='hh' ? 'hh' : (String(r['Owner']||'').toLowerCase()==='other' ? 'other' : 'dealer'),
       ownerName:String(r['Owner Name']||''), status:String(r['Status']||'Available'),
-      hold: String(r['On Hold']||'').toLowerCase()==='yes' ? true : null,
+      hhFlag: (r['HH Flag']==='Sales'||r['HH Flag']==='Hide') ? r['HH Flag'] : null,
       customerName:String(r['Customer']||''), soldFrom:String(r['Sold From']||'')
     }), ()=>hhInvData.length < MAX_TOTAL_INVENTORY_UNITS);
 
+    await importSnCollection('Exchange Stock (Mela)', 'exchange_stock', r => ({
+      model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), customerName:String(r['Customer']||''),
+      sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
+    }), ()=>exchangeData.length < MAX_EXCHANGE_STOCK);
+
+    await importSnCollection('Exchange Stock (Showroom)', 'exchange_stock_showroom', r => ({
+      model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), customerName:String(r['Customer']||''),
+      sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
+    }), ()=>exchangeSrData.length < MAX_EXCHANGE_STOCK_SR);
+
+    // Backward compatibility — older backup files exported before the
+    // Showroom/Mela split still say plain "Exchange Stock"; treat that as
+    // Mela (the original meaning) so an old backup still restores cleanly.
     await importSnCollection('Exchange Stock', 'exchange_stock', r => ({
       model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
       blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), customerName:String(r['Customer']||''),
@@ -10231,6 +11072,7 @@ window.openSystemLimitsModal = ()=>{
   document.getElementById('limitMaxBikes').value = MAX_BIKES;
   document.getElementById('limitMaxInventory').value = MAX_TOTAL_INVENTORY_UNITS;
   document.getElementById('limitMaxExchange').value = MAX_EXCHANGE_STOCK;
+  document.getElementById('limitMaxExchangeSr').value = MAX_EXCHANGE_STOCK_SR;
   document.getElementById('limitMaxAccessories').value = MAX_ACCESSORIES;
   document.getElementById('limitMaxFinanceSchemes').value = MAX_FINANCE_SCHEMES;
   document.getElementById('limitMaxChalans').value = MAX_CHALANS;
@@ -10253,6 +11095,7 @@ window.saveSystemLimits = async ()=>{
   const maxBikes = parseInt(document.getElementById('limitMaxBikes').value);
   const maxInventory = parseInt(document.getElementById('limitMaxInventory').value);
   const maxExchange = parseInt(document.getElementById('limitMaxExchange').value);
+  const maxExchangeSr = parseInt(document.getElementById('limitMaxExchangeSr').value);
   const maxAccessories = parseInt(document.getElementById('limitMaxAccessories').value);
   const maxFinanceSchemes = parseInt(document.getElementById('limitMaxFinanceSchemes').value);
   const maxChalans = parseInt(document.getElementById('limitMaxChalans').value);
@@ -10263,7 +11106,7 @@ window.saveSystemLimits = async ()=>{
   const maxAreas = parseInt(document.getElementById('limitMaxAreas').value);
   const com1stParty = parseInt(document.getElementById('limitCom1stParty').value);
   const com3rdParty = parseInt(document.getElementById('limitCom3rdParty').value);
-  if(![maxBikes,maxInventory,maxExchange,maxAccessories,maxFinanceSchemes,maxChalans,maxImportant,maxAliases,maxEvents,maxFinCats,maxAreas].every(v=>Number.isInteger(v) && v>0)){
+  if(![maxBikes,maxInventory,maxExchange,maxExchangeSr,maxAccessories,maxFinanceSchemes,maxChalans,maxImportant,maxAliases,maxEvents,maxFinCats,maxAreas].every(v=>Number.isInteger(v) && v>0)){
     toast('Enter a valid whole number greater than 0 for each limit.','err');
     return;
   }
@@ -10273,13 +11116,14 @@ window.saveSystemLimits = async ()=>{
   }
   const invCount = await getAccurateTotalInventoryCount(true);
   const exCount = await getAccurateExchangeCount(true);
-  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxExchange, exCount, 'exchange stock units'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes'], [maxChalans, chalanData.length, 'chalan records'], [maxImportant, importantData.length, 'important info entries'], [maxAliases, modelAliasesData.length, 'model aliases'], [maxEvents, events.length, 'events'], [maxFinCats, financeCategories.length, 'finance categories'], [maxAreas, stockAreas.length, 'storage areas']];
+  const exSrCount = await getAccurateExchangeSrCount(true);
+  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxExchange, exCount, 'mela exchange stock units'], [maxExchangeSr, exSrCount, 'showroom exchange stock units'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes'], [maxChalans, chalanData.length, 'chalan records'], [maxImportant, importantData.length, 'important info entries'], [maxAliases, modelAliasesData.length, 'model aliases'], [maxEvents, events.length, 'events'], [maxFinCats, financeCategories.length, 'finance categories'], [maxAreas, stockAreas.length, 'storage areas']];
   for(const [limit, used, label] of checks){
     if(limit < used){ toast(`Can't set the ${label} limit below the ${used} already on file.`,'err'); return; }
   }
   try{
-    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxExchangeStock:maxExchange, maxAccessories, maxFinanceSchemes, maxChalans, maxImportantInfo:maxImportant, maxModelAliases:maxAliases, maxEvents, maxFinanceCategories:maxFinCats, maxStockAreas:maxAreas, commission1stParty:com1stParty, commission3rdParty:com3rdParty }, { merge:true });
-    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Exchange:${maxExchange} Acc:${maxAccessories} Fin:${maxFinanceSchemes} Chalan:${maxChalans} Info:${maxImportant} Alias:${maxAliases} Events:${maxEvents} FinCats:${maxFinCats} Areas:${maxAreas}` });
+    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxExchangeStock:maxExchange, maxExchangeStockSr:maxExchangeSr, maxAccessories, maxFinanceSchemes, maxChalans, maxImportantInfo:maxImportant, maxModelAliases:maxAliases, maxEvents, maxFinanceCategories:maxFinCats, maxStockAreas:maxAreas, commission1stParty:com1stParty, commission3rdParty:com3rdParty }, { merge:true });
+    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Exchange:${maxExchange} ExchangeSr:${maxExchangeSr} Acc:${maxAccessories} Fin:${maxFinanceSchemes} Chalan:${maxChalans} Info:${maxImportant} Alias:${maxAliases} Events:${maxEvents} FinCats:${maxFinCats} Areas:${maxAreas}` });
     toast('Record limits updated.');
     closeSystemLimitsModal();
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
@@ -11673,8 +12517,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Exchange Stock (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
-const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
+const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
+const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
 window.switchSec=(sec)=>{
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
@@ -11702,6 +12546,7 @@ window.switchSec=(sec)=>{
   if(sec==='hhinv') populateHHModelDropdown();
   if(sec==='allinv') renderAllInventoryTable();
   if(sec==='exchange') renderExchangeTable();
+  if(sec==='exchangeSr') renderExchangeSrTable();
   if(sec==='customers') renderCustomersPage();
   if(sec==='docs') renderDocumentsPage();
   if(sec==='storage') updateStorageOverview();
