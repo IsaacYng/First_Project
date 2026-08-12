@@ -3724,6 +3724,10 @@
           <input type="text" id="newStaffName" placeholder="Full name" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
           <input type="email" id="newStaffEmail" placeholder="Email address" autocomplete="off" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
           <input type="password" id="newStaffPass" placeholder="Temporary password (min 6 characters)" autocomplete="new-password" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+          <select id="newStaffRole" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
+            <option value="staff">Normal ID — full access except Master-only tools</option>
+            <option value="recondition">Recondition ID — Exchange Stock &amp; Blue Book only</option>
+          </select>
           <button onclick="addTeamMember()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
             <i class="fas fa-plus mr-1"></i> Create Account
           </button>
@@ -4878,6 +4882,11 @@ onAuthStateChanged(auth, async (user) => {
     document.body.classList.add('app-active');
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     await loadProfile(user.uid);
+    // A Recondition ID's default landing is Exchange Stock, not Dashboard
+    // — the Dashboard surfaces dealership-wide numbers that aren't theirs
+    // to see, and switchSec's own guard would just bounce them back here
+    // anyway the moment anything tried to render on the wrong page.
+    if(currentUserRole === 'recondition') switchSec('exchange');
     loadMasterPriceList();
     loadLiveStock();
     loadHHInventory();
@@ -5123,6 +5132,48 @@ async function loadProfile(uid) {
     });
     const toolsLabel = document.getElementById('navToolsLabel');
     if(toolsLabel) toolsLabel.classList.remove('hidden');
+
+    // Recondition ID — a narrow role for whoever handles reconditioning
+    // on traded-in bikes. They need Exchange Stock (both Mela and
+    // Showroom, since Blue Book upload/view lives inside those forms
+    // already) and nothing else — not even Dashboard, which surfaces
+    // business-wide numbers that aren't their concern.
+    const isRecondition = currentUserRole === 'recondition';
+    if(pmRole && isRecondition){
+      pmRole.textContent = 'Recondition ID';
+      pmRole.className = 'badge badge-neutral';
+      pmRole.style.cssText = 'font-size:9px;padding:1px 6px;vertical-align:middle;';
+    }
+    // Built locally rather than reusing setActiveTab()'s NAV_IDS/MNAV_IDS —
+    // those are declared inside that function's own scope, not accessible
+    // from here. Explicit map, not a derived-from-key guess — several IDs
+    // (navHHInv, navAllInv, navHHStock) don't follow a simple capitalize
+    // pattern.
+    const RECON_NAV_MAP = {
+      dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv',
+      exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc',
+      docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock',
+      chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases'
+    };
+    const RECON_MNAV_MAP = {
+      dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv',
+      exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc',
+      docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', hhstock:'mNavHHStock',
+      chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases'
+    };
+    Object.entries(RECON_NAV_MAP).forEach(([key,id])=>{
+      const keep = key==='exchange' || key==='exchangeSr';
+      const el = document.getElementById(id);
+      if(el) el.classList.toggle('hidden', isRecondition && !keep);
+    });
+    Object.entries(RECON_MNAV_MAP).forEach(([key,id])=>{
+      const keep = key==='exchange' || key==='exchangeSr';
+      const el = document.getElementById(id);
+      if(el) el.classList.toggle('hidden', isRecondition && !keep);
+    });
+    // Section labels ("Reports", "Stock Management", etc.) would otherwise
+    // sit above an empty group with nothing left visible under them.
+    document.querySelectorAll('.sidebar-section-label').forEach(el=>el.classList.toggle('hidden', isRecondition));
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
 }
 
@@ -5396,9 +5447,10 @@ function renderTeamMembersList(){
     const initial = (m.name||'?').charAt(0).toUpperCase();
     const color = m.avatarColor || AVATAR_COLORS[0];
     const avatarInner = m.photoBase64 ? `<img src="${escapeHtml(m.photoBase64)}" class="w-full h-full object-cover">` : initial;
-    // Only Master ID gets a badge — no need to label everyone else as
-    // "normal", that's just the default, unlabeled state.
-    const roleBadge = m.role==='owner' ? '<span class="badge badge-blue ml-1">Master ID</span>' : '';
+    // Only Master ID and Recondition ID get a badge — no need to label
+    // everyone else as "normal", that's just the default, unlabeled state.
+    const roleBadge = m.role==='owner' ? '<span class="badge badge-blue ml-1">Master ID</span>'
+      : m.role==='recondition' ? '<span class="badge badge-neutral ml-1">Recondition ID</span>' : '';
     return `<div class="flex items-center gap-3 p-3 border border-slate-100 rounded-xl ${!isActive?'opacity-60':''}">
       <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden" style="background:${color}">${avatarInner}</div>
       <div class="flex-1 min-w-0">
@@ -5421,6 +5473,7 @@ window.addTeamMember = async ()=>{
   const name = document.getElementById('newStaffName').value.trim();
   const email = document.getElementById('newStaffEmail').value.trim();
   const pass = document.getElementById('newStaffPass').value;
+  const role = document.getElementById('newStaffRole').value === 'recondition' ? 'recondition' : 'staff';
   if(!name || !email){ toast('Name and email are required.','err'); return; }
   if(!/^\S+@\S+\.\S+$/.test(email)){ toast('Enter a valid email address.','err'); return; }
   if(!pass || pass.length < 6){ toast('Temporary password must be at least 6 characters.','err'); return; }
@@ -5430,7 +5483,7 @@ window.addTeamMember = async ()=>{
     // near the top of this file for why).
     const cred = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
     await setDoc(doc(db,'profiles',cred.user.uid), {
-      name, email, role:'staff', active:true, avatarColor: AVATAR_COLORS[teamMembers.length % AVATAR_COLORS.length]
+      name, email, role, active:true, avatarColor: AVATAR_COLORS[teamMembers.length % AVATAR_COLORS.length]
     });
     await signOut(secondaryAuth); // clean up the temporary session
     logActivity('Team Member Added', 'profiles', { model: name, customerName: email });
@@ -5438,6 +5491,8 @@ window.addTeamMember = async ()=>{
     document.getElementById('newStaffName').value = '';
     document.getElementById('newStaffEmail').value = '';
     document.getElementById('newStaffPass').value = '';
+    document.getElementById('newStaffRole').value = 'staff';
+    document.getElementById('newStaffRole')?._csSync?.();
     await loadTeamMembers();
   }catch(e){
     const msg = friendlyError(e);
@@ -13161,6 +13216,16 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', hhstock:'HH Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
 const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
 window.switchSec=(sec)=>{
+  // A Recondition ID exists to work with old-bike trade-ins and their
+  // Blue Books specifically — sending them anywhere else in the app
+  // exposes business data (pricing, other customers' records, dealership
+  // finances) that isn't their job to see, so every section but the two
+  // Exchange ones redirects back here regardless of how the navigation
+  // was triggered.
+  if(currentUserRole === 'recondition' && sec !== 'exchange' && sec !== 'exchangeSr'){
+    toast("Recondition ID only has access to Exchange Stock.",'err');
+    sec = 'exchange';
+  }
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
     sec = 'price';
@@ -13493,6 +13558,7 @@ function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('aliasCanonicalSelect'), { placeholder:'Select a model…', searchable:true });
   enhanceNativeSelect(document.getElementById('aliasRawInput'), { placeholder:'Select a model name from Inventory…', searchable:true });
   enhanceNativeSelect(document.getElementById('hhOwnerSelect'), { placeholder:'Unit Owner' });
+  enhanceNativeSelect(document.getElementById('newStaffRole'), { placeholder:'Role' });
   enhanceNativeSelect(document.getElementById('exBlueBook'), { placeholder:'Blue Book' });
   enhanceNativeSelect(document.getElementById('exKey'), { placeholder:'Key' });
   enhanceNativeSelect(document.getElementById('exFile'), { placeholder:'File' });
