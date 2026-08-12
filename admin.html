@@ -1095,6 +1095,9 @@
         <button id="navStock" onclick="switchSec('stock');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-file-lines"></i> Stock Report
         </button>
+        <button id="navHHStock" onclick="switchSec('hhstock');closeMobileMenu()" class="nav-tab sidebar-link">
+          <i class="fas fa-file-lines"></i> HH Stock Report
+        </button>
         <button id="navChalans" onclick="switchSec('chalans');closeMobileMenu()" class="nav-tab sidebar-link">
           <i class="fas fa-file-invoice"></i> Chalan Records
         </button>
@@ -2004,6 +2007,25 @@
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Inspection</label>
+            <select id="exInspection" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="Pending">Pending</option>
+              <option value="Pass">Pass</option>
+              <option value="Fail">Fail</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5 sm:col-span-3">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Blue Book File (PDF or Image)</label>
+            <div class="flex items-center gap-3 border-2 border-dashed border-slate-200 rounded-lg px-3 py-2.5">
+              <label class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 cursor-pointer hover:bg-slate-100 transition-all flex-shrink-0">
+                <i class="fas fa-file-arrow-up text-slate-400"></i> Choose File
+                <input type="file" id="exBlueBookFile" accept=".pdf,image/*" class="hidden"/>
+              </label>
+              <span id="exBlueBookFileLabel" class="text-xs text-slate-400 truncate flex-1">No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.</span>
+              <a id="exBlueBookFileExistingLink" href="#" target="_blank" class="hidden text-xs font-bold text-bajaj-blue hover:underline flex-shrink-0">View current</a>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Send To</label>
             <input type="text" id="exSendTo" placeholder="e.g. Showroom, HH Mela, Workshop…"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
@@ -2192,6 +2214,25 @@
               <option value="yes">Yes — received</option>
               <option value="no">No — missing</option>
             </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Inspection</label>
+            <select id="exSrInspection" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="Pending">Pending</option>
+              <option value="Pass">Pass</option>
+              <option value="Fail">Fail</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5 sm:col-span-3">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Blue Book File (PDF or Image)</label>
+            <div class="flex items-center gap-3 border-2 border-dashed border-slate-200 rounded-lg px-3 py-2.5">
+              <label class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 cursor-pointer hover:bg-slate-100 transition-all flex-shrink-0">
+                <i class="fas fa-file-arrow-up text-slate-400"></i> Choose File
+                <input type="file" id="exSrBlueBookFile" accept=".pdf,image/*" class="hidden"/>
+              </label>
+              <span id="exSrBlueBookFileLabel" class="text-xs text-slate-400 truncate flex-1">No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.</span>
+              <a id="exSrBlueBookFileExistingLink" href="#" target="_blank" class="hidden text-xs font-bold text-bajaj-blue hover:underline flex-shrink-0">View current</a>
+            </div>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Send To</label>
@@ -2523,7 +2564,11 @@
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="photo" onclick="setDocTypeFilter('photo')"><i class="fas fa-file-image mr-1"></i>Photo <span id="docCountPhoto" class="filter-count-badge"></span></button>
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="word" onclick="setDocTypeFilter('word')"><i class="fas fa-file-word mr-1"></i>Word <span id="docCountWord" class="filter-count-badge"></span></button>
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="excel" onclick="setDocTypeFilter('excel')"><i class="fas fa-file-excel mr-1"></i>Excel <span id="docCountExcel" class="filter-count-badge"></span></button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="bluebook" onclick="setDocTypeFilter('bluebook')"><i class="fas fa-book mr-1"></i>Blue Books <span id="docCountBlueBook" class="filter-count-badge"></span></button>
       </div>
+      <button onclick="window.downloadAllBlueBooks()" class="mb-4 flex items-center gap-1.5 text-xs font-bold text-bajaj-blue hover:underline">
+        <i class="fas fa-download"></i> Download All Blue Books (from Mela + Showroom Exchange)
+      </button>
       <div id="docsListWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </div>
 
@@ -2742,6 +2787,88 @@
               <tr><td class="px-4 py-12 text-center text-slate-400"><i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading areas…</td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ HH STOCK REPORT ═══ -->
+    <div class="sec-panel" id="secHHStock">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Reports ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">HH Stock <span class="text-amber-500">Report</span></div>
+          <p class="text-xs text-slate-400 mt-1">Same idea as the showroom's Stock Report, for mela/outdoor stock — Sold and HH Hide units aren't counted here either.</p>
+        </div>
+        <button id="genHHStockReportBtn" onclick="openHHStockPreview()" class="cta-primary">
+          <i class="fas fa-image"></i> Download Report (JPG)
+        </button>
+      </div>
+
+      <!-- Stat tiles -->
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
+        <div class="stock-tile"><div class="k">Available Stock</div><div class="v" id="hhstkTotalUnits">—</div></div>
+        <div class="stock-tile"><div class="k">Models In Stock</div><div class="v" id="hhstkModels">—</div></div>
+        <div class="stock-tile"><div class="k">Colours</div><div class="v" id="hhstkColours">—</div></div>
+        <div class="stock-tile"><div class="k">Sold (Not In Stock)</div><div class="v" id="hhstkSold">—</div></div>
+        <div class="stock-tile"><div class="k">Report Date</div><div class="v text-lg" id="hhstkDate">—</div></div>
+      </div>
+
+      <!-- Category-wise totals -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5" id="hhstkCategoryWrap">
+        <div class="stock-tile flex items-center justify-between">
+          <div><div class="k">Bike</div><div class="v" id="hhstkCatBike">—</div></div>
+          <i class="fas fa-motorcycle text-3xl text-blue-100"></i>
+        </div>
+        <div class="stock-tile flex items-center justify-between">
+          <div><div class="k">Scooter</div><div class="v" id="hhstkCatScooter">—</div></div>
+          <i class="fas fa-motorcycle text-3xl text-amber-100"></i>
+        </div>
+      </div>
+
+      <!-- Owner-wise totals — Dealer/HH/Other, unique to HH Inventory -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5" id="hhstkOwnerWrap">
+        <div class="stock-tile flex items-center justify-between">
+          <div><div class="k">Dealer</div><div class="v" id="hhstkOwnerDealer">—</div></div>
+          <i class="fas fa-store text-3xl text-blue-100"></i>
+        </div>
+        <div class="stock-tile flex items-center justify-between">
+          <div><div class="k">HH</div><div class="v" id="hhstkOwnerHH">—</div></div>
+          <i class="fas fa-building text-3xl text-indigo-100"></i>
+        </div>
+        <div class="stock-tile flex items-center justify-between">
+          <div><div class="k">Other</div><div class="v" id="hhstkOwnerOther">—</div></div>
+          <i class="fas fa-user-tag text-3xl text-slate-200"></i>
+        </div>
+      </div>
+
+      <!-- Model x Colour breakdown -->
+      <div class="yng-card-shell overflow-hidden mb-5">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-boxes-stacked text-amber-500"></i> Stock By Model</div>
+          <button onclick="loadHHStockReportData(true)" class="text-xs font-bold text-bajaj-blue hover:underline flex items-center gap-1.5"><i class="fas fa-arrows-rotate"></i> Refresh</button>
+        </div>
+        <div id="hhStockModelList">
+          <div class="py-12 text-center text-slate-400">
+            <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading stock…
+          </div>
+        </div>
+      </div>
+
+      <!-- Event-wise stock — auto-grouped from each unit's Mela/Event field
+           (unlike Inventory's Area-Wise Stock, which is hand-typed, this
+           one's automatic since every HH Inventory unit already carries
+           its event name). -->
+      <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div>
+            <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-calendar-days text-amber-500"></i> Event-Wise Stock</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Grouped automatically from each unit's Mela/Event field — no manual entry needed.</p>
+          </div>
+        </div>
+        <div id="hhEventStockBody">
+          <div class="py-12 text-center text-slate-400">
+            <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading events…
+          </div>
         </div>
       </div>
     </div>
@@ -3053,7 +3180,7 @@
   <div class="spv-shell">
     <div class="spv-head">
       <div class="flex-1 min-w-0">
-        <div class="text-white font-bold text-sm">Daily Stock Report Preview</div>
+        <div class="text-white font-bold text-sm" id="spvTitle">Daily Stock Report Preview</div>
         <div class="text-white/50 text-xs" id="spvSubtitle">—</div>
       </div>
       <button id="spvDownloadBtn" class="spv-btn print" onclick="downloadStockReportJPG()"><i class="fas fa-download"></i> Download JPG</button>
@@ -3422,12 +3549,8 @@
           <input type="number" id="limitMaxInventory" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
         </div>
         <div class="flex items-center justify-between gap-3">
-          <label class="text-xs font-bold text-slate-600 flex-1">Exchange Stock (Mela)</label>
+          <label class="text-xs font-bold text-slate-600 flex-1">Exchange Stock (Mela + Showroom)</label>
           <input type="number" id="limitMaxExchange" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
-        </div>
-        <div class="flex items-center justify-between gap-3">
-          <label class="text-xs font-bold text-slate-600 flex-1">Exchange Stock (Showroom)</label>
-          <input type="number" id="limitMaxExchangeSr" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
         </div>
         <div class="flex items-center justify-between gap-3">
           <label class="text-xs font-bold text-slate-600 flex-1">Accessories</label>
@@ -4722,8 +4845,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
-  const MNAV_IDS = { dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
+  const NAV_IDS = { dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
+  const MNAV_IDS = { dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', hhstock:'mNavHHStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -5545,8 +5668,7 @@ function clearMasterForm(){
 // when it matters most. This asks Firestore directly for the true document
 // counts instead of trusting whatever happens to be loaded locally.
 let MAX_TOTAL_INVENTORY_UNITS = 2000;
-let MAX_EXCHANGE_STOCK = 2000;
-let MAX_EXCHANGE_STOCK_SR = 2000;
+let MAX_EXCHANGE_STOCK = 2000; // shared cap — Mela + Showroom Exchange combined, same idea as Inventory + HH Inventory sharing MAX_TOTAL_INVENTORY_UNITS
 let MAX_EVENTS = 50;
 let MAX_FINANCE_CATEGORIES = 20;
 let MAX_STOCK_AREAS = 20;
@@ -5633,6 +5755,31 @@ async function getAccurateExchangeSrCount(forceRefresh){
   }
   cachedExchangeSrCountAt = now;
   return cachedExchangeSrCount;
+}
+
+// The actual limit-enforcement number — Mela + Showroom Exchange share one
+// 2000-unit budget, not 2000 each, same idea as Inventory + HH Inventory
+// sharing MAX_TOTAL_INVENTORY_UNITS. The two functions above stay around
+// just for the per-collection breakdown shown in Storage.
+let cachedCombinedExchangeCount = null;
+let cachedCombinedExchangeCountAt = 0;
+async function getAccurateCombinedExchangeCount(forceRefresh){
+  const now = Date.now();
+  if(!forceRefresh && cachedCombinedExchangeCount!==null && (now-cachedCombinedExchangeCountAt) < TOTAL_COUNT_CACHE_MS){
+    return cachedCombinedExchangeCount;
+  }
+  try{
+    const [meSnap, srSnap] = await Promise.all([
+      getCountFromServer(collection(db,'exchange_stock')),
+      getCountFromServer(collection(db,'exchange_stock_showroom'))
+    ]);
+    cachedCombinedExchangeCount = meSnap.data().count + srSnap.data().count;
+  }catch(e){
+    console.error('Accurate combined exchange count fetch failed — falling back to loaded-data estimate', e);
+    cachedCombinedExchangeCount = exchangeData.length + exchangeSrData.length;
+  }
+  cachedCombinedExchangeCountAt = now;
+  return cachedCombinedExchangeCount;
 }
 
 document.getElementById('saveStockBtn').addEventListener('click',async()=>{
@@ -7767,6 +7914,11 @@ let stockReportTotalUnits = 0;
 let stockReportSoldUnits = 0;
 
 let stockReportAllUnits = [];
+// Both Inventory's "Stock Report" and HH Inventory's "HH Stock Report"
+// share the same preview overlay/JPG-download plumbing below — this just
+// tracks which one is currently loaded so the title and downloaded
+// filename match whichever report was actually opened.
+let currentReportKind = 'inventory';
 
 async function loadStockReportData(forceRefresh){
   if(stockReportGrouped && !forceRefresh) { renderStockDashboard(); return; }
@@ -7984,8 +8136,10 @@ function buildStockReportPage(){
 }
 
 window.openStockPreview = async function(){
+  currentReportKind = 'inventory';
   await loadStockReportData(true); // always fresh — never show a stale/cached report
   if(!Object.keys(stockReportGrouped||{}).length){ toast('No available inventory to report yet.','warn'); return; }
+  document.getElementById('spvTitle').textContent = 'Daily Stock Report Preview';
   document.getElementById('spvSubtitle').textContent = stockReportTotalUnits+' available units across '+Object.keys(stockReportGrouped).length+' models';
   document.getElementById('spvPage').innerHTML = `<div class="jpg-report-paper">${buildStockReportPage()}</div>`;
   document.getElementById('stockPreviewOverlay').classList.add('open');
@@ -8005,10 +8159,11 @@ window.downloadStockReportJPG = async function(){
   try{
     const canvas = await html2canvas(target, { scale:2, backgroundColor:'#ffffff', useCORS:true });
     const link = document.createElement('a');
-    link.download = 'Stock-Report-'+new Date().toISOString().slice(0,10)+'.jpg';
+    const namePrefix = currentReportKind==='hh' ? 'HH-Stock-Report-' : 'Stock-Report-';
+    link.download = namePrefix+new Date().toISOString().slice(0,10)+'.jpg';
     link.href = canvas.toDataURL('image/jpeg', 0.95);
     link.click();
-    toast('Stock report downloaded as JPG!');
+    toast((currentReportKind==='hh' ? 'HH stock' : 'Stock')+' report downloaded as JPG!');
   }catch(e){
     console.error('JPG export failed', e);
     toast('Could not generate image: '+friendlyError(e),'err');
@@ -8016,6 +8171,269 @@ window.downloadStockReportJPG = async function(){
     btn.innerHTML = origHtml;
     btn.disabled = false;
   }
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   HH STOCK REPORT — the same daily-report idea as Inventory's Stock
+   Report, adapted for HH Inventory (mela/outdoor stock): same Model x
+   Colour breakdown and printable JPG, but "Area-Wise Stock" (a hand-typed
+   physical-location grid that doesn't apply to mela stock) is replaced
+   with "Event-Wise Stock", grouped automatically from each unit's own
+   Mela/Event field — and an Owner (Dealer/HH/Other) breakdown is added,
+   since that's specific to this collection.
+   ═══════════════════════════════════════════════════════════════════════ */
+let hhStockReportGrouped = null;
+let hhStockReportTotalUnits = 0;
+let hhStockReportSoldUnits = 0;
+let hhStockReportAllUnits = [];
+
+async function loadHHStockReportData(forceRefresh){
+  if(hhStockReportGrouped && !forceRefresh) { renderHHStockDashboard(); return; }
+  const listEl = document.getElementById('hhStockModelList');
+  if(listEl) listEl.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading stock…</div>`;
+  try{
+    const snap = await getDocs(collection(db,"hh_inventory"));
+    const all = snap.docs.map(d=>({id:d.id,...d.data()}));
+    hhStockReportAllUnits = all;
+    // Same "available" rule as Inventory's own report — HH Hide always
+    // excludes (really gone), HH Sales always includes (still physically
+    // ours), otherwise anything not Sold counts.
+    const available = all.filter(s => {
+      if(s.hhFlag==='Hide') return false;
+      if(s.hhFlag==='Sales') return true;
+      return (s.status||'Available') !== 'Sold';
+    });
+    const byModel = {};
+    available.forEach(s=>{
+      const m = findMasterBikeByName(s.model)?.name || s.model || 'Unassigned';
+      const c = (s.color||'Unspecified').trim() || 'Unspecified';
+      byModel[m] = byModel[m] || { total:0, colours:{}, chassisByColour:{} };
+      byModel[m].total++;
+      byModel[m].colours[c] = (byModel[m].colours[c]||0) + 1;
+      byModel[m].chassisByColour[c] = byModel[m].chassisByColour[c] || [];
+      const chassisTail = (s.chassis||'').toString().trim().slice(-5);
+      if(chassisTail) byModel[m].chassisByColour[c].push(chassisTail);
+    });
+    hhStockReportGrouped = byModel;
+    hhStockReportTotalUnits = available.length;
+    hhStockReportSoldUnits = all.length - available.length;
+    renderHHStockDashboard();
+  }catch(err){
+    console.error('HH stock report load failed', err);
+    if(listEl) listEl.innerHTML = `<div class="py-12 text-center text-slate-400">
+      <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
+      <p class="text-sm mb-3">Couldn't load stock data — check your connection.</p>
+      <button onclick="loadHHStockReportData(true)" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+    </div>`;
+    toast('HH stock report load failed: '+err.message,'err');
+  }
+}
+
+function hhReportAvailableUnits(){
+  return hhStockReportAllUnits.filter(s => {
+    if(s.hhFlag==='Hide') return false;
+    if(s.hhFlag==='Sales') return true;
+    return (s.status||'Available') !== 'Sold';
+  });
+}
+
+function renderHHStockDashboard(){
+  const byModel = hhStockReportGrouped || {};
+  const models = Object.keys(byModel);
+  const allColours = new Set();
+  models.forEach(m=>Object.keys(byModel[m].colours).forEach(c=>allColours.add(c)));
+
+  document.getElementById('hhstkTotalUnits').textContent = hhStockReportTotalUnits;
+  document.getElementById('hhstkModels').textContent = models.length;
+  document.getElementById('hhstkColours').textContent = allColours.size;
+  document.getElementById('hhstkSold').textContent = hhStockReportSoldUnits;
+  document.getElementById('hhstkDate').textContent = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+  let bikeTotal = 0, scooterTotal = 0;
+  models.forEach(m=>{
+    const cat = getModelCategory(m);
+    if(cat==='Scooter') scooterTotal += byModel[m].total; else bikeTotal += byModel[m].total;
+  });
+  document.getElementById('hhstkCatBike').textContent = bikeTotal;
+  document.getElementById('hhstkCatScooter').textContent = scooterTotal;
+
+  const avail = hhReportAvailableUnits();
+  const ownerCounts = { dealer:0, hh:0, other:0 };
+  avail.forEach(s=>{
+    const o = s.owner==='hh' ? 'hh' : (s.owner==='other' ? 'other' : 'dealer');
+    ownerCounts[o]++;
+  });
+  document.getElementById('hhstkOwnerDealer').textContent = ownerCounts.dealer;
+  document.getElementById('hhstkOwnerHH').textContent = ownerCounts.hh;
+  document.getElementById('hhstkOwnerOther').textContent = ownerCounts.other;
+
+  renderHHEventStockTable();
+
+  const listEl = document.getElementById('hhStockModelList');
+  if(!models.length){
+    listEl.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-boxes-stacked text-3xl opacity-25 block mb-2"></i><p class="text-sm">No HH inventory yet.</p></div>`;
+    return;
+  }
+  const sorted = models.sort((a,b)=>byModel[b].total-byModel[a].total);
+  listEl.innerHTML = sorted.map(m=>{
+    const info = byModel[m];
+    const chips = Object.entries(info.colours).sort((a,b)=>b[1]-a[1])
+      .map(([c,n])=>`<span class="colour-chip"><span class="dot" style="background:${colourHex(c)}"></span>${c} <span class="text-slate-400 font-mono">×${n}</span></span>`)
+      .join('');
+    return `<div class="model-row">
+      <div class="font-bold text-slate-800 text-sm w-44 flex-shrink-0 truncate">${m}</div>
+      <div class="flex flex-wrap gap-1.5 flex-1">${chips}</div>
+      <div class="badge badge-blue flex-shrink-0">${info.total} unit${info.total!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+
+// Event-Wise Stock — a read-only table, auto-grouped from eventName,
+// unlike Inventory's hand-edited Area-Wise grid. No manual entry, no
+// separate "areas" collection needed — the source data already has this.
+function renderHHEventStockTable(){
+  const body = document.getElementById('hhEventStockBody');
+  if(!body) return;
+  const avail = hhReportAvailableUnits();
+  const byEvent = {};
+  avail.forEach(s=>{
+    const ev = (s.eventName||'').trim() || 'No Event Set';
+    byEvent[ev] = byEvent[ev] || { total:0, models:{} };
+    byEvent[ev].total++;
+    byEvent[ev].models[s.model||'Unassigned'] = (byEvent[ev].models[s.model||'Unassigned']||0)+1;
+  });
+  const events = Object.keys(byEvent).sort((a,b)=>byEvent[b].total-byEvent[a].total);
+  if(!events.length){
+    body.innerHTML = `<div class="py-12 text-center text-slate-400"><i class="fas fa-calendar-days text-3xl opacity-25 block mb-2"></i><p class="text-sm">No HH inventory yet.</p></div>`;
+    return;
+  }
+  body.innerHTML = `<div class="overflow-x-auto"><table class="w-full border-collapse responsive-table">
+    <thead><tr class="bg-slate-50">
+      <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200">Event / Mela</th>
+      <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200">Models</th>
+      <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200">Units</th>
+    </tr></thead>
+    <tbody>
+      ${events.map(ev=>{
+        const info = byEvent[ev];
+        const modelChips = Object.entries(info.models).sort((a,b)=>b[1]-a[1])
+          .map(([m,n])=>`<span class="badge badge-neutral">${escapeHtml(m)} ×${n}</span>`).join(' ');
+        return `<tr class="border-b border-slate-100">
+          <td class="px-4 py-3 font-bold text-slate-800 text-sm" data-th="Event">${escapeHtml(ev)}</td>
+          <td class="px-4 py-3" data-th="Models"><div class="flex flex-wrap gap-1">${modelChips}</div></td>
+          <td class="px-4 py-3" data-th="Units"><span class="badge badge-blue">${info.total} unit${info.total!==1?'s':''}</span></td>
+        </tr>`;
+      }).join('')}
+      <tr class="bg-slate-50 font-bold">
+        <td class="px-4 py-3" colspan="2">TOTAL</td>
+        <td class="px-4 py-3">${hhStockReportTotalUnits}</td>
+      </tr>
+    </tbody>
+  </table></div>`;
+}
+
+function buildHHStockReportPage(){
+  const byModel = hhStockReportGrouped || {};
+  const models = Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total);
+  const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  let sn = 0, bikeTotal = 0, scooterTotal = 0;
+
+  const rows = models.map(m=>{
+    const info = byModel[m];
+    const cat = getModelCategory(m);
+    if(cat==='Scooter') scooterTotal += info.total; else bikeTotal += info.total;
+    return Object.entries(info.colours).sort((a,b)=>b[1]-a[1]).map(([c,available])=>{
+      sn++;
+      const chassisTails = (info.chassisByColour && info.chassisByColour[c]) || [];
+      const chassisLine = chassisTails.length
+        ? `<div style="font-size:11px;color:#475569;font-weight:700;margin-top:3px;letter-spacing:.02em">Chassis: ${chassisTails.join(', ')}</div>`
+        : '';
+      return `<tr><td>${sn}</td><td>${m}${chassisLine}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${available}</td></tr>`;
+    }).join('');
+  }).join('');
+
+  // Event-wise section — same shape as Inventory's Area-Wise grid in the
+  // printed report, just sourced from eventName instead of a manual entry.
+  const avail = hhReportAvailableUnits();
+  const byEvent = {};
+  avail.forEach(s=>{
+    const ev = (s.eventName||'').trim() || 'No Event Set';
+    byEvent[ev] = (byEvent[ev]||0) + 1;
+  });
+  const eventKeys = Object.keys(byEvent).sort((a,b)=>byEvent[b]-byEvent[a]);
+  const EVENT_PALETTE = [
+    {bg:'#EAF3FB',fg:'#005EA6'}, {bg:'#FEF6E7',fg:'#B4740E'}, {bg:'#EAF7F0',fg:'#137A4B'},
+    {bg:'#F3EAFB',fg:'#7C3AED'}, {bg:'#FDEDED',fg:'#C6382E'}, {bg:'#F1F2F5',fg:'#4B5262'}
+  ];
+  const eventChips = eventKeys.map((ev,i)=>{ const p=EVENT_PALETTE[i%EVENT_PALETTE.length]; return `<div class="jrp-cat-chip" style="background:${p.bg};color:${p.fg}">${escapeHtml(ev)}: ${byEvent[ev]}</div>`; }).join('');
+  const eventSection = eventKeys.length ? `
+    <div class="jrp-area-title">Event-Wise Distribution</div>
+    <div class="jrp-cat-summary">${eventChips}</div>` : '';
+
+  // Owner breakdown chip row
+  const ownerCounts = { dealer:0, hh:0, other:0 };
+  avail.forEach(s=>{ const o = s.owner==='hh'?'hh':(s.owner==='other'?'other':'dealer'); ownerCounts[o]++; });
+
+  function buildDetailSection(title, list, chipBg, chipFg){
+    if(!list.length) return '';
+    const bodyRows = list.map((s,i)=>`<tr>
+      <td>${i+1}</td>
+      <td class="left">${escapeHtml(findMasterBikeByName(s.model)?.name || s.model || '—')}</td>
+      <td class="left">${escapeHtml(s.color||'—')}</td>
+      <td class="left" style="font-family:'JetBrains Mono',monospace;font-size:10.5px">${escapeHtml(s.chassis||'—')}</td>
+      <td class="left">${escapeHtml(s.regNo||'—')}</td>
+      <td class="left">${escapeHtml(s.customerName||'—')}</td>
+    </tr>`).join('');
+    return `
+      <div class="jrp-area-title" style="border-top-color:${chipBg}">${title} <span class="jrp-cat-chip" style="background:${chipBg};color:${chipFg};margin-left:8px">${list.length} unit${list.length!==1?'s':''}</span></div>
+      <table class="jrp-table">
+        <thead><tr><th style="width:5%">S.N</th><th>Model</th><th style="width:15%">Colour</th><th style="width:19%">Chassis No</th><th style="width:15%">Reg. No</th><th style="width:18%">Customer</th></tr></thead>
+        <tbody>${bodyRows}</tbody>
+      </table>`;
+  }
+  const bookedList = hhStockReportAllUnits.filter(s=>s.status==='Booked');
+  const hhSalesList = hhStockReportAllUnits.filter(s=>s.hhFlag==='Sales');
+  const hhHideList = hhStockReportAllUnits.filter(s=>s.hhFlag==='Hide');
+  const detailSections = [
+    buildDetailSection('Booked Units', bookedList, '#FEF6E7', '#B4740E'),
+    buildDetailSection('HH Sales (Reported, Still In Our Stock)', hhSalesList, '#EAF3FB', '#005EA6'),
+    buildDetailSection('HH Hide (Sold, Held Back From HH Report)', hhHideList, '#F1F2F5', '#4B5262'),
+  ].join('');
+
+  return `
+    <div class="jrp-head">
+      <div class="brand">SAMRIDDHI AND BROTHERS</div>
+      <div class="sub">Bajaj Authorized Dealer · Phidim, Nepal — HH (Mela/Outdoor) Stock Report</div>
+    </div>
+    <div class="jrp-cat-summary">
+      <div class="jrp-cat-chip">Bike: ${bikeTotal}</div>
+      <div class="jrp-cat-chip">Scooter: ${scooterTotal}</div>
+      <div class="jrp-cat-chip" style="background:#FEF6E7;color:#B4740E">Total Available: ${hhStockReportTotalUnits}</div>
+      <div class="jrp-cat-chip" style="background:#EAF3FB;color:#005EA6">Dealer: ${ownerCounts.dealer}</div>
+      <div class="jrp-cat-chip" style="background:#F3EAFB;color:#7C3AED">HH: ${ownerCounts.hh}</div>
+      <div class="jrp-cat-chip" style="background:#F1F2F5;color:#4B5262">Other: ${ownerCounts.other}</div>
+    </div>
+    <table class="jrp-table">
+      <thead><tr><th style="width:6%">S.N</th><th>Model</th><th style="width:14%">Category</th><th style="width:20%">Colour</th><th style="width:10%;text-align:center">Qty</th></tr></thead>
+      <tbody>
+        ${rows}
+        <tr class="grand-total"><td colspan="4">GRAND TOTAL (IN STOCK)</td><td style="text-align:center">${hhStockReportTotalUnits}</td></tr>
+      </tbody>
+    </table>
+    ${eventSection}
+    ${detailSections}
+    <div class="jrp-footer">Generated: ${today}</div>`;
+}
+
+window.openHHStockPreview = async function(){
+  currentReportKind = 'hh';
+  await loadHHStockReportData(true);
+  if(!Object.keys(hhStockReportGrouped||{}).length){ toast('No available HH inventory to report yet.','warn'); return; }
+  document.getElementById('spvTitle').textContent = 'HH Stock Report Preview';
+  document.getElementById('spvSubtitle').textContent = hhStockReportTotalUnits+' available units across '+Object.keys(hhStockReportGrouped).length+' models';
+  document.getElementById('spvPage').innerHTML = `<div class="jpg-report-paper">${buildHHStockReportPage()}</div>`;
+  document.getElementById('stockPreviewOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
 };
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -8759,6 +9177,108 @@ let exchangeSendToFilter = 'all';
 let exchangeModelFilter = 'all';
 let exchangeSearchTerm = '';
 
+// Shared by both Mela and Showroom Exchange — reuses the exact same
+// storage mechanism as the Document Vault (inline fileData in the
+// 'documents' collection, same image compression, same size caps), so a
+// Blue Book upload here shows up in — and counts against — the same
+// Document Vault storage the rest of the app already uses, rather than a
+// separate file-storage system.
+function uploadBlueBookFile(file, regNo, customerName, sourceCollection){
+  return new Promise((resolve, reject) => {
+    const ext = (file.name.split('.').pop()||'').toLowerCase();
+    const isImage = ['jpg','jpeg','png'].includes(ext);
+    // Auto-renamed regardless of whatever the file was originally called —
+    // "Reg-No_Customer-Name.ext" is what makes a pile of Blue Books
+    // actually findable later.
+    const safeReg = String(regNo||'Unknown').trim().replace(/[^\w-]+/g,'_').slice(0,40) || 'Unknown';
+    const safeCust = String(customerName||'Customer').trim().replace(/[^\w-]+/g,'_').slice(0,40) || 'Customer';
+    const autoFileName = `${safeReg}_${safeCust}.${ext||'pdf'}`;
+
+    const finish = async (fileData) => {
+      const used = getTotalStorageUsed();
+      if(used + fileData.length > STORAGE_CAP_BYTES){
+        reject(new Error(`Document Vault storage is full — can't add this Blue Book right now.`));
+        return;
+      }
+      try{
+        const docRef = await addDoc(collection(db,'documents'), {
+          name: `Blue Book — ${regNo||'Unknown'} (${customerName||'Customer'})`,
+          description: `Auto-attached from ${sourceCollection==='exchange_stock_showroom'?'Showroom':'Mela'} Exchange`,
+          fileExt: ext, fileName: autoFileName,
+          fileData, sizeBytes: fileData.length,
+          category: 'Blue Book',
+          linkedCollection: sourceCollection,
+          uploadedBy: currentUserEmail || currentUserName || 'Unknown',
+          uploadedAt: new Date()
+        });
+        resolve(docRef.id);
+      }catch(e){ reject(e); }
+    };
+
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read that file.'));
+    if(isImage){
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 1600;
+          let w = img.width, h = img.height;
+          const scale = Math.min(maxDim/w, maxDim/h, 1);
+          w = Math.round(w*scale); h = Math.round(h*scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          let quality = 0.82;
+          let fileData = canvas.toDataURL('image/jpeg', quality);
+          while(fileData.length > DOC_MAX_FILE_SIZE && quality > 0.3){
+            quality -= 0.1;
+            fileData = canvas.toDataURL('image/jpeg', quality);
+          }
+          if(fileData.length > DOC_MAX_FILE_SIZE){
+            reject(new Error(`Even compressed, this photo is too large (max ~${formatBytes(DOC_MAX_FILE_SIZE)}).`));
+            return;
+          }
+          finish(fileData);
+        };
+        img.onerror = () => reject(new Error('Could not read that image.'));
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      reader.onload = (e) => {
+        const fileData = e.target.result;
+        if(fileData.length > DOC_MAX_FILE_SIZE){
+          reject(new Error(`File is too large once stored (max ~${formatBytes(DOC_MAX_FILE_SIZE)}).`));
+          return;
+        }
+        finish(fileData);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+// Bulk "Download All Blue Books" — sequential downloads (staggered, since
+// browsers block several simultaneous downloads triggered at once)
+// instead of a client-side ZIP, since no ZIP library is available here.
+// Downloading a local copy also gives a reason to eventually clear older
+// ones out of Document Vault if cloud storage ever gets tight.
+window.downloadAllBlueBooks = async ()=>{
+  const blueBookDocs = documents.filter(d=>d.category==='Blue Book');
+  if(!blueBookDocs.length){ toast('No Blue Book files on file yet.','warn'); return; }
+  toast(`Downloading ${blueBookDocs.length} Blue Book file(s)…`);
+  blueBookDocs.forEach((d, i)=>{
+    setTimeout(()=>window.downloadDocument(d.id), i*400);
+  });
+};
+
+let exBlueBookFilePending = null;
+document.getElementById('exBlueBookFile')?.addEventListener('change', function(e){
+  exBlueBookFilePending = e.target.files[0] || null;
+  const label = document.getElementById('exBlueBookFileLabel');
+  if(label) label.textContent = exBlueBookFilePending ? exBlueBookFilePending.name : 'No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.';
+});
+
 function loadExchangeStock(){
   if(exchangeUnsub) exchangeUnsub();
   const tbody = document.getElementById('exchangeTableBody');
@@ -8887,7 +9407,9 @@ function renderExchangeTable(){
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Year">${escapeHtml(s.makeYear||'—')}</td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
       <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Valuation">${valuation}</td>
-      <td class="px-4 py-3" data-th="Documents"><div class="flex flex-wrap gap-1">${exDocBadge('Blue Book', s.blueBook==='yes')}${exDocBadge('Key', s.key==='yes')}${exDocBadge('File', s.file==='yes')}</div>
+      <td class="px-4 py-3" data-th="Documents"><div class="flex flex-wrap gap-1">${exDocBadge('Blue Book', s.blueBook==='yes')}${exDocBadge('Key', s.key==='yes')}${exDocBadge('File', s.file==='yes')}
+        ${s.inspectionStatus==='Pass' ? `<span class="badge badge-green"><i class="fas fa-check"></i> Pass</span>` : s.inspectionStatus==='Fail' ? `<span class="badge badge-red"><i class="fas fa-xmark"></i> Fail</span>` : `<span class="badge badge-neutral"><i class="fas fa-hourglass-half"></i> Pending</span>`}
+        ${s.blueBookDocId ? `<button onclick="window.openDocPreview('${s.blueBookDocId}')" class="badge badge-blue" style="cursor:pointer;border:none"><i class="fas fa-file-lines"></i> Blue Book File</button>` : ''}</div>
         ${s.remarks ? `<div class="text-[11px] text-slate-400 mt-1 max-w-[220px] truncate" title="${escapeHtml(s.remarks)}"><i class="fas fa-note-sticky text-slate-300 text-[9px] mr-1"></i>${escapeHtml(s.remarks)}</div>` : ''}
       </td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Send To"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide"><i class="fas fa-location-dot text-[8px]"></i> ${escapeHtml(s.sendTo||'Showroom')}</span></td>
@@ -9026,6 +9548,11 @@ window.cancelExchangeEdit = ()=>{
   document.getElementById('exKey').value='yes';
   document.getElementById('exFile').value='yes';
   document.getElementById('exSendTo').value='Showroom';
+  document.getElementById('exInspection').value='Pending';
+  exBlueBookFilePending = null;
+  document.getElementById('exBlueBookFile').value='';
+  document.getElementById('exBlueBookFileLabel').textContent = 'No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.';
+  document.getElementById('exBlueBookFileExistingLink').classList.add('hidden');
   const btn = document.getElementById('saveExchangeBtn');
   btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Unit';
   document.getElementById('exchangeFormTitle').textContent = 'Add Exchange Unit';
@@ -9046,6 +9573,20 @@ window._editExchange = (id)=>{
   document.getElementById('exFile').value = s.file==='no' ? 'no' : 'yes';
   document.getElementById('exRemarks').value = s.remarks||'';
   document.getElementById('exSendTo').value = s.sendTo || 'Showroom';
+  document.getElementById('exInspection').value = ['Pass','Fail'].includes(s.inspectionStatus) ? s.inspectionStatus : 'Pending';
+  exBlueBookFilePending = null;
+  document.getElementById('exBlueBookFile').value='';
+  const existingLink = document.getElementById('exBlueBookFileExistingLink');
+  const fileLabel = document.getElementById('exBlueBookFileLabel');
+  if(s.blueBookDocId){
+    const d = documents.find(x=>x.id===s.blueBookDocId);
+    fileLabel.textContent = d ? `Current file: ${d.fileName||d.name}` : 'Current file on record.';
+    existingLink.classList.remove('hidden');
+    existingLink.onclick = (e)=>{ e.preventDefault(); window.openDocPreview(s.blueBookDocId); };
+  } else {
+    fileLabel.textContent = 'No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.';
+    existingLink.classList.add('hidden');
+  }
   currentEditExchangeId = id;
   const btn = document.getElementById('saveExchangeBtn');
   btn.innerHTML = '<i class="fas fa-rotate"></i> Update Unit';
@@ -9074,9 +9615,9 @@ window._setExchangeStatus = async (id, status) => {
 };
 
 document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
-  if(!currentEditExchangeId && (await getAccurateExchangeCount(true)) >= MAX_EXCHANGE_STOCK){
-    toast(`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached.`,'err');
-    showLimitExceededModal('Exchange Stock Limit Reached', `Exchange Stock has reached the ${MAX_EXCHANGE_STOCK} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
+  if(!currentEditExchangeId && (await getAccurateCombinedExchangeCount(true)) >= MAX_EXCHANGE_STOCK){
+    toast(`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached (Mela + Showroom combined).`,'err');
+    showLimitExceededModal('Exchange Stock Limit Reached', `Exchange Stock (Mela + Showroom combined) has reached the ${MAX_EXCHANGE_STOCK} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
     return;
   }
   const modelCheck = Validate.text(document.getElementById('exModel').value, { label:'Model Name', max:80 });
@@ -9091,14 +9632,29 @@ document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
   const blueBook = document.getElementById('exBlueBook').value==='no' ? 'no' : 'yes';
   const key = document.getElementById('exKey').value==='no' ? 'no' : 'yes';
   const file = document.getElementById('exFile').value==='no' ? 'no' : 'yes';
+  const inspectionStatus = ['Pass','Fail'].includes(document.getElementById('exInspection').value) ? document.getElementById('exInspection').value : 'Pending';
   const sendToCheck = Validate.text(document.getElementById('exSendTo').value, { min:0, max:60, label:'Send To' });
   if(!sendToCheck.ok){ toast(sendToCheck.error,'err'); return; }
   const sendTo = sendToCheck.value || 'Showroom';
   const payload = {
     model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
-    valuation: Number(valuationRaw), customerName, blueBook, key, file, remarks: remarksCheck.value, sendTo
+    valuation: Number(valuationRaw), customerName, blueBook, key, file, remarks: remarksCheck.value, sendTo, inspectionStatus
   };
+  const saveBtn = document.getElementById('saveExchangeBtn');
+  const saveBtnOrigHtml = saveBtn.innerHTML;
   try{
+    if(exBlueBookFilePending){
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Uploading Blue Book…';
+      try{
+        payload.blueBookDocId = await uploadBlueBookFile(exBlueBookFilePending, regNoCheck.value, customerName, 'exchange_stock');
+      }catch(uploadErr){
+        toast('Blue Book upload failed: '+uploadErr.message,'err');
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = saveBtnOrigHtml;
+        return;
+      }
+    }
     if(currentEditExchangeId){
       await updateDoc(doc(db,'exchange_stock',currentEditExchangeId), payload);
       logActivity('Updated', 'exchange_stock', payload);
@@ -9116,6 +9672,10 @@ document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
     // never leave the popup stuck open when the save actually went through.
     document.getElementById('exchangeFormModal')?.classList.remove('open');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+  finally{
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = saveBtnOrigHtml;
+  }
 });
 
 window.exportExchangeToExcel = ()=>{
@@ -9125,10 +9685,10 @@ window.exportExchangeToExcel = ()=>{
   const rows = sorted.map(s=>({
     'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg. No': s.regNo||'',
     'Valuation': s.valuation||0, 'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
-    'File': s.file==='yes'?'Yes':'No', 'Customer': s.customerName||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
+    'File': s.file==='yes'?'Yes':'No', 'Inspection': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:10},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:10},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
   XLSX.writeFile(wb, `exchange_stock_export_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -9236,11 +9796,11 @@ document.getElementById('exImportExcelBtn').addEventListener('click', async ()=>
 
   let nextSn = await getAccurateNextSn('exchange_stock');
   const results = { success:[], failed:[] };
-  let runningTotal = await getAccurateExchangeCount(true); // real Firestore count, not just what's paginated locally
+  let runningTotal = await getAccurateCombinedExchangeCount(true); // real Firestore count (Mela + Showroom combined), not just what's paginated locally
 
   for(const row of exExcelParsedRows){
     if(runningTotal >= MAX_EXCHANGE_STOCK){
-      results.failed.push({row, reason:`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached`});
+      results.failed.push({row, reason:`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached (Mela + Showroom combined)`});
       continue;
     }
     if(!row.model || !row.makeYear || !row.regNo || !row.valuation){
@@ -9429,6 +9989,12 @@ let exchangeSrStatusFilter = 'all';
 let exchangeSrSendToFilter = 'all';
 let exchangeSrModelFilter = 'all';
 let exchangeSrSearchTerm = '';
+let exSrBlueBookFilePending = null;
+document.getElementById('exSrBlueBookFile')?.addEventListener('change', function(e){
+  exSrBlueBookFilePending = e.target.files[0] || null;
+  const label = document.getElementById('exSrBlueBookFileLabel');
+  if(label) label.textContent = exSrBlueBookFilePending ? exSrBlueBookFilePending.name : 'No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.';
+});
 
 function loadExchangeSrStock(){
   if(exchangeSrUnsub) exchangeSrUnsub();
@@ -9558,7 +10124,9 @@ function renderExchangeSrTable(){
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Year">${escapeHtml(s.makeYear||'—')}</td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
       <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Valuation">${valuation}</td>
-      <td class="px-4 py-3" data-th="Documents"><div class="flex flex-wrap gap-1">${exSrDocBadge('Blue Book', s.blueBook==='yes')}${exSrDocBadge('Key', s.key==='yes')}${exSrDocBadge('File', s.file==='yes')}</div>
+      <td class="px-4 py-3" data-th="Documents"><div class="flex flex-wrap gap-1">${exSrDocBadge('Blue Book', s.blueBook==='yes')}${exSrDocBadge('Key', s.key==='yes')}${exSrDocBadge('File', s.file==='yes')}
+        ${s.inspectionStatus==='Pass' ? `<span class="badge badge-green"><i class="fas fa-check"></i> Pass</span>` : s.inspectionStatus==='Fail' ? `<span class="badge badge-red"><i class="fas fa-xmark"></i> Fail</span>` : `<span class="badge badge-neutral"><i class="fas fa-hourglass-half"></i> Pending</span>`}
+        ${s.blueBookDocId ? `<button onclick="window.openDocPreview('${s.blueBookDocId}')" class="badge badge-blue" style="cursor:pointer;border:none"><i class="fas fa-file-lines"></i> Blue Book File</button>` : ''}</div>
         ${s.remarks ? `<div class="text-[11px] text-slate-400 mt-1 max-w-[220px] truncate" title="${escapeHtml(s.remarks)}"><i class="fas fa-note-sticky text-slate-300 text-[9px] mr-1"></i>${escapeHtml(s.remarks)}</div>` : ''}
       </td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Send To"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide"><i class="fas fa-location-dot text-[8px]"></i> ${escapeHtml(s.sendTo||'Showroom')}</span></td>
@@ -9697,6 +10265,11 @@ window.cancelExchangeSrEdit = ()=>{
   document.getElementById('exSrKey').value='yes';
   document.getElementById('exSrFile').value='yes';
   document.getElementById('exSrSendTo').value='Showroom';
+  document.getElementById('exSrInspection').value='Pending';
+  exSrBlueBookFilePending = null;
+  document.getElementById('exSrBlueBookFile').value='';
+  document.getElementById('exSrBlueBookFileLabel').textContent = 'No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.';
+  document.getElementById('exSrBlueBookFileExistingLink').classList.add('hidden');
   const btn = document.getElementById('saveExchangeSrBtn');
   btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Unit';
   document.getElementById('exchangeSrFormTitle').textContent = 'Add Exchange Unit';
@@ -9717,6 +10290,20 @@ window._editExchangeSr = (id)=>{
   document.getElementById('exSrFile').value = s.file==='no' ? 'no' : 'yes';
   document.getElementById('exSrRemarks').value = s.remarks||'';
   document.getElementById('exSrSendTo').value = s.sendTo || 'Showroom';
+  document.getElementById('exSrInspection').value = ['Pass','Fail'].includes(s.inspectionStatus) ? s.inspectionStatus : 'Pending';
+  exSrBlueBookFilePending = null;
+  document.getElementById('exSrBlueBookFile').value='';
+  const existingLink = document.getElementById('exSrBlueBookFileExistingLink');
+  const fileLabel = document.getElementById('exSrBlueBookFileLabel');
+  if(s.blueBookDocId){
+    const d = documents.find(x=>x.id===s.blueBookDocId);
+    fileLabel.textContent = d ? `Current file: ${d.fileName||d.name}` : 'Current file on record.';
+    existingLink.classList.remove('hidden');
+    existingLink.onclick = (e)=>{ e.preventDefault(); window.openDocPreview(s.blueBookDocId); };
+  } else {
+    fileLabel.textContent = 'No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.';
+    existingLink.classList.add('hidden');
+  }
   currentEditExchangeSrId = id;
   const btn = document.getElementById('saveExchangeSrBtn');
   btn.innerHTML = '<i class="fas fa-rotate"></i> Update Unit';
@@ -9745,9 +10332,9 @@ window._setExchangeSrStatus = async (id, status) => {
 };
 
 document.getElementById('saveExchangeSrBtn').addEventListener('click', async ()=>{
-  if(!currentEditExchangeSrId && (await getAccurateExchangeSrCount(true)) >= MAX_EXCHANGE_STOCK_SR){
-    toast(`Storage full — ${MAX_EXCHANGE_STOCK_SR} unit limit reached.`,'err');
-    showLimitExceededModal('Exchange Stock Limit Reached', `Exchange Stock has reached the ${MAX_EXCHANGE_STOCK_SR} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
+  if(!currentEditExchangeSrId && (await getAccurateCombinedExchangeCount(true)) >= MAX_EXCHANGE_STOCK){
+    toast(`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached (Mela + Showroom combined).`,'err');
+    showLimitExceededModal('Exchange Stock Limit Reached', `Exchange Stock (Mela + Showroom combined) has reached the ${MAX_EXCHANGE_STOCK} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
     return;
   }
   const modelCheck = Validate.text(document.getElementById('exSrModel').value, { label:'Model Name', max:80 });
@@ -9762,14 +10349,29 @@ document.getElementById('saveExchangeSrBtn').addEventListener('click', async ()=
   const blueBook = document.getElementById('exSrBlueBook').value==='no' ? 'no' : 'yes';
   const key = document.getElementById('exSrKey').value==='no' ? 'no' : 'yes';
   const file = document.getElementById('exSrFile').value==='no' ? 'no' : 'yes';
+  const inspectionStatus = ['Pass','Fail'].includes(document.getElementById('exSrInspection').value) ? document.getElementById('exSrInspection').value : 'Pending';
   const sendToCheck = Validate.text(document.getElementById('exSrSendTo').value, { min:0, max:60, label:'Send To' });
   if(!sendToCheck.ok){ toast(sendToCheck.error,'err'); return; }
   const sendTo = sendToCheck.value || 'Showroom';
   const payload = {
     model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
-    valuation: Number(valuationRaw), customerName, blueBook, key, file, remarks: remarksCheck.value, sendTo
+    valuation: Number(valuationRaw), customerName, blueBook, key, file, remarks: remarksCheck.value, sendTo, inspectionStatus
   };
+  const saveBtn = document.getElementById('saveExchangeSrBtn');
+  const saveBtnOrigHtml = saveBtn.innerHTML;
   try{
+    if(exSrBlueBookFilePending){
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Uploading Blue Book…';
+      try{
+        payload.blueBookDocId = await uploadBlueBookFile(exSrBlueBookFilePending, regNoCheck.value, customerName, 'exchange_stock_showroom');
+      }catch(uploadErr){
+        toast('Blue Book upload failed: '+uploadErr.message,'err');
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = saveBtnOrigHtml;
+        return;
+      }
+    }
     if(currentEditExchangeSrId){
       await updateDoc(doc(db,'exchange_stock_showroom',currentEditExchangeSrId), payload);
       logActivity('Updated', 'exchange_stock_showroom', payload);
@@ -9787,6 +10389,10 @@ document.getElementById('saveExchangeSrBtn').addEventListener('click', async ()=
     // never leave the popup stuck open when the save actually went through.
     document.getElementById('exchangeSrFormModal')?.classList.remove('open');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+  finally{
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = saveBtnOrigHtml;
+  }
 });
 
 window.exportExchangeSrToExcel = ()=>{
@@ -9796,10 +10402,10 @@ window.exportExchangeSrToExcel = ()=>{
   const rows = sorted.map(s=>({
     'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg. No': s.regNo||'',
     'Valuation': s.valuation||0, 'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
-    'File': s.file==='yes'?'Yes':'No', 'Customer': s.customerName||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
+    'File': s.file==='yes'?'Yes':'No', 'Inspection': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:10},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:10},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
   XLSX.writeFile(wb, `exchange_stock_export_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -9907,11 +10513,11 @@ document.getElementById('exSrImportExcelBtn').addEventListener('click', async ()
 
   let nextSn = await getAccurateNextSn('exchange_stock_showroom');
   const results = { success:[], failed:[] };
-  let runningTotal = await getAccurateExchangeSrCount(true); // real Firestore count, not just what's paginated locally
+  let runningTotal = await getAccurateCombinedExchangeCount(true); // real Firestore count (Mela + Showroom combined), not just what's paginated locally
 
   for(const row of exSrExcelParsedRows){
-    if(runningTotal >= MAX_EXCHANGE_STOCK_SR){
-      results.failed.push({row, reason:`Storage full — ${MAX_EXCHANGE_STOCK_SR} unit limit reached`});
+    if(runningTotal >= MAX_EXCHANGE_STOCK){
+      results.failed.push({row, reason:`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached (Mela + Showroom combined)`});
       continue;
     }
     if(!row.model || !row.makeYear || !row.regNo || !row.valuation){
@@ -10344,7 +10950,6 @@ function loadSystemLimits(){
       if(d.maxBikes) MAX_BIKES = d.maxBikes;
       if(d.maxTotalInventory) MAX_TOTAL_INVENTORY_UNITS = d.maxTotalInventory;
       if(d.maxExchangeStock) MAX_EXCHANGE_STOCK = d.maxExchangeStock;
-      if(d.maxExchangeStockSr) MAX_EXCHANGE_STOCK_SR = d.maxExchangeStockSr;
       if(d.maxEvents) MAX_EVENTS = d.maxEvents;
       if(d.maxFinanceCategories) MAX_FINANCE_CATEGORIES = d.maxFinanceCategories;
       if(d.maxStockAreas) MAX_STOCK_AREAS = d.maxStockAreas;
@@ -10392,12 +10997,9 @@ async function updateStorageOverview(){
     { icon:'fa-warehouse', color:'#059669', label:'All Inventory', count: invCount, maxCount: MAX_TOTAL_INVENTORY_UNITS,
       usedBytes: invCount*RECORD_SIZE_ESTIMATE.inventoryUnit, maxBytes: MAX_TOTAL_INVENTORY_UNITS*RECORD_SIZE_ESTIMATE.inventoryUnit,
       sub: `${invCount} / ${MAX_TOTAL_INVENTORY_UNITS} units — up to ${formatBytes(MAX_TOTAL_INVENTORY_UNITS*RECORD_SIZE_ESTIMATE.inventoryUnit)} at full capacity` },
-    { icon:'fa-right-left', color:'#EA580C', label:'Exchange Stock (Mela)', count: exCount, maxCount: MAX_EXCHANGE_STOCK,
-      usedBytes: exCount*RECORD_SIZE_ESTIMATE.exchangeUnit, maxBytes: MAX_EXCHANGE_STOCK*RECORD_SIZE_ESTIMATE.exchangeUnit,
-      sub: `${exCount} / ${MAX_EXCHANGE_STOCK} units — up to ${formatBytes(MAX_EXCHANGE_STOCK*RECORD_SIZE_ESTIMATE.exchangeUnit)} at full capacity` },
-    { icon:'fa-shop', color:'#EA580C', label:'Exchange Stock (Showroom)', count: exSrCount, maxCount: MAX_EXCHANGE_STOCK_SR,
-      usedBytes: exSrCount*RECORD_SIZE_ESTIMATE.exchangeUnit, maxBytes: MAX_EXCHANGE_STOCK_SR*RECORD_SIZE_ESTIMATE.exchangeUnit,
-      sub: `${exSrCount} / ${MAX_EXCHANGE_STOCK_SR} units — up to ${formatBytes(MAX_EXCHANGE_STOCK_SR*RECORD_SIZE_ESTIMATE.exchangeUnit)} at full capacity` },
+    { icon:'fa-right-left', color:'#EA580C', label:'Exchange Stock (Mela + Showroom)', count: exCount+exSrCount, maxCount: MAX_EXCHANGE_STOCK,
+      usedBytes: (exCount+exSrCount)*RECORD_SIZE_ESTIMATE.exchangeUnit, maxBytes: MAX_EXCHANGE_STOCK*RECORD_SIZE_ESTIMATE.exchangeUnit,
+      sub: `${exCount+exSrCount} / ${MAX_EXCHANGE_STOCK} units (${exCount} Mela + ${exSrCount} Showroom) — up to ${formatBytes(MAX_EXCHANGE_STOCK*RECORD_SIZE_ESTIMATE.exchangeUnit)} at full capacity` },
     { icon:'fa-helmet-safety', color:'#7C3AED', label:'Accessories', count: accessories.length, maxCount: MAX_ACCESSORIES,
       usedBytes: accessories.length*RECORD_SIZE_ESTIMATE.accessory, maxBytes: MAX_ACCESSORIES*RECORD_SIZE_ESTIMATE.accessory,
       sub: `${accessories.length} / ${MAX_ACCESSORIES} items — up to ${formatBytes(MAX_ACCESSORIES*RECORD_SIZE_ESTIMATE.accessory)} at full capacity` },
@@ -10506,12 +11108,14 @@ window.downloadFullBackup = ()=>{
     addSheet('Exchange Stock (Mela)', exchangeData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Make Year':s.makeYear||'', 'RegNo':s.regNo||'', 'Valuation':s.valuation||0,
       'Blue Book':s.blueBook==='yes'?'Yes':'No', 'Key':s.key==='yes'?'Yes':'No', 'File':s.file==='yes'?'Yes':'No',
+      'Inspection':s.inspectionStatus||'Pending', 'Blue Book File':documents.find(d=>d.id===s.blueBookDocId)?.fileName||'',
       'Customer':s.customerName||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
       'Added Date':fmtDate(s.addedAt)
     })));
     addSheet('Exchange Stock (Showroom)', exchangeSrData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Make Year':s.makeYear||'', 'RegNo':s.regNo||'', 'Valuation':s.valuation||0,
       'Blue Book':s.blueBook==='yes'?'Yes':'No', 'Key':s.key==='yes'?'Yes':'No', 'File':s.file==='yes'?'Yes':'No',
+      'Inspection':s.inspectionStatus||'Pending', 'Blue Book File':documents.find(d=>d.id===s.blueBookDocId)?.fileName||'',
       'Customer':s.customerName||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
       'Added Date':fmtDate(s.addedAt)
     })));
@@ -10654,24 +11258,24 @@ document.getElementById('restoreBackupBtn')?.addEventListener('click', async ()=
 
     await importSnCollection('Exchange Stock (Mela)', 'exchange_stock', r => ({
       model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
-      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), customerName:String(r['Customer']||''),
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: ['Pass','Fail'].includes(r['Inspection']) ? r['Inspection'] : 'Pending', customerName:String(r['Customer']||''),
       sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
-    }), ()=>exchangeData.length < MAX_EXCHANGE_STOCK);
+    }), ()=>(exchangeData.length + exchangeSrData.length) < MAX_EXCHANGE_STOCK);
 
     await importSnCollection('Exchange Stock (Showroom)', 'exchange_stock_showroom', r => ({
       model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
-      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), customerName:String(r['Customer']||''),
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: ['Pass','Fail'].includes(r['Inspection']) ? r['Inspection'] : 'Pending', customerName:String(r['Customer']||''),
       sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
-    }), ()=>exchangeSrData.length < MAX_EXCHANGE_STOCK_SR);
+    }), ()=>(exchangeData.length + exchangeSrData.length) < MAX_EXCHANGE_STOCK);
 
     // Backward compatibility — older backup files exported before the
     // Showroom/Mela split still say plain "Exchange Stock"; treat that as
     // Mela (the original meaning) so an old backup still restores cleanly.
     await importSnCollection('Exchange Stock', 'exchange_stock', r => ({
       model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
-      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), customerName:String(r['Customer']||''),
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: ['Pass','Fail'].includes(r['Inspection']) ? r['Inspection'] : 'Pending', customerName:String(r['Customer']||''),
       sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
-    }), ()=>exchangeData.length < MAX_EXCHANGE_STOCK);
+    }), ()=>(exchangeData.length + exchangeSrData.length) < MAX_EXCHANGE_STOCK);
 
     await importPlainCollection('Price List', 'bikes', r => ({
       name:String(r['Model']||''), category:String(r['Category']||''), price:Number(r['Price'])||0,
@@ -10750,7 +11354,15 @@ function renderDocumentsPage(){
     el.textContent = n ? String(n) : '';
     el.classList.toggle('hidden', !n);
   });
-  const filtered = docTypeFilter==='all' ? documents : documents.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes(String(d.fileExt||'').toLowerCase()));
+  const blueBookCountEl = document.getElementById('docCountBlueBook');
+  if(blueBookCountEl){
+    const n = documents.filter(d=>d.category==='Blue Book').length;
+    blueBookCountEl.textContent = n ? String(n) : '';
+    blueBookCountEl.classList.toggle('hidden', !n);
+  }
+  const filtered = docTypeFilter==='all' ? documents
+    : docTypeFilter==='bluebook' ? documents.filter(d=>d.category==='Blue Book')
+    : documents.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes(String(d.fileExt||'').toLowerCase()));
   if(!filtered.length){
     wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-folder-open text-3xl opacity-25 block mb-2"></i><p class="text-sm">${documents.length ? 'No documents match this filter.' : 'No documents uploaded yet.'}</p></div>`;
     return;
@@ -11072,7 +11684,6 @@ window.openSystemLimitsModal = ()=>{
   document.getElementById('limitMaxBikes').value = MAX_BIKES;
   document.getElementById('limitMaxInventory').value = MAX_TOTAL_INVENTORY_UNITS;
   document.getElementById('limitMaxExchange').value = MAX_EXCHANGE_STOCK;
-  document.getElementById('limitMaxExchangeSr').value = MAX_EXCHANGE_STOCK_SR;
   document.getElementById('limitMaxAccessories').value = MAX_ACCESSORIES;
   document.getElementById('limitMaxFinanceSchemes').value = MAX_FINANCE_SCHEMES;
   document.getElementById('limitMaxChalans').value = MAX_CHALANS;
@@ -11095,7 +11706,6 @@ window.saveSystemLimits = async ()=>{
   const maxBikes = parseInt(document.getElementById('limitMaxBikes').value);
   const maxInventory = parseInt(document.getElementById('limitMaxInventory').value);
   const maxExchange = parseInt(document.getElementById('limitMaxExchange').value);
-  const maxExchangeSr = parseInt(document.getElementById('limitMaxExchangeSr').value);
   const maxAccessories = parseInt(document.getElementById('limitMaxAccessories').value);
   const maxFinanceSchemes = parseInt(document.getElementById('limitMaxFinanceSchemes').value);
   const maxChalans = parseInt(document.getElementById('limitMaxChalans').value);
@@ -11106,7 +11716,7 @@ window.saveSystemLimits = async ()=>{
   const maxAreas = parseInt(document.getElementById('limitMaxAreas').value);
   const com1stParty = parseInt(document.getElementById('limitCom1stParty').value);
   const com3rdParty = parseInt(document.getElementById('limitCom3rdParty').value);
-  if(![maxBikes,maxInventory,maxExchange,maxExchangeSr,maxAccessories,maxFinanceSchemes,maxChalans,maxImportant,maxAliases,maxEvents,maxFinCats,maxAreas].every(v=>Number.isInteger(v) && v>0)){
+  if(![maxBikes,maxInventory,maxExchange,maxAccessories,maxFinanceSchemes,maxChalans,maxImportant,maxAliases,maxEvents,maxFinCats,maxAreas].every(v=>Number.isInteger(v) && v>0)){
     toast('Enter a valid whole number greater than 0 for each limit.','err');
     return;
   }
@@ -11115,15 +11725,14 @@ window.saveSystemLimits = async ()=>{
     return;
   }
   const invCount = await getAccurateTotalInventoryCount(true);
-  const exCount = await getAccurateExchangeCount(true);
-  const exSrCount = await getAccurateExchangeSrCount(true);
-  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxExchange, exCount, 'mela exchange stock units'], [maxExchangeSr, exSrCount, 'showroom exchange stock units'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes'], [maxChalans, chalanData.length, 'chalan records'], [maxImportant, importantData.length, 'important info entries'], [maxAliases, modelAliasesData.length, 'model aliases'], [maxEvents, events.length, 'events'], [maxFinCats, financeCategories.length, 'finance categories'], [maxAreas, stockAreas.length, 'storage areas']];
+  const exCombinedCount = await getAccurateCombinedExchangeCount(true);
+  const checks = [[maxBikes, allMasterBikes.length, 'models'], [maxInventory, invCount, 'inventory units'], [maxExchange, exCombinedCount, 'exchange stock units (Mela + Showroom combined)'], [maxAccessories, accessories.length, 'accessories'], [maxFinanceSchemes, financeSchemes.length, 'finance schemes'], [maxChalans, chalanData.length, 'chalan records'], [maxImportant, importantData.length, 'important info entries'], [maxAliases, modelAliasesData.length, 'model aliases'], [maxEvents, events.length, 'events'], [maxFinCats, financeCategories.length, 'finance categories'], [maxAreas, stockAreas.length, 'storage areas']];
   for(const [limit, used, label] of checks){
     if(limit < used){ toast(`Can't set the ${label} limit below the ${used} already on file.`,'err'); return; }
   }
   try{
-    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxExchangeStock:maxExchange, maxExchangeStockSr:maxExchangeSr, maxAccessories, maxFinanceSchemes, maxChalans, maxImportantInfo:maxImportant, maxModelAliases:maxAliases, maxEvents, maxFinanceCategories:maxFinCats, maxStockAreas:maxAreas, commission1stParty:com1stParty, commission3rdParty:com3rdParty }, { merge:true });
-    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Exchange:${maxExchange} ExchangeSr:${maxExchangeSr} Acc:${maxAccessories} Fin:${maxFinanceSchemes} Chalan:${maxChalans} Info:${maxImportant} Alias:${maxAliases} Events:${maxEvents} FinCats:${maxFinCats} Areas:${maxAreas}` });
+    await setDoc(doc(db,'settings','limits'), { maxBikes, maxTotalInventory:maxInventory, maxExchangeStock:maxExchange, maxAccessories, maxFinanceSchemes, maxChalans, maxImportantInfo:maxImportant, maxModelAliases:maxAliases, maxEvents, maxFinanceCategories:maxFinCats, maxStockAreas:maxAreas, commission1stParty:com1stParty, commission3rdParty:com3rdParty }, { merge:true });
+    logActivity('Record Limits Changed', 'settings', { model: `Models:${maxBikes} Inv:${maxInventory} Exchange:${maxExchange} Acc:${maxAccessories} Fin:${maxFinanceSchemes} Chalan:${maxChalans} Info:${maxImportant} Alias:${maxAliases} Events:${maxEvents} FinCats:${maxFinCats} Areas:${maxAreas}` });
     toast('Record limits updated.');
     closeSystemLimitsModal();
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
@@ -12517,8 +13126,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
-const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
+const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', hhstock:'HH Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
+const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
 window.switchSec=(sec)=>{
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
@@ -12552,6 +13161,7 @@ window.switchSec=(sec)=>{
   if(sec==='storage') updateStorageOverview();
   if(sec==='events') renderEventsPage();
   if(sec==='stock') loadStockReportData(true);
+  if(sec==='hhstock') loadHHStockReportData(true);
   if(sec==='chalans') renderChalanTable();
   if(sec==='dashboard') renderDashboard();
   if(sec==='modelAliases') computeModelMismatches();
