@@ -516,15 +516,13 @@
   .sidebar-logout-btn i{ width:16px; text-align:center; font-size:14px; color:#9AA1AF; flex-shrink:0; transition:color .15s ease; }
 
 
-  @media (max-width: 900px){
-    .sidebar{ position:fixed; left:0; top:0; transform:translateX(-100%); box-shadow:0 20px 60px rgba(15,23,42,.25); }
-    .sidebar.open{ transform:translateX(0); }
-    .sidebar-overlay{
-      display:none; position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:59;
-      backdrop-filter:blur(2px); opacity:0; transition:opacity .2s ease;
-    }
-    .sidebar-overlay.open{ display:block; opacity:1; }
+  .sidebar{ position:fixed; left:0; top:0; transform:translateX(-100%); box-shadow:0 20px 60px rgba(15,23,42,.25); }
+  .sidebar.open{ transform:translateX(0); }
+  .sidebar-overlay{
+    display:none; position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:59;
+    backdrop-filter:blur(2px); opacity:0; transition:opacity .2s ease;
   }
+  .sidebar-overlay.open{ display:block; opacity:1; }
 
   .main-col{ flex:1; min-width:0; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
   .main-scroll{ flex:1 1 auto; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; }
@@ -1079,7 +1077,7 @@
           <div class="font-display text-lg text-slate-900 tracking-widest leading-none truncate">BAJAJ <span class="text-amber-500">ADMIN</span></div>
           <div class="text-[9px] text-slate-400 tracking-widest uppercase">Dealer Panel</div>
         </div>
-        <button id="hamburger" onclick="closeMobileMenu()" class="md:hidden ml-auto w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 flex-shrink-0">
+        <button id="hamburger" onclick="closeMobileMenu()" class="ml-auto w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 flex-shrink-0">
           <i class="fas fa-xmark text-sm"></i>
         </button>
       </div>
@@ -1166,7 +1164,7 @@
     <div class="main-col">
       <!-- TOPBAR -->
       <header class="topbar">
-        <button id="hamburgerOpen" onclick="toggleMobileMenu()" class="topbar-menu-btn md:hidden">
+        <button id="hamburgerOpen" onclick="toggleMobileMenu()" class="topbar-menu-btn">
           <i class="fas fa-bars text-sm"></i>
         </button>
 
@@ -10122,7 +10120,12 @@ window._editExchange = (id)=>{
   const fileLabel = document.getElementById('exBlueBookFileLabel');
   if(s.blueBookDocId){
     const d = documents.find(x=>x.id===s.blueBookDocId);
-    fileLabel.textContent = d ? `Current file: ${d.fileName||d.name}` : 'Current file on record.';
+    if(d){
+      const ic = DOC_FILE_ICONS[String(d.fileExt||'').toLowerCase()] || {icon:'fa-file', color:'#64748B'};
+      fileLabel.innerHTML = `<i class="fas ${ic.icon} mr-1.5" style="color:${ic.color}"></i>Current file: ${escapeHtml(d.fileName||d.name||'')}`;
+    } else {
+      fileLabel.textContent = 'Current file on record.';
+    }
     existingLink.classList.remove('hidden');
     existingLink.onclick = (e)=>{ e.preventDefault(); window.openDocPreview(s.blueBookDocId); };
   } else {
@@ -10840,7 +10843,12 @@ window._editExchangeSr = (id)=>{
   const fileLabel = document.getElementById('exSrBlueBookFileLabel');
   if(s.blueBookDocId){
     const d = documents.find(x=>x.id===s.blueBookDocId);
-    fileLabel.textContent = d ? `Current file: ${d.fileName||d.name}` : 'Current file on record.';
+    if(d){
+      const ic = DOC_FILE_ICONS[String(d.fileExt||'').toLowerCase()] || {icon:'fa-file', color:'#64748B'};
+      fileLabel.innerHTML = `<i class="fas ${ic.icon} mr-1.5" style="color:${ic.color}"></i>Current file: ${escapeHtml(d.fileName||d.name||'')}`;
+    } else {
+      fileLabel.textContent = 'Current file on record.';
+    }
     existingLink.classList.remove('hidden');
     existingLink.onclick = (e)=>{ e.preventDefault(); window.openDocPreview(s.blueBookDocId); };
   } else {
@@ -12756,7 +12764,12 @@ function renderTrashTable(){
     const left = daysLeft(t.deletedAt);
     return `<tr class="border-b border-slate-100">
       <td class="px-4 py-3 text-xs text-slate-500 whitespace-nowrap" data-th="Deleted">${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}, ${at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</td>
-      <td class="px-4 py-3" data-th="From"><span class="badge badge-blue">${TRASH_LABELS[t.originalCollection]||t.originalCollection}</span></td>
+      <td class="px-4 py-3" data-th="From">${(()=>{
+        const lbl = TRASH_LABELS[t.originalCollection]||t.originalCollection;
+        if(t.originalCollection !== 'documents') return `<span class="badge badge-blue">${lbl}</span>`;
+        const ic = DOC_FILE_ICONS[String(d.fileExt||'').toLowerCase()] || {icon:'fa-file', color:'#64748B'};
+        return `<span class="badge badge-blue"><i class="fas ${ic.icon} mr-1" style="color:${ic.color}"></i>${lbl}</span>`;
+      })()}</td>
       <td class="px-4 py-3 font-bold text-slate-800 text-sm" data-th="Model / Item">${escapeHtml(d.model || d.name || d.title || '—')}</td>
       <td class="px-4 py-3 text-xs text-slate-500 font-mono" data-th="Chassis / Info">${escapeHtml(d.chassis || d.regNo || '—')}${d.customerName?`<div class="text-slate-400">${escapeHtml(d.customerName)}</div>`:''}</td>
       <td class="px-4 py-3" data-th="Expires">${left<=1 ? `<span class="badge badge-red">${left===0?'Today':'1 day'}</span>` : `<span class="text-xs text-slate-500">${left} days</span>`}</td>
