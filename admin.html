@@ -743,7 +743,8 @@
   body.role-recondition #secTrash button[onclick*="permanentlyDelete"],
   body.role-recondition #secTrash button[onclick*="restoreFromTrash"],
   body.role-recondition #secDocs .cta-primary,
-  body.role-recondition #secDocs button[onclick*="uploadDocument"]{
+  body.role-recondition #secDocs button[onclick*="uploadDocument"],
+  body.role-recondition #priceBulkImportCard{
     display: none !important;
   }
   .ex-status-tab:hover{ color:#1F2430; }
@@ -1481,7 +1482,7 @@
       </div><!-- /masterFormModal -->
 
       <!-- Excel Bulk Import -->
-      <div class="yng-card-shell p-5 mb-5">
+      <div id="priceBulkImportCard" class="yng-card-shell p-5 mb-5">
         <div class="flex items-center gap-2 section-title text-2xl mb-1">
           <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
         </div>
@@ -5558,15 +5559,25 @@ function renderTeamMembersList(){
     const initial = (m.name||'?').charAt(0).toUpperCase();
     const color = m.avatarColor || AVATAR_COLORS[0];
     const avatarInner = m.photoBase64 ? `<img src="${escapeHtml(m.photoBase64)}" class="w-full h-full object-cover">` : initial;
-    // Only Master ID and Recondition ID get a badge — no need to label
-    // everyone else as "normal", that's just the default, unlabeled state.
-    const roleBadge = m.role==='owner' ? '<span class="badge badge-blue ml-1">Master ID</span>'
+    // Role badges are Master-only information. Showing everyone which
+    // account is the Master ID hands out the single most useful clue for
+    // guessing a password worth guessing — so to anyone who isn't a Master
+    // themselves, every teammate simply looks like a teammate.
+    const canSeeRoles = currentUserRole === 'owner';
+    const roleBadge = !canSeeRoles ? ''
+      : m.role==='owner' ? '<span class="badge badge-blue ml-1">Master ID</span>'
       : m.role==='recondition' ? '<span class="badge badge-neutral ml-1">Recondition ID</span>' : '';
+    // Same reasoning for the email address — it's half of a login. Your own
+    // address still shows (you already know it); everyone else's is hidden
+    // unless you're a Master ID who needs it to send a password reset.
+    const contactLine = (canSeeRoles || isSelf)
+      ? `${escapeHtml(m.email||'')}${m.mobile?' · '+escapeHtml(m.mobile):''}`
+      : (m.mobile ? escapeHtml(m.mobile) : '<span class="italic opacity-60">Contact hidden</span>');
     return `<div class="flex items-center gap-3 p-3 border border-slate-100 rounded-xl ${!isActive?'opacity-60':''}">
       <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden" style="background:${color}">${avatarInner}</div>
       <div class="flex-1 min-w-0">
         <div class="text-sm font-bold text-slate-800 truncate">${escapeHtml(m.name||'Unnamed')} ${isSelf?'<span class="text-[10px] text-slate-400 font-semibold">(you)</span>':''} ${roleBadge}</div>
-        <div class="text-[11px] text-slate-400 truncate">${escapeHtml(m.email||'')}${m.mobile?' · '+escapeHtml(m.mobile):''}</div>
+        <div class="text-[11px] text-slate-400 truncate">${contactLine}</div>
         ${m.bio ? `<div class="text-[11px] text-slate-500 italic truncate mt-0.5">${escapeHtml(m.bio)}</div>` : ''}
       </div>
       ${!isActive ? '<span class="badge badge-red flex-shrink-0">Disabled</span>' : ''}
@@ -12150,8 +12161,8 @@ window.attemptFakeSubscribe = async ()=>{
     <p class="text-xs text-slate-500 mb-4 leading-relaxed">Couldn't reach the payment server right now. Please contact the account owner directly to arrange an upgrade:</p>
     <div class="border border-slate-200 rounded-xl p-4 flex flex-col gap-1.5">
       <div class="font-bold text-slate-800 text-sm">${escapeHtml(masterInfo?.name || 'Master ID')}</div>
-      ${masterInfo?.email ? `<div class="text-xs text-slate-500"><i class="fas fa-envelope text-slate-300 mr-1.5"></i>${escapeHtml(masterInfo.email)}</div>` : ''}
       ${masterInfo?.mobile ? `<div class="text-xs text-slate-500"><i class="fas fa-phone text-slate-300 mr-1.5"></i>${escapeHtml(masterInfo.mobile)}</div>` : ''}
+      ${masterInfo && !masterInfo.mobile ? `<div class="text-xs text-slate-400">No phone number saved — please ask them directly.</div>` : ''}
       ${!masterInfo ? `<div class="text-xs text-slate-400">Contact info not set up in Team Members yet.</div>` : ''}
     </div>
     <button onclick="closeDocUpgradeModal()" class="w-full mt-4 py-2.5 border-2 border-slate-200 text-slate-600 text-sm font-bold rounded-lg hover:border-slate-300 transition-all">Close</button>
