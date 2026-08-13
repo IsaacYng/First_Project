@@ -502,8 +502,58 @@
     content:''; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
     width:3px; height:18px; border-radius:0 4px 4px 0; background:#005EA6;
   }
-  .sidebar-foot{ padding:14px; border-top:1px solid #F0F1F4; flex-shrink:0; }
+  .sidebar-foot{ padding:14px; border-top:1px solid #F0F1F4; flex-shrink:0; display:flex; flex-direction:column; gap:8px; }
   .sidebar-overlay{ display:none; }
+
+  /* ── Collapsible desktop sidebar ────────────────────────────────────
+     Collapses to a 68px icon rail rather than disappearing, so the nav is
+     always one click away and the icons stay recognisable. Mobile keeps
+     its existing slide-in drawer untouched — this only applies above the
+     900px breakpoint where the sidebar is docked. */
+  .sidebar-collapse-btn{
+    width:28px; height:28px; border-radius:8px; display:none; align-items:center; justify-content:center;
+    color:#9AA1AF; background:transparent; border:1px solid transparent; flex-shrink:0; margin-left:auto;
+    transition:background .15s ease, color .15s ease;
+  }
+  .sidebar-collapse-btn:hover{ background:#F5F6F8; color:#1F2430; }
+  .sidebar-logout-btn{
+    display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:10px; width:100%;
+    font-size:13.5px; font-weight:600; color:#C6382E; background:#FDF3F2; border:1px solid #F7D9D6;
+    cursor:pointer; transition:background .15s ease;
+  }
+  .sidebar-logout-btn:hover{ background:#FBE7E5; }
+  .sidebar-logout-btn i{ width:16px; text-align:center; font-size:14px; flex-shrink:0; }
+
+  @media (min-width: 901px){
+    .sidebar-collapse-btn{ display:flex; }
+    .sidebar{ transition:width .22s ease; }
+    body.sidebar-collapsed .sidebar{ width:68px; }
+    /* Text disappears, icons stay — the whole point of the rail. */
+    body.sidebar-collapsed .sidebar-link{ justify-content:center; padding:10px 0; gap:0; }
+    body.sidebar-collapsed .sidebar-link i{ width:auto; font-size:15px; }
+    body.sidebar-collapsed .sidebar-link > span,
+    body.sidebar-collapsed .sidebar-brand .min-w-0,
+    body.sidebar-collapsed .sidebar-section-label,
+    body.sidebar-collapsed #navDateChip,
+    body.sidebar-collapsed .sidebar-logout-btn span{ display:none; }
+    /* Strip the text nodes that sit directly inside each link */
+    body.sidebar-collapsed .sidebar-link{ font-size:0; }
+    body.sidebar-collapsed .sidebar-link i{ font-size:15px; }
+    body.sidebar-collapsed .sidebar-brand{ justify-content:center; padding:18px 0 16px; }
+    body.sidebar-collapsed .sidebar-collapse-btn{ margin:0; }
+    body.sidebar-collapsed .sidebar-nav{ padding:14px 10px; }
+    body.sidebar-collapsed .sidebar-foot{ padding:10px; }
+    body.sidebar-collapsed .sidebar-logout-btn{ justify-content:center; padding:10px 0; gap:0; }
+    body.sidebar-collapsed .sidebar-link.bg-blue-50::before{ left:-10px; }
+    /* Hover tooltip so an icon-only rail is still readable */
+    body.sidebar-collapsed .sidebar-link::after{
+      content:attr(data-label); position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%);
+      background:#1F2430; color:#fff; font-size:11.5px; font-weight:600; letter-spacing:.02em;
+      padding:5px 9px; border-radius:6px; white-space:nowrap; opacity:0; pointer-events:none;
+      transition:opacity .12s ease; z-index:80;
+    }
+    body.sidebar-collapsed .sidebar-link:hover::after{ opacity:1; }
+  }
 
   @media (max-width: 900px){
     .sidebar{ position:fixed; left:0; top:0; transform:translateX(-100%); box-shadow:0 20px 60px rgba(15,23,42,.25); }
@@ -1071,72 +1121,75 @@
         <button id="hamburger" onclick="closeMobileMenu()" class="md:hidden ml-auto w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 flex-shrink-0">
           <i class="fas fa-xmark text-sm"></i>
         </button>
+        <button id="sidebarCollapseBtn" onclick="toggleSidebarCollapse()" class="sidebar-collapse-btn" title="Collapse menu" aria-label="Collapse menu">
+          <i class="fas fa-angles-left text-xs"></i>
+        </button>
       </div>
 
       <nav class="sidebar-nav">
-        <button id="navDashboard" onclick="switchSec('dashboard');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navDashboard" onclick="switchSec('dashboard');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Dashboard">
           <i class="fas fa-gauge-high"></i> Dashboard
         </button>
         <div class="sidebar-section-label">Documents</div>
-        <button id="navDocs" onclick="switchSec('docs');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navDocs" onclick="switchSec('docs');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Document Vault">
           <i class="fas fa-folder-open"></i> Document Vault
         </button>
-        <button id="navStorage" onclick="switchSec('storage');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navStorage" onclick="switchSec('storage');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Storage">
           <i class="fas fa-chart-pie"></i> Storage
         </button>
         <div class="sidebar-section-label">Dealership</div>
-        <button id="navPrice" onclick="switchSec('price');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navPrice" onclick="switchSec('price');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Price List">
           <i class="fas fa-tags"></i> Price List
         </button>
-        <button id="navInv" onclick="switchSec('inv');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navInv" onclick="switchSec('inv');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Inventory">
           <i class="fas fa-warehouse"></i> Inventory
         </button>
-        <button id="navHHInv" onclick="switchSec('hhinv');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navHHInv" onclick="switchSec('hhinv');closeMobileMenu()" class="nav-tab sidebar-link" data-label="HH Inventory">
           <i class="fas fa-tents"></i> HH Inventory
         </button>
-        <button id="navAllInv" onclick="switchSec('allinv');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navAllInv" onclick="switchSec('allinv');closeMobileMenu()" class="nav-tab sidebar-link" data-label="All Inventory">
           <i class="fas fa-layer-group"></i> All Inventory
         </button>
-        <button id="navExchange" onclick="switchSec('exchange');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navExchange" onclick="switchSec('exchange');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Mela Exchange">
           <i class="fas fa-right-left"></i> Mela Exchange
         </button>
-        <button id="navExchangeSr" onclick="switchSec('exchangeSr');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navExchangeSr" onclick="switchSec('exchangeSr');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Showroom Exchange">
           <i class="fas fa-shop"></i> Showroom Exchange
         </button>
-        <button id="navCustomers" onclick="switchSec('customers');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navCustomers" onclick="switchSec('customers');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Customers">
           <i class="fas fa-address-card"></i> Customers
         </button>
-        <button id="navFin" onclick="switchSec('fin');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navFin" onclick="switchSec('fin');closeMobileMenu()" class="nav-tab sidebar-link" data-label="HFL Finance">
           <i class="fas fa-percent"></i> HFL Finance
         </button>
-        <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Accessories">
           <i class="fas fa-helmet-safety"></i> Accessories
         </button>
         <div class="sidebar-section-label">Marketing</div>
-        <button id="navEvents" onclick="switchSec('events');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navEvents" onclick="switchSec('events');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Events & Offers">
           <i class="fas fa-bullhorn"></i> Events & Offers
         </button>
         <div class="sidebar-section-label">Reports</div>
-        <button id="navStock" onclick="switchSec('stock');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navStock" onclick="switchSec('stock');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Stock Report">
           <i class="fas fa-file-lines"></i> Stock Report
         </button>
-        <button id="navHHStock" onclick="switchSec('hhstock');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navHHStock" onclick="switchSec('hhstock');closeMobileMenu()" class="nav-tab sidebar-link hidden" data-label="HH Stock Report">
           <i class="fas fa-file-lines"></i> HH Stock Report
         </button>
-        <button id="navChalans" onclick="switchSec('chalans');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navChalans" onclick="switchSec('chalans');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Chalan Records">
           <i class="fas fa-file-invoice"></i> Chalan Records
         </button>
-        <button id="navHistory" onclick="switchSec('history');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navHistory" onclick="switchSec('history');closeMobileMenu()" class="nav-tab sidebar-link hidden" data-label="Activity Log">
           <i class="fas fa-clock-rotate-left"></i> Activity Log
         </button>
-        <button id="navTrash" onclick="switchSec('trash');closeMobileMenu()" class="nav-tab sidebar-link">
+        <button id="navTrash" onclick="switchSec('trash');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Trash">
           <i class="fas fa-trash-can"></i> Trash <span id="trashNavCount" class="hidden ml-auto bg-red-100 text-red-600 text-[10px] font-extrabold rounded-full px-1.5 py-0.5"></span>
         </button>
         <div id="navToolsLabel" class="sidebar-section-label hidden">Tools</div>
-        <button id="navImportant" onclick="switchSec('important');closeMobileMenu()" class="nav-tab sidebar-link hidden">
+        <button id="navImportant" onclick="switchSec('important');closeMobileMenu()" class="nav-tab sidebar-link hidden" data-label="Important Info">
           <i class="fas fa-key"></i> Important Info
         </button>
-        <button id="navModelAliases" onclick="switchSec('modelAliases');closeMobileMenu()" class="nav-tab sidebar-link hidden">
+        <button id="navModelAliases" onclick="switchSec('modelAliases');closeMobileMenu()" class="nav-tab sidebar-link hidden" data-label="Model Aliases">
           <i class="fas fa-code-compare"></i> Model Aliases <span id="modelMismatchNavCount" class="hidden ml-auto bg-amber-100 text-amber-600 text-[10px] font-extrabold rounded-full px-1.5 py-0.5"></span>
         </button>
       </nav>
@@ -1146,6 +1199,9 @@
           <i class="fas fa-calendar text-amber-500 text-xs"></i>
           <span id="currentDate"></span>
         </div>
+        <button id="sidebarLogoutBtn" onclick="signOutFromSidebar()" class="sidebar-logout-btn" data-label="Log Out" title="Log Out">
+          <i class="fas fa-right-from-bracket"></i><span>Log Out</span>
+        </button>
       </div>
     </aside>
 
@@ -2644,6 +2700,11 @@
         <div class="eyebrow">Documents</div>
         <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Storage <span class="text-amber-500">Overview</span></div>
         <p class="text-sm text-slate-500 mt-1.5 max-w-lg">How everything on the free Firebase plan is being used — documents, price list, inventory, and the rest, all in one place.</p>
+        <div class="flex flex-wrap gap-2 mt-4">
+          <span id="storageHeadlineUsed" class="inline-flex items-center gap-1.5 bg-blue-50 text-bajaj-blue border border-blue-100 rounded-full px-3 py-1.5 text-[11px] font-bold"><i class="fas fa-database text-[10px]"></i> —</span>
+          <span id="storageHeadlineFiles" class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-600 border border-amber-100 rounded-full px-3 py-1.5 text-[11px] font-bold"><i class="fas fa-file-lines text-[10px]"></i> —</span>
+          <span id="storageHeadlineStatus" class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full px-3 py-1.5 text-[11px] font-bold"><i class="fas fa-circle-check text-[10px]"></i> —</span>
+        </div>
       </div>
 
       <div id="totalStorageWrap" class="hidden yng-card-shell p-6 mb-5 flex flex-col sm:flex-row items-center gap-6">
@@ -3035,6 +3096,30 @@
         <button onclick="window.openAliasFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
           <i class="fas fa-plus"></i> Add Alias
         </button>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+        <div class="yng-card-shell p-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-triangle-exclamation text-amber-500"></i></div>
+          <div class="min-w-0">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Needs Linking</div>
+            <div class="text-2xl font-black text-slate-800 leading-tight" id="aliasStatUnmatched">—</div>
+          </div>
+        </div>
+        <div class="yng-card-shell p-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-link text-bajaj-blue"></i></div>
+          <div class="min-w-0">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aliases Saved</div>
+            <div class="text-2xl font-black text-slate-800 leading-tight" id="aliasStatSaved">—</div>
+          </div>
+        </div>
+        <div class="yng-card-shell p-4 flex items-center gap-3 col-span-2 lg:col-span-1">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-circle-check text-emerald-600"></i></div>
+          <div class="min-w-0">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Units Auto-Corrected</div>
+            <div class="text-2xl font-black text-slate-800 leading-tight" id="aliasStatUnits">—</div>
+          </div>
+        </div>
       </div>
 
       <div class="yng-card-shell overflow-hidden mb-5">
@@ -5117,6 +5202,34 @@ document.addEventListener('keydown', e => {
 });
 document.getElementById('logoutBtn').addEventListener('click', ()=>signOut(auth));
 
+// Sidebar logout — same action as the profile-menu one, just reachable
+// without opening a menu first.
+window.signOutFromSidebar = ()=>signOut(auth);
+
+// Desktop sidebar collapse. Collapses to an icon rail rather than hiding
+// entirely, so navigation is always visible. The preference is remembered
+// where the browser allows it, but a blocked/unavailable localStorage
+// (private mode, sandboxed preview) must never break the button — hence
+// the try/catch around both read and write.
+const SIDEBAR_COLLAPSE_KEY = 'bajajAdminSidebarCollapsed';
+function applySidebarCollapsed(collapsed){
+  document.body.classList.toggle('sidebar-collapsed', collapsed);
+  const btn = document.getElementById('sidebarCollapseBtn');
+  if(btn){
+    btn.innerHTML = `<i class="fas fa-angles-${collapsed?'right':'left'} text-xs"></i>`;
+    btn.title = collapsed ? 'Expand menu' : 'Collapse menu';
+    btn.setAttribute('aria-label', btn.title);
+  }
+}
+window.toggleSidebarCollapse = ()=>{
+  const next = !document.body.classList.contains('sidebar-collapsed');
+  applySidebarCollapsed(next);
+  try{ localStorage.setItem(SIDEBAR_COLLAPSE_KEY, next ? '1' : '0'); }catch(e){ /* storage unavailable — collapse still works for this session */ }
+};
+try{
+  if(localStorage.getItem(SIDEBAR_COLLAPSE_KEY) === '1') applySidebarCollapsed(true);
+}catch(e){ /* ignore — start expanded */ }
+
 window.togglePasswordVisibility = ()=>{
   const input = document.getElementById('pass');
   const icon = document.getElementById('togglePassIcon');
@@ -5219,9 +5332,11 @@ async function loadProfile(uid) {
     if(teamBtn) teamBtn.classList.remove('hidden'); // everyone can view the team; only Master ID can manage it
     // Activity Log shows EVERYONE's actions across the whole system — a
     // Normal ID only gets to see their own via "My Activity" in Profile.
-    // Only Master ID sees the full combined log.
+    // Activity Log is hidden from the menu for every role right now,
+    // Master included — the page and its data are untouched, so putting it
+    // back is just a matter of restoring this toggle.
     const historyNavBtn = document.getElementById('navHistory');
-    if(historyNavBtn) historyNavBtn.classList.toggle('hidden', currentUserRole !== 'owner');
+    if(historyNavBtn) historyNavBtn.classList.add('hidden');
     // Important Info is visible to everyone now — Contacts are shared team
     // info; Links and Credentials stay Master-only inside the page itself.
     const importantNavBtn = document.getElementById('navImportant');
@@ -6372,6 +6487,15 @@ window.setAliasSearch = (v)=>{
 function renderModelAliasesPage(){
   const suggestedCount = modelMismatches.filter(m=>m.suggestion).length;
   const reviewCount = modelMismatches.length - suggestedCount;
+
+  // Summary strip — leads with the numbers that answer "is anything wrong
+  // right now", instead of making them count rows to find out.
+  const aliasNames = new Set(modelAliasesData.map(a=>normModelName(a.alias)));
+  const correctedUnits = [...invData, ...hhInvData].filter(u=>aliasNames.has(normModelName(u.model))).length;
+  const setStat = (id, val)=>{ const el = document.getElementById(id); if(el) el.textContent = val; };
+  setStat('aliasStatUnmatched', modelMismatches.length);
+  setStat('aliasStatSaved', modelAliasesData.length);
+  setStat('aliasStatUnits', correctedUnits);
   const setBadge = (id, n)=>{
     const el = document.getElementById(id);
     if(!el) return;
@@ -11370,6 +11494,25 @@ async function updateStorageOverview(){
   const exSrCount = await getAccurateExchangeSrCount();
   const used = getTotalStorageUsed();
 
+  // Headline chips — the three things worth knowing before reading any of
+  // the per-collection detail below.
+  const usedPctOfCap = STORAGE_CAP_BYTES ? (used / STORAGE_CAP_BYTES) * 100 : 0;
+  const headUsed = document.getElementById('storageHeadlineUsed');
+  if(headUsed) headUsed.innerHTML = `<i class="fas fa-database text-[10px]"></i> ${formatBytes(used)} of ${formatBytes(STORAGE_CAP_BYTES)} used`;
+  const headFiles = document.getElementById('storageHeadlineFiles');
+  if(headFiles) headFiles.innerHTML = `<i class="fas fa-file-lines text-[10px]"></i> ${documents.length} file${documents.length!==1?'s':''} stored`;
+  const headStatus = document.getElementById('storageHeadlineStatus');
+  if(headStatus){
+    const near = usedPctOfCap >= 90 ? 'full' : usedPctOfCap >= 70 ? 'filling' : 'ok';
+    const cfg = {
+      ok:      { cls:'bg-emerald-50 text-emerald-600 border-emerald-100', icon:'fa-circle-check', text:'Plenty of room left' },
+      filling: { cls:'bg-amber-50 text-amber-600 border-amber-100',       icon:'fa-triangle-exclamation', text:'Filling up — clear old files soon' },
+      full:    { cls:'bg-red-50 text-red-600 border-red-100',             icon:'fa-circle-exclamation', text:'Almost full — clear space now' }
+    }[near];
+    headStatus.className = `inline-flex items-center gap-1.5 border rounded-full px-3 py-1.5 text-[11px] font-bold ${cfg.cls}`;
+    headStatus.innerHTML = `<i class="fas ${cfg.icon} text-[10px]"></i> ${cfg.text}`;
+  }
+
   const rows = [
     { icon:'fa-folder-open', color:'#D97706', label:'Document Vault', usedBytes: used, maxBytes: STORAGE_CAP_BYTES,
       sub: `${documents.length} file${documents.length!==1?'s':''} — ${formatBytes(used)} of ${formatBytes(STORAGE_CAP_BYTES)} allowed` },
@@ -13611,9 +13754,13 @@ window.switchSec=(sec)=>{
     toast("Recondition ID doesn't have access to that section.",'err');
     sec = 'exchange';
   }
-  if(sec==='history' && currentUserRole !== 'owner'){
-    toast("Only a Master ID can view the full Activity Log — check My Profile for your own activity.",'err');
+  if(sec==='history'){
+    toast("The Activity Log is turned off right now — your own recent activity is still in My Profile.",'err');
     sec = 'price';
+  }
+  if(sec==='hhstock'){
+    toast("HH Stock Report is turned off right now.",'err');
+    sec = 'stock';
   }
   if(sec==='modelAliases' && currentUserRole !== 'owner'){
     toast("Only a Master ID can manage Model Aliases.",'err');
