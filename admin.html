@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
   tailwind.config = {
     theme: {
@@ -2688,9 +2689,15 @@
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="excel" onclick="setDocTypeFilter('excel')"><i class="fas fa-file-excel mr-1"></i>Excel <span id="docCountExcel" class="filter-count-badge"></span></button>
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="bluebook" onclick="setDocTypeFilter('bluebook')"><i class="fas fa-book mr-1"></i>Blue Books <span id="docCountBlueBook" class="filter-count-badge"></span></button>
       </div>
-      <button onclick="window.downloadAllBlueBooks()" class="mb-4 flex items-center gap-1.5 text-xs font-bold text-bajaj-blue hover:underline">
-        <i class="fas fa-download"></i> Download All Blue Books (from Mela + Showroom Exchange)
-      </button>
+      <div class="flex flex-wrap items-center gap-2 mb-4">
+        <button id="docDownloadAllBtn" onclick="window.downloadAllDocuments()" class="flex items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+          <i class="fas fa-file-zipper"></i> <span id="docDownloadAllLabel">Download All (ZIP)</span>
+        </button>
+        <button onclick="window.downloadAllBlueBooks()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
+          <i class="fas fa-book"></i> Blue Books Only
+        </button>
+        <span class="text-[11px] text-slate-400">Downloads whatever the filter above is showing, as one zip file.</span>
+      </div>
       <div id="docsListWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </div>
 
@@ -2702,6 +2709,7 @@
         <p class="text-sm text-slate-500 mt-1.5 max-w-lg">How everything on the free Firebase plan is being used — documents, price list, inventory, and the rest, all in one place.</p>
         <div class="flex flex-wrap gap-2 mt-4">
           <span id="storageHeadlineUsed" class="inline-flex items-center gap-1.5 bg-blue-50 text-bajaj-blue border border-blue-100 rounded-full px-3 py-1.5 text-[11px] font-bold"><i class="fas fa-database text-[10px]"></i> —</span>
+          <span id="storageHeadlineFree" class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full px-3 py-1.5 text-[11px] font-bold"><i class="fas fa-battery-half text-[10px]"></i> —</span>
           <span id="storageHeadlineFiles" class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-600 border border-amber-100 rounded-full px-3 py-1.5 text-[11px] font-bold"><i class="fas fa-file-lines text-[10px]"></i> —</span>
           <span id="storageHeadlineStatus" class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full px-3 py-1.5 text-[11px] font-bold"><i class="fas fa-circle-check text-[10px]"></i> —</span>
         </div>
@@ -5251,6 +5259,22 @@ let currentUserMobile = '';
 // removed", a data URL string means "new photo chosen".
 let pendingProfilePhoto = null;
 
+// Hides a sidebar heading only when every nav link under it is hidden, so
+// headings stay visible for the groups a role CAN see, and no heading is
+// ever left floating above an empty gap. Walks forward from each label
+// until the next label, which is exactly how the markup groups them.
+function hideEmptySidebarLabels(){
+  document.querySelectorAll('.sidebar-section-label').forEach(label=>{
+    let anyVisible = false;
+    let node = label.nextElementSibling;
+    while(node && !node.classList.contains('sidebar-section-label')){
+      if(node.classList.contains('sidebar-link') && !node.classList.contains('hidden')){ anyVisible = true; break; }
+      node = node.nextElementSibling;
+    }
+    label.classList.toggle('hidden', !anyVisible);
+  });
+}
+
 // Good Morning/Afternoon/Evening — a small personal touch on the landing
 // page, based on the device's local clock and whatever name is on file.
 function renderGreeting(){
@@ -5332,11 +5356,19 @@ async function loadProfile(uid) {
     if(teamBtn) teamBtn.classList.remove('hidden'); // everyone can view the team; only Master ID can manage it
     // Activity Log shows EVERYONE's actions across the whole system — a
     // Normal ID only gets to see their own via "My Activity" in Profile.
-    // Activity Log is hidden from the menu for every role right now,
-    // Master included — the page and its data are untouched, so putting it
-    // back is just a matter of restoring this toggle.
+    const ALL_NAV_IDS = ['navDashboard','navPrice','navInv','navHHInv','navAllInv','navExchange','navExchangeSr',
+      'navCustomers','navFin','navAcc','navDocs','navStorage','navEvents','navStock','navHHStock','navChalans',
+      'navHistory','navTrash','navImportant','navModelAliases'];
+    ALL_NAV_IDS.forEach(id=>document.getElementById(id)?.classList.remove('hidden'));
+
+    // A Master ID is never restricted anywhere in this app — these two are
+    // simply not offered to anyone else.
     const historyNavBtn = document.getElementById('navHistory');
-    if(historyNavBtn) historyNavBtn.classList.add('hidden');
+    if(historyNavBtn) historyNavBtn.classList.toggle('hidden', currentUserRole !== 'owner');
+    // HH Stock Report is off for everyone except a Master ID, who is never
+    // restricted anywhere in this app.
+    const hhStockNavBtn = document.getElementById('navHHStock');
+    if(hhStockNavBtn) hhStockNavBtn.classList.toggle('hidden', currentUserRole !== 'owner');
     // Important Info is visible to everyone now — Contacts are shared team
     // info; Links and Credentials stay Master-only inside the page itself.
     const importantNavBtn = document.getElementById('navImportant');
@@ -5389,18 +5421,20 @@ async function loadProfile(uid) {
     // check something they removed). Everything else stays hidden.
     const RECON_FULL = ['exchange','exchangeSr'];
     const RECON_READONLY = ['docs','storage','price','fin','events','trash'];
-    Object.entries(RECON_NAV_MAP).forEach(([key,id])=>{
-      const keep = RECON_FULL.includes(key) || RECON_READONLY.includes(key);
-      const el = document.getElementById(id);
-      if(el) el.classList.toggle('hidden', isRecondition && !keep);
-    });
+    if(isRecondition){
+      Object.entries(RECON_NAV_MAP).forEach(([key,id])=>{
+        const keep = RECON_FULL.includes(key) || RECON_READONLY.includes(key);
+        if(!keep) document.getElementById(id)?.classList.add('hidden');
+      });
+    }
     // Drives the CSS below that strips Add/Edit/Delete controls out of the
     // read-only sections, so those pages genuinely look view-only rather
     // than showing buttons that just error out when tapped.
     document.body.classList.toggle('role-recondition', isRecondition);
-    // Section labels ("Reports", "Stock Management", etc.) would otherwise
-    // sit above an empty group with nothing left visible under them.
-    document.querySelectorAll('.sidebar-section-label').forEach(el=>el.classList.toggle('hidden', isRecondition));
+    // Section labels stay visible for every role — they're what makes the
+    // menu readable. A label is only hidden when nothing under it survived
+    // the role filter, so a heading never sits above an empty gap.
+    hideEmptySidebarLabels();
   } catch { document.getElementById('headerUserName').textContent = 'Admin'; }
 }
 
@@ -9747,13 +9781,81 @@ function uploadBlueBookFile(file, regNo, customerName, sourceCollection){
 // instead of a client-side ZIP, since no ZIP library is available here.
 // Downloading a local copy also gives a reason to eventually clear older
 // ones out of Document Vault if cloud storage ever gets tight.
+// Bundles a set of stored documents into a single .zip. Individual
+// downloads were the old approach, but firing a dozen of them in a row is
+// exactly the pattern browsers block as a popup storm — one zip is both
+// more reliable and what "download everything at once" actually means.
+// Falls back to the old staggered method if JSZip didn't load.
+async function downloadDocsAsZip(docs, zipName, describe){
+  if(!docs.length){ toast(`No ${describe} to download.`,'warn'); return; }
+  if(typeof JSZip === 'undefined'){
+    toast(`Zip tool unavailable — downloading ${docs.length} file(s) one by one…`,'warn');
+    docs.forEach((d,i)=>setTimeout(()=>window.downloadDocument(d.id), i*400));
+    return;
+  }
+  const btn = document.getElementById('docDownloadAllBtn');
+  const label = document.getElementById('docDownloadAllLabel');
+  const restore = label ? label.textContent : null;
+  if(btn) btn.disabled = true;
+  if(label) label.textContent = 'Zipping…';
+  try{
+    const zip = new JSZip();
+    const usedNames = new Set();
+    let added = 0;
+    for(const d of docs){
+      if(!d.fileData) continue;
+      // fileData is a data: URL — the part after the comma is the base64
+      // payload JSZip wants.
+      const base64 = String(d.fileData).split(',')[1];
+      if(!base64) continue;
+      const ext = String(d.fileExt||'').toLowerCase();
+      let name = (d.fileName || d.name || 'document').trim().replace(/[\\/:*?"<>|]/g,'-');
+      if(ext && !name.toLowerCase().endsWith('.'+ext)) name += '.'+ext;
+      // Two records can legitimately share a filename; keep both.
+      let unique = name, n = 2;
+      while(usedNames.has(unique)){
+        const dot = name.lastIndexOf('.');
+        unique = dot > 0 ? `${name.slice(0,dot)} (${n})${name.slice(dot)}` : `${name} (${n})`;
+        n++;
+      }
+      usedNames.add(unique);
+      zip.file(unique, base64, { base64:true });
+      added++;
+    }
+    if(!added){ toast('Those records have no attached files.','warn'); return; }
+    const blob = await zip.generateAsync({ type:'blob', compression:'DEFLATE' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${zipName}_${new Date().toISOString().slice(0,10)}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    toast(`${added} file(s) downloaded as one zip.`);
+  }catch(e){
+    console.error('zip build failed', e);
+    toast('Could not build the zip: '+friendlyError(e),'err');
+  }finally{
+    if(btn) btn.disabled = false;
+    if(label && restore !== null) label.textContent = restore;
+  }
+}
+
+// Downloads whatever the Document Vault filter is currently showing, so
+// what you get matches what you can see.
+window.downloadAllDocuments = async ()=>{
+  let list = currentUserRole === 'recondition'
+    ? documents.filter(d=>d.category === 'Blue Book')
+    : documents.slice();
+  if(docTypeFilter === 'bluebook') list = list.filter(d=>d.category==='Blue Book');
+  else if(docTypeFilter !== 'all') list = list.filter(d=>(DOC_TYPE_GROUPS[docTypeFilter]||[]).includes(String(d.fileExt||'').toLowerCase()));
+  await downloadDocsAsZip(list, 'Documents', 'documents in this filter');
+};
+
 window.downloadAllBlueBooks = async ()=>{
   const blueBookDocs = documents.filter(d=>d.category==='Blue Book');
-  if(!blueBookDocs.length){ toast('No Blue Book files on file yet.','warn'); return; }
-  toast(`Downloading ${blueBookDocs.length} Blue Book file(s)…`);
-  blueBookDocs.forEach((d, i)=>{
-    setTimeout(()=>window.downloadDocument(d.id), i*400);
-  });
+  await downloadDocsAsZip(blueBookDocs, 'Blue-Books', 'Blue Book files');
 };
 
 let exBlueBookFilePending = null;
@@ -11497,8 +11599,20 @@ async function updateStorageOverview(){
   // Headline chips — the three things worth knowing before reading any of
   // the per-collection detail below.
   const usedPctOfCap = STORAGE_CAP_BYTES ? (used / STORAGE_CAP_BYTES) * 100 : 0;
+  // Percentages are against the allowance actually set for this dealership
+  // (STORAGE_CAP_BYTES), not Firebase's raw 1 GB — that allowance is the
+  // number staff are working within, so it's the one worth a percentage.
+  const freePct = Math.max(0, 100 - usedPctOfCap);
   const headUsed = document.getElementById('storageHeadlineUsed');
-  if(headUsed) headUsed.innerHTML = `<i class="fas fa-database text-[10px]"></i> ${formatBytes(used)} of ${formatBytes(STORAGE_CAP_BYTES)} used`;
+  if(headUsed) headUsed.innerHTML = `<i class="fas fa-database text-[10px]"></i> ${formatBytes(used)} of ${formatBytes(STORAGE_CAP_BYTES)} used · ${usedPctOfCap.toFixed(1)}%`;
+  const headFree = document.getElementById('storageHeadlineFree');
+  if(headFree){
+    const cls = freePct <= 10 ? 'bg-red-50 text-red-600 border-red-100'
+      : freePct <= 30 ? 'bg-amber-50 text-amber-600 border-amber-100'
+      : 'bg-emerald-50 text-emerald-600 border-emerald-100';
+    headFree.className = `inline-flex items-center gap-1.5 border rounded-full px-3 py-1.5 text-[11px] font-bold ${cls}`;
+    headFree.innerHTML = `<i class="fas fa-battery-half text-[10px]"></i> ${freePct.toFixed(1)}% free · ${formatBytes(Math.max(0, STORAGE_CAP_BYTES - used))} left`;
+  }
   const headFiles = document.getElementById('storageHeadlineFiles');
   if(headFiles) headFiles.innerHTML = `<i class="fas fa-file-lines text-[10px]"></i> ${documents.length} file${documents.length!==1?'s':''} stored`;
   const headStatus = document.getElementById('storageHeadlineStatus');
@@ -11515,7 +11629,7 @@ async function updateStorageOverview(){
 
   const rows = [
     { icon:'fa-folder-open', color:'#D97706', label:'Document Vault', usedBytes: used, maxBytes: STORAGE_CAP_BYTES,
-      sub: `${documents.length} file${documents.length!==1?'s':''} — ${formatBytes(used)} of ${formatBytes(STORAGE_CAP_BYTES)} allowed` },
+      sub: `${documents.length} file${documents.length!==1?'s':''} — ${formatBytes(used)} of ${formatBytes(STORAGE_CAP_BYTES)} allowed · ${Math.max(0, 100 - usedPctOfCap).toFixed(1)}% free` },
     { icon:'fa-tags', color:'#005EA6', label:'Master Price List (Models)', count: allMasterBikes.length, maxCount: MAX_BIKES,
       usedBytes: allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike, maxBytes: MAX_BIKES*RECORD_SIZE_ESTIMATE.bike,
       sub: `${allMasterBikes.length} / ${MAX_BIKES} models — up to ${formatBytes(MAX_BIKES*RECORD_SIZE_ESTIMATE.bike)} at full capacity` },
@@ -13754,12 +13868,12 @@ window.switchSec=(sec)=>{
     toast("Recondition ID doesn't have access to that section.",'err');
     sec = 'exchange';
   }
-  if(sec==='history'){
-    toast("The Activity Log is turned off right now — your own recent activity is still in My Profile.",'err');
+  if(sec==='history' && currentUserRole !== 'owner'){
+    toast("Only a Master ID can view the full Activity Log — your own recent activity is in My Profile.",'err');
     sec = 'price';
   }
-  if(sec==='hhstock'){
-    toast("HH Stock Report is turned off right now.",'err');
+  if(sec==='hhstock' && currentUserRole !== 'owner'){
+    toast("Only a Master ID can open the HH Stock Report.",'err');
     sec = 'stock';
   }
   if(sec==='modelAliases' && currentUserRole !== 'owner'){
