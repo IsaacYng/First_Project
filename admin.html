@@ -2825,7 +2825,7 @@
           <div class="flex flex-col gap-1.5 sm:col-span-2">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Popup Background Image <span class="normal-case font-medium text-slate-300">(optional)</span></label>
             <div id="evBgPreviewWrap" class="hidden relative mb-1.5">
-              <img id="evBgPreview" class="w-full h-32 object-cover rounded-lg border border-slate-200"/>
+              <img id="evBgPreview" class="w-full h-32 object-contain bg-white rounded-lg border border-slate-200"/>
               <button type="button" onclick="removeEventBgImage()" class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-white/90 hover:bg-white shadow flex items-center justify-center text-red-500"><i class="fas fa-trash-can text-xs"></i></button>
             </div>
             <label class="flex items-center gap-3 border-2 border-dashed border-slate-300 bg-slate-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-slate-50 hover:border-bajaj-blue transition-all">
@@ -11404,14 +11404,15 @@ function checkAndShowEventPopup(){
     const badgeIcon = isUpcoming ? 'fa-hourglass-half' : 'fa-fire';
     // The full poster shows uncropped (object-contain) — a marketing banner
     // is usually packed with text/offers, so cropping it (as a plain CSS
-    // background-cover box did before) was cutting off real content. A
-    // gradient wash along the bottom keeps the badge readable over busy
-    // poster art without needing a hard edge/box around it.
+    // background-cover box did before) was cutting off real content. The
+    // letterbox behind it is white rather than near-black: most posters are
+    // bright, so dark bars read as an error rather than as empty space. The
+    // badge gets a white ring instead of a dark gradient wash, which keeps
+    // it legible over any poster without dimming the artwork.
     const imageBlock = ev.bgImage
-      ? `<div class="w-full bg-slate-900 flex items-center justify-center relative">
-           <img src="${escapeHtml(ev.bgImage)}" class="w-full h-auto max-h-[55vh] object-contain">
-           <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent pointer-events-none"></div>
-           <div id="eventPopupBadge_${i}" class="absolute bottom-3 left-3 inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg"><i class="fas ${badgeIcon} text-[10px]"></i>${badgeText}</div>
+      ? `<div class="w-full bg-white flex items-center justify-center relative">
+           <img src="${escapeHtml(ev.bgImage)}" class="w-full h-auto max-h-[60vh] object-contain" alt="${escapeHtml(ev.title||'Event poster')}">
+           <div id="eventPopupBadge_${i}" class="absolute bottom-3 left-3 inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg ring-2 ring-white/90"><i class="fas ${badgeIcon} text-[10px]"></i>${badgeText}</div>
          </div>`
       : `<div class="w-full h-32 bg-gradient-to-br from-bajaj-blue via-blue-700 to-blue-800 flex items-end p-4 relative overflow-hidden">
            <i class="fas fa-bullhorn absolute -right-3 -top-3 text-8xl text-white/10"></i>
