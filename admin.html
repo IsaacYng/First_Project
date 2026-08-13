@@ -486,23 +486,41 @@
     z-index:60; transition:transform .25s ease;
   }
   .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:18px 18px 16px; border-bottom:1px solid #F0F1F4; flex-shrink:0; }
-  .sidebar-nav{ flex:1; overflow-y:auto; padding:14px 12px; display:flex; flex-direction:column; gap:2px; }
-  .sidebar-section-label{ font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#A6ACB9; padding:10px 10px 6px; }
+  .sidebar-nav{ flex:1; overflow-y:auto; padding:14px 12px; display:flex; flex-direction:column; gap:3px; }
+  /* A hairline above each heading separates groups without adding a heavy
+     divider line — the eye reads the break, but nothing shouts. The first
+     heading skips it, since there's already the brand border above it. */
+  .sidebar-section-label{
+    font-size:9.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#A6ACB9;
+    padding:14px 10px 6px; margin-top:6px; border-top:1px solid #F2F3F6;
+  }
+  .sidebar-nav > .sidebar-section-label:first-child{ border-top:none; margin-top:0; padding-top:4px; }
   .sidebar-link{
-    display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:10px;
+    display:flex; align-items:center; gap:11px; padding:9px 11px; border-radius:10px;
     font-size:13.5px; font-weight:600; color:#4B5262; text-decoration:none; cursor:pointer;
-    border:1px solid transparent; transition:background .15s ease, color .15s ease; position:relative;
+    border:1px solid transparent; position:relative; overflow:hidden;
+    transition:background .16s ease, color .16s ease, transform .16s ease;
   }
-  .sidebar-link i{ width:16px; text-align:center; font-size:14px; color:#9AA1AF; transition:color .15s ease; flex-shrink:0; }
-  .sidebar-link:hover{ background:#F5F6F8; color:#1F2430; }
-  .sidebar-link:hover i{ color:#5B6270; }
+  /* Icons sit in their own tinted tile, so the rail still looks deliberate
+     when the labels are hidden rather than like a column of loose glyphs. */
+  .sidebar-link i{
+    width:26px; height:26px; display:flex; align-items:center; justify-content:center;
+    border-radius:7px; font-size:12.5px; color:#8A91A0; background:#F4F5F7; flex-shrink:0;
+    transition:color .16s ease, background .16s ease, box-shadow .16s ease;
+  }
+  .sidebar-link:hover{ background:#F5F6F8; color:#1F2430; transform:translateX(2px); }
+  .sidebar-link:hover i{ color:#005EA6; background:#E8F1FA; }
   /* Active state driven by existing bg-blue-50/border-blue-200/text-blue-700 utility classes */
-  .sidebar-link.bg-blue-50{ background:#EEF5FC !important; color:#005EA6 !important; font-weight:700; border-color:transparent !important; }
-  .sidebar-link.bg-blue-50 i{ color:#005EA6 !important; }
-  .sidebar-link.bg-blue-50::before{
-    content:''; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
-    width:3px; height:18px; border-radius:0 4px 4px 0; background:#005EA6;
+  .sidebar-link.bg-blue-50{
+    background:linear-gradient(90deg,#EAF3FC 0%,#F4F9FE 100%) !important;
+    color:#00538F !important; font-weight:750; border-color:transparent !important; transform:none;
   }
+  .sidebar-link.bg-blue-50 i{ color:#fff !important; background:#005EA6 !important; box-shadow:0 2px 6px rgba(0,94,166,.32); }
+  .sidebar-link.bg-blue-50::before{
+    content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
+    width:3px; height:60%; border-radius:0 4px 4px 0; background:#005EA6;
+  }
+  .sidebar-link.bg-blue-50:hover{ transform:none; }
   .sidebar-foot{ padding:14px; border-top:1px solid #F0F1F4; flex-shrink:0; display:flex; flex-direction:column; gap:8px; }
   .sidebar-overlay{ display:none; }
 
@@ -530,16 +548,17 @@
     .sidebar{ transition:width .22s ease; }
     body.sidebar-collapsed .sidebar{ width:68px; }
     /* Text disappears, icons stay — the whole point of the rail. */
-    body.sidebar-collapsed .sidebar-link{ justify-content:center; padding:10px 0; gap:0; }
-    body.sidebar-collapsed .sidebar-link i{ width:auto; font-size:15px; }
+    body.sidebar-collapsed .sidebar-link{ justify-content:center; padding:6px 0; gap:0; }
+    body.sidebar-collapsed .sidebar-link i{ width:34px; height:34px; font-size:14px; }
+    body.sidebar-collapsed .sidebar-link:hover{ transform:none; }
+    body.sidebar-collapsed .sidebar-section-label{ border-top:1px solid #F2F3F6; height:1px; padding:0; margin:8px 6px; overflow:hidden; }
     body.sidebar-collapsed .sidebar-link > span,
     body.sidebar-collapsed .sidebar-brand .min-w-0,
-    body.sidebar-collapsed .sidebar-section-label,
     body.sidebar-collapsed #navDateChip,
     body.sidebar-collapsed .sidebar-logout-btn span{ display:none; }
     /* Strip the text nodes that sit directly inside each link */
     body.sidebar-collapsed .sidebar-link{ font-size:0; }
-    body.sidebar-collapsed .sidebar-link i{ font-size:15px; }
+    body.sidebar-collapsed .sidebar-link i{ font-size:14px; }
     body.sidebar-collapsed .sidebar-brand{ justify-content:center; padding:18px 0 16px; }
     body.sidebar-collapsed .sidebar-collapse-btn{ margin:0; }
     body.sidebar-collapsed .sidebar-nav{ padding:14px 10px; }
@@ -5088,6 +5107,10 @@ onAuthStateChanged(auth, async (user) => {
     loadExchangeStock();
     loadExchangeSrStock();
     loadFinanceSchemes();
+    // Was missing entirely — the function existed but nothing ever called
+    // it, so `financeCategories` stayed empty and Model Categories always
+    // read "No categories yet" no matter what was saved in Firestore.
+    loadFinanceCategories();
     loadAccessories();
     loadEvents();
     loadDocuments();
