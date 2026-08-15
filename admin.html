@@ -11464,7 +11464,7 @@ const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','mp3
 // text risks upload failures regardless of what this is set to.
 let DOC_MAX_FILE_SIZE = 400 * 1024;
 const DOC_TYPE_GROUPS = { pdf:['pdf'], photo:['jpg','jpeg','png'], word:['doc','docx'], excel:['xls','xlsx'] };
-const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626',label:'PDF'}, doc:{icon:'fa-file-word',color:'#2563EB',label:'DOC'}, docx:{icon:'fa-file-word',color:'#2563EB',label:'DOC'}, xls:{icon:'fa-file-excel',color:'#059669',label:'XLS'}, xlsx:{icon:'fa-file-excel',color:'#059669',label:'XLS'}, jpg:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, jpeg:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, png:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, mp3:{icon:'fa-file-audio',color:'#7C3AED',label:'MP3'}, mp4:{icon:'fa-file-video',color:'#DB2777',label:'MP4'} };
+const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626',label:'PDF'}, doc:{icon:'fa-file-word',color:'#2563EB',label:'DOC'}, docx:{icon:'fa-file-word',color:'#2563EB',label:'DOC'}, xls:{icon:'fa-file-excel',color:'#059669',label:'XLS'}, xlsx:{icon:'fa-file-excel',color:'#059669',label:'XLS'}, jpg:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, jpeg:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, png:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, mp3:{icon:'fa-file-audio',color:'#7C3AED',label:'MP3'}, mp4:{icon:'fa-file-video',color:'#DB2777',label:'MP4'}, webp:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, gif:{icon:'fa-file-image',color:'#D97706',label:'GIF'}, heic:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, csv:{icon:'fa-file-csv',color:'#059669',label:'CSV'}, txt:{icon:'fa-file-lines',color:'#64748B',label:'TXT'}, zip:{icon:'fa-file-zipper',color:'#B45309',label:'ZIP'} };
 // Firestore's free (Spark) tier gives ~1 GiB of total stored data for the
 // ENTIRE database. Documents-as-base64 dwarf everything else that lives
 // there (inventory/price-list records are ~1-2KB each, activity log
@@ -11979,7 +11979,7 @@ function renderDocumentsPage(){
       <div class="flex items-start justify-between gap-2 mb-3">
         <div class="flex items-center gap-2">
           <div class="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${iconInfo.color}15">
-            <span class="text-[10px] font-black tracking-tight" style="color:${iconInfo.color}">${iconInfo.label}</span>
+            <i class="fas ${iconInfo.icon} text-lg" style="color:${iconInfo.color}"></i>
           </div>
           <span class="text-[10px] font-extrabold tracking-wide px-1.5 py-0.5 rounded" style="background:${iconInfo.color}15;color:${iconInfo.color}">${ext.toUpperCase()||'FILE'}</span>
         </div>
@@ -12209,7 +12209,7 @@ window.openDocPreview = (id)=>{
   } else {
     const iconInfo = DOC_FILE_ICONS[ext] || {icon:'fa-file', color:'#64748B', label:(ext||'FILE').slice(0,3).toUpperCase()};
     body.innerHTML = `<div class="text-center py-10">
-      <div class="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-3" style="background:${iconInfo.color}15"><span class="text-base font-black tracking-tight" style="color:${iconInfo.color}">${iconInfo.label}</span></div>
+      <div class="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-3" style="background:${iconInfo.color}15"><i class="fas ${iconInfo.icon} text-2xl" style="color:${iconInfo.color}"></i></div>
       <p class="text-sm text-slate-500 mb-4">Preview isn't available for this file type — download it to view.</p>
       <button onclick="downloadDocument('${id}')" class="cta-primary !py-2 !px-4 !text-xs"><i class="fas fa-download"></i> Download</button>
     </div>`;
