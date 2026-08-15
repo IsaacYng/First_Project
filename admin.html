@@ -2681,7 +2681,8 @@
         </div>
         <div class="flex-1 text-center sm:text-left">
           <div id="totalStorageLabel" class="text-lg font-extrabold text-slate-800 mb-1">0 MB / 0 MB</div>
-          <p class="text-xs text-slate-500 leading-relaxed">Everything combined — documents, inventory, price list, and the rest — stays capped at the free plan's full total.</p>
+          <p class="text-xs text-slate-500 leading-relaxed mb-3">Google gives two separate no-cost allowances — one for records, one for files. The ring shows whichever is closest to its limit.</p>
+          <div id="storageQuotaBreakdown" class="text-left bg-slate-50 rounded-xl px-3 py-1 border border-slate-100"></div>
         </div>
       </div>
 
@@ -2689,8 +2690,8 @@
         <div class="flex items-center justify-between gap-2 mb-1">
           <div class="text-xs font-bold text-slate-600"><i class="fas fa-chart-simple text-bajaj-blue mr-1"></i> Storage Allocation</div>
           <div class="flex items-center gap-1">
-            <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set Document Vault limits"><i class="fas fa-gear text-xs"></i></button>
-            <button id="systemLimitsSettingsBtn" onclick="openSystemLimitsModal()" class="hidden w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Set record limits"><i class="fas fa-gear text-xs"></i></button>
+            <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden items-center gap-1.5 px-2 h-6 rounded-md text-[10px] font-bold text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="File storage limits"><i class="fas fa-cloud text-[10px]"></i> Files</button>
+            <button id="systemLimitsSettingsBtn" onclick="openSystemLimitsModal()" class="hidden items-center gap-1.5 px-2 h-6 rounded-md text-[10px] font-bold text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Record limits"><i class="fas fa-database text-[10px]"></i> Records</button>
           </div>
         </div>
         <p class="text-[11px] text-slate-400 mb-4">What the Master ID has allowed for each category — and how much is actually being used right now.</p>
@@ -3653,7 +3654,10 @@
           </select>
         </div>
         <p id="fileSizeCapPreview" class="text-[11px] text-slate-400 mb-1"></p>
-        <p class="text-[10.5px] text-amber-600 mb-3"><i class="fas fa-circle-info mr-1"></i>Firestore hard-caps a single document at 1MB total — going much past ~900KB risks upload failures.</p>
+        <p class="text-[10.5px] text-slate-400 mb-3"><i class="fas fa-circle-info mr-1"></i>Files live in Cloud Storage now, so the old ~900KB Firestore ceiling no longer applies. 10 MB matches the Storage security rule.</p>
+        <button type="button" onclick="applyFreeTierStorageLimits()" class="w-full flex items-center justify-center gap-2 py-2 mb-3 border-2 border-dashed border-slate-200 text-slate-500 rounded-lg text-xs font-bold hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
+          <i class="fas fa-wand-magic-sparkles"></i> Use Free-Tier Maximum (5 GB)
+        </button>
       </div>
 
       <button onclick="saveStorageCap()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
@@ -5076,10 +5080,11 @@ onAuthStateChanged(auth, async (user) => {
     loadDocuments();
     loadStorageSettings();
     loadSystemLimits();
-    loadStockAreas();
-    loadTrash();
+    // Trash, Important Info and Storage Areas each feed exactly one page.
+    // Subscribing to them at sign-in meant every staff member downloaded
+    // three collections they might never look at. They now load the first
+    // time their page is opened (see ensureSectionData in switchSec).
     loadActivityLog();
-    loadImportantInfo();
     loadChalans();
     autoArchiveOldSoldUnits();
     loadModelAliases();
@@ -11548,7 +11553,7 @@ function loadStorageSettings(){
     }
     updateStorageOverview();
     const gearBtn = document.getElementById('docStorageSettingsBtn');
-    if(gearBtn) gearBtn.classList.toggle('hidden', currentUserRole !== 'owner');
+    if(gearBtn){ const show = currentUserRole === 'owner'; gearBtn.classList.toggle('hidden', !show); gearBtn.classList.toggle('flex', show); }
   }, err=>console.error('storage settings listener failed', err));
 }
 
@@ -11572,7 +11577,7 @@ function loadSystemLimits(){
     }
     updateStorageOverview();
     const gearBtn2 = document.getElementById('systemLimitsSettingsBtn');
-    if(gearBtn2) gearBtn2.classList.toggle('hidden', currentUserRole !== 'owner');
+    if(gearBtn2){ const show = currentUserRole === 'owner'; gearBtn2.classList.toggle('hidden', !show); gearBtn2.classList.toggle('flex', show); }
   }, err=>console.error('system limits listener failed', err));
 }
 
@@ -11734,6 +11739,10 @@ async function updateStorageOverview(){
   const ring = document.getElementById('storageRing');
   const ringPct = document.getElementById('storageRingPct');
   if(totalWrap) totalWrap.classList.toggle('hidden', currentUserRole !== 'owner');
+  // The Storage page reports on these collections, so make sure they're
+  // actually loaded before it draws numbers from them.
+  ensureSectionData('trash');
+  ensureSectionData('stock');
   refreshMigrationCard();
   const restoreCard = document.getElementById('restoreBackupCard');
   if(restoreCard) restoreCard.classList.toggle('hidden', currentUserRole !== 'owner');
@@ -11749,22 +11758,54 @@ async function updateStorageOverview(){
     backupBtn.classList.toggle('flex', canDownloadBackup);
   }
   if(totalLabel && ring && ringPct && currentUserRole === 'owner'){
-    const estimatedOtherBytes = (allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike)
+    // Files and records sit in two SEPARATE Google free allowances now that
+    // documents live in Cloud Storage: records count against Firestore's
+    // 1 GiB, files against Cloud Storage's 5 GB. Adding them together (as
+    // this did while files were stored inline) would report a single
+    // number that matches neither limit. Any file still inline is counted
+    // on the Firestore side, because that's genuinely where it still is.
+    const inlineBytes = documents.filter(d=>d.fileData && !d.storageUrl).reduce((s,d)=>s+(d.sizeBytes||0),0);
+    const cloudBytes = documents.filter(d=>d.storageUrl).reduce((s,d)=>s+(d.sizeBytes||0),0);
+    const firestoreBytes = (allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike)
       + (invCount*RECORD_SIZE_ESTIMATE.inventoryUnit)
+      + ((exCount+exSrCount)*RECORD_SIZE_ESTIMATE.exchangeUnit)
       + (accessories.length*RECORD_SIZE_ESTIMATE.accessory)
       + (financeSchemes.length*RECORD_SIZE_ESTIMATE.financeScheme)
       + (chalanData.length*RECORD_SIZE_ESTIMATE.chalan)
       + (importantData.length*RECORD_SIZE_ESTIMATE.chalan)
       + (modelAliasesData.length*RECORD_SIZE_ESTIMATE.chalan)
+      + inlineBytes
       + OTHER_COLLECTIONS_ESTIMATE;
-    const totalEstimated = used + estimatedOtherBytes;
-    const ceiling = 1024*1024*1024; // full ~1 GiB Firestore free tier — no safety margin held back
-    const pct = Math.min(100, (totalEstimated/ceiling)*100);
+
+    const FIRESTORE_FREE = 1024*1024*1024;      // 1 GiB Firestore no-cost tier
+    const CLOUD_STORAGE_FREE = 5*1024*1024*1024; // 5 GB Cloud Storage no-cost tier
+
+    // The ring tracks whichever allowance is closest to its limit — that's
+    // the one that would actually start costing money first.
+    const fsPct = (firestoreBytes/FIRESTORE_FREE)*100;
+    const csPct = (cloudBytes/CLOUD_STORAGE_FREE)*100;
+    const worst = fsPct >= csPct ? 'firestore' : 'cloud';
+    const pct = Math.min(100, Math.max(fsPct, csPct));
     const ringColor = pct>=90 ? '#EF4444' : pct>=70 ? '#F59E0B' : '#005EA6';
     ring.style.background = `conic-gradient(${ringColor} ${pct*3.6}deg, #E2E8F0 ${pct*3.6}deg)`;
-    ringPct.textContent = `${Math.round(pct)}%`;
+    ringPct.textContent = `${pct < 1 ? pct.toFixed(1) : Math.round(pct)}%`;
     ringPct.className = 'text-xl font-extrabold ' + (pct>=90 ? 'text-red-500' : pct>=70 ? 'text-amber-500' : 'text-slate-800');
-    totalLabel.textContent = `~${formatBytes(totalEstimated)} / ${formatBytes(ceiling)}`;
+    totalLabel.innerHTML = worst === 'firestore'
+      ? `~${formatBytes(firestoreBytes)} / ${formatBytes(FIRESTORE_FREE)} <span class="text-slate-400">database</span>`
+      : `~${formatBytes(cloudBytes)} / ${formatBytes(CLOUD_STORAGE_FREE)} <span class="text-slate-400">file storage</span>`;
+
+    const breakdown = document.getElementById('storageQuotaBreakdown');
+    if(breakdown){
+      breakdown.innerHTML = `
+        <div class="flex items-center justify-between gap-3 py-1.5">
+          <span class="text-[11px] font-bold text-slate-500"><i class="fas fa-database text-bajaj-blue mr-1.5"></i>Database (records)</span>
+          <span class="text-[11px] font-mono text-slate-500">${formatBytes(firestoreBytes)} / ${formatBytes(FIRESTORE_FREE)} · ${fsPct<1?fsPct.toFixed(2):fsPct.toFixed(1)}%</span>
+        </div>
+        <div class="flex items-center justify-between gap-3 py-1.5 border-t border-slate-100">
+          <span class="text-[11px] font-bold text-slate-500"><i class="fas fa-cloud text-amber-500 mr-1.5"></i>File storage (documents)</span>
+          <span class="text-[11px] font-mono text-slate-500">${formatBytes(cloudBytes)} / ${formatBytes(CLOUD_STORAGE_FREE)} · ${csPct<1?csPct.toFixed(2):csPct.toFixed(1)}%</span>
+        </div>`;
+    }
   }
 }
 
@@ -12429,6 +12470,20 @@ window.closeDocPreview = ()=>{
   overlay.classList.add('hidden');
   overlay.classList.remove('flex');
   document.getElementById('docPreviewBody').innerHTML = '';
+};
+
+// Fills the form with Google's no-cost Cloud Storage allowance. Sets the
+// form only — the Master still presses Save, same as the record-limits
+// equivalent, so nothing changes without a deliberate confirmation.
+window.applyFreeTierStorageLimits = ()=>{
+  document.getElementById('storageCapValue').value = 5;
+  document.getElementById('storageCapUnit').value = 'GB';
+  document.getElementById('storageCapUnit')?._csSync?.();
+  document.getElementById('fileSizeCapValue').value = 10;
+  document.getElementById('fileSizeCapUnit').value = 'MB';
+  document.getElementById('fileSizeCapUnit')?._csSync?.();
+  updateStorageCapPreview();
+  toast('Filled with the free-tier maximum — press Save Limits to apply.');
 };
 
 window.openStorageCapModal = ()=>{
@@ -13270,10 +13325,16 @@ function updateNotifBadge(){
   }
 }
 
+// Two sizes on purpose. At login only the newest few are needed — that's
+// all the notification bell reads — so pulling 500 was costing ~450
+// wasted document reads per sign-in, against a 50k/day free quota shared
+// by the whole team. The full history is fetched only when someone
+// actually opens the Activity Log.
+let activityLogLimit = 50;
 function loadActivityLog(){
   if(activityLogUnsub) activityLogUnsub();
   let notifFirstLoadDone = false;
-  const q = query(collection(db,"activity_log"), orderBy('at','desc'), limit(500));
+  const q = query(collection(db,"activity_log"), orderBy('at','desc'), limit(activityLogLimit));
   activityLogUnsub = onSnapshot(q, snap=>{
     const previousIds = new Set(activityLogData.map(a=>a.id));
     activityLogData = snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -14036,6 +14097,23 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 /* ─── Nav ─── */
 const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', hhstock:'HH Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
 const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
+// Starts a page's Firestore listener the first time that page is opened,
+// then remembers it's running so re-visiting costs nothing. Keeps sign-in
+// light without changing how any page behaves once you're on it.
+const sectionDataLoaded = { trash:false, important:false, stock:false, history:false };
+function ensureSectionData(sec){
+  if(sec === 'trash' && !sectionDataLoaded.trash){ sectionDataLoaded.trash = true; loadTrash(); }
+  if(sec === 'important' && !sectionDataLoaded.important){ sectionDataLoaded.important = true; loadImportantInfo(); }
+  if(sec === 'stock' && !sectionDataLoaded.stock){ sectionDataLoaded.stock = true; loadStockAreas(); }
+  // Opening the log is the one moment the full history is actually wanted,
+  // so re-subscribe at the larger size instead of carrying it all day.
+  if(sec === 'history' && !sectionDataLoaded.history){
+    sectionDataLoaded.history = true;
+    activityLogLimit = 500;
+    loadActivityLog();
+  }
+}
+
 window.switchSec=(sec)=>{
   // A Recondition ID exists to work with old-bike trade-ins and their
   // Blue Books specifically — sending them anywhere else in the app
@@ -14083,6 +14161,7 @@ window.switchSec=(sec)=>{
   if(sec==='docs') renderDocumentsPage();
   if(sec==='storage') updateStorageOverview();
   if(sec==='events') renderEventsPage();
+  ensureSectionData(sec);
   if(sec==='stock') loadStockReportData(true);
   if(sec==='hhstock') loadHHStockReportData(true);
   if(sec==='chalans') renderChalanTable();
