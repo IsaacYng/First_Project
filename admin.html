@@ -9,9 +9,9 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
   tailwind.config = {
     theme: {
@@ -2697,6 +2697,19 @@
         <div id="storageAllocationList" class="flex flex-col gap-4"></div>
       </div>
 
+      <div id="migrateStorageCard" class="hidden yng-card-shell p-5 mb-5 border-2 border-amber-200 bg-amber-50/40">
+        <div class="flex items-center gap-2 mb-1">
+          <i class="fas fa-rocket text-amber-500"></i>
+          <div class="text-xs font-bold text-slate-600">Speed Up Loading <span class="ml-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[9px] font-extrabold uppercase align-middle">Master Only</span></div>
+        </div>
+        <p class="text-[11px] text-slate-500 mb-1">Older files are stored inside the database itself, so the app downloads every one of them before it can open. Moving them to Firebase Storage means only a small link is loaded instead.</p>
+        <p id="migrateStorageStatus" class="text-[11px] font-bold text-amber-700 mb-3">—</p>
+        <button id="migrateStorageBtn" onclick="migrateDocsToStorage()" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all">
+          <i class="fas fa-rocket"></i> <span id="migrateStorageBtnText">Move Files to Storage</span>
+        </button>
+        <div id="migrateStorageLog" class="hidden mt-3 text-[11px] text-slate-500 max-h-32 overflow-y-auto"></div>
+      </div>
+
       <div class="yng-card-shell p-5 mb-5">
         <div class="flex items-center gap-2 mb-1">
           <i class="fas fa-cloud-arrow-down text-emerald-500"></i>
@@ -3704,6 +3717,10 @@
           <label class="text-xs font-bold text-slate-600 flex-1">Storage Areas</label>
           <input type="number" id="limitMaxAreas" min="1" class="w-24 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right outline-none focus:border-bajaj-blue transition-all"/>
         </div>
+        <button type="button" onclick="applyRecommendedLimits()" class="mt-1 w-full flex items-center justify-center gap-2 py-2 border-2 border-dashed border-slate-200 text-slate-500 rounded-lg text-xs font-bold hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
+          <i class="fas fa-wand-magic-sparkles"></i> Use Recommended Maximums
+        </button>
+        <p class="text-[10px] text-slate-400 mt-1.5 text-center">Fills every field above with the highest safe value. Nothing saves until you press Save below.</p>
       </div>
       <div class="pt-4 mt-1 border-t border-slate-100">
         <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Default Commission (Rs.)</label>
@@ -3889,6 +3906,9 @@ import {
   getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc, where,
   serverTimestamp, query, orderBy, limit, runTransaction, writeBatch, getCountFromServer
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import {
+  getStorage, ref as storageRef, uploadBytes, uploadString, getDownloadURL, deleteObject
+} from "https://www.gstatic.com/firebasejs/10.10.0/firebase-storage.js";
 
 /* ─── Who's doing it — used by the Trash / Activity Log so every delete,
    sale, and restore is attributed to whoever was signed in at the time. ─── */
@@ -3960,6 +3980,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+// Firebase Storage holds the actual file bytes. Keeping them here instead
+// of inline in Firestore is what stops every page load from downloading
+// the entire Document Vault before the app can render.
+const storage = getStorage(app);
 // A second, independent Firebase app instance — used ONLY when creating a
 // new staff account. createUserWithEmailAndPassword normally signs in as
 // the newly-created user on whatever auth instance it's called against; by
@@ -5937,17 +5961,32 @@ function clearMasterForm(){
 // grows past one page — that would let the cap silently stop working right
 // when it matters most. This asks Firestore directly for the true document
 // counts instead of trusting whatever happens to be loaded locally.
-let MAX_TOTAL_INVENTORY_UNITS = 2000;
-let MAX_EXCHANGE_STOCK = 2000; // shared cap — Mela + Showroom Exchange combined, same idea as Inventory + HH Inventory sharing MAX_TOTAL_INVENTORY_UNITS
-let MAX_EVENTS = 50;
-let MAX_FINANCE_CATEGORIES = 20;
-let MAX_STOCK_AREAS = 20;
-let MAX_BIKES = 50;
-let MAX_ACCESSORIES = 20;
-let MAX_FINANCE_SCHEMES = 20;
-let MAX_CHALANS = 2000;
-let MAX_IMPORTANT_INFO = 200;
-let MAX_MODEL_ALIASES = 200;
+/* Record limits — deliberately generous. These aren't technical ceilings;
+   they exist so a runaway import can't quietly fill the database. Every
+   record here is tiny (roughly 0.1-1.2 KB), so even with all of these
+   maxed out the total lands near 45 MB — under 5% of Firestore's 1 GiB
+   no-cost allowance. Files no longer live in Firestore at all, which is
+   what makes limits this size safe. A Master ID can change any of them
+   from the gear icon in Storage. */
+let MAX_TOTAL_INVENTORY_UNITS = 20000;
+let MAX_EXCHANGE_STOCK = 10000; // shared cap — Mela + Showroom Exchange combined, same idea as Inventory + HH Inventory sharing MAX_TOTAL_INVENTORY_UNITS
+let MAX_EVENTS = 500;
+let MAX_FINANCE_CATEGORIES = 100;
+let MAX_STOCK_AREAS = 100;
+let MAX_BIKES = 500;
+let MAX_ACCESSORIES = 500;
+let MAX_FINANCE_SCHEMES = 200;
+let MAX_CHALANS = 20000;
+let MAX_IMPORTANT_INFO = 1000;
+let MAX_MODEL_ALIASES = 1000;
+
+// What "Use Recommended Maximums" fills the System Limits form with — kept
+// beside the defaults above so the two can't drift apart.
+const RECOMMENDED_LIMITS = {
+  limitMaxBikes:500, limitMaxInventory:20000, limitMaxExchange:10000, limitMaxAccessories:500,
+  limitMaxFinanceSchemes:200, limitMaxChalans:20000, limitMaxImportant:1000, limitMaxAliases:1000,
+  limitMaxEvents:500, limitMaxFinCats:100, limitMaxAreas:100
+};
 let COMMISSION_1ST_PARTY = 1200;
 let COMMISSION_3RD_PARTY = 200;
 
@@ -9649,17 +9688,19 @@ function uploadBlueBookFile(file, regNo, customerName, sourceCollection){
     const autoFileName = `${safeReg}_${safeCust}.${ext||'pdf'}`;
 
     const finish = async (fileData) => {
+      const realBytes = dataUrlByteSize(fileData);
       const used = getTotalStorageUsed();
-      if(used + fileData.length > STORAGE_CAP_BYTES){
+      if(used + realBytes > STORAGE_CAP_BYTES){
         reject(new Error(`Document Vault storage is full — can't add this Blue Book right now.`));
         return;
       }
       try{
+        const { url, path } = await uploadFileToStorage(fileData, autoFileName, ext);
         const docRef = await addDoc(collection(db,'documents'), {
           name: `Blue Book — ${regNo||'Unknown'} (${customerName||'Customer'})`,
           description: `Auto-attached from ${sourceCollection==='exchange_stock_showroom'?'Showroom':'Mela'} Exchange`,
           fileExt: ext, fileName: autoFileName,
-          fileData, sizeBytes: fileData.length,
+          storageUrl: url, storagePath: path, sizeBytes: realBytes,
           category: 'Blue Book',
           linkedCollection: sourceCollection,
           uploadedBy: currentUserEmail || currentUserName || 'Unknown',
@@ -9739,11 +9780,24 @@ async function downloadDocsAsZip(docs, zipName, describe){
     const usedNames = new Set();
     let added = 0;
     for(const d of docs){
-      if(!d.fileData) continue;
-      // fileData is a data: URL — the part after the comma is the base64
-      // payload JSZip wants.
-      const base64 = String(d.fileData).split(',')[1];
-      if(!base64) continue;
+      const src = docFileSrc(d);
+      if(!src) continue;
+      // Old records hold the bytes inline as a data: URL; new ones point at
+      // Storage and have to be fetched. One failed file shouldn't sink the
+      // whole zip, so a fetch error just skips that entry.
+      let payload, payloadIsBase64;
+      if(d.storageUrl){
+        try{
+          const resp = await fetch(src);
+          if(!resp.ok) throw new Error('HTTP '+resp.status);
+          payload = await resp.blob();
+          payloadIsBase64 = false;
+        }catch(err){ console.warn('skipped file in zip', d.name, err); continue; }
+      } else {
+        payload = String(src).split(',')[1];
+        payloadIsBase64 = true;
+        if(!payload) continue;
+      }
       const ext = String(d.fileExt||'').toLowerCase();
       let name = (d.fileName || d.name || 'document').trim().replace(/[\\/:*?"<>|]/g,'-');
       if(ext && !name.toLowerCase().endsWith('.'+ext)) name += '.'+ext;
@@ -9755,7 +9809,7 @@ async function downloadDocsAsZip(docs, zipName, describe){
         n++;
       }
       usedNames.add(unique);
-      zip.file(unique, base64, { base64:true });
+      zip.file(unique, payload, payloadIsBase64 ? { base64:true } : undefined);
       added++;
     }
     if(!added){ toast('Those records have no attached files.','warn'); return; }
@@ -11458,20 +11512,19 @@ let docTypeFilter = 'all';
 let docEditingId = null;
 let pendingDocFile = null;
 const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','mp3','mp4'];
-// Master-editable (see Storage settings gear next to Document Vault) —
-// starts at 400KB. Firestore hard-caps every single document at 1MB total
-// (including all its other fields), so going much past ~900KB as base64
-// text risks upload failures regardless of what this is set to.
-let DOC_MAX_FILE_SIZE = 400 * 1024;
+// Master-editable (see Storage settings gear next to Document Vault).
+// Files now live in Firebase Storage rather than inline in Firestore, so
+// the old ~900KB ceiling (Firestore's 1MB-per-document hard limit) no
+// longer applies — 10MB matches the Storage security rule.
+let DOC_MAX_FILE_SIZE = 10 * 1024 * 1024;
 const DOC_TYPE_GROUPS = { pdf:['pdf'], photo:['jpg','jpeg','png'], word:['doc','docx'], excel:['xls','xlsx'] };
 const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626',label:'PDF'}, doc:{icon:'fa-file-word',color:'#2563EB',label:'DOC'}, docx:{icon:'fa-file-word',color:'#2563EB',label:'DOC'}, xls:{icon:'fa-file-excel',color:'#059669',label:'XLS'}, xlsx:{icon:'fa-file-excel',color:'#059669',label:'XLS'}, jpg:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, jpeg:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, png:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, mp3:{icon:'fa-file-audio',color:'#7C3AED',label:'MP3'}, mp4:{icon:'fa-file-video',color:'#DB2777',label:'MP4'}, webp:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, gif:{icon:'fa-file-image',color:'#D97706',label:'GIF'}, heic:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, csv:{icon:'fa-file-csv',color:'#059669',label:'CSV'}, txt:{icon:'fa-file-lines',color:'#64748B',label:'TXT'}, zip:{icon:'fa-file-zipper',color:'#B45309',label:'ZIP'} };
-// Firestore's free (Spark) tier gives ~1 GiB of total stored data for the
-// ENTIRE database. Documents-as-base64 dwarf everything else that lives
-// there (inventory/price-list records are ~1-2KB each, activity log
-// entries ~300 bytes) — so documents get 70% of the full 1 GiB, leaving a
-// genuinely comfortable buffer for everything else. Configurable by a
-// Master ID from the gear icon.
-let STORAGE_CAP_BYTES = 1024 * 1024 * 1024 * 0.7;
+// Files live in Firebase Storage now, which on the Blaze plan is billed by
+// usage rather than capped at Firestore's 1 GiB. This is therefore a
+// self-imposed budget ceiling, not a technical limit — it exists so a
+// runaway upload can't quietly run up a bill. Configurable by a Master ID
+// from the gear icon.
+let STORAGE_CAP_BYTES = 5 * 1024 * 1024 * 1024;
 const BYTE_UNITS = { KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 };
 const RECORD_SIZE_ESTIMATE = { bike: 500, inventoryUnit: 1200, exchangeUnit: 700, accessory: 100, financeScheme: 300, chalan: 500, event: 800, financeCategory: 100, stockArea: 80 };
 const OTHER_COLLECTIONS_ESTIMATE = 5 * 1024 * 1024; // rough allowance for activity log / trash / events / team photos
@@ -11482,6 +11535,7 @@ function loadDocuments(){
     documents = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderDocumentsPage();
     updateStorageOverview();
+    maybePromptStorageMigration();
   }, err=>console.error('documents listener failed', err));
 }
 
@@ -11520,6 +11574,50 @@ function loadSystemLimits(){
     const gearBtn2 = document.getElementById('systemLimitsSettingsBtn');
     if(gearBtn2) gearBtn2.classList.toggle('hidden', currentUserRole !== 'owner');
   }, err=>console.error('system limits listener failed', err));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FILE STORAGE — files live in Firebase Storage, Firestore keeps only a
+   pointer (storageUrl + storagePath). Records created before this change
+   still carry the whole file inline as `fileData`, so every read path
+   below accepts either shape and nothing breaks mid-migration.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+// A data URL's base64 payload is ~4 chars per 3 bytes; this returns the
+// real byte count so storage totals reflect actual usage rather than the
+// inflated length of the encoded text.
+function dataUrlByteSize(dataUrl){
+  const b64 = String(dataUrl||'').split(',')[1] || '';
+  const padding = (b64.endsWith('==') ? 2 : b64.endsWith('=') ? 1 : 0);
+  return Math.max(0, Math.floor(b64.length * 3 / 4) - padding);
+}
+
+// Uploads a data URL and hands back the public download URL plus the
+// storage path (kept so the object can be deleted later — without the
+// path, deleting a Firestore record would silently orphan the file).
+async function uploadFileToStorage(dataUrl, originalName, ext){
+  const safe = String(originalName||'file').replace(/[^\w.\-]+/g,'_').slice(-60);
+  const path = `documents/${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safe}`;
+  const sRef = storageRef(storage, path);
+  await uploadString(sRef, dataUrl, 'data_url');
+  const url = await getDownloadURL(sRef);
+  return { url, path };
+}
+
+// Where to actually read a file from — new records point at Storage, old
+// ones still have the bytes inline.
+function docFileSrc(d){
+  return d?.storageUrl || d?.fileData || '';
+}
+
+// Deleting a Firestore record must also remove the object it points at,
+// or Storage fills up with files nothing references. Old inline records
+// have no object to remove, and a missing object is not an error worth
+// blocking a delete over.
+async function deleteStorageObject(path){
+  if(!path) return;
+  try{ await deleteObject(storageRef(storage, path)); }
+  catch(e){ console.warn('storage object delete skipped', path, e?.code || e); }
 }
 
 function getTotalStorageUsed(){
@@ -11636,6 +11734,7 @@ async function updateStorageOverview(){
   const ring = document.getElementById('storageRing');
   const ringPct = document.getElementById('storageRingPct');
   if(totalWrap) totalWrap.classList.toggle('hidden', currentUserRole !== 'owner');
+  refreshMigrationCard();
   const restoreCard = document.getElementById('restoreBackupCard');
   if(restoreCard) restoreCard.classList.toggle('hidden', currentUserRole !== 'owner');
   // Downloading a backup is safe for any staff to do (it's read-only,
@@ -11673,6 +11772,103 @@ async function updateStorageOverview(){
 // sheet in one workbook, using the same field names staff already see in
 // each section's own Export button, so a backup is just as readable as
 // what they're used to.
+/* ═══════════════════════════════════════════════════════════════════════
+   MIGRATION — moves files that are still stored inline in Firestore over
+   to Firebase Storage, one at a time. Deliberately cautious: each file is
+   uploaded and its Firestore record repointed BEFORE the inline copy is
+   cleared, so a failure at any step leaves that record still working off
+   its original data. Safe to stop and re-run — already-migrated records
+   are skipped.
+   ═══════════════════════════════════════════════════════════════════════ */
+// Migration is deliberately a manual, consented action — moving someone's
+// files shouldn't start on its own. But leaving it entirely to memory just
+// means the app stays slow forever, so a Master ID gets one reminder per
+// session pointing at the button, rather than silence.
+let storageMigrationPrompted = false;
+function maybePromptStorageMigration(){
+  if(storageMigrationPrompted) return;
+  if(currentUserRole !== 'owner') return;
+  const pending = documents.filter(d=>d.fileData && !d.storageUrl);
+  if(!pending.length) return;
+  storageMigrationPrompted = true;
+  const bytes = pending.reduce((s,d)=>s+(d.sizeBytes||0),0);
+  // Delayed so it lands after the app has settled, not on top of the
+  // login/dashboard render.
+  setTimeout(()=>{
+    toast(`${pending.length} file(s) are slowing this app down (~${formatBytes(bytes)} loaded every time). Open Storage → "Move Files to Storage" to fix it — takes under a minute.`, 'warn');
+  }, 2500);
+}
+
+function pendingMigrationDocs(){
+  return documents.filter(d=>d.fileData && !d.storageUrl);
+}
+
+function refreshMigrationCard(){
+  const card = document.getElementById('migrateStorageCard');
+  if(!card) return;
+  const pending = pendingMigrationDocs();
+  const isMaster = currentUserRole === 'owner';
+  card.classList.toggle('hidden', !isMaster || pending.length === 0);
+  const status = document.getElementById('migrateStorageStatus');
+  if(status){
+    const bytes = pending.reduce((s,d)=>s+(d.sizeBytes||0),0);
+    status.textContent = `${pending.length} file(s) still inline — about ${formatBytes(bytes)} downloaded on every single app open.`;
+  }
+}
+
+window.migrateDocsToStorage = async ()=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can run this.','err'); return; }
+  const pending = pendingMigrationDocs();
+  if(!pending.length){ toast('Nothing left to move — all files are already in Storage.'); return; }
+
+  const ok = await showConfirm({
+    title: `Move ${pending.length} file(s) to Storage?`,
+    message: `Each file is copied to Firebase Storage first, and only then unlinked from the database. Nothing is deleted until its copy is confirmed, so your files stay safe even if this is interrupted.<br><br>You can keep using the app afterwards exactly as before — it will just open much faster.`,
+    okText: 'Start',
+    okColorClass:'text-amber-600 hover:bg-amber-50',
+    iconClass:'fa-rocket', iconColor:'#D97706', iconBg:'#FEF6E7'
+  });
+  if(!ok) return;
+
+  const btn = document.getElementById('migrateStorageBtn');
+  const btnText = document.getElementById('migrateStorageBtnText');
+  const log = document.getElementById('migrateStorageLog');
+  if(btn) btn.disabled = true;
+  if(log){ log.classList.remove('hidden'); log.innerHTML = ''; }
+  const addLog = (msg, bad)=>{
+    if(!log) return;
+    log.insertAdjacentHTML('beforeend', `<div class="${bad?'text-red-500':'text-slate-500'}">${escapeHtml(msg)}</div>`);
+    log.scrollTop = log.scrollHeight;
+  };
+
+  let done = 0, failed = 0;
+  for(let i=0;i<pending.length;i++){
+    const d = pending[i];
+    if(btnText) btnText.textContent = `Moving ${i+1} of ${pending.length}…`;
+    try{
+      const { url, path } = await uploadFileToStorage(d.fileData, d.fileName || d.name || 'file', String(d.fileExt||'').toLowerCase());
+      // Repoint first, clear the inline copy second — never the other way
+      // round, so an interruption can't strand a record with no file.
+      await updateDoc(doc(db,'documents',d.id), {
+        storageUrl: url, storagePath: path,
+        sizeBytes: dataUrlByteSize(d.fileData),
+        fileData: null
+      });
+      done++;
+      addLog(`✓ ${d.name || d.fileName || d.id}`);
+    }catch(e){
+      failed++;
+      addLog(`✗ ${d.name || d.id} — ${friendlyError(e)}`, true);
+    }
+  }
+
+  if(btn) btn.disabled = false;
+  if(btnText) btnText.textContent = 'Move Files to Storage';
+  logActivity('Files Moved to Storage', 'documents', { model: `${done} moved${failed?`, ${failed} failed`:''}` });
+  toast(`${done} file(s) moved to Storage${failed?`, ${failed} failed — try again for those`:''}.`, failed ? 'err' : 'ok');
+  refreshMigrationCard();
+};
+
 window.downloadFullBackup = ()=>{
   if(currentUserRole === 'recondition'){ toast('Recondition ID can only download Exchange Stock / Blue Book files.','err'); return; }
   const btn = document.getElementById('fullBackupBtn');
@@ -12086,19 +12282,25 @@ window.uploadDocument = async ()=>{
   const isImage = ['jpg','jpeg','png'].includes(ext);
 
   const finish = async (fileData)=>{
+    const realBytes = dataUrlByteSize(fileData);
     const used = getTotalStorageUsed();
-    if(used + fileData.length > STORAGE_CAP_BYTES){
+    if(used + realBytes > STORAGE_CAP_BYTES){
       closeDocUploadModal();
       openDocUpgradeModal();
       if(btn) btn.disabled = false;
       if(progressWrap) progressWrap.classList.add('hidden');
       return;
     }
-    if(progressBar) progressBar.style.width = '80%';
+    if(progressBar) progressBar.style.width = '60%';
     try{
+      // The bytes go to Firebase Storage; Firestore only keeps a pointer.
+      // That's the whole point — the document list stays a few KB, so
+      // opening the app no longer means downloading every file first.
+      const { url, path } = await uploadFileToStorage(fileData, pendingDocFile.name, ext);
+      if(progressBar) progressBar.style.width = '85%';
       await addDoc(collection(db,'documents'), {
         name, description, fileExt: ext, fileName: pendingDocFile.name,
-        fileData, sizeBytes: fileData.length,
+        storageUrl: url, storagePath: path, sizeBytes: realBytes,
         uploadedBy: currentUserEmail || currentUserName || 'Unknown',
         uploadedAt: new Date()
       });
@@ -12174,7 +12376,8 @@ window.uploadDocument = async ()=>{
 
 window.downloadDocument = (id)=>{
   const d = documents.find(x=>x.id===id);
-  if(!d?.fileData) return;
+  const src = docFileSrc(d);
+  if(!src) return;
   if(currentUserRole === 'recondition' && d.category !== 'Blue Book'){
     toast('Recondition ID can only download Blue Book files.','err');
     return;
@@ -12183,7 +12386,10 @@ window.downloadDocument = (id)=>{
   const ext = String(d.fileExt||'').toLowerCase();
   if(ext && !filename.toLowerCase().endsWith('.'+ext)) filename += '.'+ext;
   const a = document.createElement('a');
-  a.href = d.fileData;
+  a.href = src;
+  // Storage URLs are cross-origin, so the download attribute alone won't
+  // force a save — opening in a new tab is the reliable fallback there.
+  if(d.storageUrl) a.target = '_blank';
   a.download = filename;
   document.body.appendChild(a);
   a.click();
@@ -12199,13 +12405,13 @@ window.openDocPreview = (id)=>{
   document.getElementById('docPreviewDownloadBtn').onclick = ()=>downloadDocument(id);
   const body = document.getElementById('docPreviewBody');
   if(['jpg','jpeg','png'].includes(ext)){
-    body.innerHTML = `<img src="${escapeHtml(d.fileData)}" class="max-w-full max-h-[70vh] object-contain rounded-lg">`;
+    body.innerHTML = `<img src="${escapeHtml(docFileSrc(d))}" class="max-w-full max-h-[70vh] object-contain rounded-lg">`;
   } else if(ext==='pdf'){
-    body.innerHTML = `<embed src="${escapeHtml(d.fileData)}" type="application/pdf" class="w-full h-[70vh] rounded-lg">`;
+    body.innerHTML = `<embed src="${escapeHtml(docFileSrc(d))}" type="application/pdf" class="w-full h-[70vh] rounded-lg">`;
   } else if(ext==='mp3'){
-    body.innerHTML = `<audio controls class="w-full" src="${escapeHtml(d.fileData)}"></audio>`;
+    body.innerHTML = `<audio controls class="w-full" src="${escapeHtml(docFileSrc(d))}"></audio>`;
   } else if(ext==='mp4'){
-    body.innerHTML = `<video controls class="max-w-full max-h-[70vh] rounded-lg" src="${escapeHtml(d.fileData)}"></video>`;
+    body.innerHTML = `<video controls class="max-w-full max-h-[70vh] rounded-lg" src="${escapeHtml(docFileSrc(d))}"></video>`;
   } else {
     const iconInfo = DOC_FILE_ICONS[ext] || {icon:'fa-file', color:'#64748B', label:(ext||'FILE').slice(0,3).toUpperCase()};
     body.innerHTML = `<div class="text-center py-10">
@@ -12305,6 +12511,17 @@ window.closeSystemLimitsModal = ()=>{
   document.getElementById('systemLimitsModal').classList.add('hidden');
   document.getElementById('systemLimitsModal').classList.remove('flex');
 };
+// Fills the form with the generous defaults rather than writing them
+// straight to Firestore — the Master still reviews and presses Save, so
+// nothing changes behind their back.
+window.applyRecommendedLimits = ()=>{
+  Object.entries(RECOMMENDED_LIMITS).forEach(([id,val])=>{
+    const el = document.getElementById(id);
+    if(el) el.value = val;
+  });
+  toast('Filled with the recommended maximums — press Save to apply.');
+};
+
 window.saveSystemLimits = async ()=>{
   if(currentUserRole !== 'owner'){ toast('Only a Master ID can change record limits.','err'); return; }
   const maxBikes = parseInt(document.getElementById('limitMaxBikes').value);
@@ -12816,6 +13033,12 @@ window.permanentlyDeleteTrashItem = async (trashId)=>{
   });
   if(!ok) return;
   try{
+    // The Storage object only goes when the record is erased for good —
+    // while it's in Trash the file must survive, or "restore" would bring
+    // back a record pointing at a file that no longer exists.
+    if(t?.originalCollection === 'documents' && t?.data?.storagePath){
+      await deleteStorageObject(t.data.storagePath);
+    }
     await deleteDoc(doc(db,'trash',trashId));
     toast('Permanently deleted.');
   }
@@ -12835,6 +13058,11 @@ window.emptyTrash = async ()=>{
     const chunks = [];
     const items = [...trashData];
     for(let i=0;i<items.length;i+=400) chunks.push(items.slice(i,i+400));
+    // Remove the Storage objects too, or emptying Trash would free the
+    // records while leaving the files behind, still being billed for.
+    for(const t of items){
+      if(t.originalCollection === 'documents' && t.data?.storagePath) await deleteStorageObject(t.data.storagePath);
+    }
     for(const chunk of chunks){
       const batch = writeBatch(db);
       chunk.forEach(t=>batch.delete(doc(db,'trash',t.id)));
