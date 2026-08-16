@@ -13950,7 +13950,7 @@ onFinReady(() => {
 const makeYearEl=document.getElementById('makeYearInput');
 if(makeYearEl && !makeYearEl.value) makeYearEl.value=new Date().getFullYear();
 
-const CUSTOM_SELECT_IDS=['modelSelect','dpPercent','tenure'];
+const CUSTOM_SELECT_IDS=['modelSelect','fin_dpPercent','fin_tenure'];
 function buildCustomSelect(selectId){
   const real=document.getElementById(selectId);
   const panel=document.getElementById(selectId+'Panel');
@@ -14019,13 +14019,13 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape') closeAllCustomSelects();
 });
 
-buildCustomSelect('dpPercent');
-buildCustomSelect('tenure');
+buildCustomSelect('fin_dpPercent');
+buildCustomSelect('fin_tenure');
 
 document.querySelectorAll('.rate-chip').forEach(chip=>{
   chip.addEventListener('click',()=>{
     const sel=document.getElementById('fin_dpPercent');
-    if(sel){sel.value=chip.dataset.dp;sel.dispatchEvent(new Event('input',{bubbles:true}));syncCustomSelectUI('dpPercent');}
+    if(sel){sel.value=chip.dataset.dp;sel.dispatchEvent(new Event('input',{bubbles:true}));syncCustomSelectUI('fin_dpPercent');}
   });
 });
 
@@ -14673,7 +14673,7 @@ function bindRateChipClicks(){
   document.querySelectorAll('.rate-chip').forEach(chip=>{
     chip.addEventListener('click',()=>{
       const sel=document.getElementById('fin_dpPercent');
-      if(sel){sel.value=chip.dataset.dp;sel.dispatchEvent(new Event('input',{bubbles:true}));syncCustomSelectUI('dpPercent');}
+      if(sel){sel.value=chip.dataset.dp;sel.dispatchEvent(new Event('input',{bubbles:true}));syncCustomSelectUI('fin_dpPercent');}
     });
   });
 }
@@ -14691,7 +14691,7 @@ function renderTenureOptionsForDp(dp,mapOverride){
   const defaultTenure=tenures.includes(60)?60:Math.max(...tenures);
   const targetTenure=tenures.includes(prevTenure)?prevTenure:defaultTenure;
   tenureSelect.value=String(targetTenure);
-  if(typeof buildCustomSelect==='function') buildCustomSelect('tenure');
+  if(typeof buildCustomSelect==='function') buildCustomSelect('fin_tenure');
 }
 
 function renderFinanceSchemeUI(){
@@ -14704,7 +14704,7 @@ function renderFinanceSchemeUI(){
   dpSelect.innerHTML=dpValues.map(dp=>`<option value="${dp}">${dp}%</option>`).join('');
   const targetDp=dpValues.includes(prevSelectedDp)?prevSelectedDp:(dpValues.includes(50)?50:dpValues[0]);
   dpSelect.value=String(targetDp);
-  if(typeof buildCustomSelect==='function') buildCustomSelect('dpPercent');
+  if(typeof buildCustomSelect==='function') buildCustomSelect('fin_dpPercent');
 
   const chipsWrap=document.getElementById('rateChipsWrap');
   if(chipsWrap){
