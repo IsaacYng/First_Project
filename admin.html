@@ -71,49 +71,27 @@
 
 </script>
 <style>
-  /* ═══ Theme tokens (light default, dark via [data-theme="dark"]) ═══
-     Phase 1 of the pro-level UI upgrade: shared shell (sidebar, topbar,
-     badges, cards, selects) now reads color from these variables instead
-     of hardcoded hex, so the whole app can flip theme in one place.
-     Section-specific palettes (Finance/Sheet tool's own --blue etc, and
-     individual inventory/table sections) stay as a follow-up pass. */
+  /* ═══ Premium design tokens (single refined light theme) ═══
+     Centralized so the whole app's palette, shadows, and surfaces stay
+     consistent — refining one value here updates every card/button/input
+     built on top of it. */
   :root{
-    --bg-page:#F8FAFC; --bg-surface:#fff; --bg-surface-2:#F5F6F8; --bg-surface-3:#F1F2F5;
-    --border:#E7E9EE; --border-soft:#F0F1F4; --border-strong:#D7DBE3;
-    --text-primary:#1F2430; --text-secondary:#4B5262; --text-tertiary:#5B6270; --text-muted:#9AA1AF; --text-faint:#A6ACB9;
+    --bg-page:#F7F8FA; --bg-surface:#fff; --bg-surface-2:#F4F5F7; --bg-surface-3:#EEF0F3;
+    --border:#E6E8EC; --border-soft:#EFF1F4; --border-strong:#D5D9E0;
+    --text-primary:#161A23; --text-secondary:#454C5B; --text-tertiary:#5B6270; --text-muted:#8B93A3; --text-faint:#A3AAB8;
     --brand:#005EA6; --brand-dark:#004A85; --brand-soft-bg:#EEF5FC; --brand-soft-bg-2:#EAF3FB; --brand-soft-border:#D6E9F9;
     --amber:#F59E0B; --amber-dark:#B4740E; --amber-soft-bg:#FEF6E7; --amber-soft-border:#FBEACB;
     --danger:#DC2626; --danger-text:#C6382E; --danger-soft-bg:#FDEDED; --danger-soft-border:#F9D9D6;
     --success:#16A34A; --success-text:#137A4B; --success-soft-bg:#EAF7F0; --success-soft-border:#D3EFDF;
-    --shadow-sm:0 1px 2px rgba(15,23,42,.03); --shadow-md:0 14px 34px rgba(15,23,42,.14),0 2px 8px rgba(15,23,42,.06);
-    --shadow-lift:0 20px 60px rgba(15,23,42,.25);
+    --shadow-sm:0 1px 2px rgba(15,23,42,.04);
+    --shadow-md:0 12px 32px rgba(15,23,42,.10), 0 2px 8px rgba(15,23,42,.05);
+    --shadow-lift:0 24px 64px rgba(15,23,42,.18);
     color-scheme: light;
   }
-  [data-theme="dark"]{
-    --bg-page:#0B0E14; --bg-surface:#12161F; --bg-surface-2:#1A2029; --bg-surface-3:#212836;
-    --border:#262E3D; --border-soft:#1E2531; --border-strong:#333D50;
-    --text-primary:#EDF0F5; --text-secondary:#C3C9D4; --text-tertiary:#9BA3B4; --text-muted:#7C8494; --text-faint:#69707F;
-    --brand:#3B9EDB; --brand-dark:#2E85BE; --brand-soft-bg:#16283A; --brand-soft-bg-2:#152A3D; --brand-soft-border:#1E3F5A;
-    --amber:#FBBF24; --amber-dark:#F5C86B; --amber-soft-bg:#2E2410; --amber-soft-border:#4A3A16;
-    --danger:#F87171; --danger-text:#F98B85; --danger-soft-bg:#331817; --danger-soft-border:#5A2624;
-    --success:#4ADE80; --success-text:#7EE0A6; --success-soft-bg:#0F2A1C; --success-soft-border:#1F4A32;
-    --shadow-sm:0 1px 2px rgba(0,0,0,.3); --shadow-md:0 14px 34px rgba(0,0,0,.45),0 2px 8px rgba(0,0,0,.3);
-    --shadow-lift:0 20px 60px rgba(0,0,0,.55);
-    color-scheme: dark;
-  }
-  /* Theme toggle switch (topbar) */
-  .theme-toggle-btn{
-    width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
-    color:var(--text-tertiary); background:var(--bg-surface); border:1px solid var(--border); cursor:pointer;
-    transition:all .2s ease; position:relative; flex-shrink:0;
-  }
-  .theme-toggle-btn:hover{ background:var(--bg-surface-2); border-color:var(--border-strong); color:var(--text-primary); transform:translateY(-1px); }
-  .theme-toggle-btn i{ transition:transform .35s cubic-bezier(.34,1.56,.64,1); }
-  .theme-toggle-btn:active i{ transform:rotate(20deg) scale(.9); }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { max-width:100%; overflow-x:hidden; }
-  body { font-family: 'DM Sans', sans-serif; background:var(--bg-page); color:var(--text-primary); -webkit-font-smoothing:antialiased; transition:background .25s ease, color .25s ease; }
+  body { font-family: 'DM Sans', sans-serif; background:var(--bg-page); color:var(--text-primary); -webkit-font-smoothing:antialiased; }
   .font-display{ letter-spacing:0.01em; }
 
   /* Scrollbar */
@@ -2553,9 +2531,6 @@
           </div>
           <button class="topbar-icon-btn lg:hidden" aria-label="Search" onclick="window.openGlobalSearch()">
             <i class="fas fa-magnifying-glass text-sm"></i>
-          </button>
-          <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle dark mode" onclick="window.toggleAppTheme()">
-            <i class="fa-solid fa-moon text-sm" id="themeToggleIcon"></i>
           </button>
           <div class="relative">
             <button class="topbar-icon-btn" aria-label="Notifications" onclick="toggleNotifMenu(event)">
@@ -18295,30 +18270,9 @@ function ensureSectionData(sec){
   }
 }
 
-/* ─── Theme (light/dark) ───
-   Preference is stored per-browser in localStorage (not per-account —
-   this is a personal display setting, not app data, so it doesn't need
-   a Firestore round-trip). Defaults to the visitor's OS preference the
-   first time, then remembers whatever they pick after that. */
-(function initTheme(){
-  const KEY = 'yng_admin_theme';
-  const icon = ()=>document.getElementById('themeToggleIcon');
-  function apply(theme){
-    document.documentElement.setAttribute('data-theme', theme);
-    const el = icon();
-    if(el) el.className = theme === 'dark' ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm';
-  }
-  let saved = null;
-  try{ saved = localStorage.getItem(KEY); }catch(e){}
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  apply(saved || (prefersDark ? 'dark' : 'light'));
-  window.toggleAppTheme = function(){
-    const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-    const next = current === 'dark' ? 'light' : 'dark';
-    apply(next);
-    try{ localStorage.setItem(KEY, next); }catch(e){}
-  };
-})();
+/* Theme is a fixed premium light design — no runtime toggle. Colors still
+   flow through the CSS variables defined at :root so the palette stays
+   centralized and easy to refine as one thing later. */
 
 window.switchSec=(sec)=>{
   // A Recondition ID exists to work with old-bike trade-ins and their
