@@ -593,6 +593,18 @@
   .profile-menu-user .nm{ font-size:13px; font-weight:700; color:var(--text-primary); }
   .profile-menu-user .em{ font-size:11px; color:var(--text-muted); margin-top:1px; }
 
+  /* ═══ Skeleton shimmer (global) — used anywhere a numeric value is
+     still loading from Firestore, instead of a misleading "0" that reads
+     as an actual zero price/count. Add class="skel" to any value element;
+     JS removes it the moment real data arrives. ═══ */
+  .skel{
+    color:transparent !important; border-radius:5px; position:relative; overflow:hidden;
+    background:linear-gradient(90deg,var(--bg-surface-3) 25%,var(--bg-surface-2) 37%,var(--bg-surface-3) 63%);
+    background-size:400% 100%; animation:app_shimmer 1.4s ease infinite;
+    display:inline-block; min-width:44px; min-height:1em;
+  }
+  @keyframes app_shimmer{ 0%{background-position:100% 50%} 100%{background-position:0 50%} }
+
   /* ═══ Muted status badges (design tokens: neutral / blue / amber / red / green) ═══ */
   .badge{ display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:7px; font-size:11px; font-weight:700; letter-spacing:.01em; border:1px solid transparent; line-height:1.5; }
   .badge-neutral{ background:var(--bg-surface-3); color:var(--text-tertiary); border-color:var(--border); }
@@ -1494,17 +1506,6 @@
   50%{transform:scale(1.12);color:#16A34A}
   100%{transform:scale(1) translateY(0);opacity:1;color:inherit}
 }
-/* Skeleton shimmer — shown on price/EMI values while live pricing data is
-   still loading from Firestore, instead of a misleading "0" that reads
-   as an actual zero price. Removed the moment real data arrives. */
-#secFinanceTool .skel{
-  color:transparent !important; border-radius:5px; position:relative; overflow:hidden;
-  background:linear-gradient(90deg,var(--bg-surface-3) 25%,var(--bg-surface-2) 37%,var(--bg-surface-3) 63%);
-  background-size:400% 100%; animation:fin_shimmer 1.4s ease infinite;
-  display:inline-block; min-width:56px;
-}
-#secFinanceTool .metric-val.skel{ min-height:1.1em; }
-@keyframes fin_shimmer{ 0%{background-position:100% 50%} 100%{background-position:0 50%} }
 #secFinanceTool .metric-val.updating{
   animation:fin_metricShimmer .5s ease-in-out infinite;
 }
@@ -4922,7 +4923,7 @@
       <div class="sum-pill"><span class="k">Tenure</span><span class="v" id="sumTenure">--</span></div>
       <div class="sum-pill" id="sumAccPill"><span class="k">Accessories</span><span class="v" id="sumAcc">Rs. 4,950</span></div>
       <div class="sum-pill"><span class="k">Namsari</span><span class="v" id="sumNamsari">Rs. 3,000</span></div>
-      <div class="sum-pill"><span class="k">Models Listed</span><span class="v" id="sumCount">0</span></div>
+      <div class="sum-pill"><span class="k">Models Listed</span><span class="v skel" id="sumCount">0</span></div>
     </div>
 
     <!-- ══════════ SHEET TABLE ══════════ -->
@@ -13863,10 +13864,12 @@ onSnapshot(collection(db,"bikes"), snap=>{
       category:b.category||'Bike'
     }));
   recalcAll();
+  document.querySelectorAll('#secSheetTool .skel').forEach(el=>el.classList.remove('skel'));
 }, err=>{
   console.error("Sheet: bikes listener failed.",err);
   BIKES=[]; // stay blank rather than showing stale/hardcoded prices
   recalcAll();
+  document.querySelectorAll('#secSheetTool .skel').forEach(el=>el.classList.remove('skel'));
 });
 
 /* Categories: drives which accessories actually apply per bike category
@@ -14983,8 +14986,24 @@ function applyChassisData(data,fallbackChassis){
     const sel=document.getElementById('modelSelect');
     const previouslySelectedText=sel.options[sel.selectedIndex]?.text||'';
     showModelMismatchWarning(previouslySelectedText,data.model);
+    // Inventory units get their model name typed by hand at intake, so it
+    // doesn't always match the Master Price List string exactly ("150 SD"
+    // vs "150 SD BS VI", etc). Resolve through the same Model Aliases table
+    // the admin already maintains before falling back to a raw match, so a
+    // known alias still auto-selects the right price instead of silently
+    // leaving the dropdown on whatever it was.
+    const resolvedModel = (typeof resolveModelName==='function') ? resolveModelName(data.model) : data.model;
+    let matched=false;
     for(let i=0;i<sel.options.length;i++){
-      if(sel.options[i].text===data.model){sel.selectedIndex=i;syncCustomSelectUI('modelSelect');renderFinanceSchemeUI();calculateFinance();break;}
+      if(sel.options[i].text===resolvedModel){sel.selectedIndex=i;syncCustomSelectUI('modelSelect');renderFinanceSchemeUI();calculateFinance();matched=true;break;}
+    }
+    if(!matched && resolvedModel!==data.model){
+      // Alias resolved to something, but nothing in the dropdown matches it
+      // either (e.g. the canonical name itself changed) — try the raw name
+      // too before giving up silently.
+      for(let i=0;i<sel.options.length;i++){
+        if(sel.options[i].text===data.model){sel.selectedIndex=i;syncCustomSelectUI('modelSelect');renderFinanceSchemeUI();calculateFinance();break;}
+      }
     }
   }else{
     showModelMismatchWarning('','');
