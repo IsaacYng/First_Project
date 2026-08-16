@@ -778,11 +778,11 @@
 #secSheetTool{font-family:'DM Sans',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-font-smoothing:antialiased;overflow-x:hidden;width:100%;max-width:100vw}
 #secSheetTool a{text-decoration:none;color:inherit}
 #secSheetTool{
-  --blue:#005EA6; --blueDark:#004A85; --blueLt:#E8F2FB;
-  --amber:#F59E0B; --amberDark:#D97706;
-  --green:#16A34A; --red:#DC2626;
-  --line:#E2E8F0; --bgSoft:#F8FAFC;
-  --ink:#0F172A; --ink2:#334155; --ink3:#64748B; --ink4:#94A3B8;
+  --blue:var(--brand); --blueDark:var(--brand-dark); --blueLt:var(--brand-soft-bg);
+  --amber:var(--amber); --amberDark:var(--amber-dark);
+  --green:var(--success); --red:var(--danger);
+  --line:var(--border); --bgSoft:var(--bg-page);
+  --ink:var(--text-primary); --ink2:var(--text-secondary); --ink3:var(--text-tertiary); --ink4:var(--text-muted);
   --mono:'JetBrains Mono',monospace;
 }
 #secSheetTool #sheetLoader{
@@ -951,7 +951,7 @@
 #secSheetTool .cst-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 #secSheetTool .cst-chevron{color:var(--ink3);font-size:12px;transition:transform .22s ease;margin-left:8px;flex-shrink:0}
 #secSheetTool .custom-select-trigger.open .cst-chevron{transform:rotate(180deg);color:var(--blue)}
-#secSheetTool .custom-select-panel{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:320px;overflow-y:auto;z-index:40;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);transform-origin:top center;transition:opacity .18s ease,transform .18s ease,visibility .18s;padding:6px}
+#secSheetTool .custom-select-panel{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--bg-surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:320px;overflow-y:auto;z-index:40;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);transform-origin:top center;transition:opacity .18s ease,transform .18s ease,visibility .18s;padding:6px}
 #secSheetTool .custom-select-panel.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
 #secSheetTool .cst-option{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:background .15s;font-size:14px;color:var(--ink2);font-weight:500}
 #secSheetTool .cst-option:hover{background:var(--blueLt)}
@@ -968,8 +968,8 @@
 #secSheetTool .fin-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(245,158,11,.08) 0%,transparent 70%);border-radius:50%}
 #secSheetTool .headline{font-family:'Bebas Neue',cursive;line-height:.95;letter-spacing:.01em}
 #secSheetTool .price-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,94,166,.28)}
-#secSheetTool .stat-chip{background:#fff;border:1px solid rgba(0,94,166,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
-#secSheetTool .calc-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:1.4rem;box-shadow:0 2px 14px rgba(0,0,0,.04)}
+#secSheetTool .stat-chip{background:var(--bg-surface);border:1px solid rgba(0,94,166,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+#secSheetTool .calc-card{background:var(--bg-surface);border:1px solid var(--line);border-radius:18px;padding:1.4rem;box-shadow:0 2px 14px rgba(0,0,0,.04)}
 #secSheetTool .calc-card:has(.custom-select-panel.open){position:relative;z-index:60}
 #secSheetTool .calc-card.dropdown-open{position:relative;z-index:60}
 #secSheetTool .calc-card-title{display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:700;color:var(--ink);letter-spacing:.01em;margin-bottom:1.2rem;flex-wrap:wrap}
@@ -996,10 +996,10 @@
 #secSheetTool .mode-btn.active{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(0,94,166,.28)}
 #secSheetTool .mode-btn:not(.active):hover{color:var(--blue)}
 #secSheetTool .summary-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem;margin-bottom:1.1rem}
-#secSheetTool .sum-pill{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 16px;display:flex;flex-direction:column;gap:2px;box-shadow:0 2px 10px rgba(0,0,0,.04);min-width:0}
+#secSheetTool .sum-pill{background:var(--bg-surface);border:1px solid var(--line);border-radius:12px;padding:9px 16px;display:flex;flex-direction:column;gap:2px;box-shadow:0 2px 10px rgba(0,0,0,.04);min-width:0}
 #secSheetTool .sum-pill .k{font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #secSheetTool .sum-pill .v{font-family:'Bebas Neue',cursive;font-size:1.15rem;color:var(--blue);letter-spacing:.02em}
-#secSheetTool .sheet-wrap{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 2px 14px rgba(0,0,0,.04);overflow:hidden}
+#secSheetTool .sheet-wrap{background:var(--bg-surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 2px 14px rgba(0,0,0,.04);overflow:hidden}
 #secSheetTool .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative}
 #secSheetTool .table-scroll::-webkit-scrollbar{height:8px}
 #secSheetTool .table-scroll::-webkit-scrollbar-thumb{background:rgba(0,94,166,.3);border-radius:99px}
@@ -1165,11 +1165,11 @@
 #secFinanceTool{font-family:'DM Sans',sans-serif;background:#F8FAFC;color:#0F172A;-webkit-font-smoothing:antialiased;overflow-x:hidden;width:100%;max-width:100vw}
 #secFinanceTool a{text-decoration:none;color:inherit}
 #secFinanceTool{
-  --blue:#005EA6; --blueDark:#004A85; --blueLt:#E8F2FB;
-  --amber:#F59E0B; --amberDark:#D97706;
-  --green:#16A34A; --red:#DC2626;
-  --line:#E2E8F0; --bgSoft:#F8FAFC;
-  --ink:#0F172A; --ink2:#334155; --ink3:#64748B; --ink4:#94A3B8;
+  --blue:var(--brand); --blueDark:var(--brand-dark); --blueLt:var(--brand-soft-bg);
+  --amber:var(--amber); --amberDark:var(--amber-dark);
+  --green:var(--success); --red:var(--danger);
+  --line:var(--border); --bgSoft:var(--bg-page);
+  --ink:var(--text-primary); --ink2:var(--text-secondary); --ink3:var(--text-tertiary); --ink4:var(--text-muted);
   --mono:'JetBrains Mono',monospace;
 }
 #secFinanceTool #financeLoader{
@@ -1412,7 +1412,7 @@
 #secFinanceTool .fin-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(245,158,11,.08) 0%,transparent 70%);border-radius:50%}
 #secFinanceTool .headline{font-family:'Bebas Neue',cursive;line-height:.95;letter-spacing:.01em}
 #secFinanceTool .price-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,94,166,.28)}
-#secFinanceTool .stat-chip{background:#fff;border:1px solid rgba(0,94,166,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+#secFinanceTool .stat-chip{background:var(--bg-surface);border:1px solid rgba(0,94,166,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
 #secFinanceTool .total-dp-banner{
   background:linear-gradient(120deg,var(--blue) 0%,var(--blueDark) 65%,#00284D 100%);
   border-radius:16px;padding:1rem 1.5rem;display:flex;align-items:center;
@@ -1453,7 +1453,7 @@
 }
 @media (max-width:640px){#secFinanceTool .total-dp-banner{top:0}}
 #secFinanceTool .calc-card{
-  background:#fff;border:1px solid var(--line);border-radius:18px;
+  background:var(--bg-surface);border:1px solid var(--line);border-radius:18px;
   padding:1.4rem;box-shadow:0 2px 14px rgba(0,0,0,.04);
   transition:all .25s cubic-bezier(.4,.0,.2,1);cursor:default;
   min-width:0;
@@ -1857,7 +1857,7 @@
 #secFinanceTool .doc-list li .lbl{display:flex;align-items:baseline;gap:6px}
 #secFinanceTool .sig-row{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;white-space:nowrap}
 #secFinanceTool .sig-box{flex:1;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:11pt !important;min-width:0}
-#secFinanceTool .sign-panel{background:#fff;border-radius:14px;padding:16px 18px;margin-top:14px;box-shadow:0 2px 14px rgba(0,0,0,.05)}
+#secFinanceTool .sign-panel{background:var(--bg-surface);border-radius:14px;padding:16px 18px;margin-top:14px;box-shadow:0 2px 14px rgba(0,0,0,.05)}
 #secFinanceTool .sign-panel h4{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px}
 #secFinanceTool .sign-checks{display:flex;flex-wrap:wrap;gap:16px}
 #secFinanceTool .sign-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2)}
@@ -1944,7 +1944,7 @@
   }
 #secFinanceTool .topbar-icon-btn:hover{ background:#F5F6F8; border-color:#D7DBE3; color:#1F2430; }
 #secFinanceTool .results-panel{
-    background:#F8FAFC !important; color:var(--ink) !important;
+    background:var(--bg-surface) !important; color:var(--ink) !important;
     border:1px solid var(--line) !important; border-radius:14px !important;
     padding:1.5rem 1.4rem !important; box-shadow:none !important;
   }
@@ -1964,17 +1964,17 @@
 #secFinanceTool .res-lbl{ color:var(--ink) !important; font-size:13.5px !important; font-weight:700 !important; }
 #secFinanceTool .res-val{ color:var(--ink) !important; font-size:13.5px !important; font-weight:700 !important; }
 #secFinanceTool .res-val.indigo{ color:var(--blue) !important; }
-#secFinanceTool .res-val.red{ color:#DC2626 !important; }
-#secFinanceTool .res-val.amber{ color:#B45309 !important; font-style:normal !important; }
+#secFinanceTool .res-val.red{ color:var(--red) !important; }
+#secFinanceTool .res-val.amber{ color:var(--amberDark) !important; font-style:normal !important; }
 #secFinanceTool .grand-total-box{
-    background:#fff !important; border:1px solid var(--line) !important;
+    background:var(--bg-surface) !important; border:1px solid var(--line) !important;
     text-align:left !important; padding:.9rem 1rem !important; margin-bottom:1rem !important;
   }
 #secFinanceTool .grand-total-box:hover{ transform:none !important; box-shadow:none !important; }
 #secFinanceTool .grand-total-lbl{ color:var(--ink3) !important; }
 #secFinanceTool .grand-total-val{ color:var(--ink) !important; }
 #secFinanceTool .emi-box{
-    background:#fff !important; border:1px solid var(--line) !important;
+    background:var(--bg-surface) !important; border:1px solid var(--line) !important;
     text-align:left !important; padding:.9rem 1rem !important;
     display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap;
   }
@@ -1985,7 +1985,7 @@
 #secFinanceTool .emi-box:hover .emi-box-val{ font-size:clamp(1.3rem,3.6vw,1.65rem) !important; }
 #secFinanceTool .emi-box-sub{ color:var(--ink3) !important; width:100%; margin-top:2px !important; }
 #secFinanceTool .adv-box{
-    background:#fff !important; border:1px solid var(--line) !important;
+    background:var(--bg-surface) !important; border:1px solid var(--line) !important;
   }
 #secFinanceTool .adv-box-lbl{ color:var(--ink3) !important; }
 #secFinanceTool .adv-box-val{ color:var(--ink) !important; }
@@ -2043,7 +2043,7 @@
     flex:1;padding:11px 16px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;
     font-family:'DM Sans',sans-serif;transition:all .18s ease;border:1.5px solid var(--line);
   }
-#secFinanceTool .dobp-btn.ghost{background:#fff;color:var(--ink3)}
+#secFinanceTool .dobp-btn.ghost{background:var(--bg-surface);color:var(--ink3)}
 #secFinanceTool .dobp-btn.ghost:hover{background:var(--bgSoft);color:var(--ink)}
 #secFinanceTool .dobp-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
 #secFinanceTool .dobp-btn.primary:hover{background:var(--blueDark)}
