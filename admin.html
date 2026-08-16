@@ -1833,7 +1833,11 @@
 #secFinanceTool .two-up, #secFinanceTool .customer-grid{grid-template-columns:1fr}
 #secFinanceTool .mobile-bar{display:flex}
 #secFinanceTool{padding-bottom:76px}
-#secFinanceTool .preview-body{padding:12px}}
+#secFinanceTool .preview-body{padding:12px}
+#secFinanceTool .docs-required-card{padding:1.7rem 1.6rem}
+#secFinanceTool .docs-required-card .calc-card-title{font-size:1.05rem}
+#secFinanceTool .docs-required-card span[style*="font-size:13px"]{font-size:14.5px!important}
+#secFinanceTool .docs-required-card i[style*="font-size:14px"]{font-size:15.5px!important}}
 @media (max-width:480px){#secFinanceTool .acc-grid{grid-template-columns:1fr}
 #secFinanceTool .config-row{grid-template-columns:1fr}
 #secFinanceTool .total-dp-banner{flex-direction:column;align-items:flex-start}}
@@ -4521,7 +4525,7 @@
         </div>
       </div>
 
-      <div class="calc-card" style="display:flex;flex-direction:column;flex:1;justify-content:center">
+      <div class="calc-card docs-required-card" style="display:flex;flex-direction:column;flex:1;justify-content:center">
         <div class="calc-card-title" style="margin-bottom:.9rem"><span class="icon"><i class="fa-solid fa-file-circle-check"></i></span>Documents Required — Applicant</div>
         <div style="display:flex;flex-direction:column;gap:11px">
           <div style="display:flex;align-items:flex-start;gap:10px">
@@ -4557,11 +4561,6 @@
 
     </div>
   </div>
-
-  <footer style="margin-top:28px;padding:16px 20px;border-top:1px solid var(--line);background:#fff;display:flex;flex-direction:column;gap:3px;align-items:center;text-align:center;font-size:11.5px;color:var(--ink4)">
-    <span>&copy; Samriddhi And Brothers Auto Pvt. Ltd. &middot; Bajaj Authorized Dealer, Phidim</span>
-    <span style="font-size:11px;color:#B6BCC7">Staff use only &mdash; prices and EMI figures are indicative and subject to change.</span>
-  </footer>
 
 <div id="fin_previewOverlay" onclick="if(event.target===this) closePreview()">
   <div class="preview-shell">
@@ -4920,11 +4919,6 @@
     </div>
 
   </div>
-
-  <footer style="margin-top:28px;padding:16px 20px;border-top:1px solid var(--line);background:#fff;display:flex;flex-direction:column;gap:3px;align-items:center;text-align:center;font-size:11.5px;color:var(--ink4)">
-    <span>&copy; Samriddhi And Brothers Auto Pvt. Ltd. &middot; Bajaj Authorized Dealer, Phidim</span>
-    <span style="font-size:11px;color:#B6BCC7">Staff use only &mdash; prices and EMI figures are indicative and subject to change.</span>
-  </footer>
 
 <div id="previewOverlay" onclick="if(event.target===this) closePreview()">
   <div class="preview-shell">
