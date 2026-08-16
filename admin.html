@@ -1494,6 +1494,17 @@
   50%{transform:scale(1.12);color:#16A34A}
   100%{transform:scale(1) translateY(0);opacity:1;color:inherit}
 }
+/* Skeleton shimmer — shown on price/EMI values while live pricing data is
+   still loading from Firestore, instead of a misleading "0" that reads
+   as an actual zero price. Removed the moment real data arrives. */
+#secFinanceTool .skel{
+  color:transparent !important; border-radius:5px; position:relative; overflow:hidden;
+  background:linear-gradient(90deg,var(--bg-surface-3) 25%,var(--bg-surface-2) 37%,var(--bg-surface-3) 63%);
+  background-size:400% 100%; animation:fin_shimmer 1.4s ease infinite;
+  display:inline-block; min-width:56px;
+}
+#secFinanceTool .metric-val.skel{ min-height:1.1em; }
+@keyframes fin_shimmer{ 0%{background-position:100% 50%} 100%{background-position:0 50%} }
 #secFinanceTool .metric-val.updating{
   animation:fin_metricShimmer .5s ease-in-out infinite;
 }
@@ -4341,7 +4352,7 @@
         </div>
       </div>
 
-  <div style="max-width:1280px;margin:0 auto;padding:0 20px 24px">
+  <div style="max-width:1400px;margin:0 auto;padding:0 0 24px">
 
     <div id="bikeLoadWarning" style="display:none;margin-bottom:16px;padding:12px 16px;background:#FEF2F2;border:1.5px solid #FCA5A5;border-radius:10px;color:#991B1B;font-size:13px;font-weight:600;align-items:center;gap:8px">
       <i class="fa-solid fa-triangle-exclamation"></i> <span id="bikeLoadWarningText">Live prices are taking longer than usual to load — check your internet connection. Showing indicative prices for now.</span>
@@ -4373,9 +4384,9 @@
           </div>
 
           <div class="metrics-row">
-            <div class="metric-box"><span class="metric-lbl">MRP Price</span><span class="metric-val" id="mrp">0</span></div>
+            <div class="metric-box"><span class="metric-lbl">MRP Price</span><span class="metric-val skel" id="mrp">0</span></div>
             <div class="metric-box has-input"><span class="metric-lbl">Discount</span><input type="number" id="discountInput" value="0" placeholder="0"></div>
-            <div class="metric-box"><span class="metric-lbl">After Discount</span><span class="metric-val green" id="afterDiscount">0</span></div>
+            <div class="metric-box"><span class="metric-lbl">After Discount</span><span class="metric-val green skel" id="afterDiscount">0</span></div>
             <div class="metric-box has-input"><span class="metric-lbl">Advance EMI</span><input type="number" id="advEmiInput" value="0" placeholder="0"></div>
           </div>
 
@@ -4422,7 +4433,7 @@
         <div class="two-up">
           <div class="calc-card">
             <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>Additional Charges</div>
-            <div class="charge-row"><label><i class="fa-solid fa-shield-halved"></i> Insurance</label><span class="val" id="displayIns">Rs. 0</span></div>
+            <div class="charge-row"><label><i class="fa-solid fa-shield-halved"></i> Insurance</label><span class="val skel" id="displayIns">Rs. 0</span></div>
             <div class="charge-row"><label><i class="fa-solid fa-stamp"></i> Registration / Namsari</label><input type="number" id="fin_namsariInput" value="3000"></div>
           </div>
           <div class="calc-card">
@@ -4512,31 +4523,31 @@
 
         <div class="grand-total-box">
           <div class="grand-total-lbl"><i class="fa-solid fa-thumbtack"></i> Total Downpayment</div>
-          <div class="grand-total-val" id="displayTotalDPSummary">Rs. 0</div>
+          <div class="grand-total-val skel" id="displayTotalDPSummary">Rs. 0</div>
         </div>
 
-        <div class="res-row"><span class="res-lbl">Interest Rate</span><span class="res-val indigo" id="displayRate">0%</span></div>
-        <div class="res-row"><span class="res-lbl">Downpayment Amount</span><span class="res-val" id="displayDpAmt">Rs. 0</span></div>
-        <div class="res-row"><span class="res-lbl">Loan Amount</span><span class="res-val" id="displayLoanAmt">Rs. 0</span></div>
+        <div class="res-row"><span class="res-lbl">Interest Rate</span><span class="res-val indigo skel" id="displayRate">0%</span></div>
+        <div class="res-row"><span class="res-lbl">Downpayment Amount</span><span class="res-val skel" id="displayDpAmt">Rs. 0</span></div>
+        <div class="res-row"><span class="res-lbl">Loan Amount</span><span class="res-val skel" id="displayLoanAmt">Rs. 0</span></div>
 
         <div class="split-legend"><span><span class="dot dp"></span> Downpayment</span><span><span class="dot loan"></span> Loan</span></div>
         <div class="split-bar" aria-hidden="true"><div class="seg-dp" id="splitDpBar" style="width:50%"></div><div class="seg-loan" id="splitLoanBar" style="width:50%"></div></div>
 
         <div class="emi-box">
           <div class="emi-box-lbl">Monthly EMI</div>
-          <div class="emi-box-val" id="displayEMI">Rs. 0</div>
+          <div class="emi-box-val skel" id="displayEMI">Rs. 0</div>
           <div class="emi-box-sub" id="emiTenureLabel">for 60 months</div>
         </div>
 
-        <div class="res-row"><span class="res-lbl">Auto Rounding Adj.</span><span class="res-val amber" id="displayAutoAdEmi">Rs. 0</span></div>
+        <div class="res-row"><span class="res-lbl">Auto Rounding Adj.</span><span class="res-val amber skel" id="displayAutoAdEmi">Rs. 0</span></div>
 
         <div class="adv-box" style="margin:.75rem 0 .25rem">
           <span class="adv-box-lbl">Total Advance EMI</span>
-          <span class="adv-box-val" id="displayTotalAdvEmi">Rs. 0</span>
+          <span class="adv-box-val skel" id="displayTotalAdvEmi">Rs. 0</span>
         </div>
 
-        <div class="res-row"><span class="res-lbl">Due EMI (Remaining)</span><span class="res-val" id="displayDueEmi">Rs. 0</span></div>
-        <div class="res-row"><span class="res-lbl">Total Interest Payable</span><span class="res-val red" id="displayTotalInterest">Rs. 0</span></div>
+        <div class="res-row"><span class="res-lbl">Due EMI (Remaining)</span><span class="res-val skel" id="displayDueEmi">Rs. 0</span></div>
+        <div class="res-row"><span class="res-lbl">Total Interest Payable</span><span class="res-val red skel" id="displayTotalInterest">Rs. 0</span></div>
 
         <div class="summary-actions">
           <button class="btn-preview" onclick="openPreview()"><i class="fa-solid fa-file-lines"></i> Preview Form</button>
@@ -14814,6 +14825,9 @@ function initBikesListener(){
       select.innerHTML=sorted.map((bike,idx)=>`<option value="${bike.id}" ${idx===defaultIdx?"selected":""}>${escAttr(bike.name)}</option>`).join('');
       buildCustomSelect('modelSelect');
       if(typeof calculateFinance==='function') calculateFinance();
+      // Real pricing data has arrived — swap every skeleton placeholder
+      // back to its real (now-populated) number in one pass.
+      document.querySelectorAll('#secFinanceTool .skel').forEach(el=>el.classList.remove('skel'));
     }
   }, err=>{
     clearTimeout(warnWatchdog);
@@ -14839,6 +14853,7 @@ function initBikesListener(){
         select.innerHTML=allBikes.map((b,idx)=>`<option value="${b.id}" ${idx===defaultIdx?"selected":""}>${escAttr(b.name)}</option>`).join('');
         buildCustomSelect('modelSelect');
         if(typeof calculateFinance==='function') calculateFinance();
+        document.querySelectorAll('#secFinanceTool .skel').forEach(el=>el.classList.remove('skel'));
       }
     }
   });
