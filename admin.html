@@ -877,7 +877,7 @@
 #secSheetTool header{animation:slideDownFade .6s ease-out .2s both}
 #secSheetTool .fin-hero{animation:fadeInUp .7s ease-out .4s both}
 #secSheetTool main{animation:none}
-#secSheetTool .calc-card{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both;opacity:0}
+#secSheetTool .calc-card{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both;opacity:1}
 #secSheetTool .calc-card:nth-child(1){animation-delay:.8s}
 #secSheetTool .calc-card:nth-child(2){animation-delay:.95s}
 #secSheetTool .calc-card:nth-child(3){animation-delay:1.1s}
@@ -1140,7 +1140,7 @@
   content:'';position:absolute;top:-120px;right:-100px;
   width:460px;height:460px;
   background:radial-gradient(circle,rgba(245,158,11,.18) 0%,transparent 70%);
-  border-radius:50%;animation:introGlowPulse 3.2s ease-in-out infinite;
+  border-radius:50%;animation:fin_introGlowPulse 3.2s ease-in-out infinite;
 }
 #secFinanceTool #financeLoader::after{
   content:'';position:absolute;bottom:-140px;left:-100px;
@@ -1148,28 +1148,28 @@
   background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);
   border-radius:50%;
 }
-@keyframes introGlowPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.08)}}
+@keyframes fin_introGlowPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.08)}}
 #secFinanceTool #financeLoader.fade-out{opacity:0;visibility:hidden}
 #secFinanceTool .intro-grid{
   position:absolute;inset:0;opacity:.07;
   background-image:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),
                     linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);
   background-size:42px 42px;
-  animation:introGridDrift 9s linear infinite;
+  animation:fin_introGridDrift 9s linear infinite;
 }
-@keyframes introGridDrift{from{background-position:0 0}to{background-position:-84px -84px}}
+@keyframes fin_introGridDrift{from{background-position:0 0}to{background-position:-84px -84px}}
 #secFinanceTool .intro-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;}
 #secFinanceTool .intro-logo-mark{
   width:58px;height:58px;border-radius:16px;
   background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);
   display:flex;align-items:center;justify-content:center;
   opacity:0;transform:translateY(-10px) scale(.85);
-  animation:introLogoIn .6s cubic-bezier(.34,1.56,.64,1) .05s forwards;
+  animation:fin_introLogoIn .6s cubic-bezier(.34,1.56,.64,1) .05s forwards;
   box-shadow:0 8px 24px rgba(0,0,0,.18);
   margin-bottom:18px;
   color:#F59E0B;
 }
-@keyframes introLogoIn{to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fin_introLogoIn{to{opacity:1;transform:translateY(0) scale(1)}}
 #secFinanceTool .intro-road{
   position:relative;width:min(340px,74vw);height:96px;
   display:flex;align-items:flex-end;justify-content:center;
@@ -1182,46 +1182,46 @@
 #secFinanceTool .intro-road-line::after{
   content:'';position:absolute;inset:0;
   background:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 18px,transparent 18px 34px);
-  transform:translateX(-34px);animation:introRoadScroll .55s linear infinite;
+  transform:translateX(-34px);animation:fin_introRoadScroll .55s linear infinite;
 }
-@keyframes introRoadScroll{to{transform:translateX(0)}}
+@keyframes fin_introRoadScroll{to{transform:translateX(0)}}
 #secFinanceTool .intro-speed-lines{
   position:absolute;bottom:30px;left:50%;margin-left:-30px;width:60px;height:34px;
-  opacity:0;animation:introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards,introSpeedShow 2.3s ease forwards;
+  opacity:0;animation:fin_introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards,fin_introSpeedShow 2.3s ease forwards;
 }
 #secFinanceTool .intro-speed-lines span{
   position:absolute;height:2px;border-radius:2px;background:rgba(255,255,255,.55);
-  right:100%;opacity:0;animation:introSpeedFlick .5s ease-in-out infinite;
+  right:100%;opacity:0;animation:fin_introSpeedFlick .5s ease-in-out infinite;
 }
 #secFinanceTool .intro-speed-lines span:nth-child(1){top:4px;width:22px;animation-delay:.05s}
 #secFinanceTool .intro-speed-lines span:nth-child(2){top:15px;width:32px;animation-delay:.12s}
 #secFinanceTool .intro-speed-lines span:nth-child(3){top:26px;width:18px;animation-delay:.19s}
-@keyframes introSpeedFlick{0%{opacity:0;transform:translateX(0)}45%{opacity:.9}100%{opacity:0;transform:translateX(-14px)}}
-@keyframes introSpeedShow{0%,68%{opacity:0}74%{opacity:1}100%{opacity:0}}
+@keyframes fin_introSpeedFlick{0%{opacity:0;transform:translateX(0)}45%{opacity:.9}100%{opacity:0;transform:translateX(-14px)}}
+@keyframes fin_introSpeedShow{0%,68%{opacity:0}74%{opacity:1}100%{opacity:0}}
 #secFinanceTool .intro-bike-wrap{
   position:absolute;bottom:14px;left:50%;margin-left:-39px;
-  animation:introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+  animation:fin_introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
 }
 #secFinanceTool .intro-bike-wrap svg{filter:drop-shadow(0 8px 14px rgba(0,0,0,.3))}
-#secFinanceTool .bike-part{opacity:0;transform:scale(.55);transform-box:fill-box;transform-origin:center;animation:introPartIn .42s cubic-bezier(.34,1.56,.64,1) forwards}
+#secFinanceTool .bike-part{opacity:0;transform:scale(.55);transform-box:fill-box;transform-origin:center;animation:fin_introPartIn .42s cubic-bezier(.34,1.56,.64,1) forwards}
 #secFinanceTool .bike-part.bp-wheels{animation-delay:.05s}
 #secFinanceTool .bike-part.bp-frame{animation-delay:.28s}
 #secFinanceTool .bike-part.bp-panel{animation-delay:.5s}
 #secFinanceTool .bike-part.bp-light{animation-delay:.72s}
-@keyframes introPartIn{to{opacity:1;transform:scale(1)}}
+@keyframes fin_introPartIn{to{opacity:1;transform:scale(1)}}
 #secFinanceTool .intro-headlight{
-  animation:introHeadlightPulse .5s ease-in-out .9s infinite;
+  animation:fin_introHeadlightPulse .5s ease-in-out .9s infinite;
   opacity:0;animation-fill-mode:forwards;
 }
-@keyframes introHeadlightPulse{0%{opacity:0}20%,100%{opacity:1}60%{opacity:.55}}
+@keyframes fin_introHeadlightPulse{0%{opacity:0}20%,100%{opacity:1}60%{opacity:.55}}
 #secFinanceTool .intro-bike-shadow{
   position:absolute;bottom:8px;left:50%;margin-left:-38px;width:76px;height:11px;
   background:radial-gradient(ellipse,rgba(0,0,0,.32) 0%,transparent 75%);
   border-radius:50%;opacity:0;
-  animation:introShadowFade .5s ease .05s forwards,introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+  animation:fin_introShadowFade .5s ease .05s forwards,fin_introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
 }
-@keyframes introShadowFade{to{opacity:.9}}
-@keyframes introRide{
+@keyframes fin_introShadowFade{to{opacity:.9}}
+@keyframes fin_introRide{
   0%{left:50%;margin-left:-39px}
   68%{left:50%;margin-left:-39px}
   80%{left:50%;margin-left:-39px}
@@ -1229,7 +1229,7 @@
 }
 #secFinanceTool .intro-brand{
   margin-top:22px;text-align:center;opacity:0;transform:translateY(14px);
-  animation:introTextIn .7s ease 1.55s forwards;
+  animation:fin_introTextIn .7s ease 1.55s forwards;
 }
 #secFinanceTool .intro-brand .intro-name{
   font-family:'Bebas Neue',cursive;font-size:clamp(1.9rem,6vw,2.6rem);
@@ -1240,10 +1240,10 @@
   margin-top:6px;font-size:11px;font-weight:600;letter-spacing:.22em;
   text-transform:uppercase;color:rgba(255,255,255,.65);
 }
-@keyframes introTextIn{to{opacity:1;transform:translateY(0)}}
+@keyframes fin_introTextIn{to{opacity:1;transform:translateY(0)}}
 #secFinanceTool .intro-progress{
   margin-top:24px;display:flex;align-items:center;gap:10px;
-  opacity:0;animation:introFade .5s ease 1.7s forwards;
+  opacity:0;animation:fin_introFade .5s ease 1.7s forwards;
 }
 #secFinanceTool .intro-bar{
   width:130px;height:3px;border-radius:99px;
@@ -1252,19 +1252,19 @@
 #secFinanceTool .intro-bar-fill{
   width:0%;height:100%;border-radius:99px;
   background:linear-gradient(90deg,#F59E0B,#FBBF24);
-  animation:introFill 1.9s cubic-bezier(.4,0,.2,1) .15s forwards;
+  animation:fin_introFill 1.9s cubic-bezier(.4,0,.2,1) .15s forwards;
 }
 #secFinanceTool .intro-percent{
   font-size:11px;font-weight:700;letter-spacing:.03em;
   color:rgba(255,255,255,.8);min-width:30px;font-variant-numeric:tabular-nums;
 }
-@keyframes introFade{to{opacity:1}}
-@keyframes introFill{to{width:100%}}
+@keyframes fin_introFade{to{opacity:1}}
+@keyframes fin_introFill{to{width:100%}}
 #secFinanceTool header{animation:none}
 #secFinanceTool .fin-hero{animation:none}
 #secFinanceTool main{animation:none}
 #secFinanceTool .calc-card{
-  animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both;
+  animation:fin_popIn .5s cubic-bezier(.34,1.56,.64,1) both;
   opacity:0;
 }
 #secFinanceTool .calc-card:nth-child(1){animation-delay:.8s}
@@ -1274,10 +1274,10 @@
 #secFinanceTool footer{animation:none}
 #secFinanceTool main{position:relative;z-index:2}
 #secFinanceTool footer{position:relative;z-index:1}
-@keyframes slideDownFade{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-@keyframes popIn{0%{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
-@keyframes slideInRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fin_slideDownFade{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fin_fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fin_popIn{0%{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes fin_slideInRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
 #secFinanceTool .two-up > .calc-card:nth-child(1){animation-delay:1.05s}
 #secFinanceTool .two-up > .calc-card:nth-child(2){animation-delay:1.15s}
 #secFinanceTool{animation-delay:inherit}
@@ -1341,10 +1341,10 @@
   box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:320px;overflow-y:auto;
   z-index:40;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);
   transform-origin:top center;transition:opacity .18s ease,transform .18s ease,visibility .18s;
-  padding:6px;animation:dropdownOpen .22s cubic-bezier(.34,1.56,.64,1) forwards;
+  padding:6px;animation:fin_dropdownOpen .22s cubic-bezier(.34,1.56,.64,1) forwards;
 }
 #secFinanceTool .custom-select-panel.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
-@keyframes dropdownOpen{from{opacity:0;transform:translateY(-8px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fin_dropdownOpen{from{opacity:0;transform:translateY(-8px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 #secFinanceTool .cst-option{
   display:flex;align-items:center;gap:12px;padding:11px 12px;
   border-radius:10px;cursor:pointer;transition:all .15s;
@@ -1401,9 +1401,9 @@
   display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);
   border:1px solid rgba(255,255,255,.22);padding:7px 14px;border-radius:10px;
   font-size:11.5px;font-weight:600;color:#fff;position:relative;z-index:1;
-  animation:badgePulse 2s ease-in-out infinite;
+  animation:fin_badgePulse 2s ease-in-out infinite;
 }
-@keyframes badgePulse{
+@keyframes fin_badgePulse{
   0%,100%{transform:scale(1);opacity:.95}
   50%{transform:scale(1.05);opacity:1}
 }
@@ -1442,9 +1442,9 @@
 }
 #secFinanceTool select.styled:focus, #secFinanceTool input.styled:focus{
   border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,94,166,.15);
-  animation:inputFocus .3s ease forwards;background:linear-gradient(135deg,var(--bgSoft) 0%,rgba(0,94,166,.06) 100%);
+  animation:fin_inputFocus .3s ease forwards;background:linear-gradient(135deg,var(--bgSoft) 0%,rgba(0,94,166,.06) 100%);
 }
-@keyframes inputFocus{
+@keyframes fin_inputFocus{
   0%{box-shadow:0 0 0 0 rgba(0,94,166,.1)}
   100%{box-shadow:0 0 0 4px rgba(0,94,166,.15)}
 }
@@ -1465,17 +1465,17 @@
 }
 #secFinanceTool .metric-val.green{color:var(--green)}
 #secFinanceTool .metric-val.updated{
-  animation:metricPop .45s cubic-bezier(.34,1.56,.64,1);
+  animation:fin_metricPop .45s cubic-bezier(.34,1.56,.64,1);
 }
-@keyframes metricPop{
+@keyframes fin_metricPop{
   0%{transform:scale(.75) translateY(8px);opacity:0}
   50%{transform:scale(1.12);color:#16A34A}
   100%{transform:scale(1) translateY(0);opacity:1;color:inherit}
 }
 #secFinanceTool .metric-val.updating{
-  animation:metricShimmer .5s ease-in-out infinite;
+  animation:fin_metricShimmer .5s ease-in-out infinite;
 }
-@keyframes metricShimmer{
+@keyframes fin_metricShimmer{
   0%,100%{opacity:1}
   50%{opacity:.65}
 }
@@ -1533,7 +1533,7 @@
 #secFinanceTool .model-mismatch-warning{
   display:none;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;
   background:rgba(245,158,11,.1);border:1.5px solid rgba(245,158,11,.35);border-radius:10px;
-  font-size:12px;line-height:1.5;color:#92400E;animation:slideDown .2s ease-out;
+  font-size:12px;line-height:1.5;color:#92400E;animation:fin_slideDown .2s ease-out;
 }
 #secFinanceTool .model-mismatch-warning i{color:var(--amber);margin-top:2px;flex-shrink:0}
 #secFinanceTool .model-mismatch-warning span{flex:1;min-width:0}
@@ -1541,7 +1541,7 @@
 #secFinanceTool .chassis-status-warning{
   display:none;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;
   background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.4);border-radius:10px;
-  font-size:12px;line-height:1.5;color:#7F1D1D;animation:slideDown .2s ease-out;
+  font-size:12px;line-height:1.5;color:#7F1D1D;animation:fin_slideDown .2s ease-out;
 }
 #secFinanceTool .chassis-status-warning i{color:var(--red);margin-top:2px;flex-shrink:0}
 #secFinanceTool .chassis-status-warning span{flex:1;min-width:0}
@@ -1568,18 +1568,18 @@
   content:'';position:absolute;top:0;left:0;right:0;bottom:0;
   background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
   opacity:0;pointer-events:none;border-radius:18px;
-  animation:shimmerPulse 2.5s ease-in-out infinite;
+  animation:fin_shimmerPulse 2.5s ease-in-out infinite;
 }
-@keyframes shimmerPulse{
+@keyframes fin_shimmerPulse{
   0%,100%{opacity:0;transform:translateX(-100%)}
   50%{opacity:1;transform:translateX(100%)}
 }
 #secFinanceTool .res-title{
   display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700;
   letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);
-  margin-bottom:1.4rem;animation:titleSlide .5s ease-out;
+  margin-bottom:1.4rem;animation:fin_titleSlide .5s ease-out;
 }
-@keyframes titleSlide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fin_titleSlide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
 #secFinanceTool .res-title i{color:var(--amber)}
 #secFinanceTool .res-row{
   display:flex;align-items:center;justify-content:space-between;padding:10px 0;
@@ -1596,16 +1596,16 @@
 #secFinanceTool .res-val.red{color:#F87171}
 #secFinanceTool .res-val.amber{color:#FBBF24;font-style:italic;font-size:12.5px}
 #secFinanceTool .res-val.updating{
-  animation:valueShimmer .5s ease-in-out infinite;
+  animation:fin_valueShimmer .5s ease-in-out infinite;
 }
-@keyframes valueShimmer{
+@keyframes fin_valueShimmer{
   0%,100%{opacity:1;transform:translateX(0)}
   50%{opacity:.6;transform:translateX(2px)}
 }
 #secFinanceTool .res-val.updated{
-  animation:valuePopIn .5s cubic-bezier(.34,1.56,.64,1) !important;
+  animation:fin_valuePopIn .5s cubic-bezier(.34,1.56,.64,1) !important;
 }
-@keyframes valuePopIn{
+@keyframes fin_valuePopIn{
   0%{transform:scale(.7) translateY(6px);opacity:0}
   50%{transform:scale(1.15);color:#FBBF24}
   85%{transform:scale(.98)}
@@ -1636,17 +1636,17 @@
   transition:all .3s cubic-bezier(.34,1.56,.64,1);
 }
 #secFinanceTool .emi-box-val.updated{
-  animation:emiPulse .5s cubic-bezier(.34,1.56,.64,1);
+  animation:fin_emiPulse .5s cubic-bezier(.34,1.56,.64,1);
 }
-@keyframes emiPulse{
+@keyframes fin_emiPulse{
   0%{transform:scale(.85) rotateZ(-2deg);opacity:.8}
   50%{transform:scale(1.15) rotateZ(1deg)}
   100%{transform:scale(1) rotateZ(0);opacity:1}
 }
 #secFinanceTool .emi-box-val.updating{
-  animation:emiShimmer .4s ease-in-out infinite;
+  animation:fin_emiShimmer .4s ease-in-out infinite;
 }
-@keyframes emiShimmer{
+@keyframes fin_emiShimmer{
   0%,100%{opacity:1}
   50%{opacity:.6}
 }
@@ -1665,8 +1665,8 @@
   letter-spacing:.02em;line-height:1;color:#fff;margin-top:4px;
   transition:all .3s cubic-bezier(.34,1.56,.64,1);
 }
-#secFinanceTool .grand-total-val.updated{animation:emiPulse .5s cubic-bezier(.34,1.56,.64,1)}
-#secFinanceTool .grand-total-val.updating{animation:emiShimmer .4s ease-in-out infinite}
+#secFinanceTool .grand-total-val.updated{animation:fin_emiPulse .5s cubic-bezier(.34,1.56,.64,1)}
+#secFinanceTool .grand-total-val.updating{animation:fin_emiShimmer .4s ease-in-out infinite}
 #secFinanceTool .adv-box{
   background:rgba(255,255,255,.06);border-radius:12px;padding:12px 14px;
   display:flex;align-items:center;justify-content:space-between;
@@ -1679,18 +1679,18 @@
   transition:all .3s cubic-bezier(.34,1.56,.64,1);
 }
 #secFinanceTool .adv-box-val.updated{
-  animation:advPop .48s cubic-bezier(.34,1.56,.64,1);
+  animation:fin_advPop .48s cubic-bezier(.34,1.56,.64,1);
 }
-@keyframes advPop{
+@keyframes fin_advPop{
   0%{transform:scale(.65) rotate(-12deg) translateY(8px);opacity:0}
   50%{transform:scale(1.18) rotate(3deg);color:#FFD700}
   85%{transform:scale(.95) rotate(-1deg)}
   100%{transform:scale(1) rotate(0) translateY(0);opacity:1;color:inherit}
 }
 #secFinanceTool .adv-box-val.updating{
-  animation:advShimmer .5s ease-in-out infinite;
+  animation:fin_advShimmer .5s ease-in-out infinite;
 }
-@keyframes advShimmer{
+@keyframes fin_advShimmer{
   0%,100%{opacity:1;transform:translateY(0)}
   50%{opacity:.5;transform:translateY(2px)}
 }
@@ -1717,9 +1717,9 @@
 #secFinanceTool .btn-whatsapp{width:100%;justify-content:center;background:var(--amber);border-color:var(--amber);margin-top:.6rem}
 #secFinanceTool .btn-whatsapp:hover{background:var(--amberDark);border-color:var(--amberDark)}
 #secFinanceTool .field-error{border-color:var(--red) !important;box-shadow:0 0 0 3px rgba(220,38,38,.1) !important}
-#secFinanceTool .field-error-msg{font-size:11px;color:var(--red);margin-top:5px;display:none;align-items:center;gap:5px;animation:slideDown .2s ease-out}
+#secFinanceTool .field-error-msg{font-size:11px;color:var(--red);margin-top:5px;display:none;align-items:center;gap:5px;animation:fin_slideDown .2s ease-out}
 #secFinanceTool .field-error-msg.show{display:flex}
-@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fin_slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 #secFinanceTool .validation-toast{
   position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-12px);
   background:#0F172A;color:#fff;padding:12px 18px;border-radius:12px;
@@ -1734,7 +1734,7 @@
   display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;
   background:#fff;border:1px solid var(--line);border-radius:14px;
   box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:170px;overflow-y:auto;overflow-x:hidden;
-  z-index:55;padding:6px;animation:dropdownOpen .22s cubic-bezier(.34,1.56,.64,1) forwards;
+  z-index:55;padding:6px;animation:fin_dropdownOpen .22s cubic-bezier(.34,1.56,.64,1) forwards;
 }
 #secFinanceTool .csd-item{
   display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;max-width:100%;
@@ -1747,15 +1747,15 @@
 #secFinanceTool .csd-item .csd-sub{font-size:11px;color:var(--ink4);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #secFinanceTool .csd-item .csd-color-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.12);transition:all .2s ease;transform:scale(1)}
 #secFinanceTool .csd-item:hover .csd-color-dot{transform:scale(1.2)}
-#secFinanceTool .csd-empty{padding:14px 12px;font-size:12px;color:var(--ink4);text-align:center;animation:fadeIn .2s ease}
+#secFinanceTool .csd-empty{padding:14px 12px;font-size:12px;color:var(--ink4);text-align:center;animation:fin_fadeIn .2s ease}
 #secFinanceTool .mobile-bar{
   
   position:fixed;left:0;right:0;bottom:0;z-index:50;background:#0F172A;
   color:#fff;padding:10px 14px;display:none;align-items:center;gap:10px;
   box-shadow:0 -8px 28px rgba(0,0,0,.18);border-top:1px solid rgba(255,255,255,.08);
-  animation:slideUpMobile .3s ease-out;
+  animation:fin_slideUpMobile .3s ease-out;
 }
-@keyframes slideUpMobile{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fin_slideUpMobile{from{transform:translateY(100%)}to{transform:translateY(0)}}
 #secFinanceTool .mobile-bar .emi-chunk{flex:1;min-width:0}
 #secFinanceTool .mobile-bar .lbl{font-size:8.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);white-space:nowrap}
 #secFinanceTool .mobile-bar .val{font-family:'Bebas Neue',cursive;font-size:1.25rem;letter-spacing:.02em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1769,16 +1769,16 @@
   position:fixed;inset:0;z-index:100;
   background:rgba(8,15,26,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
   display:none;align-items:flex-start;justify-content:center;
-  padding:24px 16px;overflow-y:auto;animation:fadeIn .2s ease;
+  padding:24px 16px;overflow-y:auto;animation:fin_fadeIn .2s ease;
 }
 #secFinanceTool #fin_previewOverlay.open{display:flex}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fin_fadeIn{from{opacity:0}to{opacity:1}}
 #secFinanceTool .preview-shell{
   width:100%;max-width:900px;background:#F1F5F9;border-radius:20px;
   overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.4);
-  animation:shellSlide .32s cubic-bezier(.16,1,.3,1) both;
+  animation:fin_shellSlide .32s cubic-bezier(.16,1,.3,1) both;
 }
-@keyframes shellSlide{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fin_shellSlide{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 #secFinanceTool .preview-toolbar{
   background:#0F172A;color:#fff;padding:14px 20px;
   display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
@@ -1798,8 +1798,8 @@
 #secFinanceTool .pbtn.close:hover{background:rgba(255,255,255,.16)}
 #secFinanceTool .preview-body{padding:20px;overflow-x:auto}
 #secFinanceTool .a4-page{display:none}
-#secFinanceTool .a4-page.active{display:block;animation:pageSlide .28s ease both}
-@keyframes pageSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+#secFinanceTool .a4-page.active{display:block;animation:fin_pageSlide .28s ease both}
+@keyframes fin_pageSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 #secFinanceTool .a4-paper{
   font-family:'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;
   font-size:12.5pt !important;color:#000 !important;background:#fff !important;
@@ -1966,9 +1966,9 @@
 #secFinanceTool .dobp-overlay.open{display:flex}
 #secFinanceTool .dobp-sheet{
     background:#fff;border-radius:18px;width:100%;max-width:420px;overflow:hidden;
-    box-shadow:0 30px 70px rgba(15,23,42,.3);animation:dobpIn .22s cubic-bezier(.34,1.56,.64,1);
+    box-shadow:0 30px 70px rgba(15,23,42,.3);animation:fin_dobpIn .22s cubic-bezier(.34,1.56,.64,1);
   }
-@keyframes dobpIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes fin_dobpIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
 #secFinanceTool .dobp-head{
     display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     padding:14px 16px;border-bottom:1px solid var(--line);
@@ -2011,9 +2011,9 @@
 #secFinanceTool .app-footer-note{font-size:11px;color:#B6BCC7}
 #secFinanceTool .greet-caret{
     display:inline-block;margin-left:1px;color:#005EA6;font-weight:400;
-    animation:greetBlink 1s step-end infinite;
+    animation:fin_greetBlink 1s step-end infinite;
   }
-@keyframes greetBlink{50%{opacity:0}}
+@keyframes fin_greetBlink{50%{opacity:0}}
 #secFinanceTool .event-popup-dot{
     width:7px; height:7px; border-radius:50%; background:#E2E8F0; border:none; padding:0; cursor:pointer;
     transition:all .2s ease;
@@ -2022,7 +2022,7 @@
 #secFinanceTool .no-scrollbar{ scrollbar-width:none; -ms-overflow-style:none; }
 #secFinanceTool .no-scrollbar::-webkit-scrollbar{ display:none; }
 #secFinanceTool .section-title{ font-family: 'Bebas Neue', cursive; line-height: 1; letter-spacing: 0.01em; color: #0F172A; }
-@keyframes slideIn { from{opacity:0;transform:translateY(16px) scale(.96);} to{opacity:1;transform:translateY(0) scale(1);} }
+@keyframes fin_slideIn { from{opacity:0;transform:translateY(16px) scale(.96);} to{opacity:1;transform:translateY(0) scale(1);} }
 
   /* ── Recondition ID: view-only sections ──────────────────────────────
      These pages are visible to a Recondition ID for reference, but every
