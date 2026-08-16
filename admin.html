@@ -731,6 +731,392 @@
   .chalan-pos-tab{ color:#7C8494; }
   .chalan-pos-tab:hover{ color:#1F2430; }
   .chalan-pos-tab.active{ background:#fff; color:#005EA6; box-shadow:0 1px 3px rgba(15,23,42,.1); }
+  /* ═══ EMI RATE SHEET — every rule scoped to #secSheetTool so this
+     section's styling stays inside it and can't restyle the panel. ═══ */
+#secSheetTool a{text-decoration:none;color:inherit}
+#secSheetTool{
+  --blue:#005EA6; --blueDark:#004A85; --blueLt:#E8F2FB;
+  --amber:#F59E0B; --amberDark:#D97706;
+  --green:#16A34A; --red:#DC2626;
+  --line:#E2E8F0; --bgSoft:#F8FAFC;
+  --ink:#0F172A; --ink2:#334155; --ink3:#64748B; --ink4:#94A3B8;
+  --mono:'JetBrains Mono',monospace;
+}
+#secSheetTool #sheetLoader{
+  position:fixed;inset:0;width:100%;height:100%;
+  background:radial-gradient(ellipse at 30% 20%,#0A6BB8 0%,#004A85 45%,#002E56 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;overflow:hidden;
+  transition:opacity .7s cubic-bezier(.4,0,.2,1),visibility .7s;
+  visibility:visible;opacity:1;
+}
+#secSheetTool #sheetLoader::before{
+  content:'';position:absolute;top:-120px;right:-100px;
+  width:460px;height:460px;
+  background:radial-gradient(circle,rgba(245,158,11,.18) 0%,transparent 70%);
+  border-radius:50%;animation:introGlowPulse 3.2s ease-in-out infinite;
+}
+#secSheetTool #sheetLoader::after{
+  content:'';position:absolute;bottom:-140px;left:-100px;
+  width:380px;height:380px;
+  background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);
+  border-radius:50%;
+}
+@keyframes introGlowPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.08)}}
+#secSheetTool #sheetLoader.fade-out{opacity:0;visibility:hidden}
+#secSheetTool .intro-grid{
+  position:absolute;inset:0;opacity:.07;
+  background-image:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),
+                    linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);
+  background-size:42px 42px;
+  animation:introGridDrift 9s linear infinite;
+}
+@keyframes introGridDrift{from{background-position:0 0}to{background-position:-84px -84px}}
+#secSheetTool .intro-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;}
+#secSheetTool .intro-logo-mark{
+  width:58px;height:58px;border-radius:16px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(-10px) scale(.85);
+  animation:introLogoIn .6s cubic-bezier(.34,1.56,.64,1) .05s forwards;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+  margin-bottom:18px;
+  color:#F59E0B;
+}
+@keyframes introLogoIn{to{opacity:1;transform:translateY(0) scale(1)}}
+#secSheetTool .intro-road{
+  position:relative;width:min(340px,74vw);height:96px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+#secSheetTool .intro-road-line{
+  position:absolute;bottom:24px;left:0;right:0;height:2px;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 18px,transparent 18px 34px);
+  overflow:hidden;
+}
+#secSheetTool .intro-road-line::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 18px,transparent 18px 34px);
+  transform:translateX(-34px);animation:introRoadScroll .55s linear infinite;
+}
+@keyframes introRoadScroll{to{transform:translateX(0)}}
+#secSheetTool .intro-speed-lines{
+  position:absolute;bottom:30px;left:50%;margin-left:-30px;width:60px;height:34px;
+  opacity:0;animation:introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards,introSpeedShow 2.3s ease forwards;
+}
+#secSheetTool .intro-speed-lines span{
+  position:absolute;height:2px;border-radius:2px;background:rgba(255,255,255,.55);
+  right:100%;opacity:0;animation:introSpeedFlick .5s ease-in-out infinite;
+}
+#secSheetTool .intro-speed-lines span:nth-child(1){top:4px;width:22px;animation-delay:.05s}
+#secSheetTool .intro-speed-lines span:nth-child(2){top:15px;width:32px;animation-delay:.12s}
+#secSheetTool .intro-speed-lines span:nth-child(3){top:26px;width:18px;animation-delay:.19s}
+@keyframes introSpeedFlick{0%{opacity:0;transform:translateX(0)}45%{opacity:.9}100%{opacity:0;transform:translateX(-14px)}}
+@keyframes introSpeedShow{0%,68%{opacity:0}74%{opacity:1}100%{opacity:0}}
+#secSheetTool .intro-bike-wrap{
+  position:absolute;bottom:14px;left:50%;margin-left:-39px;
+  animation:introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+}
+#secSheetTool .intro-bike-wrap svg{filter:drop-shadow(0 8px 14px rgba(0,0,0,.3))}
+#secSheetTool .bike-part{opacity:0;transform:scale(.55);transform-box:fill-box;transform-origin:center;animation:introPartIn .42s cubic-bezier(.34,1.56,.64,1) forwards}
+#secSheetTool .bike-part.bp-wheels{animation-delay:.05s}
+#secSheetTool .bike-part.bp-frame{animation-delay:.28s}
+#secSheetTool .bike-part.bp-panel{animation-delay:.5s}
+#secSheetTool .bike-part.bp-light{animation-delay:.72s}
+@keyframes introPartIn{to{opacity:1;transform:scale(1)}}
+#secSheetTool .intro-headlight{
+  animation:introHeadlightPulse .5s ease-in-out .9s infinite;
+  opacity:0;animation-fill-mode:forwards;
+}
+@keyframes introHeadlightPulse{0%{opacity:0}20%,100%{opacity:1}60%{opacity:.55}}
+#secSheetTool .intro-bike-shadow{
+  position:absolute;bottom:8px;left:50%;margin-left:-38px;width:76px;height:11px;
+  background:radial-gradient(ellipse,rgba(0,0,0,.32) 0%,transparent 75%);
+  border-radius:50%;opacity:0;
+  animation:introShadowFade .5s ease .05s forwards,introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+}
+@keyframes introShadowFade{to{opacity:.9}}
+@keyframes introRide{
+  0%{left:50%;margin-left:-39px}
+  68%{left:50%;margin-left:-39px}
+  80%{left:50%;margin-left:-39px}
+  100%{left:118%;margin-left:-39px}
+}
+#secSheetTool .intro-brand{
+  margin-top:22px;text-align:center;opacity:0;transform:translateY(14px);
+  animation:introTextIn .7s ease 1.55s forwards;
+}
+#secSheetTool .intro-brand .intro-name{
+  font-family:'Bebas Neue',cursive;font-size:clamp(1.9rem,6vw,2.6rem);
+  letter-spacing:.04em;color:#fff;line-height:1;
+}
+#secSheetTool .intro-brand .intro-name span{color:#F59E0B}
+#secSheetTool .intro-brand .intro-tag{
+  margin-top:6px;font-size:11px;font-weight:600;letter-spacing:.22em;
+  text-transform:uppercase;color:rgba(255,255,255,.65);
+}
+@keyframes introTextIn{to{opacity:1;transform:translateY(0)}}
+#secSheetTool .intro-progress{
+  margin-top:24px;display:flex;align-items:center;gap:10px;
+  opacity:0;animation:introFade .5s ease 1.7s forwards;
+}
+#secSheetTool .intro-bar{
+  width:130px;height:3px;border-radius:99px;
+  background:rgba(255,255,255,.18);overflow:hidden;
+}
+#secSheetTool .intro-bar-fill{
+  width:0%;height:100%;border-radius:99px;
+  background:linear-gradient(90deg,#F59E0B,#FBBF24);
+  animation:introFill 1.9s cubic-bezier(.4,0,.2,1) .15s forwards;
+}
+#secSheetTool .intro-percent{
+  font-size:11px;font-weight:700;letter-spacing:.03em;
+  color:rgba(255,255,255,.8);min-width:30px;font-variant-numeric:tabular-nums;
+}
+@keyframes introFade{to{opacity:1}}
+@keyframes introFill{to{width:100%}}
+#secSheetTool header{animation:slideDownFade .6s ease-out .2s both}
+#secSheetTool .fin-hero{animation:fadeInUp .7s ease-out .4s both}
+#secSheetTool main{animation:fadeInUp .8s ease-out .6s both}
+#secSheetTool .calc-card{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both;opacity:0}
+#secSheetTool .calc-card:nth-child(1){animation-delay:.8s}
+#secSheetTool .calc-card:nth-child(2){animation-delay:.95s}
+#secSheetTool .calc-card:nth-child(3){animation-delay:1.1s}
+#secSheetTool .sheet-wrap{animation:slideInRight .7s cubic-bezier(.34,1.56,.64,1) .9s both}
+#secSheetTool footer{animation:fadeInUp .6s ease-out 1.3s both}
+@keyframes slideDownFade{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{0%{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:none}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+#secSheetTool{animation-delay:inherit}
+@media(prefers-reduced-motion:reduce){#secSheetTool .calc-card, #secSheetTool .sheet-wrap, #secSheetTool header, #secSheetTool .fin-hero, #secSheetTool main, #secSheetTool footer{animation:none!important;opacity:1;transform:none!important}}
+#secSheetTool .nav-blur{background:rgba(255,255,255,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,94,166,0.08);box-shadow:0 2px 24px rgba(0,0,0,0.06)}
+#secSheetTool .nav-link{position:relative;font-size:0.875rem;font-weight:500;color:#374151;display:flex;align-items:center;gap:5px;transition:color 0.2s;padding:4px 2px}
+#secSheetTool .nav-link::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:#005EA6;border-radius:2px;transition:width 0.25s ease}
+#secSheetTool .nav-link:hover{color:#005EA6}
+#secSheetTool .nav-link:hover::after{width:100%}
+#secSheetTool .nav-link.active{color:#005EA6}
+#secSheetTool .nav-link.active::after{width:100%}
+#secSheetTool #mobile-menu{max-height:0;overflow:hidden;transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.28s ease;opacity:0}
+#secSheetTool #mobile-menu.open{max-height:640px;opacity:1}
+#secSheetTool .cta-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;border-radius:10px;padding:10px 20px;border:none;cursor:pointer;transition:background .2s,transform .15s;box-shadow:0 4px 14px rgba(0,94,166,.22)}
+#secSheetTool .cta-primary:hover{background:var(--blueDark)}
+#secSheetTool .custom-select{position:relative}
+#secSheetTool .sr-only-select{position:absolute;opacity:0;pointer-events:none;height:46px;width:100%;left:0;top:0}
+#secSheetTool .custom-select-trigger{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);padding:0 16px;font-size:14px;color:var(--ink);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif;text-align:left}
+#secSheetTool .custom-select-trigger:hover{border-color:#C9D6E3}
+#secSheetTool .custom-select-trigger.open{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1)}
+#secSheetTool .cst-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+#secSheetTool .cst-chevron{color:var(--ink3);font-size:12px;transition:transform .22s ease;margin-left:8px;flex-shrink:0}
+#secSheetTool .custom-select-trigger.open .cst-chevron{transform:rotate(180deg);color:var(--blue)}
+#secSheetTool .custom-select-panel{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:320px;overflow-y:auto;z-index:40;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);transform-origin:top center;transition:opacity .18s ease,transform .18s ease,visibility .18s;padding:6px}
+#secSheetTool .custom-select-panel.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+#secSheetTool .cst-option{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:background .15s;font-size:14px;color:var(--ink2);font-weight:500}
+#secSheetTool .cst-option:hover{background:var(--blueLt)}
+#secSheetTool .cst-option .cst-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .18s,background .18s}
+#secSheetTool .cst-option .cst-dot::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);opacity:0;transform:scale(.4);transition:opacity .15s,transform .15s}
+#secSheetTool .cst-option.selected{color:var(--ink);font-weight:700;background:var(--blueLt)}
+#secSheetTool .cst-option.selected .cst-dot{border-color:var(--blue)}
+#secSheetTool .cst-option.selected .cst-dot::after{opacity:1;transform:scale(1)}
+#secSheetTool .field-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;display:block}
+#secSheetTool input.styled{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);padding:0 14px;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
+#secSheetTool input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1)}
+#secSheetTool .fin-hero{background:linear-gradient(135deg,#F0F7FF 0%,#EBF4FF 55%,#DCEEFB 100%);position:relative;overflow:hidden}
+#secSheetTool .fin-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:420px;height:420px;background:radial-gradient(circle,rgba(0,94,166,.1) 0%,transparent 70%);border-radius:50%}
+#secSheetTool .fin-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(245,158,11,.08) 0%,transparent 70%);border-radius:50%}
+#secSheetTool .headline{font-family:'Bebas Neue',cursive;line-height:.95;letter-spacing:.01em}
+#secSheetTool .price-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,94,166,.28)}
+#secSheetTool .stat-chip{background:#fff;border:1px solid rgba(0,94,166,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+#secSheetTool .calc-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:1.4rem;box-shadow:0 2px 14px rgba(0,0,0,.04)}
+#secSheetTool .calc-card:has(.custom-select-panel.open){position:relative;z-index:60}
+#secSheetTool .calc-card.dropdown-open{position:relative;z-index:60}
+#secSheetTool .calc-card-title{display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:700;color:var(--ink);letter-spacing:.01em;margin-bottom:1.2rem;flex-wrap:wrap}
+#secSheetTool .calc-card-title .icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--blueLt);color:var(--blue);flex-shrink:0}
+#secSheetTool .acc-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:12px}
+@media (max-width:680px){#secSheetTool .acc-grid-4{grid-template-columns:1fr 1fr}}
+@media (max-width:380px){#secSheetTool .acc-grid-4{grid-template-columns:1fr}}
+#secSheetTool .acc-field{display:flex;flex-direction:column;gap:6px}
+#secSheetTool .acc-field label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:6px}
+#secSheetTool .acc-field label i{color:var(--blue);font-size:12px}
+#secSheetTool .acc-field input{border:none;border-bottom:1.5px solid var(--line);background:transparent;outline:none;font-size:15px;font-weight:700;color:var(--ink);padding:5px 2px;transition:border-color .18s;font-family:'DM Sans',sans-serif}
+#secSheetTool .acc-field input:focus{border-color:var(--blue)}
+#secSheetTool .acc-row-custom{display:flex;align-items:center;gap:8px;background:var(--bgSoft);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+#secSheetTool .acc-row-custom input.name{flex:1;border:none;background:transparent;font-size:13px;font-weight:600;color:var(--ink);outline:none}
+#secSheetTool .acc-row-custom input.amt{width:90px;border:none;background:transparent;font-size:13px;font-weight:700;color:var(--ink);outline:none;text-align:right}
+#secSheetTool .acc-remove{width:26px;height:26px;border-radius:8px;border:none;background:rgba(220,38,38,.08);color:var(--red);cursor:pointer;flex-shrink:0;font-size:12px;transition:background .15s}
+#secSheetTool .acc-remove:hover{background:rgba(220,38,38,.16)}
+#secSheetTool .acc-add-btn{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--blue);background:var(--blueLt);border:1px dashed rgba(0,94,166,.35);border-radius:10px;padding:8px 14px;cursor:pointer;transition:background .15s}
+#secSheetTool .acc-add-btn:hover{background:#DCEEFB}
+#secSheetTool .acc-total-chip{margin-left:auto;background:var(--blueLt);color:var(--blue);font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:.02em;padding:4px 14px;border-radius:999px}
+#secSheetTool .mode-toggle{display:inline-flex;background:var(--bgSoft);border:1.5px solid var(--line);border-radius:999px;padding:4px;gap:2px}
+#secSheetTool .mode-btn{border:none;background:transparent;color:var(--ink3);font-size:12.5px;font-weight:700;letter-spacing:.02em;padding:8px 18px;border-radius:999px;cursor:pointer;transition:background .2s,color .2s;display:flex;align-items:center;gap:7px}
+#secSheetTool .mode-btn i{font-size:11px}
+#secSheetTool .mode-btn.active{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(0,94,166,.28)}
+#secSheetTool .mode-btn:not(.active):hover{color:var(--blue)}
+#secSheetTool .summary-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem;margin-bottom:1.1rem}
+#secSheetTool .sum-pill{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 16px;display:flex;flex-direction:column;gap:2px;box-shadow:0 2px 10px rgba(0,0,0,.04);min-width:0}
+#secSheetTool .sum-pill .k{font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#secSheetTool .sum-pill .v{font-family:'Bebas Neue',cursive;font-size:1.15rem;color:var(--blue);letter-spacing:.02em}
+#secSheetTool .sheet-wrap{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 2px 14px rgba(0,0,0,.04);overflow:hidden}
+#secSheetTool .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative}
+#secSheetTool .table-scroll::-webkit-scrollbar{height:8px}
+#secSheetTool .table-scroll::-webkit-scrollbar-thumb{background:rgba(0,94,166,.3);border-radius:99px}
+#secSheetTool .sheet-table{border-collapse:collapse;width:100%;min-width:1180px;font-size:12.5px}
+#secSheetTool .sheet-table thead th{background:var(--blueDark);color:#fff;font-weight:700;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:12px 10px;text-align:center;white-space:nowrap;position:sticky;top:0;z-index:2;min-width:52px}
+#secSheetTool .sheet-table thead th:first-child, #secSheetTool .sheet-table tbody td:first-child{text-align:center}
+#secSheetTool .sheet-table thead th:nth-child(2), #secSheetTool .sheet-table tbody td:nth-child(2){text-align:left}
+#secSheetTool .sheet-table thead th .badge{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--amber);margin-top:2px;text-transform:none;letter-spacing:0}
+#secSheetTool .sheet-table tbody td{padding:10px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap;color:var(--ink2)}
+#secSheetTool .sheet-table tbody tr:nth-child(even){background:var(--bgSoft)}
+#secSheetTool .sheet-table tbody tr:hover{background:var(--blueLt)}
+#secSheetTool .sheet-table tbody td.model-cell{font-weight:700;color:var(--ink)}
+#secSheetTool .sheet-table tbody td.total-cell{font-weight:800;color:var(--blue);font-family:'JetBrains Mono',monospace}
+#secSheetTool .sheet-table tbody td:first-child{color:var(--ink4);font-weight:600}
+#secSheetTool .scroll-hint{display:none;align-items:center;justify-content:center;gap:8px;font-size:11.5px;font-weight:600;color:var(--ink3);padding:9px;background:var(--bgSoft);border-top:1px solid var(--line)}
+#secSheetTool .scroll-hint i{color:var(--blue)}
+#secSheetTool #previewOverlay{position:fixed;inset:0;z-index:100;background:rgba(8,15,26,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+#secSheetTool #previewOverlay.open{display:flex;animation:overlayIn .25s ease both}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+#secSheetTool .preview-shell{width:100%;max-width:1100px;background:#F1F5F9;border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.4);animation:shellIn .32s cubic-bezier(.16,1,.3,1) both}
+@keyframes shellIn{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+#secSheetTool .preview-toolbar{background:#0F172A;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+#secSheetTool .preview-toolbar .ptitle{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:.04em}
+#secSheetTool .preview-toolbar .ptitle i{color:var(--amber)}
+#secSheetTool .ptabs{display:flex;gap:6px;background:rgba(255,255,255,.06);padding:4px;border-radius:10px;flex-wrap:wrap}
+#secSheetTool .ptab{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;transition:all .18s;border:none;background:transparent}
+#secSheetTool .ptab.active{background:var(--blue);color:#fff}
+#secSheetTool .pactions{display:flex;gap:8px}
+#secSheetTool .pbtn{border:none;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .18s}
+#secSheetTool .pbtn.print{background:var(--amber);color:#0F172A}
+#secSheetTool .pbtn.print:hover{background:#FBBF24}
+#secSheetTool .pbtn.close{background:rgba(255,255,255,.08);color:#fff}
+#secSheetTool .pbtn.close:hover{background:rgba(255,255,255,.16)}
+#secSheetTool .preview-body{padding:20px;overflow-x:auto}
+#secSheetTool .pv-page{display:none}
+#secSheetTool .pv-page.active{display:block;animation:pageIn .28s ease both}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+#secSheetTool .a4l-paper{font-family:'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;background:#fff !important;width:297mm;min-height:210mm;height:210mm;padding:9mm 10mm;box-sizing:border-box;margin:0 auto;box-shadow:0 6px 40px rgba(0,0,0,.22);border:1px solid #ddd;display:flex;flex-direction:column;justify-content:center}
+#secSheetTool .pv-titlebar{flex:0 0 auto;text-align:center;color:#000;font-size:12pt;font-weight:700;margin-bottom:4mm}
+#secSheetTool .pv-tablewrap{flex:0 0 auto}
+#secSheetTool .pv-datebar{flex:0 0 auto;text-align:center;color:#000;font-size:9pt;margin-top:4mm}
+#secSheetTool .pv-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:9.2pt;color:#000;border:1px solid #000}
+#secSheetTool .pv-table th{background:#4C7A2A;color:#fff;padding:7px 4px;text-align:right;font-size:8.4pt;letter-spacing:.01em;word-wrap:break-word;border:0.75px solid #000}
+#secSheetTool .pv-table th:nth-child(1), #secSheetTool .pv-table td:nth-child(1){text-align:center;width:4%}
+#secSheetTool .pv-table th:nth-child(2), #secSheetTool .pv-table td:nth-child(2){text-align:left;width:17%}
+#secSheetTool .pv-table th:nth-child(n+3), #secSheetTool .pv-table td:nth-child(n+3){width:8.6%}
+#secSheetTool .pv-table td{padding:4px;border:0.5px solid #000;text-align:right;word-wrap:break-word;overflow-wrap:break-word}
+#secSheetTool .pv-table tr:nth-child(even){background:#D9D9D9}
+#secSheetTool .pv-table td.total-cell{font-weight:bold}
+@media print{#secSheetTool #sheetLoader{display:none !important}
+#secSheetTool{display:none !important}
+#secSheetTool #print-wrapper{display:block !important}
+#secSheetTool .print-page{width:297mm !important;min-height:210mm !important;height:210mm !important;padding:9mm 10mm !important;margin:0 auto !important;box-sizing:border-box !important;overflow:visible !important;page-break-after:always !important;break-after:page !important;page-break-inside:avoid !important;display:flex !important;flex-direction:column !important;justify-content:center !important;align-items:stretch !important}
+#secSheetTool .print-page:last-child{page-break-after:avoid !important;break-after:avoid !important}
+#secSheetTool @page{size:A4 landscape;margin:0}}
+#secSheetTool #print-wrapper{display:none}
+@media (max-width:1024px){#secSheetTool .controls-grid{grid-template-columns:1fr !important}}
+@media (max-width:768px){#secSheetTool .scroll-hint{display:flex}
+#secSheetTool .preview-body{padding:12px}}
+@media (max-width:480px){#secSheetTool .summary-strip{gap:.4rem}
+#secSheetTool .sum-pill{padding:7px 12px}}
+@media (min-width:1024px){#secSheetTool main > div{padding-left:32px;padding-right:32px}
+#secSheetTool .calc-card{padding:1.7rem 1.9rem;border-radius:20px;transition:box-shadow .25s,border-color .25s}
+#secSheetTool .calc-card:hover{box-shadow:0 8px 28px rgba(0,94,166,.08);border-color:rgba(0,94,166,.16)}
+#secSheetTool .calc-card-title{font-size:1.02rem;margin-bottom:1.5rem}
+#secSheetTool .controls-grid{gap:1.4rem}
+#secSheetTool .custom-select-trigger, #secSheetTool input.styled{height:48px}
+#secSheetTool .acc-grid-4{gap:1.3rem}
+#secSheetTool .summary-strip{gap:.85rem;margin-bottom:1.4rem}
+#secSheetTool .sum-pill{padding:12px 20px;border-radius:14px}
+#secSheetTool .sum-pill .v{font-size:1.3rem}
+#secSheetTool .sheet-wrap{border-radius:22px}
+#secSheetTool .sheet-table{font-size:13.5px}
+#secSheetTool .sheet-table thead th{padding:15px 12px;font-size:11px}
+#secSheetTool .sheet-table tbody td{padding:13px 10px}
+#secSheetTool .sheet-table tbody tr{transition:background .15s}
+#secSheetTool .fin-hero{padding-top:0}}
+@media (min-width:1440px){#secSheetTool main > div{max-width:1500px}
+#secSheetTool .sheet-table{font-size:14.5px}}
+#secSheetTool #sheetLoader{display:none!important}
+#secSheetTool .ftr-grid{grid-template-columns:1fr}
+@media(min-width:640px){#secSheetTool .ftr-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:1024px){#secSheetTool .ftr-grid{grid-template-columns:1fr 1fr 1fr 1fr}}
+#secSheetTool{ background:#F6F7F9; }
+#secSheetTool .app-shell{ display:flex; min-height:100vh; width:100%; }
+#secSheetTool .sidebar{
+    width:250px; flex-shrink:0; background:#fff; border-right:1px solid #E7E9EE;
+    display:flex; flex-direction:column; height:100vh; position:sticky; top:0;
+    z-index:60; transition:transform .25s ease;
+  }
+#secSheetTool .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:18px 18px 16px; border-bottom:1px solid #F0F1F4; flex-shrink:0; }
+#secSheetTool .sidebar-nav{ flex:1; overflow-y:auto; padding:14px 12px; display:flex; flex-direction:column; gap:2px; }
+#secSheetTool .sidebar-section-label{ font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#A6ACB9; padding:10px 10px 6px; }
+#secSheetTool .sidebar-link{
+    display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:10px;
+    font-size:13.5px; font-weight:600; color:#4B5262; text-decoration:none; cursor:pointer;
+    border:1px solid transparent; transition:background .15s ease, color .15s ease; position:relative;
+    background:none; width:100%; text-align:left; box-sizing:border-box;
+  }
+#secSheetTool .sidebar-link i{ width:16px; text-align:center; font-size:14px; color:#9AA1AF; transition:color .15s ease; flex-shrink:0; }
+#secSheetTool .sidebar-link:hover{ background:#F5F6F8; color:#1F2430; }
+#secSheetTool .sidebar-link:hover i{ color:#5B6270; }
+#secSheetTool .sidebar-link.active-link{ background:#EEF5FC; color:#005EA6; font-weight:700; }
+#secSheetTool .sidebar-link.active-link i{ color:#005EA6; }
+#secSheetTool .sidebar-link.active-link::before{
+    content:''; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+    width:3px; height:18px; border-radius:0 4px 4px 0; background:#005EA6;
+  }
+#secSheetTool .sidebar-foot{ padding:14px; border-top:1px solid #F0F1F4; flex-shrink:0; }
+#secSheetTool .sidebar{ transition:transform .25s ease, width .25s ease, opacity .2s ease; }
+@media (min-width: 901px){#secSheetTool .sidebar.collapsed{ width:0; min-width:0; border-right:none; opacity:0; pointer-events:none; }}
+#secSheetTool .sidebar-overlay{ display:none; }
+@media (max-width: 900px){#secSheetTool .sidebar{ position:fixed; left:0; top:0; transform:translateX(-100%); box-shadow:0 20px 60px rgba(15,23,42,.25); }
+#secSheetTool .sidebar.open{ transform:translateX(0); }
+#secSheetTool .sidebar-overlay{
+      display:none; position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:59;
+      backdrop-filter:blur(2px); opacity:0; transition:opacity .2s ease;
+    }
+#secSheetTool .sidebar-overlay.open{ display:block; opacity:1; }}
+#secSheetTool .main-col{ flex:1; min-width:0; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+#secSheetTool .main-scroll{ flex:1 1 auto; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
+#secSheetTool .topbar{
+    position:sticky; top:0; z-index:40; height:64px; flex-shrink:0;
+    background:rgba(255,255,255,.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid #E7E9EE; display:flex; align-items:center; gap:14px; padding:0 18px;
+  }
+#secSheetTool .topbar-menu-btn{
+    width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    color:#5B6270; background:#F5F6F8; border:1px solid #E7E9EE; cursor:pointer; flex-shrink:0; transition:all .15s;
+  }
+#secSheetTool .topbar-menu-btn:hover{ background:#EEF0F3; }
+#secSheetTool .topbar-title{ min-width:0; }
+#secSheetTool .topbar-title .eyebrow{ font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#9AA1AF; }
+#secSheetTool .topbar-title .heading{ font-size:15px; font-weight:800; color:#1F2430; line-height:1.1; margin-top:1px; }
+#secSheetTool .topbar-icon-btn{
+    width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    color:#5B6270; background:#fff; border:1px solid #E7E9EE; cursor:pointer; transition:all .15s ease; flex-shrink:0; text-decoration:none;
+  }
+#secSheetTool .topbar-icon-btn:hover{ background:#F5F6F8; border-color:#D7DBE3; color:#1F2430; }
+#secSheetTool .app-footer{
+    margin-top:28px;padding:16px 20px;border-top:1px solid #E7E9EE;background:#fff;
+    display:flex;flex-direction:column;gap:3px;align-items:center;text-align:center;
+    font-size:11.5px;color:#94A3B8;
+  }
+#secSheetTool .app-footer-note{font-size:11px;color:#B6BCC7}
+#secSheetTool .greet-caret{
+    display:inline-block;margin-left:1px;color:#005EA6;font-weight:400;
+    animation:greetBlink 1s step-end infinite;
+  }
+@keyframes greetBlink{50%{opacity:0}}
+#secSheetTool .event-popup-dot{
+    width:7px; height:7px; border-radius:50%; background:#E2E8F0; border:none; padding:0; cursor:pointer;
+    transition:all .2s ease;
+  }
+#secSheetTool .event-popup-dot.active{ background:#005EA6; width:20px; border-radius:4px; }
+#secSheetTool .no-scrollbar{ scrollbar-width:none; -ms-overflow-style:none; }
+#secSheetTool .no-scrollbar::-webkit-scrollbar{ display:none; }
+#secSheetTool .section-title{ font-family: 'Bebas Neue', cursive; line-height: 1; letter-spacing: 0.01em; color: #0F172A; }
+@keyframes slideIn { from{opacity:0;transform:translateY(16px) scale(.96);} to{opacity:1;transform:translateY(0) scale(1);} }
+
   /* ── Recondition ID: view-only sections ──────────────────────────────
      These pages are visible to a Recondition ID for reference, but every
      control that would change something is removed rather than left to
@@ -1092,6 +1478,10 @@
         </button>
         <button id="navStorage" onclick="switchSec('storage');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Storage">
           <i class="fas fa-chart-pie"></i> Storage
+        </button>
+        <div class="sidebar-section-label">Finance Tool</div>
+        <button id="navSheetTool" onclick="switchSec('sheetTool');closeMobileMenu()" class="nav-tab sidebar-link" data-label="EMI Rate Sheet">
+          <i class="fas fa-table"></i> EMI Rate Sheet
         </button>
         <div class="sidebar-section-label">Dealership</div>
         <button id="navPrice" onclick="switchSec('price');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Price List">
@@ -2980,6 +3370,129 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- ═══ EMI RATE SHEET (native section) ═══ -->
+    <div class="sec-panel" id="secSheetTool">
+
+  <div style="max-width:1400px;margin:0 auto;padding:20px 20px 56px">
+
+    <!-- ══════════ CONTROLS ══════════ -->
+    <div class="calc-card" style="margin-bottom:20px">
+      <div class="calc-card-title">
+        <span class="icon"><i class="fa-solid fa-sliders"></i></span>Sheet Settings
+        <div class="mode-toggle" id="modeToggle" role="tablist" aria-label="Sheet mode">
+          <button type="button" class="mode-btn active" id="modeIndoorBtn" data-mode="indoor" role="tab" aria-selected="true">
+            <i class="fa-solid fa-house"></i> Indoor
+          </button>
+          <button type="button" class="mode-btn" id="modeOutdoorBtn" data-mode="outdoor" role="tab" aria-selected="false">
+            <i class="fa-solid fa-sun"></i> Outdoor
+          </button>
+        </div>
+        <button class="acc-add-btn" style="margin-left:auto" onclick="openPreview()"><i class="fa-solid fa-print"></i> Print Preview</button>
+      </div>
+
+      <div class="controls-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1.6fr;gap:1rem;align-items:start">
+
+        <div>
+          <label class="field-label">Downpayment %</label>
+          <div class="custom-select" id="dpPercentWrap">
+            <select id="dpPercent" class="sr-only-select" tabindex="-1" aria-hidden="true">
+              <option value="">Loading…</option>
+            </select>
+            <button type="button" class="custom-select-trigger" id="dpPercentTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="cst-text" id="dpPercentTriggerText">Loading…</span>
+              <i class="fa-solid fa-chevron-down cst-chevron"></i>
+            </button>
+            <div class="custom-select-panel" id="dpPercentPanel" role="listbox"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label">Loan Tenure</label>
+          <div class="custom-select" id="tenureWrap">
+            <select id="tenure" class="sr-only-select" tabindex="-1" aria-hidden="true">
+              <option value="">Loading…</option>
+            </select>
+            <button type="button" class="custom-select-trigger" id="tenureTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="cst-text" id="tenureTriggerText">Loading…</span>
+              <i class="fa-solid fa-chevron-down cst-chevron"></i>
+            </button>
+            <div class="custom-select-panel" id="tenurePanel" role="listbox"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label">Registration / Namsari</label>
+          <input type="number" id="namsariInput" class="styled" value="3000">
+        </div>
+
+        <div style="grid-column:span 1">
+          <label class="field-label">Interest Rate (auto, by DP%)</label>
+          <div style="height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);display:flex;align-items:center;padding:0 14px;font-family:'Bebas Neue',cursive;font-size:1.2rem;color:var(--blue);letter-spacing:.02em">
+            <span id="rateDisplay">--</span>%&nbsp;<span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--ink4);margin-left:8px">fixed for this DP tier</span>
+          </div>
+        </div>
+
+      </div>
+      <p id="outdoorHint" style="display:none;font-size:11px;color:var(--ink4);font-style:italic;margin-top:10px">Finance Insurance is pulled per model from the price list (Admin Panel) — not manual here.</p>
+    </div>
+
+    <!-- ══════════ ACCESSORIES ══════════ -->
+    <div class="calc-card" style="margin-bottom:20px" id="accessoriesCard">
+      <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-helmet-safety"></i></span>Accessories Bundle
+        <span class="acc-total-chip" id="accTotalChip">Rs. 4,950</span>
+      </div>
+      <div class="acc-grid-4">
+        <!-- display:contents lets the dynamically-rendered fields flow into
+             this same grid, so "Others" lines up with them instead of
+             starting a new row in a second grid. -->
+        <div id="accDynamicGrid" style="display:contents"><!-- populated live from admin's Accessories Inventory --></div>
+        <div class="acc-field"><label><i class="fa-solid fa-plus"></i> Others</label><input type="number" id="accOthers" value="0" inputmode="numeric" placeholder="Manual amount"></div>
+      </div>
+      <div id="customAccList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
+      <button class="acc-add-btn" onclick="addCustomAccessory()"><i class="fa-solid fa-plus"></i> Add Item</button>
+      <p style="font-size:11px;color:var(--ink4);font-style:italic;margin-top:8px">Increase, reduce, or remove items — the Total column on the sheet updates for every model at once.</p>
+    </div>
+
+    <!-- ══════════ SUMMARY STRIP ══════════ -->
+    <div class="summary-strip">
+      <div class="sum-pill"><span class="k">Mode</span><span class="v" id="sumMode">Indoor</span></div>
+      <div class="sum-pill"><span class="k">Downpayment</span><span class="v" id="sumDp">--</span></div>
+      <div class="sum-pill"><span class="k">Interest Rate</span><span class="v" id="sumRate">--</span></div>
+      <div class="sum-pill"><span class="k">Tenure</span><span class="v" id="sumTenure">--</span></div>
+      <div class="sum-pill" id="sumAccPill"><span class="k">Accessories</span><span class="v" id="sumAcc">Rs. 4,950</span></div>
+      <div class="sum-pill"><span class="k">Namsari</span><span class="v" id="sumNamsari">Rs. 3,000</span></div>
+      <div class="sum-pill"><span class="k">Models Listed</span><span class="v" id="sumCount">0</span></div>
+    </div>
+
+    <!-- ══════════ SHEET TABLE ══════════ -->
+    <div class="sheet-wrap">
+      <div class="table-scroll">
+        <table class="sheet-table" id="mainSheetTable">
+          <thead id="sheetHead"></thead>
+          <tbody id="sheetBody"></tbody>
+        </table>
+      </div>
+      <div class="scroll-hint"><i class="fa-solid fa-arrows-left-right"></i> Scroll sideways to see all columns</div>
+    </div>
+
+  </div>
+
+<div id="previewOverlay" onclick="if(event.target===this) closePreview()">
+  <div class="preview-shell">
+    <div class="preview-toolbar">
+      <div class="ptitle"><i class="fa-solid fa-file-lines"></i> Sheet Preview — <span id="pvSubtitle">Downpayment</span></div>
+      <div class="ptabs" id="pvTabs"></div>
+      <div class="pactions">
+        <button class="pbtn print" onclick="printAllTenures()"><i class="fa-solid fa-print"></i> Print All Tenures</button>
+        <button class="pbtn close" onclick="closePreview()"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+    <div class="preview-body" id="pvBody"></div>
+  </div>
+</div>
+<div id="print-wrapper"></div>
     </div>
 
     <!-- ═══ ACTIVITY LOG ═══ -->
@@ -5000,8 +5513,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
-  const MNAV_IDS = { dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', hhstock:'mNavHHStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
+  const NAV_IDS = { sheetTool:'navSheetTool', dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
+  const MNAV_IDS = { sheetTool:'mNavSheetTool', dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', hhstock:'mNavHHStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -5316,7 +5829,7 @@ async function loadProfile(uid) {
     if(teamBtn) teamBtn.classList.remove('hidden'); // everyone can view the team; only Master ID can manage it
     // Activity Log shows EVERYONE's actions across the whole system — a
     // Normal ID only gets to see their own via "My Activity" in Profile.
-    const ALL_NAV_IDS = ['navDashboard','navPrice','navInv','navHHInv','navAllInv','navExchange','navExchangeSr',
+    const ALL_NAV_IDS = ['navSheetTool','navDashboard','navPrice','navInv','navHHInv','navAllInv','navExchange','navExchangeSr',
       'navCustomers','navFin','navAcc','navDocs','navStorage','navEvents','navStock','navHHStock','navChalans',
       'navHistory','navTrash','navImportant','navModelAliases'];
     ALL_NAV_IDS.forEach(id=>document.getElementById(id)?.classList.remove('hidden'));
@@ -5369,6 +5882,7 @@ async function loadProfile(uid) {
     // path too, as defense-in-depth in case a section is ever reached
     // some other way.
     const RECON_NAV_MAP = {
+      sheetTool:'navSheetTool',
       dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv',
       exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc',
       docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock',
@@ -11174,6 +11688,783 @@ document.getElementById('exSrImportExcelBtn').addEventListener('click', async ()
 
 
 
+/* ═══════════════════════════════════════════════════════════════════════
+   EMI RATE SHEET — the former standalone page, now a native section.
+   Wrapped in an IIFE inside this module: its declarations stay private,
+   and it inherits the panel's existing Firestore connection. Only the
+   handlers its own markup calls are published to window.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function(){
+  const onSheetReady = fn => (document.readyState === 'loading')
+    ? document.addEventListener('DOMContentLoaded', fn)
+    : fn();
+
+/* Intro overlay is hidden unconditionally on this page (see #sheetLoader
+   CSS) — no need to wait out the old 2.3s animation timer before marking
+   the page ready. */
+onSheetReady(() => {
+  document.body.classList.add('site-loaded');
+});
+
+/* ══════════ Hamburger ══════════ */
+/* Old top-nav hamburger removed — the sidebar shell owns navigation now. */
+
+/* ══════════ Bike catalogue — loaded live from Firebase only. No hardcoded fallback:
+   if the connection fails, the sheet stays blank rather than showing stale prices. ══════════ */
+let BIKES=[];
+let financeCategories=[]; // {id,name,accessoryNames:[...]} — managed from admin's Model Categories
+
+/* ══════════ Finance schemes (admin-controlled: Down Payment % / Interest Rate / Tenure)
+   Mirrors the same finance_schemes collection & lookup logic used in finance.html,
+   so both pages always agree with what's set in the Admin Panel. ══════════ */
+let financeSchemes=[];
+
+function buildFinanceSchemeMap(){
+  // This map drives the DP%/Tenure PICKER only — it unions tenures across every
+  // category at the same Down Payment % so a valid Bike tenure (e.g. 60mo) is
+  // never hidden from the dropdown just because a Scooter scheme shares that DP%.
+  // The interest-rate badge shown for a DP% still reflects whichever scheme was
+  // saved most recently at that DP% (categories can carry different rates —
+  // each row below is priced with ITS OWN category's rate, not this badge).
+  const sorted=[...financeSchemes].sort((a,b)=>{
+    const ta=a.createdAt?.toMillis?a.createdAt.toMillis():0;
+    const tb=b.createdAt?.toMillis?b.createdAt.toMillis():0;
+    return ta-tb;
+  });
+  const map=new Map();
+  sorted.forEach(f=>{
+    const dp=Number(f.downPay);
+    if(!Number.isFinite(dp)) return;
+    const tenures=Array.isArray(f.tenures)?f.tenures.map(Number).filter(t=>t>0):[];
+    const existing=map.get(dp);
+    if(existing){
+      existing.tenures=[...new Set([...existing.tenures,...tenures])].sort((a,b)=>a-b);
+      existing.rate=Number(f.rate)||existing.rate;
+    }else{
+      map.set(dp,{ rate:Number(f.rate)||0, tenures:[...new Set(tenures)].sort((a,b)=>a-b) });
+    }
+  });
+  return map;
+}
+
+function buildFinanceSchemeMapByCategory(){
+  // Per-category map (Bike / Scooter / ...) — this is what actually prices each
+  // row, so a Scooter scheme never borrows a Bike's rate or tenure list (or
+  // vice-versa) even when both share the same Down Payment %.
+  const sorted=[...financeSchemes].sort((a,b)=>{
+    const ta=a.createdAt?.toMillis?a.createdAt.toMillis():0;
+    const tb=b.createdAt?.toMillis?b.createdAt.toMillis():0;
+    return ta-tb;
+  });
+  const byCat={};
+  sorted.forEach(f=>{
+    const dp=Number(f.downPay);
+    if(!Number.isFinite(dp)) return;
+    const cat=f.category||'Bike';
+    if(!byCat[cat]) byCat[cat]=new Map();
+    const tenures=Array.isArray(f.tenures)?f.tenures.map(Number).filter(t=>t>0):[];
+    byCat[cat].set(dp,{ rate:Number(f.rate)||0, tenures:[...new Set(tenures)].sort((a,b)=>a-b) });
+  });
+  return byCat;
+}
+
+function financeEntryFor(category,dp){
+  const byCat=buildFinanceSchemeMapByCategory();
+  const map=byCat[category]||byCat['Bike'];
+  const dpNum=Number(dp);
+  if(!map||!map.size) return {rate:0,tenures:[]};
+  if(map.has(dpNum)) return map.get(dpNum);
+  const dps=[...map.keys()].sort((a,b)=>a-b);
+  let nearest=dps.filter(d=>d<=dpNum).pop();
+  if(nearest===undefined) nearest=dps[0];
+  return map.get(nearest);
+}
+
+function rateForDp(dp){
+  const map=buildFinanceSchemeMap();
+  const dpNum=Number(dp);
+  if(map.has(dpNum)) return map.get(dpNum).rate;
+  if(map.size){
+    const dps=[...map.keys()].sort((a,b)=>a-b);
+    let nearest=dps.filter(d=>d<=dpNum).pop();
+    if(nearest===undefined) nearest=dps[0];
+    return map.get(nearest).rate;
+  }
+  return 0; // no schemes configured yet in Admin Panel
+}
+
+function renderTenureOptionsForDp(dp,mapOverride){
+  const map=mapOverride||buildFinanceSchemeMap();
+  const tenureSelect=document.getElementById('tenure');
+  if(!tenureSelect) return;
+  const scheme=map.get(Number(dp));
+  const tenures=(scheme&&scheme.tenures.length)?scheme.tenures:[12];
+  const prevTenure=Number(tenureSelect.value)||null;
+  tenureSelect.innerHTML=tenures.map(t=>`<option value="${t}">${t} Months</option>`).join('');
+  const targetTenure=tenures.includes(prevTenure)?prevTenure:tenures[0];
+  tenureSelect.value=String(targetTenure);
+  buildCustomSelect('tenure');
+}
+
+function currentSchemeTenures(dp){
+  const scheme=buildFinanceSchemeMap().get(Number(dp));
+  return (scheme&&scheme.tenures.length)?scheme.tenures:[12];
+}
+
+function renderFinanceSchemeUI(){
+  const map=buildFinanceSchemeMap();
+  const dpValues=[...map.keys()].sort((a,b)=>a-b);
+  const dpSelect=document.getElementById('dpPercent');
+  if(!dpSelect||!dpValues.length) return; // no schemes yet in Firestore — keep "Loading…" state
+
+  const prevSelectedDp=Number(dpSelect.value)||null;
+  dpSelect.innerHTML=dpValues.map(dp=>`<option value="${dp}">${dp}%</option>`).join('');
+  const targetDp=dpValues.includes(prevSelectedDp)?prevSelectedDp:(dpValues.includes(50)?50:dpValues[0]);
+  dpSelect.value=String(targetDp);
+  buildCustomSelect('dpPercent');
+
+  renderTenureOptionsForDp(targetDp,map);
+  recalcAll();
+}
+
+/* ══════════ Indoor / Outdoor mode ══════════
+   Indoor  = current default sheet: Insurance + Accessories + Namsari, unchanged.
+   Outdoor = matches the printed office sheet format: Insurance + Finance Insurance
+             columns, no Accessories column/amount at all. */
+let sheetMode='indoor';
+
+function setMode(mode){
+  sheetMode=mode;
+  document.getElementById('modeIndoorBtn').classList.toggle('active',mode==='indoor');
+  document.getElementById('modeOutdoorBtn').classList.toggle('active',mode==='outdoor');
+  document.getElementById('modeIndoorBtn').setAttribute('aria-selected',mode==='indoor');
+  document.getElementById('modeOutdoorBtn').setAttribute('aria-selected',mode==='outdoor');
+  document.getElementById('accessoriesCard').style.display=mode==='indoor'?'block':'none';
+  document.getElementById('outdoorHint').style.display=mode==='outdoor'?'block':'none';
+  document.getElementById('sumAccPill').style.display=mode==='indoor'?'flex':'none';
+  document.getElementById('sumMode').textContent=mode==='indoor'?'Indoor':'Outdoor';
+  recalcAll();
+}
+document.getElementById('modeIndoorBtn').addEventListener('click',()=>setMode('indoor'));
+document.getElementById('modeOutdoorBtn').addEventListener('click',()=>setMode('outdoor'));
+
+/* ══════════ Custom dropdowns ══════════ */
+const CUSTOM_SELECT_IDS=['dpPercent','tenure'];
+function buildCustomSelect(selectId){
+  const real=document.getElementById(selectId);
+  const panel=document.getElementById(selectId+'Panel');
+  if(!real||!panel) return;
+  panel.innerHTML='';
+  Array.from(real.options).forEach((opt,i)=>{
+    const item=document.createElement('div');
+    item.className='cst-option'+(opt.selected?' selected':'');
+    item.setAttribute('role','option'); item.dataset.index=i;
+    item.innerHTML=`<span class="cst-dot"></span><span>${opt.text}</span>`;
+    item.addEventListener('click',()=>{
+      real.selectedIndex=i;
+      real.dispatchEvent(new Event('input',{bubbles:true}));
+      syncCustomSelectUI(selectId); closeCustomSelect(selectId);
+    });
+    panel.appendChild(item);
+  });
+  syncCustomSelectUI(selectId);
+}
+function syncCustomSelectUI(selectId){
+  const real=document.getElementById(selectId);
+  const triggerText=document.getElementById(selectId+'TriggerText');
+  const panel=document.getElementById(selectId+'Panel');
+  if(!real||!triggerText) return;
+  const opt=real.options[real.selectedIndex];
+  triggerText.textContent=opt?opt.text:'Select';
+  panel?.querySelectorAll('.cst-option').forEach(el=>el.classList.toggle('selected',Number(el.dataset.index)===real.selectedIndex));
+}
+function openCustomSelect(id){
+  document.getElementById(id+'Panel')?.classList.add('open');
+  document.getElementById(id+'Trigger')?.classList.add('open');
+  document.getElementById(id+'Trigger')?.setAttribute('aria-expanded','true');
+  document.getElementById(id+'Wrap')?.closest('.calc-card')?.classList.add('dropdown-open');
+}
+function closeCustomSelect(id){
+  document.getElementById(id+'Panel')?.classList.remove('open');
+  document.getElementById(id+'Trigger')?.classList.remove('open');
+  document.getElementById(id+'Trigger')?.setAttribute('aria-expanded','false');
+  document.getElementById(id+'Wrap')?.closest('.calc-card')?.classList.remove('dropdown-open');
+}
+function closeAllCustomSelects(except){CUSTOM_SELECT_IDS.forEach(id=>{if(id!==except) closeCustomSelect(id);});}
+CUSTOM_SELECT_IDS.forEach(id=>{
+  document.getElementById(id+'Trigger')?.addEventListener('click',e=>{
+    e.stopPropagation();
+    const panel=document.getElementById(id+'Panel');
+    const wasOpen=panel?.classList.contains('open');
+    closeAllCustomSelects();
+    if(!wasOpen) openCustomSelect(id);
+  });
+});
+document.addEventListener('click',e=>{
+  CUSTOM_SELECT_IDS.forEach(id=>{const wrap=document.getElementById(id+'Wrap'); if(wrap&&!wrap.contains(e.target)) closeCustomSelect(id);});
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAllCustomSelects();closePreview();}});
+
+/* ══════════ Accessories: custom add/remove rows (Indoor only) ══════════ */
+let customAccessories=[]; // {id,name,amount}
+let customAccSeq=0;
+function addCustomAccessory(name,amount){
+  const id='ca'+(++customAccSeq);
+  customAccessories.push({id,name:name||'',amount:amount||0});
+  renderCustomAccessories();
+  recalcAll();
+}
+function removeCustomAccessory(id){
+  customAccessories=customAccessories.filter(a=>a.id!==id);
+  renderCustomAccessories();
+  recalcAll();
+}
+function renderCustomAccessories(){
+  const box=document.getElementById('customAccList');
+  box.innerHTML='';
+  customAccessories.forEach(item=>{
+    const row=document.createElement('div');
+    row.className='acc-row-custom';
+    row.innerHTML=`
+      <input class="name" type="text" placeholder="Item name" value="${escAttrSheet(item.name)}">
+      <input class="amt" type="number" placeholder="0" value="${item.amount}">
+      <button class="acc-remove" title="Remove"><i class="fa-solid fa-xmark"></i></button>`;
+    row.querySelector('.name').addEventListener('input',e=>{item.name=e.target.value;});
+    row.querySelector('.amt').addEventListener('input',e=>{item.amount=parseFloat(e.target.value)||0;recalcAll();});
+    row.querySelector('.acc-remove').addEventListener('click',()=>removeCustomAccessory(item.id));
+    box.appendChild(row);
+  });
+}
+function normalizeAccName(s){ return (s||'').toLowerCase().replace(/[^a-z]/g,''); }
+function categoryAllowsAccessory(bike, accessoryName){
+  const cat = financeCategories.find(c => c.name === (bike?.category || 'Bike'));
+  if(!cat) return true; // category doesn't exist at all — harmless fallback
+  if(!Array.isArray(cat.accessoryNames) || !cat.accessoryNames.length) return false; // nothing selected for this category = none apply
+  const target = normalizeAccName(accessoryName);
+  // Normalized match — the Accessories Inventory item may be saved as
+  // "Legguard" (one word) while this code refers to it as "Leg Guard".
+  return cat.accessoryNames.some(n => normalizeAccName(n) === target);
+}
+let accessoriesCatalog=[]; // [{name, price}] excluding Namsari — from Firestore "accessories" collection, admin-managed
+function slugifyAccName(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'item'; }
+function escAttrSheet(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;'); }
+// These fields are global (one price per accessory, shared across every row
+// in the table) — which rows actually ADD that price is decided per-bike in
+// accessoriesTotal() below via each row's own category.
+function renderAccessoryFields(){
+  const grid=document.getElementById('accDynamicGrid');
+  if(!grid) return;
+  grid.innerHTML = accessoriesCatalog.map(item=>{
+    const id='acc_'+slugifyAccName(item.name);
+    return `<div class="acc-field"><label><i class="fa-solid fa-circle-dot"></i> ${escAttrSheet(item.name)}</label><input type="number" id="${id}" data-acc-name="${escAttrSheet(item.name)}" value="${item.price}" inputmode="numeric"></div>`;
+  }).join('') || `<div style="font-size:12px;color:var(--ink4)">No accessories in the catalog yet.</div>`;
+}
+function accessoriesTotal(bike){
+  // Every accessory configured for this bike's category (admin's Model
+  // Categories → Accessories checklist) applies to every bike in that
+  // category — no per-bike exceptions.
+  const base=Array.from(document.querySelectorAll('#accDynamicGrid input[data-acc-name]')).reduce((sum,el)=>{
+    const name=el.dataset.accName;
+    if(!categoryAllowsAccessory(bike,name)) return sum;
+    return sum+(parseFloat(el.value)||0);
+  },0) + (parseFloat(document.getElementById('accOthers')?.value)||0);
+  const custom=customAccessories.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
+  return base+custom;
+}
+
+/* ══════════ Core row calculation (mirrors finance.html EMI/rounding logic) ══════════
+   mode='indoor'  -> insurance-like cost = bike.insurance + accessories total
+   mode='outdoor' -> insurance-like cost = this bike's own financeInsurance ONLY
+                     (displayed as the "Insurance" column; raw Insurance is not shown
+                     or added here — avoids double counting) */
+function computeRow(bike,dpPct,tenure,namsari,accTotal,mode){
+  const dpAmt=bike.price*(dpPct/100);
+  const loanAmt=bike.price-dpAmt;
+  const entry=financeEntryFor(bike.category||'Bike',dpPct);
+  const rate=entry.rate;
+  // If this bike's own category has no scheme configured yet, don't block it —
+  // only flag when the category DOES have tenures defined and this one isn't in them
+  // (e.g. Scooter capped at 36mo, sheet-wide tenure set to 48mo).
+  const tenureOk=entry.tenures.length ? entry.tenures.includes(Number(tenure)) : true;
+  const monthlyRate=(rate/12)/100;
+  const emi=(tenureOk && loanAmt>0)
+    ? (monthlyRate>0
+        ? (loanAmt*monthlyRate*Math.pow(1+monthlyRate,tenure))/(Math.pow(1+monthlyRate,tenure)-1)
+        : loanAmt/tenure)
+    : 0;
+  const financeInsurance=parseFloat(bike.financeInsurance)||0;
+  const rawTotal=mode==='indoor'
+    ? dpAmt+namsari+bike.insurance+emi+accTotal
+    : dpAmt+namsari+financeInsurance+emi;
+  const lastThree=rawTotal%1000;
+  const autoRounding=lastThree>0 ? (1000-lastThree) : 0;
+  const advanceEmi=emi+autoRounding;
+  const total=rawTotal+autoRounding;
+  return {dpAmt,loanAmt,insurance:bike.insurance,financeInsurance,emi,advanceEmi,total,rate,tenureOk};
+}
+const fmt=n=>Math.round(n).toLocaleString('en-IN');
+const fmtDec=n=>Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+/* ══════════ Table headers per mode ══════════ */
+function renderSheetHead(s){
+  const head=document.getElementById('sheetHead');
+  if(s.mode==='indoor'){
+    head.innerHTML=`<tr>
+      <th>S.N</th><th>Model</th><th>Price</th>
+      <th>DP Amount <span class="badge">${s.dp}%</span></th>
+      <th>Loan Amount</th><th>Insurance</th>
+      <th>Monthly EMI <span class="badge">${s.rate.toFixed(2)}%</span></th>
+      <th>Advance EMI <span class="badge">${s.tenure} mo</span></th>
+      <th>Accessories</th><th>Namsari</th><th>Total Downpayment</th>
+    </tr>`;
+  }else{
+    head.innerHTML=`<tr>
+      <th>S.N</th><th>Model</th><th>Price</th>
+      <th>DP Amount <span class="badge">${s.dp}%</span></th>
+      <th>Loan Amount</th><th>Insurance</th>
+      <th>Monthly EMI <span class="badge">${s.rate.toFixed(2)}%</span></th>
+      <th>Advance EMI <span class="badge">${s.tenure} mo</span></th>
+      <th>Namsari</th><th>Total Downpayment</th>
+    </tr>`;
+  }
+}
+
+/* ══════════ Render main sheet ══════════ */
+function currentSettings(){
+  const dp=parseFloat(document.getElementById('dpPercent').value)||0;
+  const tenure=parseFloat(document.getElementById('tenure').value)||12;
+  const namsari=parseFloat(document.getElementById('namsariInput').value)||0;
+  const acc=accessoriesTotal();
+  const rate=rateForDp(dp);
+  const mode=sheetMode;
+  return {dp,tenure,namsari,acc,rate,mode};
+}
+function recalcAll(){
+  const s=currentSettings();
+  const schemesReady=financeSchemes.length>0 && s.dp>0;
+
+  document.getElementById('rateDisplay').textContent=schemesReady?s.rate.toFixed(2):'--';
+  document.getElementById('accTotalChip').textContent='Rs. '+fmt(s.acc);
+
+  document.getElementById('sumDp').textContent=schemesReady?(s.dp+'%'):'--';
+  document.getElementById('sumRate').textContent=schemesReady?(s.rate.toFixed(2)+'%'):'--';
+  document.getElementById('sumTenure').textContent=schemesReady?(s.tenure+' mo'):'--';
+  document.getElementById('sumAcc').textContent='Rs. '+fmt(s.acc);
+  document.getElementById('sumNamsari').textContent='Rs. '+fmt(s.namsari);
+
+  const body=document.getElementById('sheetBody');
+
+  if(!schemesReady){
+    document.getElementById('sheetHead').innerHTML='';
+    body.innerHTML=`<tr><td colspan="11" style="text-align:center;padding:24px;color:var(--ink4)">
+      <i class="fa-solid fa-circle-notch fa-spin"></i> Waiting for finance schemes from Admin Panel…
+    </td></tr>`;
+    return;
+  }
+
+  renderSheetHead(s);
+  body.innerHTML='';
+  // Models whose category doesn't offer the currently-selected tenure at this DP%
+  // (e.g. Chetak/Scooter capped at 36mo while the sheet is set to 48mo) are left
+  // out of the sheet entirely, rather than shown with N/A cells.
+  let shown=0;
+  BIKES.forEach((bike)=>{
+    const bikeAcc=accessoriesTotal(bike);
+    const r=computeRow(bike,s.dp,s.tenure,s.namsari,bikeAcc,s.mode);
+    if(!r.tenureOk) return;
+    shown++;
+    const tr=document.createElement('tr');
+    if(s.mode==='indoor'){
+      tr.innerHTML=`
+        <td>${shown}</td>
+        <td class="model-cell">${escAttrSheet(bike.name)}</td>
+        <td>${fmt(bike.price)}</td>
+        <td>${fmt(r.dpAmt)}</td>
+        <td>${fmt(r.loanAmt)}</td>
+        <td>${fmt(r.insurance)}</td>
+        <td>${fmtDec(r.emi)}</td>
+        <td>${fmtDec(r.advanceEmi)}</td>
+        <td>${fmt(bikeAcc)}</td>
+        <td>${fmt(s.namsari)}</td>
+        <td class="total-cell">${fmt(r.total)}</td>`;
+    }else{
+      tr.innerHTML=`
+        <td>${shown}</td>
+        <td class="model-cell">${escAttrSheet(bike.name)}</td>
+        <td>${fmt(bike.price)}</td>
+        <td>${fmt(r.dpAmt)}</td>
+        <td>${fmt(r.loanAmt)}</td>
+        <td>${fmt(r.financeInsurance)}</td>
+        <td>${fmtDec(r.emi)}</td>
+        <td>${fmtDec(r.advanceEmi)}</td>
+        <td>${fmt(s.namsari)}</td>
+        <td class="total-cell">${fmt(r.total)}</td>`;
+    }
+    body.appendChild(tr);
+  });
+  document.getElementById('sumCount').textContent=shown;
+  if(!shown){
+    document.getElementById('sheetHead').innerHTML='';
+    body.innerHTML=`<tr><td colspan="11" style="text-align:center;padding:24px;color:var(--ink4)">
+      No models offer ${s.tenure} months at ${s.dp}% Down Payment — pick a different tenure.
+    </td></tr>`;
+  }
+}
+
+/* ══════════ Print-preview modal: one A4-landscape page per tenure (of the current DP's scheme) ══════════ */
+function buildTenurePage(dp,tenure,namsari,acc,mode){
+  const rate=rateForDp(dp);
+  let rows='';
+  let n=0;
+  BIKES.forEach((bike)=>{
+    const bikeAcc=accessoriesTotal(bike);
+    const r=computeRow(bike,dp,tenure,namsari,bikeAcc,mode);
+    if(!r.tenureOk) return;
+    n++;
+    if(mode==='indoor'){
+      rows+=`<tr>
+        <td>${n}</td><td>${escAttrSheet(bike.name)}</td><td>${fmt(bike.price)}</td>
+        <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td><td>${fmt(r.insurance)}</td>
+        <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>
+        <td>${fmt(bikeAcc)}</td><td>${fmt(namsari)}</td>
+        <td class="total-cell">${fmt(r.total)}</td></tr>`;
+    }else{
+      rows+=`<tr>
+        <td>${n}</td><td>${escAttrSheet(bike.name)}</td><td>${fmt(bike.price)}</td>
+        <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td>
+        <td>${fmt(r.financeInsurance)}</td>
+        <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>
+        <td>${fmt(namsari)}</td>
+        <td class="total-cell">${fmt(r.total)}</td></tr>`;
+    }
+  });
+  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const headCells=mode==='indoor'
+    ? `<th>S.N</th><th>Model</th><th>Price</th><th>DP Amt</th><th>Loan Amt</th><th>Insurance</th>
+       <th>Monthly EMI</th><th>Advance EMI</th><th>Accessories</th><th>Namsari</th><th>Total</th>`
+    : `<th>S.N</th><th>Model</th><th>Price</th><th>DP Amt</th><th>Loan Amt</th><th>Insurance</th>
+       <th>Monthly EMI</th><th>Advance EMI</th><th>Namsari</th><th>Total</th>`;
+  const modeLabel=mode==='indoor'?'Indoor':'Outdoor';
+  return `
+    <div class="pv-titlebar">Samriddhi And Brothers — Bajaj Finance Sheet (${modeLabel}) &nbsp;|&nbsp; DP ${dp}% &nbsp;|&nbsp; Interest ${rate}% &nbsp;|&nbsp; Tenure ${tenure} Months</div>
+    <div class="pv-tablewrap">
+      <table class="pv-table">
+        <thead><tr>${headCells}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="pv-datebar">${today}</div>`;
+}
+
+function openPreview(){
+  const s=currentSettings();
+  if(!financeSchemes.length || !s.dp){ return; } // nothing to preview until schemes load
+  document.getElementById('pvSubtitle').textContent=(s.mode==='indoor'?'Indoor · ':'Outdoor · ')+s.dp+'% Downpayment · '+s.rate.toFixed(2)+'% Interest';
+
+  const tenures=currentSchemeTenures(s.dp);
+  const tabs=document.getElementById('pvTabs');
+  const body=document.getElementById('pvBody');
+  tabs.innerHTML=''; body.innerHTML='';
+  tenures.forEach(t=>{
+    const tabBtn=document.createElement('button');
+    tabBtn.className='ptab'+(t===s.tenure?' active':'');
+    tabBtn.textContent=t+' Months';
+    tabBtn.onclick=()=>switchPvTab(t);
+    tabBtn.dataset.tenure=t;
+    tabs.appendChild(tabBtn);
+
+    const page=document.createElement('div');
+    page.className='pv-page'+(t===s.tenure?' active':'');
+    page.id='pvPage'+t;
+    page.innerHTML=`<div class="a4l-paper">${buildTenurePage(s.dp,t,s.namsari,s.acc,s.mode)}</div>`;
+    body.appendChild(page);
+  });
+  if(!tenures.includes(s.tenure) && tenures.length){
+    switchPvTab(tenures[0]);
+  }
+
+  document.getElementById('previewOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  fitPreviewPages();
+}
+/* Scales the A4-landscape preview page down to fit the screen so it is fully
+   visible and centered — never overflows sideways on a phone. Print output is
+   untouched since @media print bypasses this and uses #print-wrapper instead. */
+function fitPreviewPages(){
+  const body=document.getElementById('pvBody');
+  if(!body) return;
+  const naturalWidthPx=1122; // 297mm at 96dpi
+  const available=body.clientWidth-4;
+  const scale=Math.min(1,available/naturalWidthPx);
+  document.querySelectorAll('.a4l-paper').forEach(el=>{
+    el.style.zoom=scale;
+  });
+}
+window.addEventListener('resize',()=>{ if(document.getElementById('previewOverlay').classList.contains('open')) fitPreviewPages(); });
+function switchPvTab(t){
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.toggle('active',Number(b.dataset.tenure)===t));
+  document.querySelectorAll('.pv-page').forEach(p=>p.classList.toggle('active',p.id==='pvPage'+t));
+  fitPreviewPages();
+}
+function closePreview(){
+  document.getElementById('previewOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+/* ══════════ Print all tenures (of the current DP's scheme) at once ══════════ */
+function printAllTenures(){
+  const s=currentSettings();
+  if(!financeSchemes.length || !s.dp) return;
+  const tenures=currentSchemeTenures(s.dp);
+  const wrapper=document.getElementById('print-wrapper');
+  wrapper.innerHTML=tenures.map(t=>`<div class="print-page a4l-paper">${buildTenurePage(s.dp,t,s.namsari,s.acc,s.mode)}</div>`).join('');
+  window.print();
+}
+
+/* ══════════ Wire up recalculation ══════════ */
+document.addEventListener('input',e=>{
+  if(e.target.dataset && e.target.dataset.accName !== undefined){ recalcAll(); return; }
+  if(['accOthers','namsariInput'].includes(e.target.id)){
+    recalcAll();
+  }
+});
+// DP change must rebuild the tenure list for that scheme BEFORE recalculating —
+// a listener bound directly on the element runs before the document's bubbled
+// listener above, so this ordering is safe.
+document.getElementById('dpPercent').addEventListener('input',()=>{
+  syncCustomSelectUI('dpPercent');
+  renderTenureOptionsForDp(document.getElementById('dpPercent').value);
+  recalcAll();
+});
+document.getElementById('tenure').addEventListener('input',()=>{syncCustomSelectUI('tenure');recalcAll();});
+
+recalcAll();
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   EVENTS & OFFERS POPUP — mirrors the admin panel's event popup system.
+   Whatever's running or upcoming (per the admin-set start/end dates)
+   shows automatically once per page load.
+   ═══════════════════════════════════════════════════════════════════ */
+let events = [];
+let eventPopupShownThisLoad = false;
+let eventPopupAutoSlideTimer = null;
+let eventPopupCountdownTimers = [];
+
+function escapeHtml(v){
+  return (v==null ? '' : String(v)).replace(/[&<>"']/g, c => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[c]));
+}
+
+function eventStatus(ev){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(ev.startDate); start.setHours(0,0,0,0);
+  const end = new Date(ev.endDate); end.setHours(23,59,59,999);
+  if(today < start) return 'upcoming';
+  if(today > end) return 'ended';
+  return 'running';
+}
+function daysUntil(dateStr){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(dateStr); target.setHours(0,0,0,0);
+  return Math.round((target - today) / (24*60*60*1000));
+}
+function endOfDay(dateStr){ const d = new Date(dateStr); d.setHours(23,59,59,999); return d; }
+function stopEventPopupCountdowns(){
+  eventPopupCountdownTimers.forEach(t=>clearInterval(t));
+  eventPopupCountdownTimers = [];
+}
+
+function checkAndShowEventPopup(){
+  const running = [...events.filter(ev => eventStatus(ev)==='running')].sort((a,b)=> new Date(a.endDate) - new Date(b.endDate));
+  const upcoming = [...events.filter(ev => eventStatus(ev)==='upcoming')].sort((a,b)=> new Date(a.startDate) - new Date(b.startDate));
+  const list = [...running.map(ev=>({ev, isUpcoming:false})), ...upcoming.map(ev=>({ev, isUpcoming:true}))];
+  if(!list.length) return;
+
+  const carousel = document.getElementById('eventPopupCarousel');
+  const dotsWrap = document.getElementById('eventPopupDots');
+  carousel.innerHTML = list.map(({ev, isUpcoming}, i)=>{
+    const badgeText = isUpcoming
+      ? (daysUntil(ev.startDate)<=0 ? 'Starting today!' : `Starts in ${daysUntil(ev.startDate)} day${daysUntil(ev.startDate)!==1?'s':''}`)
+      : (daysUntil(ev.endDate)<=0 ? 'Last day!' : `${daysUntil(ev.endDate)} day${daysUntil(ev.endDate)!==1?'s':''} left`);
+    const badgeIcon = isUpcoming ? 'fa-hourglass-half' : 'fa-fire';
+    const imageBlock = ev.bgImage
+      ? `<div class="w-full bg-slate-900 flex items-center justify-center relative">
+           <img src="${escapeHtml(ev.bgImage)}" class="w-full h-auto max-h-[55vh] object-contain">
+           <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent pointer-events-none"></div>
+           <div id="eventPopupBadge_${i}" class="absolute bottom-3 left-3 inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg"><i class="fas ${badgeIcon} text-[10px]"></i>${badgeText}</div>
+         </div>`
+      : `<div class="w-full h-32 bg-gradient-to-br from-bajaj-blue via-blue-700 to-blue-800 flex items-end p-4 relative overflow-hidden">
+           <i class="fas fa-bullhorn absolute -right-3 -top-3 text-8xl text-white/10"></i>
+           <div id="eventPopupBadge_${i}" class="inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg"><i class="fas ${badgeIcon} text-[10px]"></i>${badgeText}</div>
+         </div>`;
+    return `<div class="w-full flex-shrink-0 overflow-y-auto" style="scroll-snap-align:start; max-height:min(calc(92vh - 50px), 640px);">
+      ${imageBlock}
+      <div class="p-5">
+        <div class="section-title text-[1.8rem] leading-tight text-slate-900 mb-2">${escapeHtml(ev.title||'')}</div>
+        ${ev.location ? `<div class="inline-flex items-center gap-1.5 bg-blue-50 text-bajaj-blue text-[11px] font-bold px-2.5 py-1 rounded-full mb-3"><i class="fas fa-location-dot"></i> ${escapeHtml(ev.location)}</div>` : ''}
+        ${ev.description ? `<div class="text-sm text-slate-600 leading-relaxed whitespace-pre-line mb-4">${escapeHtml(ev.description)}</div>` : ''}
+        <button onclick="closeEventPopup()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">Got it</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  stopEventPopupCountdowns();
+  if(list.length > 1){
+    dotsWrap.classList.remove('hidden'); dotsWrap.classList.add('flex');
+    dotsWrap.innerHTML = list.map((_,i)=>`<button type="button" data-dot="${i}" class="event-popup-dot ${i===0?'active':''}" onclick="scrollEventPopupTo(${i})"></button>`).join('');
+    let currentIdx = 0;
+    const goTo = (idx)=>{
+      currentIdx = ((idx % list.length) + list.length) % list.length;
+      carousel.scrollTo({ left: currentIdx * carousel.clientWidth, behavior: 'smooth' });
+    };
+    carousel.onscroll = ()=>{
+      currentIdx = Math.round(carousel.scrollLeft / carousel.clientWidth);
+      dotsWrap.querySelectorAll('.event-popup-dot').forEach((d,i)=>d.classList.toggle('active', i===currentIdx));
+    };
+    const restartAutoSlide = ()=>{
+      clearInterval(eventPopupAutoSlideTimer);
+      eventPopupAutoSlideTimer = setInterval(()=>goTo(currentIdx+1), 5000);
+    };
+    carousel.addEventListener('scroll', restartAutoSlide, {passive:true});
+    restartAutoSlide();
+  } else {
+    dotsWrap.classList.add('hidden'); dotsWrap.classList.remove('flex');
+    carousel.onscroll = null;
+    clearInterval(eventPopupAutoSlideTimer);
+  }
+
+  list.forEach(({ev, isUpcoming}, i)=>{
+    const target = isUpcoming ? new Date(ev.startDate) : endOfDay(ev.endDate);
+    if((target - new Date()) >= 26*60*60*1000) return;
+    const badgeEl = document.getElementById('eventPopupBadge_'+i);
+    if(!badgeEl) return;
+    const tick = ()=>{
+      const diff = target - new Date();
+      if(diff <= 0){ badgeEl.innerHTML = `<i class="fas fa-fire text-[10px]"></i>${isUpcoming?'Starting now!':'Ending now!'}`; return; }
+      const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+      const label = isUpcoming ? 'Starts in' : 'Ends in';
+      badgeEl.innerHTML = `<i class="fas fa-stopwatch text-[10px]"></i>${label} ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    };
+    tick();
+    eventPopupCountdownTimers.push(setInterval(tick, 1000));
+  });
+
+  const overlay = document.getElementById('eventPopupOverlay');
+  overlay.classList.remove('hidden');
+  overlay.classList.add('flex');
+}
+
+window.scrollEventPopupTo = (idx)=>{
+  const carousel = document.getElementById('eventPopupCarousel');
+  const count = carousel.children.length;
+  if (!count) return;
+  carousel.scrollTo({ left: (((idx % count) + count) % count) * carousel.clientWidth, behavior: 'smooth' });
+};
+window.closeEventPopup = ()=>{
+  const overlay = document.getElementById('eventPopupOverlay');
+  overlay.classList.add('hidden');
+  overlay.classList.remove('flex');
+  clearInterval(eventPopupAutoSlideTimer);
+  stopEventPopupCountdowns();
+};
+
+onSnapshot(collection(db, "events"), snap => {
+  events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  if(!eventPopupShownThisLoad){
+    eventPopupShownThisLoad = true;
+    checkAndShowEventPopup();
+  }
+}, err => {
+  console.warn("Events listener failed:", err.message);
+});
+
+function sortBySn(bikes){
+  return [...bikes].sort((a,b)=>{
+    const snA=(a.sn!==undefined&&a.sn!==null&&a.sn!=='')?Number(a.sn):9999;
+    const snB=(b.sn!==undefined&&b.sn!==null&&b.sn!=='')?Number(b.sn):9999;
+    return snA-snB;
+  });
+}
+
+/* Bikes: live listener (same as finance_schemes/accessories below) so a category
+   or "fits legguard/seatcover" change saved in Admin Panel shows up here right
+   away, without needing to reload this page. */
+onSnapshot(collection(db,"bikes"), snap=>{
+  const docs=snap.docs.map(d=>({id:d.id,...d.data()}));
+  const sorted=sortBySn(docs);
+  BIKES=sorted
+    .filter(b=>b.name && b.price!==undefined)
+    .map(b=>({
+      name:b.name,
+      price:parseFloat(b.price)||0,
+      insurance:parseFloat(b.Insurance!==undefined?b.Insurance:b.insurance)||0,
+      financeInsurance:parseFloat(b.financeInsurance)||0,
+      category:b.category||'Bike'
+    }));
+  recalcAll();
+}, err=>{
+  console.error("Sheet: bikes listener failed.",err);
+  BIKES=[]; // stay blank rather than showing stale/hardcoded prices
+  recalcAll();
+});
+
+/* Categories: drives which accessories actually apply per bike category
+   (admin's Model Categories → Accessories checklist). If a category hasn't
+   been configured yet (no accessoryNames saved), everything still applies —
+   only an explicitly-saved, non-empty list restricts what's included. */
+onSnapshot(collection(db,"finance_categories"), snap=>{
+  financeCategories=snap.docs.map(d=>({id:d.id,...d.data()}));
+  recalcAll();
+}, err=>{
+  console.error("Sheet: finance_categories listener failed.",err);
+});
+
+/* Finance schemes: live listener (same collection & shape as Admin Panel /
+   finance.html) so DP%, Interest Rate, and Tenure options always match what
+   the admin configured — no more hardcoded ladder in this file. */
+onSnapshot(collection(db,"finance_schemes"), snap=>{
+  financeSchemes=snap.docs.map(d=>({id:d.id,...d.data()}));
+  renderFinanceSchemeUI();
+}, err=>{
+  console.error("Sheet: finance_schemes listener failed.",err);
+});
+
+/* Accessories: same admin-controlled default prices (Helmet / Leg Guard / Seat
+   Cover / Namsari) as finance.html — no more hardcoded ladder here either. Only
+   sets values on load/update, same as admin panel behaviour; "Others" stays a
+   manual free-entry field since it isn't a catalog item. */
+onSnapshot(collection(db,"accessories"), snap=>{
+  const list = snap.docs.map(d=>d.data());
+  const catalog = [];
+  list.forEach(a=>{
+    const n=(a.name||'').toLowerCase().replace(/[^a-z]/g,'');
+    if(!Number.isFinite(Number(a.price))) return;
+    if(n.includes('namsari')||n.includes('registration')){
+      const el=document.getElementById('namsariInput');
+      if(el) el.value=Number(a.price);
+    } else {
+      catalog.push({ name: a.name, price: Number(a.price) });
+    }
+  });
+  accessoriesCatalog = catalog;
+  renderAccessoryFields();
+  recalcAll();
+}, err=>{
+  console.error("Sheet: accessories listener failed.",err);
+});
+
+/* Bikes listener is registered above with finance_schemes/accessories. */
+
+
+
+  window.openPreview        = typeof openPreview        === 'function' ? openPreview        : window.openPreview;
+  window.closePreview       = typeof closePreview       === 'function' ? closePreview       : window.closePreview;
+  window.printAllTenures    = typeof printAllTenures    === 'function' ? printAllTenures    : window.printAllTenures;
+  window.addCustomAccessory = typeof addCustomAccessory === 'function' ? addCustomAccessory : window.addCustomAccessory;
+})();
+
 /* ─── Accessories Inventory ─── */
 function loadAccessories(){
   if(accessoriesUnsub) accessoriesUnsub();
@@ -14107,8 +15398,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', hhstock:'HH Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
-const SEC_IDS = { dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
+const SEC_TITLES = { sheetTool:'EMI Rate Sheet', dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', hhstock:'HH Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
+const SEC_IDS = { sheetTool:'secSheetTool', dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
 // Starts a page's Firestore listener the first time that page is opened,
 // then remembers it's running so re-visiting costs nothing. Keeps sign-in
 // light without changing how any page behaves once you're on it.
