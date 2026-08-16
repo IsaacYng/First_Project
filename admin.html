@@ -1117,6 +1117,913 @@
 #secSheetTool .section-title{ font-family: 'Bebas Neue', cursive; line-height: 1; letter-spacing: 0.01em; color: #0F172A; }
 @keyframes slideIn { from{opacity:0;transform:translateY(16px) scale(.96);} to{opacity:1;transform:translateY(0) scale(1);} }
 
+  /* ═══ DP ALLOCATIONS — scoped to #secFinanceTool so this section's
+     styling stays inside it and can't restyle the panel. ═══ */
+#secFinanceTool a{text-decoration:none;color:inherit}
+#secFinanceTool{
+  --blue:#005EA6; --blueDark:#004A85; --blueLt:#E8F2FB;
+  --amber:#F59E0B; --amberDark:#D97706;
+  --green:#16A34A; --red:#DC2626;
+  --line:#E2E8F0; --bgSoft:#F8FAFC;
+  --ink:#0F172A; --ink2:#334155; --ink3:#64748B; --ink4:#94A3B8;
+  --mono:'JetBrains Mono',monospace;
+}
+#secFinanceTool #financeLoader{
+  position:fixed;inset:0;width:100%;height:100%;
+  background:radial-gradient(ellipse at 30% 20%,#0A6BB8 0%,#004A85 45%,#002E56 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;overflow:hidden;
+  transition:opacity .7s cubic-bezier(.4,0,.2,1),visibility .7s;
+  visibility:visible;opacity:1;
+}
+#secFinanceTool #financeLoader::before{
+  content:'';position:absolute;top:-120px;right:-100px;
+  width:460px;height:460px;
+  background:radial-gradient(circle,rgba(245,158,11,.18) 0%,transparent 70%);
+  border-radius:50%;animation:introGlowPulse 3.2s ease-in-out infinite;
+}
+#secFinanceTool #financeLoader::after{
+  content:'';position:absolute;bottom:-140px;left:-100px;
+  width:380px;height:380px;
+  background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);
+  border-radius:50%;
+}
+@keyframes introGlowPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.08)}}
+#secFinanceTool #financeLoader.fade-out{opacity:0;visibility:hidden}
+#secFinanceTool .intro-grid{
+  position:absolute;inset:0;opacity:.07;
+  background-image:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),
+                    linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);
+  background-size:42px 42px;
+  animation:introGridDrift 9s linear infinite;
+}
+@keyframes introGridDrift{from{background-position:0 0}to{background-position:-84px -84px}}
+#secFinanceTool .intro-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;}
+#secFinanceTool .intro-logo-mark{
+  width:58px;height:58px;border-radius:16px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(-10px) scale(.85);
+  animation:introLogoIn .6s cubic-bezier(.34,1.56,.64,1) .05s forwards;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+  margin-bottom:18px;
+  color:#F59E0B;
+}
+@keyframes introLogoIn{to{opacity:1;transform:translateY(0) scale(1)}}
+#secFinanceTool .intro-road{
+  position:relative;width:min(340px,74vw);height:96px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+#secFinanceTool .intro-road-line{
+  position:absolute;bottom:24px;left:0;right:0;height:2px;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 18px,transparent 18px 34px);
+  overflow:hidden;
+}
+#secFinanceTool .intro-road-line::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.4) 0 18px,transparent 18px 34px);
+  transform:translateX(-34px);animation:introRoadScroll .55s linear infinite;
+}
+@keyframes introRoadScroll{to{transform:translateX(0)}}
+#secFinanceTool .intro-speed-lines{
+  position:absolute;bottom:30px;left:50%;margin-left:-30px;width:60px;height:34px;
+  opacity:0;animation:introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards,introSpeedShow 2.3s ease forwards;
+}
+#secFinanceTool .intro-speed-lines span{
+  position:absolute;height:2px;border-radius:2px;background:rgba(255,255,255,.55);
+  right:100%;opacity:0;animation:introSpeedFlick .5s ease-in-out infinite;
+}
+#secFinanceTool .intro-speed-lines span:nth-child(1){top:4px;width:22px;animation-delay:.05s}
+#secFinanceTool .intro-speed-lines span:nth-child(2){top:15px;width:32px;animation-delay:.12s}
+#secFinanceTool .intro-speed-lines span:nth-child(3){top:26px;width:18px;animation-delay:.19s}
+@keyframes introSpeedFlick{0%{opacity:0;transform:translateX(0)}45%{opacity:.9}100%{opacity:0;transform:translateX(-14px)}}
+@keyframes introSpeedShow{0%,68%{opacity:0}74%{opacity:1}100%{opacity:0}}
+#secFinanceTool .intro-bike-wrap{
+  position:absolute;bottom:14px;left:50%;margin-left:-39px;
+  animation:introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+}
+#secFinanceTool .intro-bike-wrap svg{filter:drop-shadow(0 8px 14px rgba(0,0,0,.3))}
+#secFinanceTool .bike-part{opacity:0;transform:scale(.55);transform-box:fill-box;transform-origin:center;animation:introPartIn .42s cubic-bezier(.34,1.56,.64,1) forwards}
+#secFinanceTool .bike-part.bp-wheels{animation-delay:.05s}
+#secFinanceTool .bike-part.bp-frame{animation-delay:.28s}
+#secFinanceTool .bike-part.bp-panel{animation-delay:.5s}
+#secFinanceTool .bike-part.bp-light{animation-delay:.72s}
+@keyframes introPartIn{to{opacity:1;transform:scale(1)}}
+#secFinanceTool .intro-headlight{
+  animation:introHeadlightPulse .5s ease-in-out .9s infinite;
+  opacity:0;animation-fill-mode:forwards;
+}
+@keyframes introHeadlightPulse{0%{opacity:0}20%,100%{opacity:1}60%{opacity:.55}}
+#secFinanceTool .intro-bike-shadow{
+  position:absolute;bottom:8px;left:50%;margin-left:-38px;width:76px;height:11px;
+  background:radial-gradient(ellipse,rgba(0,0,0,.32) 0%,transparent 75%);
+  border-radius:50%;opacity:0;
+  animation:introShadowFade .5s ease .05s forwards,introRide 2.3s cubic-bezier(.45,.05,.15,1) forwards;
+}
+@keyframes introShadowFade{to{opacity:.9}}
+@keyframes introRide{
+  0%{left:50%;margin-left:-39px}
+  68%{left:50%;margin-left:-39px}
+  80%{left:50%;margin-left:-39px}
+  100%{left:118%;margin-left:-39px}
+}
+#secFinanceTool .intro-brand{
+  margin-top:22px;text-align:center;opacity:0;transform:translateY(14px);
+  animation:introTextIn .7s ease 1.55s forwards;
+}
+#secFinanceTool .intro-brand .intro-name{
+  font-family:'Bebas Neue',cursive;font-size:clamp(1.9rem,6vw,2.6rem);
+  letter-spacing:.04em;color:#fff;line-height:1;
+}
+#secFinanceTool .intro-brand .intro-name span{color:#F59E0B}
+#secFinanceTool .intro-brand .intro-tag{
+  margin-top:6px;font-size:11px;font-weight:600;letter-spacing:.22em;
+  text-transform:uppercase;color:rgba(255,255,255,.65);
+}
+@keyframes introTextIn{to{opacity:1;transform:translateY(0)}}
+#secFinanceTool .intro-progress{
+  margin-top:24px;display:flex;align-items:center;gap:10px;
+  opacity:0;animation:introFade .5s ease 1.7s forwards;
+}
+#secFinanceTool .intro-bar{
+  width:130px;height:3px;border-radius:99px;
+  background:rgba(255,255,255,.18);overflow:hidden;
+}
+#secFinanceTool .intro-bar-fill{
+  width:0%;height:100%;border-radius:99px;
+  background:linear-gradient(90deg,#F59E0B,#FBBF24);
+  animation:introFill 1.9s cubic-bezier(.4,0,.2,1) .15s forwards;
+}
+#secFinanceTool .intro-percent{
+  font-size:11px;font-weight:700;letter-spacing:.03em;
+  color:rgba(255,255,255,.8);min-width:30px;font-variant-numeric:tabular-nums;
+}
+@keyframes introFade{to{opacity:1}}
+@keyframes introFill{to{width:100%}}
+#secFinanceTool header{animation:none}
+#secFinanceTool .fin-hero{animation:none}
+#secFinanceTool main{animation:none}
+#secFinanceTool .calc-card{
+  animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both;
+  opacity:0;
+}
+#secFinanceTool .calc-card:nth-child(1){animation-delay:.8s}
+#secFinanceTool .calc-card:nth-child(2){animation-delay:.95s}
+#secFinanceTool .calc-card:nth-child(3){animation-delay:1.1s}
+#secFinanceTool .results-panel{animation:none}
+#secFinanceTool footer{animation:none}
+#secFinanceTool main{position:relative;z-index:2}
+#secFinanceTool footer{position:relative;z-index:1}
+@keyframes slideDownFade{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{0%{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+#secFinanceTool .two-up > .calc-card:nth-child(1){animation-delay:1.05s}
+#secFinanceTool .two-up > .calc-card:nth-child(2){animation-delay:1.15s}
+#secFinanceTool{animation-delay:inherit}
+@media(prefers-reduced-motion:reduce){#secFinanceTool .calc-card, #secFinanceTool .results-panel, #secFinanceTool header, #secFinanceTool .fin-hero, #secFinanceTool main, #secFinanceTool footer{animation:none!important;opacity:1;transform:none!important}}
+#secFinanceTool .nav-blur{
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0,94,166,0.08);
+  box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+}
+#secFinanceTool .nav-link{
+  position: relative; font-size: 0.875rem; font-weight: 500; color: #374151;
+  display: flex; align-items: center; gap: 5px; transition: color 0.2s;
+  padding: 4px 2px;
+}
+#secFinanceTool .nav-link::after{
+  content: ''; position: absolute; bottom: -2px; left: 0;
+  width: 0; height: 2px; background: #005EA6; border-radius: 2px; transition: width 0.25s ease;
+}
+#secFinanceTool .nav-link:hover{ color: #005EA6; }
+#secFinanceTool .nav-link:hover::after{ width: 100%; }
+#secFinanceTool .nav-link.active{ color: #005EA6; }
+#secFinanceTool .nav-link.active::after{ width: 100%; }
+#secFinanceTool #mobile-menu{ max-height: 0; overflow: hidden; transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease; opacity: 0; }
+#secFinanceTool #mobile-menu.open{ max-height: 560px; opacity: 1; }
+#secFinanceTool .cta-primary{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--blue);color:#fff;font-weight:600;border-radius:10px;
+  padding:10px 20px;border:none;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,.0,.2,1);
+  box-shadow:0 4px 14px rgba(0,94,166,.22);
+}
+#secFinanceTool .cta-primary:hover{
+  background:var(--blueDark);transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(0,94,166,.35);
+}
+#secFinanceTool .cta-primary:active{transform:translateY(0)}
+#secFinanceTool .custom-select{position:relative}
+#secFinanceTool .sr-only-select{position:absolute;opacity:0;pointer-events:none;height:46px;width:100%;left:0;top:0}
+#secFinanceTool .custom-select-trigger{
+  width:100%;height:46px;border:1.5px solid var(--line);
+  border-radius:12px;background:var(--bgSoft);padding:0 16px;
+  font-size:14px;color:var(--ink);display:flex;align-items:center;
+  justify-content:space-between;cursor:pointer;
+  transition:all .22s cubic-bezier(.4,.0,.2,1);font-family:'DM Sans',sans-serif;text-align:left;
+}
+#secFinanceTool .custom-select-trigger:hover{
+  border-color:#C9D6E3;transform:translateY(-1px);
+  background:linear-gradient(135deg,var(--bgSoft) 0%,rgba(0,94,166,.02) 100%);
+}
+#secFinanceTool .custom-select-trigger.open{
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.1);
+}
+#secFinanceTool .cst-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+#secFinanceTool .cst-chevron{color:var(--ink3);font-size:12px;transition:transform .22s ease;margin-left:8px;flex-shrink:0}
+#secFinanceTool .custom-select-trigger.open .cst-chevron{transform:rotate(180deg);color:var(--blue)}
+#secFinanceTool .custom-select-panel{
+  position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;
+  border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:320px;overflow-y:auto;
+  z-index:40;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.98);
+  transform-origin:top center;transition:opacity .18s ease,transform .18s ease,visibility .18s;
+  padding:6px;animation:dropdownOpen .22s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+#secFinanceTool .custom-select-panel.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+@keyframes dropdownOpen{from{opacity:0;transform:translateY(-8px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+#secFinanceTool .cst-option{
+  display:flex;align-items:center;gap:12px;padding:11px 12px;
+  border-radius:10px;cursor:pointer;transition:all .15s;
+  font-size:14px;color:var(--ink2);font-weight:500;
+}
+#secFinanceTool .cst-option:hover{background:var(--blueLt);transform:translateX(4px)}
+#secFinanceTool .cst-option .cst-dot{
+  width:18px;height:18px;border-radius:50%;border:2px solid var(--line);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:border-color .18s,background .18s;
+}
+#secFinanceTool .cst-option .cst-dot::after{
+  content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);
+  opacity:0;transform:scale(.4);transition:opacity .15s,transform .15s;
+}
+#secFinanceTool .cst-option.selected{color:var(--ink);font-weight:700;background:var(--blueLt)}
+#secFinanceTool .cst-option.selected .cst-dot{border-color:var(--blue)}
+#secFinanceTool .cst-option.selected .cst-dot::after{opacity:1;transform:scale(1)}
+#secFinanceTool .fin-hero{background:linear-gradient(135deg,#F0F7FF 0%,#EBF4FF 55%,#DCEEFB 100%);position:relative;overflow:hidden}
+#secFinanceTool .fin-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:420px;height:420px;background:radial-gradient(circle,rgba(0,94,166,.1) 0%,transparent 70%);border-radius:50%}
+#secFinanceTool .fin-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(245,158,11,.08) 0%,transparent 70%);border-radius:50%}
+#secFinanceTool .headline{font-family:'Bebas Neue',cursive;line-height:.95;letter-spacing:.01em}
+#secFinanceTool .price-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,94,166,.28)}
+#secFinanceTool .stat-chip{background:#fff;border:1px solid rgba(0,94,166,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+#secFinanceTool .total-dp-banner{
+  background:linear-gradient(120deg,var(--blue) 0%,var(--blueDark) 65%,#00284D 100%);
+  border-radius:16px;padding:1rem 1.5rem;display:flex;align-items:center;
+  justify-content:space-between;gap:1rem;flex-wrap:wrap;position:sticky;
+  top:64px;z-index:40;overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,94,166,.28),0 1px 0 rgba(255,255,255,.08) inset;
+  border:1px solid rgba(255,255,255,.1);
+  transition:all .3s ease;
+}
+#secFinanceTool .total-dp-banner::after{
+  content:'';position:absolute;left:0;right:0;bottom:-1px;height:3px;
+  background:linear-gradient(90deg,var(--amber),#FBBF24,var(--amber));
+  opacity:.9;
+}
+#secFinanceTool .total-dp-banner:hover{box-shadow:0 14px 36px rgba(0,94,166,.32),0 1px 0 rgba(255,255,255,.08) inset}
+#secFinanceTool .total-dp-banner::before{
+  content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;
+  background:radial-gradient(circle,rgba(245,158,11,.2) 0%,transparent 70%);border-radius:50%;
+}
+#secFinanceTool .tdp-left{display:flex;flex-direction:column;gap:3px;position:relative;z-index:1}
+#secFinanceTool .tdp-label{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#BFDBFE;display:flex;align-items:center;gap:6px}
+#secFinanceTool .tdp-label i{font-size:9px;color:var(--amber)}
+#secFinanceTool .tdp-title{font-family:'Bebas Neue',cursive;font-size:1.25rem;letter-spacing:.03em;color:#fff}
+#secFinanceTool .tdp-value{
+  font-family:'Bebas Neue',cursive;font-size:clamp(1.9rem,5vw,2.5rem);
+  letter-spacing:.02em;line-height:1;color:#fff;position:relative;z-index:1;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+#secFinanceTool .tdp-badge{
+  display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.22);padding:7px 14px;border-radius:10px;
+  font-size:11.5px;font-weight:600;color:#fff;position:relative;z-index:1;
+  animation:badgePulse 2s ease-in-out infinite;
+}
+@keyframes badgePulse{
+  0%,100%{transform:scale(1);opacity:.95}
+  50%{transform:scale(1.05);opacity:1}
+}
+@media (max-width:640px){#secFinanceTool .total-dp-banner{top:0}}
+#secFinanceTool .calc-card{
+  background:#fff;border:1px solid var(--line);border-radius:18px;
+  padding:1.4rem;box-shadow:0 2px 14px rgba(0,0,0,.04);
+  transition:all .25s cubic-bezier(.4,.0,.2,1);cursor:default;
+  min-width:0;
+}
+#secFinanceTool .calc-card:has(.custom-select-panel.open){z-index:60}
+#secFinanceTool .calc-card.dropdown-open{z-index:60}
+#secFinanceTool .calc-card:hover{
+  border-color:rgba(0,94,166,.15);box-shadow:0 8px 28px rgba(0,94,166,.12);
+  transform:translateY(-2px);
+}
+#secFinanceTool .calc-card-title{
+  display:flex;align-items:center;gap:10px;font-size:.95rem;
+  font-weight:700;color:var(--ink);letter-spacing:.01em;margin-bottom:1.2rem;
+}
+#secFinanceTool .calc-card-title .icon{
+  width:36px;height:36px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:15px;background:var(--blueLt);color:var(--blue);
+  flex-shrink:0;
+}
+#secFinanceTool .field-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;display:block}
+#secFinanceTool select.styled, #secFinanceTool input.styled{
+  width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;
+  background:var(--bgSoft);padding:0 14px;font-size:14px;color:var(--ink);
+  outline:none;transition:all .2s cubic-bezier(.4,.0,.2,1);
+  appearance:none;-webkit-appearance:none;font-family:'DM Sans',sans-serif;
+}
+#secFinanceTool select.styled{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;
+}
+#secFinanceTool select.styled:focus, #secFinanceTool input.styled:focus{
+  border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,94,166,.15);
+  animation:inputFocus .3s ease forwards;background:linear-gradient(135deg,var(--bgSoft) 0%,rgba(0,94,166,.06) 100%);
+}
+@keyframes inputFocus{
+  0%{box-shadow:0 0 0 0 rgba(0,94,166,.1)}
+  100%{box-shadow:0 0 0 4px rgba(0,94,166,.15)}
+}
+#secFinanceTool .metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:1.25rem}
+#secFinanceTool .metric-box{
+  background:var(--bgSoft);border:1px solid var(--line);border-radius:12px;
+  padding:.85rem;display:flex;flex-direction:column;gap:5px;
+  transition:all .18s cubic-bezier(.4,.0,.2,1);
+}
+#secFinanceTool .metric-box.has-input:focus-within{
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,94,166,.08);
+  transform:translateY(-2px);background:linear-gradient(135deg,#F8FAFC 0%,rgba(0,94,166,.04) 100%);
+}
+#secFinanceTool .metric-lbl{font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3)}
+#secFinanceTool .metric-val{
+  font-family:'Bebas Neue',cursive;font-size:1.25rem;letter-spacing:.02em;color:var(--ink);
+  line-height:1.1;transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+#secFinanceTool .metric-val.green{color:var(--green)}
+#secFinanceTool .metric-val.updated{
+  animation:metricPop .45s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes metricPop{
+  0%{transform:scale(.75) translateY(8px);opacity:0}
+  50%{transform:scale(1.12);color:#16A34A}
+  100%{transform:scale(1) translateY(0);opacity:1;color:inherit}
+}
+#secFinanceTool .metric-val.updating{
+  animation:metricShimmer .5s ease-in-out infinite;
+}
+@keyframes metricShimmer{
+  0%,100%{opacity:1}
+  50%{opacity:.65}
+}
+#secFinanceTool .metric-box input{
+  border:none;background:transparent;padding:0;font-family:'Bebas Neue',cursive;
+  font-size:1.25rem;color:var(--ink);outline:none;width:100%;
+  letter-spacing:.02em;line-height:1.1;
+}
+#secFinanceTool .metric-box input::-webkit-outer-spin-button, #secFinanceTool .metric-box input::-webkit-inner-spin-button{-webkit-appearance:none}
+#secFinanceTool .config-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding-top:1.25rem;border-top:1px solid var(--line);margin-top:1.25rem}
+#secFinanceTool .two-up{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+#secFinanceTool .charge-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);transition:all .2s ease}
+#secFinanceTool .charge-row:hover{background:rgba(0,94,166,.02);padding:11px 8px;border-radius:6px;margin:0 -8px;padding:11px 8px}
+#secFinanceTool .charge-row:last-child{border-bottom:none;padding-bottom:0}
+#secFinanceTool .charge-row label{font-size:13.5px;color:var(--ink2);font-weight:500;display:flex;align-items:center;gap:8px}
+#secFinanceTool .charge-row label i{color:var(--blue);font-size:13px;transition:transform .2s ease}
+#secFinanceTool .charge-row:hover label i{transform:scale(1.1)}
+#secFinanceTool .charge-row .val{font-size:14px;font-weight:700;color:var(--ink)}
+#secFinanceTool .charge-row input{
+  text-align:right;border:none;border-bottom:1.5px solid var(--line);
+  background:transparent;outline:none;font-size:14px;font-weight:700;
+  color:var(--ink);width:110px;padding:5px 4px;
+  transition:all .18s cubic-bezier(.4,.0,.2,1);font-family:'DM Sans',sans-serif;
+}
+#secFinanceTool .charge-row input:focus{border-color:var(--blue)}
+#secFinanceTool .itoggle{display:flex;gap:6px;transition:all .2s ease}
+#secFinanceTool .itoggle-btn{
+  flex:1;text-align:center;background:var(--bgSoft);border:1.5px solid var(--line);
+  border-radius:8px;padding:9px 10px;font-size:12px;font-weight:700;
+  color:var(--ink3);cursor:pointer;transition:all .18s cubic-bezier(.4,.0,.2,1);
+  user-select:none;
+}
+#secFinanceTool .itoggle-btn:hover{transform:translateY(-1px)}
+#secFinanceTool .itoggle-btn.active{
+  background:var(--blueLt);border-color:var(--blue);color:var(--blue);
+  transform:scale(1.02);box-shadow:0 4px 12px rgba(0,94,166,.15);
+}
+#secFinanceTool .acc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+#secFinanceTool .acc-field{display:flex;flex-direction:column;gap:6px}
+#secFinanceTool .acc-field label{
+  font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink3);display:flex;align-items:center;gap:6px;
+}
+#secFinanceTool .acc-field label i{color:var(--blue);font-size:12px}
+#secFinanceTool .acc-field input{
+  border:none;border-bottom:1.5px solid var(--line);background:transparent;
+  outline:none;font-size:15px;font-weight:700;color:var(--ink);padding:5px 2px;
+  transition:all .18s cubic-bezier(.4,.0,.2,1);font-family:'DM Sans',sans-serif;
+}
+#secFinanceTool .acc-field input:focus{border-color:var(--blue);background:rgba(0,94,166,.02)}
+#secFinanceTool .chassis-tools-row{display:flex;gap:12px;margin-top:14px;align-items:flex-end;flex-wrap:wrap}
+#secFinanceTool .chassis-tools-row .ct-search{flex:1 1 220px;min-width:200px}
+#secFinanceTool .chassis-tools-row .ct-find{flex:0 0 auto}
+#secFinanceTool .chassis-tools-row .ct-year{flex:0 0 120px;min-width:110px}
+#secFinanceTool .model-mismatch-warning{
+  display:none;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;
+  background:rgba(245,158,11,.1);border:1.5px solid rgba(245,158,11,.35);border-radius:10px;
+  font-size:12px;line-height:1.5;color:#92400E;animation:slideDown .2s ease-out;
+}
+#secFinanceTool .model-mismatch-warning i{color:var(--amber);margin-top:2px;flex-shrink:0}
+#secFinanceTool .model-mismatch-warning span{flex:1;min-width:0}
+#secFinanceTool .model-mismatch-warning strong{color:#78350F}
+#secFinanceTool .chassis-status-warning{
+  display:none;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;
+  background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.4);border-radius:10px;
+  font-size:12px;line-height:1.5;color:#7F1D1D;animation:slideDown .2s ease-out;
+}
+#secFinanceTool .chassis-status-warning i{color:var(--red);margin-top:2px;flex-shrink:0}
+#secFinanceTool .chassis-status-warning span{flex:1;min-width:0}
+#secFinanceTool .chassis-status-warning strong{color:#450A0A}
+#secFinanceTool .csd-item.csd-flagged{background:rgba(220,38,38,.05)}
+#secFinanceTool .csd-item.csd-flagged:hover{background:rgba(220,38,38,.1)}
+#secFinanceTool .csd-status-pill{font-size:9.5px;font-weight:800;letter-spacing:.03em;padding:2px 6px;border-radius:20px;flex-shrink:0;text-transform:uppercase;background:rgba(220,38,38,.12);color:#B91C1C;border:1px solid rgba(220,38,38,.3)}
+@media (max-width:520px){#secFinanceTool .chassis-tools-row{flex-direction:column;align-items:stretch}
+#secFinanceTool .chassis-tools-row .ct-search, #secFinanceTool .chassis-tools-row .ct-find, #secFinanceTool .chassis-tools-row .ct-year{flex:1 1 auto;min-width:0;width:100%}
+#secFinanceTool .chassis-tools-row .ct-find{order:2}
+#secFinanceTool .chassis-tools-row .ct-year{order:3}}
+#secFinanceTool .customer-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;min-width:0}
+#secFinanceTool .customer-grid>*{min-width:0}
+#secFinanceTool .calc-grid, #secFinanceTool .metrics-row, #secFinanceTool .config-row, #secFinanceTool .two-up, #secFinanceTool .acc-grid{min-width:0}
+#secFinanceTool .metrics-row>*, #secFinanceTool .acc-grid>*{min-width:0}
+#secFinanceTool .calc-grid{min-width:0}
+#secFinanceTool .calc-grid>div{min-width:0}
+#secFinanceTool .results-panel{
+  background:#0F172A;border-radius:18px;padding:1.4rem;color:#fff;
+  position:sticky;top:calc(64px + 1rem);overflow:hidden;min-width:0;
+  border:1px solid rgba(255,255,255,.1);transition:all .3s ease;
+}
+#secFinanceTool .results-panel::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+  opacity:0;pointer-events:none;border-radius:18px;
+  animation:shimmerPulse 2.5s ease-in-out infinite;
+}
+@keyframes shimmerPulse{
+  0%,100%{opacity:0;transform:translateX(-100%)}
+  50%{opacity:1;transform:translateX(100%)}
+}
+#secFinanceTool .res-title{
+  display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);
+  margin-bottom:1.4rem;animation:titleSlide .5s ease-out;
+}
+@keyframes titleSlide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+#secFinanceTool .res-title i{color:var(--amber)}
+#secFinanceTool .res-row{
+  display:flex;align-items:center;justify-content:space-between;padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,.07);transition:all .2s ease;
+}
+#secFinanceTool .res-row:hover{background:rgba(255,255,255,.02);padding:10px 8px;margin:0 -8px;border-radius:6px}
+#secFinanceTool .res-row:last-child{border-bottom:none}
+#secFinanceTool .res-lbl{font-size:12.5px;color:rgba(255,255,255,.45);font-weight:400}
+#secFinanceTool .res-val{
+  font-size:13.5px;font-weight:600;color:rgba(255,255,255,.9);
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+#secFinanceTool .res-val.indigo{color:#7DC4FF}
+#secFinanceTool .res-val.red{color:#F87171}
+#secFinanceTool .res-val.amber{color:#FBBF24;font-style:italic;font-size:12.5px}
+#secFinanceTool .res-val.updating{
+  animation:valueShimmer .5s ease-in-out infinite;
+}
+@keyframes valueShimmer{
+  0%,100%{opacity:1;transform:translateX(0)}
+  50%{opacity:.6;transform:translateX(2px)}
+}
+#secFinanceTool .res-val.updated{
+  animation:valuePopIn .5s cubic-bezier(.34,1.56,.64,1) !important;
+}
+@keyframes valuePopIn{
+  0%{transform:scale(.7) translateY(6px);opacity:0}
+  50%{transform:scale(1.15);color:#FBBF24}
+  85%{transform:scale(.98)}
+  100%{transform:scale(1) translateY(0);opacity:1;color:inherit}
+}
+#secFinanceTool .split-bar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin:.9rem 0;background:rgba(255,255,255,.08)}
+#secFinanceTool .split-bar .seg-dp{background:var(--amber);transition:width .4s cubic-bezier(.34,1.56,.64,1)}
+#secFinanceTool .split-bar .seg-loan{background:var(--blue);transition:width .4s cubic-bezier(.34,1.56,.64,1)}
+#secFinanceTool .split-legend{display:flex;justify-content:space-between;font-size:10.5px;color:rgba(255,255,255,.5);margin-bottom:.4rem}
+#secFinanceTool .split-legend span{display:flex;align-items:center;gap:5px}
+#secFinanceTool .split-legend .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+#secFinanceTool .split-legend .dot.dp{background:var(--amber)}
+#secFinanceTool .split-legend .dot.loan{background:var(--blue)}
+#secFinanceTool .emi-box{
+  background:linear-gradient(120deg,var(--blue),#0070C7);border-radius:12px;
+  padding:.8rem;margin:.75rem 0;text-align:center;position:relative;overflow:hidden;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);cursor:default;
+}
+#secFinanceTool .emi-box:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,94,166,.3)}
+#secFinanceTool .emi-box::before{
+  content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;
+  background:radial-gradient(circle,rgba(245,158,11,.22) 0%,transparent 70%);border-radius:50%;
+}
+#secFinanceTool .emi-box-lbl{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-bottom:4px;position:relative;z-index:1}
+#secFinanceTool .emi-box-val{
+  font-family:'Bebas Neue',cursive;font-size:clamp(1.3rem,3.6vw,1.65rem);
+  letter-spacing:.02em;line-height:1;color:#fff;position:relative;z-index:1;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+#secFinanceTool .emi-box-val.updated{
+  animation:emiPulse .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes emiPulse{
+  0%{transform:scale(.85) rotateZ(-2deg);opacity:.8}
+  50%{transform:scale(1.15) rotateZ(1deg)}
+  100%{transform:scale(1) rotateZ(0);opacity:1}
+}
+#secFinanceTool .emi-box-val.updating{
+  animation:emiShimmer .4s ease-in-out infinite;
+}
+@keyframes emiShimmer{
+  0%,100%{opacity:1}
+  50%{opacity:.6}
+}
+#secFinanceTool .emi-box:hover .emi-box-val{font-size:clamp(1.4rem,3.8vw,1.75rem)}
+#secFinanceTool .emi-box-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;position:relative;z-index:1}
+#secFinanceTool .grand-total-box{
+  background:linear-gradient(120deg,rgba(245,158,11,.16),rgba(245,158,11,.05));
+  border:1px solid rgba(245,158,11,.35);border-radius:14px;
+  padding:1rem 1.1rem;margin-bottom:1.2rem;text-align:center;position:relative;overflow:hidden;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+#secFinanceTool .grand-total-box:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(245,158,11,.18)}
+#secFinanceTool .grand-total-lbl{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#FBBF24}
+#secFinanceTool .grand-total-val{
+  font-family:'Bebas Neue',cursive;font-size:clamp(1.9rem,5.5vw,2.4rem);
+  letter-spacing:.02em;line-height:1;color:#fff;margin-top:4px;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+#secFinanceTool .grand-total-val.updated{animation:emiPulse .5s cubic-bezier(.34,1.56,.64,1)}
+#secFinanceTool .grand-total-val.updating{animation:emiShimmer .4s ease-in-out infinite}
+#secFinanceTool .adv-box{
+  background:rgba(255,255,255,.06);border-radius:12px;padding:12px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  border:1px solid rgba(255,255,255,.08);transition:all .2s ease;
+}
+#secFinanceTool .adv-box:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.15)}
+#secFinanceTool .adv-box-lbl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+#secFinanceTool .adv-box-val{
+  font-family:'Bebas Neue',cursive;font-size:1.45rem;letter-spacing:.02em;color:#7DC4FF;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+}
+#secFinanceTool .adv-box-val.updated{
+  animation:advPop .48s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes advPop{
+  0%{transform:scale(.65) rotate(-12deg) translateY(8px);opacity:0}
+  50%{transform:scale(1.18) rotate(3deg);color:#FFD700}
+  85%{transform:scale(.95) rotate(-1deg)}
+  100%{transform:scale(1) rotate(0) translateY(0);opacity:1;color:inherit}
+}
+#secFinanceTool .adv-box-val.updating{
+  animation:advShimmer .5s ease-in-out infinite;
+}
+@keyframes advShimmer{
+  0%,100%{opacity:1;transform:translateY(0)}
+  50%{opacity:.5;transform:translateY(2px)}
+}
+#secFinanceTool .rate-chips{display:flex;gap:6px;margin-top:.9rem;flex-wrap:wrap}
+#secFinanceTool .rate-chip{
+  flex:1;min-width:70px;text-align:center;background:var(--bgSoft);border:1.5px solid var(--line);
+  border-radius:10px;padding:7px 4px;font-size:11px;font-weight:600;color:var(--ink3);
+  transition:all .2s cubic-bezier(.4,.0,.2,1);cursor:pointer;user-select:none;
+}
+#secFinanceTool .rate-chip:hover{transform:translateY(-3px);box-shadow:0 4px 14px rgba(0,94,166,.2)}
+#secFinanceTool .rate-chip.active{
+  background:var(--blueLt);border-color:var(--blue);color:var(--blue);
+  transform:scale(1.02);box-shadow:0 6px 18px rgba(0,94,166,.25);
+}
+#secFinanceTool .rate-chip .pct{font-family:'Bebas Neue',cursive;font-size:1.1rem;display:block}
+#secFinanceTool .btn-preview{
+  width:100%;justify-content:center;background:transparent;border:2px solid rgba(255,255,255,.18);
+  color:#fff;margin-top:.9rem;font-weight:600;font-size:.85rem;
+  letter-spacing:.02em;padding:12px 20px;border-radius:10px;display:flex;align-items:center;
+  gap:8px;cursor:pointer;transition:all .2s cubic-bezier(.4,.0,.2,1);
+}
+#secFinanceTool .btn-preview:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);transform:translateY(-2px)}
+#secFinanceTool .btn-preview:active{transform:translateY(0)}
+#secFinanceTool .btn-whatsapp{width:100%;justify-content:center;background:var(--amber);border-color:var(--amber);margin-top:.6rem}
+#secFinanceTool .btn-whatsapp:hover{background:var(--amberDark);border-color:var(--amberDark)}
+#secFinanceTool .field-error{border-color:var(--red) !important;box-shadow:0 0 0 3px rgba(220,38,38,.1) !important}
+#secFinanceTool .field-error-msg{font-size:11px;color:var(--red);margin-top:5px;display:none;align-items:center;gap:5px;animation:slideDown .2s ease-out}
+#secFinanceTool .field-error-msg.show{display:flex}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+#secFinanceTool .validation-toast{
+  position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-12px);
+  background:#0F172A;color:#fff;padding:12px 18px;border-radius:12px;
+  font-size:13px;font-weight:600;box-shadow:0 12px 32px rgba(0,0,0,.28);
+  z-index:120;display:flex;align-items:center;gap:10px;opacity:0;
+  pointer-events:none;transition:opacity .22s ease,transform .22s ease;
+}
+#secFinanceTool .validation-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#secFinanceTool .validation-toast i{color:#F87171}
+#secFinanceTool #chassisSearchWrap{position:relative}
+#secFinanceTool #chassisSearchDropdown{
+  display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 20px 48px rgba(15,23,42,.16);max-height:170px;overflow-y:auto;overflow-x:hidden;
+  z-index:55;padding:6px;animation:dropdownOpen .22s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+#secFinanceTool .csd-item{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;max-width:100%;
+  text-align:left;padding:10px 12px;border-radius:10px;border:none;background:transparent;
+  cursor:pointer;transition:all .15s cubic-bezier(.4,.0,.2,1);overflow:hidden;
+}
+#secFinanceTool .csd-item:hover{background:var(--blueLt)}
+#secFinanceTool .csd-item .csd-main{min-width:0;flex:1;overflow:hidden}
+#secFinanceTool .csd-item .csd-chassis{font-size:13px;font-weight:700;color:var(--ink);font-family:'JetBrains Mono',monospace;letter-spacing:.02em;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#secFinanceTool .csd-item .csd-sub{font-size:11px;color:var(--ink4);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#secFinanceTool .csd-item .csd-color-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.12);transition:all .2s ease;transform:scale(1)}
+#secFinanceTool .csd-item:hover .csd-color-dot{transform:scale(1.2)}
+#secFinanceTool .csd-empty{padding:14px 12px;font-size:12px;color:var(--ink4);text-align:center;animation:fadeIn .2s ease}
+#secFinanceTool .mobile-bar{
+  
+  position:fixed;left:0;right:0;bottom:0;z-index:50;background:#0F172A;
+  color:#fff;padding:10px 14px;display:none;align-items:center;gap:10px;
+  box-shadow:0 -8px 28px rgba(0,0,0,.18);border-top:1px solid rgba(255,255,255,.08);
+  animation:slideUpMobile .3s ease-out;
+}
+@keyframes slideUpMobile{from{transform:translateY(100%)}to{transform:translateY(0)}}
+#secFinanceTool .mobile-bar .emi-chunk{flex:1;min-width:0}
+#secFinanceTool .mobile-bar .lbl{font-size:8.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);white-space:nowrap}
+#secFinanceTool .mobile-bar .val{font-family:'Bebas Neue',cursive;font-size:1.25rem;letter-spacing:.02em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#secFinanceTool .mobile-bar .mbtn{background:var(--blue);padding:9px 14px;border-radius:9px;font-size:12px;font-weight:700;border:none;color:#fff;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .2s ease}
+#secFinanceTool .mobile-bar .mbtn:hover{transform:translateY(-2px)}
+#secFinanceTool .mobile-bar .mbtn.amber{background:var(--amber)}
+#secFinanceTool footer{background:#0F172A}
+#secFinanceTool .footer-link{color:#94A3B8;font-size:.875rem;transition:color .18s}
+#secFinanceTool .footer-link:hover{color:#fff}
+#secFinanceTool #fin_previewOverlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(8,15,26,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:none;align-items:flex-start;justify-content:center;
+  padding:24px 16px;overflow-y:auto;animation:fadeIn .2s ease;
+}
+#secFinanceTool #fin_previewOverlay.open{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+#secFinanceTool .preview-shell{
+  width:100%;max-width:900px;background:#F1F5F9;border-radius:20px;
+  overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.4);
+  animation:shellSlide .32s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes shellSlide{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+#secFinanceTool .preview-toolbar{
+  background:#0F172A;color:#fff;padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:5;
+}
+#secFinanceTool .preview-toolbar .ptitle{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:.04em}
+#secFinanceTool .preview-toolbar .ptitle i{color:var(--amber)}
+#secFinanceTool .ptabs{display:flex;gap:6px;background:rgba(255,255,255,.06);padding:4px;border-radius:10px}
+#secFinanceTool .ptab{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;transition:all .18s;border:none;background:transparent}
+#secFinanceTool .ptab:hover{background:rgba(255,255,255,.08)}
+#secFinanceTool .ptab.active{background:var(--blue);color:#fff}
+#secFinanceTool .pactions{display:flex;gap:8px}
+#secFinanceTool .pbtn{border:none;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .18s}
+#secFinanceTool .pbtn.print{background:var(--amber);color:#0F172A}
+#secFinanceTool .pbtn.print:hover{background:#FBBF24;transform:translateY(-1px)}
+#secFinanceTool .pbtn.close{background:rgba(255,255,255,.08);color:#fff}
+#secFinanceTool .pbtn.close:hover{background:rgba(255,255,255,.16)}
+#secFinanceTool .preview-body{padding:20px;overflow-x:auto}
+#secFinanceTool .a4-page{display:none}
+#secFinanceTool .a4-page.active{display:block;animation:pageSlide .28s ease both}
+@keyframes pageSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+#secFinanceTool .a4-paper{
+  font-family:'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;
+  font-size:12.5pt !important;color:#000 !important;background:#fff !important;
+  line-height:1.45 !important;width:210mm;min-height:297mm;padding:14mm 16mm 12mm 16mm;
+  box-sizing:border-box;margin:0 auto;box-shadow:0 6px 40px rgba(0,0,0,.22);border:1px solid #ddd;
+}
+#secFinanceTool .a4-paper *{font-family:'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;color:#000 !important}
+#secFinanceTool .doc-list{list-style:none}
+#secFinanceTool .doc-list li{display:grid;grid-template-columns:140px 16px 1fr;align-items:baseline;margin-bottom:3px;font-size:12.5pt}
+#secFinanceTool .doc-list.fin li{grid-template-columns:195px 16px 1fr}
+#secFinanceTool .doc-list li .lbl{display:flex;align-items:baseline;gap:6px}
+#secFinanceTool .sig-row{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;white-space:nowrap}
+#secFinanceTool .sig-box{flex:1;text-align:center;border-top:1px solid #000;padding-top:3px;font-size:11pt !important;min-width:0}
+#secFinanceTool .sign-panel{background:#fff;border-radius:14px;padding:16px 18px;margin-top:14px;box-shadow:0 2px 14px rgba(0,0,0,.05)}
+#secFinanceTool .sign-panel h4{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px}
+#secFinanceTool .sign-checks{display:flex;flex-wrap:wrap;gap:16px}
+#secFinanceTool .sign-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2)}
+#secFinanceTool .sign-check input{width:16px;height:16px;accent-color:var(--blue)}
+@media print{#secFinanceTool #financeLoader{display:none !important}
+#secFinanceTool{display:none !important}
+#secFinanceTool #fin_print-wrapper{display:block !important}
+#secFinanceTool .print-page{width:210mm !important;height:297mm !important;padding:12mm 14mm 10mm 14mm !important;margin:0 !important;box-sizing:border-box !important;overflow:hidden !important;page-break-after:always !important;break-after:page !important}
+#secFinanceTool .print-page:last-child{page-break-after:avoid !important;break-after:avoid !important}
+#secFinanceTool @page{size:A4 portrait;margin:0}}
+#secFinanceTool #fin_print-wrapper{display:none}
+@media (max-width:1024px){#secFinanceTool .calc-grid{grid-template-columns:1fr !important}
+#secFinanceTool .results-panel{position:static}}
+@media (max-width:768px){#secFinanceTool .metrics-row{grid-template-columns:1fr 1fr}
+#secFinanceTool .two-up, #secFinanceTool .customer-grid{grid-template-columns:1fr}
+#secFinanceTool .mobile-bar{display:flex}
+#secFinanceTool .preview-body{padding:12px}}
+@media (max-width:480px){#secFinanceTool .acc-grid{grid-template-columns:1fr}
+#secFinanceTool .config-row{grid-template-columns:1fr}
+#secFinanceTool .total-dp-banner{flex-direction:column;align-items:flex-start}}
+@media (max-width:640px){#secFinanceTool div[style*="grid-template-columns:1fr 1fr 1fr 1fr"]{grid-template-columns:1fr 1fr !important}}
+@media (max-width:400px){#secFinanceTool div[style*="grid-template-columns:1fr 1fr 1fr 1fr"]{grid-template-columns:1fr !important}}
+#secFinanceTool #financeLoader{display:none!important}
+#secFinanceTool .ftr-grid{grid-template-columns:1fr}
+@media(min-width:640px){#secFinanceTool .ftr-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:1024px){#secFinanceTool .ftr-grid{grid-template-columns:1fr 1fr 1fr 1fr}}
+#secFinanceTool{ background:#F6F7F9; }
+#secFinanceTool .app-shell{ display:flex; min-height:100vh; width:100%; }
+#secFinanceTool .sidebar{
+    width:250px; flex-shrink:0; background:#fff; border-right:1px solid #E7E9EE;
+    display:flex; flex-direction:column; height:100vh; position:sticky; top:0;
+    z-index:60; transition:transform .25s ease;
+  }
+#secFinanceTool .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:18px 18px 16px; border-bottom:1px solid #F0F1F4; flex-shrink:0; }
+#secFinanceTool .sidebar-nav{ flex:1; overflow-y:auto; padding:14px 12px; display:flex; flex-direction:column; gap:2px; }
+#secFinanceTool .sidebar-section-label{ font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#A6ACB9; padding:10px 10px 6px; }
+#secFinanceTool .sidebar-link{
+    display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:10px;
+    font-size:13.5px; font-weight:600; color:#4B5262; text-decoration:none; cursor:pointer;
+    border:1px solid transparent; transition:background .15s ease, color .15s ease; position:relative;
+    background:none; width:100%; text-align:left; box-sizing:border-box;
+  }
+#secFinanceTool .sidebar-link i{ width:16px; text-align:center; font-size:14px; color:#9AA1AF; transition:color .15s ease; flex-shrink:0; }
+#secFinanceTool .sidebar-link:hover{ background:#F5F6F8; color:#1F2430; }
+#secFinanceTool .sidebar-link:hover i{ color:#5B6270; }
+#secFinanceTool .sidebar-link.active-link{ background:#EEF5FC; color:#005EA6; font-weight:700; }
+#secFinanceTool .sidebar-link.active-link i{ color:#005EA6; }
+#secFinanceTool .sidebar-link.active-link::before{
+    content:''; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+    width:3px; height:18px; border-radius:0 4px 4px 0; background:#005EA6;
+  }
+#secFinanceTool .sidebar-foot{ padding:14px; border-top:1px solid #F0F1F4; flex-shrink:0; }
+#secFinanceTool .sidebar{ transition:transform .25s ease, width .25s ease, opacity .2s ease; }
+@media (min-width: 901px){#secFinanceTool .sidebar.collapsed{ width:0; min-width:0; border-right:none; opacity:0; pointer-events:none; }}
+#secFinanceTool .sidebar-overlay{ display:none; }
+@media (max-width: 900px){#secFinanceTool .sidebar{ position:fixed; left:0; top:0; transform:translateX(-100%); box-shadow:0 20px 60px rgba(15,23,42,.25); }
+#secFinanceTool .sidebar.open{ transform:translateX(0); }
+#secFinanceTool .sidebar-overlay{
+      display:none; position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:59;
+      backdrop-filter:blur(2px); opacity:0; transition:opacity .2s ease;
+    }
+#secFinanceTool .sidebar-overlay.open{ display:block; opacity:1; }}
+#secFinanceTool .main-col{ flex:1; min-width:0; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+#secFinanceTool .main-scroll{ flex:1 1 auto; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
+#secFinanceTool .topbar{
+    position:sticky; top:0; z-index:40; height:64px; flex-shrink:0;
+    background:rgba(255,255,255,.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid #E7E9EE; display:flex; align-items:center; gap:14px; padding:0 18px;
+  }
+#secFinanceTool .topbar-menu-btn{
+    width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    color:#5B6270; background:#F5F6F8; border:1px solid #E7E9EE; cursor:pointer; flex-shrink:0; transition:all .15s;
+  }
+#secFinanceTool .topbar-menu-btn:hover{ background:#EEF0F3; }
+#secFinanceTool .topbar-title{ min-width:0; }
+#secFinanceTool .topbar-title .eyebrow{ font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#9AA1AF; }
+#secFinanceTool .topbar-title .heading{ font-size:15px; font-weight:800; color:#1F2430; line-height:1.1; margin-top:1px; }
+#secFinanceTool .topbar-icon-btn{
+    width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    color:#5B6270; background:#fff; border:1px solid #E7E9EE; cursor:pointer; transition:all .15s ease; flex-shrink:0; text-decoration:none;
+  }
+#secFinanceTool .topbar-icon-btn:hover{ background:#F5F6F8; border-color:#D7DBE3; color:#1F2430; }
+#secFinanceTool .results-panel{
+    background:#F8FAFC !important; color:var(--ink) !important;
+    border:1px solid var(--line) !important; border-radius:14px !important;
+    padding:1.5rem 1.4rem !important; box-shadow:none !important;
+  }
+#secFinanceTool .results-panel::before{ display:none !important; }
+#secFinanceTool .res-title{
+    color:var(--ink) !important; font-family:'DM Sans',sans-serif !important;
+    font-size:1.05rem !important; font-weight:700 !important;
+    letter-spacing:0 !important; text-transform:none !important;
+    margin-bottom:1.5rem !important;
+  }
+#secFinanceTool .res-title i{ color:var(--blue) !important; }
+#secFinanceTool .res-row{
+    border-bottom:none !important; padding:9px 0 !important;
+    background:transparent !important; margin:0 !important;
+  }
+#secFinanceTool .res-row:hover{ background:transparent !important; padding:9px 0 !important; margin:0 !important; }
+#secFinanceTool .res-lbl{ color:var(--ink) !important; font-size:13.5px !important; font-weight:700 !important; }
+#secFinanceTool .res-val{ color:var(--ink) !important; font-size:13.5px !important; font-weight:700 !important; }
+#secFinanceTool .res-val.indigo{ color:var(--blue) !important; }
+#secFinanceTool .res-val.red{ color:#DC2626 !important; }
+#secFinanceTool .res-val.amber{ color:#B45309 !important; font-style:normal !important; }
+#secFinanceTool .grand-total-box{
+    background:#fff !important; border:1px solid var(--line) !important;
+    text-align:left !important; padding:.9rem 1rem !important; margin-bottom:1rem !important;
+  }
+#secFinanceTool .grand-total-box:hover{ transform:none !important; box-shadow:none !important; }
+#secFinanceTool .grand-total-lbl{ color:var(--ink3) !important; }
+#secFinanceTool .grand-total-val{ color:var(--ink) !important; }
+#secFinanceTool .emi-box{
+    background:#fff !important; border:1px solid var(--line) !important;
+    text-align:left !important; padding:.9rem 1rem !important;
+    display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  }
+#secFinanceTool .emi-box:hover{ transform:none !important; box-shadow:none !important; }
+#secFinanceTool .emi-box::before{ display:none !important; }
+#secFinanceTool .emi-box-lbl{ color:var(--ink3) !important; margin-bottom:0 !important; }
+#secFinanceTool .emi-box-val{ color:var(--blue) !important; }
+#secFinanceTool .emi-box:hover .emi-box-val{ font-size:clamp(1.3rem,3.6vw,1.65rem) !important; }
+#secFinanceTool .emi-box-sub{ color:var(--ink3) !important; width:100%; margin-top:2px !important; }
+#secFinanceTool .adv-box{
+    background:#fff !important; border:1px solid var(--line) !important;
+  }
+#secFinanceTool .adv-box-lbl{ color:var(--ink3) !important; }
+#secFinanceTool .adv-box-val{ color:var(--ink) !important; }
+#secFinanceTool .split-legend{ color:var(--ink3) !important; }
+#secFinanceTool .split-bar{ background:var(--line) !important; }
+#secFinanceTool .summary-actions{ display:flex; gap:10px; margin-top:1.1rem; }
+#secFinanceTool .summary-actions .btn-preview, #secFinanceTool .summary-actions .btn-whatsapp{ margin-top:0 !important; flex:1; }
+#secFinanceTool .btn-preview{
+    background:var(--blue) !important; border:none !important; color:#fff !important;
+  }
+#secFinanceTool .btn-preview:hover{ background:var(--blueDark) !important; }
+#secFinanceTool .btn-whatsapp{
+    background:var(--amber) !important; border:none !important; color:#fff !important;
+  }
+#secFinanceTool .btn-whatsapp:hover{ background:var(--amberDark) !important; }
+@media(max-width:520px){#secFinanceTool .summary-actions{ flex-direction:column; }}
+#secFinanceTool .field-hint{
+    font-size:11.5px; line-height:1.5; color:var(--ink3);
+    margin:6px 0 0; display:block;
+  }
+#secFinanceTool .dobp-overlay{
+    position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+    background:rgba(15,23,42,.55);backdrop-filter:blur(3px);padding:16px;
+  }
+#secFinanceTool .dobp-overlay.open{display:flex}
+#secFinanceTool .dobp-sheet{
+    background:#fff;border-radius:18px;width:100%;max-width:420px;overflow:hidden;
+    box-shadow:0 30px 70px rgba(15,23,42,.3);animation:dobpIn .22s cubic-bezier(.34,1.56,.64,1);
+  }
+@keyframes dobpIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+#secFinanceTool .dobp-head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    padding:14px 16px;border-bottom:1px solid var(--line);
+  }
+#secFinanceTool .dobp-title{font-family:'Bebas Neue',cursive;font-size:1.3rem;letter-spacing:.02em;color:var(--ink)}
+#secFinanceTool .dobp-wheels{position:relative;display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:4px;padding:8px 12px}
+#secFinanceTool .dobp-highlight{
+    position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%);height:44px;
+    background:var(--blueLt);border:1.5px solid rgba(0,94,166,.28);border-radius:11px;pointer-events:none;
+  }
+#secFinanceTool .dobp-col{
+    height:220px;overflow-y:auto;scroll-snap-type:y mandatory;
+    scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;position:relative;z-index:1;
+  }
+#secFinanceTool .dobp-col::-webkit-scrollbar{display:none}
+#secFinanceTool .dobp-col::before, #secFinanceTool .dobp-col::after{content:'';display:block;height:88px}
+#secFinanceTool .dobp-item{
+    height:44px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;
+    font-size:15px;font-weight:600;color:var(--ink4);cursor:pointer;
+    transition:color .15s ease,transform .15s ease,opacity .15s ease;opacity:.55;white-space:nowrap;
+  }
+#secFinanceTool .dobp-item.sel{color:var(--blue);font-weight:800;font-size:17px;opacity:1;transform:scale(1.04)}
+#secFinanceTool .dobp-foot{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--line)}
+#secFinanceTool .dobp-btn{
+    flex:1;padding:11px 16px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;
+    font-family:'DM Sans',sans-serif;transition:all .18s ease;border:1.5px solid var(--line);
+  }
+#secFinanceTool .dobp-btn.ghost{background:#fff;color:var(--ink3)}
+#secFinanceTool .dobp-btn.ghost:hover{background:var(--bgSoft);color:var(--ink)}
+#secFinanceTool .dobp-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+#secFinanceTool .dobp-btn.primary:hover{background:var(--blueDark)}
+#secFinanceTool .results-panel{ position:static !important; }
+#secFinanceTool main > div{ padding-bottom:32px !important; }
+#secFinanceTool main > div:has(.calc-card.dropdown-open){ padding-bottom:200px !important; }
+#secFinanceTool .app-footer{
+    margin-top:28px;padding:16px 20px;border-top:1px solid #E7E9EE;background:#fff;
+    display:flex;flex-direction:column;gap:3px;align-items:center;text-align:center;
+    font-size:11.5px;color:#94A3B8;
+  }
+#secFinanceTool .app-footer-note{font-size:11px;color:#B6BCC7}
+#secFinanceTool .greet-caret{
+    display:inline-block;margin-left:1px;color:#005EA6;font-weight:400;
+    animation:greetBlink 1s step-end infinite;
+  }
+@keyframes greetBlink{50%{opacity:0}}
+#secFinanceTool .event-popup-dot{
+    width:7px; height:7px; border-radius:50%; background:#E2E8F0; border:none; padding:0; cursor:pointer;
+    transition:all .2s ease;
+  }
+#secFinanceTool .event-popup-dot.active{ background:#005EA6; width:20px; border-radius:4px; }
+#secFinanceTool .no-scrollbar{ scrollbar-width:none; -ms-overflow-style:none; }
+#secFinanceTool .no-scrollbar::-webkit-scrollbar{ display:none; }
+#secFinanceTool .section-title{ font-family: 'Bebas Neue', cursive; line-height: 1; letter-spacing: 0.01em; color: #0F172A; }
+@keyframes slideIn { from{opacity:0;transform:translateY(16px) scale(.96);} to{opacity:1;transform:translateY(0) scale(1);} }
+
   /* ── Recondition ID: view-only sections ──────────────────────────────
      These pages are visible to a Recondition ID for reference, but every
      control that would change something is removed rather than left to
@@ -1480,6 +2387,9 @@
           <i class="fas fa-chart-pie"></i> Storage
         </button>
         <div class="sidebar-section-label">Finance Tool</div>
+        <button id="navFinanceTool" onclick="switchSec('financeTool');closeMobileMenu()" class="nav-tab sidebar-link" data-label="DP Allocations">
+          <i class="fas fa-calculator"></i> DP Allocations
+        </button>
         <button id="navSheetTool" onclick="switchSec('sheetTool');closeMobileMenu()" class="nav-tab sidebar-link" data-label="EMI Rate Sheet">
           <i class="fas fa-table"></i> EMI Rate Sheet
         </button>
@@ -3370,6 +4280,497 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- ═══ DP ALLOCATIONS (native section) ═══ -->
+    <div class="sec-panel" id="secFinanceTool">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+        <div>
+          <div class="section-label">Finance Tool ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">DP <span class="text-amber-500">Allocations</span></div>
+        </div>
+      </div>
+
+  <div style="max-width:1280px;margin:0 auto;padding:36px 20px 56px">
+
+    <div id="bikeLoadWarning" style="display:none;margin-bottom:16px;padding:12px 16px;background:#FEF2F2;border:1.5px solid #FCA5A5;border-radius:10px;color:#991B1B;font-size:13px;font-weight:600;align-items:center;gap:8px">
+      <i class="fa-solid fa-triangle-exclamation"></i> <span id="bikeLoadWarningText">Live prices are taking longer than usual to load — check your internet connection. Showing indicative prices for now.</span>
+    </div>
+
+    <div class="calc-grid" style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:stretch">
+
+      <!-- LEFT COLUMN -->
+      <div style="display:flex;flex-direction:column;gap:24px">
+
+        <div class="calc-card">
+          <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-location-dot"></i></span>Location</div>
+          <div class="itoggle" id="insuranceTypeToggle">
+            <div class="itoggle-btn active" data-itype="indoor"><i class="fa-solid fa-house" style="margin-right:5px"></i>Indoor</div>
+            <div class="itoggle-btn" data-itype="outdoor"><i class="fa-solid fa-cloud-sun" style="margin-right:5px"></i>Outdoor</div>
+          </div>
+        </div>
+
+        <div class="calc-card">
+          <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-motorcycle"></i></span>Select Model &amp; Pricing</div>
+          <label class="field-label">Bike Model</label>
+          <div class="custom-select" id="modelSelectWrap">
+            <select id="modelSelect" class="styled sr-only-select" tabindex="-1" aria-hidden="true"><option>Loading bikes…</option></select>
+            <button type="button" class="custom-select-trigger" id="modelSelectTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="cst-text" id="modelSelectTriggerText">Loading bikes…</span>
+              <i class="fa-solid fa-chevron-down cst-chevron"></i>
+            </button>
+            <div class="custom-select-panel" id="modelSelectPanel" role="listbox"></div>
+          </div>
+
+          <div class="metrics-row">
+            <div class="metric-box"><span class="metric-lbl">MRP Price</span><span class="metric-val" id="mrp">0</span></div>
+            <div class="metric-box has-input"><span class="metric-lbl">Discount</span><input type="number" id="discountInput" value="0" placeholder="0"></div>
+            <div class="metric-box"><span class="metric-lbl">After Discount</span><span class="metric-val green" id="afterDiscount">0</span></div>
+            <div class="metric-box has-input"><span class="metric-lbl">Advance EMI</span><input type="number" id="advEmiInput" value="0" placeholder="0"></div>
+          </div>
+
+          <div class="config-row">
+            <div>
+              <label class="field-label">Downpayment %</label>
+              <div class="custom-select" id="fin_dpPercentWrap">
+                <select id="fin_dpPercent" class="styled sr-only-select" tabindex="-1" aria-hidden="true">
+                  <option value="30">30%</option><option value="40">40%</option>
+                  <option value="50" selected>50%</option><option value="60">60%</option>
+                </select>
+                <button type="button" class="custom-select-trigger" id="fin_dpPercentTrigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="cst-text" id="fin_dpPercentTriggerText">50%</span>
+                  <i class="fa-solid fa-chevron-down cst-chevron"></i>
+                </button>
+                <div class="custom-select-panel" id="fin_dpPercentPanel" role="listbox"></div>
+              </div>
+            </div>
+            <div>
+              <label class="field-label">Loan Tenure</label>
+              <div class="custom-select" id="fin_tenureWrap">
+                <select id="fin_tenure" class="styled sr-only-select" tabindex="-1" aria-hidden="true">
+                  <option value="12">12 Months</option><option value="18">18 Months</option>
+                  <option value="24">24 Months</option><option value="36">36 Months</option>
+                  <option value="48">48 Months</option><option value="60" selected>60 Months</option>
+                </select>
+                <button type="button" class="custom-select-trigger" id="fin_tenureTrigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="cst-text" id="fin_tenureTriggerText">60 Months</span>
+                  <i class="fa-solid fa-chevron-down cst-chevron"></i>
+                </button>
+                <div class="custom-select-panel" id="fin_tenurePanel" role="listbox"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rate-chips" id="rateChipsWrap">
+            <div class="rate-chip" data-dp="30"><span class="pct">13.99%</span>30% DP</div>
+            <div class="rate-chip" data-dp="40"><span class="pct">12.99%</span>40% DP</div>
+            <div class="rate-chip" data-dp="50"><span class="pct">11.99%</span>50% DP</div>
+            <div class="rate-chip" data-dp="60"><span class="pct">8.99%</span>60% DP</div>
+          </div>
+        </div>
+
+        <div class="two-up">
+          <div class="calc-card">
+            <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>Additional Charges</div>
+            <div class="charge-row"><label><i class="fa-solid fa-shield-halved"></i> Insurance</label><span class="val" id="displayIns">Rs. 0</span></div>
+            <div class="charge-row"><label><i class="fa-solid fa-stamp"></i> Registration / Namsari</label><input type="number" id="fin_namsariInput" value="3000"></div>
+          </div>
+          <div class="calc-card">
+            <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-helmet-safety"></i></span>Accessories</div>
+            <div class="acc-grid">
+              <!-- display:contents lets the dynamic fields flow into this same
+                   grid so "Others" aligns with them rather than sitting in a
+                   separate grid below. -->
+              <div id="fin_accDynamicGrid" style="display:contents"><!-- populated live from admin's Accessories Inventory --></div>
+              <div class="acc-field"><label><i class="fa-solid fa-plus"></i> Others</label><input type="number" id="othersInput" value="0"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-card">
+          <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-user-tag"></i></span>Customer &amp; Vehicle Details <span style="font-weight:400;font-size:11px;color:var(--ink4);margin-left:auto">for the printed form</span></div>
+          <div class="customer-grid" style="margin-bottom:14px">
+            <div>
+              <label class="field-label">Customer Full Name <span style="color:var(--red)">*</span></label>
+              <input type="text" id="custNameInput" class="styled" placeholder="e.g. Ram Bahadur Rai">
+              <div class="field-error-msg" id="custNameError"><i class="fa-solid fa-circle-exclamation"></i> Customer name is required</div>
+            </div>
+            <div>
+              <label class="field-label">Contact Number <span style="color:var(--red)">*</span></label>
+              <input type="tel" id="custPhoneInput" class="styled" placeholder="98XXXXXXXX" maxlength="10" inputmode="numeric">
+              <div class="field-error-msg" id="custPhoneError"><i class="fa-solid fa-circle-exclamation"></i> Enter a valid 10-digit phone number</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:14px">
+            <label class="field-label">Date of Birth <span style="color:var(--red)">*</span></label>
+            <!-- Single trigger for both calendars — opens the slot-wheel picker -->
+            <button type="button" class="custom-select-trigger" id="dobTrigger">
+              <span class="cst-text" id="dobTriggerText">Select date of birth</span>
+              <i class="fa-solid fa-calendar-days cst-chevron"></i>
+            </button>
+
+            <div class="field-error-msg" id="dobError"><i class="fa-solid fa-circle-exclamation"></i> Date of birth is required</div>
+            <div id="dobAgeNote" style="display:none;margin-top:8px;font-size:12px;font-weight:600"></div>
+          </div>
+          <div class="customer-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:.75rem">
+            <div class="acc-field">
+              <label>Chassis No. <span style="color:var(--red)">*</span></label>
+              <input type="text" id="manualChassis" placeholder="Chassis">
+              <div class="field-error-msg" id="manualChassisError"><i class="fa-solid fa-circle-exclamation"></i> Chassis number is required</div>
+            </div>
+            <div class="acc-field">
+              <label>Engine No. <span style="color:var(--red)">*</span></label>
+              <input type="text" id="manualEngine" placeholder="Engine">
+              <div class="field-error-msg" id="manualEngineError"><i class="fa-solid fa-circle-exclamation"></i> Engine number is required</div>
+            </div>
+            <div class="acc-field">
+              <label>Regd. No. <span style="color:var(--red)">*</span></label>
+              <input type="text" id="manualReg" placeholder="Reg No">
+              <div class="field-error-msg" id="manualRegError"><i class="fa-solid fa-circle-exclamation"></i> Registration number is required</div>
+            </div>
+            <div class="acc-field">
+              <label>Color <span style="color:var(--red)">*</span></label>
+              <input type="text" id="manualColor" placeholder="Color">
+              <div class="field-error-msg" id="manualColorError"><i class="fa-solid fa-circle-exclamation"></i> Color is required</div>
+            </div>
+          </div>
+          <div class="chassis-tools-row">
+            <div class="ct-search" id="chassisSearchWrap">
+              <label class="field-label">Search Inventory by Chassis</label>
+              <input type="text" id="chassisSearch" class="styled" placeholder="Type chassis no. to auto-fill" autocomplete="off">
+              <div id="chassisSearchDropdown"></div>
+            </div>
+            <button onclick="findChassis()" class="cta-primary ct-find" style="height:46px;font-size:13px;padding:0 18px;white-space:nowrap"><i class="fa-solid fa-magnifying-glass"></i> Find</button>
+            <div class="ct-year">
+              <label class="field-label">Make Year</label>
+              <input type="text" id="makeYearInput" class="styled" value="">
+            </div>
+          </div>
+          <p id="searchStatus" style="font-size:11px;color:var(--ink4);font-style:italic;margin-top:8px"></p>
+          <div id="modelMismatchWarning" class="model-mismatch-warning"><i class="fa-solid fa-triangle-exclamation"></i><span></span></div>
+          <div id="chassisStatusWarning" class="chassis-status-warning"><i class="fa-solid fa-ban"></i><span></span></div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+      <div class="results-panel">
+        <div class="res-title"><i class="fa-solid fa-chart-pie"></i> Results Summary</div>
+
+        <div class="grand-total-box">
+          <div class="grand-total-lbl"><i class="fa-solid fa-thumbtack"></i> Total Downpayment</div>
+          <div class="grand-total-val" id="displayTotalDPSummary">Rs. 0</div>
+        </div>
+
+        <div class="res-row"><span class="res-lbl">Interest Rate</span><span class="res-val indigo" id="displayRate">0%</span></div>
+        <div class="res-row"><span class="res-lbl">Downpayment Amount</span><span class="res-val" id="displayDpAmt">Rs. 0</span></div>
+        <div class="res-row"><span class="res-lbl">Loan Amount</span><span class="res-val" id="displayLoanAmt">Rs. 0</span></div>
+
+        <div class="split-legend"><span><span class="dot dp"></span> Downpayment</span><span><span class="dot loan"></span> Loan</span></div>
+        <div class="split-bar" aria-hidden="true"><div class="seg-dp" id="splitDpBar" style="width:50%"></div><div class="seg-loan" id="splitLoanBar" style="width:50%"></div></div>
+
+        <div class="emi-box">
+          <div class="emi-box-lbl">Monthly EMI</div>
+          <div class="emi-box-val" id="displayEMI">Rs. 0</div>
+          <div class="emi-box-sub" id="emiTenureLabel">for 60 months</div>
+        </div>
+
+        <div class="res-row"><span class="res-lbl">Auto Rounding Adj.</span><span class="res-val amber" id="displayAutoAdEmi">Rs. 0</span></div>
+
+        <div class="adv-box" style="margin:.75rem 0 .25rem">
+          <span class="adv-box-lbl">Total Advance EMI</span>
+          <span class="adv-box-val" id="displayTotalAdvEmi">Rs. 0</span>
+        </div>
+
+        <div class="res-row"><span class="res-lbl">Due EMI (Remaining)</span><span class="res-val" id="displayDueEmi">Rs. 0</span></div>
+        <div class="res-row"><span class="res-lbl">Total Interest Payable</span><span class="res-val red" id="displayTotalInterest">Rs. 0</span></div>
+
+        <div class="summary-actions">
+          <button class="btn-preview" onclick="openPreview()"><i class="fa-solid fa-file-lines"></i> Preview Form</button>
+        </div>
+      </div>
+
+      <div class="calc-card" style="display:flex;flex-direction:column;flex:1;justify-content:center">
+        <div class="calc-card-title" style="margin-bottom:.9rem"><span class="icon"><i class="fa-solid fa-file-circle-check"></i></span>Documents Required — Applicant</div>
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-id-card" style="color:var(--blue);font-size:14px;margin-top:2px;width:14px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">Citizenship — original + 2 photocopies</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-id-badge" style="color:var(--blue);font-size:14px;margin-top:2px;width:14px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">Driving license (renewed) — original + 1 photocopy</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-camera-retro" style="color:var(--blue);font-size:14px;margin-top:2px;width:14px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">Passport-size photos — 3 recent copies</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-mobile-screen" style="color:var(--blue);font-size:14px;margin-top:2px;width:14px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">Mobile number registered in your own name</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <i class="fa-solid fa-file-invoice-dollar" style="color:var(--blue);font-size:14px;margin-top:2px;width:14px"></i>
+            <span style="font-size:13px;color:var(--ink2);line-height:1.5">Income proof — optional, but required (+1 photocopy) if down payment is 40% or more</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+          <p style="font-size:11.5px;color:var(--ink3);line-height:1.6"><i class="fa-solid fa-circle-info" style="color:var(--amber);margin-right:5px"></i>Under 25? Guarantor must be your father or mother (with relation proof), or another family member aged 25+ with relation proof, plus an appointment letter showing employment/business.</p>
+        </div>
+        <div style="margin-top:8px">
+          <p style="font-size:11.5px;color:var(--red);line-height:1.6;font-weight:600"><i class="fa-solid fa-triangle-exclamation" style="margin-right:5px"></i>Photocopies alone are not accepted — please bring all original documents.</p>
+        </div>
+      </div>
+
+      </div>
+
+    </div>
+  </div>
+
+<div id="fin_previewOverlay" onclick="if(event.target===this) closePreview()">
+  <div class="preview-shell">
+    <div class="preview-toolbar">
+      <div class="ptitle"><i class="fa-solid fa-file-signature"></i> Document Preview</div>
+      <div class="ptabs">
+        <button class="ptab active" id="tabAlloc" onclick="switchTab('alloc')">Allocation Form</button>
+        <button class="ptab" id="tabQuote" onclick="switchTab('quote')">Quotation</button>
+      </div>
+      <div class="pactions">
+        <button class="pbtn print" onclick="printBothPages()"><i class="fa-solid fa-print"></i> Print Both</button>
+        <button class="pbtn close" onclick="closePreview()"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+
+    <div id="previewModelWarning" class="model-mismatch-warning" style="margin:12px 20px 0"></div>
+    <div id="previewChassisStatusWarning" class="chassis-status-warning" style="margin:12px 20px 0"></div>
+
+    <div class="preview-body">
+
+      <!-- PAGE 1 — ALLOCATION FORM -->
+      <div class="a4-page active" id="pageAlloc">
+        <div id="print-area" class="a4-paper">
+          <div style="text-align:center;margin-bottom:5mm">
+            <p style="font-size:15pt;font-weight:bold">HULAS FINSERV HIRE PURCHASE LIMITED</p>
+            <p style="font-size:15pt;font-weight:bold;margin-top:4px">DOWNPAYMENT ALLOCATION FORM</p>
+          </div>
+          <hr style="border:none;border-top:2px solid #000;margin:0 0 5mm 0">
+
+          <p style="font-size:13pt;font-weight:bold;margin-bottom:3px">Customer &amp; Vehicle Information</p>
+          <ul class="doc-list" style="margin-bottom:5mm">
+            <li><span class="lbl"><span>•</span><span>Date</span></span><span>:</span><span id="a4Date">--</span></li>
+            <li><span class="lbl"><span>•</span><span>Dealer Name</span></span><span>:</span><span id="a4Dealer">Samriddhi And Brothers Auto Pvt. Ltd.</span></li>
+            <li><span class="lbl"><span>•</span><span>Customer Name</span></span><span>:</span><strong id="a4CustName">--</strong></li>
+            <li><span class="lbl"><span>•</span><span>Contact Number</span></span><span>:</span><span id="a4CustPhone">--</span></li>
+            <li><span class="lbl"><span>•</span><span>Vehicle Model</span></span><span>:</span><strong id="a4Model">--</strong></li>
+          </ul>
+
+          <p style="font-size:13pt;font-weight:bold;margin-bottom:3px">Financial Details</p>
+          <ul class="doc-list fin" style="margin-bottom:5mm">
+            <li><span class="lbl"><span>•</span><span>Retail Price</span></span><span>:</span><span id="a4MRP">0.00</span></li>
+            <li><span class="lbl"><span>•</span><span>Down Payment</span></span><span>:</span><span id="a4DP">0.00</span></li>
+            <li><span class="lbl"><span>•</span><span>Loan Amount</span></span><span>:</span><span id="a4Loan">0.00</span></li>
+            <li><span class="lbl"><span>•</span><span>Interest Rate (%)</span></span><span>:</span><span id="a4Rate">--</span></li>
+            <li><span class="lbl"><span>•</span><span>Tenure (Months)</span></span><span>:</span><span id="a4Tenure">--</span></li>
+            <li style="display:block;margin-bottom:3px">• &nbsp;Registration Charge / Yatayat Expenses: &nbsp;<span id="a4Namsari">3,000.00</span>&nbsp;<em style="font-size:11pt">(suggested by HH)</em></li>
+            <li style="display:block;margin-bottom:3px">• &nbsp;Insurance Premium : &nbsp;<span id="a4Ins">0.00</span></li>
+            <li style="display:block;margin-bottom:3px">• &nbsp;Advance EMI (If Any) : &nbsp;<span id="a4AdvEmiAmt">0.00</span></li>
+            <li style="display:block;margin-bottom:3px">• &nbsp;Total Down-payment Amount paid by Customer : &nbsp;<strong id="a4TotalDP">0.00</strong></li>
+          </ul>
+
+          <p style="font-size:13pt;font-weight:bold;margin-top:4mm">Declaration</p>
+          <hr style="border:none;border-top:1px solid #000;margin:3px 0 3mm 0">
+          <p style="font-size:12.5pt;margin-bottom:2mm;line-height:1.55">We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.</p>
+          <p style="font-size:12.5pt">Signatures &amp; Authorization</p>
+
+          <div class="sig-row" style="margin-top:28mm">
+            <div class="sig-box">Customer's Signature</div>
+            <div class="sig-box">Dealer's Signature &amp; Stamp</div>
+            <div class="sig-box">LO's Signature &amp; Stamp</div>
+          </div>
+          <hr style="border:none;border-top:1px solid #000;margin-top:4mm">
+          <hr style="border:none;border-top:1px solid #000;margin-top:2px">
+        </div>
+
+      </div>
+
+      <!-- PAGE 2 — QUOTATION -->
+      <div class="a4-page" id="pageQuote">
+        <div id="quotation-print-area" class="a4-paper">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:3mm">
+            <div style="flex-shrink:0"><img src="logo.jpg" alt="Bajaj Logo" style="height:100px;width:auto;object-fit:contain" onerror="this.style.display='none'"></div>
+            <div style="flex:1;text-align:center">
+              <p style="font-size:15pt;font-weight:bold;margin-bottom:1px">Samriddhi &amp; Brothers Auto Pvt. Ltd.</p>
+              <p style="font-size:13pt;font-weight:bold;margin-bottom:2px">Authorized Dealer of Bajaj Motorcycle</p>
+              <p style="font-size:10.5pt;text-decoration:underline">Phidim-04, Panchthar, Nepal &nbsp; Tel: 024-523144, 9802315425 &nbsp; Email: Sambriddhi.bajaj@gmail.com</p>
+            </div>
+          </div>
+          <hr style="border:none;border-top:1.5px solid #000;margin:0 0 3mm 0">
+
+          <div style="text-align:right;font-size:12pt;margin-bottom:2mm">Date: &nbsp;<span id="a4Date2">--/--/----</span></div>
+          <div style="text-align:center;margin-bottom:4mm"><strong style="font-size:13pt;text-decoration:underline;letter-spacing:.5px">QUOTATION</strong></div>
+
+          <p style="font-size:12pt;margin-bottom:1mm">To Hulas Finserv Hire Purchase Limited</p>
+          <p style="font-size:12pt;font-weight:bold;margin-bottom:1mm">C/O &nbsp;<span id="a4CustName2">--</span></p>
+          <p style="font-size:12pt;margin-bottom:1mm">Dear Sir/Madam,</p>
+          <p style="font-size:12pt;margin-bottom:2mm">We are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
+
+          <p style="font-size:12pt;margin-bottom:1mm">Details :</p>
+          <p style="font-size:12pt;font-weight:bold;margin-bottom:1mm">Model: <span id="a4Model2">---</span></p>
+          <p style="font-size:12pt;font-weight:bold;margin-bottom:2mm">Price: <span id="a4MRP2">0</span>/- &nbsp;&nbsp;&nbsp; In Words: <span id="a4PriceWords">---</span></p>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;row-gap:2px;font-size:12pt;margin-bottom:2mm">
+            <p>Color: <span id="a4Color2">---</span></p>
+            <p>Regd No: <span id="a4Reg2">---</span></p>
+            <p>Engine No: <span id="a4Engine2">---</span></p>
+            <p>Chassis No: <span id="a4Chassis2" style="text-transform:uppercase">---</span></p>
+            <p>Make Year: &nbsp;<span id="a4MakeYear">2026</span></p>
+          </div>
+
+          <div id="a4DiscountRow" style="display:none;font-size:12pt;margin-bottom:2mm">
+            <p style="margin-bottom:1mm">Discount: Rs. <span id="a4DiscountAmt">0</span>/- &nbsp;&nbsp; In Words: <em id="a4DiscountWords">---</em></p>
+            <p style="margin-bottom:1mm">Net Price: Rs. <span id="a4NetPrice">0</span>/- &nbsp;&nbsp; In Words: <em id="a4NetPriceWords">---</em></p>
+          </div>
+
+          <div style="font-size:12pt;line-height:1.55;margin-top:1mm">
+            <p style="margin-bottom:1mm">Terms and Conditions :-</p>
+            <p style="margin-bottom:1mm">- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
+            <p style="margin-bottom:1mm">- Delivery :- Subject to availability</p>
+            <p style="margin-bottom:1mm">- Price Validity:- Subject to change without prior notice unless booked in advance at prevailing price.</p>
+            <p style="margin-bottom:1mm">- Taxes and Duties:- The price quoted above is inclusive of 13% VAT. However, other local taxes like – Road Tax, Registration Fees, Municipality Tax etc. will be on the account of purchaser.</p>
+            <p style="margin-bottom:1mm">- Insurance:- On account of purchaser.</p>
+            <p style="margin-bottom:1mm">- Warranty:- Warranty is not applicable on wear and tear and the items like Battery, Tyre, Tube, Brake Shoe, Clutch, Plate Cable, Chain Spocket and Bulb. Warranty Policy is detailed in the Owner's manual which will be provided at the time of the delivery of motorcycle.</p>
+            <p>- Servicing – 7 Free Servicing.</p>
+          </div>
+
+          <div style="text-align:right;font-size:12pt;margin-top:3mm"><p>Sincerely Your's</p></div>
+          <div style="text-align:right;font-size:12pt;margin-top:15mm"><p>Authorized Signature</p></div>
+          <hr style="border:none;border-top:1px solid #000;margin-top:4mm">
+        </div>
+      </div>
+
+    </div>
+<div class="dobp-overlay" id="dobPicker">
+  <div class="dobp-sheet">
+    <div class="dobp-head">
+      <span class="dobp-title">Date of Birth</span>
+      <div class="itoggle" id="dobpCalToggle" style="max-width:170px">
+        <div class="itoggle-btn active" data-dobcal="AD">A.D.</div>
+        <div class="itoggle-btn" data-dobcal="BS">B.S.</div>
+      </div>
+    </div>
+    <div class="dobp-wheels">
+      <div class="dobp-highlight" aria-hidden="true"></div>
+      <div class="dobp-col" id="dobpYear"   data-unit="year"></div>
+      <div class="dobp-col" id="dobpMonth"  data-unit="month"></div>
+      <div class="dobp-col" id="dobpDay"    data-unit="day"></div>
+    </div>
+    <div class="dobp-foot">
+      <button type="button" class="dobp-btn ghost" id="dobpCancel">Cancel</button>
+      <button type="button" class="dobp-btn primary" id="dobpDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="validation-toast" id="validationToast"><i class="fa-solid fa-triangle-exclamation"></i><span id="validationToastMsg">Please fill required fields</span></div>
+<div class="mobile-bar" style="position:static;margin-top:16px;border-radius:14px" id="mobileBar">
+  <div class="emi-chunk">
+    <div class="lbl">Monthly EMI</div>
+    <div class="val" id="mobileEmiVal">Rs. 0</div>
+  </div>
+  <div class="emi-chunk">
+    <div class="lbl">Total DP</div>
+    <div class="val" id="mobileTotalDpVal">Rs. 0</div>
+  </div>
+  <button class="mbtn" onclick="openPreview()"><i class="fa-solid fa-file-lines"></i> Preview</button>
+</div>
+<div id="fin_print-wrapper">
+  <div class="print-page a4-paper">
+    <div style="text-align:center;margin-bottom:5mm">
+      <p style="font-size:15pt;font-weight:bold">HULAS FINSERV HIRE PURCHASE LIMITED</p>
+      <p style="font-size:15pt;font-weight:bold;margin-top:4px">DOWNPAYMENT ALLOCATION FORM</p>
+    </div>
+    <hr style="border:none;border-top:2px solid #000;margin:0 0 5mm 0">
+    <p style="font-size:13pt;font-weight:bold;margin-bottom:3px">Customer &amp; Vehicle Information</p>
+    <ul class="doc-list" style="margin-bottom:5mm">
+      <li><span class="lbl"><span>•</span><span>Date</span></span><span>:</span><span id="p1Date">--</span></li>
+      <li><span class="lbl"><span>•</span><span>Dealer Name</span></span><span>:</span><span id="p1Dealer">Samriddhi And Brothers Auto Pvt. Ltd.</span></li>
+      <li><span class="lbl"><span>•</span><span>Customer Name</span></span><span>:</span><strong id="p1CustName">--</strong></li>
+      <li><span class="lbl"><span>•</span><span>Contact Number</span></span><span>:</span><span id="p1CustPhone">--</span></li>
+      <li><span class="lbl"><span>•</span><span>Vehicle Model</span></span><span>:</span><strong id="p1Model">--</strong></li>
+    </ul>
+    <p style="font-size:13pt;font-weight:bold;margin-bottom:3px">Financial Details</p>
+    <ul class="doc-list fin" style="margin-bottom:5mm">
+      <li><span class="lbl"><span>•</span><span>Retail Price</span></span><span>:</span><span id="p1MRP">0.00</span></li>
+      <li><span class="lbl"><span>•</span><span>Down Payment</span></span><span>:</span><span id="p1DP">0.00</span></li>
+      <li><span class="lbl"><span>•</span><span>Loan Amount</span></span><span>:</span><span id="p1Loan">0.00</span></li>
+      <li><span class="lbl"><span>•</span><span>Interest Rate (%)</span></span><span>:</span><span id="p1Rate">--</span></li>
+      <li><span class="lbl"><span>•</span><span>Tenure (Months)</span></span><span>:</span><span id="p1Tenure">--</span></li>
+      <li style="display:block;margin-bottom:3px">• &nbsp;Registration Charge / Yatayat Expenses: &nbsp;<span id="p1Namsari">3,000.00</span>&nbsp;<em style="font-size:11pt">(suggested by HH)</em></li>
+      <li style="display:block;margin-bottom:3px">• &nbsp;Insurance Premium : &nbsp;<span id="p1Ins">0.00</span></li>
+      <li style="display:block;margin-bottom:3px">• &nbsp;Advance EMI (If Any) : &nbsp;<span id="p1AdvEmi">0.00</span></li>
+      <li style="display:block;margin-bottom:3px">• &nbsp;Total Down-payment Amount paid by Customer : &nbsp;<strong id="p1TotalDP">0.00</strong></li>
+    </ul>
+    <p style="font-size:13pt;font-weight:bold;margin-top:4mm">Declaration</p>
+    <hr style="border:none;border-top:1px solid #000;margin:3px 0 3mm 0">
+    <p style="font-size:11.5pt;margin-bottom:2mm;line-height:1.55">We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.</p>
+    <p style="font-size:11.5pt">Signatures &amp; Authorization</p>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:6px;white-space:nowrap;margin-top:24mm">
+      <div style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:10.5pt">Customer's Signature</div>
+      <div style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:10.5pt">Dealer's Signature &amp; Stamp</div>
+      <div style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:10.5pt">LO's Signature &amp; Stamp</div>
+    </div>
+    <hr style="border:none;border-top:1px solid #000;margin-top:4mm">
+    <hr style="border:none;border-top:1px solid #000;margin-top:2px">
+  </div>
+
+  <div class="print-page a4-paper">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:3mm">
+      <div style="flex-shrink:0"><img src="logo.jpg" alt="Bajaj Logo" style="height:100px;width:auto;object-fit:contain" onerror="this.style.display='none'"></div>
+      <div style="flex:1;text-align:center">
+        <p style="font-size:15pt;font-weight:bold;margin-bottom:1px">Samriddhi &amp; Brothers Auto Pvt. Ltd.</p>
+        <p style="font-size:13pt;font-weight:bold;margin-bottom:2px">Authorized Dealer of Bajaj Motorcycle</p>
+        <p style="font-size:10.5pt;text-decoration:underline">Phidim-04, Panchthar, Nepal &nbsp; Tel: 024-523144, 9802315425 &nbsp; Email: Sambriddhi.bajaj@gmail.com</p>
+      </div>
+    </div>
+    <hr style="border:none;border-top:1.5px solid #000;margin:0 0 3mm 0">
+    <div style="text-align:right;font-size:12pt;margin-bottom:2mm">Date: &nbsp;<span id="p2Date">--/--/----</span></div>
+    <div style="text-align:center;margin-bottom:4mm"><strong style="font-size:13pt;text-decoration:underline;letter-spacing:.5px">QUOTATION</strong></div>
+    <p style="font-size:12pt;margin-bottom:1mm">To Hulas Finserv Hire Purchase Limited</p>
+    <p style="font-size:12pt;font-weight:bold;margin-bottom:1mm">C/O &nbsp;<span id="p2CustName">--</span></p>
+    <p style="font-size:12pt;margin-bottom:1mm">Dear Sir/Madam,</p>
+    <p style="font-size:12pt;margin-bottom:1mm">We are pleased to furnish quotation of Bajaj Motorcycle as per following.</p>
+    <p style="font-size:12pt;margin-bottom:1mm">Details :</p>
+    <p style="font-size:12pt;font-weight:bold;margin-bottom:1mm">Model: <span id="p2Model">---</span></p>
+    <p style="font-size:12pt;font-weight:bold;margin-bottom:2mm">Price: <span id="p2MRP">0</span>/- In Words: <span id="p2PriceWords">---</span></p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;row-gap:2px;font-size:12pt;margin-bottom:2mm">
+      <p>Color: <span id="p2Color">---</span></p>
+      <p>Regd No: <span id="p2Reg">---</span></p>
+      <p>Engine No: <span id="p2Engine">---</span></p>
+      <p>Chassis No: <span id="p2Chassis" style="text-transform:uppercase">---</span></p>
+      <p>Make Year: &nbsp;<span id="p2MakeYear">2026</span></p>
+    </div>
+    <div id="p2DiscountRow" style="display:none;font-size:12pt;margin-bottom:2mm">
+      <p style="margin-bottom:1mm">Discount: Rs. <span id="p2DiscountAmt">0</span>/- In Words: <em id="p2DiscountWords">---</em></p>
+      <p style="margin-bottom:1mm">Net Price: Rs. <span id="p2NetPrice">0</span>/- In Words: <em id="p2NetPriceWords">---</em></p>
+    </div>
+    <div style="font-size:12pt;line-height:1.5">
+      <p style="margin-bottom:1mm">Terms and Conditions :-</p>
+      <p style="margin-bottom:1mm">- Payment:- Cash, Cheque or Demand Draft at the time of Delivery.</p>
+      <p style="margin-bottom:1mm">- Delivery :- Subject to availability</p>
+      <p style="margin-bottom:1mm">- Price Validity:- Subject to change without prior notice unless booked in advance at prevailing price.</p>
+      <p style="margin-bottom:1mm">- Taxes and Duties:- The price quoted above is inclusive of 13% VAT. However, other local taxes like – Road Tax, Registration Fees, Municipality Tax etc. will be on the account of purchaser.</p>
+      <p style="margin-bottom:1mm">- Insurance:- On account of purchaser.</p>
+      <p style="margin-bottom:1mm">- Warranty:- Warranty is not applicable on wear and tear and the items like Battery, Tyre, Tube, Brake Shoe, Clutch, Plate Cable, Chain Spocket and Bulb. Warranty Policy is detailed in the Owner's manual which will be provided at the time of the delivery of motorcycle.</p>
+      <p>- Servicing – 7 Free Servicing.</p>
+    </div>
+    <div style="text-align:right;font-size:12pt;margin-top:3mm"><p>Sincerely Your's</p></div>
+    <div style="text-align:right;font-size:12pt;margin-top:14mm"><p>Authorized Signature</p></div>
+    <hr style="border:none;border-top:1px solid #000;margin-top:4mm">
+  </div>
+</div>
     </div>
 
     <!-- ═══ EMI RATE SHEET (native section) ═══ -->
@@ -5519,8 +6920,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { sheetTool:'navSheetTool', dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
-  const MNAV_IDS = { sheetTool:'mNavSheetTool', dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', hhstock:'mNavHHStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
+  const NAV_IDS = { financeTool:'navFinanceTool', sheetTool:'navSheetTool', dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
+  const MNAV_IDS = { financeTool:'mNavFinanceTool', sheetTool:'mNavSheetTool', dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', hhstock:'mNavHHStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -5835,7 +7236,7 @@ async function loadProfile(uid) {
     if(teamBtn) teamBtn.classList.remove('hidden'); // everyone can view the team; only Master ID can manage it
     // Activity Log shows EVERYONE's actions across the whole system — a
     // Normal ID only gets to see their own via "My Activity" in Profile.
-    const ALL_NAV_IDS = ['navSheetTool','navDashboard','navPrice','navInv','navHHInv','navAllInv','navExchange','navExchangeSr',
+    const ALL_NAV_IDS = ['navFinanceTool','navSheetTool','navDashboard','navPrice','navInv','navHHInv','navAllInv','navExchange','navExchangeSr',
       'navCustomers','navFin','navAcc','navDocs','navStorage','navEvents','navStock','navHHStock','navChalans',
       'navHistory','navTrash','navImportant','navModelAliases'];
     ALL_NAV_IDS.forEach(id=>document.getElementById(id)?.classList.remove('hidden'));
@@ -5888,7 +7289,7 @@ async function loadProfile(uid) {
     // path too, as defense-in-depth in case a section is ever reached
     // some other way.
     const RECON_NAV_MAP = {
-      sheetTool:'navSheetTool',
+      financeTool:'navFinanceTool', sheetTool:'navSheetTool',
       dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv',
       exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc',
       docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock',
@@ -12471,6 +13872,1404 @@ onSnapshot(collection(db,"accessories"), snap=>{
   window.addCustomAccessory = typeof addCustomAccessory === 'function' ? addCustomAccessory : window.addCustomAccessory;
 })();
 
+/* ═══════════════════════════════════════════════════════════════════════
+   DP ALLOCATIONS — the former standalone finance page, now a native
+   section. IIFE inside this module so its declarations stay private and
+   it reuses the panel's open Firestore connection.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function(){
+  const onFinReady = fn => (document.readyState === 'loading')
+    ? document.addEventListener('DOMContentLoaded', fn)
+    : fn();
+
+/* Intro overlay is hidden unconditionally on this page (see #financeLoader
+   CSS) — no need to wait out the old 2.3s animation timer before marking
+   the page ready. */
+onFinReady(() => {
+  document.body.classList.add('site-loaded');
+});
+
+/* Hamburger */
+/* Old top-nav hamburger removed — the sidebar shell owns navigation now. */
+
+const makeYearEl=document.getElementById('makeYearInput');
+if(makeYearEl && !makeYearEl.value) makeYearEl.value=new Date().getFullYear();
+
+const CUSTOM_SELECT_IDS=['modelSelect','dpPercent','tenure'];
+function buildCustomSelect(selectId){
+  const real=document.getElementById(selectId);
+  const panel=document.getElementById(selectId+'Panel');
+  if(!real||!panel) return;
+  panel.innerHTML='';
+  Array.from(real.options).forEach((opt,i)=>{
+    const item=document.createElement('div');
+    item.className='cst-option'+(opt.selected?' selected':'');
+    item.setAttribute('role','option');
+    item.dataset.index=i;
+    item.innerHTML=`<span class="cst-dot"></span><span>${opt.text}</span>`;
+    item.addEventListener('click',()=>{
+      real.selectedIndex=i;
+      real.dispatchEvent(new Event('input',{bubbles:true}));
+      syncCustomSelectUI(selectId);
+      closeCustomSelect(selectId);
+    });
+    panel.appendChild(item);
+  });
+  syncCustomSelectUI(selectId);
+}
+function syncCustomSelectUI(selectId){
+  const real=document.getElementById(selectId);
+  const triggerText=document.getElementById(selectId+'TriggerText');
+  const panel=document.getElementById(selectId+'Panel');
+  if(!real||!triggerText) return;
+  const opt=real.options[real.selectedIndex];
+  triggerText.textContent=opt?opt.text:'Select';
+  if(panel){
+    panel.querySelectorAll('.cst-option').forEach(el=>{
+      el.classList.toggle('selected',Number(el.dataset.index)===real.selectedIndex);
+    });
+  }
+}
+function openCustomSelect(selectId){
+  document.getElementById(selectId+'Panel')?.classList.add('open');
+  document.getElementById(selectId+'Trigger')?.classList.add('open');
+  document.getElementById(selectId+'Trigger')?.setAttribute('aria-expanded','true');
+  document.getElementById(selectId+'Wrap')?.closest('.calc-card')?.classList.add('dropdown-open');
+}
+function closeCustomSelect(selectId){
+  document.getElementById(selectId+'Panel')?.classList.remove('open');
+  document.getElementById(selectId+'Trigger')?.classList.remove('open');
+  document.getElementById(selectId+'Trigger')?.setAttribute('aria-expanded','false');
+  document.getElementById(selectId+'Wrap')?.closest('.calc-card')?.classList.remove('dropdown-open');
+}
+function closeAllCustomSelects(exceptId){
+  CUSTOM_SELECT_IDS.forEach(id=>{ if(id!==exceptId) closeCustomSelect(id); });
+}
+CUSTOM_SELECT_IDS.forEach(selectId=>{
+  document.getElementById(selectId+'Trigger')?.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    const panel=document.getElementById(selectId+'Panel');
+    const wasOpen=panel?.classList.contains('open');
+    closeAllCustomSelects();
+    if(!wasOpen) openCustomSelect(selectId);
+  });
+});
+document.addEventListener('click',(e)=>{
+  CUSTOM_SELECT_IDS.forEach(selectId=>{
+    const wrap=document.getElementById(selectId+'Wrap');
+    if(wrap && !wrap.contains(e.target)) closeCustomSelect(selectId);
+  });
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeAllCustomSelects();
+});
+
+buildCustomSelect('dpPercent');
+buildCustomSelect('tenure');
+
+document.querySelectorAll('.rate-chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    const sel=document.getElementById('fin_dpPercent');
+    if(sel){sel.value=chip.dataset.dp;sel.dispatchEvent(new Event('input',{bubbles:true}));syncCustomSelectUI('dpPercent');}
+  });
+});
+
+let insuranceType = 'indoor';
+let accessoriesCatalog = []; // [{name, price}] excluding Namsari — from Firestore "accessories" collection, admin-managed
+let lastAccCategory = null;
+// Shared with the module-type script block further down, which is where
+// the Firestore listener populates it. A module has its own isolated scope,
+// so this MUST live on window — a plain `let` in either block is invisible
+// to the other and throws "financeCategories is not defined".
+window.financeCategories = window.financeCategories || [];
+
+function normalizeAccName(s){ return (s||'').toLowerCase().replace(/[^a-z]/g,''); }
+function categoryAllowsAccessory(bike, accessoryName){
+  const cat = (window.financeCategories||[]).find(c => c.name === (bike?.category || 'Bike'));
+  if(!cat) return true; // category doesn't exist at all — harmless fallback
+  if(!Array.isArray(cat.accessoryNames) || !cat.accessoryNames.length) return false; // nothing selected for this category = none apply
+  const target = normalizeAccName(accessoryName);
+  // Normalized match — the Accessories Inventory item may be saved as
+  // "Legguard" (one word) while this code refers to it as "Leg Guard".
+  return cat.accessoryNames.some(n => normalizeAccName(n) === target);
+}
+function slugifyAccName(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'item'; }
+function escAttr(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;'); }
+function getCurrentBikeForAcc(){
+  const id = document.getElementById('modelSelect')?.value;
+  return (typeof allBikes!=='undefined' && allBikes.find(b=>b.id===id)) || (typeof allBikes!=='undefined' ? allBikes[0] : undefined);
+}
+// Rebuilds the Accessories card from whatever's currently in the admin's
+// Accessories Inventory, filtered to what this bike's category allows.
+// Only re-renders when the category actually changes (or force=true, e.g.
+// the catalog itself changed) — otherwise it would wipe out any value the
+// person is mid-way through editing on every keystroke.
+function renderAccessoryFields(force){
+  const grid = document.getElementById('fin_accDynamicGrid');
+  if(!grid) return;
+  const bike = getCurrentBikeForAcc();
+  const category = bike?.category || 'Bike';
+  // Self-healing: if the grid ended up empty (e.g. rendered once before
+  // Firestore data had fully arrived) but we now actually have catalog
+  // data, force a fresh render even if the category "hasn't changed" —
+  // otherwise a bad first render can get stuck permanently.
+  const stuckEmpty = accessoriesCatalog.length>0 && grid.querySelectorAll('input[data-acc-name]').length===0;
+  if(!force && !stuckEmpty && category === lastAccCategory) return;
+  lastAccCategory = category;
+  const applicable = accessoriesCatalog.filter(item => categoryAllowsAccessory(bike, item.name));
+  grid.innerHTML = applicable.map(item=>{
+    const id = 'acc_' + slugifyAccName(item.name);
+    const val = insuranceType==='outdoor' ? 0 : item.price;
+    return `<div class="acc-field"><label><i class="fa-solid fa-circle-dot"></i> ${escAttr(item.name)}</label><input type="number" id="${id}" data-acc-name="${escAttr(item.name)}" value="${val}"></div>`;
+  }).join('') || (accessoriesCatalog.length
+    ? `<div style="font-size:12px;color:var(--ink4);grid-column:1/-1">No accessories configured for this category yet.</div>`
+    : `<div style="font-size:12px;color:var(--ink4);grid-column:1/-1">Loading accessories…</div>`);
+}
+function applyAccessoryDefaults(type){
+  document.querySelectorAll('#fin_accDynamicGrid input[data-acc-name]').forEach(el=>{
+    const item = accessoriesCatalog.find(a=>a.name===el.dataset.accName);
+    el.value = type==='outdoor' ? 0 : (item ? item.price : 0);
+  });
+  const othersEl = document.getElementById('othersInput');
+  if(othersEl && type==='outdoor') othersEl.value = 0;
+}
+// Admin-controlled accessory prices (Helmet / Leg Guard / Seat Cover / any
+// new item added in the Accessories Inventory) come from the Firestore
+// "accessories" collection managed in admin.html. See the
+// onSnapshot(collection(db,"accessories")...) listener further below.
+window.updateAccessoryDefaults = function(catalog){
+  accessoriesCatalog = catalog;
+  renderAccessoryFields(true);
+  if(insuranceType==='indoor') applyAccessoryDefaults('indoor');
+  else applyAccessoryDefaults('outdoor');
+};
+// Namsari/Registration is a flat govt fee, unrelated to the indoor/outdoor accessory
+// toggle, so it gets its own direct hook instead of going through the catalog.
+window.updateNamsariDefault = function(price){
+  const el = document.getElementById('fin_namsariInput');
+  if(el && Number.isFinite(price)) el.value = price;
+};
+document.querySelectorAll('#insuranceTypeToggle .itoggle-btn').forEach(btnEl=>{
+  btnEl.addEventListener('click',()=>{
+    insuranceType = btnEl.dataset.itype;
+    document.querySelectorAll('#insuranceTypeToggle .itoggle-btn').forEach(b=>b.classList.toggle('active', b===btnEl));
+    applyAccessoryDefaults(insuranceType);
+    if(typeof calculateFinance==='function') calculateFinance();
+  });
+});
+
+function showFieldError(inputId,errorId,show){
+  const input=document.getElementById(inputId);
+  const err=document.getElementById(errorId);
+  if(input) input.classList.toggle('field-error',show);
+  if(err) err.classList.toggle('show',show);
+}
+function showValidationToast(msg){
+  const toast=document.getElementById('validationToast');
+  const msgEl=document.getElementById('validationToastMsg');
+  if(!toast) return;
+  if(msgEl) msgEl.textContent=msg;
+  toast.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>toast.classList.remove('show'),3200);
+}
+function validateRequiredFields(){
+  const name=document.getElementById('custNameInput')?.value.trim()||'';
+  const phone=document.getElementById('custPhoneInput')?.value.trim()||'';
+  const chassis=document.getElementById('manualChassis')?.value.trim()||'';
+  const engine=document.getElementById('manualEngine')?.value.trim()||'';
+  const reg=document.getElementById('manualReg')?.value.trim()||'';
+  const color=document.getElementById('manualColor')?.value.trim()||'';
+  const phoneValid=/^[0-9]{10}$/.test(phone);
+  const dobDate=(typeof getDobAdDate==='function')?getDobAdDate():null;
+  const dobAge=(typeof ageFromAdDate==='function')?ageFromAdDate(dobDate):null;
+  const dobValid=!!dobDate && dobAge!==null && dobAge>=0 && dobAge<=120;
+  const dobAgeEligible=dobValid && dobAge<=60;
+
+  showFieldError('custNameInput','custNameError',name.length===0);
+  showFieldError('custPhoneInput','custPhoneError',!phoneValid);
+  showFieldError('','dobError',!dobValid);
+  showFieldError('manualChassis','manualChassisError',chassis.length===0);
+  showFieldError('manualEngine','manualEngineError',engine.length===0);
+  showFieldError('manualReg','manualRegError',reg.length===0);
+  showFieldError('manualColor','manualColorError',color.length===0);
+
+  if(name.length===0) return {ok:false,msg:'Please enter the customer name.',focus:'custNameInput'};
+  if(!phoneValid) return {ok:false,msg:'Please enter a valid 10-digit phone number.',focus:'custPhoneInput'};
+  if(!dobValid) return {ok:false,msg:'Please enter the customer date of birth.',focus:'dobTrigger'};
+  if(!dobAgeEligible) return {ok:false,msg:`Applicant is ${dobAge} — over the 60-year age limit for finance.`,focus:'dobTrigger'};
+  if(chassis.length===0) return {ok:false,msg:'Please enter the chassis number.',focus:'manualChassis'};
+  if(engine.length===0) return {ok:false,msg:'Please enter the engine number.',focus:'manualEngine'};
+  if(reg.length===0) return {ok:false,msg:'Please enter the registration number.',focus:'manualReg'};
+  if(color.length===0) return {ok:false,msg:'Please enter the vehicle color.',focus:'manualColor'};
+  return {ok:true};
+}
+
+
+/* ═══ DATE OF BIRTH (A.D. / B.S.) ═══
+   Bikram Sambat month-day table, BS 2000–2090, with 1 Baisakh 2000 BS
+   anchored to 14 April 1943 AD. Verified against known BS↔AD anchors
+   (2070/2080/2082 new year, 2081-09-15). Each year encodes 12 two-digit
+   month lengths. */
+const BS_START_YEAR=2000;
+const BS_EPOCH_UTC=Date.UTC(1943,3,14);
+const BS_MONTH_DAYS="303231323130303029302931,313132313131302930293030,313132323130302930293030,313231323130303029293031,303231323130303029302931,313132313131302930293030,313132323130302930293030,313231323130303029293031,313131323131293030292931,313132313131302930293030,313132323130302930293030,313231323130303029293031,313131323131293030293030,313132313131302930293030,313132323130302930293030,313231323130303029293031,313131323131293030293030,313132313131302930293030,313231323130302930293030,313231323130303029302931,313131323131302930293030,313132313131302930293030,313231323130303029293030,313231323130303029302931,313131323131302930293030,313132313131302930293030,313231323130303029293031,303231323130303029302931,313132313131302930293030,313132313230302930293030,313231323130303029293031,303231323130303029302931,313132313131302930293030,313132323130302930293030,313231323130303029293031,303231323131293030292931,313132313131302930293030,313132323130302930293030,313231323130303029293031,313131323131293030293030,313132313131302930293030,313132323130302930293030,313231323130303029293031,313131323131293030293030,313132313131302930293030,313231323130302930293030,313231323130303029293031,313131323131302930293030,313132313131302930293030,313231323130303029293030,313231323130303029302931,313131323131302930293030,313132313131302930293030,313231323130303029293030,313231323130303029302931,313132313131302930293030,313132313230302930293030,313231323130303029293031,303231323130303029302931,313132313131302930293030,313132323130302930293030,313231323130303029293031,303231323131293029302931,313132313131302930293030,313132323130302930293030,313231323130303029293031,313131323131293030292931,313132313131302930293030,313132323130302930293030,313231323130303029293031,313131323131293030293030,313132313131302930293030,313231323130302930293030,313231323130303029293031,313131323131302930293030,313132313131302930293030,313231323130303029293030,313231323130303029302931,313131323131302930293030,313132313131302930293030,313231323130303029293030,313231323130303029302931,313132313131302930293030,313132313131302930293030,313231323130303029293031,303231323130303029302931,313132313131302930293030,313132313131303029303030,303132323031303029303030,303231323130303029303030,303231323130303029303030".split(",").map(function(r){
+  var out=[]; for(var i=0;i<12;i++) out.push(Number(r.substr(i*2,2))); return out;
+});
+const BS_MONTH_NAMES=["Baisakh","Jestha","Asar","Shrawan","Bhadra","Aswin","Kartik","Mangsir","Poush","Magh","Falgun","Chaitra"];
+
+function bsToAdDate(by,bm,bd){
+  const yi=by-BS_START_YEAR;
+  if(yi<0||yi>=BS_MONTH_DAYS.length||bm<1||bm>12) return null;
+  if(bd<1||bd>BS_MONTH_DAYS[yi][bm-1]) return null;
+  let days=0;
+  for(let y=0;y<yi;y++) days+=BS_MONTH_DAYS[y].reduce((a,b)=>a+b,0);
+  for(let m=0;m<bm-1;m++) days+=BS_MONTH_DAYS[yi][m];
+  days+=bd-1;
+  return new Date(BS_EPOCH_UTC+days*86400000);
+}
+function ageFromAdDate(d){
+  if(!d) return null;
+  const now=new Date();
+  let age=now.getFullYear()-d.getUTCFullYear();
+  const mDiff=now.getMonth()-d.getUTCMonth();
+  if(mDiff<0||(mDiff===0&&now.getDate()<d.getUTCDate())) age--;
+  return age;
+}
+// Whichever calendar the user picked, this resolves to a single A.D. date.
+// ── Selected DOB state; the wheel picker is the only thing that writes it ──
+window._dob={cal:"AD",y:null,m:null,d:null};
+
+function adMonthDays(y,m){ return new Date(Date.UTC(y,m,0)).getUTCDate(); }
+// Reverse of bsToAdDate — needed so the picker can cap at "today" in B.S. too.
+function adToBsDate(dateObj){
+  let days=Math.floor((Date.UTC(dateObj.getUTCFullYear(),dateObj.getUTCMonth(),dateObj.getUTCDate())-BS_EPOCH_UTC)/86400000);
+  if(days<0) return null;
+  let yi=0;
+  while(yi<BS_MONTH_DAYS.length){
+    const total=BS_MONTH_DAYS[yi].reduce((a,b)=>a+b,0);
+    if(days<total) break;
+    days-=total; yi++;
+  }
+  if(yi>=BS_MONTH_DAYS.length) return null;
+  let mi=0;
+  while(mi<12 && days>=BS_MONTH_DAYS[yi][mi]){ days-=BS_MONTH_DAYS[yi][mi]; mi++; }
+  return {y:BS_START_YEAR+yi,m:mi+1,d:days+1};
+}
+// "Today" in whichever calendar the picker is currently showing.
+function todayIn(cal){
+  const now=new Date();
+  const utcToday=new Date(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()));
+  if(cal==="AD") return {y:utcToday.getUTCFullYear(),m:utcToday.getUTCMonth()+1,d:utcToday.getUTCDate()};
+  return adToBsDate(utcToday)||{y:BS_START_YEAR+BS_MONTH_DAYS.length-1,m:12,d:30};
+}
+function bsMonthDays(y,m){
+  const yi=y-BS_START_YEAR;
+  return (yi>=0&&yi<BS_MONTH_DAYS.length)?BS_MONTH_DAYS[yi][m-1]:30;
+}
+const AD_MONTH_NAMES=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+// Resolves the picked date to a single A.D. date regardless of which calendar
+// it was entered in, so age and validation only ever deal with A.D.
+function getDobAdDate(){
+  const s=window._dob;
+  if(!s||!s.y||!s.m||!s.d) return null;
+  if(s.cal==="AD"){
+    if(s.d>adMonthDays(s.y,s.m)) return null;
+    return new Date(Date.UTC(s.y,s.m-1,s.d));
+  }
+  return bsToAdDate(s.y,s.m,s.d);
+}
+function formatDobLabel(){
+  const s=window._dob;
+  if(!s||!s.y||!s.m||!s.d) return "Select date of birth";
+  const names=s.cal==="AD"?AD_MONTH_NAMES:BS_MONTH_NAMES;
+  return `${s.d} ${names[s.m-1]} ${s.y} ${s.cal==="AD"?"A.D.":"B.S."}`;
+}
+function updateDobAgeNote(){
+  const note=document.getElementById("dobAgeNote");
+  const trig=document.getElementById("dobTriggerText");
+  if(trig) trig.textContent=formatDobLabel();
+  if(!note) return;
+  const age=ageFromAdDate(getDobAdDate());
+  if(age===null||age<0||age>120){ note.style.display="none"; return; }
+  if(age>60){
+    note.style.color="#B91C1C";
+    note.innerHTML='<i class="fa-solid fa-circle-xmark"></i> Age '+age+' — over the 60-year limit, so this applicant is not eligible for finance.';
+  } else if(age<25){
+    note.style.color="#92400E";
+    note.innerHTML='<i class="fa-solid fa-triangle-exclamation"></i> Age '+age+' — under 25, so a guarantor is required (father/mother with relation proof, or another family member aged 25+).';
+  } else {
+    note.style.color="#15803D";
+    note.innerHTML='<i class="fa-solid fa-circle-check"></i> Age '+age+' — eligible, no guarantor needed on age grounds.';
+  }
+  note.style.display="block";
+}
+
+/* ── Slot-machine style wheel picker (year / month / day at once) ── */
+(function initDobPicker(){
+  const overlay=document.getElementById("dobPicker");
+  const trigger=document.getElementById("dobTrigger");
+  if(!overlay||!trigger) return;
+  const ROW=44;
+  const cols={year:document.getElementById("dobpYear"),month:document.getElementById("dobpMonth"),day:document.getElementById("dobpDay")};
+  // Draft state while the sheet is open; only copied to window._dob on Done.
+  let draft={cal:"AD",y:null,m:null,d:null};
+  let scrollTimers={};
+
+  const yearRange=()=>{
+    // 100 years back from today, and never into the future.
+    const t=todayIn(draft.cal);
+    const floor=draft.cal==="AD"?t.y-100:Math.max(BS_START_YEAR,t.y-100);
+    const ceil=draft.cal==="AD"?t.y:Math.min(BS_START_YEAR+BS_MONTH_DAYS.length-1,t.y);
+    return {min:floor,max:ceil};
+  };
+  const monthNames=()=>draft.cal==="AD"?AD_MONTH_NAMES:BS_MONTH_NAMES;
+  const daysInDraftMonth=()=>draft.cal==="AD"?adMonthDays(draft.y,draft.m):bsMonthDays(draft.y,draft.m);
+
+  function renderCol(unit,values,labels,selected){
+    const el=cols[unit];
+    el.innerHTML=values.map((v,i)=>`<div class="dobp-item" data-val="${v}">${labels[i]}</div>`).join("");
+    const idx=Math.max(0,values.indexOf(selected));
+    el.scrollTop=idx*ROW;
+    markSelected(unit);
+  }
+  function markSelected(unit){
+    const el=cols[unit];
+    const idx=Math.round(el.scrollTop/ROW);
+    el.querySelectorAll(".dobp-item").forEach((it,i)=>it.classList.toggle("sel",i===idx));
+  }
+  function valueAt(unit){
+    const el=cols[unit];
+    const idx=Math.round(el.scrollTop/ROW);
+    const item=el.querySelectorAll(".dobp-item")[idx];
+    return item?Number(item.dataset.val):null;
+  }
+  function renderAll(){
+    const t=todayIn(draft.cal);
+    const {min,max}=yearRange();
+    const years=[]; for(let y=max;y>=min;y--) years.push(y);
+    if(!years.includes(draft.y)) draft.y=draft.cal==="AD"?(new Date().getFullYear()-25):(t.y-25);
+    renderCol("year",years,years.map(String),draft.y);
+
+    // Nothing later than today is a valid birth date, so trim the month and
+    // day wheels when the current year/month is selected.
+    const names=monthNames();
+    let months=names.map((_,i)=>i+1);
+    if(draft.y===t.y) months=months.filter(m=>m<=t.m);
+    if(!draft.m||!months.includes(draft.m)) draft.m=months[months.length-1];
+    renderCol("month",months,months.map(m=>names[m-1]),draft.m);
+
+    let max_d=daysInDraftMonth();
+    if(draft.y===t.y&&draft.m===t.m) max_d=Math.min(max_d,t.d);
+    const days=Array.from({length:max_d},(_,i)=>i+1);
+    if(!draft.d||draft.d>max_d) draft.d=Math.min(draft.d||1,max_d);
+    renderCol("day",days,days.map(String),draft.d);
+  }
+  function refreshDaysOnly(){
+    const t=todayIn(draft.cal);
+    const names=monthNames();
+    let months=names.map((_,i)=>i+1);
+    if(draft.y===t.y) months=months.filter(m=>m<=t.m);
+    if(!months.includes(draft.m)){
+      draft.m=months[months.length-1];
+      renderCol("month",months,months.map(m=>names[m-1]),draft.m);
+    }
+    let max_d=daysInDraftMonth();
+    if(draft.y===t.y&&draft.m===t.m) max_d=Math.min(max_d,t.d);
+    const days=Array.from({length:max_d},(_,i)=>i+1);
+    const keep=Math.min(draft.d||1,max_d);
+    draft.d=keep;
+    renderCol("day",days,days.map(String),keep);
+  }
+
+  Object.keys(cols).forEach(unit=>{
+    const el=cols[unit];
+    el.addEventListener("scroll",()=>{
+      markSelected(unit);
+      clearTimeout(scrollTimers[unit]);
+      // Wait for the snap to settle before committing the value.
+      scrollTimers[unit]=setTimeout(()=>{
+        const v=valueAt(unit);
+        if(v===null) return;
+        if(unit==="year"){ draft.y=v; refreshDaysOnly(); }
+        else if(unit==="month"){ draft.m=v; refreshDaysOnly(); }
+        else draft.d=v;
+      },120);
+    },{passive:true});
+    // Tapping a row scrolls it to the centre rather than needing a drag.
+    el.addEventListener("click",e=>{
+      const item=e.target.closest(".dobp-item");
+      if(!item) return;
+      const idx=[...el.querySelectorAll(".dobp-item")].indexOf(item);
+      el.scrollTo({top:idx*ROW,behavior:"smooth"});
+    });
+  });
+
+  document.querySelectorAll("#dobpCalToggle .itoggle-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll("#dobpCalToggle .itoggle-btn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      draft.cal=btn.dataset.dobcal;
+      draft.y=null; // year ranges differ between calendars
+      renderAll();
+    });
+  });
+
+  function openPicker(){
+    draft={...(window._dob.y?window._dob:{cal:window._dob.cal||"AD",y:null,m:1,d:1})};
+    document.querySelectorAll("#dobpCalToggle .itoggle-btn").forEach(b=>{
+      b.classList.toggle("active",b.dataset.dobcal===draft.cal);
+    });
+    overlay.classList.add("open");
+    renderAll();
+  }
+  function closePicker(){ overlay.classList.remove("open"); }
+
+  trigger.addEventListener("click",openPicker);
+  document.getElementById("dobpCancel")?.addEventListener("click",closePicker);
+  document.getElementById("dobpDone")?.addEventListener("click",()=>{
+    // Read straight off the wheels so a half-settled scroll still commits.
+    draft.y=valueAt("year")??draft.y;
+    draft.m=valueAt("month")??draft.m;
+    draft.d=valueAt("day")??draft.d;
+    window._dob={...draft};
+    window._dobCalendar=draft.cal;
+    closePicker();
+    updateDobAgeNote();
+    if(getDobAdDate()) showFieldError("","dobError",false);
+  });
+  overlay.addEventListener("click",e=>{ if(e.target===overlay) closePicker(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") closePicker(); });
+})();
+
+/* ── Live validation: clear a field's red warning as soon as it's satisfied,
+      instead of leaving it on screen until the next Preview attempt. ── */
+(function wireLiveValidation(){
+  const rules=[
+    ['custNameInput','custNameError', v=>v.trim().length>0],
+    ['custPhoneInput','custPhoneError', v=>/^[0-9]{10}$/.test(v.trim())],
+    ['manualChassis','manualChassisError', v=>v.trim().length>0],
+    ['manualEngine','manualEngineError', v=>v.trim().length>0],
+    ['manualReg','manualRegError', v=>v.trim().length>0],
+    ['manualColor','manualColorError', v=>v.trim().length>0],
+  ];
+  rules.forEach(([inputId,errorId,isValid])=>{
+    const el=document.getElementById(inputId);
+    if(!el) return;
+    el.addEventListener('input',()=>{
+      if(isValid(el.value)) showFieldError(inputId,errorId,false);
+    });
+  });
+
+  /* Customer name: capitalise the first letter of each word as it's typed,
+     preserving the caret so the field doesn't jump while typing. */
+  const nameEl=document.getElementById('custNameInput');
+  if(nameEl){
+    nameEl.addEventListener('input',()=>{
+      const pos=nameEl.selectionStart;
+      const fixed=nameEl.value.replace(/(^|\s)(\S)/g,(m,sp,ch)=>sp+ch.toUpperCase());
+      if(fixed!==nameEl.value){
+        nameEl.value=fixed;
+        nameEl.setSelectionRange(pos,pos);
+      }
+    });
+  }
+})();
+['custNameInput','custPhoneInput','manualChassis','manualEngine','manualReg','manualColor'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input',()=>{
+    showFieldError(id,id+'Error',false);
+  });
+});
+
+function openPreview(){
+  const result=validateRequiredFields();
+  if(!result.ok){
+    showValidationToast(result.msg);
+    document.getElementById(result.focus)?.scrollIntoView({behavior:'smooth',block:'center'});
+    document.getElementById(result.focus)?.focus();
+    return;
+  }
+  syncAllToA4();
+  const sel=document.getElementById('modelSelect');
+  const currentModelText=sel?.options[sel.selectedIndex]?.text||'';
+  showModelMismatchWarning(currentModelText,window._lastChassisModel||'','previewModelWarning');
+  showChassisStatusWarning(window._lastChassisStatus||'',window._lastChassisHH||'','previewChassisStatusWarning');
+  document.getElementById('fin_previewOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closePreview(){
+  document.getElementById('fin_previewOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function switchTab(which){
+  document.getElementById('pageAlloc').classList.toggle('active',which==='alloc');
+  document.getElementById('pageQuote').classList.toggle('active',which==='quote');
+  document.getElementById('tabAlloc').classList.toggle('active',which==='alloc');
+  document.getElementById('tabQuote').classList.toggle('active',which==='quote');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closePreview();
+});
+
+
+let allBikes = [];
+
+/* ═══════════════════════════════════════════════════════════════════
+   EVENTS & OFFERS POPUP — mirrors the admin panel's event popup system.
+   Whatever's running or upcoming (per the admin-set start/end dates)
+   shows automatically once per page load.
+   ═══════════════════════════════════════════════════════════════════ */
+let events = [];
+let eventPopupShownThisLoad = false;
+let eventPopupAutoSlideTimer = null;
+let eventPopupCountdownTimers = [];
+
+function escapeHtml(v){
+  return (v==null ? '' : String(v)).replace(/[&<>"']/g, c => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[c]));
+}
+
+function eventStatus(ev){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(ev.startDate); start.setHours(0,0,0,0);
+  const end = new Date(ev.endDate); end.setHours(23,59,59,999);
+  if(today < start) return 'upcoming';
+  if(today > end) return 'ended';
+  return 'running';
+}
+function daysUntil(dateStr){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(dateStr); target.setHours(0,0,0,0);
+  return Math.round((target - today) / (24*60*60*1000));
+}
+function endOfDay(dateStr){ const d = new Date(dateStr); d.setHours(23,59,59,999); return d; }
+function stopEventPopupCountdowns(){
+  eventPopupCountdownTimers.forEach(t=>clearInterval(t));
+  eventPopupCountdownTimers = [];
+}
+
+function checkAndShowEventPopup(){
+  const running = [...events.filter(ev => eventStatus(ev)==='running')].sort((a,b)=> new Date(a.endDate) - new Date(b.endDate));
+  const upcoming = [...events.filter(ev => eventStatus(ev)==='upcoming')].sort((a,b)=> new Date(a.startDate) - new Date(b.startDate));
+  const list = [...running.map(ev=>({ev, isUpcoming:false})), ...upcoming.map(ev=>({ev, isUpcoming:true}))];
+  if(!list.length) return;
+
+  const carousel = document.getElementById('eventPopupCarousel');
+  const dotsWrap = document.getElementById('eventPopupDots');
+  carousel.innerHTML = list.map(({ev, isUpcoming}, i)=>{
+    const badgeText = isUpcoming
+      ? (daysUntil(ev.startDate)<=0 ? 'Starting today!' : `Starts in ${daysUntil(ev.startDate)} day${daysUntil(ev.startDate)!==1?'s':''}`)
+      : (daysUntil(ev.endDate)<=0 ? 'Last day!' : `${daysUntil(ev.endDate)} day${daysUntil(ev.endDate)!==1?'s':''} left`);
+    const badgeIcon = isUpcoming ? 'fa-hourglass-half' : 'fa-fire';
+    const imageBlock = ev.bgImage
+      ? `<div class="w-full bg-slate-900 flex items-center justify-center relative">
+           <img src="${escapeHtml(ev.bgImage)}" class="w-full h-auto max-h-[55vh] object-contain">
+           <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent pointer-events-none"></div>
+           <div id="eventPopupBadge_${i}" class="absolute bottom-3 left-3 inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg"><i class="fas ${badgeIcon} text-[10px]"></i>${badgeText}</div>
+         </div>`
+      : `<div class="w-full h-32 bg-gradient-to-br from-bajaj-blue via-blue-700 to-blue-800 flex items-end p-4 relative overflow-hidden">
+           <i class="fas fa-bullhorn absolute -right-3 -top-3 text-8xl text-white/10"></i>
+           <div id="eventPopupBadge_${i}" class="inline-flex items-center gap-1.5 bg-amber-400 text-slate-900 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg"><i class="fas ${badgeIcon} text-[10px]"></i>${badgeText}</div>
+         </div>`;
+    return `<div class="w-full flex-shrink-0 overflow-y-auto" style="scroll-snap-align:start; max-height:min(calc(92vh - 50px), 640px);">
+      ${imageBlock}
+      <div class="p-5">
+        <div class="section-title text-[1.8rem] leading-tight text-slate-900 mb-2">${escapeHtml(ev.title||'')}</div>
+        ${ev.location ? `<div class="inline-flex items-center gap-1.5 bg-blue-50 text-bajaj-blue text-[11px] font-bold px-2.5 py-1 rounded-full mb-3"><i class="fas fa-location-dot"></i> ${escapeHtml(ev.location)}</div>` : ''}
+        ${ev.description ? `<div class="text-sm text-slate-600 leading-relaxed whitespace-pre-line mb-4">${escapeHtml(ev.description)}</div>` : ''}
+        <button onclick="closeEventPopup()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">Got it</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  stopEventPopupCountdowns();
+  if(list.length > 1){
+    dotsWrap.classList.remove('hidden'); dotsWrap.classList.add('flex');
+    dotsWrap.innerHTML = list.map((_,i)=>`<button type="button" data-dot="${i}" class="event-popup-dot ${i===0?'active':''}" onclick="scrollEventPopupTo(${i})"></button>`).join('');
+    let currentIdx = 0;
+    const goTo = (idx)=>{
+      currentIdx = ((idx % list.length) + list.length) % list.length;
+      carousel.scrollTo({ left: currentIdx * carousel.clientWidth, behavior: 'smooth' });
+    };
+    carousel.onscroll = ()=>{
+      currentIdx = Math.round(carousel.scrollLeft / carousel.clientWidth);
+      dotsWrap.querySelectorAll('.event-popup-dot').forEach((d,i)=>d.classList.toggle('active', i===currentIdx));
+    };
+    const restartAutoSlide = ()=>{
+      clearInterval(eventPopupAutoSlideTimer);
+      eventPopupAutoSlideTimer = setInterval(()=>goTo(currentIdx+1), 5000);
+    };
+    carousel.addEventListener('scroll', restartAutoSlide, {passive:true});
+    restartAutoSlide();
+  } else {
+    dotsWrap.classList.add('hidden'); dotsWrap.classList.remove('flex');
+    carousel.onscroll = null;
+    clearInterval(eventPopupAutoSlideTimer);
+  }
+
+  list.forEach(({ev, isUpcoming}, i)=>{
+    const target = isUpcoming ? new Date(ev.startDate) : endOfDay(ev.endDate);
+    if((target - new Date()) >= 26*60*60*1000) return;
+    const badgeEl = document.getElementById('eventPopupBadge_'+i);
+    if(!badgeEl) return;
+    const tick = ()=>{
+      const diff = target - new Date();
+      if(diff <= 0){ badgeEl.innerHTML = `<i class="fas fa-fire text-[10px]"></i>${isUpcoming?'Starting now!':'Ending now!'}`; return; }
+      const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+      const label = isUpcoming ? 'Starts in' : 'Ends in';
+      badgeEl.innerHTML = `<i class="fas fa-stopwatch text-[10px]"></i>${label} ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    };
+    tick();
+    eventPopupCountdownTimers.push(setInterval(tick, 1000));
+  });
+
+  const overlay = document.getElementById('eventPopupOverlay');
+  overlay.classList.remove('hidden');
+  overlay.classList.add('flex');
+}
+
+window.scrollEventPopupTo = (idx)=>{
+  const carousel = document.getElementById('eventPopupCarousel');
+  const count = carousel.children.length;
+  if (!count) return;
+  carousel.scrollTo({ left: (((idx % count) + count) % count) * carousel.clientWidth, behavior: 'smooth' });
+};
+window.closeEventPopup = ()=>{
+  const overlay = document.getElementById('eventPopupOverlay');
+  overlay.classList.add('hidden');
+  overlay.classList.remove('flex');
+  clearInterval(eventPopupAutoSlideTimer);
+  stopEventPopupCountdowns();
+};
+
+onSnapshot(collection(db, "events"), snap => {
+  events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  if(!eventPopupShownThisLoad){
+    eventPopupShownThisLoad = true;
+    checkAndShowEventPopup();
+  }
+}, err => {
+  console.warn("Events listener failed:", err.message);
+});
+
+let invList = [];
+let hhInvList = [];
+// Units taken out to outdoor melas/events live in their own `hh_inventory`
+// collection (separate from the shop's main `inventory`) — merged into the
+// same chassis search here so a customer's bike bought at a mela can still be
+// found when writing up their finance record.
+function allInventoryRecords(){
+  return [...invList, ...hhInvList];
+}
+onSnapshot(collection(db,"hh_inventory"), snap=>{
+  hhInvList = snap.docs.map(d=>({id:d.id,...d.data(),_source:'hh'}));
+  const activeInput=document.getElementById('chassisSearch');
+  if(activeInput && document.activeElement===activeInput && activeInput.value.trim()){
+    renderChassisDropdown(searchChassisSuggestions(activeInput.value.trim()));
+  }
+});
+onSnapshot(collection(db,"inventory"), snap=>{
+  invList = snap.docs.map(d=>({id:d.id,...d.data(),_source:'main'}));
+  const activeInput=document.getElementById('chassisSearch');
+  if(activeInput && document.activeElement===activeInput && activeInput.value.trim()){
+    renderChassisDropdown(searchChassisSuggestions(activeInput.value));
+  }
+});
+
+/* ═══ FINANCE SCHEMES (admin-controlled: Down Payment % / Interest Rate / Tenure) ═══ */
+let financeSchemes = [];
+// financeCategories is declared on window in the classic script block above
+// (module scope is isolated, so both blocks must share it via window).
+
+function getSelectedFinanceCategory(){
+  const selId=document.getElementById('modelSelect')?.value;
+  const bike=allBikes.find(b=>b.id===selId);
+  return bike?.category||'Bike';
+}
+
+function buildFinanceSchemeMap(){
+  // Schemes are per-category (Bike 60mo max, Scooter 36mo max, ...). Without this
+  // filter, a Scooter scheme saved at the same Down Payment % as a Bike scheme
+  // would silently overwrite it in the map below — e.g. Bike showing only 36
+  // months even though its own category allows 60 — so filter to the currently
+  // selected model's category first. Schemes saved before category existed have
+  // no `category` field; treat those as universal so old data still shows.
+  const category=getSelectedFinanceCategory();
+  const relevant=financeSchemes.filter(f=>!f.category||f.category===category);
+  // Later docs (by createdAt) win on duplicate downPay values; tenures are unioned.
+  const sorted=[...relevant].sort((a,b)=>{
+    const ta=a.createdAt?.toMillis?a.createdAt.toMillis():0;
+    const tb=b.createdAt?.toMillis?b.createdAt.toMillis():0;
+    return ta-tb;
+  });
+  const map=new Map();
+  sorted.forEach(f=>{
+    const dp=Number(f.downPay);
+    if(!Number.isFinite(dp)) return;
+    const tenures=Array.isArray(f.tenures)?f.tenures.map(Number).filter(t=>t>0):[];
+    map.set(dp,{ rate:Number(f.rate)||0, tenures:[...new Set(tenures)].sort((a,b)=>a-b) });
+  });
+  return map;
+}
+
+function bindRateChipClicks(){
+  document.querySelectorAll('.rate-chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      const sel=document.getElementById('fin_dpPercent');
+      if(sel){sel.value=chip.dataset.dp;sel.dispatchEvent(new Event('input',{bubbles:true}));syncCustomSelectUI('dpPercent');}
+    });
+  });
+}
+
+function renderTenureOptionsForDp(dp,mapOverride){
+  const map=mapOverride||buildFinanceSchemeMap();
+  const tenureSelect=document.getElementById('fin_tenure');
+  if(!tenureSelect) return;
+  const scheme=map.get(Number(dp));
+  const tenures=(scheme&&scheme.tenures.length)?scheme.tenures:[12];
+  const prevTenure=Number(tenureSelect.value)||null;
+  tenureSelect.innerHTML=tenures.map(t=>`<option value="${t}">${t} Months</option>`).join('');
+  // Keep whatever the user already picked; otherwise default to 60 months,
+  // and if this scheme doesn't offer 60, fall back to its longest tenure.
+  const defaultTenure=tenures.includes(60)?60:Math.max(...tenures);
+  const targetTenure=tenures.includes(prevTenure)?prevTenure:defaultTenure;
+  tenureSelect.value=String(targetTenure);
+  if(typeof buildCustomSelect==='function') buildCustomSelect('tenure');
+}
+
+function renderFinanceSchemeUI(){
+  const map=buildFinanceSchemeMap();
+  const dpValues=[...map.keys()].sort((a,b)=>a-b);
+  const dpSelect=document.getElementById('fin_dpPercent');
+  if(!dpSelect||!dpValues.length) return; // no schemes yet — keep the built-in fallback options
+
+  const prevSelectedDp=Number(dpSelect.value)||null;
+  dpSelect.innerHTML=dpValues.map(dp=>`<option value="${dp}">${dp}%</option>`).join('');
+  const targetDp=dpValues.includes(prevSelectedDp)?prevSelectedDp:(dpValues.includes(50)?50:dpValues[0]);
+  dpSelect.value=String(targetDp);
+  if(typeof buildCustomSelect==='function') buildCustomSelect('dpPercent');
+
+  const chipsWrap=document.getElementById('rateChipsWrap');
+  if(chipsWrap){
+    chipsWrap.innerHTML=dpValues.map(dp=>`<div class="rate-chip" data-dp="${dp}"><span class="pct">${map.get(dp).rate}%</span>${dp}% DP</div>`).join('');
+    bindRateChipClicks();
+  }
+
+  renderTenureOptionsForDp(targetDp,map);
+  updateHeroStats(map);
+}
+
+// Hero chips show the best headline terms the admin has actually configured
+// for this category: the lowest interest rate on offer and the longest tenure.
+function updateHeroStats(map){
+  const schemes=[...map.values()];
+  if(!schemes.length) return;
+  const rates=schemes.map(s=>Number(s.rate)).filter(Number.isFinite);
+  const tenures=schemes.flatMap(s=>(s.tenures||[])).map(Number).filter(Number.isFinite);
+  const rateEl=document.getElementById('heroLowestRate');
+  const tenEl=document.getElementById('heroMaxTenure');
+  if(rateEl && rates.length) rateEl.textContent=Number(Math.min(...rates).toFixed(2))+'%';
+  if(tenEl && tenures.length) tenEl.textContent=String(Math.max(...tenures));
+}
+
+// When DP% changes (dropdown click or rate-chip click), refresh the tenure
+// list for that scheme BEFORE the global input-listener recalculates —
+// listeners bound directly on the element run before the document's
+// bubbled listener, so this ordering is safe.
+// When the selected model changes, its category may differ (Bike vs Scooter),
+// so the DP%/tenure options need to be rebuilt for that category BEFORE the
+// global input-listener recalculates — same ordering reason as dpPercent below.
+document.getElementById('modelSelect')?.addEventListener('input',()=>{
+  renderFinanceSchemeUI();
+});
+document.getElementById('fin_dpPercent')?.addEventListener('input',()=>{
+  const dp=document.getElementById('fin_dpPercent')?.value;
+  renderTenureOptionsForDp(dp);
+});
+
+onSnapshot(collection(db,"finance_schemes"), snap=>{
+  financeSchemes=snap.docs.map(d=>({id:d.id,...d.data()}));
+  renderFinanceSchemeUI();
+  if(typeof calculateFinance==='function') calculateFinance();
+});
+
+/* Categories: drives which accessories actually apply per bike category
+   (admin's Model Categories → Accessories checklist). If a category hasn't
+   been configured yet (no accessoryNames saved), everything still applies —
+   only an explicitly-saved, non-empty list restricts what's included. */
+onSnapshot(collection(db,"finance_categories"), snap=>{
+  window.financeCategories=snap.docs.map(d=>({id:d.id,...d.data()}));
+  // Category rules just (re)loaded or changed — the accessory field list
+  // for the currently-selected bike may now be stale, so force a rebuild
+  // instead of the usual "only when category changes" shortcut.
+  if(typeof renderAccessoryFields==='function') renderAccessoryFields(true);
+  if(typeof calculateFinance==='function') calculateFinance();
+});
+
+/* ═══ ACCESSORIES (admin-controlled default prices: Helmet / Leg Guard / Seat Cover / Namsari) ═══ */
+onSnapshot(collection(db,"accessories"), snap=>{
+  const list = snap.docs.map(d=>({id:d.id,...d.data()}));
+  const catalog = [];
+  let namsariPrice = null;
+  list.forEach(a=>{
+    const n=(a.name||'').toLowerCase().replace(/[^a-z]/g,'');
+    if(!Number.isFinite(Number(a.price))) return;
+    if(n.includes('namsari')||n.includes('registration')) namsariPrice = Number(a.price);
+    else catalog.push({ name: a.name, price: Number(a.price) });
+  });
+  if(typeof window.updateAccessoryDefaults==='function') window.updateAccessoryDefaults(catalog);
+  if(namsariPrice!==null && typeof window.updateNamsariDefault==='function') window.updateNamsariDefault(namsariPrice);
+  if(typeof calculateFinance==='function') calculateFinance();
+});
+
+function sortBySn(bikes){
+  return [...bikes].sort((a,b)=>{
+    const snA=(a.sn!==undefined&&a.sn!==null&&a.sn!=='')?Number(a.sn):9999;
+    const snB=(b.sn!==undefined&&b.sn!==null&&b.sn!=='')?Number(b.sn):9999;
+    return snA-snB;
+  });
+}
+
+function numberToWords(num){
+  if(num===0) return "Zero";
+  const a=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+  const b=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  function inWords(n){
+    if(n<20) return a[n];
+    if(n<100) return b[Math.floor(n/10)]+" "+a[n%10];
+    if(n<1000) return a[Math.floor(n/100)]+" Hundred "+inWords(n%100);
+    if(n<100000) return inWords(Math.floor(n/1000))+" Thousand "+inWords(n%1000);
+    if(n<10000000) return inWords(Math.floor(n/100000))+" Lakh "+inWords(n%100000);
+    return inWords(Math.floor(n/10000000))+" Crore "+inWords(n%10000000);
+  }
+  return inWords(num).replace(/\s+/g,' ').trim();
+}
+
+function findDefaultBikeIndex(list){
+  const idx=list.findIndex(b=>modelsLikelyMatch(b.name,'Pulsar 150 SD'));
+  return idx>=0?idx:0;
+}
+
+function initBikesListener(){
+  const warnEl = document.getElementById('bikeLoadWarning');
+  const warnWatchdog = setTimeout(() => {
+    if(warnEl) warnEl.style.display = 'flex';
+  }, 6000);
+  // Live listener (matches sheet.html/index.html) instead of a one-time
+  // fetch — auto-reconnects and stays in sync if the connection drops
+  // and comes back, rather than needing a full page reload to recover.
+  onSnapshot(collection(db,"bikes"), snapshot=>{
+    clearTimeout(warnWatchdog);
+    if(warnEl) warnEl.style.display = 'none';
+    allBikes=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+    const sorted=sortBySn(allBikes);
+    const select=document.getElementById('modelSelect');
+    if(select){
+      const previousValue=select.value;
+      const stillExists=sorted.some(b=>b.id===previousValue);
+      const defaultIdx=stillExists ? sorted.findIndex(b=>b.id===previousValue) : findDefaultBikeIndex(sorted);
+      select.innerHTML=sorted.map((bike,idx)=>`<option value="${bike.id}" ${idx===defaultIdx?"selected":""}>${escAttr(bike.name)}</option>`).join('');
+      buildCustomSelect('modelSelect');
+      if(typeof calculateFinance==='function') calculateFinance();
+    }
+  }, err=>{
+    clearTimeout(warnWatchdog);
+    console.error("Error fetching bikes:",err);
+    if(warnEl){
+      const textEl = document.getElementById('bikeLoadWarningText');
+      if(textEl) textEl.textContent = "Couldn't load live prices from the server — showing indicative prices only. (" + (err?.message || 'connection error') + ")";
+      warnEl.style.display = 'flex';
+    }
+    if(allBikes.length===0){
+      allBikes=[
+        {id:"d1",name:"Pulsar N150",price:339900,Insurance:8500,financeInsurance:7890,category:"Bike"},
+        {id:"d2",name:"Pulsar N160",price:379900,Insurance:9200,financeInsurance:8400,category:"Bike"},
+        {id:"d3",name:"Pulsar NS200",price:449900,Insurance:10500,financeInsurance:9800,category:"Bike"},
+        {id:"d4",name:"Dominar 250",price:489900,Insurance:11500,financeInsurance:10500,category:"Bike"},
+        {id:"d5",name:"Avenger Street 160",price:349900,Insurance:8800,financeInsurance:8100,category:"Bike"},
+        {id:"d6",name:"Platina 100",price:219900,Insurance:6200,financeInsurance:5800,category:"Bike"},
+        {id:"d7",name:"Chetak Electric",price:389900,Insurance:7500,financeInsurance:6900,category:"Scooter"},
+      ];
+      const select=document.getElementById('modelSelect');
+      if(select){
+        const defaultIdx=findDefaultBikeIndex(allBikes);
+        select.innerHTML=allBikes.map((b,idx)=>`<option value="${b.id}" ${idx===defaultIdx?"selected":""}>${escAttr(b.name)}</option>`).join('');
+        buildCustomSelect('modelSelect');
+        if(typeof calculateFinance==='function') calculateFinance();
+      }
+    }
+  });
+}
+
+window.findChassis=async function(){
+  const searchVal=document.getElementById('chassisSearch').value.trim();
+  const statusEl=document.getElementById('searchStatus');
+  if(!statusEl||!searchVal) return;
+  statusEl.innerText="Searching Inventory…"; statusEl.style.color="#005EA6";
+  try{
+    const q=query(collection(db,"inventory"),where("chassis","==",searchVal));
+    const qs=await getDocs(q);
+    if(!qs.empty){
+      const data=qs.docs[0].data();
+      applyChassisData(data,searchVal);
+      statusEl.innerText="Vehicle data loaded."; statusEl.style.color="#16A34A";
+    }else{
+      // Not in the shop's main stock — check the HH mela/event inventory too
+      // before giving up.
+      const hq=query(collection(db,"hh_inventory"),where("chassis","==",searchVal));
+      const hqs=await getDocs(hq);
+      if(!hqs.empty){
+        const data=hqs.docs[0].data();
+        applyChassisData(data,searchVal);
+        statusEl.innerText="Vehicle data loaded (HH Mela stock)."; statusEl.style.color="#16A34A";
+      }else{
+        document.getElementById('manualChassis').value=searchVal;
+        window._lastChassisStatus=''; window._lastChassisHH='';
+        showChassisStatusWarning('','');
+        statusEl.innerText="Not found in inventory — enter manually."; statusEl.style.color="#F59E0B";
+      }
+    }
+  }catch(err){
+    statusEl.innerText="Connection error."; statusEl.style.color="#DC2626";
+  }
+};
+
+// ═══ Model name/CC/series parsing for chassis↔model mismatch warnings ═══
+function parseModelInfo(str){
+  const s=(str||'').toString().toUpperCase().replace(/^BAJAJ\s+/,'');
+  const brandMatch=s.match(/[A-Z]+/);
+  const brand=brandMatch?brandMatch[0]:'';
+  const ccMatch=s.match(/\d{2,4}/);
+  const cc=ccMatch?ccMatch[0]:'';
+  // series token that sits directly against the cc number, e.g. "N160", "NS200", "160 DD"
+  // NS must be checked before N, and longer tokens before their prefixes.
+  const SERIES_TOKENS=['NS','RS','AS','DD','SD','N'];
+  let series='';
+  const tokenAlt=SERIES_TOKENS.join('|');
+  const preSeries=s.match(new RegExp('(?:'+tokenAlt+')\\s*\\d{2,4}'));
+  if(preSeries){
+    const m=preSeries[0].match(new RegExp('^(?:'+tokenAlt+')'));
+    if(m) series=m[0];
+  }
+  if(!series){
+    const postSeries=s.match(new RegExp('\\d{2,4}\\s*(?:'+tokenAlt+'|ES|FI|ABS|DTSI)'));
+    if(postSeries){
+      const m=postSeries[0].match(new RegExp('(?:'+tokenAlt+'|ES|FI|ABS|DTSI)$'));
+      if(m) series=m[0];
+    }
+  }
+  // "Single Disc" / "Double Disc" spelled out instead of SD/DD abbreviations
+  if(!series){
+    if(/SINGLE\s*DISC/.test(s)) series='SD';
+    else if(/DOUBLE\s*DISC|DUAL\s*DISC/.test(s)) series='DD';
+  }
+  if(!series) series='SD'; // unspecified series is treated as the base/SD variant
+  return {brand,cc,series,raw:s};
+}
+function brandsLikelyMatch(brandA,brandB){
+  if(!brandA||!brandB) return true;
+  if(brandA===brandB) return true;
+  // tolerate a "Bajaj" prefix or similar extra wording on one side only
+  return brandA.includes(brandB)||brandB.includes(brandA);
+}
+function modelsLikelyMatch(modelA,modelB){
+  const A=parseModelInfo(modelA), B=parseModelInfo(modelB);
+  if(!A.cc||!B.cc) return true; // not enough info to compare safely — don't warn
+  if(!brandsLikelyMatch(A.brand,B.brand)) return false;
+  if(A.cc!==B.cc) return false;
+  if(A.series!==B.series) return false;
+  return true;
+}
+window.showModelMismatchWarning=function(selectedModelText,chassisModelText,targetId='modelMismatchWarning'){
+  const el=document.getElementById(targetId);
+  if(!el) return;
+  if(!chassisModelText || modelsLikelyMatch(selectedModelText,chassisModelText)){
+    el.style.display='none';
+    el.textContent='';
+    return;
+  }
+  // The message must sit inside ONE span: bare text nodes and <strong> tags
+  // placed directly in a flex container each become separate flex items, which
+  // is what stacked the words into narrow columns.
+  el.innerHTML=`<i class="fa-solid fa-triangle-exclamation"></i><span>Chassis mismatch: this chassis is a <strong>${chassisModelText}</strong>, but <strong>${selectedModelText||'the selected model'}</strong> was selected. The model has been switched — please confirm before continuing.</span>`;
+  el.style.display='flex';
+}
+
+// ═══ Sold / HH-Hide chassis warning ═══
+// Flags a chassis pulled from inventory that's already marked Sold or held
+// back as HH Hide, so it doesn't get quietly re-used on a new finance record.
+window.showChassisStatusWarning=function(status,hhFlag,targetId='chassisStatusWarning'){
+  const el=document.getElementById(targetId);
+  if(!el) return;
+  let msg='';
+  if(hhFlag==='Hide'){
+    msg='This chassis is marked <strong>HH Hide</strong> in inventory — held back from HH\'s report. Please double-check before using it here.';
+  }else if(status==='Sold'){
+    msg='This chassis is already marked <strong>SOLD</strong> in inventory. Please confirm before creating a new finance record for it.';
+  }
+  if(!msg){ el.style.display='none'; el.innerHTML=''; return; }
+  el.innerHTML=`<i class="fa-solid fa-ban"></i><span>${msg}</span>`;
+  el.style.display='flex';
+}
+
+function applyChassisData(data,fallbackChassis){
+  document.getElementById('manualChassis').value=data.chassis||fallbackChassis||"";
+  document.getElementById('manualEngine').value=data.engine||"";
+  document.getElementById('manualReg').value=data.regNo||"";
+  document.getElementById('manualColor').value=data.color||"";
+  window._lastChassisModel=data.model||'';
+  window._lastChassisStatus=data.status||'';
+  window._lastChassisHH=data.hhFlag||'';
+  showChassisStatusWarning(window._lastChassisStatus,window._lastChassisHH);
+  if(data.model){
+    const sel=document.getElementById('modelSelect');
+    const previouslySelectedText=sel.options[sel.selectedIndex]?.text||'';
+    showModelMismatchWarning(previouslySelectedText,data.model);
+    for(let i=0;i<sel.options.length;i++){
+      if(sel.options[i].text===data.model){sel.selectedIndex=i;syncCustomSelectUI('modelSelect');renderFinanceSchemeUI();calculateFinance();break;}
+    }
+  }else{
+    showModelMismatchWarning('','');
+  }
+  showFieldError('manualChassis','manualChassisError',false);
+  showFieldError('manualEngine','manualEngineError',false);
+  showFieldError('manualReg','manualRegError',false);
+  showFieldError('manualColor','manualColorError',false);
+}
+// If the chassis number is hand-edited after a lookup, the stored model no
+// longer reliably applies to it, so stop comparing against it.
+document.getElementById('manualChassis')?.addEventListener('input',()=>{
+  window._lastChassisModel='';
+  window._lastChassisStatus='';
+  window._lastChassisHH='';
+  showModelMismatchWarning('','');
+  showChassisStatusWarning('','');
+});
+
+function normChassis(v){ return (v||'').toString().trim().toUpperCase().replace(/\s+/g,''); }
+function chassisMatchScore(chassis,q){
+  chassis=normChassis(chassis); q=normChassis(q);
+  if(!chassis||!q) return -1;
+  if(chassis===q) return 100;
+  if(chassis.endsWith(q)) return 80;
+  if(chassis.startsWith(q)) return 60;
+  if(chassis.includes(q)) return 40;
+  return -1;
+}
+function searchChassisSuggestions(q){
+  if(!q||!q.trim()) return [];
+  return allInventoryRecords()
+    .map(s=>({s,score:chassisMatchScore(s.chassis,q)}))
+    .filter(x=>x.score>=0)
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,2)
+    .map(x=>x.s);
+}
+function colourDotHex(col=''){
+  const map={red:'#ef4444',blue:'#3b82f6',black:'#374151',white:'#e2e8f0',orange:'#f97316',green:'#22c55e',yellow:'#eab308',silver:'#94a3b8',grey:'#64748b',gray:'#64748b',maroon:'#be123c',brown:'#92400e',purple:'#7c3aed',pink:'#ec4899'};
+  const k=(col||'').toLowerCase().split(/\s+/).find(w=>map[w]);
+  return k?map[k]:'#005EA6';
+}
+function renderChassisDropdown(list){
+  const dd=document.getElementById('chassisSearchDropdown');
+  if(!dd) return;
+  const card=document.getElementById('chassisSearchWrap')?.closest('.calc-card');
+  // Fallback for browsers without CSS :has() — grow the page only while the
+  // dropdown is open so it has somewhere to expand into.
+  const pad=(on)=>{
+    const wrap=document.querySelector('main > div');
+    if(!wrap) return;
+    if(on) wrap.style.setProperty('padding-bottom','200px','important');
+    else wrap.style.removeProperty('padding-bottom');
+  };
+  const openDropdown=()=>{ dd.style.display='block'; card?.classList.add('dropdown-open'); pad(true); };
+  const closeDropdown=()=>{ dd.style.display='none'; card?.classList.remove('dropdown-open'); pad(false); };
+  window._closeChassisDropdown=closeDropdown;
+  if(!list.length){
+    dd.innerHTML='<div class="csd-empty">No matching chassis found.</div>';
+    openDropdown();
+    return;
+  }
+  dd.innerHTML=list.map(s=>{
+    const flagged=s.hhFlag==='Hide'||s.status==='Sold';
+    const pill=s.hhFlag==='Hide'?'<span class="csd-status-pill">HH Hide</span>':(s.status==='Sold'?'<span class="csd-status-pill">Sold</span>':'');
+    const sourceTag=s._source==='hh'?'<span class="csd-status-pill" style="background:rgba(0,94,166,.1);color:#005EA6;border-color:rgba(0,94,166,.3)">HH Mela</span>':'';
+    return `
+    <button type="button" class="csd-item${flagged?' csd-flagged':''}" data-id="${s.id}">
+      <span class="csd-main">
+        <span class="csd-chassis">${escAttr((s.chassis||'—').toUpperCase())}</span>
+        <span class="csd-sub">${escAttr(s.model||'—')} · Engine ${escAttr(s.engine||'—')}${s.regNo?(' · '+escAttr(s.regNo)):''}</span>
+      </span>
+      ${sourceTag}${pill}
+      <span class="csd-color-dot" style="background:${colourDotHex(s.color||'')}"></span>
+    </button>`;}).join('');
+  openDropdown();
+  dd.querySelectorAll('.csd-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      const rec=allInventoryRecords().find(x=>x.id===item.dataset.id);
+      if(rec){
+        document.getElementById('chassisSearch').value=rec.chassis||'';
+        applyChassisData(rec,rec.chassis);
+        const statusEl=document.getElementById('searchStatus');
+        if(statusEl){statusEl.innerText="Vehicle data loaded."; statusEl.style.color="#16A34A";}
+      }
+      closeDropdown();
+    });
+  });
+}
+const chassisSearchInput=document.getElementById('chassisSearch');
+chassisSearchInput?.addEventListener('input',(e)=>{
+  const val=e.target.value;
+  if(!val.trim()){ window._closeChassisDropdown ? window._closeChassisDropdown() : document.getElementById('chassisSearchDropdown').style.display='none'; return; }
+  renderChassisDropdown(searchChassisSuggestions(val));
+});
+chassisSearchInput?.addEventListener('focus',(e)=>{
+  if(e.target.value.trim()) renderChassisDropdown(searchChassisSuggestions(e.target.value));
+});
+document.addEventListener('click',(e)=>{
+  const wrap=document.getElementById('chassisSearchWrap');
+  if(wrap && !wrap.contains(e.target)){
+    if(window._closeChassisDropdown) window._closeChassisDropdown();
+    else{ const dd=document.getElementById('chassisSearchDropdown'); if(dd) dd.style.display='none'; }
+  }
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(window._closeChassisDropdown) window._closeChassisDropdown();
+    else{ const dd=document.getElementById('chassisSearchDropdown'); if(dd) dd.style.display='none'; }
+  }
+});
+
+window.calculateFinance=function(){
+ try{
+  let selectedId=document.getElementById('modelSelect')?.value;
+  let bike=allBikes.find(b=>b.id===selectedId);
+  if(!bike && allBikes.length>0){
+    console.warn('Selected bike not found, using first bike');
+    bike=allBikes[0];
+    const select=document.getElementById('modelSelect');
+    if(select) select.value=bike.id;
+  }
+  if(!bike) return;
+
+  // Re-check model vs the chassis on record every time the model changes,
+  // not just at the moment the chassis was first looked up.
+  if(window._lastChassisModel) showModelMismatchWarning(bike.name,window._lastChassisModel);
+
+  const getVal=(id,fb=0)=>parseFloat(document.getElementById(id)?.value)||fb;
+
+  const mrp=parseFloat(bike.price)||0;
+  const cashInsurance=parseFloat(bike.Insurance)||0;
+  const financeInsurance=parseFloat(bike.financeInsurance)||cashInsurance;
+  const activeInsurance=(typeof insuranceType!=='undefined' && insuranceType==='outdoor') ? financeInsurance : cashInsurance;
+  const discount=getVal('discountInput');
+  const customerExtraAdv=getVal('advEmiInput');
+  const namsari=getVal('namsariInput',3000);
+  // Category filtering already decides which accessory rows even exist in
+  // the DOM (renderAccessoryFields) — every accessory configured for this
+  // bike's category applies to every bike in that category.
+  renderAccessoryFields(false);
+  const accCost=Array.from(document.querySelectorAll('#fin_accDynamicGrid input[data-acc-name]')).reduce((sum,el)=>{
+    return sum+(parseFloat(el.value)||0);
+  },0)+getVal('othersInput');
+  const dpPercentVal=getVal('dpPercent',50);
+  const tenure=getVal('tenure',60);
+
+  const afterDiscount=mrp-discount;
+  const dpAmountOnly=afterDiscount*(dpPercentVal/100);
+  const loanAmount=afterDiscount-dpAmountOnly;
+
+  // Interest rate comes from the admin-managed finance_schemes collection.
+  // Exact downPay% match wins; otherwise fall back to the closest scheme at
+  // or below the selected DP%, and only use the old hardcoded ladder if no
+  // schemes have been configured in Firestore yet.
+  const schemeMap=buildFinanceSchemeMap();
+  let rate;
+  if(schemeMap.has(dpPercentVal)){
+    rate=schemeMap.get(dpPercentVal).rate;
+  }else if(schemeMap.size){
+    const dps=[...schemeMap.keys()].sort((a,b)=>a-b);
+    let nearest=dps.filter(d=>d<=dpPercentVal).pop();
+    if(nearest===undefined) nearest=dps[0];
+    rate=schemeMap.get(nearest).rate;
+  }else{
+    rate=13.99;
+    if(dpPercentVal>=60) rate=8.99;
+    else if(dpPercentVal>=50) rate=11.99;
+    else if(dpPercentVal>=40) rate=12.99;
+  }
+
+  const monthlyRate=(rate/12)/100;
+  const emi=loanAmount>0
+    ? (loanAmount*monthlyRate*Math.pow(1+monthlyRate,tenure))/(Math.pow(1+monthlyRate,tenure)-1)
+    : 0;
+
+  const rawTotalDownpayment=dpAmountOnly+namsari+activeInsurance+emi+accCost+customerExtraAdv;
+  const lastThreeDigits=rawTotalDownpayment%1000;
+  const autoRounding=lastThreeDigits>0?(1000-lastThreeDigits):0;
+  const finalTotalDP=rawTotalDownpayment+autoRounding;
+
+  const totalAdvEmi=emi+autoRounding+customerExtraAdv;
+  const dueEmi=(emi*tenure)-totalAdvEmi;
+  const totalInterest=(emi*tenure)-loanAmount;
+  const finalTotalDP_A4=dpAmountOnly+namsari+financeInsurance+totalAdvEmi;
+
+  const animateValue=(id,targetNum,format='default')=>{
+    const el=document.getElementById(id);
+    if(!el){
+      console.warn('Element not found:', id);
+      return;
+    }
+    
+    if(!Number.isFinite(targetNum)) targetNum=0;
+    
+    const getText=(val)=>{
+      const num=Number.isFinite(val)?val:0;
+      if(format==='default') return `RS. ${Math.round(num).toLocaleString()}`;
+      if(format==='pct') return `${Number(num.toFixed(2))}%`;
+      if(format==='dec') return `RS. ${num.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+      return String(Math.round(num));
+    };
+
+    // Set the value directly — no count-up stepping and no pop animation,
+    // which made every recalculation jump around distractingly.
+    el.classList.remove('updating');
+    el.textContent=getText(targetNum);
+    el.dataset.value=targetNum;
+  };
+
+  animateValue('displayTotalDPSummary',Math.round(finalTotalDP),'default');
+  animateValue('mrp',mrp,'default');
+  animateValue('afterDiscount',afterDiscount,'default');
+  animateValue('displayIns',activeInsurance,'default');
+  animateValue('displayRate',rate,'pct');
+  animateValue('displayDpAmt',dpAmountOnly,'default');
+  animateValue('displayLoanAmt',loanAmount,'default');
+  animateValue('displayEMI',emi,'dec');
+  animateValue('displayAutoAdEmi',autoRounding,'dec');
+  animateValue('displayTotalAdvEmi',totalAdvEmi,'dec');
+  animateValue('displayDueEmi',dueEmi,'dec');
+  animateValue('displayTotalInterest',totalInterest,'dec');
+  animateValue('mobileEmiVal',Math.round(emi),'default');
+  animateValue('mobileTotalDpVal',Math.round(finalTotalDP),'default');
+  
+  const tenureLbl=document.getElementById('emiTenureLabel');
+  if(tenureLbl) tenureLbl.textContent=`for ${tenure} months`;
+
+  document.querySelectorAll('.rate-chip').forEach(chip=>chip.classList.toggle('active',parseFloat(chip.dataset.dp)===dpPercentVal));
+  
+  const dpBar=document.getElementById('splitDpBar'), loanBar=document.getElementById('splitLoanBar');
+  if(dpBar&&loanBar){
+    const targetDpWidth=dpPercentVal;
+    const targetLoanWidth=100-dpPercentVal;
+    const currentDpWidth=parseFloat(dpBar.style.width)||50;
+    const currentLoanWidth=parseFloat(loanBar.style.width)||50;
+    
+    const animateBar=(bar,from,to)=>{
+      let step=0;
+      const steps=20;
+      const tick=()=>{
+        step++;
+        const progress=step/steps;
+        const easeProgress=progress<.5?2*progress*progress:1-Math.pow(-2*progress+2,2)/2;
+        const current=from+((to-from)*easeProgress);
+        bar.style.width=current+'%';
+        if(step<steps) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+    animateBar(dpBar,currentDpWidth,targetDpWidth);
+    animateBar(loanBar,currentLoanWidth,targetLoanWidth);
+  }
+
+  window._lastCalc={bike,mrp,discount,afterDiscount,cashInsurance,financeInsurance,activeInsurance,insuranceType,rate,dpAmountOnly,loanAmount,emi,autoRounding,totalAdvEmi,tenure,namsari,finalTotalDP,finalTotalDP_A4};
+ }catch(err){
+  console.error('calculateFinance() crashed:', err);
+  const warnEl = document.getElementById('bikeLoadWarning');
+  const textEl = document.getElementById('bikeLoadWarningText');
+  if(warnEl && textEl){
+    textEl.textContent = 'Calculation error: ' + (err && err.message ? err.message : String(err));
+    warnEl.style.display = 'flex';
+  }
+ }
+};
+
+window.syncAllToA4=function(){
+  const c=window._lastCalc;
+  if(!c) return;
+  const fmt=n=>Math.round(n).toLocaleString('en-IN');
+  const fmtDec=n=>Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const set=(id,val)=>{const el=document.getElementById(id); if(el) el.innerText=val;};
+  const today=new Date();
+  const dateStr=today.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  const custName=document.getElementById('custNameInput')?.value||"--";
+  const custPhone=document.getElementById('custPhoneInput')?.value||"--";
+
+  set('a4Date',dateStr); set('a4CustName',custName); set('a4CustPhone',custPhone);
+  set('a4Dealer','Samriddhi And Brothers Auto Pvt. Ltd.'); set('a4Model',c.bike.name);
+  set('a4MRP',fmtDec(c.afterDiscount)); set('a4DP',fmtDec(c.dpAmountOnly)); set('a4Loan',fmtDec(c.loanAmount));
+  set('a4Rate',c.rate.toFixed(2)); set('a4Tenure',c.tenure); set('a4Ins',fmtDec(c.financeInsurance));
+  set('a4AdvEmiAmt',fmtDec(c.totalAdvEmi)); set('a4TotalDP',fmtDec(c.finalTotalDP_A4)); set('a4Namsari',fmtDec(c.namsari));
+
+  set('a4Date2',dateStr); set('a4CustName2',custName); set('a4Model2',c.bike.name);
+  set('a4MRP2',fmt(c.mrp)); set('a4PriceWords',numberToWords(Math.round(c.mrp))+" rupees only.");
+  set('a4NetPriceWords',numberToWords(Math.round(c.afterDiscount))+" rupees only.");
+  set('a4DiscountWords',numberToWords(Math.round(c.discount))+" rupees only.");
+
+  ['manualChassis','manualEngine','manualReg','manualColor'].forEach((id,i)=>{
+    const map=['a4Chassis2','a4Engine2','a4Reg2','a4Color2'];
+    const el=document.getElementById(map[i]);
+    if(el) el.innerText=document.getElementById(id)?.value||"---";
+  });
+  const myEl=document.getElementById('a4MakeYear');
+  if(myEl) myEl.innerText=document.getElementById('makeYearInput')?.value||String(new Date().getFullYear());
+
+  const a4Row=document.getElementById('a4DiscountRow');
+  if(c.discount>0){
+    if(a4Row) a4Row.style.display='block';
+    set('a4DiscountAmt',fmt(c.discount)); set('a4NetPrice',fmt(c.afterDiscount));
+  }else if(a4Row) a4Row.style.display='none';
+};
+
+function syncField(srcId,dstId){
+  const src=document.getElementById(srcId), dst=document.getElementById(dstId);
+  if(src&&dst) dst.innerHTML=src.innerHTML;
+}
+window.printBothPages=function(){
+  const result=validateRequiredFields();
+  if(!result.ok){
+    showValidationToast(result.msg);
+    document.getElementById(result.focus)?.scrollIntoView({behavior:'smooth',block:'center'});
+    document.getElementById(result.focus)?.focus();
+    return;
+  }
+  syncAllToA4();
+  ['Date','Dealer','CustName','CustPhone','Model','MRP','DP','Loan','Rate','Tenure','Namsari','Ins'].forEach(k=>syncField('a4'+k,'p1'+k));
+  syncField('a4AdvEmiAmt','p1AdvEmi'); syncField('a4TotalDP','p1TotalDP');
+  ['Date2','CustName2','Model2','MRP2','PriceWords','Color2','Reg2','Engine2','Chassis2','MakeYear','DiscountAmt','DiscountWords','NetPrice','NetPriceWords'].forEach(k=>{
+    const dst='p2'+k.replace('2','');
+    syncField('a4'+k,dst);
+  });
+  const discSrc=document.getElementById('a4DiscountRow'), discDst=document.getElementById('p2DiscountRow');
+  if(discSrc&&discDst) discDst.style.display=discSrc.style.display;
+  window.print();
+};
+
+document.addEventListener('input',(e)=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'){
+    calculateFinance();
+  }
+});
+
+initBikesListener();
+
+
+
+})();
+
 /* ─── Accessories Inventory ─── */
 function loadAccessories(){
   if(accessoriesUnsub) accessoriesUnsub();
@@ -15404,8 +18203,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { sheetTool:'EMI Rate Sheet', dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', hhstock:'HH Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
-const SEC_IDS = { sheetTool:'secSheetTool', dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
+const SEC_TITLES = { financeTool:'DP Allocations', sheetTool:'EMI Rate Sheet', dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', hhstock:'HH Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
+const SEC_IDS = { financeTool:'secFinanceTool', sheetTool:'secSheetTool', dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
 // Starts a page's Firestore listener the first time that page is opened,
 // then remembers it's running so re-visiting costs nothing. Keeps sign-in
 // light without changing how any page behaves once you're on it.
