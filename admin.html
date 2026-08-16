@@ -119,17 +119,20 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Toast */
-  @keyframes slideIn { from{opacity:0;transform:translateY(16px) scale(.96);} to{opacity:1;transform:translateY(0) scale(1);} }
-  @keyframes toastOut { from{opacity:1;transform:translateY(0) scale(1);} to{opacity:0;transform:translateY(10px) scale(.97);} }
+  @keyframes slideIn { from{opacity:0;transform:translateY(20px) scale(.92);} 60%{opacity:1;transform:translateY(-3px) scale(1.015);} to{opacity:1;transform:translateY(0) scale(1);} }
+  @keyframes toastOut { from{opacity:1;transform:translateY(0) scale(1);} to{opacity:0;transform:translateY(10px) scale(.96);} }
   @keyframes toastBarShrink { from{width:100%;} to{width:0%;} }
+  @keyframes toastIconPop { 0%{transform:scale(0) rotate(-20deg);opacity:0;} 55%{transform:scale(1.25) rotate(6deg);opacity:1;} 80%{transform:scale(.92) rotate(-2deg);} 100%{transform:scale(1) rotate(0);} }
   #toast{
     backdrop-filter:blur(10px);
     background:rgba(255,255,255,.97);
     box-shadow:0 10px 15px -3px rgba(15,23,42,.08),0 4px 6px -4px rgba(15,23,42,.08),0 0 0 1px rgba(15,23,42,.04);
+    animation:slideIn .4s cubic-bezier(.34,1.56,.64,1);
   }
   #toast.leaving{ animation:toastOut .25s ease forwards; }
   #toastProgress{ animation:toastBarShrink 3.2s linear forwards; }
   #toastIconWrap{ display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;flex-shrink:0; }
+  #toastIconWrap i{ display:inline-block; animation:toastIconPop .5s cubic-bezier(.34,1.56,.64,1) .05s both; }
 
   /* Table row hover */
   tbody tr { transition: background 0.12s; }
@@ -6933,7 +6936,13 @@ function toast(msg, type='ok') {
 
   t.classList.remove('hidden','leaving');
   t.style.display = 'flex';
-  t.style.animation = 'slideIn .3s ease';
+  t.style.animation = 'slideIn .4s cubic-bezier(.34,1.56,.64,1)';
+  // Re-trigger the icon's pop-in each time (it only plays once per element
+  // otherwise) so back-to-back actions — save, then save again — each get
+  // their own little "done!" flourish instead of a static icon after the first.
+  ic.style.animation = 'none';
+  void ic.offsetWidth;
+  ic.style.animation = 'toastIconPop .5s cubic-bezier(.34,1.56,.64,1) .05s both';
 
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>hideToast(), 3200);
