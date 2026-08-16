@@ -18296,6 +18296,13 @@ window.switchSec=(sec)=>{
   const target = document.getElementById(SEC_IDS[sec] || 'secStock');
   target.classList.add('active');
   target.style.display = 'block';
+  // Sections share one scroll container (.main-scroll), so leaving a
+  // previous page mid-scroll used to carry that scroll position straight
+  // into whatever section opened next — cutting its own heading off under
+  // the sticky topbar (looked like a layout bug, was really just leftover
+  // scroll). Every switch now starts fresh at the top, no animation so it
+  // doesn't visibly scroll-fly across unrelated pages.
+  document.querySelector('.main-scroll')?.scrollTo({top:0,behavior:'instant'});
   setActiveTab(sec);
   const heading = document.getElementById('topbarHeading');
   if(heading) heading.textContent = SEC_TITLES[sec] || '';
