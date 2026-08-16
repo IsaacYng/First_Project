@@ -1831,8 +1831,6 @@
 #secFinanceTool .results-panel{position:static}}
 @media (max-width:768px){#secFinanceTool .metrics-row{grid-template-columns:1fr 1fr}
 #secFinanceTool .two-up, #secFinanceTool .customer-grid{grid-template-columns:1fr}
-#secFinanceTool .mobile-bar{display:flex}
-#secFinanceTool{padding-bottom:76px}
 #secFinanceTool .preview-body{padding:12px}
 #secFinanceTool .docs-required-card{padding:1.7rem 1.6rem}
 #secFinanceTool .docs-required-card .calc-card-title{font-size:1.05rem}
@@ -4709,17 +4707,6 @@
 </div>
 
 <div class="validation-toast" id="validationToast"><i class="fa-solid fa-triangle-exclamation"></i><span id="validationToastMsg">Please fill required fields</span></div>
-<div class="mobile-bar" style="position:static;margin-top:16px;border-radius:14px" id="mobileBar">
-  <div class="emi-chunk">
-    <div class="lbl">Monthly EMI</div>
-    <div class="val" id="mobileEmiVal">Rs. 0</div>
-  </div>
-  <div class="emi-chunk">
-    <div class="lbl">Total DP</div>
-    <div class="val" id="mobileTotalDpVal">Rs. 0</div>
-  </div>
-  <button class="mbtn" onclick="openPreview()"><i class="fa-solid fa-file-lines"></i> Preview</button>
-</div>
 <div id="fin_print-wrapper">
   <div class="print-page a4-paper">
     <div style="text-align:center;margin-bottom:5mm">
@@ -15186,8 +15173,6 @@ window.calculateFinance=function(){
   animateValue('displayTotalAdvEmi',totalAdvEmi,'dec');
   animateValue('displayDueEmi',dueEmi,'dec');
   animateValue('displayTotalInterest',totalInterest,'dec');
-  animateValue('mobileEmiVal',Math.round(emi),'default');
-  animateValue('mobileTotalDpVal',Math.round(finalTotalDP),'default');
   
   const tenureLbl=document.getElementById('emiTenureLabel');
   if(tenureLbl) tenureLbl.textContent=`for ${tenure} months`;
