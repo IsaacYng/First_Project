@@ -502,18 +502,35 @@
   .app-shell{ display:flex; min-height:100vh; width:100%; }
 
   /* ── Global print fix ─────────────────────────────────────────────
-     The per-section @media print rules (Sheet Tool, Finance Tool) only
-     hide the CHILDREN of #secSheetTool / #secFinanceTool — they never
-     touch the sidebar/topbar wrapping everything, since those live
-     outside those sections in .app-shell. Without this, printing a
-     sheet also printed the sidebar+topbar chrome (and could push the
-     real print-wrapper onto a later page). This hides the whole shell
-     chrome for ANY print job and lets .app-shell go block so nothing
-     constrains the print-page's width via flex. ── */
+     The Sheet Tool / Finance Tool were originally standalone pages whose
+     #print-wrapper sat directly under <body>, so their scoped
+     "#secX >*:not(#print-wrapper){display:none}" print rules were enough
+     on their own. Inside the admin panel that wrapper is buried 5 levels
+     deep: body > #admin-section > .app-shell > .main-col > .main-scroll >
+     .max-w-7xl wrapper > #secSheetTool > #print-wrapper.
+
+     .main-scroll is a SCROLL CONTAINER (overflow-y:auto, overflow-x:hidden)
+     living inside a height:100vh / overflow:hidden chain. When printing,
+     the browser clips every descendant to that scroll box — so the 297mm
+     landscape rate-sheet pages came out blank / cut off, and overflow-x:hidden
+     sliced off the right edge regardless. The .max-w-7xl wrapper also capped
+     the width and added side padding.
+
+     The per-section rules already hide each section's on-screen content and
+     reveal its #print-wrapper; this block just neutralizes the shared shell
+     chain around it — hide the chrome, and collapse every ancestor to a plain
+     block with no height cap, no width cap, no padding and visible overflow —
+     so the A4 pages flow straight onto the paper. Applies to BOTH the Sheet
+     (landscape) and Finance (portrait) print jobs, which share this shell. ── */
   @media print{
     #sidebar, .topbar, #sidebarOverlay{ display:none !important; }
-    .app-shell, .main-col{ display:block !important; height:auto !important; min-height:0 !important; overflow:visible !important; }
-    html, body{ margin:0 !important; padding:0 !important; background:#fff !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    #admin-section, .app-shell, .main-col, .main-scroll, .main-scroll > div{
+      display:block !important; height:auto !important; min-height:0 !important;
+      max-height:none !important; max-width:none !important; width:auto !important;
+      overflow:visible !important; padding:0 !important; margin:0 !important;
+    }
+    html, body{ margin:0 !important; padding:0 !important; background:#fff !important;
+                overflow:visible !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   }
 
   /* ── Sidebar ── */
