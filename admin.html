@@ -1047,7 +1047,7 @@
 #secSheetTool #print-wrapper{display:block !important}
 #secSheetTool .print-page{width:297mm !important;min-height:210mm !important;height:210mm !important;padding:9mm 10mm !important;margin:0 auto !important;box-sizing:border-box !important;overflow:visible !important;page-break-after:always !important;break-after:page !important;page-break-inside:avoid !important;display:flex !important;flex-direction:column !important;justify-content:center !important;align-items:stretch !important}
 #secSheetTool .print-page:last-child{page-break-after:avoid !important;break-after:avoid !important}
-#secSheetTool @page{size:A4 landscape;margin:0}}
+}
 #secSheetTool #print-wrapper{display:none}
 @media (max-width:1024px){#secSheetTool .controls-grid{grid-template-columns:1fr !important}}
 @media (max-width:768px){#secSheetTool .scroll-hint{display:flex}
@@ -1860,7 +1860,7 @@
 #secFinanceTool #fin_print-wrapper{display:block !important}
 #secFinanceTool .print-page{width:210mm !important;height:297mm !important;padding:12mm 14mm 10mm 14mm !important;margin:0 !important;box-sizing:border-box !important;overflow:hidden !important;page-break-after:always !important;break-after:page !important}
 #secFinanceTool .print-page:last-child{page-break-after:avoid !important;break-after:avoid !important}
-#secFinanceTool @page{size:A4 portrait;margin:0}}
+}
 #secFinanceTool #fin_print-wrapper{display:none}
 @media (max-width:1024px){#secFinanceTool .calc-grid{grid-template-columns:1fr !important}
 #secFinanceTool .results-panel{position:static}}
@@ -2261,6 +2261,12 @@
   .jrp-area-grid td{ text-align:center; }
   .jrp-area-grid td.left{ text-align:left; }
 </style>
+<!-- @page can't be scoped to a section (e.g. "#secSheetTool @page{}" is
+     invalid CSS and browsers silently drop it) — it applies to the whole
+     print job, not a DOM subtree. Sheet Tool needs landscape, Finance Tool
+     needs portrait, so this one shared rule gets its content swapped in by
+     JS right before each section's print button calls window.print(). -->
+<style id="dynamicPageSize"></style>
 </head>
 <body class="bg-slate-50 text-slate-700 min-h-screen">
 
@@ -6536,6 +6542,14 @@ function escapeJsAttr(v){
 // Firebase" to anyone poking around — none of that should reach the
 // screen. This maps known error codes to plain, generic wording and falls
 // back to one safe catch-all for anything unrecognized.
+// @page can't be scoped to a section — it's a whole-print-job setting, not
+// a per-element one — so Sheet Tool (landscape) and Finance Tool (portrait)
+// share this one dynamic <style> tag, updated right before each print call.
+function setPrintPageOrientation(orientation){
+  const el = document.getElementById('dynamicPageSize');
+  if(el) el.textContent = `@page{ size:A4 ${orientation}; margin:0; }`;
+}
+
 function friendlyError(e){
   const code = (e && e.code) || '';
   const map = {
@@ -13912,6 +13926,7 @@ function printAllTenures(){
   if(!tenures.length){ toast('No tenures selected — pick at least one in "Tenures to Include".','err'); return; }
   const wrapper=document.getElementById('print-wrapper');
   wrapper.innerHTML=tenures.map(t=>`<div class="print-page a4l-paper">${buildTenurePage(s.dp,t,s.namsari,s.acc,s.mode)}</div>`).join('');
+  setPrintPageOrientation('landscape');
   window.print();
 }
 
@@ -13937,6 +13952,7 @@ window.printFullSheet = ()=>{
   });
   if(!pages){ toast('Nothing to print — no DP%/tenure combinations found.','err'); return; }
   wrapper.innerHTML=pages;
+  setPrintPageOrientation('landscape');
   window.print();
 };
 
@@ -15669,6 +15685,7 @@ window.printBothPages=function(){
   const discSrc=document.getElementById('a4DiscountRow'), discDst=document.getElementById('p2DiscountRow');
   if(discSrc&&discDst) discDst.style.display=discSrc.style.display;
   markChassisSoldOnPrint();
+  setPrintPageOrientation('portrait');
   window.print();
 };
 
