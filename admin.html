@@ -4909,6 +4909,24 @@
       <p id="outdoorHint" style="display:none;font-size:11px;color:var(--ink4);font-style:italic;margin-top:10px">Finance Insurance is pulled per model from the price list (Admin Panel) — not manual here.</p>
     </div>
 
+    <!-- ══════════ MULTI-MODEL PRINT SELECTION ══════════ -->
+    <div class="calc-card" style="margin-bottom:20px" id="modelPrintSelectorCard">
+      <div class="calc-card-title">
+        <span class="icon"><i class="fa-solid fa-list-check"></i></span>Models to Include
+        <span class="acc-total-chip" id="modelPrintCountChip">0 selected</span>
+      </div>
+      <p style="font-size:11.5px;color:var(--ink4);margin-bottom:10px">Pick which models the Print Preview / Print All Tenures / Excel export below actually include — no need to print models you don't currently stock.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <button type="button" class="acc-add-btn" style="padding:6px 12px;font-size:11.5px" onclick="setModelPrintSelection('all')"><i class="fa-solid fa-check-double"></i> Select All</button>
+        <button type="button" class="acc-add-btn" style="padding:6px 12px;font-size:11.5px" onclick="setModelPrintSelection('stock')"><i class="fa-solid fa-warehouse"></i> In-Stock Only</button>
+        <button type="button" class="acc-add-btn" style="padding:6px 12px;font-size:11.5px" onclick="setModelPrintSelection('none')"><i class="fa-solid fa-xmark"></i> Clear</button>
+        <button type="button" class="acc-add-btn" style="padding:6px 12px;font-size:11.5px;margin-left:auto" onclick="exportSheetToExcel()"><i class="fa-solid fa-file-excel"></i> Export to Excel</button>
+      </div>
+      <div id="modelPrintCheckList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;max-height:260px;overflow-y:auto;padding:2px">
+        <p style="grid-column:1/-1;text-align:center;color:var(--ink4);font-size:12px;padding:12px">Loading models…</p>
+      </div>
+    </div>
+
     <!-- ══════════ ACCESSORIES ══════════ -->
     <div class="calc-card" style="margin-bottom:20px" id="accessoriesCard">
       <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-helmet-safety"></i></span>Accessories Bundle
@@ -13242,6 +13260,34 @@ onSheetReady(() => {
 let BIKES=[];
 let financeCategories=[]; // {id,name,accessoryNames:[...]} — managed from admin's Model Categories
 
+/* ══════════ Multi-model print selection ══════════
+   Sheet Tool has its own separate module scope from the admin panel's
+   Inventory pages, so it needs its own light inventory listener rather
+   than reaching into another page's data — this is intentionally minimal:
+   just enough to know which model NAMES currently have an available unit,
+   nothing else about the inventory gets touched or rendered here. */
+let sheetInStockModels = new Set();
+let selectedPrintModels = new Set(); // empty = "no filter yet" (falls back to all)
+onSnapshot(collection(db,"inventory"), snap=>{
+  updateSheetStockModels(snap.docs.map(d=>d.data()), 'inventory');
+});
+onSnapshot(collection(db,"hh_inventory"), snap=>{
+  updateSheetStockModels(snap.docs.map(d=>d.data()), 'hh_inventory');
+});
+let _sheetInvSnapshots = { inventory:[], hh_inventory:[] };
+function updateSheetStockModels(docs, source){
+  _sheetInvSnapshots[source] = docs;
+  const all = [..._sheetInvSnapshots.inventory, ..._sheetInvSnapshots.hh_inventory];
+  // Same alias mismatch problem as DP Allocation's chassis search — an
+  // inventory unit's model name is typed by hand and won't always match
+  // the Master Price List string exactly, so resolve it the same way.
+  sheetInStockModels = new Set(
+    all.filter(d=>d.status!=='Sold' && d.model)
+       .map(d=> (typeof resolveModelName==='function') ? resolveModelName(d.model) : d.model)
+  );
+  if(typeof renderModelPrintSelector==='function') renderModelPrintSelector();
+}
+
 /* ══════════ Finance schemes (admin-controlled: Down Payment % / Interest Rate / Tenure)
    Mirrors the same finance_schemes collection & lookup logic used in finance.html,
    so both pages always agree with what's set in the Admin Panel. ══════════ */
@@ -13640,11 +13686,96 @@ function recalcAll(){
 }
 
 /* ══════════ Print-preview modal: one A4-landscape page per tenure (of the current DP's scheme) ══════════ */
+/* ══════════ Multi-model print/export selector ══════════ */
+function renderModelPrintSelector(){
+  const wrap = document.getElementById('modelPrintCheckList');
+  const countChip = document.getElementById('modelPrintCountChip');
+  if(!wrap) return;
+  if(!BIKES.length){
+    wrap.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--ink4);font-size:12px;padding:12px">No models yet.</p>`;
+    countChip.textContent = '0 selected';
+    return;
+  }
+  // First time this renders (nothing chosen yet), default to whatever's
+  // actually in stock — that's the common case (don't print models you
+  // have zero of) — everything is still one click away via Select All.
+  if(selectedPrintModels.size===0 && !window._modelPrintSelectionTouched){
+    BIKES.forEach(b=>{ if(sheetInStockModels.has(b.name)) selectedPrintModels.add(b.name); });
+    if(!selectedPrintModels.size) BIKES.forEach(b=>selectedPrintModels.add(b.name)); // nothing in stock yet — fall back to all, rather than an empty list
+  }
+  wrap.innerHTML = BIKES.map(b=>{
+    const inStock = sheetInStockModels.has(b.name);
+    const checked = selectedPrintModels.has(b.name);
+    return `<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink2);padding:5px 7px;border-radius:8px;cursor:pointer;background:${checked?'var(--blueLt)':'transparent'}" onmouseover="this.style.background='var(--bgSoft)'" onmouseout="this.style.background='${checked?'var(--blueLt)':'transparent'}'">
+      <input type="checkbox" data-model="${escAttrSheet(b.name)}" ${checked?'checked':''} onchange="toggleModelPrintSelection('${escAttrSheet(b.name).replace(/'/g,"\\'")}',this.checked)" style="accent-color:var(--blue)">
+      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escAttrSheet(b.name)}</span>
+      ${inStock ? '' : `<span style="font-size:9.5px;font-weight:700;color:var(--ink4);background:var(--bgSoft);border:1px solid var(--line);border-radius:5px;padding:1px 5px;flex-shrink:0">no stock</span>`}
+    </label>`;
+  }).join('');
+  countChip.textContent = selectedPrintModels.size + ' selected';
+}
+window.toggleModelPrintSelection = (name, checked)=>{
+  window._modelPrintSelectionTouched = true;
+  if(checked) selectedPrintModels.add(name); else selectedPrintModels.delete(name);
+  renderModelPrintSelector();
+};
+window.setModelPrintSelection = (mode)=>{
+  window._modelPrintSelectionTouched = true;
+  if(mode==='all') selectedPrintModels = new Set(BIKES.map(b=>b.name));
+  else if(mode==='stock') selectedPrintModels = new Set(BIKES.filter(b=>sheetInStockModels.has(b.name)).map(b=>b.name));
+  else selectedPrintModels = new Set();
+  renderModelPrintSelector();
+};
+
+/* ══════════ Excel export — same rows the sheet/print already compute,
+   one workbook sheet per tenure in the current DP's scheme, respecting
+   the same model selection as Print. Uses the XLSX library already
+   loaded for Inventory's own import/export features. ══════════ */
+window.exportSheetToExcel = ()=>{
+  if(typeof XLSX==='undefined'){ toast('Excel library not loaded — try refreshing the page.','err'); return; }
+  const s=currentSettings();
+  if(!financeSchemes.length || !s.dp){ toast('Finance schemes are still loading — try again in a moment.','warn'); return; }
+  const modelsToInclude = selectedPrintModels.size ? BIKES.filter(b=>selectedPrintModels.has(b.name)) : BIKES;
+  if(!modelsToInclude.length){ toast('No models selected — pick at least one above.','err'); return; }
+  const tenures=currentSchemeTenures(s.dp);
+  const wb = XLSX.utils.book_new();
+  tenures.forEach(t=>{
+    const rate=rateForDp(s.dp);
+    const header = s.mode==='indoor'
+      ? ['S.N','Model','Price','DP Amount','Loan Amount','Insurance','Monthly EMI','Advance EMI','Accessories','Namsari','Total Downpayment']
+      : ['S.N','Model','Price','DP Amount','Loan Amount','Insurance','Monthly EMI','Advance EMI','Namsari','Total Downpayment'];
+    const rows=[header];
+    let n=0;
+    modelsToInclude.forEach(bike=>{
+      const bikeAcc=accessoriesTotal(bike);
+      const r=computeRow(bike,s.dp,t,s.namsari,bikeAcc,s.mode);
+      if(!r.tenureOk) return;
+      n++;
+      rows.push(s.mode==='indoor'
+        ? [n,bike.name,bike.price,r.dpAmt,r.loanAmt,r.insurance,r.emi,r.advanceEmi,bikeAcc,s.namsari,r.total]
+        : [n,bike.name,bike.price,r.dpAmt,r.loanAmt,r.financeInsurance,r.emi,r.advanceEmi,s.namsari,r.total]);
+    });
+    if(rows.length<2) return; // nothing valid at this tenure (e.g. capped category) — skip the sheet entirely
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = header.map(()=>({wch:16}));
+    // Sheet names can't exceed 31 chars or contain [ ] : * ? / \ — tenure-only names are always safe.
+    XLSX.utils.book_append_sheet(wb, ws, `${t} Months (${rate.toFixed(2)}% @ ${s.dp}% DP)`.slice(0,31));
+  });
+  if(!wb.SheetNames.length){ toast('Nothing to export at this Downpayment %.','err'); return; }
+  const today=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `EMI-Rate-Sheet_${s.dp}pct-DP_${today}.xlsx`);
+  toast(`Excel exported — ${wb.SheetNames.length} tenure sheet${wb.SheetNames.length>1?'s':''}, ${modelsToInclude.length} model${modelsToInclude.length>1?'s':''}.`);
+};
+
 function buildTenurePage(dp,tenure,namsari,acc,mode){
   const rate=rateForDp(dp);
   let rows='';
   let n=0;
-  BIKES.forEach((bike)=>{
+  // Print/Preview respects the same "Models to Include" checklist as the
+  // Excel export — empty selection (nothing touched yet) falls back to
+  // showing everything, same as before this feature existed.
+  const modelsToInclude = selectedPrintModels.size ? BIKES.filter(b=>selectedPrintModels.has(b.name)) : BIKES;
+  modelsToInclude.forEach((bike)=>{
     const bikeAcc=accessoriesTotal(bike);
     const r=computeRow(bike,dp,tenure,namsari,bikeAcc,mode);
     if(!r.tenureOk) return;
@@ -13932,11 +14063,13 @@ onSnapshot(collection(db,"bikes"), snap=>{
       category:b.category||'Bike'
     }));
   recalcAll();
+  renderModelPrintSelector();
   document.querySelectorAll('#secSheetTool .skel').forEach(el=>el.classList.remove('skel'));
 }, err=>{
   console.error("Sheet: bikes listener failed.",err);
   BIKES=[]; // stay blank rather than showing stale/hardcoded prices
   recalcAll();
+  renderModelPrintSelector();
   document.querySelectorAll('#secSheetTool .skel').forEach(el=>el.classList.remove('skel'));
 });
 
@@ -15390,6 +15523,32 @@ function syncField(srcId,dstId){
   const src=document.getElementById(srcId), dst=document.getElementById(dstId);
   if(src&&dst) dst.innerHTML=src.innerHTML;
 }
+// Printing the allocation is the dealership's real "this bike is sold"
+// moment — so the matching inventory unit (found by chassis) gets marked
+// Sold automatically here, tagged as financed through HFL with the
+// customer's name, instead of needing a separate manual trip to Inventory
+// afterward. Skips quietly if there's no chassis, no matching unit, or the
+// unit is already marked Sold (so re-printing never re-stamps the date).
+async function markChassisSoldOnPrint(){
+  const chassis = document.getElementById('manualChassis')?.value.trim();
+  if(!chassis) return;
+  const rec = allInventoryRecords().find(r => String(r.chassis||'').trim().toUpperCase() === chassis.toUpperCase());
+  if(!rec || rec.status === 'Sold') return;
+  const custName = document.getElementById('custNameInput')?.value.trim() || '';
+  const collectionName = rec._source === 'hh' ? 'hh_inventory' : 'inventory';
+  try{
+    await updateDoc(doc(db, collectionName, rec.id), {
+      status: 'Sold', customerName: custName || rec.customerName || '',
+      soldAt: new Date(), soldFrom: 'HFL',
+    });
+    logActivity('Sold via DP Allocation print', collectionName, { chassis, customer: custName });
+    toast(`Unit marked Sold — HFL${custName ? ', '+custName : ''}.`);
+  }catch(e){
+    console.error('markChassisSoldOnPrint failed', e);
+    toast('Printed, but could not update the inventory status: '+friendlyError(e), 'warn');
+  }
+}
+
 window.printBothPages=function(){
   const result=validateRequiredFields();
   if(!result.ok){
@@ -15407,6 +15566,7 @@ window.printBothPages=function(){
   });
   const discSrc=document.getElementById('a4DiscountRow'), discDst=document.getElementById('p2DiscountRow');
   if(discSrc&&discDst) discDst.style.display=discSrc.style.display;
+  markChassisSoldOnPrint();
   window.print();
 };
 
