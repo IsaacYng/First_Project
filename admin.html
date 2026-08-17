@@ -2428,7 +2428,8 @@
     <!-- SIDEBAR -->
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-brand">
-        <div class="w-9 h-9 rounded-xl bg-bajaj-blue flex items-center justify-center text-white shadow-btn flex-shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-bajaj-blue flex items-center justify-center text-white shadow-btn flex-shrink-0 overflow-hidden relative">
+          <img src="favicon.png" alt="" class="w-full h-full object-cover absolute inset-0" onerror="this.style.display='none'">
           <i class="fas fa-motorcycle text-sm"></i>
         </div>
         <div class="min-w-0">
@@ -2819,6 +2820,12 @@
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price (Rs.) <span class="text-red-400">*</span></label>
             <input type="number" id="mPrice" placeholder="145000"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price Effective From <span class="text-slate-400 normal-case font-medium">(optional)</span></label>
+            <input type="date" id="mPriceEffectiveDate"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full"/>
+            <span class="text-[10.5px] text-slate-400 leading-snug">Leave blank to apply the price above right away. Set a future date to keep today's price live until then — it switches over automatically.</span>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Insurance (Rs.) <span class="text-red-400">*</span></label>
@@ -4007,6 +4014,7 @@
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="photo" onclick="setDocTypeFilter('photo')"><i class="fas fa-file-image mr-1"></i>Photo <span id="docCountPhoto" class="filter-count-badge"></span></button>
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="word" onclick="setDocTypeFilter('word')"><i class="fas fa-file-word mr-1"></i>Word <span id="docCountWord" class="filter-count-badge"></span></button>
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="excel" onclick="setDocTypeFilter('excel')"><i class="fas fa-file-excel mr-1"></i>Excel <span id="docCountExcel" class="filter-count-badge"></span></button>
+        <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="audio" onclick="setDocTypeFilter('audio')"><i class="fas fa-file-audio mr-1"></i>Audio <span id="docCountAudio" class="filter-count-badge"></span></button>
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="bluebook" onclick="setDocTypeFilter('bluebook')"><i class="fas fa-book mr-1"></i>Blue Books <span id="docCountBlueBook" class="filter-count-badge"></span></button>
       </div>
       <div class="flex flex-wrap items-center gap-2 mb-4">
@@ -7756,6 +7764,31 @@ window.handleForgotPassword = async ()=>{
 };
 
 /* ─── Master Price List ─── */
+// Runs once per bikes snapshot: any model with a scheduledPriceDate that's
+// today or already passed gets its price switched over automatically, so
+// nobody has to remember to come back and flip it manually. Client-side
+// only (no Cloud Functions on the free tier) — "checked whenever the admin
+// panel loads" is close enough for a dealership price list; it doesn't need
+// to flip at the stroke of midnight unattended.
+let applyingScheduledPrices = false;
+async function applyScheduledPrices(bikes){
+  if(applyingScheduledPrices) return;
+  const todayStr = new Date().toISOString().slice(0,10);
+  const due = bikes.filter(b => b.scheduledPriceDate && b.scheduledPriceDate <= todayStr && b.scheduledPrice!=null);
+  if(!due.length) return;
+  applyingScheduledPrices = true;
+  try{
+    const batch = writeBatch(db);
+    due.forEach(b => batch.update(doc(db,"bikes",b.id), { price: b.scheduledPrice, scheduledPrice: null, scheduledPriceDate: null }));
+    await batch.commit();
+    due.forEach(b => logActivity('Scheduled Price Applied', 'bikes', { model: b.name, newPrice: b.scheduledPrice }));
+    toast(`${due.length} scheduled price change${due.length>1?'s':''} applied: `+due.map(b=>b.name).join(', '));
+  }catch(e){
+    console.error('applyScheduledPrices failed', e);
+  }finally{
+    applyingScheduledPrices = false;
+  }
+}
 function loadMasterPriceList() {
   if(bikesUnsub) bikesUnsub();
   bikesUnsub = onSnapshot(collection(db,"bikes"), snap => {
@@ -7765,6 +7798,7 @@ function loadMasterPriceList() {
     if(typeof renderFinCategoryChips === 'function') renderFinCategoryChips();
     if(typeof updateStorageOverview === 'function') updateStorageOverview();
     if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
+    applyScheduledPrices(allMasterBikes);
   }, err => {
     console.error('bikes listener failed', err);
     document.getElementById('masterTableBody').innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400">
@@ -7801,7 +7835,10 @@ function renderMasterTable() {
       </td>
       <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">${escapeHtml(b.name)}</td>
       <td class="px-4 py-3" data-th="Category">${catBadge}</td>
-      <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Price">Rs ${Number(b.price).toLocaleString('en-IN')}</td>
+      <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Price">
+        Rs ${Number(b.price).toLocaleString('en-IN')}
+        ${b.scheduledPriceDate ? `<div class="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold whitespace-nowrap"><i class="fas fa-clock"></i> Rs ${Number(b.scheduledPrice).toLocaleString('en-IN')} from ${escapeHtml(b.scheduledPriceDate)}</div>` : ''}
+      </td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Insurance">Rs ${Number(b.Insurance||0).toLocaleString('en-IN')}</td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Finance Ins.">Rs ${Number(b.financeInsurance||0).toLocaleString('en-IN')}</td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="1st Party Ins.">Rs ${Number(b.firstPartyInsurance||0).toLocaleString('en-IN')}</td>
@@ -7844,12 +7881,16 @@ window._editMaster=(id)=>{
   document.getElementById('mSn').value=b.sn||'';
   document.getElementById('mName').value=b.name;
   document.getElementById('mCategory').value=b.category||'Bike';
-  document.getElementById('mPrice').value=b.price;
+  document.getElementById('mPrice').value=b.scheduledPriceDate ? b.scheduledPrice : b.price;
   document.getElementById('mNormalIns').value=b.Insurance||0;
   document.getElementById('mFinanceIns').value=b.financeInsurance||0;
   document.getElementById('mFirstPartyIns').value=b.firstPartyInsurance||0;
   document.getElementById('mThirdPartyIns').value=b.thirdPartyInsurance||0;
   document.getElementById('mImg').value=b.img||'';
+  // If a scheduled price change is already pending on this model, surface
+  // both the pending price (above) and its date so re-opening Edit shows
+  // exactly what's queued up, not the old live price with no explanation.
+  document.getElementById('mPriceEffectiveDate').value=b.scheduledPriceDate||'';
   currentEditId=id;
   const btn=document.getElementById('saveModelBtn');
   btn.innerHTML='<i class="fas fa-rotate"></i> Update Model Info';
@@ -7903,7 +7944,24 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
   const [sn, name, price, ins, fin, firstPartyIns, thirdPartyIns] = checks.map(c=>c.value);
   const imgRaw = document.getElementById('mImg').value.trim();
   if(imgRaw && !/^https?:\/\/.+/i.test(imgRaw)){ toast('Image URL must start with http:// or https://','err'); return; }
-  const data={sn,name,category,price,Insurance:ins,financeInsurance:fin,firstPartyInsurance:firstPartyIns,thirdPartyInsurance:thirdPartyIns,img:imgRaw};
+  // Scheduled price change: a future Effective Date means keep today's
+  // price live and stash the new one — applyScheduledPrices() checks every
+  // bike for a due date each time the admin panel loads and switches it
+  // over automatically, so nobody has to remember to come back and flip it.
+  const effDateRaw = document.getElementById('mPriceEffectiveDate').value; // "YYYY-MM-DD" or ""
+  const todayStr = new Date().toISOString().slice(0,10);
+  const existingBike = currentEditId ? allMasterBikes.find(b=>b.id===currentEditId) : null;
+  // Scheduling only makes sense when editing a bike that already has a live
+  // price to protect — a brand-new model has nothing to "keep" in the
+  // meantime, so its first price just applies immediately regardless of
+  // whatever date happens to be sitting in that field.
+  const isFutureDated = effDateRaw && effDateRaw > todayStr && !!existingBike;
+  const finalPrice = isFutureDated ? (Number(existingBike.price)||price) : price;
+  const data={
+    sn,name,category,price:finalPrice,Insurance:ins,financeInsurance:fin,firstPartyInsurance:firstPartyIns,thirdPartyInsurance:thirdPartyIns,img:imgRaw,
+    scheduledPrice: isFutureDated ? price : null,
+    scheduledPriceDate: isFutureDated ? effDateRaw : null,
+  };
   try {
     // If this S.N is already taken by a different model, bump that model
     // (and everything after it) up by one first, so the new/edited entry
@@ -7911,21 +7969,22 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
     const collision = allMasterBikes.some(b => Number(b.sn)===sn && b.id!==currentEditId);
     if(collision) await shiftMasterSnUp(sn, currentEditId);
 
+    const scheduleNote = isFutureDated ? ` New price Rs. ${price.toLocaleString('en-IN')} takes effect ${effDateRaw}.` : '';
     if(currentEditId){
       await updateDoc(doc(db,"bikes",currentEditId),data);
       logActivity('Model Updated', 'bikes', { model: name, sn });
-      toast('Model updated!'+(collision?' S.N renumbered automatically.':''));
+      toast('Model updated!'+(collision?' S.N renumbered automatically.':'')+scheduleNote);
     }else{
       await addDoc(collection(db,"bikes"),data);
       logActivity('Model Added', 'bikes', { model: name, sn });
-      toast('Model added!'+(collision?' S.N renumbered automatically.':''));
+      toast('Model added!'+(collision?' S.N renumbered automatically.':'')+scheduleNote);
     }
     window.cancelMasterEdit();
   }catch(e){toast('Error: '+friendlyError(e),'err');}
 });
 
 function clearMasterForm(){
-  ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mFirstPartyIns','mThirdPartyIns','mImg'].forEach(id=>document.getElementById(id).value='');
+  ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mFirstPartyIns','mThirdPartyIns','mImg','mPriceEffectiveDate'].forEach(id=>document.getElementById(id).value='');
   const catSel = document.getElementById('mCategory');
   // "Bike" is the sensible default for a fresh Add Model form — fall back to
   // whatever category happens to exist first only if Bike isn't set up.
@@ -15695,7 +15754,7 @@ const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','mp3
 // the old ~900KB ceiling (Firestore's 1MB-per-document hard limit) no
 // longer applies — 10MB matches the Storage security rule.
 let DOC_MAX_FILE_SIZE = 10 * 1024 * 1024;
-const DOC_TYPE_GROUPS = { pdf:['pdf'], photo:['jpg','jpeg','png'], word:['doc','docx'], excel:['xls','xlsx'] };
+const DOC_TYPE_GROUPS = { pdf:['pdf'], photo:['jpg','jpeg','png'], word:['doc','docx'], excel:['xls','xlsx'], audio:['mp3','wav','m4a','ogg'] };
 const DOC_FILE_ICONS = { pdf:{icon:'fa-file-pdf',color:'#DC2626',label:'PDF'}, doc:{icon:'fa-file-word',color:'#2563EB',label:'DOC'}, docx:{icon:'fa-file-word',color:'#2563EB',label:'DOC'}, xls:{icon:'fa-file-excel',color:'#059669',label:'XLS'}, xlsx:{icon:'fa-file-excel',color:'#059669',label:'XLS'}, jpg:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, jpeg:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, png:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, mp3:{icon:'fa-file-audio',color:'#7C3AED',label:'MP3'}, mp4:{icon:'fa-file-video',color:'#DB2777',label:'MP4'}, webp:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, gif:{icon:'fa-file-image',color:'#D97706',label:'GIF'}, heic:{icon:'fa-file-image',color:'#D97706',label:'IMG'}, csv:{icon:'fa-file-csv',color:'#059669',label:'CSV'}, txt:{icon:'fa-file-lines',color:'#64748B',label:'TXT'}, zip:{icon:'fa-file-zipper',color:'#B45309',label:'ZIP'} };
 // Files live in Firebase Storage now, which on the Blaze plan is billed by
 // usage rather than capped at Firestore's 1 GiB. This is therefore a
@@ -16353,7 +16412,7 @@ function renderDocumentsPage(){
   // Keep each tab's count in sync with the full (unfiltered) list, not just
   // whatever's currently showing — otherwise switching filters would make
   // the numbers drift.
-  const countEls = { all:'docCountAll', pdf:'docCountPdf', photo:'docCountPhoto', word:'docCountWord', excel:'docCountExcel' };
+  const countEls = { all:'docCountAll', pdf:'docCountPdf', photo:'docCountPhoto', word:'docCountWord', excel:'docCountExcel', audio:'docCountAudio' };
   Object.entries(countEls).forEach(([key, elId])=>{
     const el = document.getElementById(elId);
     if(!el) return;
