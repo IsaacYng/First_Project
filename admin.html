@@ -523,7 +523,7 @@
      so the A4 pages flow straight onto the paper. Applies to BOTH the Sheet
      (landscape) and Finance (portrait) print jobs, which share this shell. ── */
   @media print{
-    #sidebar, .topbar, #sidebarOverlay{ display:none !important; }
+    #sidebar, .topbar, #sidebarOverlay, .main-scroll > footer{ display:none !important; }
     #admin-section, .app-shell, .main-col, .main-scroll, .main-scroll > div{
       display:block !important; height:auto !important; min-height:0 !important;
       max-height:none !important; max-width:none !important; width:auto !important;
