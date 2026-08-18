@@ -2932,12 +2932,6 @@
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Price Effective From <span class="text-slate-400 normal-case font-medium">(optional)</span></label>
-            <input type="date" id="mPriceEffectiveDate"
-              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full"/>
-            <span class="text-[10.5px] text-slate-400 leading-snug">Leave blank to apply the price above right away. Set a future date to keep today's price live until then — it switches over automatically.</span>
-          </div>
-          <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Insurance (Rs.) <span class="text-red-400">*</span></label>
             <input type="number" id="mNormalIns" placeholder="8500"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
@@ -7906,27 +7900,25 @@ window.handleForgotPassword = async ()=>{
 };
 
 /* ─── Master Price List ─── */
-// Runs once per bikes snapshot: any model with a scheduledPriceDate that's
-// today or already passed gets its price switched over automatically, so
-// nobody has to remember to come back and flip it manually. Client-side
-// only (no Cloud Functions on the free tier) — "checked whenever the admin
-// panel loads" is close enough for a dealership price list; it doesn't need
-// to flip at the stroke of midnight unattended.
+// Scheduled price change feature was removed. This now only cleans up any
+// records still carrying scheduledPrice/scheduledPriceDate from before —
+// it applies whatever was scheduled and clears the fields, silently.
 let applyingScheduledPrices = false;
 async function applyScheduledPrices(bikes){
   if(applyingScheduledPrices) return;
-  const todayStr = new Date().toISOString().slice(0,10);
-  const due = bikes.filter(b => b.scheduledPriceDate && b.scheduledPriceDate <= todayStr && b.scheduledPrice!=null);
-  if(!due.length) return;
+  const leftover = bikes.filter(b => b.scheduledPriceDate || b.scheduledPrice!=null);
+  if(!leftover.length) return;
   applyingScheduledPrices = true;
   try{
     const batch = writeBatch(db);
-    due.forEach(b => batch.update(doc(db,"bikes",b.id), { price: b.scheduledPrice, scheduledPrice: null, scheduledPriceDate: null }));
+    leftover.forEach(b => batch.update(doc(db,"bikes",b.id), {
+      // if a price was queued, honour it; otherwise just clear the stale fields
+      price: (b.scheduledPrice!=null ? b.scheduledPrice : b.price),
+      scheduledPrice: null, scheduledPriceDate: null
+    }));
     await batch.commit();
-    due.forEach(b => logActivity('Scheduled Price Applied', 'bikes', { model: b.name, newPrice: b.scheduledPrice }));
-    toast(`${due.length} scheduled price change${due.length>1?'s':''} applied: `+due.map(b=>b.name).join(', '));
   }catch(e){
-    console.error('applyScheduledPrices failed', e);
+    console.error('scheduled-price cleanup failed', e);
   }finally{
     applyingScheduledPrices = false;
   }
@@ -7979,7 +7971,6 @@ function renderMasterTable() {
       <td class="px-4 py-3" data-th="Category">${catBadge}</td>
       <td class="px-4 py-3 font-mono text-sm font-semibold text-slate-700" data-th="Price">
         Rs ${Number(b.price).toLocaleString('en-IN')}
-        ${b.scheduledPriceDate ? `<div class="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold whitespace-nowrap"><i class="fas fa-clock"></i> Rs ${Number(b.scheduledPrice).toLocaleString('en-IN')} from ${escapeHtml(b.scheduledPriceDate)}</div>` : ''}
       </td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Insurance">Rs ${Number(b.Insurance||0).toLocaleString('en-IN')}</td>
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="Finance Ins.">Rs ${Number(b.financeInsurance||0).toLocaleString('en-IN')}</td>
@@ -8023,16 +8014,12 @@ window._editMaster=(id)=>{
   document.getElementById('mSn').value=b.sn||'';
   document.getElementById('mName').value=b.name;
   document.getElementById('mCategory').value=b.category||'Bike';
-  document.getElementById('mPrice').value=b.scheduledPriceDate ? b.scheduledPrice : b.price;
+  document.getElementById('mPrice').value=b.price;
   document.getElementById('mNormalIns').value=b.Insurance||0;
   document.getElementById('mFinanceIns').value=b.financeInsurance||0;
   document.getElementById('mFirstPartyIns').value=b.firstPartyInsurance||0;
   document.getElementById('mThirdPartyIns').value=b.thirdPartyInsurance||0;
   document.getElementById('mImg').value=b.img||'';
-  // If a scheduled price change is already pending on this model, surface
-  // both the pending price (above) and its date so re-opening Edit shows
-  // exactly what's queued up, not the old live price with no explanation.
-  document.getElementById('mPriceEffectiveDate').value=b.scheduledPriceDate||'';
   currentEditId=id;
   const btn=document.getElementById('saveModelBtn');
   btn.innerHTML='<i class="fas fa-rotate"></i> Update Model Info';
@@ -8086,23 +8073,12 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
   const [sn, name, price, ins, fin, firstPartyIns, thirdPartyIns] = checks.map(c=>c.value);
   const imgRaw = document.getElementById('mImg').value.trim();
   if(imgRaw && !/^https?:\/\/.+/i.test(imgRaw)){ toast('Image URL must start with http:// or https://','err'); return; }
-  // Scheduled price change: a future Effective Date means keep today's
-  // price live and stash the new one — applyScheduledPrices() checks every
-  // bike for a due date each time the admin panel loads and switches it
-  // over automatically, so nobody has to remember to come back and flip it.
-  const effDateRaw = document.getElementById('mPriceEffectiveDate').value; // "YYYY-MM-DD" or ""
-  const todayStr = new Date().toISOString().slice(0,10);
-  const existingBike = currentEditId ? allMasterBikes.find(b=>b.id===currentEditId) : null;
-  // Scheduling only makes sense when editing a bike that already has a live
-  // price to protect — a brand-new model has nothing to "keep" in the
-  // meantime, so its first price just applies immediately regardless of
-  // whatever date happens to be sitting in that field.
-  const isFutureDated = effDateRaw && effDateRaw > todayStr && !!existingBike;
-  const finalPrice = isFutureDated ? (Number(existingBike.price)||price) : price;
   const data={
-    sn,name,category,price:finalPrice,Insurance:ins,financeInsurance:fin,firstPartyInsurance:firstPartyIns,thirdPartyInsurance:thirdPartyIns,img:imgRaw,
-    scheduledPrice: isFutureDated ? price : null,
-    scheduledPriceDate: isFutureDated ? effDateRaw : null,
+    sn,name,category,price,Insurance:ins,financeInsurance:fin,firstPartyInsurance:firstPartyIns,thirdPartyInsurance:thirdPartyIns,img:imgRaw,
+    // Scheduled price change feature was removed — always clear these so any
+    // model saved from before that still carries them gets cleaned up.
+    scheduledPrice: null,
+    scheduledPriceDate: null,
   };
   try {
     // If this S.N is already taken by a different model, bump that model
@@ -8111,22 +8087,21 @@ document.getElementById('saveModelBtn').addEventListener('click',async()=>{
     const collision = allMasterBikes.some(b => Number(b.sn)===sn && b.id!==currentEditId);
     if(collision) await shiftMasterSnUp(sn, currentEditId);
 
-    const scheduleNote = isFutureDated ? ` New price Rs. ${price.toLocaleString('en-IN')} takes effect ${effDateRaw}.` : '';
     if(currentEditId){
       await updateDoc(doc(db,"bikes",currentEditId),data);
       logActivity('Model Updated', 'bikes', { model: name, sn });
-      toast('Model updated!'+(collision?' S.N renumbered automatically.':'')+scheduleNote);
+      toast('Model updated!'+(collision?' S.N renumbered automatically.':''));
     }else{
       await addDoc(collection(db,"bikes"),data);
       logActivity('Model Added', 'bikes', { model: name, sn });
-      toast('Model added!'+(collision?' S.N renumbered automatically.':'')+scheduleNote);
+      toast('Model added!'+(collision?' S.N renumbered automatically.':''));
     }
     window.cancelMasterEdit();
   }catch(e){toast('Error: '+friendlyError(e),'err');}
 });
 
 function clearMasterForm(){
-  ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mFirstPartyIns','mThirdPartyIns','mImg','mPriceEffectiveDate'].forEach(id=>document.getElementById(id).value='');
+  ['mSn','mName','mPrice','mNormalIns','mFinanceIns','mFirstPartyIns','mThirdPartyIns','mImg'].forEach(id=>document.getElementById(id).value='');
   const catSel = document.getElementById('mCategory');
   // "Bike" is the sensible default for a fresh Add Model form — fall back to
   // whatever category happens to exist first only if Bike isn't set up.
