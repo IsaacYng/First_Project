@@ -14179,15 +14179,13 @@ window.closeEventPopup = ()=>{
   stopEventPopupCountdowns();
 };
 
-onSnapshot(collection(db, "events"), snap => {
-  events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  if(!eventPopupShownThisLoad){
-    eventPopupShownThisLoad = true;
-    checkAndShowEventPopup();
-  }
-}, err => {
-  console.warn("Events listener failed:", err.message);
-});
+// [Removed] This section's own events-collection listener was a leftover from
+// the standalone Sheet page. It ran the moment this script parsed — i.e. on
+// the login screen, before sign-in — and fired the event popup independently
+// of the real one. That's why the popup appeared on the login page and popped
+// more than once. The single login-gated loadEvents() (called from
+// onAuthStateChanged only after a user signs in) is now the sole trigger, so
+// the popup shows exactly once per login/refresh.
 
 function sortBySn(bikes){
   return [...bikes].sort((a,b)=>{
@@ -14961,15 +14959,10 @@ window.closeEventPopup = ()=>{
   stopEventPopupCountdowns();
 };
 
-onSnapshot(collection(db, "events"), snap => {
-  events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  if(!eventPopupShownThisLoad){
-    eventPopupShownThisLoad = true;
-    checkAndShowEventPopup();
-  }
-}, err => {
-  console.warn("Events listener failed:", err.message);
-});
+// [Removed] Duplicate events-collection listener — same leftover as in the
+// Sheet section, and the second source of the double "pop". loadEvents()
+// (login-gated) is the single source that shows the event popup once per
+// login/refresh.
 
 let invList = [];
 let hhInvList = [];
@@ -15397,10 +15390,17 @@ function chassisMatchScore(chassis,q){
 }
 function searchChassisSuggestions(q){
   if(!q||!q.trim()) return [];
+  const isAvail=s=>!(s.status==='Sold'||s.hhFlag==='Hide');
   return allInventoryRecords()
     .map(s=>({s,score:chassisMatchScore(s.chassis,q)}))
     .filter(x=>x.score>=0)
-    .sort((a,b)=>b.score-a.score)
+    .sort((a,b)=>{
+      // For allocation, available (not Sold / not HH-hidden) units float to
+      // the top; within the same availability the stronger chassis match wins.
+      const av=isAvail(a.s), bv=isAvail(b.s);
+      if(av!==bv) return av?-1:1;
+      return b.score-a.score;
+    })
     .slice(0,2)
     .map(x=>x.s);
 }
