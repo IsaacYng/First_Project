@@ -2293,6 +2293,88 @@
   .jrp-area-grid th{ text-align:center; }
   .jrp-area-grid td{ text-align:center; }
   .jrp-area-grid td.left{ text-align:left; }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     DASHBOARD — "Instrument Cluster" redesign
+     Subject: a motorcycle dealership's daily landing page. The old
+     version was a generic gray SaaS card-grid with no connection to
+     what this business actually sells. This reskins it as a bike
+     instrument cluster — the one screen a rider already reads at a
+     glance — while leaving every #dash*/#greeting* id untouched, so
+     renderDashboard()/renderGreeting()/renderSalesTrendChart() need
+     zero JS changes. Only new wrapper markup + scoped overrides for
+     the innerHTML those functions already inject. ─────────────────── */
+  #secDashboard{ --cluster-navy:#0B2540; --cluster-navy2:#123A63; --lcd:#EEF2ED; --lcd-line:#CFE0D8; }
+
+  /* Masthead — greeting reads like the cluster's welcome LCD */
+  #secDashboard .cluster-mast{
+    background:linear-gradient(135deg,var(--cluster-navy),var(--cluster-navy2));
+    border-radius:18px; padding:16px 20px; display:flex; align-items:center; gap:14px;
+    box-shadow:0 10px 30px rgba(11,37,64,.25), inset 0 0 0 1px rgba(255,255,255,.06);
+    position:relative; overflow:hidden;
+  }
+  #secDashboard .cluster-mast::before{
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(140px 70px at 12% 0%, rgba(255,255,255,.08), transparent 70%);
+    pointer-events:none;
+  }
+  #secDashboard #greetingIcon{
+    width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,.08);
+    border:1.5px solid rgba(255,255,255,.18); color:#F59E0B; display:flex; align-items:center; justify-content:center;
+    font-size:15px; flex-shrink:0; box-shadow:inset 0 0 14px rgba(245,158,11,.35);
+  }
+  #secDashboard #greetingText{ color:#fff; font-size:14px; font-weight:800; letter-spacing:.01em; }
+  #secDashboard #greetingDate{ color:rgba(255,255,255,.55); font-size:11px; font-weight:700; letter-spacing:.04em; margin-top:1px; }
+
+  /* Needs Attention — idiot-light row: dim until something needs it */
+  #secDashboard .lamp-row{ display:flex; flex-wrap:wrap; gap:10px; }
+  #secDashboard .lamp{
+    display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid var(--border);
+    border-radius:12px; padding:10px 16px; cursor:pointer; transition:border-color .2s, box-shadow .2s;
+  }
+  #secDashboard .lamp:hover{ border-color:#F59E0B; box-shadow:0 6px 18px rgba(245,158,11,.15); }
+  #secDashboard .lamp-dot{
+    width:11px; height:11px; border-radius:50%; background:#F59E0B; flex-shrink:0;
+    box-shadow:0 0 0 4px rgba(245,158,11,.18), 0 0 10px rgba(245,158,11,.7);
+    animation:lampGlow 1.8s ease-in-out infinite;
+  }
+  @keyframes lampGlow{0%,100%{opacity:1}50%{opacity:.55}}
+  #secDashboard .lamp-label{ font-size:11px; font-weight:800; color:#B4740E; text-transform:uppercase; letter-spacing:.06em; }
+  #secDashboard .lamp-count{ font-family:'JetBrains Mono',monospace; font-weight:800; font-size:15px; color:#1F2430; margin-left:2px; }
+
+  /* Gauge panels — the 5 stat tiles read like small LCD gauge faces */
+  #secDashboard .gauge-panel{
+    background:var(--lcd); border:1.5px solid var(--lcd-line); border-radius:14px; padding:14px;
+    cursor:pointer; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    box-shadow:inset 0 1px 3px rgba(11,37,64,.06);
+  }
+  #secDashboard .gauge-panel:hover{ transform:translateY(-3px); border-color:var(--brand); box-shadow:inset 0 1px 3px rgba(11,37,64,.06), 0 10px 24px rgba(0,94,166,.14); }
+  #secDashboard .gauge-panel .gauge-icon{
+    width:30px; height:30px; border-radius:8px; background:#fff; border:1px solid var(--lcd-line);
+    display:flex; align-items:center; justify-content:center; margin-bottom:8px;
+  }
+  #secDashboard .gauge-panel .gauge-label{ font-size:10px; font-weight:800; color:#5B7267; text-transform:uppercase; letter-spacing:.08em; }
+  #secDashboard .gauge-panel .gauge-value{
+    font-family:'JetBrains Mono',monospace; font-weight:800; font-size:1.7rem; color:var(--cluster-navy);
+    letter-spacing:.01em; margin-top:2px; font-variant-numeric:tabular-nums;
+  }
+
+  /* Lower cards — thin blue top trim instead of a plain header rule */
+  #secDashboard .cluster-card{ border-top:3px solid var(--brand) !important; }
+
+  /* Sales trend bars — reuses the exact classes renderSalesTrendChart()
+     already writes (bg-bajaj-blue / bg-blue-200), just repaints them */
+  #secDashboard #dashSalesTrendChart .bg-bajaj-blue{ background:linear-gradient(180deg,#0B84E0,var(--brand)) !important; }
+  #secDashboard #dashSalesTrendChart .bg-blue-200{ background:#E4ECF3 !important; }
+  #secDashboard #dashSalesTrendChart span.text-xs{ font-family:'JetBrains Mono',monospace; }
+
+  /* Business Summary — money figures get the same digital-readout type
+     as the gauge tiles above */
+  #secDashboard #dashBusinessSummary .text-lg.font-black{ font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; }
+
+  /* Recent Activity — quiet left rail instead of a floating dot */
+  #secDashboard #dashRecentActivity > div{ border-left:2.5px solid var(--brand-soft-border); padding-left:14px !important; }
+  #secDashboard #dashRecentActivity .fa-circle{ display:none; }
 </style>
 <!-- @page can't be scoped to a section (e.g. "#secSheetTool @page{}" is
      invalid CSS and browsers silently drop it) — it applies to the whole
@@ -2630,11 +2712,14 @@
 
     <!-- ═══ DASHBOARD ═══ -->
     <div class="sec-panel active" id="secDashboard">
-      <div id="greetingBanner" class="mb-5 flex items-center gap-3 bg-gradient-to-r from-blue-50 to-transparent border border-blue-100 rounded-xl px-4 py-3">
-        <div id="greetingIcon" class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-amber-500 text-base flex-shrink-0 shadow-sm"><i class="fas fa-sun"></i></div>
+      <!-- Masthead — bezel strip; renderGreeting() only ever touches the
+           text inside these three ids, never this wrapper, so it keeps
+           working unmodified. -->
+      <div id="greetingBanner" class="cluster-mast mb-5">
+        <div id="greetingIcon"><i class="fas fa-sun"></i></div>
         <div>
-          <div id="greetingText" class="text-sm font-extrabold text-slate-800">Good Morning, Admin!</div>
-          <div id="greetingDate" class="text-[11px] text-slate-400 font-semibold"></div>
+          <div id="greetingText">Good Morning, Admin!</div>
+          <div id="greetingDate"></div>
         </div>
       </div>
 
@@ -2644,8 +2729,7 @@
         <p class="text-sm text-slate-500 mt-1.5">Everything at a glance.</p>
       </div>
 
-      <!-- Quick Actions — the handful of things staff open this app to do
-           every single day, one tap away instead of a page navigation. -->
+      <!-- Quick Actions -->
       <div class="flex gap-2.5 flex-wrap mb-6">
         <button onclick="window.switchSec('inv');window.openInvFormModal&&window.openInvFormModal()" class="flex items-center gap-2 px-4 py-2.5 bg-bajaj-blue text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all">
           <i class="fas fa-plus"></i> Add Unit
@@ -2661,73 +2745,49 @@
         </button>
       </div>
 
-      <!-- Needs Attention — the two things on this dashboard that actually
-           call for staff to DO something, pulled out from the general
-           stats and given a consistent amber "alert" treatment so they
-           don't get lost in a wall of same-weight numbers. Only shows if
-           there's actually something to act on. -->
+      <!-- Needs Attention — warning-lamp row, dark until something needs it -->
       <div id="dashAttentionWrap" class="hidden mb-6">
         <div class="text-xs font-extrabold text-amber-600 uppercase tracking-wide mb-2 flex items-center gap-1.5"><i class="fas fa-bell"></i> Needs Attention</div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div id="dashMismatchAlertCard" class="hidden yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow border-2 border-amber-200 bg-amber-50/40" onclick="window.switchSec('modelAliases')">
-            <div class="flex items-center gap-2.5 mb-1.5">
-              <div class="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0"><i class="fas fa-code-compare text-amber-600 text-sm"></i></div>
-              <span class="text-[11px] font-bold text-amber-700 uppercase tracking-wide">Model Mismatches</span>
-            </div>
-            <div class="text-3xl font-black text-slate-800" id="dashMismatchCount">0</div>
+        <div class="lamp-row">
+          <div id="dashMismatchAlertCard" class="hidden lamp" onclick="window.switchSec('modelAliases')">
+            <span class="lamp-dot"></span>
+            <span class="lamp-label">Model Mismatches</span>
+            <span class="lamp-count" id="dashMismatchCount">0</span>
           </div>
         </div>
       </div>
 
-      <!-- Informational stats — deliberately restrained to two colours
-           (brand blue for counts, teal for the one "growth" metric) rather
-           than a different colour per card, so the eye doesn't have to
-           work to figure out what's actually important vs just a number. -->
+      <!-- Gauge panels — the 5 landing stats, LCD-tinted like a cluster face -->
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('price')">
-          <div class="flex items-center gap-2.5 mb-2">
-            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-tags text-bajaj-blue text-sm"></i></div>
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Models</span>
-          </div>
-          <div class="text-3xl font-black text-slate-800" id="dashModelsCount">0</div>
+        <div class="gauge-panel" onclick="window.switchSec('price')">
+          <div class="gauge-icon"><i class="fas fa-tags text-bajaj-blue text-sm"></i></div>
+          <div class="gauge-label">Models</div>
+          <div class="gauge-value" id="dashModelsCount">0</div>
         </div>
-        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('inv')">
-          <div class="flex items-center gap-2.5 mb-2">
-            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-warehouse text-bajaj-blue text-sm"></i></div>
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Available Units</span>
-          </div>
-          <div class="text-3xl font-black text-slate-800" id="dashAvailableCount">0</div>
+        <div class="gauge-panel" onclick="window.switchSec('inv')">
+          <div class="gauge-icon"><i class="fas fa-warehouse text-bajaj-blue text-sm"></i></div>
+          <div class="gauge-label">Available Units</div>
+          <div class="gauge-value" id="dashAvailableCount">0</div>
         </div>
-        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('inv')">
-          <div class="flex items-center gap-2.5 mb-2">
-            <div class="w-9 h-9 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-chart-line text-teal-600 text-sm"></i></div>
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Sold This Month</span>
-          </div>
-          <div class="text-3xl font-black text-slate-800" id="dashSoldMonthCount">0</div>
+        <div class="gauge-panel" onclick="window.switchSec('inv')">
+          <div class="gauge-icon"><i class="fas fa-chart-line text-teal-600 text-sm"></i></div>
+          <div class="gauge-label">Sold This Month</div>
+          <div class="gauge-value" id="dashSoldMonthCount">0</div>
         </div>
-        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('chalans')">
-          <div class="flex items-center gap-2.5 mb-2">
-            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-file-invoice text-bajaj-blue text-sm"></i></div>
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Chalans This Month</span>
-          </div>
-          <div class="text-3xl font-black text-slate-800" id="dashChalanMonthCount">0</div>
+        <div class="gauge-panel" onclick="window.switchSec('chalans')">
+          <div class="gauge-icon"><i class="fas fa-file-invoice text-bajaj-blue text-sm"></i></div>
+          <div class="gauge-label">Chalans This Month</div>
+          <div class="gauge-value" id="dashChalanMonthCount">0</div>
         </div>
-        <div class="yng-card-shell p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.switchSec('exchange')">
-          <div class="flex items-center gap-2.5 mb-2">
-            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-right-left text-bajaj-blue text-sm"></i></div>
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Exchange In Stock</span>
-          </div>
-          <div class="text-3xl font-black text-slate-800" id="dashExchangeCount">0</div>
+        <div class="gauge-panel" onclick="window.switchSec('exchange')">
+          <div class="gauge-icon"><i class="fas fa-right-left text-bajaj-blue text-sm"></i></div>
+          <div class="gauge-label">Exchange In Stock</div>
+          <div class="gauge-value" id="dashExchangeCount">0</div>
         </div>
       </div>
 
-      <!-- Business Summary — the actual "hisab" (accounts) a dealership
-           owner wants at a glance: what's the stock worth, what's the
-           month worth so far, what's sitting in exchange. A stock-level
-           list like "Low Stock" doesn't belong here — it's a working list
-           for the Inventory page, not a landing-page summary — so this
-           replaces it with real rupee totals instead. -->
-      <div class="yng-card-shell overflow-hidden mb-4">
+      <!-- Business Summary — real rupee totals -->
+      <div class="yng-card-shell cluster-card overflow-hidden mb-4">
         <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-2 flex-wrap">
           <div class="flex items-center gap-2">
             <i class="fas fa-chart-column text-teal-600"></i>
@@ -2739,14 +2799,14 @@
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div class="yng-card-shell overflow-hidden">
+        <div class="yng-card-shell cluster-card overflow-hidden">
           <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
             <i class="fas fa-sack-dollar text-emerald-600"></i>
             <div class="section-title text-xl">Business Summary</div>
           </div>
           <div id="dashBusinessSummary" class="p-5 flex flex-col gap-3"></div>
         </div>
-        <div class="yng-card-shell overflow-hidden">
+        <div class="yng-card-shell cluster-card overflow-hidden">
           <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
             <i class="fas fa-clock-rotate-left text-bajaj-blue"></i>
             <div class="section-title text-xl">Recent Activity</div>
