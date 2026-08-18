@@ -265,36 +265,38 @@
   }
   .yng-card-shell:hover{ transform:translateY(-4px); box-shadow:0 16px 40px rgba(91,110,116,.12); border-color:rgba(91,110,116,.24); }
 
-  /* ═══ LOGIN — Soft Blue palette, Insightlancer-style ═══ */
+  /* ═══ LOGIN — photo-style centered single-column card ═══ */
   :root{
     --lblue:#3E4F55; --lblueDark:#2C3A3F; --lblueLt:#EAEEF2;
     --lamber:#819FA7; --lamberDark:#647E86; --lline:#DCE1E7; --lbg:#F3F5F9;
   }
-  .login-hero{
-    background: linear-gradient(150deg, #F3F5F9 0%, #DCE6EC 55%, #B9CAD2 100%);
+  .login-stage{
+    background: linear-gradient(160deg, #F3F5F9 0%, #E3EAEF 50%, #C9D6DD 100%);
     position:relative; overflow:hidden;
   }
-  .login-hero::before {
-    content: ''; position: absolute; top: -80px; right: -80px;
-    width: 460px; height: 460px;
-    background: radial-gradient(circle, rgba(91,110,116,0.16) 0%, transparent 70%);
-    border-radius: 50%; pointer-events: none;
+  .login-ring{ position:absolute; border-radius:50%; border:1.5px solid rgba(91,110,116,0.14); pointer-events:none; }
+  .login-card{
+    position:relative; z-index:2; width:100%; max-width:400px;
+    background:#fff; border-radius:28px; padding:30px 28px 28px;
+    box-shadow:0 30px 70px rgba(30,42,48,.18), 0 6px 18px rgba(30,42,48,.08);
+    border:1px solid rgba(255,255,255,.6);
   }
-  .login-hero::after {
-    content: ''; position: absolute; bottom: -60px; left: -60px;
-    width: 320px; height: 320px;
-    background: radial-gradient(circle, rgba(129,159,167,0.16) 0%, transparent 70%);
-    border-radius: 50%; pointer-events: none;
+  .login-illus{
+    width:200px; height:126px; margin:0 auto 6px;
+    display:flex; align-items:center; justify-content:center;
   }
-  .login-hero-grid{
-    position:absolute; inset:0; opacity:.4;
-    background-image: linear-gradient(rgba(91,110,116,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(91,110,116,.05) 1px, transparent 1px);
-    background-size: 42px 42px;
+  .remember-toggle{ display:flex; align-items:center; gap:9px; cursor:pointer; user-select:none; }
+  .remember-toggle input{ position:absolute; opacity:0; width:0; height:0; }
+  .remember-switch{
+    width:38px; height:22px; border-radius:999px; background:#CFD9E0; position:relative; flex-shrink:0; transition:background .18s ease;
   }
-  .login-ring{ position:absolute; border-radius:50%; border:1.5px solid rgba(91,110,116,0.12); }
-  .login-stat{ text-align:center; }
-  .login-panel{background:#fff;position:relative}
-  .login-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--lblue),var(--lamber))}
+  .remember-switch::after{
+    content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,.18); transition:transform .18s ease;
+  }
+  .remember-toggle input:checked ~ .remember-switch{ background:#3E4F55; }
+  .remember-toggle input:checked ~ .remember-switch::after{ transform:translateX(16px); }
+  .remember-label{ font-size:12px; font-weight:600; color:#556067; }
   .lfield-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#647E86;margin-bottom:6px;display:block}
   .lfield{width:100%;height:50px;border:1.5px solid var(--lline);border-radius:14px;background:var(--lbg);padding:0 14px 0 44px;font-size:14px;color:#0D0D0D;outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
   .lfield:focus{border-color:var(--lblue);box-shadow:0 0 0 3px rgba(62,79,85,.12);background:#fff}
@@ -2456,73 +2458,87 @@
   </div>
 </div>
 
-<!-- ══════════════════ LOGIN (redesigned — index.html hero language) ══════════════════ -->
-<div id="login-section" class="min-h-screen flex">
+<!-- ══════════════════ LOGIN (photo-style — centered single column) ══════════════════ -->
+<div id="login-section" class="login-stage min-h-screen flex items-center justify-center px-5 py-8">
 
-  <!-- Left hero — hidden on mobile -->
-  <div class="hidden lg:flex flex-1 flex-col justify-center p-14 login-hero relative">
-    <div class="login-hero-grid"></div>
-    <div class="login-ring w-[440px] h-[440px]" style="top:50%;right:-120px;transform:translateY(-50%);"></div>
-    <div class="login-ring w-[320px] h-[320px]" style="top:50%;right:-60px;transform:translateY(-50%);opacity:.6;"></div>
-    <i class="fas fa-motorcycle absolute right-[-10px] bottom-10 text-bajaj-blue opacity-[0.06]" style="font-size:16rem;transform:scaleX(-1);"></i>
+  <!-- soft decorative rings behind the card -->
+  <div class="login-ring w-[300px] h-[300px]" style="top:8%;left:-90px;"></div>
+  <div class="login-ring w-[220px] h-[220px]" style="bottom:6%;right:-70px;opacity:.6;"></div>
 
-    <div class="relative z-10 max-w-md">
-      <span class="price-badge">
-        <i class="fas fa-shield-halved" style="font-size:11px;"></i>
-        Authorized Dealer Console
-      </span>
-      <h1 class="section-title text-[clamp(2.2rem,4.4vw,3rem)] mt-5">Restricted Access</h1>
-      <p class="text-slate-500 text-sm leading-relaxed mt-3 max-w-sm">
-        This panel controls live pricing, inventory, and finance data for Samriddhi And Brothers. Sign-in is restricted to authorized dealership staff only — all changes are logged.
-      </p>
-      <div class="flex flex-col gap-2.5 mt-7 max-w-xs">
-        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-lock text-bajaj-blue w-4 text-center"></i> Encrypted sign-in via Firebase Auth</div>
-        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-user-shield text-bajaj-blue w-4 text-center"></i> Access limited to approved admin accounts</div>
-        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-clock-rotate-left text-bajaj-blue w-4 text-center"></i> Every change syncs and is timestamped in real time</div>
+  <div class="login-card">
+    <!-- Illustration -->
+    <div class="login-illus">
+      <svg viewBox="0 0 240 150" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- backdrop panels -->
+        <rect x="70" y="14" width="96" height="70" rx="8" fill="#E7ECF1"/>
+        <rect x="82" y="26" width="72" height="6" rx="3" fill="#CFD9E0"/>
+        <rect x="82" y="38" width="52" height="5" rx="2.5" fill="#DCE1E7"/>
+        <rect x="82" y="48" width="60" height="5" rx="2.5" fill="#DCE1E7"/>
+        <!-- phone -->
+        <rect x="100" y="30" width="52" height="92" rx="10" fill="#3E4F55"/>
+        <rect x="106" y="40" width="40" height="72" rx="5" fill="#F3F5F9"/>
+        <!-- shield check on screen -->
+        <path d="M126 52l12 4v10c0 8-5.5 13-12 15-6.5-2-12-7-12-15V56l12-4z" fill="#819FA7"/>
+        <path d="M121 66l4 4 7-7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- dots (passcode) -->
+        <circle cx="115" cy="98" r="2.4" fill="#819FA7"/><circle cx="123" cy="98" r="2.4" fill="#819FA7"/>
+        <circle cx="131" cy="98" r="2.4" fill="#CFD9E0"/><circle cx="139" cy="98" r="2.4" fill="#CFD9E0"/>
+        <!-- person seated, right -->
+        <circle cx="182" cy="96" r="9" fill="#5B6E74"/>
+        <path d="M166 128c0-11 8-18 16-18s16 7 16 18z" fill="#5B6E74"/>
+        <!-- plant, left -->
+        <path d="M60 122c-6-4-9-12-8-20 6 2 11 8 11 16" fill="#819FA7"/>
+        <path d="M60 122c4-6 11-9 18-8-3 6-9 10-16 10" fill="#647E86"/>
+        <rect x="54" y="120" width="16" height="12" rx="2" fill="#45555A"/>
+        <!-- envelope, top-left of phone -->
+        <rect x="150" y="40" width="26" height="18" rx="3" fill="#fff" stroke="#CFD9E0" stroke-width="1.4"/>
+        <path d="M150 42l13 9 13-9" stroke="#819FA7" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <!-- ground line -->
+        <rect x="40" y="130" width="160" height="3" rx="1.5" fill="#E7ECF1"/>
+      </svg>
+    </div>
+
+    <!-- Logo + brand -->
+    <div class="flex items-center justify-center gap-2.5 mb-5">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0" style="background:#3E4F55">
+        <i class="fas fa-motorcycle text-sm"></i>
+      </div>
+      <div class="text-left">
+        <div class="font-display text-lg tracking-widest leading-none" style="color:#0D0D0D">SAMRIDDHI <span style="color:#819FA7">ADMIN</span></div>
+        <div class="text-[9px] text-slate-400 tracking-widest uppercase mt-0.5">Bajaj Authorized Dealer Panel</div>
       </div>
     </div>
-  </div>
 
-  <!-- Right form -->
-  <div class="w-full lg:w-[440px] flex-shrink-0 login-panel flex flex-col justify-center px-8 py-10">
-
-    <!-- Logo -->
-    <div class="flex items-center gap-3 mb-8">
-      <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0" style="background:#3E4F55">
-        <i class="fas fa-motorcycle text-lg"></i>
-      </div>
-      <div>
-        <div class="font-display text-2xl tracking-widest leading-none" style="color:#0D0D0D">SAMRIDDHI <span style="color:#819FA7">ADMIN</span></div>
-        <div class="text-[10px] text-slate-400 tracking-widest uppercase mt-0.5">Bajaj Authorized Dealer Panel</div>
-      </div>
-    </div>
-
-    <h2 class="section-title text-4xl" style="color:#0D0D0D">Login</h2>
-    <p class="text-sm text-slate-500 mt-1 mb-7">Please sign in to continue.</p>
+    <h2 class="section-title text-4xl text-center" style="color:#0D0D0D">Login</h2>
+    <p class="text-sm text-slate-500 mt-1 mb-7 text-center">Please sign in to continue.</p>
 
     <!-- Email -->
     <div class="flex flex-col gap-1.5 mb-4">
-      <label class="lfield-label">Email Address</label>
       <div class="lfield-wrap">
-        <i class="fas fa-envelope"></i>
-        <input type="email" id="email" placeholder="admin@samriddhibajaj.com" autocomplete="email" class="lfield"/>
+        <i class="fas fa-user"></i>
+        <input type="email" id="email" placeholder="Email address" autocomplete="email" class="lfield"/>
       </div>
     </div>
 
     <!-- Password -->
-    <div class="flex flex-col gap-1.5 mb-2">
-      <label class="lfield-label">Password</label>
+    <div class="flex flex-col gap-1.5 mb-3">
       <div class="lfield-wrap">
         <i class="fas fa-lock"></i>
-        <input type="password" id="pass" placeholder="••••••••••" autocomplete="current-password" class="lfield"/>
+        <input type="password" id="pass" placeholder="Password" autocomplete="current-password" class="lfield"/>
         <button type="button" id="togglePassBtn" onclick="togglePasswordVisibility()" class="pass-toggle-btn" aria-label="Show password" tabindex="-1">
           <i class="fas fa-eye" id="togglePassIcon"></i>
         </button>
       </div>
     </div>
 
-    <div class="text-right mb-4">
-      <a href="#" onclick="handleForgotPassword();return false;" class="text-xs text-slate-400 hover:text-amber-500 transition-colors">Forgot password?</a>
+    <!-- Remember + forgot -->
+    <div class="flex items-center justify-between mb-5">
+      <label class="remember-toggle">
+        <input type="checkbox" id="rememberMe" checked>
+        <span class="remember-switch"></span>
+        <span class="remember-label">Keep me signed in</span>
+      </label>
+      <a href="#" onclick="handleForgotPassword();return false;" class="text-xs text-slate-400 hover:text-slate-600 transition-colors">Forgot?</a>
     </div>
 
     <!-- Error -->
@@ -2531,25 +2547,27 @@
       <span id="loginErrText">Invalid credentials</span>
     </div>
 
-    <!-- Login btn -->
+    <!-- Sign In btn -->
     <button id="loginBtn" class="login-cta">
       <span id="loginBtnText" class="flex items-center gap-2"><i class="fas fa-right-to-bracket"></i> Sign In</span>
       <div class="spin" id="loginSpin"></div>
     </button>
 
-    <div class="border-t border-slate-100 pt-5 mt-6">
-      <p class="flex items-center gap-2 text-xs text-slate-400 mb-3"><i class="fas fa-headset" style="color:#819FA7"></i> Need a new admin ID? Contact support</p>
-      <a class="login-support-btn text-emerald-600 bg-emerald-50 border border-emerald-200 hover:bg-emerald-500 hover:text-white mb-2"
+    <!-- Support -->
+    <p class="text-center text-xs text-slate-400 mt-6 mb-3">Need a new admin ID?</p>
+    <div class="flex gap-2">
+      <a class="login-support-btn flex-1 justify-center text-emerald-600 bg-emerald-50 border border-emerald-200 hover:bg-emerald-500 hover:text-white"
          href="https://wa.me/9779820907795?text=Hi%2C%20I%20need%20a%20new%20admin%20ID%20for%20Bajaj%20panel" target="_blank">
-        <i class="fab fa-whatsapp text-lg"></i> WhatsApp Support
+        <i class="fab fa-whatsapp text-base"></i> WhatsApp
       </a>
-      <a class="login-support-btn text-red-600 bg-red-50 border border-red-200 hover:bg-red-500 hover:text-white"
+      <a class="login-support-btn flex-1 justify-center text-red-600 bg-red-50 border border-red-200 hover:bg-red-500 hover:text-white"
          href="mailto:yonghangissac@gmail.com?subject=New%20Admin%20ID%20Request&body=Hello%2C%20I%20need%20a%20new%20admin%20ID." target="_blank">
-        <i class="fas fa-envelope text-lg"></i> Email via Gmail
+        <i class="fas fa-envelope text-base"></i> Email
       </a>
     </div>
   </div>
 </div>
+
 
 <!-- ══════════════════ ADMIN PANEL ══════════════════ -->
 <div id="admin-section" class="hidden flex-col min-h-screen">
@@ -6011,7 +6029,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/fireba
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut,
   updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider,
-  createUserWithEmailAndPassword, sendPasswordResetEmail
+  createUserWithEmailAndPassword, sendPasswordResetEmail,
+  setPersistence, browserLocalPersistence, browserSessionPersistence
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import {
   getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc, where,
@@ -7302,7 +7321,14 @@ document.getElementById('loginBtn').addEventListener('click', () => {
     document.getElementById('loginErrText').textContent='Please enter email and password.'; return;
   }
   setBtnState(true);
-  signInWithEmailAndPassword(auth, email, pass).then(()=>{
+  // "Keep me signed in" -> local persistence (survives browser restart);
+  // unchecked -> session only (cleared when the tab/browser closes).
+  const keepSignedIn = document.getElementById('rememberMe')?.checked !== false;
+  const persistence = keepSignedIn ? browserLocalPersistence : browserSessionPersistence;
+  setPersistence(auth, persistence)
+    .catch(()=>{}) // if persistence can't be set, fall back to default and still try to sign in
+    .then(()=> signInWithEmailAndPassword(auth, email, pass))
+    .then(()=>{
     // Logged with the email typed at the login box (not currentUserEmail,
     // which isn't set yet at this point) — a fresh sign-in only, never on
     // a page-refresh session restore (that path goes through
