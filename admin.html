@@ -2337,6 +2337,41 @@
   #secDashboard .sm-badge{ font-size:10px; font-weight:800; padding:3px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:.03em; }
   #secDashboard .sm-badge.in{ background:#E7F7EE; color:#0F9D58; }
   #secDashboard .sm-badge.out{ background:#FDEEEE; color:#E5484D; }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     STORAGE OVERVIEW — "Cloudly" redesign, per reference screenshot.
+     Same underlying data/logic as before (updateStorageOverview() still
+     computes the exact same rows[] array); only the render step now
+     splits that array across two containers — #storageQuotaCards (the
+     first few, as colourful pastel quota cards) and #storageFolderGrid
+     (the rest, as compact folder tiles) — instead of one plain list.
+     Every Master-only gate (totalStorageWrap, migrateStorageCard,
+     restoreBackupCard, docStorageSettingsBtn) is untouched. ────────── */
+  #secStorage .cloud-card{ background:#fff; border-radius:22px; border:1px solid #ECEDEF; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+  #secStorage .quota-card{ border-radius:20px; padding:16px; position:relative; overflow:hidden; }
+  #secStorage .quota-card .qc-icon{
+    width:34px; height:34px; border-radius:10px; background:rgba(255,255,255,.7); display:flex; align-items:center; justify-content:center;
+    margin-bottom:10px;
+  }
+  #secStorage .quota-card .qc-label{ font-size:11px; font-weight:700; color:#5B6272; }
+  #secStorage .quota-card .qc-count{ font-size:1.15rem; font-weight:800; color:#0B0D12; margin-top:1px; }
+  #secStorage .quota-card .qc-bar-track{ height:5px; border-radius:99px; background:rgba(11,13,18,.08); margin-top:12px; overflow:hidden; }
+  #secStorage .quota-card .qc-bar-fill{ height:100%; border-radius:99px; }
+  #secStorage .quota-card .qc-view{
+    display:flex; align-items:center; justify-content:space-between; margin-top:10px; font-size:11px; font-weight:700; color:#0B0D12;
+    cursor:pointer; opacity:.75; transition:opacity .15s;
+  }
+  #secStorage .quota-card .qc-view:hover{ opacity:1; }
+  #secStorage .folder-tile{
+    display:flex; align-items:center; gap:10px; background:#FAFAFB; border:1px solid #F0F1F3; border-radius:14px; padding:11px 13px; cursor:pointer;
+    transition:border-color .15s, transform .15s;
+  }
+  #secStorage .folder-tile:hover{ border-color:var(--brand); transform:translateY(-2px); }
+  #secStorage .folder-tile .ft-icon{ width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  #secStorage .folder-tile .ft-label{ font-size:12px; font-weight:700; color:#1F2430; }
+  #secStorage .folder-tile .ft-count{ font-size:10.5px; color:#8B93A3; font-weight:600; }
+  #secStorage .donut-wrap{ width:170px; height:170px; margin:0 auto; }
+  #secStorage .donut-legend-dot{ width:9px; height:9px; border-radius:50%; display:inline-block; flex-shrink:0; }
 </style>
 <!-- @page can't be scoped to a section (e.g. "#secSheetTool @page{}" is
      invalid CSS and browsers silently drop it) — it applies to the whole
@@ -4091,46 +4126,50 @@
 
     <!-- ═══ STORAGE ═══ -->
     <div class="sec-panel" id="secStorage">
-      <div class="mb-6">
-        <div class="eyebrow">Documents</div>
-        <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Storage <span class="text-amber-500">Overview</span></div>
-        <p class="text-sm text-slate-500 mt-1.5 max-w-lg">How everything on the free Firebase plan is being used — documents, price list, inventory, and the rest, all in one place.</p>
-        <div class="flex flex-wrap gap-2 mt-4">
-          <span id="storageHeadlineUsed" class="inline-flex items-center gap-1.5 bg-blue-50 text-bajaj-blue border border-blue-100 rounded-full px-3 py-1.5 text-[11px] font-bold"><i class="fas fa-database text-[10px]"></i> —</span>
-          <span id="storageHeadlineFree" class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full px-3 py-1.5 text-[11px] font-bold"><i class="fas fa-battery-half text-[10px]"></i> —</span>
-          <span id="storageHeadlineFiles" class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-600 border border-amber-100 rounded-full px-3 py-1.5 text-[11px] font-bold"><i class="fas fa-file-lines text-[10px]"></i> —</span>
+      <div class="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        <div>
+          <div class="eyebrow">Documents</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Storage <span class="text-amber-500">Overview</span></div>
+          <p class="text-sm text-slate-500 mt-1.5 max-w-lg">How everything on the free Firebase plan is being used — documents, price list, inventory, and the rest, all in one place.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <span id="storageHeadlineFiles" class="inline-flex items-center gap-1.5 bg-slate-50 text-slate-500 border border-slate-100 rounded-full px-3 py-1.5 text-[11px] font-bold"><i class="fas fa-file-lines text-[10px]"></i> —</span>
           <span id="storageHeadlineStatus" class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full px-3 py-1.5 text-[11px] font-bold"><i class="fas fa-circle-check text-[10px]"></i> —</span>
         </div>
       </div>
 
-      <div id="totalStorageWrap" class="hidden yng-card-shell p-6 mb-5 flex flex-col sm:flex-row items-center gap-6">
-        <div class="relative flex-shrink-0" style="width:130px;height:130px;">
-          <div id="storageRing" class="w-full h-full rounded-full flex items-center justify-center" style="background:conic-gradient(#005EA6 0deg, #E2E8F0 0deg);">
-            <div class="bg-white rounded-full flex flex-col items-center justify-center" style="width:96px;height:96px;">
-              <div id="storageRingPct" class="text-xl font-extrabold text-slate-800">0%</div>
-              <div class="text-[9px] text-slate-400 font-semibold uppercase tracking-wide">used</div>
+      <!-- Quota cards — the handful of categories that actually fill up -->
+      <div id="storageQuotaCards" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Left: everything else, Folders-style -->
+        <div class="lg:col-span-2 cloud-card p-6">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <div class="section-title text-xl">All Categories</div>
+            <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden items-center gap-1.5 px-2.5 h-7 rounded-md text-[11px] font-bold text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Storage and record limits"><i class="fas fa-sliders text-[10px]"></i> Limits</button>
+          </div>
+          <p class="text-[11px] text-slate-400 mb-4">What the Master ID has allowed for each category — and how much is actually being used right now.</p>
+          <div id="storageFolderGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+        </div>
+
+        <!-- Right: Storage Details donut (Master-only, same gate as before) -->
+        <div id="totalStorageWrap" class="hidden cloud-card p-6 text-center">
+          <div class="section-title text-xl mb-4">Storage Details</div>
+          <div class="donut-wrap relative">
+            <div id="storageRing" class="w-full h-full rounded-full flex items-center justify-center" style="background:conic-gradient(#005EA6 0deg, #E2E8F0 0deg);">
+              <div class="bg-white rounded-full flex flex-col items-center justify-center" style="width:122px;height:122px;">
+                <div id="storageRingPct" class="text-2xl font-extrabold text-slate-800">0%</div>
+                <div class="text-[9px] text-slate-400 font-semibold uppercase tracking-wide">used</div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="flex-1 text-center sm:text-left">
-          <div id="totalStorageLabel" class="text-lg font-extrabold text-slate-800 mb-1">0 MB / 0 MB</div>
-          <p class="text-xs text-slate-500 leading-relaxed mb-3">Google gives two separate no-cost allowances — one for records, one for files. The ring shows whichever is closest to its limit.</p>
+          <div id="totalStorageLabel" class="text-sm font-extrabold text-slate-800 mt-4 mb-1">0 MB / 0 MB</div>
+          <p class="text-[11px] text-slate-400 leading-relaxed mb-3">Two separate no-cost allowances — one for records, one for files.</p>
           <div id="storageQuotaBreakdown" class="text-left bg-slate-50 rounded-xl px-3 py-1 border border-slate-100"></div>
         </div>
       </div>
 
-      <div class="yng-card-shell p-5 mb-5">
-        <div class="flex items-center justify-between gap-2 mb-1">
-          <div class="text-xs font-bold text-slate-600"><i class="fas fa-chart-simple text-bajaj-blue mr-1"></i> Storage Allocation</div>
-          <div class="flex items-center gap-1">
-            <button id="docStorageSettingsBtn" onclick="openStorageCapModal()" class="hidden items-center gap-1.5 px-2 h-6 rounded-md text-[10px] font-bold text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="Storage and record limits"><i class="fas fa-sliders text-[10px]"></i> Limits</button>
-          </div>
-        </div>
-        <p class="text-[11px] text-slate-400 mb-4">What the Master ID has allowed for each category — and how much is actually being used right now.</p>
-        <div id="storageAllocationList" class="flex flex-col gap-4"></div>
-      </div>
-
-      <div id="migrateStorageCard" class="hidden yng-card-shell p-5 mb-5 border-2 border-amber-200 bg-amber-50/40">
+      <div id="migrateStorageCard" class="hidden cloud-card p-5 mt-5 border-2 border-amber-200 bg-amber-50/40">
         <div class="flex items-center gap-2 mb-1">
           <i class="fas fa-rocket text-amber-500"></i>
           <div class="text-xs font-bold text-slate-600">Speed Up Loading <span class="ml-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[9px] font-extrabold uppercase align-middle">Master Only</span></div>
@@ -4143,7 +4182,7 @@
         <div id="migrateStorageLog" class="hidden mt-3 text-[11px] text-slate-500 max-h-32 overflow-y-auto"></div>
       </div>
 
-      <div class="yng-card-shell p-5 mb-5">
+      <div class="cloud-card p-5 mt-5">
         <div class="flex items-center gap-2 mb-1">
           <i class="fas fa-cloud-arrow-down text-emerald-500"></i>
           <div class="text-xs font-bold text-slate-600">Full Data Backup</div>
@@ -16310,8 +16349,8 @@ function formatBytes(bytes){
 }
 
 async function updateStorageOverview(){
-  const list = document.getElementById('storageAllocationList');
-  if(!list) return;
+  const quotaCheck = document.getElementById('storageQuotaCards');
+  if(!quotaCheck) return;
   const invCount = await getAccurateTotalInventoryCount();
   const exCount = await getAccurateExchangeCount();
   const exSrCount = await getAccurateExchangeSrCount();
@@ -16349,61 +16388,74 @@ async function updateStorageOverview(){
   }
 
   const rows = [
-    { icon:'fa-folder-open', color:'#D97706', label:'Document Vault', usedBytes: used, maxBytes: STORAGE_CAP_BYTES,
+    { icon:'fa-folder-open', color:'#D97706', label:'Document Vault', usedBytes: used, maxBytes: STORAGE_CAP_BYTES, sec:'docs',
       sub: `${documents.length} file${documents.length!==1?'s':''} — ${formatBytes(used)} of ${formatBytes(STORAGE_CAP_BYTES)} allowed · ${Math.max(0, 100 - usedPctOfCap).toFixed(1)}% free` },
-    { icon:'fa-tags', color:'#005EA6', label:'Master Price List (Models)', count: allMasterBikes.length, maxCount: MAX_BIKES,
+    { icon:'fa-tags', color:'#005EA6', label:'Master Price List (Models)', count: allMasterBikes.length, maxCount: MAX_BIKES, sec:'price',
       usedBytes: allMasterBikes.length*RECORD_SIZE_ESTIMATE.bike, maxBytes: MAX_BIKES*RECORD_SIZE_ESTIMATE.bike,
       sub: `${allMasterBikes.length} / ${MAX_BIKES} models — up to ${formatBytes(MAX_BIKES*RECORD_SIZE_ESTIMATE.bike)} at full capacity` },
-    { icon:'fa-warehouse', color:'#059669', label:'All Inventory', count: invCount, maxCount: MAX_TOTAL_INVENTORY_UNITS,
+    { icon:'fa-warehouse', color:'#059669', label:'All Inventory', count: invCount, maxCount: MAX_TOTAL_INVENTORY_UNITS, sec:'allinv',
       usedBytes: invCount*RECORD_SIZE_ESTIMATE.inventoryUnit, maxBytes: MAX_TOTAL_INVENTORY_UNITS*RECORD_SIZE_ESTIMATE.inventoryUnit,
       sub: `${invCount} / ${MAX_TOTAL_INVENTORY_UNITS} units — up to ${formatBytes(MAX_TOTAL_INVENTORY_UNITS*RECORD_SIZE_ESTIMATE.inventoryUnit)} at full capacity` },
-    { icon:'fa-right-left', color:'#EA580C', label:'Exchange Stock (Mela + Showroom)', count: exCount+exSrCount, maxCount: MAX_EXCHANGE_STOCK,
+    { icon:'fa-right-left', color:'#EA580C', label:'Exchange Stock (Mela + Showroom)', count: exCount+exSrCount, maxCount: MAX_EXCHANGE_STOCK, sec:'exchange',
       usedBytes: (exCount+exSrCount)*RECORD_SIZE_ESTIMATE.exchangeUnit, maxBytes: MAX_EXCHANGE_STOCK*RECORD_SIZE_ESTIMATE.exchangeUnit,
       sub: `${exCount+exSrCount} / ${MAX_EXCHANGE_STOCK} units (${exCount} Mela + ${exSrCount} Showroom) — up to ${formatBytes(MAX_EXCHANGE_STOCK*RECORD_SIZE_ESTIMATE.exchangeUnit)} at full capacity` },
-    { icon:'fa-helmet-safety', color:'#7C3AED', label:'Accessories', count: accessories.length, maxCount: MAX_ACCESSORIES,
+    { icon:'fa-helmet-safety', color:'#7C3AED', label:'Accessories', count: accessories.length, maxCount: MAX_ACCESSORIES, sec:'acc',
       usedBytes: accessories.length*RECORD_SIZE_ESTIMATE.accessory, maxBytes: MAX_ACCESSORIES*RECORD_SIZE_ESTIMATE.accessory,
       sub: `${accessories.length} / ${MAX_ACCESSORIES} items — up to ${formatBytes(MAX_ACCESSORIES*RECORD_SIZE_ESTIMATE.accessory)} at full capacity` },
-    { icon:'fa-percent', color:'#DB2777', label:'Finance Schemes', count: financeSchemes.length, maxCount: MAX_FINANCE_SCHEMES,
+    { icon:'fa-percent', color:'#DB2777', label:'Finance Schemes', count: financeSchemes.length, maxCount: MAX_FINANCE_SCHEMES, sec:'fin',
       usedBytes: financeSchemes.length*RECORD_SIZE_ESTIMATE.financeScheme, maxBytes: MAX_FINANCE_SCHEMES*RECORD_SIZE_ESTIMATE.financeScheme,
       sub: `${financeSchemes.length} / ${MAX_FINANCE_SCHEMES} schemes — up to ${formatBytes(MAX_FINANCE_SCHEMES*RECORD_SIZE_ESTIMATE.financeScheme)} at full capacity` },
-    { icon:'fa-file-invoice', color:'#0EA5E9', label:'Chalan Records', count: chalanData.length, maxCount: MAX_CHALANS,
+    { icon:'fa-file-invoice', color:'#0EA5E9', label:'Chalan Records', count: chalanData.length, maxCount: MAX_CHALANS, sec:'chalans',
       usedBytes: chalanData.length*RECORD_SIZE_ESTIMATE.chalan, maxBytes: MAX_CHALANS*RECORD_SIZE_ESTIMATE.chalan,
       sub: `${chalanData.length} / ${MAX_CHALANS} records — auto-clears after 1 year` },
-    { icon:'fa-address-book', color:'#059669', label:'Important Info (Contacts/Links)', count: importantData.length, maxCount: MAX_IMPORTANT_INFO,
+    { icon:'fa-address-book', color:'#059669', label:'Important Info (Contacts/Links)', count: importantData.length, maxCount: MAX_IMPORTANT_INFO, sec:'important',
       usedBytes: importantData.length*RECORD_SIZE_ESTIMATE.chalan, maxBytes: MAX_IMPORTANT_INFO*RECORD_SIZE_ESTIMATE.chalan,
       sub: `${importantData.length} / ${MAX_IMPORTANT_INFO} entries` },
-    { icon:'fa-code-compare', color:'#7C3AED', label:'Model Aliases', count: modelAliasesData.length, maxCount: MAX_MODEL_ALIASES,
+    { icon:'fa-code-compare', color:'#7C3AED', label:'Model Aliases', count: modelAliasesData.length, maxCount: MAX_MODEL_ALIASES, sec:'modelAliases',
       usedBytes: modelAliasesData.length*RECORD_SIZE_ESTIMATE.chalan, maxBytes: MAX_MODEL_ALIASES*RECORD_SIZE_ESTIMATE.chalan,
       sub: `${modelAliasesData.length} / ${MAX_MODEL_ALIASES} aliases` },
-    { icon:'fa-calendar-days', color:'#DC2626', label:'Events', count: events.length, maxCount: MAX_EVENTS,
+    { icon:'fa-calendar-days', color:'#DC2626', label:'Events', count: events.length, maxCount: MAX_EVENTS, sec:'events',
       usedBytes: events.length*RECORD_SIZE_ESTIMATE.event, maxBytes: MAX_EVENTS*RECORD_SIZE_ESTIMATE.event,
       sub: `${events.length} / ${MAX_EVENTS} events` },
-    { icon:'fa-layer-group', color:'#0891B2', label:'Finance Categories', count: financeCategories.length, maxCount: MAX_FINANCE_CATEGORIES,
+    { icon:'fa-layer-group', color:'#0891B2', label:'Finance Categories', count: financeCategories.length, maxCount: MAX_FINANCE_CATEGORIES, sec:'fin',
       usedBytes: financeCategories.length*RECORD_SIZE_ESTIMATE.financeCategory, maxBytes: MAX_FINANCE_CATEGORIES*RECORD_SIZE_ESTIMATE.financeCategory,
       sub: `${financeCategories.length} / ${MAX_FINANCE_CATEGORIES} categories` },
-    { icon:'fa-warehouse', color:'#65A30D', label:'Storage Areas', count: stockAreas.length, maxCount: MAX_STOCK_AREAS,
+    { icon:'fa-warehouse', color:'#65A30D', label:'Storage Areas', count: stockAreas.length, maxCount: MAX_STOCK_AREAS, sec:'stock',
       usedBytes: stockAreas.length*RECORD_SIZE_ESTIMATE.stockArea, maxBytes: MAX_STOCK_AREAS*RECORD_SIZE_ESTIMATE.stockArea,
       sub: `${stockAreas.length} / ${MAX_STOCK_AREAS} areas` }
   ];
 
-  list.innerHTML = rows.map(r=>{
-    // Bar tracks whichever ceiling actually governs this category — count
-    // for the four record types (that's the real enforced limit), bytes
-    // for the Document Vault (which has no record-count cap, only a size one).
-    const pct = r.maxCount ? Math.min(100, (r.count/r.maxCount)*100) : Math.min(100, (r.usedBytes/r.maxBytes)*100);
-    const barColor = pct>=90 ? 'bg-red-500' : pct>=70 ? 'bg-amber-500' : 'bg-bajaj-blue';
-    return `<div>
-      <div class="flex items-center justify-between gap-2 mb-1">
-        <div class="flex items-center gap-2 min-w-0">
-          <div class="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style="background:${r.color}15"><i class="fas ${r.icon} text-xs" style="color:${r.color}"></i></div>
-          <span class="text-xs font-bold text-slate-700 truncate">${escapeHtml(r.label)}</span>
+  // Quota cards — the first four (the categories most likely to actually
+  // fill up day-to-day) as colourful pastel cards; the rest as compact
+  // folder tiles below. Same rows[] data either way, just two renderers.
+  const QUOTA_BG = ['#EAF3FB','#FDF2F8','#F5F3FF','#FFF7ED'];
+  const quotaEl = document.getElementById('storageQuotaCards');
+  if(quotaEl){
+    quotaEl.innerHTML = rows.slice(0,4).map((r,i)=>{
+      const pct = r.maxCount ? Math.min(100, (r.count/r.maxCount)*100) : Math.min(100, (r.usedBytes/r.maxBytes)*100);
+      const barColor = pct>=90 ? '#EF4444' : pct>=70 ? '#F59E0B' : r.color;
+      const countLabel = r.maxCount ? `${r.count} / ${r.maxCount}` : formatBytes(r.usedBytes);
+      return `<div class="quota-card" style="background:${QUOTA_BG[i%4]}">
+        <div class="qc-icon"><i class="fas ${r.icon}" style="color:${r.color}"></i></div>
+        <div class="qc-label">${escapeHtml(r.label.replace(/\s*\(.*\)$/,''))}</div>
+        <div class="qc-count">${countLabel}</div>
+        <div class="qc-bar-track"><div class="qc-bar-fill" style="width:${pct}%; background:${barColor}"></div></div>
+        <div class="qc-view" onclick="window.switchSec('${r.sec}')">View <i class="fas fa-arrow-right text-[9px]"></i></div>
+      </div>`;
+    }).join('');
+  }
+  const folderEl = document.getElementById('storageFolderGrid');
+  if(folderEl){
+    folderEl.innerHTML = rows.slice(4).map(r=>{
+      return `<div class="folder-tile" onclick="window.switchSec('${r.sec}')">
+        <div class="ft-icon" style="background:${r.color}15"><i class="fas ${r.icon}" style="color:${r.color}"></i></div>
+        <div class="min-w-0 flex-1">
+          <div class="ft-label truncate">${escapeHtml(r.label)}</div>
+          <div class="ft-count">${r.count}${r.maxCount ? ' / '+r.maxCount : ''} · ${formatBytes(r.usedBytes)}</div>
         </div>
-        <span class="text-xs font-extrabold text-slate-800 flex-shrink-0">${formatBytes(r.usedBytes)}</span>
-      </div>
-      <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-1"><div class="h-full ${barColor} rounded-full transition-all" style="width:${pct}%"></div></div>
-      <p class="text-[10.5px] text-slate-400 pl-9">${r.sub}</p>
-    </div>`;
-  }).join('');
+      </div>`;
+    }).join('');
+  }
 
   const totalWrap = document.getElementById('totalStorageWrap');
   const totalLabel = document.getElementById('totalStorageLabel');
@@ -16469,11 +16521,11 @@ async function updateStorageOverview(){
     if(breakdown){
       breakdown.innerHTML = `
         <div class="flex items-center justify-between gap-3 py-1.5">
-          <span class="text-[11px] font-bold text-slate-500"><i class="fas fa-database text-bajaj-blue mr-1.5"></i>Database (records)</span>
+          <span class="text-[11px] font-bold text-slate-500 flex items-center gap-1.5"><span class="donut-legend-dot" style="background:#005EA6"></span>Database (records)</span>
           <span class="text-[11px] font-mono text-slate-500">${formatBytes(firestoreBytes)} / ${formatBytes(FIRESTORE_FREE)} · ${fsPct<1?fsPct.toFixed(2):fsPct.toFixed(1)}%</span>
         </div>
         <div class="flex items-center justify-between gap-3 py-1.5 border-t border-slate-100">
-          <span class="text-[11px] font-bold text-slate-500"><i class="fas fa-cloud text-amber-500 mr-1.5"></i>File storage (documents)</span>
+          <span class="text-[11px] font-bold text-slate-500 flex items-center gap-1.5"><span class="donut-legend-dot" style="background:#F59E0B"></span>File storage (documents)</span>
           <span class="text-[11px] font-mono text-slate-500">${formatBytes(cloudBytes)} / ${formatBytes(CLOUD_STORAGE_FREE)} · ${csPct<1?csPct.toFixed(2):csPct.toFixed(1)}%</span>
         </div>`;
     }
