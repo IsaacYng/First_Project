@@ -275,6 +275,28 @@
     position:relative; overflow:hidden;
   }
   .login-ring{ position:absolute; border-radius:50%; border:1.5px solid rgba(91,110,116,0.14); pointer-events:none; }
+  /* Desktop brand hero (left) — hidden on mobile */
+  .login-hero-pc{ display:none; }
+  /* Card column — full-width centered on mobile */
+  .login-card-col{
+    position:relative; flex:1; display:flex; align-items:center; justify-content:center;
+    padding:32px 20px;
+  }
+  @media (min-width:1024px){
+    .login-hero-pc{
+      display:flex; flex:1; align-items:center; padding:56px;
+      position:relative; overflow:hidden;
+    }
+    .login-hero-pc-inner{ position:relative; z-index:2; max-width:460px; margin:0 auto; }
+    .login-illus-lg{ width:300px; height:190px; }
+    /* On desktop the card sits on a clean white panel, not a floating card */
+    .login-card-col{ flex:0 0 480px; background:#fff; box-shadow:-1px 0 0 rgba(91,110,116,.08); }
+    .login-card{
+      box-shadow:none; border:none; border-radius:0; padding:0; max-width:340px;
+    }
+    /* Illustration + brand already live in the hero on desktop */
+    .login-illus-mobile, .login-brand-mobile, .login-ring-mobile{ display:none; }
+  }
   .login-card{
     position:relative; z-index:2; width:100%; max-width:400px;
     background:#fff; border-radius:28px; padding:30px 28px 28px;
@@ -2459,55 +2481,94 @@
 </div>
 
 <!-- ══════════════════ LOGIN (photo-style — centered single column) ══════════════════ -->
-<div id="login-section" class="login-stage min-h-screen flex items-center justify-center px-5 py-8">
+<div id="login-section" class="login-stage min-h-screen flex">
 
-  <!-- soft decorative rings behind the card -->
-  <div class="login-ring w-[300px] h-[300px]" style="top:8%;left:-90px;"></div>
-  <div class="login-ring w-[220px] h-[220px]" style="bottom:6%;right:-70px;opacity:.6;"></div>
-
-  <div class="login-card">
-    <!-- Illustration -->
-    <div class="login-illus">
-      <svg viewBox="0 0 240 150" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <!-- backdrop panels -->
-        <rect x="70" y="14" width="96" height="70" rx="8" fill="#E7ECF1"/>
-        <rect x="82" y="26" width="72" height="6" rx="3" fill="#CFD9E0"/>
-        <rect x="82" y="38" width="52" height="5" rx="2.5" fill="#DCE1E7"/>
-        <rect x="82" y="48" width="60" height="5" rx="2.5" fill="#DCE1E7"/>
-        <!-- phone -->
-        <rect x="100" y="30" width="52" height="92" rx="10" fill="#3E4F55"/>
-        <rect x="106" y="40" width="40" height="72" rx="5" fill="#F3F5F9"/>
-        <!-- shield check on screen -->
-        <path d="M126 52l12 4v10c0 8-5.5 13-12 15-6.5-2-12-7-12-15V56l12-4z" fill="#819FA7"/>
-        <path d="M121 66l4 4 7-7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-        <!-- dots (passcode) -->
-        <circle cx="115" cy="98" r="2.4" fill="#819FA7"/><circle cx="123" cy="98" r="2.4" fill="#819FA7"/>
-        <circle cx="131" cy="98" r="2.4" fill="#CFD9E0"/><circle cx="139" cy="98" r="2.4" fill="#CFD9E0"/>
-        <!-- person seated, right -->
-        <circle cx="182" cy="96" r="9" fill="#5B6E74"/>
-        <path d="M166 128c0-11 8-18 16-18s16 7 16 18z" fill="#5B6E74"/>
-        <!-- plant, left -->
-        <path d="M60 122c-6-4-9-12-8-20 6 2 11 8 11 16" fill="#819FA7"/>
-        <path d="M60 122c4-6 11-9 18-8-3 6-9 10-16 10" fill="#647E86"/>
-        <rect x="54" y="120" width="16" height="12" rx="2" fill="#45555A"/>
-        <!-- envelope, top-left of phone -->
-        <rect x="150" y="40" width="26" height="18" rx="3" fill="#fff" stroke="#CFD9E0" stroke-width="1.4"/>
-        <path d="M150 42l13 9 13-9" stroke="#819FA7" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-        <!-- ground line -->
-        <rect x="40" y="130" width="160" height="3" rx="1.5" fill="#E7ECF1"/>
-      </svg>
-    </div>
-
-    <!-- Logo + brand -->
-    <div class="flex items-center justify-center gap-2.5 mb-5">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0" style="background:#3E4F55">
-        <i class="fas fa-motorcycle text-sm"></i>
+  <!-- Left brand hero — desktop only -->
+  <div class="login-hero-pc">
+    <div class="login-ring w-[420px] h-[420px]" style="top:50%;left:-140px;transform:translateY(-50%);"></div>
+    <div class="login-ring w-[300px] h-[300px]" style="top:50%;left:-80px;transform:translateY(-50%);opacity:.6;"></div>
+    <div class="login-hero-pc-inner">
+      <div class="login-illus-lg">
+        <svg viewBox="0 0 240 150" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="70" y="14" width="96" height="70" rx="8" fill="#DCE6EC"/>
+          <rect x="82" y="26" width="72" height="6" rx="3" fill="#B9CAD2"/>
+          <rect x="82" y="38" width="52" height="5" rx="2.5" fill="#CBD9DF"/>
+          <rect x="82" y="48" width="60" height="5" rx="2.5" fill="#CBD9DF"/>
+          <rect x="100" y="30" width="52" height="92" rx="10" fill="#3E4F55"/>
+          <rect x="106" y="40" width="40" height="72" rx="5" fill="#F3F5F9"/>
+          <path d="M126 52l12 4v10c0 8-5.5 13-12 15-6.5-2-12-7-12-15V56l12-4z" fill="#819FA7"/>
+          <path d="M121 66l4 4 7-7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="115" cy="98" r="2.4" fill="#819FA7"/><circle cx="123" cy="98" r="2.4" fill="#819FA7"/>
+          <circle cx="131" cy="98" r="2.4" fill="#CBD9DF"/><circle cx="139" cy="98" r="2.4" fill="#CBD9DF"/>
+          <circle cx="182" cy="96" r="9" fill="#5B6E74"/>
+          <path d="M166 128c0-11 8-18 16-18s16 7 16 18z" fill="#5B6E74"/>
+          <path d="M60 122c-6-4-9-12-8-20 6 2 11 8 11 16" fill="#819FA7"/>
+          <path d="M60 122c4-6 11-9 18-8-3 6-9 10-16 10" fill="#647E86"/>
+          <rect x="54" y="120" width="16" height="12" rx="2" fill="#45555A"/>
+          <rect x="150" y="40" width="26" height="18" rx="3" fill="#fff" stroke="#CBD9DF" stroke-width="1.4"/>
+          <path d="M150 42l13 9 13-9" stroke="#819FA7" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+          <rect x="40" y="130" width="160" height="3" rx="1.5" fill="#DCE6EC"/>
+        </svg>
       </div>
-      <div class="text-left">
-        <div class="font-display text-lg tracking-widest leading-none" style="color:#0D0D0D">SAMRIDDHI <span style="color:#819FA7">ADMIN</span></div>
-        <div class="text-[9px] text-slate-400 tracking-widest uppercase mt-0.5">Bajaj Authorized Dealer Panel</div>
+      <div class="flex items-center gap-2.5 mt-8 mb-4">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0" style="background:#3E4F55">
+          <i class="fas fa-motorcycle"></i>
+        </div>
+        <div class="font-display text-2xl tracking-widest leading-none" style="color:#0D0D0D">SAMRIDDHI <span style="color:#819FA7">ADMIN</span></div>
+      </div>
+      <h1 class="section-title text-[clamp(2rem,3vw,2.8rem)]" style="color:#0D0D0D">Dealer Console</h1>
+      <p class="text-slate-500 text-sm leading-relaxed mt-3 max-w-sm">
+        Live pricing, inventory and finance for Samriddhi And Brothers — in one secure panel. Access is limited to authorized dealership staff, and every change is logged.
+      </p>
+      <div class="flex flex-col gap-2.5 mt-7 max-w-xs">
+        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-lock w-4 text-center" style="color:#5B6E74"></i> Encrypted sign-in via Firebase Auth</div>
+        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-user-shield w-4 text-center" style="color:#5B6E74"></i> Approved admin accounts only</div>
+        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-clock-rotate-left w-4 text-center" style="color:#5B6E74"></i> Real-time, timestamped changes</div>
       </div>
     </div>
+  </div>
+
+  <!-- Card column — full width on mobile, right panel on desktop -->
+  <div class="login-card-col">
+    <!-- soft rings behind the card (mobile) -->
+    <div class="login-ring login-ring-mobile w-[300px] h-[300px]" style="top:6%;left:-90px;"></div>
+    <div class="login-ring login-ring-mobile w-[220px] h-[220px]" style="bottom:6%;right:-70px;opacity:.6;"></div>
+
+    <div class="login-card">
+      <!-- Illustration (mobile-only; desktop shows it in the hero) -->
+      <div class="login-illus login-illus-mobile">
+        <svg viewBox="0 0 240 150" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="70" y="14" width="96" height="70" rx="8" fill="#E7ECF1"/>
+          <rect x="82" y="26" width="72" height="6" rx="3" fill="#CFD9E0"/>
+          <rect x="82" y="38" width="52" height="5" rx="2.5" fill="#DCE1E7"/>
+          <rect x="82" y="48" width="60" height="5" rx="2.5" fill="#DCE1E7"/>
+          <rect x="100" y="30" width="52" height="92" rx="10" fill="#3E4F55"/>
+          <rect x="106" y="40" width="40" height="72" rx="5" fill="#F3F5F9"/>
+          <path d="M126 52l12 4v10c0 8-5.5 13-12 15-6.5-2-12-7-12-15V56l12-4z" fill="#819FA7"/>
+          <path d="M121 66l4 4 7-7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="115" cy="98" r="2.4" fill="#819FA7"/><circle cx="123" cy="98" r="2.4" fill="#819FA7"/>
+          <circle cx="131" cy="98" r="2.4" fill="#CFD9E0"/><circle cx="139" cy="98" r="2.4" fill="#CFD9E0"/>
+          <circle cx="182" cy="96" r="9" fill="#5B6E74"/>
+          <path d="M166 128c0-11 8-18 16-18s16 7 16 18z" fill="#5B6E74"/>
+          <path d="M60 122c-6-4-9-12-8-20 6 2 11 8 11 16" fill="#819FA7"/>
+          <path d="M60 122c4-6 11-9 18-8-3 6-9 10-16 10" fill="#647E86"/>
+          <rect x="54" y="120" width="16" height="12" rx="2" fill="#45555A"/>
+          <rect x="150" y="40" width="26" height="18" rx="3" fill="#fff" stroke="#CFD9E0" stroke-width="1.4"/>
+          <path d="M150 42l13 9 13-9" stroke="#819FA7" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+          <rect x="40" y="130" width="160" height="3" rx="1.5" fill="#E7ECF1"/>
+        </svg>
+      </div>
+
+      <!-- Logo + brand (mobile-only) -->
+      <div class="login-brand-mobile flex items-center justify-center gap-2.5 mb-5">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0" style="background:#3E4F55">
+          <i class="fas fa-motorcycle text-sm"></i>
+        </div>
+        <div class="text-left">
+          <div class="font-display text-lg tracking-widest leading-none" style="color:#0D0D0D">SAMRIDDHI <span style="color:#819FA7">ADMIN</span></div>
+          <div class="text-[9px] text-slate-400 tracking-widest uppercase mt-0.5">Bajaj Authorized Dealer Panel</div>
+        </div>
+      </div>
 
     <h2 class="section-title text-4xl text-center" style="color:#0D0D0D">Login</h2>
     <p class="text-sm text-slate-500 mt-1 mb-7 text-center">Please sign in to continue.</p>
@@ -2565,6 +2626,7 @@
         <i class="fas fa-envelope text-base"></i> Email
       </a>
     </div>
+  </div>
   </div>
 </div>
 
