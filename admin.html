@@ -15503,7 +15503,7 @@ window.calculateFinance=function(){
   const activeInsurance=(typeof insuranceType!=='undefined' && insuranceType==='outdoor') ? financeInsurance : cashInsurance;
   const discount=getVal('discountInput');
   const customerExtraAdv=getVal('advEmiInput');
-  const namsari=getVal('namsariInput',3000);
+  const namsari=getVal('fin_namsariInput',3000);
   // Category filtering already decides which accessory rows even exist in
   // the DOM (renderAccessoryFields) — every accessory configured for this
   // bike's category applies to every bike in that category.
@@ -15511,8 +15511,8 @@ window.calculateFinance=function(){
   const accCost=Array.from(document.querySelectorAll('#fin_accDynamicGrid input[data-acc-name]')).reduce((sum,el)=>{
     return sum+(parseFloat(el.value)||0);
   },0)+getVal('othersInput');
-  const dpPercentVal=getVal('dpPercent',50);
-  const tenure=getVal('tenure',60);
+  const dpPercentVal=getVal('fin_dpPercent',50);
+  const tenure=getVal('fin_tenure',60);
 
   const afterDiscount=mrp-discount;
   const dpAmountOnly=afterDiscount*(dpPercentVal/100);
