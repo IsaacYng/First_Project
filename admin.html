@@ -8605,7 +8605,7 @@ function renderDashboard(){
       topModelsEl.innerHTML = `<div class="py-8 text-center text-slate-400 text-sm">No sales yet.</div>`;
     } else {
       topModelsEl.innerHTML = top.map(([model,count])=>{
-        const avail = [...invData, ...hhInvData].filter(u=>u.model===model && u.status==='Available').length;
+        const avail = [...invData.filter(u=>!u.hhFlag), ...hhInvData].filter(u=>u.model===model && u.status==='Available').length;
         const price = priceOfSM(model);
         const color = AVATAR_COLORS[[...model].reduce((s,c)=>s+c.charCodeAt(0),0) % AVATAR_COLORS.length];
         return `<div class="sm-product-row">
@@ -18490,7 +18490,7 @@ document.getElementById('hhExcelFileInput').addEventListener('change', function(
 
       hhExcelParsedRows = aoa.slice(1).map(r=>{
         const ownerRaw = colIdx.owner!==-1 ? (r[colIdx.owner]||'').toString().trim() : '';
-        let owner = 'dealer', ownerName = '';
+        let owner = 'hh', ownerName = ''; // Importing into HH Inventory specifically, so a blank Owner column should default to HH, not Dealer
         if(ownerRaw){
           if(/^hh$/i.test(ownerRaw)) owner = 'hh';
           else if(/^dealer$/i.test(ownerRaw)) owner = 'dealer';
@@ -18580,7 +18580,7 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
         regNo: row.regNo || '',
         color: row.color,
         eventName: row.eventName || '',
-        owner: row.owner || 'dealer',
+        owner: row.owner || 'hh',
         ownerName: row.ownerName || '',
         status: 'Available',
         customerName: '',
