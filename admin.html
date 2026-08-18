@@ -4152,20 +4152,39 @@
           <div id="storageFolderGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
         </div>
 
-        <!-- Right: Storage Details donut (Master-only, same gate as before) -->
-        <div id="totalStorageWrap" class="hidden cloud-card p-6 text-center">
-          <div class="section-title text-xl mb-4">Storage Details</div>
-          <div class="donut-wrap relative">
-            <div id="storageRing" class="w-full h-full rounded-full flex items-center justify-center" style="background:conic-gradient(#005EA6 0deg, #E2E8F0 0deg);">
-              <div class="bg-white rounded-full flex flex-col items-center justify-center" style="width:122px;height:122px;">
-                <div id="storageRingPct" class="text-2xl font-extrabold text-slate-800">0%</div>
-                <div class="text-[9px] text-slate-400 font-semibold uppercase tracking-wide">used</div>
+        <!-- Right column: quick summary (everyone) + Storage Details donut (Master-only) -->
+        <div class="flex flex-col gap-5">
+          <div class="cloud-card p-6 text-center">
+            <div class="section-title text-xl mb-4">At a Glance</div>
+            <div class="donut-wrap relative" style="width:120px;height:120px">
+              <div id="storageQuickRing" class="w-full h-full rounded-full flex items-center justify-center" style="background:conic-gradient(#D97706 0deg, #E2E8F0 0deg);">
+                <div class="bg-white rounded-full flex flex-col items-center justify-center" style="width:88px;height:88px;">
+                  <div id="storageQuickPct" class="text-lg font-extrabold text-slate-800">0%</div>
+                  <div class="text-[8px] text-slate-400 font-semibold uppercase tracking-wide">used</div>
+                </div>
               </div>
             </div>
+            <div id="storageQuickLabel" class="text-sm font-extrabold text-slate-800 mt-4 mb-0.5">0 MB / 0 MB</div>
+            <div class="text-[10.5px] text-slate-400 mb-4">Document Vault allowance</div>
+            <div id="storageQuickStatus" class="text-[11px] font-bold rounded-full px-3 py-1.5 inline-block mb-3">—</div>
+            <div id="storageQuickFiles" class="text-[11px] text-slate-400">—</div>
           </div>
-          <div id="totalStorageLabel" class="text-sm font-extrabold text-slate-800 mt-4 mb-1">0 MB / 0 MB</div>
-          <p class="text-[11px] text-slate-400 leading-relaxed mb-3">Two separate no-cost allowances — one for records, one for files.</p>
-          <div id="storageQuotaBreakdown" class="text-left bg-slate-50 rounded-xl px-3 py-1 border border-slate-100"></div>
+
+          <!-- Storage Details donut (Master-only, same gate as before) -->
+          <div id="totalStorageWrap" class="hidden cloud-card p-6 text-center">
+            <div class="section-title text-xl mb-4">Storage Details</div>
+            <div class="donut-wrap relative">
+              <div id="storageRing" class="w-full h-full rounded-full flex items-center justify-center" style="background:conic-gradient(#005EA6 0deg, #E2E8F0 0deg);">
+                <div class="bg-white rounded-full flex flex-col items-center justify-center" style="width:122px;height:122px;">
+                  <div id="storageRingPct" class="text-2xl font-extrabold text-slate-800">0%</div>
+                  <div class="text-[9px] text-slate-400 font-semibold uppercase tracking-wide">used</div>
+                </div>
+              </div>
+            </div>
+            <div id="totalStorageLabel" class="text-sm font-extrabold text-slate-800 mt-4 mb-1">0 MB / 0 MB</div>
+            <p class="text-[11px] text-slate-400 leading-relaxed mb-3">Two separate no-cost allowances — one for records, one for files.</p>
+            <div id="storageQuotaBreakdown" class="text-left bg-slate-50 rounded-xl px-3 py-1 border border-slate-100"></div>
+          </div>
         </div>
       </div>
 
@@ -16387,6 +16406,29 @@ async function updateStorageOverview(){
     headStatus.innerHTML = `<i class="fas ${cfg.icon} text-[10px]"></i> ${cfg.text}`;
   }
 
+  // "At a Glance" — visible to every role, unlike the Master-only donut
+  // below it, so the right column is never an empty gap for Staff/
+  // Recondition IDs. Same numbers as the Document Vault quota card up
+  // top, just given room to breathe with a ring + status line.
+  {
+    const near2 = usedPctOfCap >= 90 ? 'full' : usedPctOfCap >= 70 ? 'filling' : 'ok';
+    const cfg2 = {
+      ok:      { cls:'bg-emerald-50 text-emerald-600', color:'#059669', text:'Healthy — plenty of room left' },
+      filling: { cls:'bg-amber-50 text-amber-600',     color:'#F59E0B', text:'Filling up — clear old files soon' },
+      full:    { cls:'bg-red-50 text-red-600',          color:'#EF4444', text:'Almost full — clear space now' }
+    }[near2];
+    const qRing = document.getElementById('storageQuickRing');
+    if(qRing) qRing.style.background = `conic-gradient(${cfg2.color} ${Math.min(100,usedPctOfCap)*3.6}deg, #E2E8F0 ${Math.min(100,usedPctOfCap)*3.6}deg)`;
+    const qPct = document.getElementById('storageQuickPct');
+    if(qPct) qPct.textContent = `${usedPctOfCap < 1 ? usedPctOfCap.toFixed(1) : Math.round(usedPctOfCap)}%`;
+    const qLabel = document.getElementById('storageQuickLabel');
+    if(qLabel) qLabel.textContent = `${formatBytes(used)} / ${formatBytes(STORAGE_CAP_BYTES)}`;
+    const qStatus = document.getElementById('storageQuickStatus');
+    if(qStatus){ qStatus.className = `text-[11px] font-bold rounded-full px-3 py-1.5 inline-block mb-3 ${cfg2.cls}`; qStatus.textContent = cfg2.text; }
+    const qFiles = document.getElementById('storageQuickFiles');
+    if(qFiles) qFiles.textContent = `${documents.length} file${documents.length!==1?'s':''} stored · ${formatBytes(Math.max(0, STORAGE_CAP_BYTES - used))} free`;
+  }
+
   const rows = [
     { icon:'fa-folder-open', color:'#D97706', label:'Document Vault', usedBytes: used, maxBytes: STORAGE_CAP_BYTES, sec:'docs',
       sub: `${documents.length} file${documents.length!==1?'s':''} — ${formatBytes(used)} of ${formatBytes(STORAGE_CAP_BYTES)} allowed · ${Math.max(0, 100 - usedPctOfCap).toFixed(1)}% free` },
@@ -16434,7 +16476,7 @@ async function updateStorageOverview(){
     quotaEl.innerHTML = rows.slice(0,4).map((r,i)=>{
       const pct = r.maxCount ? Math.min(100, (r.count/r.maxCount)*100) : Math.min(100, (r.usedBytes/r.maxBytes)*100);
       const barColor = pct>=90 ? '#EF4444' : pct>=70 ? '#F59E0B' : r.color;
-      const countLabel = r.maxCount ? `${r.count} / ${r.maxCount}` : formatBytes(r.usedBytes);
+      const countLabel = r.maxCount ? `${r.count} / ${r.maxCount}` : `${formatBytes(r.usedBytes)} / ${formatBytes(r.maxBytes)}`;
       return `<div class="quota-card" style="background:${QUOTA_BG[i%4]}">
         <div class="qc-icon"><i class="fas ${r.icon}" style="color:${r.color}"></i></div>
         <div class="qc-label">${escapeHtml(r.label.replace(/\s*\(.*\)$/,''))}</div>
@@ -16466,6 +16508,7 @@ async function updateStorageOverview(){
   // actually loaded before it draws numbers from them.
   ensureSectionData('trash');
   ensureSectionData('stock');
+  ensureSectionData('important');
   refreshMigrationCard();
   const restoreCard = document.getElementById('restoreBackupCard');
   if(restoreCard) restoreCard.classList.toggle('hidden', currentUserRole !== 'owner');
@@ -17919,6 +17962,7 @@ function loadImportantInfo(){
   importantUnsub = onSnapshot(q, snap=>{
     importantData = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderImportantList();
+    if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err=>console.error('important_info listener failed', err));
 }
 
