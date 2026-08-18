@@ -2295,86 +2295,48 @@
   .jrp-area-grid td.left{ text-align:left; }
 
   /* ═══════════════════════════════════════════════════════════════════
-     DASHBOARD — "Instrument Cluster" redesign
-     Subject: a motorcycle dealership's daily landing page. The old
-     version was a generic gray SaaS card-grid with no connection to
-     what this business actually sells. This reskins it as a bike
-     instrument cluster — the one screen a rider already reads at a
-     glance — while leaving every #dash*/#greeting* id untouched, so
-     renderDashboard()/renderGreeting()/renderSalesTrendChart() need
-     zero JS changes. Only new wrapper markup + scoped overrides for
-     the innerHTML those functions already inject. ─────────────────── */
-  #secDashboard{ --cluster-navy:#0B2540; --cluster-navy2:#123A63; --lcd:#EEF2ED; --lcd-line:#CFE0D8; }
-
-  /* Masthead — greeting reads like the cluster's welcome LCD */
-  #secDashboard .cluster-mast{
-    background:linear-gradient(135deg,var(--cluster-navy),var(--cluster-navy2));
-    border-radius:18px; padding:16px 20px; display:flex; align-items:center; gap:14px;
-    box-shadow:0 10px 30px rgba(11,37,64,.25), inset 0 0 0 1px rgba(255,255,255,.06);
-    position:relative; overflow:hidden;
+     DASHBOARD — "Soft Minimal" redesign (round 2, per reference image)
+     Big bold black numbers, soft rounded-3xl white cards on a light-gray
+     canvas, colour used only for trend pills + one gradient chart bar.
+     Every #dash*/#greeting id is untouched so renderGreeting() keeps
+     working; renderDashboard()/renderSalesTrendChart() got a few small,
+     additive JS blocks (trend %, recent-customer avatars, top models) —
+     nothing existing was removed, just new ids appended into. ─────── */
+  #secDashboard{ --sm-bg:#F2F3F5; }
+  #secDashboard .sm-card{ background:#fff; border-radius:24px; border:1px solid #ECEDEF; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+  #secDashboard .sm-stat-value{ font-family:'DM Sans',sans-serif; font-weight:800; font-size:2.75rem; line-height:1; color:#0B0D12; letter-spacing:-0.02em; }
+  #secDashboard .sm-trend{ display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:700; padding:4px 9px; border-radius:999px; }
+  #secDashboard .sm-trend.up{ background:#E7F7EE; color:#0F9D58; }
+  #secDashboard .sm-trend.down{ background:#FDEEEE; color:#E5484D; }
+  #secDashboard .sm-avatar{
+    width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:800; font-size:15px; flex-shrink:0; border:2.5px solid #fff; box-shadow:0 0 0 1px #ECEDEF;
   }
-  #secDashboard .cluster-mast::before{
-    content:''; position:absolute; inset:0;
-    background:radial-gradient(140px 70px at 12% 0%, rgba(255,255,255,.08), transparent 70%);
-    pointer-events:none;
+  #secDashboard .sm-avatar-ring{ display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; }
+  #secDashboard .sm-avatar-ring .sm-avatar-name{ font-size:11px; font-weight:700; color:#5B6272; }
+  #secDashboard .sm-view-all{
+    width:52px; height:52px; border-radius:50%; border:1.5px dashed #D5D9E0; display:flex; align-items:center; justify-content:center;
+    color:#8B93A3; transition:border-color .18s, color .18s;
   }
-  #secDashboard #greetingIcon{
-    width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,.08);
-    border:1.5px solid rgba(255,255,255,.18); color:#F59E0B; display:flex; align-items:center; justify-content:center;
-    font-size:15px; flex-shrink:0; box-shadow:inset 0 0 14px rgba(245,158,11,.35);
+  #secDashboard .sm-avatar-ring:hover .sm-view-all{ border-color:var(--brand); color:var(--brand); border-style:solid; }
+  #secDashboard .sm-chart-total{ font-family:'DM Sans',sans-serif; font-weight:800; font-size:2.6rem; letter-spacing:-0.02em; color:#D8DCE2; }
+  #secDashboard #dashSalesTrendChart .bg-bajaj-blue{
+    background:linear-gradient(180deg,#37D67A,#0F9D58) !important; border-radius:10px 10px 4px 4px !important; position:relative;
   }
-  #secDashboard #greetingText{ color:#fff; font-size:14px; font-weight:800; letter-spacing:.01em; }
-  #secDashboard #greetingDate{ color:rgba(255,255,255,.55); font-size:11px; font-weight:700; letter-spacing:.04em; margin-top:1px; }
-
-  /* Needs Attention — idiot-light row: dim until something needs it */
-  #secDashboard .lamp-row{ display:flex; flex-wrap:wrap; gap:10px; }
-  #secDashboard .lamp{
-    display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid var(--border);
-    border-radius:12px; padding:10px 16px; cursor:pointer; transition:border-color .2s, box-shadow .2s;
+  #secDashboard #dashSalesTrendChart .bg-blue-200{ background:#EAEBEF !important; border-radius:10px 10px 4px 4px !important; }
+  #secDashboard #dashSalesTrendChart > div > div:last-child span.text-xs{
+    background:#0B0D12; color:#fff; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px;
+    padding:4px 9px; border-radius:8px; margin-bottom:2px;
   }
-  #secDashboard .lamp:hover{ border-color:#F59E0B; box-shadow:0 6px 18px rgba(245,158,11,.15); }
-  #secDashboard .lamp-dot{
-    width:11px; height:11px; border-radius:50%; background:#F59E0B; flex-shrink:0;
-    box-shadow:0 0 0 4px rgba(245,158,11,.18), 0 0 10px rgba(245,158,11,.7);
-    animation:lampGlow 1.8s ease-in-out infinite;
+  #secDashboard .sm-product-row{ display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #F3F4F6; }
+  #secDashboard .sm-product-row:last-child{ border-bottom:none; }
+  #secDashboard .sm-product-icon{
+    width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:14px; flex-shrink:0;
   }
-  @keyframes lampGlow{0%,100%{opacity:1}50%{opacity:.55}}
-  #secDashboard .lamp-label{ font-size:11px; font-weight:800; color:#B4740E; text-transform:uppercase; letter-spacing:.06em; }
-  #secDashboard .lamp-count{ font-family:'JetBrains Mono',monospace; font-weight:800; font-size:15px; color:#1F2430; margin-left:2px; }
-
-  /* Gauge panels — the 5 stat tiles read like small LCD gauge faces */
-  #secDashboard .gauge-panel{
-    background:var(--lcd); border:1.5px solid var(--lcd-line); border-radius:14px; padding:14px;
-    cursor:pointer; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-    box-shadow:inset 0 1px 3px rgba(11,37,64,.06);
-  }
-  #secDashboard .gauge-panel:hover{ transform:translateY(-3px); border-color:var(--brand); box-shadow:inset 0 1px 3px rgba(11,37,64,.06), 0 10px 24px rgba(0,94,166,.14); }
-  #secDashboard .gauge-panel .gauge-icon{
-    width:30px; height:30px; border-radius:8px; background:#fff; border:1px solid var(--lcd-line);
-    display:flex; align-items:center; justify-content:center; margin-bottom:8px;
-  }
-  #secDashboard .gauge-panel .gauge-label{ font-size:10px; font-weight:800; color:#5B7267; text-transform:uppercase; letter-spacing:.08em; }
-  #secDashboard .gauge-panel .gauge-value{
-    font-family:'JetBrains Mono',monospace; font-weight:800; font-size:1.7rem; color:var(--cluster-navy);
-    letter-spacing:.01em; margin-top:2px; font-variant-numeric:tabular-nums;
-  }
-
-  /* Lower cards — thin blue top trim instead of a plain header rule */
-  #secDashboard .cluster-card{ border-top:3px solid var(--brand) !important; }
-
-  /* Sales trend bars — reuses the exact classes renderSalesTrendChart()
-     already writes (bg-bajaj-blue / bg-blue-200), just repaints them */
-  #secDashboard #dashSalesTrendChart .bg-bajaj-blue{ background:linear-gradient(180deg,#0B84E0,var(--brand)) !important; }
-  #secDashboard #dashSalesTrendChart .bg-blue-200{ background:#E4ECF3 !important; }
-  #secDashboard #dashSalesTrendChart span.text-xs{ font-family:'JetBrains Mono',monospace; }
-
-  /* Business Summary — money figures get the same digital-readout type
-     as the gauge tiles above */
-  #secDashboard #dashBusinessSummary .text-lg.font-black{ font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; }
-
-  /* Recent Activity — quiet left rail instead of a floating dot */
-  #secDashboard #dashRecentActivity > div{ border-left:2.5px solid var(--brand-soft-border); padding-left:14px !important; }
-  #secDashboard #dashRecentActivity .fa-circle{ display:none; }
+  #secDashboard .sm-badge{ font-size:10px; font-weight:800; padding:3px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:.03em; }
+  #secDashboard .sm-badge.in{ background:#E7F7EE; color:#0F9D58; }
+  #secDashboard .sm-badge.out{ background:#FDEEEE; color:#E5484D; }
 </style>
 <!-- @page can't be scoped to a section (e.g. "#secSheetTool @page{}" is
      invalid CSS and browsers silently drop it) — it applies to the whole
@@ -2712,106 +2674,105 @@
 
     <!-- ═══ DASHBOARD ═══ -->
     <div class="sec-panel active" id="secDashboard">
-      <!-- Masthead — bezel strip; renderGreeting() only ever touches the
-           text inside these three ids, never this wrapper, so it keeps
-           working unmodified. -->
-      <div id="greetingBanner" class="cluster-mast mb-5">
-        <div id="greetingIcon"><i class="fas fa-sun"></i></div>
-        <div>
-          <div id="greetingText">Good Morning, Admin!</div>
-          <div id="greetingDate"></div>
+      <!-- Greeting — renderGreeting() only ever touches text inside these
+           three ids, never this wrapper. -->
+      <div id="greetingBanner" class="mb-5">
+        <div id="greetingIcon" class="hidden"><i class="fas fa-sun"></i></div>
+        <div id="greetingText" class="section-title text-3xl leading-none">Good Morning, Admin!</div>
+        <div id="greetingDate" class="text-sm text-slate-400 font-semibold mt-1"></div>
+      </div>
+
+      <!-- Needs Attention — quiet until there's actually something to act on -->
+      <div id="dashAttentionWrap" class="hidden mb-5">
+        <div id="dashMismatchAlertCard" class="hidden sm-card p-4 flex items-center gap-3 cursor-pointer" style="border-left:3px solid #F59E0B" onclick="window.switchSec('modelAliases')">
+          <div class="w-9 h-9 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-code-compare text-amber-600 text-sm"></i></div>
+          <div class="flex-1">
+            <div class="text-sm font-bold text-slate-800">Model Mismatches need review</div>
+            <div class="text-[11px] text-slate-400">Tap to open Model Aliases</div>
+          </div>
+          <div class="text-2xl font-black text-slate-800" id="dashMismatchCount">0</div>
         </div>
       </div>
 
-      <div class="mb-6">
-        <div class="eyebrow">Overview</div>
-        <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Dashboard</div>
-        <p class="text-sm text-slate-500 mt-1.5">Everything at a glance.</p>
-      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Left column -->
+        <div class="lg:col-span-2 flex flex-col gap-5">
 
-      <!-- Quick Actions -->
-      <div class="flex gap-2.5 flex-wrap mb-6">
-        <button onclick="window.switchSec('inv');window.openInvFormModal&&window.openInvFormModal()" class="flex items-center gap-2 px-4 py-2.5 bg-bajaj-blue text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all">
-          <i class="fas fa-plus"></i> Add Unit
-        </button>
-        <button onclick="window.switchSec('exchange');window.openExchangeFormModal&&window.openExchangeFormModal()" class="flex items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
-          <i class="fas fa-right-left"></i> Add Exchange Unit
-        </button>
-        <button onclick="window.switchSec('chalans')" class="flex items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
-          <i class="fas fa-file-invoice"></i> Chalan Records
-        </button>
-        <button onclick="window.switchSec('customers')" class="flex items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
-          <i class="fas fa-address-card"></i> Customers
-        </button>
-      </div>
+          <!-- Overview -->
+          <div class="sm-card p-6">
+            <div class="flex items-center justify-between mb-5">
+              <div class="section-title text-2xl">Overview</div>
+              <span class="text-xs font-bold text-slate-400 bg-slate-50 border border-slate-100 rounded-full px-3 py-1.5">This month</span>
+            </div>
+            <div class="grid grid-cols-2 gap-6">
+              <div>
+                <div class="flex items-center gap-1.5 text-slate-400 text-xs font-bold uppercase tracking-wide mb-2"><i class="fas fa-motorcycle"></i> Units Sold</div>
+                <div class="flex items-end gap-2 flex-wrap">
+                  <div class="sm-stat-value" id="dashSoldMonthCount">0</div>
+                  <span id="dashSoldTrend"></span>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5 text-slate-400 text-xs font-bold uppercase tracking-wide mb-2"><i class="fas fa-sack-dollar"></i> Revenue</div>
+                <div class="flex items-end gap-2 flex-wrap">
+                  <div class="sm-stat-value" style="font-size:2rem" id="dashRevenueMonth">Rs. 0</div>
+                  <span id="dashRevenueTrend"></span>
+                </div>
+              </div>
+            </div>
 
-      <!-- Needs Attention — warning-lamp row, dark until something needs it -->
-      <div id="dashAttentionWrap" class="hidden mb-6">
-        <div class="text-xs font-extrabold text-amber-600 uppercase tracking-wide mb-2 flex items-center gap-1.5"><i class="fas fa-bell"></i> Needs Attention</div>
-        <div class="lamp-row">
-          <div id="dashMismatchAlertCard" class="hidden lamp" onclick="window.switchSec('modelAliases')">
-            <span class="lamp-dot"></span>
-            <span class="lamp-label">Model Mismatches</span>
-            <span class="lamp-count" id="dashMismatchCount">0</span>
+            <div class="mt-6 pt-5 border-t border-slate-100">
+              <div class="text-base font-extrabold text-slate-800" id="dashSoldHeadline">0 units sold this month!</div>
+              <p class="text-xs text-slate-400 mt-0.5">Your most recent customers, from Chalan records.</p>
+              <div class="flex items-start gap-4 mt-4 flex-wrap" id="dashRecentCustomers"></div>
+            </div>
+          </div>
+
+          <!-- Compact secondary stats -->
+          <div class="sm-card p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="cursor-pointer" onclick="window.switchSec('price')">
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Models</div>
+              <div class="text-xl font-black text-slate-800 mt-0.5" id="dashModelsCount">0</div>
+            </div>
+            <div class="cursor-pointer" onclick="window.switchSec('inv')">
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Available Units</div>
+              <div class="text-xl font-black text-slate-800 mt-0.5" id="dashAvailableCount">0</div>
+            </div>
+            <div class="cursor-pointer" onclick="window.switchSec('chalans')">
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Chalans This Month</div>
+              <div class="text-xl font-black text-slate-800 mt-0.5" id="dashChalanMonthCount">0</div>
+            </div>
+            <div class="cursor-pointer" onclick="window.switchSec('exchange')">
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Exchange In Stock</div>
+              <div class="text-xl font-black text-slate-800 mt-0.5" id="dashExchangeCount">0</div>
+            </div>
+          </div>
+
+          <!-- Sales Trend -->
+          <div class="sm-card p-6">
+            <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
+              <div class="section-title text-2xl">Sales Trend</div>
+              <span id="dashTopModelChip" class="text-[11px] font-bold text-slate-500 bg-slate-50 border border-slate-100 rounded-full px-3 py-1.5"></span>
+            </div>
+            <div class="text-xs text-slate-400 font-semibold mb-3">Last 6 months</div>
+            <div class="sm-chart-total mb-2" id="dashTrendTotal">0 units sold</div>
+            <div id="dashSalesTrendChart"></div>
           </div>
         </div>
-      </div>
 
-      <!-- Gauge panels — the 5 landing stats, LCD-tinted like a cluster face -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-        <div class="gauge-panel" onclick="window.switchSec('price')">
-          <div class="gauge-icon"><i class="fas fa-tags text-bajaj-blue text-sm"></i></div>
-          <div class="gauge-label">Models</div>
-          <div class="gauge-value" id="dashModelsCount">0</div>
-        </div>
-        <div class="gauge-panel" onclick="window.switchSec('inv')">
-          <div class="gauge-icon"><i class="fas fa-warehouse text-bajaj-blue text-sm"></i></div>
-          <div class="gauge-label">Available Units</div>
-          <div class="gauge-value" id="dashAvailableCount">0</div>
-        </div>
-        <div class="gauge-panel" onclick="window.switchSec('inv')">
-          <div class="gauge-icon"><i class="fas fa-chart-line text-teal-600 text-sm"></i></div>
-          <div class="gauge-label">Sold This Month</div>
-          <div class="gauge-value" id="dashSoldMonthCount">0</div>
-        </div>
-        <div class="gauge-panel" onclick="window.switchSec('chalans')">
-          <div class="gauge-icon"><i class="fas fa-file-invoice text-bajaj-blue text-sm"></i></div>
-          <div class="gauge-label">Chalans This Month</div>
-          <div class="gauge-value" id="dashChalanMonthCount">0</div>
-        </div>
-        <div class="gauge-panel" onclick="window.switchSec('exchange')">
-          <div class="gauge-icon"><i class="fas fa-right-left text-bajaj-blue text-sm"></i></div>
-          <div class="gauge-label">Exchange In Stock</div>
-          <div class="gauge-value" id="dashExchangeCount">0</div>
-        </div>
-      </div>
-
-      <!-- Business Summary — real rupee totals -->
-      <div class="yng-card-shell cluster-card overflow-hidden mb-4">
-        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-2 flex-wrap">
-          <div class="flex items-center gap-2">
-            <i class="fas fa-chart-column text-teal-600"></i>
-            <div class="section-title text-xl">Sales Trend — Last 6 Months</div>
+        <!-- Right column -->
+        <div class="flex flex-col gap-5">
+          <div class="sm-card p-5">
+            <div class="section-title text-xl mb-3">Top Models</div>
+            <div id="dashTopModels"></div>
+            <button onclick="window.switchSec('price')" class="w-full mt-3 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:border-bajaj-blue hover:text-bajaj-blue transition-all">Full Price List</button>
           </div>
-          <span id="dashTopModelChip" class="text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-3 py-1"></span>
-        </div>
-        <div id="dashSalesTrendChart" class="p-5"></div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div class="yng-card-shell cluster-card overflow-hidden">
-          <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-            <i class="fas fa-sack-dollar text-emerald-600"></i>
-            <div class="section-title text-xl">Business Summary</div>
+          <div class="sm-card overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-100">
+              <div class="section-title text-xl">Recent Activity</div>
+            </div>
+            <div id="dashRecentActivity"></div>
           </div>
-          <div id="dashBusinessSummary" class="p-5 flex flex-col gap-3"></div>
-        </div>
-        <div class="yng-card-shell cluster-card overflow-hidden">
-          <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-            <i class="fas fa-clock-rotate-left text-bajaj-blue"></i>
-            <div class="section-title text-xl">Recent Activity</div>
-          </div>
-          <div id="dashRecentActivity"></div>
         </div>
       </div>
     </div>
@@ -8426,6 +8387,8 @@ function renderSalesTrendChart(){
 
   const max = Math.max(1, ...months.map(m=>m.count));
   const total = months.reduce((s,m)=>s+m.count,0);
+  const totalEl = document.getElementById('dashTrendTotal');
+  if(totalEl) totalEl.textContent = `${total} unit${total!==1?'s':''} sold`;
   if(!total){
     el.innerHTML = `<div class="py-8 text-center text-slate-400 text-sm"><i class="fas fa-chart-column text-2xl opacity-25 block mb-2"></i>No sales recorded in the last 6 months yet.</div>`;
     return;
@@ -8554,11 +8517,106 @@ function renderDashboard(){
         if(a.customerName) bits.push(escapeHtml(a.customerName));
         const what = bits.join(' ');
         const where = TRASH_LABELS[a.collection] || a.collection || '';
-        return `<div class="flex items-start gap-2.5 px-5 py-3 border-b border-slate-50 last:border-0">
-          <i class="fas fa-circle text-[6px] text-bajaj-blue mt-1.5 flex-shrink-0"></i>
+        const byName = (a.by||'?').trim();
+        const byInitial = byName.charAt(0).toUpperCase();
+        const byColor = AVATAR_COLORS[[...byName].reduce((s,c)=>s+c.charCodeAt(0),0) % AVATAR_COLORS.length];
+        return `<div class="flex items-start gap-3 px-5 py-3.5 border-b border-slate-50 last:border-0">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0" style="background:${byColor}">${escapeHtml(byInitial)}</div>
           <div class="min-w-0">
             <div class="text-xs text-slate-700"><b>${escapeHtml(a.action||'')}</b>${where?' <span class="text-slate-400">in '+escapeHtml(where)+'</span>':''}${what?' — '+what:''}</div>
             <div class="text-[10px] text-slate-400">${at.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}, ${at.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // ─── Soft Minimal redesign additions (additive — nothing above this
+  // point was removed, these just feed the new hero stats / recent
+  // customers / top models blocks in the redesigned markup). ───
+  const priceOfSM = model => allMasterBikes.find(b=>b.name===resolveModelName(model))?.price || 0;
+  const prevMonthDate = new Date(now.getFullYear(), now.getMonth()-1, 1);
+  const soldPrevMonthUnits = [...invData, ...hhInvData].filter(u=>{
+    if(u.status!=='Sold' || !u.soldAt) return false;
+    const at = u.soldAt?.toDate ? u.soldAt.toDate() : new Date(u.soldAt);
+    return at.getMonth()===prevMonthDate.getMonth() && at.getFullYear()===prevMonthDate.getFullYear();
+  });
+  const soldPrevMonthCount = soldPrevMonthUnits.length;
+  const soldPrevMonthValue = soldPrevMonthUnits.reduce((s,u)=>s+priceOfSM(u.model),0);
+  const soldThisMonthValue = [...invData, ...hhInvData].filter(u=>{
+    if(u.status!=='Sold' || !u.soldAt) return false;
+    const at = u.soldAt?.toDate ? u.soldAt.toDate() : new Date(u.soldAt);
+    return at.getMonth()===now.getMonth() && at.getFullYear()===now.getFullYear();
+  }).reduce((s,u)=>s+priceOfSM(u.model),0);
+
+  function trendPillHTML(curr, prev){
+    const pct = prev ? Math.round(((curr-prev)/prev)*100) : (curr>0 ? 100 : 0);
+    const isUp = pct>=0;
+    return `<span class="sm-trend ${isUp?'up':'down'}"><i class="fas fa-arrow-${isUp?'up':'down'}"></i>${Math.abs(pct)}%</span>`;
+  }
+  const revenueEl = document.getElementById('dashRevenueMonth');
+  if(revenueEl) revenueEl.textContent = `Rs. ${soldThisMonthValue.toLocaleString('en-IN')}`;
+  const soldTrendEl = document.getElementById('dashSoldTrend');
+  if(soldTrendEl) soldTrendEl.innerHTML = trendPillHTML(soldThisMonth, soldPrevMonthCount);
+  const revTrendEl = document.getElementById('dashRevenueTrend');
+  if(revTrendEl) revTrendEl.innerHTML = trendPillHTML(soldThisMonthValue, soldPrevMonthValue);
+  const headlineEl = document.getElementById('dashSoldHeadline');
+  if(headlineEl) headlineEl.textContent = `${soldThisMonth} unit${soldThisMonth!==1?'s':''} sold this month!`;
+
+  // Recent customers — from Chalan records, most recent unique names first
+  const custEl = document.getElementById('dashRecentCustomers');
+  if(custEl){
+    const seen = new Set();
+    const names = [];
+    [...chalanData].sort((a,b)=>{
+      const ta = (a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt||0)).getTime();
+      const tb = (b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt||0)).getTime();
+      return tb-ta;
+    }).forEach(c=>{
+      const nm = (c.customerName||'').trim();
+      if(nm && !seen.has(nm.toLowerCase())){ seen.add(nm.toLowerCase()); names.push(nm); }
+    });
+    custEl.innerHTML = names.slice(0,5).map(nm=>{
+      const initial = nm.charAt(0).toUpperCase();
+      const color = AVATAR_COLORS[[...nm].reduce((s,c)=>s+c.charCodeAt(0),0) % AVATAR_COLORS.length];
+      return `<div class="sm-avatar-ring" onclick="window.switchSec('customers')">
+        <div class="sm-avatar" style="background:${color}">${escapeHtml(initial)}</div>
+        <span class="sm-avatar-name">${escapeHtml(nm.split(' ')[0])}</span>
+      </div>`;
+    }).join('') + `<div class="sm-avatar-ring" onclick="window.switchSec('customers')">
+      <div class="sm-view-all"><i class="fas fa-arrow-right text-xs"></i></div>
+      <span class="sm-avatar-name">View all</span>
+    </div>`;
+  }
+
+  // Top Models — best sellers over the same 6-month window as the chart above
+  const topModelsEl = document.getElementById('dashTopModels');
+  if(topModelsEl){
+    const win = [];
+    for(let i=5; i>=0; i--){ const d = new Date(now.getFullYear(), now.getMonth()-i, 1); win.push({y:d.getFullYear(), m:d.getMonth()}); }
+    const tally = {};
+    [...invData, ...hhInvData].forEach(u=>{
+      if(u.status!=='Sold' || !u.soldAt || !u.model) return;
+      const at = u.soldAt?.toDate ? u.soldAt.toDate() : new Date(u.soldAt);
+      if(win.some(w=>w.y===at.getFullYear() && w.m===at.getMonth())) tally[u.model] = (tally[u.model]||0)+1;
+    });
+    const top = Object.entries(tally).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    if(!top.length){
+      topModelsEl.innerHTML = `<div class="py-8 text-center text-slate-400 text-sm">No sales yet.</div>`;
+    } else {
+      topModelsEl.innerHTML = top.map(([model,count])=>{
+        const avail = [...invData, ...hhInvData].filter(u=>u.model===model && u.status==='Available').length;
+        const price = priceOfSM(model);
+        const color = AVATAR_COLORS[[...model].reduce((s,c)=>s+c.charCodeAt(0),0) % AVATAR_COLORS.length];
+        return `<div class="sm-product-row">
+          <div class="sm-product-icon" style="background:${color}"><i class="fas fa-motorcycle"></i></div>
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-bold text-slate-800 truncate">${escapeHtml(model)}</div>
+            <div class="text-[11px] text-slate-400">${count} sold · last 6 months</div>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <div class="text-sm font-black text-slate-800">Rs. ${price.toLocaleString('en-IN')}</div>
+            <span class="sm-badge ${avail>0?'in':'out'}">${avail>0? avail+' in stock':'Out of stock'}</span>
           </div>
         </div>`;
       }).join('');
