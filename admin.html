@@ -265,48 +265,57 @@
   }
   .yng-card-shell:hover{ transform:translateY(-4px); box-shadow:0 16px 40px rgba(91,110,116,.12); border-color:rgba(91,110,116,.24); }
 
-  /* ═══ LOGIN — photo-style centered single-column card ═══ */
+  /* ═══ LOGIN — Diprella-style split card ═══ */
   :root{
     --lblue:#3E4F55; --lblueDark:#2C3A3F; --lblueLt:#EAEEF2;
     --lamber:#819FA7; --lamberDark:#647E86; --lline:#DCE1E7; --lbg:#F3F5F9;
   }
-  .login-stage{
-    background: linear-gradient(160deg, #F3F5F9 0%, #E3EAEF 50%, #C9D6DD 100%);
-    position:relative; overflow:hidden;
-  }
-  .login-ring{ position:absolute; border-radius:50%; border:1.5px solid rgba(91,110,116,0.14); pointer-events:none; }
-  /* Desktop brand hero (left) — hidden on mobile */
-  .login-hero-pc{ display:none; }
-  /* Card column — full-width centered on mobile */
-  .login-card-col{
-    position:relative; flex:1; display:flex; align-items:center; justify-content:center;
-    padding:32px 20px;
-  }
-  @media (min-width:1024px){
-    .login-hero-pc{
-      display:flex; flex:1; align-items:center; padding:56px;
-      position:relative; overflow:hidden;
-    }
-    .login-hero-pc-inner{ position:relative; z-index:2; max-width:460px; margin:0 auto; }
-    .login-illus-lg{ width:300px; height:190px; }
-    /* On desktop the card sits on a clean white panel, not a floating card */
-    .login-card-col{ flex:0 0 480px; background:#fff; box-shadow:-1px 0 0 rgba(91,110,116,.08); }
-    .login-card{
-      box-shadow:none; border:none; border-radius:0; padding:0; max-width:340px;
-    }
-    /* Illustration + brand already live in the hero on desktop */
-    .login-illus-mobile, .login-brand-mobile, .login-ring-mobile{ display:none; }
-  }
+  .login-stage{ background:#EEF1F4; position:relative; overflow:hidden; }
+  /* soft corner blobs */
+  .login-blob{ position:absolute; border-radius:38% 62% 55% 45% / 45% 45% 55% 55%; pointer-events:none; z-index:0; opacity:.5; }
+  .login-blob-1{ top:-90px; right:-70px; width:280px; height:280px; background:linear-gradient(135deg,#9DB4BB,#819FA7); }
+  .login-blob-2{ bottom:-100px; left:-80px; width:320px; height:320px; background:linear-gradient(135deg,#DCE6EC,#B9CAD2); }
+
   .login-card{
-    position:relative; z-index:2; width:100%; max-width:400px;
-    background:#fff; border-radius:28px; padding:30px 28px 28px;
-    box-shadow:0 30px 70px rgba(30,42,48,.18), 0 6px 18px rgba(30,42,48,.08);
-    border:1px solid rgba(255,255,255,.6);
+    position:relative; z-index:2; width:100%; max-width:840px; min-height:520px;
+    background:#fff; border-radius:22px; overflow:hidden; display:flex;
+    box-shadow:0 30px 80px rgba(30,42,48,.20), 0 8px 24px rgba(30,42,48,.08);
   }
-  .login-illus{
-    width:200px; height:126px; margin:0 auto 6px;
-    display:flex; align-items:center; justify-content:center;
+
+  /* LEFT welcome panel */
+  .login-left{
+    flex:0 0 44%; position:relative; overflow:hidden;
+    background:linear-gradient(150deg,#647E86 0%,#5B6E74 50%,#45555A 100%);
+    color:#fff; padding:34px 34px 30px; display:flex; flex-direction:column; justify-content:space-between;
   }
+  .login-left-diamond{ position:absolute; width:120px; height:120px; border-radius:26px; transform:rotate(45deg); background:rgba(255,255,255,.05); pointer-events:none; }
+  .login-left-diamond-1{ top:60px; right:-40px; }
+  .login-left-diamond-2{ bottom:40px; left:-50px; width:150px; height:150px; }
+  .login-left-mid{ position:relative; z-index:2; }
+  .login-left-title{ font-family:'Bebas Neue',sans-serif; font-size:2.8rem; line-height:1; letter-spacing:.02em; margin-bottom:14px; }
+  .login-left-sub{ font-size:13px; line-height:1.65; color:rgba(255,255,255,.82); max-width:280px; }
+  .login-left-points{ display:flex; flex-direction:column; gap:9px; margin-top:22px; }
+  .login-left-points span{ font-size:11.5px; color:rgba(255,255,255,.9); display:flex; align-items:center; gap:9px; }
+  .login-left-points i{ width:16px; text-align:center; color:#CFE0E5; }
+
+  /* RIGHT form panel */
+  .login-right{ flex:1; padding:40px 40px 34px; display:flex; flex-direction:column; justify-content:center; }
+  .login-right-title{ font-family:'Bebas Neue',sans-serif; font-size:2.6rem; line-height:1; letter-spacing:.03em; color:#0D0D0D; text-align:center; }
+  .login-right-sub{ font-size:13px; color:#7E8B92; text-align:center; margin-top:4px; margin-bottom:26px; }
+  .login-divider{ display:flex; align-items:center; gap:12px; margin:22px 0 14px; color:#A2ADB4; font-size:11px; }
+  .login-divider::before, .login-divider::after{ content:''; flex:1; height:1px; background:#E8ECF1; }
+
+  /* stack on mobile */
+  @media (max-width:768px){
+    .login-card{ flex-direction:column; max-width:420px; min-height:0; }
+    .login-left{ flex:none; padding:24px 26px; }
+    .login-left-mid{ margin:16px 0; }
+    .login-left-title{ font-size:2.2rem; margin-bottom:8px; }
+    .login-left-sub{ max-width:none; }
+    .login-left-points{ display:none; }
+    .login-right{ padding:28px 26px 26px; }
+  }
+
   .remember-toggle{ display:flex; align-items:center; gap:9px; cursor:pointer; user-select:none; }
   .remember-toggle input{ position:absolute; opacity:0; width:0; height:0; }
   .remember-switch{
@@ -320,7 +329,7 @@
   .remember-toggle input:checked ~ .remember-switch::after{ transform:translateX(16px); }
   .remember-label{ font-size:12px; font-weight:600; color:#556067; }
   .lfield-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#647E86;margin-bottom:6px;display:block}
-  .lfield{width:100%;height:50px;border:1.5px solid var(--lline);border-radius:14px;background:var(--lbg);padding:0 14px 0 44px;font-size:14px;color:#0D0D0D;outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
+  .lfield{width:100%;height:50px;border:1.5px solid transparent;border-radius:12px;background:#EFF2F5;padding:0 14px 0 44px;font-size:14px;color:#0D0D0D;outline:none;transition:border-color .2s,box-shadow .2s,background .2s;font-family:'DM Sans',sans-serif}
   .lfield:focus{border-color:var(--lblue);box-shadow:0 0 0 3px rgba(62,79,85,.12);background:#fff}
   .lfield-wrap{position:relative}
   .lfield-wrap i{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#819FA7;font-size:14px}
@@ -331,10 +340,10 @@
   }
   .lfield-wrap .pass-toggle-btn:hover{ color:#3E4F55; background:#EAEEF2; }
   .lfield-wrap input[type="password"], .lfield-wrap input[type="text"].lfield{ padding-right:42px; }
-  .login-cta{width:100%;padding:15px 20px;background:var(--lblue);color:#fff;border:none;border-radius:14px;font-weight:700;font-size:14px;letter-spacing:.02em;box-shadow:0 8px 22px rgba(62,79,85,.30);transition:background .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+  .login-cta{width:100%;padding:15px 20px;background:var(--lblue);color:#fff;border:none;border-radius:999px;font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase;box-shadow:0 10px 24px rgba(62,79,85,.30);transition:background .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
   .login-cta:hover{background:var(--lblueDark);transform:translateY(-1px)}
   .login-cta:disabled{opacity:.6;cursor:not-allowed;transform:none}
-  .login-support-btn{display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:700;transition:all .18s;text-decoration:none}
+  .login-support-btn{display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:999px;font-size:13px;font-weight:700;transition:all .18s;text-decoration:none}
 
   /* ═══ Sidebar nav-tab state (structural rules live in the shell block below) ═══ */
   #navAvatar{box-shadow:0 0 0 2px #fff, 0 0 0 3.5px rgba(91,110,116,.25)}
@@ -2481,154 +2490,90 @@
 </div>
 
 <!-- ══════════════════ LOGIN (photo-style — centered single column) ══════════════════ -->
-<div id="login-section" class="login-stage min-h-screen flex">
+<!-- ══════════════════ LOGIN (Diprella-style split card) ══════════════════ -->
+<div id="login-section" class="login-stage min-h-screen flex items-center justify-center px-5 py-8">
 
-  <!-- Left brand hero — desktop only -->
-  <div class="login-hero-pc">
-    <div class="login-ring w-[420px] h-[420px]" style="top:50%;left:-140px;transform:translateY(-50%);"></div>
-    <div class="login-ring w-[300px] h-[300px]" style="top:50%;left:-80px;transform:translateY(-50%);opacity:.6;"></div>
-    <div class="login-hero-pc-inner">
-      <div class="login-illus-lg">
-        <svg viewBox="0 0 240 150" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect x="70" y="14" width="96" height="70" rx="8" fill="#DCE6EC"/>
-          <rect x="82" y="26" width="72" height="6" rx="3" fill="#B9CAD2"/>
-          <rect x="82" y="38" width="52" height="5" rx="2.5" fill="#CBD9DF"/>
-          <rect x="82" y="48" width="60" height="5" rx="2.5" fill="#CBD9DF"/>
-          <rect x="100" y="30" width="52" height="92" rx="10" fill="#3E4F55"/>
-          <rect x="106" y="40" width="40" height="72" rx="5" fill="#F3F5F9"/>
-          <path d="M126 52l12 4v10c0 8-5.5 13-12 15-6.5-2-12-7-12-15V56l12-4z" fill="#819FA7"/>
-          <path d="M121 66l4 4 7-7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="115" cy="98" r="2.4" fill="#819FA7"/><circle cx="123" cy="98" r="2.4" fill="#819FA7"/>
-          <circle cx="131" cy="98" r="2.4" fill="#CBD9DF"/><circle cx="139" cy="98" r="2.4" fill="#CBD9DF"/>
-          <circle cx="182" cy="96" r="9" fill="#5B6E74"/>
-          <path d="M166 128c0-11 8-18 16-18s16 7 16 18z" fill="#5B6E74"/>
-          <path d="M60 122c-6-4-9-12-8-20 6 2 11 8 11 16" fill="#819FA7"/>
-          <path d="M60 122c4-6 11-9 18-8-3 6-9 10-16 10" fill="#647E86"/>
-          <rect x="54" y="120" width="16" height="12" rx="2" fill="#45555A"/>
-          <rect x="150" y="40" width="26" height="18" rx="3" fill="#fff" stroke="#CBD9DF" stroke-width="1.4"/>
-          <path d="M150 42l13 9 13-9" stroke="#819FA7" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-          <rect x="40" y="130" width="160" height="3" rx="1.5" fill="#DCE6EC"/>
-        </svg>
-      </div>
-      <div class="flex items-center gap-2.5 mt-8 mb-4">
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0" style="background:#3E4F55">
-          <i class="fas fa-motorcycle"></i>
+  <!-- decorative corner blobs -->
+  <span class="login-blob login-blob-1"></span>
+  <span class="login-blob login-blob-2"></span>
+
+  <div class="login-card">
+    <!-- LEFT: welcome panel -->
+    <div class="login-left">
+      <span class="login-left-diamond login-left-diamond-1"></span>
+      <span class="login-left-diamond login-left-diamond-2"></span>
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-white/15 border border-white/25 flex-shrink-0">
+          <i class="fas fa-motorcycle text-white text-sm"></i>
         </div>
-        <div class="font-display text-2xl tracking-widest leading-none" style="color:#0D0D0D">SAMRIDDHI <span style="color:#819FA7">ADMIN</span></div>
+        <span class="font-display text-lg text-white tracking-widest">SAMRIDDHI</span>
       </div>
-      <h1 class="section-title text-[clamp(2rem,3vw,2.8rem)]" style="color:#0D0D0D">Dealer Console</h1>
-      <p class="text-slate-500 text-sm leading-relaxed mt-3 max-w-sm">
-        Live pricing, inventory and finance for Samriddhi And Brothers — in one secure panel. Access is limited to authorized dealership staff, and every change is logged.
-      </p>
-      <div class="flex flex-col gap-2.5 mt-7 max-w-xs">
-        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-lock w-4 text-center" style="color:#5B6E74"></i> Encrypted sign-in via Firebase Auth</div>
-        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-user-shield w-4 text-center" style="color:#5B6E74"></i> Approved admin accounts only</div>
-        <div class="flex items-center gap-2.5 text-xs text-slate-500"><i class="fas fa-clock-rotate-left w-4 text-center" style="color:#5B6E74"></i> Real-time, timestamped changes</div>
+
+      <div class="login-left-mid">
+        <h2 class="login-left-title">Welcome Back!</h2>
+        <p class="login-left-sub">Samriddhi And Brothers dealer console — live pricing, inventory and finance, all in one secure place.</p>
+        <div class="login-left-points">
+          <span><i class="fas fa-lock"></i> Encrypted Firebase sign-in</span>
+          <span><i class="fas fa-user-shield"></i> Approved admin IDs only</span>
+          <span><i class="fas fa-clock-rotate-left"></i> Every change is logged</span>
+        </div>
       </div>
+
+      <div class="text-[10px] text-white/50 tracking-widest uppercase">Bajaj Authorized Dealer</div>
     </div>
-  </div>
 
-  <!-- Card column — full width on mobile, right panel on desktop -->
-  <div class="login-card-col">
-    <!-- soft rings behind the card (mobile) -->
-    <div class="login-ring login-ring-mobile w-[300px] h-[300px]" style="top:6%;left:-90px;"></div>
-    <div class="login-ring login-ring-mobile w-[220px] h-[220px]" style="bottom:6%;right:-70px;opacity:.6;"></div>
+    <!-- RIGHT: sign-in form -->
+    <div class="login-right">
+      <h2 class="login-right-title">Sign In</h2>
+      <p class="login-right-sub">Please sign in to continue.</p>
 
-    <div class="login-card">
-      <!-- Illustration (mobile-only; desktop shows it in the hero) -->
-      <div class="login-illus login-illus-mobile">
-        <svg viewBox="0 0 240 150" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect x="70" y="14" width="96" height="70" rx="8" fill="#E7ECF1"/>
-          <rect x="82" y="26" width="72" height="6" rx="3" fill="#CFD9E0"/>
-          <rect x="82" y="38" width="52" height="5" rx="2.5" fill="#DCE1E7"/>
-          <rect x="82" y="48" width="60" height="5" rx="2.5" fill="#DCE1E7"/>
-          <rect x="100" y="30" width="52" height="92" rx="10" fill="#3E4F55"/>
-          <rect x="106" y="40" width="40" height="72" rx="5" fill="#F3F5F9"/>
-          <path d="M126 52l12 4v10c0 8-5.5 13-12 15-6.5-2-12-7-12-15V56l12-4z" fill="#819FA7"/>
-          <path d="M121 66l4 4 7-7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="115" cy="98" r="2.4" fill="#819FA7"/><circle cx="123" cy="98" r="2.4" fill="#819FA7"/>
-          <circle cx="131" cy="98" r="2.4" fill="#CFD9E0"/><circle cx="139" cy="98" r="2.4" fill="#CFD9E0"/>
-          <circle cx="182" cy="96" r="9" fill="#5B6E74"/>
-          <path d="M166 128c0-11 8-18 16-18s16 7 16 18z" fill="#5B6E74"/>
-          <path d="M60 122c-6-4-9-12-8-20 6 2 11 8 11 16" fill="#819FA7"/>
-          <path d="M60 122c4-6 11-9 18-8-3 6-9 10-16 10" fill="#647E86"/>
-          <rect x="54" y="120" width="16" height="12" rx="2" fill="#45555A"/>
-          <rect x="150" y="40" width="26" height="18" rx="3" fill="#fff" stroke="#CFD9E0" stroke-width="1.4"/>
-          <path d="M150 42l13 9 13-9" stroke="#819FA7" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-          <rect x="40" y="130" width="160" height="3" rx="1.5" fill="#E7ECF1"/>
-        </svg>
-      </div>
-
-      <!-- Logo + brand (mobile-only) -->
-      <div class="login-brand-mobile flex items-center justify-center gap-2.5 mb-5">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0" style="background:#3E4F55">
-          <i class="fas fa-motorcycle text-sm"></i>
-        </div>
-        <div class="text-left">
-          <div class="font-display text-lg tracking-widest leading-none" style="color:#0D0D0D">SAMRIDDHI <span style="color:#819FA7">ADMIN</span></div>
-          <div class="text-[9px] text-slate-400 tracking-widest uppercase mt-0.5">Bajaj Authorized Dealer Panel</div>
-        </div>
-      </div>
-
-    <h2 class="section-title text-4xl text-center" style="color:#0D0D0D">Login</h2>
-    <p class="text-sm text-slate-500 mt-1 mb-7 text-center">Please sign in to continue.</p>
-
-    <!-- Email -->
-    <div class="flex flex-col gap-1.5 mb-4">
-      <div class="lfield-wrap">
+      <div class="lfield-wrap mb-4">
         <i class="fas fa-user"></i>
         <input type="email" id="email" placeholder="Email address" autocomplete="email" class="lfield"/>
       </div>
-    </div>
 
-    <!-- Password -->
-    <div class="flex flex-col gap-1.5 mb-3">
-      <div class="lfield-wrap">
+      <div class="lfield-wrap mb-3">
         <i class="fas fa-lock"></i>
         <input type="password" id="pass" placeholder="Password" autocomplete="current-password" class="lfield"/>
         <button type="button" id="togglePassBtn" onclick="togglePasswordVisibility()" class="pass-toggle-btn" aria-label="Show password" tabindex="-1">
           <i class="fas fa-eye" id="togglePassIcon"></i>
         </button>
       </div>
-    </div>
 
-    <!-- Remember + forgot -->
-    <div class="flex items-center justify-between mb-5">
-      <label class="remember-toggle">
-        <input type="checkbox" id="rememberMe" checked>
-        <span class="remember-switch"></span>
-        <span class="remember-label">Keep me signed in</span>
-      </label>
-      <a href="#" onclick="handleForgotPassword();return false;" class="text-xs text-slate-400 hover:text-slate-600 transition-colors">Forgot?</a>
-    </div>
+      <div class="flex items-center justify-between mb-5">
+        <label class="remember-toggle">
+          <input type="checkbox" id="rememberMe" checked>
+          <span class="remember-switch"></span>
+          <span class="remember-label">Keep me signed in</span>
+        </label>
+        <a href="#" onclick="handleForgotPassword();return false;" class="text-xs text-slate-400 hover:text-slate-600 transition-colors">Forgot?</a>
+      </div>
 
-    <!-- Error -->
-    <div id="loginErr" class="hidden items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 text-sm text-red-600 mb-3">
-      <i class="fas fa-circle-xmark flex-shrink-0"></i>
-      <span id="loginErrText">Invalid credentials</span>
-    </div>
+      <div id="loginErr" class="hidden items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5 text-sm text-red-600 mb-3">
+        <i class="fas fa-circle-xmark flex-shrink-0"></i>
+        <span id="loginErrText">Invalid credentials</span>
+      </div>
 
-    <!-- Sign In btn -->
-    <button id="loginBtn" class="login-cta">
-      <span id="loginBtnText" class="flex items-center gap-2"><i class="fas fa-right-to-bracket"></i> Sign In</span>
-      <div class="spin" id="loginSpin"></div>
-    </button>
+      <button id="loginBtn" class="login-cta">
+        <span id="loginBtnText" class="flex items-center gap-2"><i class="fas fa-right-to-bracket"></i> Sign In</span>
+        <div class="spin" id="loginSpin"></div>
+      </button>
 
-    <!-- Support -->
-    <p class="text-center text-xs text-slate-400 mt-6 mb-3">Need a new admin ID?</p>
-    <div class="flex gap-2">
-      <a class="login-support-btn flex-1 justify-center text-emerald-600 bg-emerald-50 border border-emerald-200 hover:bg-emerald-500 hover:text-white"
-         href="https://wa.me/9779820907795?text=Hi%2C%20I%20need%20a%20new%20admin%20ID%20for%20Bajaj%20panel" target="_blank">
-        <i class="fab fa-whatsapp text-base"></i> WhatsApp
-      </a>
-      <a class="login-support-btn flex-1 justify-center text-red-600 bg-red-50 border border-red-200 hover:bg-red-500 hover:text-white"
-         href="mailto:yonghangissac@gmail.com?subject=New%20Admin%20ID%20Request&body=Hello%2C%20I%20need%20a%20new%20admin%20ID." target="_blank">
-        <i class="fas fa-envelope text-base"></i> Email
-      </a>
+      <div class="login-divider"><span>Need a new admin ID?</span></div>
+      <div class="flex gap-2">
+        <a class="login-support-btn flex-1 justify-center text-emerald-600 bg-emerald-50 border border-emerald-200 hover:bg-emerald-500 hover:text-white"
+           href="https://wa.me/9779820907795?text=Hi%2C%20I%20need%20a%20new%20admin%20ID%20for%20Bajaj%20panel" target="_blank">
+          <i class="fab fa-whatsapp text-base"></i> WhatsApp
+        </a>
+        <a class="login-support-btn flex-1 justify-center text-red-600 bg-red-50 border border-red-200 hover:bg-red-500 hover:text-white"
+           href="mailto:yonghangissac@gmail.com?subject=New%20Admin%20ID%20Request&body=Hello%2C%20I%20need%20a%20new%20admin%20ID." target="_blank">
+          <i class="fas fa-envelope text-base"></i> Email
+        </a>
+      </div>
     </div>
-  </div>
   </div>
 </div>
+
 
 
 <!-- ══════════════════ ADMIN PANEL ══════════════════ -->
