@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex"/>
+<title>Account Security · Samriddhi Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  /* ── Chai & Biscuit theme (matches admin.html) ── */
+  :root{
+    --bg:#F1E9E6; --surface:#fff; --field:#F6EFEA;
+    --brand:#5A4740; --brand-dark:#43332E; --chai:#9F6A4A; --biscuit:#D7A888;
+    --green:#298F60; --green-dark:#22754F; --danger:#C0392B;
+    --ink:#0B1513; --muted:#8A7A70; --line:#E3D6CD;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'DM Sans',sans-serif; color:var(--ink);
+    background:var(--bg);
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:24px 18px; -webkit-font-smoothing:antialiased; position:relative; overflow-x:hidden;
+  }
+  .blob{position:absolute;border-radius:40% 60% 55% 45%/45% 45% 55% 55%;pointer-events:none;opacity:.5;z-index:0}
+  .blob-1{top:-90px;right:-70px;width:280px;height:280px;background:linear-gradient(135deg,var(--biscuit),var(--chai))}
+  .blob-2{bottom:-100px;left:-80px;width:320px;height:320px;background:linear-gradient(135deg,var(--bg),var(--biscuit))}
+
+  .card{
+    position:relative;z-index:2;width:100%;max-width:420px;background:var(--surface);
+    border-radius:24px;padding:34px 30px 30px;
+    box-shadow:0 30px 70px rgba(43,33,29,.18),0 6px 18px rgba(43,33,29,.07);
+    border:1px solid rgba(255,255,255,.6);
+  }
+  .brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:22px}
+  .brand-mark{width:38px;height:38px;border-radius:11px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(90,71,64,.3);flex-shrink:0}
+  .brand-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.14em;color:var(--ink)}
+  .brand-name span{color:var(--chai)}
+
+  .head-icon{width:56px;height:56px;border-radius:16px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:22px}
+  h1{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.03em;text-align:center;line-height:1.05}
+  .sub{font-size:13px;color:var(--muted);text-align:center;margin-top:5px;line-height:1.5}
+  .sub b{color:var(--brand);font-weight:700;word-break:break-all}
+
+  .field-label{display:block;font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--chai);margin:18px 0 6px}
+  .field-wrap{position:relative}
+  .field-wrap > i{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--chai);font-size:14px}
+  input.field{
+    width:100%;height:50px;border:1.5px solid transparent;border-radius:12px;background:var(--field);
+    padding:0 44px;font-size:14px;color:var(--ink);outline:none;font-family:'DM Sans',sans-serif;
+    transition:border-color .2s,background .2s,box-shadow .2s;
+  }
+  input.field:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(90,71,64,.12)}
+  .eye-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:none;background:transparent;color:var(--chai);border-radius:9px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+  .eye-btn:hover{color:var(--brand);background:var(--bg)}
+
+  /* strength meter */
+  .meter{display:flex;gap:5px;margin-top:9px}
+  .meter span{flex:1;height:5px;border-radius:99px;background:#EADFD6;transition:background .2s}
+  .meter-note{font-size:11px;font-weight:600;margin-top:6px;min-height:14px}
+
+  .req{display:flex;flex-direction:column;gap:5px;margin-top:12px}
+  .req div{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:8px;transition:color .2s}
+  .req i{width:14px;text-align:center}
+  .req div.ok{color:var(--green)}
+
+  .btn{
+    width:100%;height:50px;margin-top:20px;border:none;border-radius:999px;cursor:pointer;
+    background:var(--brand);color:#fff;font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    box-shadow:0 10px 24px rgba(90,71,64,.3);transition:background .2s,transform .15s,opacity .2s;
+  }
+  .btn:hover:not(:disabled){background:var(--brand-dark);transform:translateY(-1px)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;display:none}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  .alert{display:none;align-items:center;gap:9px;border-radius:12px;padding:11px 13px;font-size:13px;margin-top:14px;line-height:1.4}
+  .alert.err{background:#FBEBE9;border:1px solid #F1CFC9;color:var(--danger)}
+  .alert.show{display:flex}
+
+  .state{text-align:center;padding:8px 0}
+  .foot{text-align:center;font-size:11px;color:var(--muted);margin-top:22px}
+  .link-btn{display:inline-flex;align-items:center;gap:7px;margin-top:16px;padding:11px 22px;border-radius:999px;background:var(--brand);color:#fff;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:.03em;box-shadow:0 8px 20px rgba(90,71,64,.28);transition:transform .15s,background .2s}
+  .link-btn:hover{background:var(--brand-dark);transform:translateY(-1px)}
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+  <span class="blob blob-1"></span>
+  <span class="blob blob-2"></span>
+
+  <div class="card">
+    <div class="brand">
+      <div class="brand-mark"><i class="fas fa-motorcycle"></i></div>
+      <div class="brand-name">SAMRIDDHI <span>ADMIN</span></div>
+    </div>
+
+    <!-- Loading -->
+    <div id="viewLoading" class="state">
+      <div class="head-icon" style="background:var(--bg);color:var(--chai)"><i class="fas fa-circle-notch fa-spin"></i></div>
+      <h1>One moment…</h1>
+      <p class="sub">Verifying your secure link.</p>
+    </div>
+
+    <!-- Reset password form -->
+    <div id="viewReset" class="hidden">
+      <div class="head-icon" style="background:var(--brand-soft,#F3E9E1);color:var(--brand)"><i class="fas fa-lock"></i></div>
+      <h1>Set a New Password</h1>
+      <p class="sub">for <b id="resetEmail">your account</b></p>
+
+      <label class="field-label" for="pw1">New password</label>
+      <div class="field-wrap">
+        <i class="fas fa-lock"></i>
+        <input class="field" type="password" id="pw1" placeholder="Enter a new password" autocomplete="new-password"/>
+        <button type="button" class="eye-btn" id="eye1" aria-label="Show password"><i class="fas fa-eye"></i></button>
+      </div>
+      <div class="meter"><span id="m1"></span><span id="m2"></span><span id="m3"></span><span id="m4"></span></div>
+      <div class="meter-note" id="meterNote"></div>
+
+      <label class="field-label" for="pw2">Confirm password</label>
+      <div class="field-wrap">
+        <i class="fas fa-lock"></i>
+        <input class="field" type="password" id="pw2" placeholder="Re-enter the password" autocomplete="new-password"/>
+        <button type="button" class="eye-btn" id="eye2" aria-label="Show password"><i class="fas fa-eye"></i></button>
+      </div>
+
+      <div class="req">
+        <div id="reqLen"><i class="fas fa-circle-xmark"></i> At least 8 characters</div>
+        <div id="reqNum"><i class="fas fa-circle-xmark"></i> Contains a number</div>
+        <div id="reqMatch"><i class="fas fa-circle-xmark"></i> Both passwords match</div>
+      </div>
+
+      <div class="alert err" id="resetErr"><i class="fas fa-circle-exclamation"></i><span id="resetErrText"></span></div>
+
+      <button class="btn" id="saveBtn" disabled>
+        <span id="saveText"><i class="fas fa-floppy-disk"></i> Save New Password</span>
+        <span class="spin" id="saveSpin"></span>
+      </button>
+    </div>
+
+    <!-- Success -->
+    <div id="viewDone" class="hidden state">
+      <div class="head-icon" style="background:#E6F2EC;color:var(--green)"><i class="fas fa-circle-check"></i></div>
+      <h1 id="doneTitle">Password Updated</h1>
+      <p class="sub" id="doneSub">You can now sign in with your new password.</p>
+      <a class="link-btn" id="doneLink" href="#"><i class="fas fa-right-to-bracket"></i> Go to Sign In</a>
+    </div>
+
+    <!-- Error / expired -->
+    <div id="viewError" class="hidden state">
+      <div class="head-icon" style="background:#FBEBE9;color:var(--danger)"><i class="fas fa-triangle-exclamation"></i></div>
+      <h1 id="errTitle">Link Expired</h1>
+      <p class="sub" id="errSub">This link is no longer valid. Password reset links expire after a short time or once they've been used.</p>
+      <a class="link-btn" id="errLink" href="#"><i class="fas fa-right-to-bracket"></i> Back to Sign In</a>
+    </div>
+
+    <div class="foot">Samriddhi And Brothers · Bajaj Authorized Dealer</div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import {
+    getAuth, verifyPasswordResetCode, confirmPasswordReset,
+    applyActionCode, checkActionCode
+  } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAXQW4khEovrBUtP5JpYFTUch_p5KT-8F8",
+    authDomain: "first-project-2082-12-26.firebaseapp.com",
+    projectId: "first-project-2082-12-26",
+    storageBucket: "first-project-2082-12-26.firebasestorage.app",
+    messagingSenderId: "545170954251",
+    appId: "1:545170954251:web:0d2f7905834af3b0be8f0e"
+  };
+  const auth = getAuth(initializeApp(firebaseConfig));
+
+  // Where "Sign In" should send people back to (your admin panel).
+  const SIGN_IN_URL = "https://secret.yonghangishak.com.np/admin";
+
+  const $ = id => document.getElementById(id);
+  const show = v => ['viewLoading','viewReset','viewDone','viewError'].forEach(x => $(x).classList.toggle('hidden', x!==v));
+
+  const params = new URLSearchParams(location.search);
+  const mode = params.get('mode');
+  const oobCode = params.get('oobCode');
+  const continueUrl = params.get('continueUrl') || SIGN_IN_URL;
+  $('doneLink').href = continueUrl;
+  $('errLink').href = continueUrl;
+
+  function friendly(e){
+    const c = (e && e.code) || '';
+    if(c.includes('expired-action-code')) return 'This link has expired. Please request a new one.';
+    if(c.includes('invalid-action-code')) return 'This link is invalid or has already been used.';
+    if(c.includes('user-disabled')) return 'This account has been disabled. Contact the Master admin.';
+    if(c.includes('user-not-found')) return 'No account was found for this link.';
+    if(c.includes('weak-password')) return 'That password is too weak. Use at least 8 characters with a number.';
+    if(c.includes('network')) return 'Network error. Check your connection and try again.';
+    return 'Something went wrong. Please request a new link.';
+  }
+
+  if(!mode || !oobCode){
+    $('errTitle').textContent = 'Invalid Link';
+    $('errSub').textContent = 'This page was opened without a valid security link. Please use the link from your email.';
+    show('viewError');
+  } else if(mode === 'resetPassword'){
+    verifyPasswordResetCode(auth, oobCode)
+      .then(email => { $('resetEmail').textContent = email; show('viewReset'); initResetForm(); })
+      .catch(e => { $('errSub').textContent = friendly(e); show('viewError'); });
+  } else if(mode === 'verifyEmail'){
+    applyActionCode(auth, oobCode)
+      .then(() => { $('doneTitle').textContent = 'Email Verified'; $('doneSub').textContent = 'Your email address is now confirmed. You can sign in.'; show('viewDone'); })
+      .catch(e => { $('errTitle').textContent='Verification Failed'; $('errSub').textContent = friendly(e); show('viewError'); });
+  } else if(mode === 'recoverEmail'){
+    checkActionCode(auth, oobCode)
+      .then(() => applyActionCode(auth, oobCode))
+      .then(() => { $('doneTitle').textContent = 'Email Restored'; $('doneSub').textContent = 'The change to your email has been reverted.'; show('viewDone'); })
+      .catch(e => { $('errTitle').textContent='Could Not Restore'; $('errSub').textContent = friendly(e); show('viewError'); });
+  } else {
+    $('errTitle').textContent = 'Unsupported Action';
+    $('errSub').textContent = 'This link type isn\u2019t handled here. Please use the link from your email.';
+    show('viewError');
+  }
+
+  function initResetForm(){
+    const pw1=$('pw1'), pw2=$('pw2'), btn=$('saveBtn');
+    const setEye=(inp,btnEl)=>{ btnEl.onclick=()=>{ const t=inp.type==='password'?'text':'password'; inp.type=t; btnEl.querySelector('i').className='fas fa-eye'+(t==='text'?'-slash':''); }; };
+    setEye(pw1,$('eye1')); setEye(pw2,$('eye2'));
+
+    const strengthColors=['#C0392B','#D98324','#9F6A4A','#298F60'];
+    const strengthWords=['Weak','Fair','Good','Strong'];
+    function score(p){
+      let s=0; if(p.length>=8)s++; if(/[0-9]/.test(p))s++; if(/[a-z]/.test(p)&&/[A-Z]/.test(p))s++; if(/[^A-Za-z0-9]/.test(p))s++;
+      return Math.min(s,4);
+    }
+    function validate(){
+      const p1=pw1.value, p2=pw2.value;
+      const len=p1.length>=8, num=/[0-9]/.test(p1), match=p1.length>0 && p1===p2;
+      $('reqLen').classList.toggle('ok',len);  $('reqLen').querySelector('i').className='fas '+(len?'fa-circle-check':'fa-circle-xmark');
+      $('reqNum').classList.toggle('ok',num);  $('reqNum').querySelector('i').className='fas '+(num?'fa-circle-check':'fa-circle-xmark');
+      $('reqMatch').classList.toggle('ok',match);$('reqMatch').querySelector('i').className='fas '+(match?'fa-circle-check':'fa-circle-xmark');
+
+      const sc=score(p1);
+      ['m1','m2','m3','m4'].forEach((m,i)=>{ $(m).style.background = (p1 && i<sc) ? strengthColors[sc-1] : '#EADFD6'; });
+      const note=$('meterNote');
+      note.textContent = p1 ? strengthWords[Math.max(0,sc-1)]+' password' : '';
+      note.style.color = p1 ? strengthColors[Math.max(0,sc-1)] : 'transparent';
+
+      btn.disabled = !(len && num && match);
+    }
+    pw1.addEventListener('input',validate);
+    pw2.addEventListener('input',validate);
+    pw2.addEventListener('keydown',e=>{ if(e.key==='Enter' && !btn.disabled) btn.click(); });
+
+    btn.addEventListener('click',()=>{
+      const err=$('resetErr'); err.classList.remove('show');
+      btn.disabled=true; $('saveText').style.display='none'; $('saveSpin').style.display='block';
+      confirmPasswordReset(auth, oobCode, pw1.value)
+        .then(()=>{ show('viewDone'); })
+        .catch(e=>{
+          $('resetErrText').textContent=friendly(e); err.classList.add('show');
+          $('saveText').style.display='inline'; $('saveSpin').style.display='none'; btn.disabled=false;
+          // If the code died mid-way, bounce to the error view instead of looping.
+          if((e.code||'').match(/expired|invalid/)){ $('errSub').textContent=friendly(e); setTimeout(()=>show('viewError'),1400); }
+        });
+    });
+  }
+</script>
+</body>
+</html>
