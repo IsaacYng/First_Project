@@ -7469,10 +7469,23 @@ window.signOutFromSidebar = ()=>signOut(auth);
     const bar = document.createElement('div'); bar.className='imp-bar'; bar.innerHTML='<div class="imp-bar-fill"></div>';
     card.appendChild(icHolder); card.appendChild(mid); card.appendChild(xBtn); card.appendChild(bar);
 
-    // rebuild label children: keep input, add prompt + card
+    // rebuild label children: keep input, add prompt + card. Clear any
+    // leftover original nodes (e.g. the old cloud icon) so only the new
+    // structure remains — the input is preserved.
+    Array.from(zone.childNodes).forEach(n => { if(n !== input) zone.removeChild(n); });
     zone.appendChild(prompt);
     zone.appendChild(card);
-    zone.appendChild(input); // ensure the input stays inside the label so clicking opens the picker
+    zone.appendChild(input); // ensure the input stays inside the label
+
+    // Explicitly open the picker on click. The native "label wraps a hidden
+    // input" activation turned flaky after this restructure (dead on some
+    // browsers), so drive it directly and prevent the double-trigger.
+    zone.addEventListener('click', e=>{
+      if(e.target === input) return;               // the synthetic click we fired — ignore
+      if(e.target.closest('.imp-file-x')) return;  // remove button handles itself
+      e.preventDefault();
+      input.click();
+    });
 
     function showFile(f){
       prompt.classList.add('hidden');
