@@ -3201,6 +3201,19 @@
           <button id="deleteSelectedBtn" onclick="deleteSelectedInvUnits()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all">
             <i class="fas fa-trash-can text-[11px]"></i> Delete Selected (<span id="deleteSelectedCount">0</span>)
           </button>
+          <button id="bulkTransferInvBtn" onclick="bulkTransferSelectedInv()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+            <i class="fas fa-right-left text-[11px]"></i> Move to HH (<span id="bulkTransferInvCount">0</span>)
+          </button>
+          <div id="bulkStatusInvWrap" class="relative hidden">
+            <button onclick="toggleBulkStatusMenu('inv')" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
+              <i class="fas fa-tag text-[11px]"></i> Set Status <i class="fas fa-chevron-down text-[9px]"></i>
+            </button>
+            <div id="bulkStatusInvMenu" class="hidden absolute left-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-30 min-w-[150px]">
+              <button onclick="bulkSetStatusInv('Available')" class="w-full text-left px-3 py-2 text-xs font-semibold text-emerald-600 hover:bg-slate-50"><i class="fas fa-circle-check mr-1.5"></i> Available</button>
+              <button onclick="bulkSetStatusInv('Booked')" class="w-full text-left px-3 py-2 text-xs font-semibold text-amber-600 hover:bg-slate-50"><i class="fas fa-bookmark mr-1.5"></i> Booked</button>
+              <button onclick="bulkSetStatusInv('Sold')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"><i class="fas fa-handshake mr-1.5"></i> Sold</button>
+            </div>
+          </div>
           <button id="cancelSelectBtn" onclick="setInvSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
             <i class="fas fa-xmark text-[11px]"></i> Cancel Select
           </button>
@@ -3414,6 +3427,19 @@
           <button id="deleteSelectedHHBtn" onclick="deleteSelectedHHInvUnits()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all">
             <i class="fas fa-trash-can text-[11px]"></i> Delete Selected (<span id="deleteSelectedHHCount">0</span>)
           </button>
+          <button id="bulkTransferHHBtn" onclick="bulkTransferSelectedHH()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+            <i class="fas fa-right-left text-[11px]"></i> Move to Inventory (<span id="bulkTransferHHCount">0</span>)
+          </button>
+          <div id="bulkStatusHHWrap" class="relative hidden">
+            <button onclick="toggleBulkStatusMenu('hh')" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
+              <i class="fas fa-tag text-[11px]"></i> Set Status <i class="fas fa-chevron-down text-[9px]"></i>
+            </button>
+            <div id="bulkStatusHHMenu" class="hidden absolute left-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-30 min-w-[150px]">
+              <button onclick="bulkSetStatusHH('Available')" class="w-full text-left px-3 py-2 text-xs font-semibold text-emerald-600 hover:bg-slate-50"><i class="fas fa-circle-check mr-1.5"></i> Available</button>
+              <button onclick="bulkSetStatusHH('Booked')" class="w-full text-left px-3 py-2 text-xs font-semibold text-amber-600 hover:bg-slate-50"><i class="fas fa-bookmark mr-1.5"></i> Booked</button>
+              <button onclick="bulkSetStatusHH('Sold')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"><i class="fas fa-handshake mr-1.5"></i> Sold</button>
+            </div>
+          </div>
           <button id="cancelSelectHHBtn" onclick="setHHInvSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
             <i class="fas fa-xmark text-[11px]"></i> Cancel Select
           </button>
@@ -7270,7 +7296,6 @@ onAuthStateChanged(auth, async (user) => {
     autoArchiveOldSoldUnits();
     loadModelAliases();
     setBtnState(false);
-    startIdleLogoutTimer();
     startActiveStatusCheck();
     startSessionGuard(user);
   } else {
@@ -7286,7 +7311,6 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('admin-section').style.display = 'none';
     document.body.classList.remove('app-active');
     setBtnState(false);
-    stopIdleLogoutTimer();
     stopActiveStatusCheck();
     stopSessionGuard();
     // If we were booted for a device-limit / possible-leak reason, show it
@@ -10342,6 +10366,7 @@ function updateDeleteSelectedBtn(){
   countEl.textContent = selectedInvIds.size;
   if(selectedInvIds.size>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); }
   else { btn.classList.add('hidden'); btn.classList.remove('flex'); }
+  toggleBulkControls('inv', selectedInvIds.size);
   if(cancelBtn){
     if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
     else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
@@ -10370,6 +10395,147 @@ window.toggleSelectAllInv = (checked)=>{
   else visibleIds.forEach(id=>selectedInvIds.delete(id));
   renderInvTable(getFilteredInv());
   updateDeleteSelectedBtn();
+};
+
+/* ─── Bulk transfer + bulk status (Inventory ↔ HH Inventory) ─── */
+function toggleBulkControls(scope, count){
+  const map = scope==='hh'
+    ? { btn:'bulkTransferHHBtn', cnt:'bulkTransferHHCount', wrap:'bulkStatusHHWrap', menu:'bulkStatusHHMenu' }
+    : { btn:'bulkTransferInvBtn', cnt:'bulkTransferInvCount', wrap:'bulkStatusInvWrap', menu:'bulkStatusInvMenu' };
+  const btn = document.getElementById(map.btn);
+  if(btn){ if(count>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); } else { btn.classList.add('hidden'); btn.classList.remove('flex'); } }
+  const cnt = document.getElementById(map.cnt); if(cnt) cnt.textContent = count;
+  const wrap = document.getElementById(map.wrap); if(wrap) wrap.classList.toggle('hidden', count===0);
+  if(count===0){ const menu=document.getElementById(map.menu); if(menu) menu.classList.add('hidden'); }
+}
+window.toggleBulkStatusMenu = (scope)=>{
+  const menu = document.getElementById(scope==='hh' ? 'bulkStatusHHMenu' : 'bulkStatusInvMenu');
+  const other = document.getElementById(scope==='hh' ? 'bulkStatusInvMenu' : 'bulkStatusHHMenu');
+  if(other) other.classList.add('hidden');
+  if(menu) menu.classList.toggle('hidden');
+};
+// close the status menu when clicking elsewhere
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('#bulkStatusInvWrap')) document.getElementById('bulkStatusInvMenu')?.classList.add('hidden');
+  if(!e.target.closest('#bulkStatusHHWrap')) document.getElementById('bulkStatusHHMenu')?.classList.add('hidden');
+});
+
+// Move selected showroom-Inventory units to HH Inventory in one go.
+window.bulkTransferSelectedInv = async ()=>{
+  if(blockIfReconditionOnly()) return;
+  if(!selectedInvIds.size) return;
+  const ids = [...selectedInvIds];
+  const ok = await showConfirm({
+    title: `Move ${ids.length} unit${ids.length!==1?'s':''} to HH Inventory?`,
+    message: `These ${ids.length} selected unit(s) move from showroom Inventory to HH Inventory (mela/outdoor). Sold ones keep their Sold status & customer; the rest show as Available there.`,
+    okText: 'Yes, Move', okColorClass: 'text-bajaj-blue hover:bg-blue-50',
+    iconClass: 'fa-right-left', iconColor: '#5A4740', iconBg: '#F3E9E1'
+  });
+  if(!ok) return;
+  try{
+    const targets = ids.map(id=>invData.find(x=>x.id===id)).filter(Boolean);
+    let nextSn = await getAccurateNextSn('hh_inventory');
+    for(let i=0;i<targets.length;i+=200){
+      const chunk = targets.slice(i, i+200);
+      const batch = writeBatch(db);
+      chunk.forEach((s, j)=>{
+        const isSold = s.status==='Sold' || s.hhFlag==='Hide';
+        const payload = {
+          sn: nextSn + i + j, model:s.model||'', chassis:s.chassis||'', engine:s.engine||'', regNo:s.regNo||'', color:s.color||'',
+          eventName:'', owner:'dealer', ownerName:'',
+          status: isSold?'Sold':'Available', customerName: isSold?(s.customerName||''):'', addedAt: new Date()
+        };
+        if(isSold){ payload.soldAt = s.soldAt || new Date(); payload.soldFrom = s.soldFrom || 'Showroom'; }
+        batch.set(doc(collection(db,'hh_inventory')), payload);
+        batch.delete(doc(db,'inventory', s.id));
+      });
+      await batch.commit();
+    }
+    logActivity('Bulk Transferred to HH Inventory', 'inventory', { model: `${targets.length} unit(s)` });
+    toast(`${targets.length} unit(s) moved to HH Inventory.`);
+    selectedInvIds.clear(); setInvSelectMode(false);
+    hhPageLimit = Math.max(hhPageLimit, nextSn + targets.length + 5);
+    loadHHInventory();
+  }catch(e){ toast('Transfer failed: '+friendlyError(e),'err'); }
+};
+
+// Move selected HH-Inventory units back to showroom Inventory in one go.
+window.bulkTransferSelectedHH = async ()=>{
+  if(blockIfReconditionOnly()) return;
+  if(!selectedHHInvIds.size) return;
+  const ids = [...selectedHHInvIds];
+  const ok = await showConfirm({
+    title: `Move ${ids.length} unit${ids.length!==1?'s':''} to Inventory?`,
+    message: `These ${ids.length} selected unit(s) move from HH Inventory back to showroom Inventory. Sold ones keep their Sold status & customer; the rest show as Available.`,
+    okText: 'Yes, Move', okColorClass: 'text-bajaj-blue hover:bg-blue-50',
+    iconClass: 'fa-right-left', iconColor: '#5A4740', iconBg: '#F3E9E1'
+  });
+  if(!ok) return;
+  try{
+    const targets = ids.map(id=>hhInvData.find(x=>x.id===id)).filter(Boolean);
+    let nextSn = await getAccurateNextSn('inventory');
+    for(let i=0;i<targets.length;i+=200){
+      const chunk = targets.slice(i, i+200);
+      const batch = writeBatch(db);
+      chunk.forEach((s, j)=>{
+        const isSold = s.status==='Sold';
+        const payload = {
+          sn: nextSn + i + j, model:s.model||'', chassis:s.chassis||'', engine:s.engine||'', regNo:s.regNo||'', color:s.color||'',
+          status: isSold?'Sold':'Available', customerName: isSold?(s.customerName||''):'', addedAt: new Date()
+        };
+        if(isSold){ payload.soldAt = s.soldAt || new Date(); payload.soldFrom = s.soldFrom || 'Mela/Event'; }
+        batch.set(doc(collection(db,'inventory')), payload);
+        batch.delete(doc(db,'hh_inventory', s.id));
+      });
+      await batch.commit();
+    }
+    logActivity('Bulk Transferred to Inventory', 'hh_inventory', { model: `${targets.length} unit(s)` });
+    toast(`${targets.length} unit(s) moved to Inventory.`);
+    selectedHHInvIds.clear(); setHHInvSelectMode(false);
+    invPageLimit = Math.max(invPageLimit, nextSn + targets.length + 5);
+    loadLiveStock();
+  }catch(e){ toast('Transfer failed: '+friendlyError(e),'err'); }
+};
+
+async function bulkSetStatus(collName, dataArr, idSet, status, clearSel){
+  const ids = [...idSet];
+  if(!ids.length) return;
+  const ok = await showConfirm({
+    title: `Mark ${ids.length} unit${ids.length!==1?'s':''} as ${status}?`,
+    message: status==='Available'
+      ? `These ${ids.length} unit(s) will be set back to Available (in stock). Any customer name on them is cleared.`
+      : `These ${ids.length} unit(s) will be marked ${status}. Existing customer names are kept — edit a unit individually if you need to set the buyer.`,
+    okText: `Mark ${status}`, okColorClass: 'text-bajaj-blue hover:bg-blue-50',
+    iconClass: 'fa-tag', iconColor: '#5A4740', iconBg: '#F3E9E1'
+  });
+  if(!ok) return;
+  try{
+    for(let i=0;i<ids.length;i+=400){
+      const chunk = ids.slice(i, i+400);
+      const batch = writeBatch(db);
+      chunk.forEach(id=>{
+        const s = dataArr.find(x=>x.id===id);
+        const upd = { status };
+        if(status==='Sold'){ upd.soldAt = (s && s.soldAt) ? s.soldAt : new Date(); if(s && !s.soldFrom) upd.soldFrom = (collName==='hh_inventory' ? 'Mela/Event' : 'Showroom'); }
+        if(status==='Available'){ upd.customerName = ''; }
+        batch.update(doc(db, collName, id), upd);
+      });
+      await batch.commit();
+    }
+    logActivity('Bulk Status Changed', collName, { model: `${ids.length} unit(s)`, customerName: status });
+    toast(`${ids.length} unit(s) marked ${status}.`);
+    clearSel();
+  }catch(e){ toast('Update failed: '+friendlyError(e),'err'); }
+}
+window.bulkSetStatusInv = (status)=>{
+  if(blockIfReconditionOnly()) return;
+  document.getElementById('bulkStatusInvMenu')?.classList.add('hidden');
+  bulkSetStatus('inventory', invData, selectedInvIds, status, ()=>{ selectedInvIds.clear(); setInvSelectMode(false); });
+};
+window.bulkSetStatusHH = (status)=>{
+  if(blockIfReconditionOnly()) return;
+  document.getElementById('bulkStatusHHMenu')?.classList.add('hidden');
+  bulkSetStatus('hh_inventory', hhInvData, selectedHHInvIds, status, ()=>{ selectedHHInvIds.clear(); setHHInvSelectMode(false); });
 };
 
 window.deleteSelectedInvUnits = async ()=>{
@@ -10697,6 +10863,7 @@ function updateDeleteSelectedHHBtn(){
   countEl.textContent = selectedHHInvIds.size;
   if(selectedHHInvIds.size>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); }
   else { btn.classList.add('hidden'); btn.classList.remove('flex'); }
+  toggleBulkControls('hh', selectedHHInvIds.size);
   if(cancelBtn){
     if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
     else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
