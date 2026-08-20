@@ -7594,11 +7594,19 @@ window.signOutFromSidebar = ()=>signOut(auth);
     Array.from(zone.childNodes).forEach(n => { if(n !== input) zone.removeChild(n); });
     zone.appendChild(prompt);
     zone.appendChild(card);
-    // Keep the input inside the label but visually-hidden (NOT display:none)
-    // so tapping the label natively opens the picker on mobile too.
+    // Put the input OUTSIDE the label and open it explicitly on tap. Relying
+    // on a label to wrap + auto-open a hidden input is unreliable on mobile
+    // (Samsung Internet / Android Chrome) — a direct input.click() fired
+    // from the tap gesture opens the picker everywhere, desktop and mobile.
     input.classList.remove('hidden');
     input.classList.add('imp-file-hidden');
-    zone.appendChild(input);
+    if(zone.parentNode) zone.parentNode.insertBefore(input, zone.nextSibling);
+    else zone.appendChild(input);
+    zone.style.cursor = 'pointer';
+    zone.addEventListener('click', e=>{
+      if(e.target.closest('.imp-file-x')) return; // remove button handles itself
+      input.click();
+    });
 
     // Layout: make the drop zone full-width and drop the action buttons
     // (Sample Template / Import Rows / Restore) into a row *below* it,
@@ -7615,9 +7623,6 @@ window.signOutFromSidebar = ()=>signOut(auth);
         parent.appendChild(row);
       }
     }
-
-    // Native label activation opens the picker (input is a hidden child of
-    // the label). No custom click handler — that broke it on mobile.
 
     function showFile(f){
       prompt.classList.add('hidden');
