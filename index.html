@@ -7443,6 +7443,8 @@ window.signOutFromSidebar = ()=>signOut(auth);
 })();
 
 
+window.togglePasswordVisibility = ()=>{
+  const input = document.getElementById('pass');
   const icon = document.getElementById('togglePassIcon');
   const btn = document.getElementById('togglePassBtn');
   const isHidden = input.type === 'password';
