@@ -4194,6 +4194,13 @@
         </button>
       </div>
 
+      <div class="relative mb-4">
+        <i class="fas fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input type="text" id="docSearchInput" oninput="setDocSearch(this.value)" placeholder="Search documents by name or description…"
+          class="w-full bg-white border border-slate-200 rounded-xl pl-11 pr-10 py-3 text-sm text-slate-700 outline-none focus:border-bajaj-blue transition-all shadow-sm"/>
+        <button type="button" id="docSearchClear" onclick="clearDocSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"><i class="fas fa-xmark text-xs"></i></button>
+      </div>
+
       <div class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 mb-4 max-w-full">
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all active" data-type="all" onclick="setDocTypeFilter('all')">All <span id="docCountAll" class="filter-count-badge"></span></button>
         <button class="doc-type-tab px-3 py-1.5 rounded-full text-xs font-bold transition-all" data-type="pdf" onclick="setDocTypeFilter('pdf')"><i class="fas fa-file-pdf mr-1"></i>PDF <span id="docCountPdf" class="filter-count-badge"></span></button>
@@ -8919,14 +8926,17 @@ function renderSalesTrendChart(){
     el.innerHTML = `<div class="py-8 text-center text-slate-400 text-sm"><i class="fas fa-chart-column text-2xl opacity-25 block mb-2"></i>No sales recorded in the last 6 months yet.</div>`;
     return;
   }
-  el.innerHTML = `<div class="flex items-end justify-between gap-2 sm:gap-4" style="height:140px">` +
+  el.innerHTML = `<div class="flex items-end justify-between gap-2 sm:gap-4 border-b border-slate-100" style="height:130px">` +
     months.map(m=>{
       const pct = Math.round((m.count/max)*100);
       const isCurrentMonth = m.year===now.getFullYear() && m.month===now.getMonth();
+      const isZero = !m.count;
+      const barClass = isZero ? 'bg-slate-100' : (isCurrentMonth ? 'bg-bajaj-blue' : 'bg-blue-200');
+      const barStyle = isZero ? 'height:7px' : `height:${Math.max(pct,10)}%`;
       return `
       <div class="flex-1 flex flex-col items-center justify-end h-full gap-1.5">
-        <span class="text-xs font-black text-slate-700">${m.count||''}</span>
-        <div class="w-full rounded-t-md ${isCurrentMonth?'bg-bajaj-blue':'bg-blue-200'} transition-all" style="height:${Math.max(pct,m.count?4:0)}%; min-height:${m.count?'4px':'0'}"></div>
+        <span class="text-xs font-black ${isZero?'text-slate-300':'text-slate-700'}">${m.count}</span>
+        <div class="w-full rounded-t-md ${barClass} transition-all" style="${barStyle}"></div>
         <span class="text-[10px] font-bold ${isCurrentMonth?'text-bajaj-blue':'text-slate-400'} uppercase">${m.label}</span>
       </div>`;
     }).join('') + `</div>`;
@@ -16904,6 +16914,19 @@ window.closeEventPopup = ()=>{
    ═══════════════════════════════════════════════════════════════════════ */
 let documents = [];
 let docTypeFilter = 'all';
+let docSearchTerm = '';
+window.setDocSearch = (v)=>{
+  docSearchTerm = v || '';
+  const clr = document.getElementById('docSearchClear');
+  if(clr) clr.classList.toggle('hidden', !docSearchTerm);
+  renderDocumentsPage();
+};
+window.clearDocSearch = ()=>{
+  docSearchTerm = '';
+  const inp = document.getElementById('docSearchInput'); if(inp) inp.value = '';
+  const clr = document.getElementById('docSearchClear'); if(clr) clr.classList.add('hidden');
+  renderDocumentsPage();
+};
 let docEditingId = null;
 let pendingDocFile = null;
 const DOC_ALLOWED_EXT = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','mp3','mp4'];
@@ -17646,11 +17669,15 @@ function renderDocumentsPage(){
     blueBookCountEl.textContent = n ? String(n) : '';
     blueBookCountEl.classList.toggle('hidden', !n);
   }
-  const filtered = docTypeFilter==='all' ? docsView
+  const filtered0 = docTypeFilter==='all' ? docsView
     : docTypeFilter==='bluebook' ? docsView.filter(d=>d.category==='Blue Book')
     : docsView.filter(d => (DOC_TYPE_GROUPS[docTypeFilter]||[]).includes(String(d.fileExt||'').toLowerCase()));
+  const q = (docSearchTerm||'').trim().toLowerCase();
+  const filtered = q
+    ? filtered0.filter(d => String(d.name||'').toLowerCase().includes(q) || String(d.description||'').toLowerCase().includes(q) || String(d.fileName||'').toLowerCase().includes(q))
+    : filtered0;
   if(!filtered.length){
-    wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-folder-open text-3xl opacity-25 block mb-2"></i><p class="text-sm">${docsView.length ? 'No documents match this filter.' : 'No documents uploaded yet.'}</p></div>`;
+    wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-folder-open text-3xl opacity-25 block mb-2"></i><p class="text-sm">${q ? 'No documents match “'+escapeHtml(docSearchTerm)+'”.' : (docsView.length ? 'No documents match this filter.' : 'No documents uploaded yet.')}</p></div>`;
     return;
   }
   const sorted = [...filtered].sort((a,b)=>{
