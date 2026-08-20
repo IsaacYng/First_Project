@@ -719,6 +719,10 @@
   .imp-file-x:hover{ background:var(--danger-soft-bg); color:var(--danger); }
   .imp-bar{ position:absolute; left:14px; right:14px; bottom:8px; height:4px; border-radius:99px; background:var(--bg-surface-3); overflow:hidden; }
   .imp-bar-fill{ height:100%; border-radius:99px; background:var(--success); width:0; transition:width .35s ease; }
+  /* File inputs must NOT be display:none or mobile browsers won't open the
+     picker when the wrapping label is tapped. This hides it visually while
+     keeping it "present" so native label activation works everywhere. */
+  .imp-file-hidden{ position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; opacity:0; }
   .yng-card-shell:hover{ box-shadow:0 6px 20px rgba(15,23,42,.08) !important; transform:translateY(-1px) !important; border-color:var(--border-strong) !important; }
   table thead tr{ background:var(--bg-surface-2) !important; }
   table th{ color:var(--text-muted) !important; font-weight:700 !important; }
@@ -7391,7 +7395,7 @@ async function startSessionGuard(user){
     await setDoc(sref, {
       uid: user.uid, email: user.email || currentUserEmail || '', name: currentUserName || '',
       role: currentUserRole || 'staff', device: sessionDeviceLabel(),
-      createdAt: now, lastActive: now, revoked: false
+      createdAt: serverTimestamp(), lastActive: now, revoked: false
     });
     // Heartbeat keeps this session "fresh" so closed tabs age out on their own.
     sessionHeartbeatTimer = setInterval(()=>{
@@ -7405,8 +7409,11 @@ async function startSessionGuard(user){
         const t = Date.now();
         const fresh = snap.docs.map(d=>({ id:d.id, ...d.data() }))
           .filter(s => s.lastActive && (t - s.lastActive) < SESSION_STALE_MS);
-        // newest first; stable tiebreak by id so every device agrees who stays
-        fresh.sort((a,b)=> (b.createdAt||0)-(a.createdAt||0) || (a.id < b.id ? 1 : -1));
+        // Rank by server time. A session whose createdAt hasn't resolved yet
+        // (just logged in) counts as the newest, so the new device wins and
+        // the OLDER ones sign themselves out — never the new one.
+        const ms = s => (s.createdAt && typeof s.createdAt.toMillis === 'function') ? s.createdAt.toMillis() : Infinity;
+        fresh.sort((a,b)=> ms(b)-ms(a) || (a.id < b.id ? 1 : -1));
         const lim = Math.max(1, currentUserMaxSessions || 1);
         const myDoc = snap.docs.find(d=>d.id===MY_SESSION_ID);
         const revokedMe = myDoc && myDoc.data().revoked === true;
@@ -7587,7 +7594,11 @@ window.signOutFromSidebar = ()=>signOut(auth);
     Array.from(zone.childNodes).forEach(n => { if(n !== input) zone.removeChild(n); });
     zone.appendChild(prompt);
     zone.appendChild(card);
-    zone.appendChild(input); // ensure the input stays inside the label
+    // Keep the input inside the label but visually-hidden (NOT display:none)
+    // so tapping the label natively opens the picker on mobile too.
+    input.classList.remove('hidden');
+    input.classList.add('imp-file-hidden');
+    zone.appendChild(input);
 
     // Layout: make the drop zone full-width and drop the action buttons
     // (Sample Template / Import Rows / Restore) into a row *below* it,
@@ -7605,15 +7616,8 @@ window.signOutFromSidebar = ()=>signOut(auth);
       }
     }
 
-    // Explicitly open the picker on click. The native "label wraps a hidden
-    // input" activation turned flaky after this restructure (dead on some
-    // browsers), so drive it directly and prevent the double-trigger.
-    zone.addEventListener('click', e=>{
-      if(e.target === input) return;               // the synthetic click we fired — ignore
-      if(e.target.closest('.imp-file-x')) return;  // remove button handles itself
-      e.preventDefault();
-      input.click();
-    });
+    // Native label activation opens the picker (input is a hidden child of
+    // the label). No custom click handler — that broke it on mobile.
 
     function showFile(f){
       prompt.classList.add('hidden');
