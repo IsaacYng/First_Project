@@ -697,6 +697,9 @@
 
   /* Refined card / table chrome (elite, low-contrast) */
   .yng-card-shell{ border-color:var(--border) !important; box-shadow:var(--shadow-sm) !important; background:var(--bg-surface) !important; transition:box-shadow .2s ease, transform .2s ease, border-color .2s ease !important; }
+  /* Import dropzone drag-over highlight (applied by installImportDropzones) */
+  label.drop-active{ border-color:var(--success) !important; background:var(--success-soft-bg) !important; box-shadow:0 0 0 3px rgba(41,143,96,.14) !important; transform:translateY(-1px); }
+  label.drop-active *{ pointer-events:none; }
   .yng-card-shell:hover{ box-shadow:0 6px 20px rgba(15,23,42,.08) !important; transform:translateY(-1px) !important; border-color:var(--border-strong) !important; }
   table thead tr{ background:var(--bg-surface-2) !important; }
   table th{ color:var(--text-muted) !important; font-weight:700 !important; }
@@ -5727,7 +5730,11 @@
             <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.mp3,.mp4" id="docFileInput" class="hidden" onchange="handleDocFileSelect(event)"/>
           </label>
         </div>
-        <div id="docUploadProgress" class="hidden">
+        <div id="docUploadProgress" class="hidden mb-1">
+          <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1.5">
+            <span id="docUploadProgressText">Preparing…</span>
+            <span id="docUploadProgressPct" class="font-mono">0%</span>
+          </div>
           <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
             <div id="docUploadProgressBar" class="h-full bg-emerald-500 rounded-full transition-all" style="width:0%"></div>
           </div>
@@ -6043,7 +6050,7 @@ import {
   serverTimestamp, query, orderBy, limit, runTransaction, writeBatch, getCountFromServer
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 import {
-  getStorage, ref as storageRef, uploadBytes, uploadString, getDownloadURL, deleteObject
+  getStorage, ref as storageRef, uploadBytes, uploadBytesResumable, uploadString, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-storage.js";
 
 /* ─── Who's doing it — used by the Trash / Activity Log so every delete,
@@ -7355,9 +7362,87 @@ document.getElementById('logoutBtn').addEventListener('click', ()=>signOut(auth)
 // without opening a menu first.
 window.signOutFromSidebar = ()=>signOut(auth);
 
+/* ─────────────────────────────────────────────────────────────────────
+   Double-submit guard. On a slow connection a Save/Import/Upload tap can
+   sit for a few seconds with no feedback, so people tap it again — and
+   again — and every tap fires another Firestore write, creating duplicate
+   records. This swallows repeat clicks on the SAME action button inside a
+   short window, before the button's own onclick runs.
 
-window.togglePasswordVisibility = ()=>{
-  const input = document.getElementById('pass');
+   Deliberately skips navigation, tabs, close/cancel, pagination and
+   toggles, where clicking again quickly is legitimate and harmless.
+   ───────────────────────────────────────────────────────────────────── */
+(function installClickGuard(){
+  const WINDOW_MS = 1500;
+  const SKIP_SELECTOR = '.nav-tab, .sidebar-link, [data-noguard], [role="tab"], [type="checkbox"], [type="radio"]';
+  const SKIP_ONCLICK = /close|cancel|switchsec|toggle|openmobile|closemobile|prevpage|nextpage|loadmore|selectrow|_selectrow|expand|collapse/i;
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('button, a.cta-primary, a.cta-amber, .login-cta, .cta-primary');
+    if(!btn) return;
+    if(btn.matches(SKIP_SELECTOR)) return;
+    const oc = btn.getAttribute('onclick') || '';
+    if(SKIP_ONCLICK.test(oc)) return;
+    // Don't fight a button that already manages its own disabled state.
+    if(btn.disabled) { e.preventDefault(); e.stopImmediatePropagation(); return; }
+    const now = Date.now();
+    const last = Number(btn.dataset.lastClickTs || 0);
+    if(now - last < WINDOW_MS){
+      e.preventDefault();
+      e.stopImmediatePropagation(); // block the duplicate before onclick fires
+      return;
+    }
+    btn.dataset.lastClickTs = String(now);
+  }, true); // capture phase — runs ahead of the element's own handlers
+})();
+
+
+/* ─────────────────────────────────────────────────────────────────────
+   Import drop zones. Every "Bulk Import from Excel" box already has a
+   hidden file <input> inside a <label>. This upgrades each of them, in one
+   place, to (a) accept drag-and-drop and (b) show the picked file's size —
+   so all the import boxes across the app behave the same without touching
+   each block's markup or its own change handler.
+   ───────────────────────────────────────────────────────────────────── */
+(function installImportDropzones(){
+  function bytes(n){ return (typeof formatBytes==='function') ? formatBytes(n) : (Math.round(n/1024)+' KB'); }
+  function enhance(input){
+    if(input.dataset.dropEnhanced) return;
+    input.dataset.dropEnhanced = '1';
+    const zone = input.closest('label') || input.parentElement;
+    if(!zone) return;
+    // find the text element that shows the chosen file name (…FileLabel)
+    const labelSpan = zone.querySelector('[id$="FileLabel"]') || zone.querySelector('span');
+
+    ['dragenter','dragover'].forEach(ev => zone.addEventListener(ev, e=>{
+      e.preventDefault(); e.stopPropagation(); zone.classList.add('drop-active');
+    }));
+    ['dragleave','dragend'].forEach(ev => zone.addEventListener(ev, e=>{
+      e.preventDefault(); e.stopPropagation(); zone.classList.remove('drop-active');
+    }));
+    zone.addEventListener('drop', e=>{
+      e.preventDefault(); e.stopPropagation(); zone.classList.remove('drop-active');
+      if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
+        try { input.files = e.dataTransfer.files; } catch(_){}
+        input.dispatchEvent(new Event('change', { bubbles:true }));
+      }
+    });
+    // Append the size after the block's own change handler has set the name.
+    input.addEventListener('change', ()=>{
+      const f = input.files && input.files[0];
+      if(f && labelSpan){
+        // block handlers set text to the file name; re-add name + size cleanly
+        setTimeout(()=>{ labelSpan.textContent = `${f.name}  ·  ${bytes(f.size)}`; }, 0);
+      }
+    });
+  }
+  function scan(){
+    document.querySelectorAll('input[type="file"][accept*=".xls"], input[type="file"][accept*=".csv"], input[type="file"][accept*="xlsx"]').forEach(enhance);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
+  else scan();
+})();
+
+
   const icon = document.getElementById('togglePassIcon');
   const btn = document.getElementById('togglePassBtn');
   const isHidden = input.type === 'password';
@@ -16351,13 +16436,38 @@ function dataUrlByteSize(dataUrl){
 // Uploads a data URL and hands back the public download URL plus the
 // storage path (kept so the object can be deleted later — without the
 // path, deleting a Firestore record would silently orphan the file).
-async function uploadFileToStorage(dataUrl, originalName, ext){
+async function uploadFileToStorage(dataUrl, originalName, ext, onProgress){
   const safe = String(originalName||'file').replace(/[^\w.\-]+/g,'_').slice(-60);
   const path = `documents/${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safe}`;
   const sRef = storageRef(storage, path);
-  await uploadString(sRef, dataUrl, 'data_url');
+  // Resumable upload gives real byte-by-byte progress (bytesTransferred /
+  // totalBytes) — that's what feeds the "X KB of Y KB" upload bar. A plain
+  // uploadString() would finish in one opaque step with no progress at all.
+  const task = uploadBytesResumable(sRef, dataUrlToBlob(dataUrl), { contentType: dataUrlMime(dataUrl) });
+  await new Promise((resolve, reject)=>{
+    task.on('state_changed',
+      snap => { if(onProgress) onProgress(snap.bytesTransferred, snap.totalBytes); },
+      reject,
+      resolve
+    );
+  });
   const url = await getDownloadURL(sRef);
   return { url, path };
+}
+
+// data: URL -> Blob, so the resumable uploader can stream real bytes and
+// report progress (uploadString/data_url can't report progress).
+function dataUrlToBlob(dataUrl){
+  const [head, b64] = String(dataUrl).split(',');
+  const mime = (head.match(/data:([^;]+)/)||[])[1] || 'application/octet-stream';
+  const bin = atob(b64||'');
+  const len = bin.length;
+  const bytes = new Uint8Array(len);
+  for(let i=0;i<len;i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+function dataUrlMime(dataUrl){
+  return (String(dataUrl).match(/data:([^;]+)/)||[])[1] || 'application/octet-stream';
 }
 
 // Where to actually read a file from — new records point at Storage, old
@@ -17103,9 +17213,13 @@ window.uploadDocument = async ()=>{
   const btn = document.getElementById('docUploadBtn');
   const progressWrap = document.getElementById('docUploadProgress');
   const progressBar = document.getElementById('docUploadProgressBar');
+  const progressText = document.getElementById('docUploadProgressText');
+  const progressPct = document.getElementById('docUploadProgressPct');
   if(btn) btn.disabled = true;
   if(progressWrap) progressWrap.classList.remove('hidden');
-  if(progressBar) progressBar.style.width = '30%';
+  if(progressBar) progressBar.style.width = '0%';
+  if(progressText) progressText.textContent = 'Preparing…';
+  if(progressPct) progressPct.textContent = '0%';
 
   const ext = (pendingDocFile.name.split('.').pop()||'').toLowerCase();
   const isImage = ['jpg','jpeg','png'].includes(ext);
@@ -17120,13 +17234,17 @@ window.uploadDocument = async ()=>{
       if(progressWrap) progressWrap.classList.add('hidden');
       return;
     }
-    if(progressBar) progressBar.style.width = '60%';
     try{
       // The bytes go to Firebase Storage; Firestore only keeps a pointer.
       // That's the whole point — the document list stays a few KB, so
       // opening the app no longer means downloading every file first.
-      const { url, path } = await uploadFileToStorage(fileData, pendingDocFile.name, ext);
-      if(progressBar) progressBar.style.width = '85%';
+      const { url, path } = await uploadFileToStorage(fileData, pendingDocFile.name, ext, (sent, total)=>{
+        const pct = total ? Math.round((sent/total)*100) : 0;
+        if(progressBar) progressBar.style.width = pct + '%';
+        if(progressPct) progressPct.textContent = pct + '%';
+        if(progressText) progressText.textContent = `${formatBytes(sent)} of ${formatBytes(total)}`;
+      });
+      if(progressText) progressText.textContent = 'Finishing…';
       await addDoc(collection(db,'documents'), {
         name, description, fileExt: ext, fileName: pendingDocFile.name,
         storageUrl: url, storagePath: path, sizeBytes: realBytes,
@@ -17134,6 +17252,7 @@ window.uploadDocument = async ()=>{
         uploadedAt: new Date()
       });
       if(progressBar) progressBar.style.width = '100%';
+      if(progressPct) progressPct.textContent = '100%';
       logActivity('Uploaded', 'documents', { model: name });
       toast('Document uploaded.');
       closeDocUploadModal();
