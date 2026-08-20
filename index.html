@@ -700,6 +700,25 @@
   /* Import dropzone drag-over highlight (applied by installImportDropzones) */
   label.drop-active{ border-color:var(--success) !important; background:var(--success-soft-bg) !important; box-shadow:0 0 0 3px rgba(41,143,96,.14) !important; transform:translateY(-1px); }
   label.drop-active *{ pointer-events:none; }
+  /* Reference-style upload/import zone (Import products mock) */
+  label.imp-zone{ display:flex !important; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:5px; width:100%; min-height:158px; padding:22px 16px !important; }
+  .imp-illus{ position:relative; height:46px; width:96px; margin-bottom:6px; }
+  .imp-chip{ position:absolute; top:2px; left:34px; width:30px; height:38px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:8.5px; font-weight:800; color:#fff; box-shadow:0 5px 12px rgba(43,33,29,.18); }
+  .imp-chip.l{ transform:rotate(-12deg) translateX(-22px); background:#2E7D5B; }
+  .imp-chip.m{ transform:translateY(-2px); background:var(--brand); z-index:2; }
+  .imp-chip.r{ transform:rotate(12deg) translateX(22px); background:var(--chai,#9F6A4A); }
+  .imp-title{ font-size:14px; font-weight:700; color:var(--text-primary); }
+  .imp-sub{ font-size:11.5px; color:var(--text-muted); }
+  .imp-browse{ margin-top:9px; padding:7px 20px; border-radius:999px; background:var(--bg-surface); border:1.5px solid var(--border-strong); font-size:12px; font-weight:700; color:var(--text-secondary); box-shadow:var(--shadow-sm); transition:all .15s; }
+  label.imp-zone:hover .imp-browse{ border-color:var(--brand); color:var(--brand); }
+  .imp-filecard{ display:flex; align-items:center; gap:12px; width:100%; padding:12px 14px 16px; border-radius:14px; background:var(--bg-surface); border:1px solid var(--border); position:relative; text-align:left; }
+  .imp-file-ic{ width:36px; height:42px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; flex-shrink:0; background:var(--brand); }
+  .imp-file-name{ font-size:13px; font-weight:700; color:var(--text-primary); word-break:break-all; line-height:1.25; }
+  .imp-file-meta{ font-size:11px; color:var(--text-muted); margin-top:1px; }
+  .imp-file-x{ margin-left:auto; width:26px; height:26px; border-radius:8px; border:none; background:transparent; color:var(--text-muted); cursor:pointer; flex-shrink:0; align-self:flex-start; transition:all .15s; }
+  .imp-file-x:hover{ background:var(--danger-soft-bg); color:var(--danger); }
+  .imp-bar{ position:absolute; left:14px; right:14px; bottom:8px; height:4px; border-radius:99px; background:var(--bg-surface-3); overflow:hidden; }
+  .imp-bar-fill{ height:100%; border-radius:99px; background:var(--success); width:0; transition:width .35s ease; }
   .yng-card-shell:hover{ box-shadow:0 6px 20px rgba(15,23,42,.08) !important; transform:translateY(-1px) !important; border-color:var(--border-strong) !important; }
   table thead tr{ background:var(--bg-surface-2) !important; }
   table th{ color:var(--text-muted) !important; font-weight:700 !important; }
@@ -7405,20 +7424,73 @@ window.signOutFromSidebar = ()=>signOut(auth);
    ───────────────────────────────────────────────────────────────────── */
 (function installImportDropzones(){
   function bytes(n){ return (typeof formatBytes==='function') ? formatBytes(n) : (Math.round(n/1024)+' KB'); }
+  function extIcon(name){
+    const e = (String(name).split('.').pop()||'').toLowerCase();
+    if(['xlsx','xls','csv'].includes(e)) return 'fa-file-excel';
+    if(e==='pdf') return 'fa-file-pdf';
+    if(['jpg','jpeg','png','gif','webp'].includes(e)) return 'fa-file-image';
+    if(['doc','docx'].includes(e)) return 'fa-file-word';
+    if(['mp3','wav'].includes(e)) return 'fa-file-audio';
+    if(['mp4','mov'].includes(e)) return 'fa-file-video';
+    return 'fa-file';
+  }
   function enhance(input){
     if(input.dataset.dropEnhanced) return;
     input.dataset.dropEnhanced = '1';
-    const zone = input.closest('label') || input.parentElement;
+    const zone = input.closest('label');
     if(!zone) return;
-    // find the text element that shows the chosen file name (…FileLabel)
-    const labelSpan = zone.querySelector('[id$="FileLabel"]') || zone.querySelector('span');
+    const nameSpan = zone.querySelector('[id$="FileLabel"]'); // keep its id — block handlers target it
+    const accept = (input.getAttribute('accept')||'').toLowerCase();
+    const isSheet = /csv|xls/.test(accept);
+    const title = isSheet ? 'Drag your Excel / CSV file here' : 'Drag your file here';
 
-    ['dragenter','dragover'].forEach(ev => zone.addEventListener(ev, e=>{
-      e.preventDefault(); e.stopPropagation(); zone.classList.add('drop-active');
-    }));
-    ['dragleave','dragend'].forEach(ev => zone.addEventListener(ev, e=>{
-      e.preventDefault(); e.stopPropagation(); zone.classList.remove('drop-active');
-    }));
+    // Build the reference-style zone. The original <input> and the
+    // [id$=FileLabel] span are preserved (re-parented), so every existing
+    // change handler that reads/sets them keeps working untouched.
+    zone.classList.add('imp-zone');
+    zone.classList.remove('flex-1','items-center','gap-3','px-4','py-3');
+
+    const prompt = document.createElement('div');
+    prompt.className = 'imp-prompt flex flex-col items-center';
+    prompt.innerHTML =
+      '<div class="imp-illus"><span class="imp-chip l">XLS</span><span class="imp-chip r">CSV</span><span class="imp-chip m"><i class="fas fa-file-arrow-up"></i></span></div>'+
+      '<div class="imp-title">'+title+'</div>'+
+      '<div class="imp-sub">or click to browse</div>'+
+      '<span class="imp-browse">Browse File</span>';
+
+    const card = document.createElement('div');
+    card.className = 'imp-filecard hidden';
+    const icHolder = document.createElement('div'); icHolder.className='imp-file-ic'; icHolder.innerHTML='<i class="fas fa-file"></i>';
+    const mid = document.createElement('div'); mid.className='min-w-0 flex-1';
+    const meta = document.createElement('div'); meta.className='imp-file-meta'; meta.textContent='';
+    if(nameSpan){ nameSpan.className='imp-file-name'; mid.appendChild(nameSpan); }
+    mid.appendChild(meta);
+    const xBtn = document.createElement('button'); xBtn.type='button'; xBtn.className='imp-file-x'; xBtn.innerHTML='<i class="fas fa-xmark"></i>';
+    const bar = document.createElement('div'); bar.className='imp-bar'; bar.innerHTML='<div class="imp-bar-fill"></div>';
+    card.appendChild(icHolder); card.appendChild(mid); card.appendChild(xBtn); card.appendChild(bar);
+
+    // rebuild label children: keep input, add prompt + card
+    zone.appendChild(prompt);
+    zone.appendChild(card);
+    zone.appendChild(input); // ensure the input stays inside the label so clicking opens the picker
+
+    function showFile(f){
+      prompt.classList.add('hidden');
+      card.classList.remove('hidden');
+      icHolder.innerHTML = '<i class="fas '+extIcon(f.name)+'"></i>';
+      if(nameSpan) nameSpan.textContent = f.name;
+      meta.textContent = bytes(f.size);
+      const fill = bar.querySelector('.imp-bar-fill');
+      fill.style.width='0'; requestAnimationFrame(()=>{ fill.style.width='100%'; });
+    }
+    function reset(){
+      prompt.classList.remove('hidden');
+      card.classList.add('hidden');
+      bar.querySelector('.imp-bar-fill').style.width='0';
+    }
+
+    ['dragenter','dragover'].forEach(ev => zone.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); zone.classList.add('drop-active'); }));
+    ['dragleave','dragend'].forEach(ev => zone.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); zone.classList.remove('drop-active'); }));
     zone.addEventListener('drop', e=>{
       e.preventDefault(); e.stopPropagation(); zone.classList.remove('drop-active');
       if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
@@ -7426,17 +7498,19 @@ window.signOutFromSidebar = ()=>signOut(auth);
         input.dispatchEvent(new Event('change', { bubbles:true }));
       }
     });
-    // Append the size after the block's own change handler has set the name.
     input.addEventListener('change', ()=>{
       const f = input.files && input.files[0];
-      if(f && labelSpan){
-        // block handlers set text to the file name; re-add name + size cleanly
-        setTimeout(()=>{ labelSpan.textContent = `${f.name}  ·  ${bytes(f.size)}`; }, 0);
-      }
+      // run after the block's own change handler (which may set the name span)
+      setTimeout(()=>{ if(f) showFile(f); else reset(); }, 0);
+    });
+    xBtn.addEventListener('click', e=>{
+      e.preventDefault(); e.stopPropagation();
+      input.value=''; reset();
+      input.dispatchEvent(new Event('change', { bubbles:true })); // let handlers disable their Import/Upload button
     });
   }
   function scan(){
-    document.querySelectorAll('input[type="file"][accept*=".xls"], input[type="file"][accept*=".csv"], input[type="file"][accept*="xlsx"]').forEach(enhance);
+    document.querySelectorAll('input[type="file"][accept*=".xls"], input[type="file"][accept*=".csv"], input[type="file"][accept*="xlsx"], input[type="file"][accept*=".pdf"]').forEach(enhance);
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
   else scan();
