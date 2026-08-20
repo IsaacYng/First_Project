@@ -6020,6 +6020,11 @@
             <option value="staff">Normal ID — full access except Master-only tools</option>
             <option value="recondition">Recondition ID — Exchange Stock &amp; Blue Book only</option>
           </select>
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-semibold text-slate-500 flex-shrink-0"><i class="fas fa-mobile-screen text-slate-400 mr-1"></i> Devices at once</label>
+            <input type="number" id="newStaffMaxSessions" min="1" max="20" value="3" class="w-20 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-bajaj-blue transition-all"/>
+            <span class="text-[10px] text-slate-400">how many phones/PCs can use this ID together</span>
+          </div>
           <button onclick="addTeamMember()" class="w-full py-2.5 bg-bajaj-blue text-white text-sm font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
             <i class="fas fa-plus mr-1"></i> Create Account
           </button>
@@ -7263,6 +7268,7 @@ onAuthStateChanged(auth, async (user) => {
     setBtnState(false);
     startIdleLogoutTimer();
     startActiveStatusCheck();
+    startSessionGuard(user);
   } else {
     // Tear down every live Firestore listener and wipe the in-memory
     // caches on sign-out. Without this, the previous user's listeners
@@ -7278,6 +7284,17 @@ onAuthStateChanged(auth, async (user) => {
     setBtnState(false);
     stopIdleLogoutTimer();
     stopActiveStatusCheck();
+    stopSessionGuard();
+    // If we were booted for a device-limit / possible-leak reason, show it
+    // on the login screen so the person actually sees why.
+    if(pendingSignoutNotice){
+      const errEl = document.getElementById('loginErr');
+      if(errEl){
+        errEl.classList.remove('hidden'); errEl.classList.add('flex');
+        const t = document.getElementById('loginErrText'); if(t) t.textContent = pendingSignoutNotice;
+      }
+      pendingSignoutNotice = '';
+    }
     eventPopupShownThisLoad = false;
   }
 });
@@ -7333,6 +7350,101 @@ function startActiveStatusCheck(){
 function stopActiveStatusCheck(){
   if(activeStatusCheckTimer){ clearInterval(activeStatusCheckTimer); activeStatusCheckTimer = null; }
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Concurrent-login guard (per-ID device limit).
+
+   Every open session registers a doc in `sessions/{id}` and heartbeats it.
+   Each session watches all live sessions for its own account: if more than
+   the account's allowed number of devices are active, the OLDEST ones sign
+   themselves out — newest login wins, exactly like an online game booting
+   your other device. A Master ID defaults to 1 device, so a second login
+   anywhere kicks the first and shows a "logged in elsewhere" warning — the
+   tell-tale that the password may have leaked. Showroom/Normal IDs default
+   to 3 devices and can be set per account (maxSessions on the profile).
+
+   Purely client-enforced (no Cloud Functions on the free tier), so it's a
+   deterrent and a leak signal, not hard security. NOTE: your Firestore
+   rules must allow signed-in users to read/write the `sessions` collection
+   for this to work.
+   ───────────────────────────────────────────────────────────────────── */
+const SESSION_HEARTBEAT_MS = 45 * 1000;
+const SESSION_STALE_MS = 150 * 1000;   // a session silent this long is treated as gone
+let MY_SESSION_ID = null;
+let sessionHeartbeatTimer = null;
+let sessionListenerUnsub = null;
+let pendingSignoutNotice = '';
+
+function sessionDeviceLabel(){
+  const ua = navigator.userAgent || '';
+  let os = /Android/i.test(ua)?'Android' : /iPhone|iPad|iPod/i.test(ua)?'iOS' : /Windows/i.test(ua)?'Windows' : /Mac/i.test(ua)?'Mac' : /Linux/i.test(ua)?'Linux' : 'Device';
+  let br = /Edg/i.test(ua)?'Edge' : /Chrome/i.test(ua)?'Chrome' : /Firefox/i.test(ua)?'Firefox' : /Safari/i.test(ua)?'Safari' : 'Browser';
+  return `${br} on ${os}`;
+}
+
+async function startSessionGuard(user){
+  try{
+    stopSessionGuard(true); // clear any prior timers/listener without deleting a doc we're about to replace
+    MY_SESSION_ID = Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10);
+    const sref = doc(db,'sessions', MY_SESSION_ID);
+    const now = Date.now();
+    await setDoc(sref, {
+      uid: user.uid, email: user.email || currentUserEmail || '', name: currentUserName || '',
+      role: currentUserRole || 'staff', device: sessionDeviceLabel(),
+      createdAt: now, lastActive: now, revoked: false
+    });
+    // Heartbeat keeps this session "fresh" so closed tabs age out on their own.
+    sessionHeartbeatTimer = setInterval(()=>{
+      updateDoc(sref, { lastActive: Date.now() }).catch(()=>{});
+    }, SESSION_HEARTBEAT_MS);
+    pruneStaleSessions(user.uid);
+
+    sessionListenerUnsub = onSnapshot(
+      query(collection(db,'sessions'), where('uid','==', user.uid)),
+      snap => {
+        const t = Date.now();
+        const fresh = snap.docs.map(d=>({ id:d.id, ...d.data() }))
+          .filter(s => s.lastActive && (t - s.lastActive) < SESSION_STALE_MS);
+        // newest first; stable tiebreak by id so every device agrees who stays
+        fresh.sort((a,b)=> (b.createdAt||0)-(a.createdAt||0) || (a.id < b.id ? 1 : -1));
+        const lim = Math.max(1, currentUserMaxSessions || 1);
+        const myDoc = snap.docs.find(d=>d.id===MY_SESSION_ID);
+        const revokedMe = myDoc && myDoc.data().revoked === true;
+        const myRank = fresh.findIndex(s=>s.id===MY_SESSION_ID);
+        if(revokedMe || (myRank >= 0 && myRank >= lim)){
+          pendingSignoutNotice = (currentUserRole==='owner')
+            ? 'Signed out: this Master ID just logged in on another device. If that wasn\u2019t you, change your password now.'
+            : 'Signed out: this ID is now in use on more devices than allowed.';
+          stopSessionGuard();
+          signOut(auth);
+        }
+      },
+      err => console.error('session guard listener failed', err)
+    );
+  }catch(e){ console.error('startSessionGuard failed', e); }
+}
+
+function stopSessionGuard(keepDoc){
+  if(sessionHeartbeatTimer){ clearInterval(sessionHeartbeatTimer); sessionHeartbeatTimer = null; }
+  if(sessionListenerUnsub){ try{ sessionListenerUnsub(); }catch{} sessionListenerUnsub = null; }
+  if(!keepDoc && MY_SESSION_ID){
+    const id = MY_SESSION_ID; MY_SESSION_ID = null;
+    deleteDoc(doc(db,'sessions', id)).catch(()=>{});
+  }
+}
+
+async function pruneStaleSessions(uid){
+  try{
+    const qs = await getDocs(query(collection(db,'sessions'), where('uid','==', uid)));
+    const t = Date.now();
+    qs.forEach(d=>{
+      const s = d.data();
+      if(!s.lastActive || (t - s.lastActive) > SESSION_STALE_MS * 2){ deleteDoc(d.ref).catch(()=>{}); }
+    });
+  }catch(e){ /* best-effort cleanup only */ }
+}
+// Free the seat if the tab is closed outright (no more heartbeats).
+window.addEventListener('beforeunload', ()=>{ try{ if(MY_SESSION_ID) deleteDoc(doc(db,'sessions', MY_SESSION_ID)); }catch{} });
 
 function setBtnState(loading) {
   const btn = document.getElementById('loginBtn');
@@ -7477,6 +7589,22 @@ window.signOutFromSidebar = ()=>signOut(auth);
     zone.appendChild(card);
     zone.appendChild(input); // ensure the input stays inside the label
 
+    // Layout: make the drop zone full-width and drop the action buttons
+    // (Sample Template / Import Rows / Restore) into a row *below* it,
+    // instead of squeezed to the right — matches the reference mock.
+    const parent = zone.parentElement;
+    if(parent){
+      parent.classList.remove('sm:flex-row','sm:items-center','items-stretch','items-center');
+      parent.classList.add('flex-col');
+      const btns = Array.from(parent.children).filter(c => c.tagName === 'BUTTON');
+      if(btns.length){
+        const row = document.createElement('div');
+        row.className = 'flex gap-3 w-full mt-1';
+        btns.forEach(b => { b.classList.remove('whitespace-nowrap'); b.classList.add('flex-1','justify-center'); row.appendChild(b); });
+        parent.appendChild(row);
+      }
+    }
+
     // Explicitly open the picker on click. The native "label wraps a hidden
     // input" activation turned flaky after this restructure (dead on some
     // browsers), so drive it directly and prevent the double-trigger.
@@ -7542,6 +7670,7 @@ window.togglePasswordVisibility = ()=>{
 
 const AVATAR_COLORS = ['#5A4740','#5A4740','#059669','#7C3AED','#DC2626','#0891B2','#DB2777','#4B5563'];
 let currentUserRole = 'owner'; // backward-compatible default — see loadProfile
+let currentUserMaxSessions = 1; // how many devices this ID may use at once (set in loadProfile)
 let currentUserAvatarColor = AVATAR_COLORS[0];
 let currentUserPhoto = ''; // base64 data URL, empty if none set
 let currentUserBio = '';
@@ -7620,6 +7749,13 @@ async function loadProfile(uid) {
     } else {
       currentUserRole = data.role;
     }
+    // Device limit for the concurrent-login guard. Master ID defaults to a
+    // single device (so a second login is a leak signal); other IDs default
+    // to 3 (showroom staff share a login across a few devices). Either can
+    // be overridden per account via maxSessions on the profile.
+    currentUserMaxSessions = (currentUserRole === 'owner')
+      ? (Number(data.maxSessions) > 0 ? Number(data.maxSessions) : 1)
+      : (Number(data.maxSessions) > 0 ? Number(data.maxSessions) : 3);
     currentUserAvatarColor = data.avatarColor || AVATAR_COLORS[0];
     currentUserPhoto = data.photoBase64 || '';
     currentUserBio = data.bio || '';
@@ -8024,6 +8160,13 @@ function renderTeamMembersList(){
       </div>
       ${!isActive ? '<span class="badge badge-red flex-shrink-0">Disabled</span>' : ''}
       ${currentUserRole==='owner' ? `
+      <div class="flex items-center gap-1.5 flex-shrink-0" title="Devices allowed at once">
+        <i class="fas fa-mobile-screen text-slate-300 text-xs"></i>
+        <input type="number" min="1" max="20" value="${Number(m.maxSessions)>0?Number(m.maxSessions):(m.role==='owner'?1:3)}"
+          onchange="setStaffMaxSessions('${m.id}', this.value)"
+          class="w-12 bg-slate-50 border border-slate-200 rounded-md px-1.5 py-1 text-xs text-center outline-none focus:border-bajaj-blue"/>
+      </div>` : ''}
+      ${currentUserRole==='owner' ? `
       <div class="flex items-center gap-1.5 flex-shrink-0">
         ${!isSelf ? `<button onclick="sendStaffPasswordReset('${escapeJsAttr(m.email)}')" title="Send password reset" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-bajaj-blue hover:border-bajaj-blue transition-all"><i class="fas fa-key text-xs"></i></button>
         <button onclick="toggleStaffActive('${m.id}', ${isActive})" title="${isActive?'Disable':'Enable'}" class="w-8 h-8 flex items-center justify-center rounded-lg border ${isActive?'border-red-200 text-red-500 hover:bg-red-50':'border-emerald-200 text-emerald-600 hover:bg-emerald-50'} transition-all"><i class="fas ${isActive?'fa-user-slash':'fa-user-check'} text-xs"></i></button>` : ''}
@@ -8038,6 +8181,9 @@ window.addTeamMember = async ()=>{
   const email = document.getElementById('newStaffEmail').value.trim();
   const pass = document.getElementById('newStaffPass').value;
   const role = document.getElementById('newStaffRole').value === 'recondition' ? 'recondition' : 'staff';
+  let maxSessions = parseInt(document.getElementById('newStaffMaxSessions')?.value, 10);
+  if(!(maxSessions >= 1)) maxSessions = 3;
+  if(maxSessions > 20) maxSessions = 20;
   if(!name || !email){ toast('Name and email are required.','err'); return; }
   if(!/^\S+@\S+\.\S+$/.test(email)){ toast('Enter a valid email address.','err'); return; }
   if(!pass || pass.length < 6){ toast('Temporary password must be at least 6 characters.','err'); return; }
@@ -8047,7 +8193,7 @@ window.addTeamMember = async ()=>{
     // near the top of this file for why).
     const cred = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
     await setDoc(doc(db,'profiles',cred.user.uid), {
-      name, email, role, active:true, avatarColor: AVATAR_COLORS[teamMembers.length % AVATAR_COLORS.length]
+      name, email, role, active:true, maxSessions, avatarColor: AVATAR_COLORS[teamMembers.length % AVATAR_COLORS.length]
     });
     await signOut(secondaryAuth); // clean up the temporary session
     logActivity('Team Member Added', 'profiles', { model: name, customerName: email });
@@ -8056,12 +8202,26 @@ window.addTeamMember = async ()=>{
     document.getElementById('newStaffEmail').value = '';
     document.getElementById('newStaffPass').value = '';
     document.getElementById('newStaffRole').value = 'staff';
+    const msEl = document.getElementById('newStaffMaxSessions'); if(msEl) msEl.value = '3';
     document.getElementById('newStaffRole')?._csSync?.();
     await loadTeamMembers();
   }catch(e){
     const msg = friendlyError(e);
     toast('Error: '+msg,'err');
   }
+};
+
+window.setStaffMaxSessions = async (uid, value)=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can change device limits.','err'); return; }
+  let n = parseInt(value, 10);
+  if(!(n >= 1)) n = 1;
+  if(n > 20) n = 20;
+  try{
+    await updateDoc(doc(db,'profiles',uid), { maxSessions: n });
+    const member = teamMembers.find(m=>m.id===uid);
+    logActivity('Device Limit Changed', 'profiles', { model: (member?.name||''), customerName: n + ' devices' });
+    toast(`Device limit set to ${n}.`);
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 window.toggleStaffActive = async (uid, currentlyActive)=>{
