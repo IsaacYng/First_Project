@@ -3204,6 +3204,9 @@
           <button id="bulkTransferInvBtn" onclick="bulkTransferSelectedInv()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
             <i class="fas fa-right-left text-[11px]"></i> Move to HH (<span id="bulkTransferInvCount">0</span>)
           </button>
+          <button id="bulkExportInvBtn" onclick="exportSelectedInv()" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+            <i class="fas fa-file-excel text-[11px]"></i> Export (<span id="bulkExportInvCount">0</span>)
+          </button>
           <div id="bulkStatusInvWrap" class="relative hidden">
             <button onclick="toggleBulkStatusMenu('inv')" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
               <i class="fas fa-tag text-[11px]"></i> Set Status <i class="fas fa-chevron-down text-[9px]"></i>
@@ -3429,6 +3432,9 @@
           </button>
           <button id="bulkTransferHHBtn" onclick="bulkTransferSelectedHH()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
             <i class="fas fa-right-left text-[11px]"></i> Move to Inventory (<span id="bulkTransferHHCount">0</span>)
+          </button>
+          <button id="bulkExportHHBtn" onclick="exportSelectedHH()" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+            <i class="fas fa-file-excel text-[11px]"></i> Export (<span id="bulkExportHHCount">0</span>)
           </button>
           <div id="bulkStatusHHWrap" class="relative hidden">
             <button onclick="toggleBulkStatusMenu('hh')" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
@@ -6040,6 +6046,14 @@
     <div class="overflow-y-auto p-5">
       <p id="teamModalDesc" class="text-[11px] text-slate-400 mb-4"></p>
       <div id="teamMembersList" class="flex flex-col gap-2 mb-5"></div>
+      <div id="activeDevicesSection" class="hidden border-t border-slate-100 pt-4 mb-5">
+        <div class="flex items-center justify-between mb-1">
+          <div class="text-sm font-bold text-slate-700"><i class="fas fa-mobile-screen-button text-slate-400 mr-1"></i> Active Devices</div>
+          <span id="activeDevicesCount" class="text-[10px] font-bold text-slate-400 bg-slate-100 rounded-full px-2 py-0.5">0</span>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-3">Every device currently signed in. Tap sign-out to boot a device — useful if an ID looks leaked.</p>
+        <div id="activeDevicesList" class="flex flex-col gap-2"></div>
+      </div>
       <div id="teamAddSection" class="hidden border-t border-slate-100 pt-4">
         <div class="text-sm font-bold text-slate-700 mb-3"><i class="fas fa-user-plus text-slate-400 mr-1"></i> Add a Team Member</div>
         <div class="flex flex-col gap-2.5">
@@ -8139,13 +8153,78 @@ window.openTeamModal = async ()=>{
     ? "Everyone here can sign in and use this admin panel. Disabling someone blocks their login immediately — it doesn't erase their account, so it can be undone anytime."
     : "Everyone who can sign into this admin panel. Only a Master ID can add someone, disable an account, or send a password reset.";
   document.getElementById('teamAddSection').classList.toggle('hidden', !isMaster);
+  document.getElementById('activeDevicesSection').classList.toggle('hidden', !isMaster);
   document.getElementById('teamFormModal').classList.remove('hidden');
   document.getElementById('teamFormModal').classList.add('flex');
   await loadTeamMembers();
+  if(isMaster) startActiveDevicesWatch();
 };
 window.closeTeamModal = ()=>{
   document.getElementById('teamFormModal').classList.add('hidden');
   document.getElementById('teamFormModal').classList.remove('flex');
+  stopActiveDevicesWatch();
+};
+
+/* ─── Active Devices manager (Master): live view of all signed-in
+   sessions, with one-tap remote sign-out (sets revoked → that device's
+   own session listener boots it). ─── */
+let activeDevicesUnsub = null;
+function startActiveDevicesWatch(){
+  stopActiveDevicesWatch();
+  const listEl = document.getElementById('activeDevicesList');
+  if(listEl) listEl.innerHTML = `<div class="py-6 text-center text-slate-400 text-xs"><i class="fas fa-circle-notch fa-spin mr-1"></i> Loading…</div>`;
+  try{
+    activeDevicesUnsub = onSnapshot(collection(db,'sessions'), snap=>{
+      const t = Date.now();
+      const fresh = snap.docs.map(d=>({ id:d.id, ...d.data() }))
+        .filter(s => s.lastActive && (t - s.lastActive) < SESSION_STALE_MS && !s.revoked)
+        .sort((a,b)=> (b.lastActive||0)-(a.lastActive||0));
+      renderActiveDevices(fresh);
+    }, err=>{
+      console.error('active devices listener failed', err);
+      if(listEl) listEl.innerHTML = `<div class="py-4 text-center text-red-400 text-xs">Couldn't load devices (check Firestore rules for the sessions collection).</div>`;
+    });
+  }catch(e){ console.error(e); }
+}
+function stopActiveDevicesWatch(){
+  if(activeDevicesUnsub){ try{ activeDevicesUnsub(); }catch{} activeDevicesUnsub = null; }
+}
+function renderActiveDevices(list){
+  const listEl = document.getElementById('activeDevicesList');
+  const countEl = document.getElementById('activeDevicesCount');
+  if(countEl) countEl.textContent = list.length;
+  if(!listEl) return;
+  if(!list.length){ listEl.innerHTML = `<div class="py-4 text-center text-slate-400 text-xs">No active devices right now.</div>`; return; }
+  listEl.innerHTML = list.map(s=>{
+    const when = s.createdAt && s.createdAt.toMillis ? s.createdAt.toMillis() : (s.lastActive||Date.now());
+    const ago = Math.max(0, Math.floor((Date.now()-when)/60000));
+    const agoTxt = ago<1 ? 'just now' : ago<60 ? `${ago}m ago` : `${Math.floor(ago/60)}h ago`;
+    const isMe = s.id === MY_SESSION_ID;
+    const roleTag = s.role==='owner' ? '<span class="text-[9px] font-extrabold text-amber-700 bg-amber-100 rounded px-1.5 py-0.5 uppercase">Master</span>' : '';
+    return `<div class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/60">
+      <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center flex-shrink-0"><i class="fas fa-mobile-screen text-slate-400 text-xs"></i></div>
+      <div class="min-w-0 flex-1">
+        <div class="text-xs font-bold text-slate-700 truncate flex items-center gap-1.5">${escapeHtml(s.name||s.email||'Unknown')} ${roleTag} ${isMe?'<span class="text-[9px] text-emerald-600 font-bold">(this device)</span>':''}</div>
+        <div class="text-[10.5px] text-slate-400 truncate">${escapeHtml(s.device||'Device')} · signed in ${agoTxt}</div>
+      </div>
+      ${isMe ? '' : `<button onclick="revokeDeviceSession('${s.id}')" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-red-200 text-red-500 text-[11px] font-bold hover:bg-red-500 hover:text-white hover:border-red-500 transition-all flex-shrink-0"><i class="fas fa-right-from-bracket text-[10px]"></i> Sign out</button>`}
+    </div>`;
+  }).join('');
+}
+window.revokeDeviceSession = async (sessionId)=>{
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can sign out devices.','err'); return; }
+  const ok = await showConfirm({
+    title: 'Sign out this device?',
+    message: 'That device will be signed out within a few seconds and sent back to the login screen.',
+    okText: 'Sign it out', okColorClass: 'text-red-500 hover:bg-red-50',
+    iconClass: 'fa-right-from-bracket', iconColor: '#C0392B', iconBg: '#FBEBE9'
+  });
+  if(!ok) return;
+  try{
+    await updateDoc(doc(db,'sessions', sessionId), { revoked: true });
+    logActivity('Device Signed Out', 'sessions', { model: 'remote sign-out' });
+    toast('Device signed out.');
+  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
 async function loadTeamMembers(){
@@ -10257,6 +10336,25 @@ function populateModelFilterDropdown(type, dataArr, currentValue){
   label.textContent = effectiveValue==='all' ? 'All Models' : effectiveValue;
 }
 
+/* Aging stock: how long a unit has sat in stock, flagged past a threshold
+   so slow-moving units don't get forgotten on the shelf. */
+const AGING_STOCK_DAYS = 60;
+function stockAgeDays(u){
+  const raw = u.addedAt;
+  if(!raw) return null;
+  const d = raw.toDate ? raw.toDate() : new Date(raw);
+  if(isNaN(d.getTime())) return null;
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+function agingBadgeHTML(u){
+  const inStock = (u.status||'Available')==='Available' && u.status!=='Sold' && u.status!=='Booked' && u.hhFlag!=='Hide';
+  if(!inStock) return '';
+  const age = stockAgeDays(u);
+  if(age===null || age < AGING_STOCK_DAYS) return '';
+  const cls = age>=120 ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700';
+  return `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md ${cls} text-[9px] font-extrabold uppercase tracking-wide align-middle" title="In stock ${age} days"><i class="fas fa-clock text-[8px]"></i> ${age}d</span>`;
+}
+
 function getFilteredInv(){
   let base = invData;
   if(invStatusFilter === 'HHSales'){
@@ -10316,6 +10414,7 @@ function renderInvTable(list){
       <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">
         ${highlightMatch(s.model, q)}
         ${isDup ? `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 text-red-600 text-[9px] font-extrabold uppercase tracking-wide align-middle"><i class="fas fa-triangle-exclamation text-[8px]"></i> Duplicate</span>` : ''}
+        ${agingBadgeHTML(s)}
       </td>
       <td class="px-4 py-3" data-th="Chassis No"><code class="${isDup?'bg-red-50 text-red-700 border-red-200':'bg-slate-50 text-slate-600 border-slate-200'} text-xs px-2 py-0.5 rounded-md border font-mono">${highlightMatch(s.chassis, q)}</code></td>
       <td class="px-4 py-3" data-th="Engine No"><code class="${isDup?'bg-red-50 text-red-700 border-red-200':'bg-slate-50 text-slate-600 border-slate-200'} text-xs px-2 py-0.5 rounded-md border font-mono">${highlightMatch(s.engine, q)}</code></td>
@@ -10406,6 +10505,9 @@ function toggleBulkControls(scope, count){
   if(btn){ if(count>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); } else { btn.classList.add('hidden'); btn.classList.remove('flex'); } }
   const cnt = document.getElementById(map.cnt); if(cnt) cnt.textContent = count;
   const wrap = document.getElementById(map.wrap); if(wrap) wrap.classList.toggle('hidden', count===0);
+  const expBtn = document.getElementById(scope==='hh' ? 'bulkExportHHBtn' : 'bulkExportInvBtn');
+  if(expBtn){ if(count>0){ expBtn.classList.remove('hidden'); expBtn.classList.add('flex'); } else { expBtn.classList.add('hidden'); expBtn.classList.remove('flex'); } }
+  const expCnt = document.getElementById(scope==='hh' ? 'bulkExportHHCount' : 'bulkExportInvCount'); if(expCnt) expCnt.textContent = count;
   if(count===0){ const menu=document.getElementById(map.menu); if(menu) menu.classList.add('hidden'); }
 }
 window.toggleBulkStatusMenu = (scope)=>{
@@ -10536,6 +10638,30 @@ window.bulkSetStatusHH = (status)=>{
   if(blockIfReconditionOnly()) return;
   document.getElementById('bulkStatusHHMenu')?.classList.add('hidden');
   bulkSetStatus('hh_inventory', hhInvData, selectedHHInvIds, status, ()=>{ selectedHHInvIds.clear(); setHHInvSelectMode(false); });
+};
+
+// Export just the ticked units to an Excel file.
+function exportUnitsToExcel(units, sheetName, filePrefix){
+  if(typeof XLSX === 'undefined'){ toast('Excel library still loading — try again in a moment.','err'); return; }
+  if(!units.length){ toast('Nothing selected to export.','err'); return; }
+  const rows = units.map(s=>({
+    'S.N': s.sn||'', 'Model': s.model||'', 'Chassis No': s.chassis||'', 'Engine No': s.engine||'',
+    'Reg No': s.regNo||'', 'Colour': s.color||'', 'Status': s.status||'Available',
+    'Customer': s.customerName||'', 'Days In Stock': (stockAgeDays(s)??''), 'Owner': s.ownerName||s.owner||''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  XLSX.writeFile(wb, `${filePrefix}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast(`${units.length} unit(s) exported.`);
+}
+window.exportSelectedInv = ()=>{
+  const units = [...selectedInvIds].map(id=>invData.find(x=>x.id===id)).filter(Boolean);
+  exportUnitsToExcel(units, 'Inventory', 'inventory_selected');
+};
+window.exportSelectedHH = ()=>{
+  const units = [...selectedHHInvIds].map(id=>hhInvData.find(x=>x.id===id)).filter(Boolean);
+  exportUnitsToExcel(units, 'HH Inventory', 'hh_inventory_selected');
 };
 
 window.deleteSelectedInvUnits = async ()=>{
@@ -10811,6 +10937,7 @@ function renderHHInvTable(){
       <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">
         ${escapeHtml(s.model||'—')}
         ${isDup ? `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 text-red-600 text-[9px] font-extrabold uppercase tracking-wide align-middle"><i class="fas fa-triangle-exclamation text-[8px]"></i> Duplicate</span>` : ''}
+        ${agingBadgeHTML(s)}
       </td>
       <td class="px-4 py-3 font-mono text-xs ${isDup?'text-red-700':'text-slate-500'}" data-th="Chassis No">${escapeHtml(s.chassis||'—')}</td>
       <td class="px-4 py-3 font-mono text-xs text-slate-500" data-th="Engine No">${escapeHtml(s.engine||'—')}</td>
