@@ -7904,7 +7904,7 @@ async function loadProfile(uid) {
     // finance options, upcoming melas, storage headroom, and Trash to
     // check something they removed). Everything else stays hidden.
     const RECON_FULL = ['exchange','exchangeSr'];
-    const RECON_READONLY = ['docs','storage','price','fin','events','trash','sheetTool'];
+    const RECON_READONLY = ['docs','storage','price','events','trash','sheetTool'];
     if(isRecondition){
       Object.entries(RECON_NAV_MAP).forEach(([key,id])=>{
         const keep = RECON_FULL.includes(key) || RECON_READONLY.includes(key);
@@ -19641,7 +19641,7 @@ window.switchSec=(sec)=>{
   // finances) that isn't their job to see, so every section but the two
   // Exchange ones redirects back here regardless of how the navigation
   // was triggered.
-  const RECON_ALLOWED_SECTIONS = ['exchange','exchangeSr','docs','storage','price','fin','events','trash','sheetTool'];
+  const RECON_ALLOWED_SECTIONS = ['exchange','exchangeSr','docs','storage','price','events','trash','sheetTool'];
   if(currentUserRole === 'recondition' && !RECON_ALLOWED_SECTIONS.includes(sec)){
     toast("Recondition ID doesn't have access to that section.",'err');
     sec = 'exchange';
@@ -19765,14 +19765,18 @@ window.runGlobalSearch = (q)=>{
   const MAX_PER_GROUP = 5;
   let html = '';
   let total = 0;
+  // Recondition IDs only work with old-bike trade-ins, so search shows them
+  // just Exchange Stock and the Price List — never inventory, chalans or
+  // contacts, which carry other customers' data they aren't meant to see.
+  const reconLimited = currentUserRole === 'recondition';
 
-  const invMatches = invData.filter(s => matches(s.model)||matches(s.chassis)||matches(s.engine)||matches(s.regNo)||matches(s.customerName)).slice(0, MAX_PER_GROUP);
+  const invMatches = reconLimited ? [] : invData.filter(s => matches(s.model)||matches(s.chassis)||matches(s.engine)||matches(s.regNo)||matches(s.customerName)).slice(0, MAX_PER_GROUP);
   if(invMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Inventory</div>`;
     html += invMatches.map(s => globalSearchResultRow('fa-warehouse','#059669', escapeHtml(s.model||'—'), `${escapeHtml(s.chassis||'')} · ${escapeHtml(s.status||'')}`, `window.jumpToSearchResult('inventory','${s.id}')`)).join('');
     total += invMatches.length;
   }
-  const hhMatches = hhInvData.filter(s => matches(s.model)||matches(s.chassis)||matches(s.engine)||matches(s.regNo)||matches(s.customerName)).slice(0, MAX_PER_GROUP);
+  const hhMatches = reconLimited ? [] : hhInvData.filter(s => matches(s.model)||matches(s.chassis)||matches(s.engine)||matches(s.regNo)||matches(s.customerName)).slice(0, MAX_PER_GROUP);
   if(hhMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">HH Inventory</div>`;
     html += hhMatches.map(s => globalSearchResultRow('fa-tents','#0EA5E9', escapeHtml(s.model||'—'), `${escapeHtml(s.chassis||'')} · ${escapeHtml(s.status||'')}`, `window.jumpToSearchResult('hh_inventory','${s.id}')`)).join('');
@@ -19784,13 +19788,13 @@ window.runGlobalSearch = (q)=>{
     html += bikeMatches.map(b => globalSearchResultRow('fa-tags','#5A4740', escapeHtml(b.name||'—'), `Rs. ${(b.price||0).toLocaleString('en-IN')}`, `window.jumpToSearchResult('price','${b.id}')`)).join('');
     total += bikeMatches.length;
   }
-  const chalanMatches = chalanData.filter(c => matches(c.model)||matches(c.chassis)||matches(c.custName)||matches(c.chalanNo)).slice(0, MAX_PER_GROUP);
+  const chalanMatches = reconLimited ? [] : chalanData.filter(c => matches(c.model)||matches(c.chassis)||matches(c.custName)||matches(c.chalanNo)).slice(0, MAX_PER_GROUP);
   if(chalanMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Chalan Records</div>`;
     html += chalanMatches.map(c => globalSearchResultRow('fa-file-invoice','#0EA5E9', escapeHtml(c.custName||c.model||'—'), `${escapeHtml(c.model||'')} · ${escapeHtml(c.chalanNo||'')}`, `window.jumpToSearchResult('chalans','${c.id}')`)).join('');
     total += chalanMatches.length;
   }
-  const impMatches = importantData.filter(a => matches(a.value1)||matches(a.value2)||matches(a.note)).slice(0, MAX_PER_GROUP);
+  const impMatches = reconLimited ? [] : importantData.filter(a => matches(a.value1)||matches(a.value2)||matches(a.note)).slice(0, MAX_PER_GROUP);
   if(impMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Important Info</div>`;
     html += impMatches.map(a => globalSearchResultRow(a.type==='link'?'fa-link':'fa-user','#5A4740', escapeHtml(a.value1||'—'), escapeHtml(a.value2||''), `window.jumpToSearchResult('important','${a.id}')`)).join('');
