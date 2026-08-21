@@ -2417,6 +2417,8 @@
   @keyframes skelShimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
   .skel-num{ width:58px; height:32px; }
   .skel-line{ height:12px; border-radius:5px; }
+  /* Full-section loading shimmer shown briefly on every nav switch */
+  .nav-switch-loader{ position:absolute; inset:0; background:var(--bg-page); z-index:45; display:flex; flex-direction:column; gap:14px; padding:24px 20px; transition:opacity .25s ease; overflow:hidden; }
 
   /* ═══════════════════════════════════════════════════════════════════
      STORAGE OVERVIEW — "Cloudly" redesign, per reference screenshot.
@@ -19766,6 +19768,38 @@ function ensureSectionData(sec){
    flow through the CSS variables defined at :root so the palette stays
    centralized and easy to refine as one thing later. */
 
+// A ~1s loading shimmer over the content area, shown on every section
+// switch so each page opens with a consistent "loading" feel instead of
+// popping in. Rapid re-clicks just reset the timer (no flicker/bug).
+let navLoaderTimer = null;
+function showNavLoader(){
+  const scroll = document.querySelector('.main-scroll');
+  if(!scroll) return;
+  if(getComputedStyle(scroll).position === 'static') scroll.style.position = 'relative';
+  let ov = document.getElementById('navSwitchLoader');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'navSwitchLoader';
+    ov.className = 'nav-switch-loader';
+    scroll.appendChild(ov);
+  }
+  ov.innerHTML =
+    '<div class="skel" style="width:150px;height:14px;border-radius:5px"></div>'+
+    '<div class="skel" style="width:280px;height:40px;border-radius:10px;margin-bottom:8px"></div>'+
+    '<div style="display:flex;gap:14px;flex-wrap:wrap">'+
+      Array(4).fill('<div class="skel" style="flex:1;min-width:130px;height:88px;border-radius:16px"></div>').join('')+
+    '</div>'+
+    '<div class="skel" style="width:100%;height:190px;border-radius:16px;margin-top:6px"></div>'+
+    '<div class="skel" style="width:100%;height:120px;border-radius:16px"></div>';
+  ov.style.display = 'flex';
+  ov.style.opacity = '1';
+  clearTimeout(navLoaderTimer);
+  navLoaderTimer = setTimeout(()=>{
+    ov.style.opacity = '0';
+    setTimeout(()=>{ if(ov) ov.style.display = 'none'; }, 250);
+  }, 900);
+}
+
 window.switchSec=(sec)=>{
   // A Recondition ID exists to work with old-bike trade-ins and their
   // Blue Books specifically — sending them anywhere else in the app
@@ -19801,6 +19835,7 @@ window.switchSec=(sec)=>{
   const target = document.getElementById(SEC_IDS[sec] || 'secStock');
   target.classList.add('active');
   target.style.display = 'block';
+  showNavLoader();
   // Sections share one scroll container (.main-scroll), so leaving a
   // previous page mid-scroll used to carry that scroll position straight
   // into whatever section opened next — cutting its own heading off under
