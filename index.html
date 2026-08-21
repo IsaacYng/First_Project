@@ -3725,6 +3725,12 @@
           <button id="deleteSelectedExBtn" onclick="deleteSelectedExchangeUnits()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all">
             <i class="fas fa-trash-can text-[11px]"></i> Delete Selected (<span id="deleteSelectedExCount">0</span>)
           </button>
+          <button id="bulkTransferExBtn" onclick="bulkTransferExToShowroom()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+            <i class="fas fa-right-left text-[11px]"></i> Move to Showroom (<span id="bulkTransferExCount">0</span>)
+          </button>
+          <button id="bulkExportExBtn" onclick="exportSelectedEx()" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+            <i class="fas fa-file-excel text-[11px]"></i> Export (<span id="bulkExportExCount">0</span>)
+          </button>
           <button id="cancelSelectExBtn" onclick="setExchangeSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
             <i class="fas fa-xmark text-[11px]"></i> Cancel Select
           </button>
@@ -3935,6 +3941,12 @@
           </button>
           <button id="deleteSelectedExSrBtn" onclick="deleteSelectedExchangeSrUnits()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all">
             <i class="fas fa-trash-can text-[11px]"></i> Delete Selected (<span id="deleteSelectedExSrCount">0</span>)
+          </button>
+          <button id="bulkTransferExSrBtn" onclick="bulkTransferExSrToMela()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
+            <i class="fas fa-right-left text-[11px]"></i> Move to Mela (<span id="bulkTransferExSrCount">0</span>)
+          </button>
+          <button id="bulkExportExSrBtn" onclick="exportSelectedExSr()" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+            <i class="fas fa-file-excel text-[11px]"></i> Export (<span id="bulkExportExSrCount">0</span>)
           </button>
           <button id="cancelSelectExSrBtn" onclick="setExchangeSrSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
             <i class="fas fa-xmark text-[11px]"></i> Cancel Select
@@ -11868,19 +11880,23 @@ window.openHHStockPreview = async function(){
 function areaStockKey(model,color){ return (model+'__'+color).replace(/[\/\.\#\$\[\]]/g,'_'); }
 
 let areaSeedAttempted = false;
+const DEFAULT_AREAS = ['Showroom','Workshop']; // always present, can't be removed
 async function seedDefaultAreas(){
   if(areaSeedAttempted) return;
+  if(currentUserRole === 'recondition') return; // recondition can't write areas
   areaSeedAttempted = true;
   try{
-    await addDoc(collection(db,"stock_areas"),{name:'Showroom'});
-    await addDoc(collection(db,"stock_areas"),{name:'Workshop'});
+    const have = new Set(stockAreas.map(a=>String(a.name||'').toLowerCase()));
+    for(const name of DEFAULT_AREAS){
+      if(!have.has(name.toLowerCase())) await addDoc(collection(db,"stock_areas"),{name});
+    }
   }catch(e){ console.error('seed default areas failed', e); }
 }
 
 function loadStockAreas(){
   onSnapshot(collection(db,"stock_areas"), snap=>{
     stockAreas = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
-    if(!stockAreas.length) seedDefaultAreas();
+    seedDefaultAreas();
     renderAreaStockTable();
     if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err=>console.error('stock_areas listener failed', err));
@@ -11910,6 +11926,10 @@ window.addStockArea = async ()=>{
 };
 
 window.removeStockArea = async (id, name)=>{
+  if(DEFAULT_AREAS.some(d=>d.toLowerCase()===String(name||'').toLowerCase())){
+    toast(`${name} is a default area — it can't be removed.`,'warn');
+    return;
+  }
   const proceed = await showConfirm({
     title:'Remove this area?',
     message:`Remove <b>${name}</b> from the area list? This column will disappear from the table (the numbers stay saved though — they'll show up again if you add it back).`,
@@ -12006,7 +12026,7 @@ function renderAreaStockTable(){
   head.innerHTML = `<th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
     <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Colour</th>
     ${stockAreas.map(a=>`<th class="px-3 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">
-        ${escapeHtml(a.name)}${areaEditMode ? `<button class="area-remove-btn" onclick="removeStockArea('${a.id}','${escapeJsAttr(a.name)}')" title="Remove area"><i class="fas fa-xmark"></i></button>` : ''}
+        ${escapeHtml(a.name)}${areaEditMode && !DEFAULT_AREAS.some(d=>d.toLowerCase()===String(a.name||'').toLowerCase()) ? `<button class="area-remove-btn" onclick="removeStockArea('${a.id}','${escapeJsAttr(a.name)}')" title="Remove area"><i class="fas fa-xmark"></i></button>` : ''}
       </th>`).join('')}
     <th class="px-4 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Row Total</th>`;
 
@@ -12949,6 +12969,7 @@ function updateDeleteSelectedExBtn(){
   countEl.textContent = selectedExchangeIds.size;
   if(selectedExchangeIds.size>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); }
   else { btn.classList.add('hidden'); btn.classList.remove('flex'); }
+  toggleExtraExBtns('ex', selectedExchangeIds.size);
   if(cancelBtn){
     if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
     else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
@@ -12984,6 +13005,76 @@ window.toggleSelectAllExchange = (checked)=>{
   else visibleIds.forEach(id=>selectedExchangeIds.delete(id));
   renderExchangeTable();
 };
+
+/* ─── Bulk transfer + export (Mela ↔ Showroom Exchange) ─── */
+function toggleExtraExBtns(scope, count){
+  const t = scope==='exSr' ? {tf:'bulkTransferExSrBtn', tc:'bulkTransferExSrCount', xb:'bulkExportExSrBtn', xc:'bulkExportExSrCount'}
+                           : {tf:'bulkTransferExBtn',   tc:'bulkTransferExCount',   xb:'bulkExportExBtn',   xc:'bulkExportExCount'};
+  [['tf','tc'],['xb','xc']].forEach(([bk,ck])=>{
+    const b = document.getElementById(t[bk]); const c = document.getElementById(t[ck]);
+    if(b){ if(count>0){ b.classList.remove('hidden'); b.classList.add('flex'); } else { b.classList.add('hidden'); b.classList.remove('flex'); } }
+    if(c) c.textContent = count;
+  });
+}
+async function bulkTransferExchange(fromColl, toColl, dataArr, idSet, toLabel, clearSel){
+  if(blockIfReconditionOnly && false) return; // recondition CAN manage exchange, so no block here
+  const ids = [...idSet];
+  if(!ids.length) return;
+  const ok = await showConfirm({
+    title: `Move ${ids.length} unit${ids.length!==1?'s':''} to ${toLabel} Exchange?`,
+    message: `These ${ids.length} selected trade-in(s) move to the ${toLabel} Exchange list. Valuation, document status (Blue Book / Key / File) and remarks all carry over. Blue Book files stay linked (they're matched by Reg No + customer name).`,
+    okText: 'Yes, Move', okColorClass: 'text-bajaj-blue hover:bg-blue-50',
+    iconClass: 'fa-right-left', iconColor: '#5A4740', iconBg: '#F3E9E1'
+  });
+  if(!ok) return;
+  try{
+    const targets = ids.map(id=>dataArr.find(x=>x.id===id)).filter(Boolean);
+    let nextSn = await getAccurateNextSn(toColl);
+    for(let i=0;i<targets.length;i+=200){
+      const chunk = targets.slice(i, i+200);
+      const batch = writeBatch(db);
+      chunk.forEach((s, j)=>{
+        batch.set(doc(collection(db, toColl)), {
+          sn: nextSn + i + j,
+          model: s.model||'', makeYear: s.makeYear||'', regNo: s.regNo||'',
+          valuation: s.valuation||0, blueBook: s.blueBook||'', key: s.key||'', file: s.file||'',
+          customerName: s.customerName||'', sendTo: s.sendTo||'', remarks: s.remarks||'',
+          status: s.status||'In Stock', addedAt: new Date()
+        });
+        batch.delete(doc(db, fromColl, s.id));
+      });
+      await batch.commit();
+    }
+    logActivity(`Bulk Moved to ${toLabel} Exchange`, fromColl, { model: `${targets.length} unit(s)` });
+    toast(`${targets.length} unit(s) moved to ${toLabel} Exchange.`);
+    clearSel();
+  }catch(e){ toast('Transfer failed: '+friendlyError(e),'err'); }
+}
+window.bulkTransferExToShowroom = ()=>
+  bulkTransferExchange('exchange_stock','exchange_stock_showroom', exchangeData, selectedExchangeIds, 'Showroom',
+    ()=>{ selectedExchangeIds.clear(); setExchangeSelectMode(false); });
+window.bulkTransferExSrToMela = ()=>
+  bulkTransferExchange('exchange_stock_showroom','exchange_stock', exchangeSrData, selectedExchangeSrIds, 'Mela',
+    ()=>{ selectedExchangeSrIds.clear(); setExchangeSrSelectMode(false); });
+
+function exportExchangeToExcel(units, sheetName, filePrefix){
+  if(typeof XLSX === 'undefined'){ toast('Excel library still loading — try again.','err'); return; }
+  if(!units.length){ toast('Nothing selected to export.','err'); return; }
+  const rows = units.map(s=>({
+    'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg No': s.regNo||'',
+    'Valuation': s.valuation||0, 'Blue Book': s.blueBook||'', 'Key': s.key||'', 'File': s.file||'',
+    'Customer': s.customerName||'', 'Send To': s.sendTo||'', 'Status': s.status||'', 'Remarks': s.remarks||''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  XLSX.writeFile(wb, `${filePrefix}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast(`${units.length} unit(s) exported.`);
+}
+window.exportSelectedEx = ()=>
+  exportExchangeToExcel([...selectedExchangeIds].map(id=>exchangeData.find(x=>x.id===id)).filter(Boolean), 'Mela Exchange', 'mela_exchange_selected');
+window.exportSelectedExSr = ()=>
+  exportExchangeToExcel([...selectedExchangeSrIds].map(id=>exchangeSrData.find(x=>x.id===id)).filter(Boolean), 'Showroom Exchange', 'showroom_exchange_selected');
 
 window.deleteSelectedExchangeUnits = async ()=>{
   if(!selectedExchangeIds.size) return;
@@ -13689,6 +13780,7 @@ function updateDeleteSelectedExSrBtn(){
   countEl.textContent = selectedExchangeSrIds.size;
   if(selectedExchangeSrIds.size>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); }
   else { btn.classList.add('hidden'); btn.classList.remove('flex'); }
+  toggleExtraExBtns('exSr', selectedExchangeSrIds.size);
   if(cancelBtn){
     if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
     else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
