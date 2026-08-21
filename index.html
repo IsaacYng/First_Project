@@ -2204,6 +2204,7 @@
      are deliberately NOT in this list: those they fully control. */
   body.role-recondition #secPrice .kebab-btn,
   body.role-recondition #secPrice .cta-primary,
+  body.role-recondition #secPrice button[onclick*="openCategoryModal"],
   body.role-recondition #secFin .kebab-btn,
   body.role-recondition #secFin .cta-primary,
   body.role-recondition #secEvents .kebab-btn,
@@ -7903,7 +7904,7 @@ async function loadProfile(uid) {
     // finance options, upcoming melas, storage headroom, and Trash to
     // check something they removed). Everything else stays hidden.
     const RECON_FULL = ['exchange','exchangeSr'];
-    const RECON_READONLY = ['docs','storage','price','fin','events','trash'];
+    const RECON_READONLY = ['docs','storage','price','fin','events','trash','sheetTool'];
     if(isRecondition){
       Object.entries(RECON_NAV_MAP).forEach(([key,id])=>{
         const keep = RECON_FULL.includes(key) || RECON_READONLY.includes(key);
@@ -19640,7 +19641,7 @@ window.switchSec=(sec)=>{
   // finances) that isn't their job to see, so every section but the two
   // Exchange ones redirects back here regardless of how the navigation
   // was triggered.
-  const RECON_ALLOWED_SECTIONS = ['exchange','exchangeSr','docs','storage','price','fin','events','trash'];
+  const RECON_ALLOWED_SECTIONS = ['exchange','exchangeSr','docs','storage','price','fin','events','trash','sheetTool'];
   if(currentUserRole === 'recondition' && !RECON_ALLOWED_SECTIONS.includes(sec)){
     toast("Recondition ID doesn't have access to that section.",'err');
     sec = 'exchange';
