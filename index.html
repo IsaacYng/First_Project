@@ -2419,6 +2419,15 @@
   .skel-line{ height:12px; border-radius:5px; }
   /* Full-section loading shimmer shown briefly on every nav switch */
   .nav-switch-loader{ position:absolute; inset:0; background:var(--bg-page); z-index:45; display:flex; flex-direction:column; gap:14px; padding:24px 20px; transition:opacity .25s ease; overflow:hidden; }
+  /* Live activity popups ("pop pop") — a colleague's action slides in */
+  .live-pop-wrap{ position:fixed; top:72px; right:14px; z-index:800; display:flex; flex-direction:column; gap:10px; max-width:300px; pointer-events:none; }
+  .live-pop{ pointer-events:auto; background:#fff; border:1px solid var(--border); border-left:3px solid var(--brand); border-radius:14px; box-shadow:var(--shadow-md); padding:11px 13px; display:flex; align-items:center; gap:11px; cursor:pointer; animation:livePopIn .32s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes livePopIn{ from{opacity:0; transform:translateX(34px)} to{opacity:1; transform:translateX(0)} }
+  .live-pop.out{ animation:livePopOut .25s ease forwards; }
+  @keyframes livePopOut{ to{opacity:0; transform:translateX(34px)} }
+  .live-pop .lp-ic{ width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0; font-size:13px; }
+  .live-pop .lp-who{ font-size:12px; font-weight:800; color:var(--text-primary); }
+  .live-pop .lp-what{ font-size:11px; color:var(--text-tertiary); }
 
   /* ═══════════════════════════════════════════════════════════════════
      STORAGE OVERVIEW — "Cloudly" redesign, per reference screenshot.
@@ -7007,7 +7016,7 @@ function renderAllInventoryTable(){
   if(dupChip){
     if(totalDups>0){
       dupChip.classList.remove('hidden'); dupChip.classList.add('flex'); dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${totalDups} duplicate${totalDups!==1?'s':''} found`;
-      if(resolveBtn && currentUserRole==='owner'){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
+      if(resolveBtn && currentUserRole!=='recondition'){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
     } else {
       dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
       if(resolveBtn){ resolveBtn.classList.add('hidden'); resolveBtn.classList.remove('flex'); }
@@ -7108,7 +7117,7 @@ function computeAllDuplicateGroups(){
 }
 
 window.openDuplicateResolver = ()=>{
-  if(currentUserRole !== 'owner'){ toast('Only a Master ID can resolve duplicates.','err'); return; }
+  if(currentUserRole === 'recondition'){ toast('Recondition IDs can\u2019t resolve duplicates.','err'); return; }
   const groups = computeAllDuplicateGroups();
   if(!groups.length){ toast('No duplicates found.'); return; }
   renderDuplicateResolver(groups);
@@ -7340,6 +7349,7 @@ onAuthStateChanged(auth, async (user) => {
     setBtnState(false);
     startActiveStatusCheck();
     startSessionGuard(user);
+    startLivePopups();
   } else {
     // Tear down every live Firestore listener and wipe the in-memory
     // caches on sign-out. Without this, the previous user's listeners
@@ -7355,6 +7365,7 @@ onAuthStateChanged(auth, async (user) => {
     setBtnState(false);
     stopActiveStatusCheck();
     stopSessionGuard();
+    stopLivePopups();
     // If we were booted for a device-limit / possible-leak reason, show it
     // on the login screen so the person actually sees why.
     if(pendingSignoutNotice){
@@ -7504,6 +7515,64 @@ function stopSessionGuard(keepDoc){
     const id = MY_SESSION_ID; MY_SESSION_ID = null;
     deleteDoc(doc(db,'sessions', id)).catch(()=>{});
   }
+}
+
+/* ─── Live activity popups ("pop pop") ─────────────────────────────────
+   Watches the activity log in real time; when a *colleague* (any device
+   but yours) does something — sells a unit, adds stock, uploads a doc,
+   logs in — a little card slides in top-right. Your own actions never pop.
+   ───────────────────────────────────────────────────────────────────── */
+let livePopUnsub = null, livePopBaseline = 0, livePopFirstSnap = true;
+const LIVE_POP_STYLE = {
+  'Sold':{ic:'fa-handshake',bg:'#298F60'}, 'Added':{ic:'fa-plus',bg:'#5A4740'},
+  'Bulk':{ic:'fa-layer-group',bg:'#5A4740'}, 'Uploaded':{ic:'fa-cloud-arrow-up',bg:'#5A4740'},
+  'Deleted':{ic:'fa-trash-can',bg:'#C0392B'}, 'Login':{ic:'fa-right-to-bracket',bg:'#819FA7'},
+  'Transferred':{ic:'fa-right-left',bg:'#9F6A4A'}, 'Updated':{ic:'fa-pen',bg:'#9F6A4A'},
+  'Device':{ic:'fa-mobile-screen',bg:'#C0392B'}, _default:{ic:'fa-bell',bg:'#9F6A4A'}
+};
+function livePopStyle(action){
+  const k = Object.keys(LIVE_POP_STYLE).find(k=>k!=='_default' && action && action.indexOf(k)===0);
+  return LIVE_POP_STYLE[k] || LIVE_POP_STYLE._default;
+}
+function showLivePop(a){
+  let wrap = document.getElementById('livePopWrap');
+  if(!wrap){ wrap = document.createElement('div'); wrap.id='livePopWrap'; wrap.className='live-pop-wrap'; document.body.appendChild(wrap); }
+  const who = String(a.by||'Someone').split('@')[0];
+  const st = livePopStyle(a.action);
+  const detail = [a.model, a.customerName].filter(Boolean).join(' · ');
+  const el = document.createElement('div');
+  el.className = 'live-pop';
+  el.innerHTML = `<div class="lp-ic" style="background:${st.bg}"><i class="fas ${st.ic}"></i></div>
+    <div class="min-w-0"><div class="lp-who">${escapeHtml(who)}</div>
+    <div class="lp-what">${escapeHtml(a.action||'')}${detail?' — '+escapeHtml(detail):''}</div></div>`;
+  const remove = ()=>{ el.classList.add('out'); setTimeout(()=>el.remove(), 250); };
+  el.onclick = remove;
+  wrap.appendChild(el);
+  while(wrap.children.length > 4) wrap.firstChild.remove();
+  setTimeout(remove, 5500);
+}
+function startLivePopups(){
+  stopLivePopups();
+  livePopBaseline = Date.now();
+  livePopFirstSnap = true;
+  try{
+    livePopUnsub = onSnapshot(query(collection(db,'activity_log'), orderBy('at','desc'), limit(8)), snap=>{
+      if(livePopFirstSnap){ livePopFirstSnap = false; return; } // ignore the initial batch
+      snap.docChanges().forEach(ch=>{
+        if(ch.type !== 'added') return;
+        const a = ch.doc.data();
+        const atMs = a.at && a.at.toMillis ? a.at.toMillis() : 0;
+        if(atMs < livePopBaseline) return;                  // pre-existing entry
+        const me = currentUserEmail || currentUserName || '';
+        if(a.by && me && a.by === me) return;               // never pop your own action
+        showLivePop(a);
+      });
+    }, err=>console.error('live popups listener failed', err));
+  }catch(e){ console.error('startLivePopups failed', e); }
+}
+function stopLivePopups(){
+  if(livePopUnsub){ try{ livePopUnsub(); }catch{} livePopUnsub = null; }
+  document.getElementById('livePopWrap')?.remove();
 }
 
 async function pruneStaleSessions(uid){
@@ -10456,7 +10525,7 @@ function renderInvTable(list){
   if(dupIds.size>0){
     dupChip.classList.remove('hidden'); dupChip.classList.add('flex');
     dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${dupIds.size} duplicate${dupIds.size!==1?'s':''} found`;
-    if(resolveBtn && currentUserRole==='owner'){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
+    if(resolveBtn && currentUserRole!=='recondition'){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
   } else {
     dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
     if(resolveBtn){ resolveBtn.classList.add('hidden'); resolveBtn.classList.remove('flex'); }
@@ -10977,7 +11046,7 @@ function renderHHInvTable(){
     if(dupIds.size>0){
       dupChip.classList.remove('hidden'); dupChip.classList.add('flex');
       dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${dupIds.size} duplicate${dupIds.size!==1?'s':''} found`;
-      if(resolveBtn && currentUserRole==='owner'){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
+      if(resolveBtn && currentUserRole!=='recondition'){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
     } else {
       dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
       if(resolveBtn){ resolveBtn.classList.add('hidden'); resolveBtn.classList.remove('flex'); }
