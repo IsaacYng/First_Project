@@ -2411,6 +2411,12 @@
   #secDashboard .sm-badge{ font-size:10px; font-weight:800; padding:3px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:.03em; }
   #secDashboard .sm-badge.in{ background:#E7F7EE; color:#0F9D58; }
   #secDashboard .sm-badge.out{ background:#FDEEEE; color:#E5484D; }
+  /* Skeleton loading shimmer — shown on the dashboard while the Firestore
+     data is still arriving, so numbers don't flash "0" before they load. */
+  .skel{ display:inline-block; vertical-align:middle; background:linear-gradient(90deg,#EAE0D8 25%,#F5EDE7 50%,#EAE0D8 75%); background-size:200% 100%; animation:skelShimmer 1.3s ease-in-out infinite; border-radius:7px; }
+  @keyframes skelShimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .skel-num{ width:58px; height:32px; }
+  .skel-line{ height:12px; border-radius:5px; }
 
   /* ═══════════════════════════════════════════════════════════════════
      STORAGE OVERVIEW — "Cloudly" redesign, per reference screenshot.
@@ -8425,6 +8431,7 @@ function loadMasterPriceList() {
   if(bikesUnsub) bikesUnsub();
   bikesUnsub = onSnapshot(collection(db,"bikes"), snap => {
     allMasterBikes = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markDashReady('bikes');
     renderMasterTable(); updatePriceStats(); populateModelDropdown();
     // Category rows show "N models using this category" — keep that fresh too.
     if(typeof renderFinCategoryChips === 'function') renderFinCategoryChips();
@@ -8864,6 +8871,7 @@ function loadChalans(){
   if(chalanUnsub) chalanUnsub();
   chalanUnsub = onSnapshot(query(collection(db,"chalans"), orderBy('createdAt','desc')), snap=>{
     chalanData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markDashReady('chalans');
     purgeExpiredChalans();
     renderChalanTable();
     updateStorageOverview();
@@ -8955,7 +8963,35 @@ function renderSalesTrendChart(){
     }).join('') + `</div>`;
 }
 
+// Tracks whether each collection the dashboard needs has arrived at least
+// once. Until all have, the dashboard shows a loading skeleton instead of
+// flashing "0" for stats that simply haven't loaded yet.
+const DASH_READY = { bikes:false, inv:false, hh:false, chalans:false, ex:false, exSr:false };
+function markDashReady(k){
+  if(DASH_READY[k]) return;
+  DASH_READY[k] = true;
+  if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
+}
+function dashAllReady(){ return DASH_READY.bikes && DASH_READY.inv && DASH_READY.hh && DASH_READY.chalans && DASH_READY.ex && DASH_READY.exSr; }
+function renderDashboardSkeleton(){
+  ['dashModelsCount','dashAvailableCount','dashSoldMonthCount','dashChalanMonthCount','dashExchangeCount'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.innerHTML='<span class="skel skel-num"></span>';
+  });
+  const rev=document.getElementById('dashRevenueMonth'); if(rev) rev.innerHTML='<span class="skel" style="width:120px;height:28px"></span>';
+  ['dashSoldTrend','dashRevenueTrend'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
+  const hd=document.getElementById('dashSoldHeadline'); if(hd) hd.innerHTML='<span class="skel skel-line" style="width:190px;display:inline-block"></span>';
+  const cust=document.getElementById('dashRecentCustomers'); if(cust) cust.innerHTML=Array(5).fill('<span class="skel" style="width:52px;height:52px;border-radius:50%"></span>').join('');
+  const tt=document.getElementById('dashTrendTotal'); if(tt) tt.innerHTML='<span class="skel" style="width:130px;height:30px"></span>';
+  const chart=document.getElementById('dashSalesTrendChart');
+  if(chart) chart.innerHTML='<div class="flex items-end justify-between gap-3" style="height:130px">'+[40,25,60,35,80,55].map(h=>`<div class="flex-1 flex items-end h-full"><span class="skel" style="width:100%;height:${h}%;border-radius:8px 8px 0 0"></span></div>`).join('')+'</div>';
+  const tm=document.getElementById('dashTopModels'); if(tm) tm.innerHTML=Array(3).fill('<div class="flex items-center gap-3 py-2"><span class="skel" style="width:44px;height:44px;border-radius:12px"></span><div class="flex-1"><div class="skel skel-line" style="width:70%;margin-bottom:6px"></div><div class="skel skel-line" style="width:40%"></div></div></div>').join('');
+  const bs=document.getElementById('dashBusinessSummary'); if(bs) bs.innerHTML=Array(3).fill('<div class="skel skel-line" style="width:100%;height:16px;margin:6px 0"></div>').join('');
+  const ra=document.getElementById('dashRecentActivity'); if(ra) ra.innerHTML='<div class="p-5">'+Array(4).fill('<div class="skel skel-line" style="width:100%;height:14px;margin:12px 0"></div>').join('')+'</div>';
+}
+
 function renderDashboard(){
+  // Still loading — show the skeleton, don't compute stats from empty arrays.
+  if(!dashAllReady()){ renderDashboardSkeleton(); return; }
   const modelsEl = document.getElementById('dashModelsCount');
   if(modelsEl) modelsEl.textContent = allMasterBikes.length;
 
@@ -10200,6 +10236,7 @@ function loadLiveStock(){
   const q = query(collection(db,"inventory"), orderBy('sn','asc'), limit(invPageLimit));
   invUnsub = onSnapshot(q, snap=>{
     invData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markDashReady('inv');
     invHasMore = snap.docs.length === invPageLimit; // there may be more beyond this page
     const liveIds = new Set(invData.map(s=>s.id));
     selectedInvIds.forEach(id=>{ if(!liveIds.has(id)) selectedInvIds.delete(id); });
@@ -10758,6 +10795,7 @@ function loadHHInventory(){
   const q = query(collection(db,"hh_inventory"), orderBy('sn','asc'), limit(hhPageLimit));
   hhInvUnsub = onSnapshot(q, snap=>{
     hhInvData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markDashReady('hh');
     hhHasMore = snap.docs.length === hhPageLimit;
     const liveIds = new Set(hhInvData.map(s=>s.id));
     selectedHHInvIds.forEach(id=>{ if(!liveIds.has(id)) selectedHHInvIds.delete(id); });
@@ -12816,6 +12854,7 @@ function loadExchangeStock(){
   const tbody = document.getElementById('exchangeTableBody');
   exchangeUnsub = onSnapshot(query(collection(db,'exchange_stock'), orderBy('sn','asc')), snap=>{
     exchangeData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markDashReady('ex');
     const liveIds = new Set(exchangeData.map(s=>s.id));
     selectedExchangeIds.forEach(id=>{ if(!liveIds.has(id)) selectedExchangeIds.delete(id); });
     renderExchangeTable();
@@ -13627,6 +13666,7 @@ function loadExchangeSrStock(){
   const tbody = document.getElementById('exchangeSrTableBody');
   exchangeSrUnsub = onSnapshot(query(collection(db,'exchange_stock_showroom'), orderBy('sn','asc')), snap=>{
     exchangeSrData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markDashReady('exSr');
     const liveIds = new Set(exchangeSrData.map(s=>s.id));
     selectedExchangeSrIds.forEach(id=>{ if(!liveIds.has(id)) selectedExchangeSrIds.delete(id); });
     renderExchangeSrTable();
