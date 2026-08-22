@@ -2261,6 +2261,17 @@
   }
   .model-filter-btn:hover{ border-color:#5A4740; }
   .model-filter-btn.menu-open{ border-color:#5A4740; box-shadow:0 0 0 3px #F3E9E1; }
+  /* Consistent dropdown for all list filters (destinations, models, melas) */
+  .filter-select{
+    -webkit-appearance:none; appearance:none;
+    background:#F8FAFC; border:2px solid #E2E8F0; border-radius:10px;
+    padding:8px 30px 8px 12px; font-size:13px; font-weight:600; color:#334155;
+    min-width:150px; max-width:230px; cursor:pointer; transition:all .15s ease; outline:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 11px center;
+  }
+  .filter-select:hover{ border-color:#5A4740; }
+  .filter-select:focus{ border-color:#5A4740; box-shadow:0 0 0 3px #F3E9E1; }
   .model-filter-menu{
     position:absolute; z-index:45; top:calc(100% + 6px); left:0; min-width:100%; width:230px;
     max-height:280px; overflow-y:auto; background:#fff; border:1px solid #E2E8F0; border-radius:12px;
@@ -3250,7 +3261,7 @@
           <span id="selectModeHint" class="hidden items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-bajaj-blue">
             <i class="fas fa-hand-pointer text-[10px]"></i> Select mode — tap rows to add
           </span>
-          <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 overflow-x-auto max-w-full inv-filter-scroll">
+          <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 overflow-x-auto max-w-full inv-filter-scroll ml-auto flex-shrink-0">
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active flex-shrink-0" data-status="all" onclick="setInvStatusFilter('all')">All <span class="pill-count" id="pcAll">0</span></button>
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Available" onclick="setInvStatusFilter('Available')">Available <span class="pill-count" id="pcAvailable">0</span></button>
             <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Booked" onclick="setInvStatusFilter('Booked')">Booked <span class="pill-count" id="pcBooked">0</span></button>
@@ -3495,8 +3506,7 @@
             </button>
             <div id="hhInvModelFilterMenu" class="model-filter-menu hidden"></div>
           </div>
-          <select id="hhInvMelaFilter" onchange="setHHInvMelaFilter(this.value)"
-            class="flex-shrink-0 bg-slate-50 border-2 border-slate-200 rounded-full px-3 py-1.5 text-xs font-bold text-slate-600 outline-none focus:border-bajaj-blue transition-all cursor-pointer">
+          <select id="hhInvMelaFilter" onchange="setHHInvMelaFilter(this.value)" class="filter-select flex-shrink-0">
             <option value="all">All Melas</option>
           </select>
           <div class="relative ml-auto w-full sm:w-64">
@@ -5432,6 +5442,8 @@
         <div id="chalanMonthFilterWrap" class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
           <!-- Month pills injected dynamically — one per month that actually has Chalans, newest first -->
         </div>
+        <div id="chalanModelFilterWrap" class="flex-shrink-0"></div>
+        <div id="chalanPartyFilterWrap" class="flex-shrink-0"></div>
         <div class="relative max-w-sm w-full">
           <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
           <input type="text" id="chalanSearchInput" oninput="window.setChalanSearch(this.value)" placeholder="Search model, chassis, customer, chalan no…"
@@ -8035,6 +8047,12 @@ async function loadProfile(uid) {
     // together without oversight.
     const modelAliasNavBtn = document.getElementById('navModelAliases');
     if(modelAliasNavBtn) modelAliasNavBtn.classList.toggle('hidden', currentUserRole !== 'owner');
+    // HFL Finance and Accessories are Master-only — staff don't manage
+    // finance schemes or accessory default prices.
+    ['navFin','navAcc','mNavFin','mNavAcc'].forEach(id=>{
+      const b = document.getElementById(id);
+      if(b) b.classList.toggle('hidden', currentUserRole !== 'owner');
+    });
     // Fix Numbering / Resolve Duplicates are data-repair tools, not day-to-
     // day sales work — a mis-click doesn't destroy anything (both confirm
     // first), but they're clutter for staff whose job is Add/Sell/Chalan,
@@ -9341,7 +9359,7 @@ function renderDashboard(){
       const at = u.soldAt?.toDate ? u.soldAt.toDate() : new Date(u.soldAt);
       if(win.some(w=>w.y===at.getFullYear() && w.m===at.getMonth())) tally[u.model] = (tally[u.model]||0)+1;
     });
-    const top = Object.entries(tally).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const top = Object.entries(tally).sort((a,b)=>b[1]-a[1]).slice(0,3);
     if(!top.length){
       topModelsEl.innerHTML = `<div class="py-8 text-center text-slate-400 text-sm">No sales yet.</div>`;
     } else {
@@ -9665,6 +9683,10 @@ window._deleteModelAlias = async (id)=>{
 let selectedChalanIds = new Set();
 let chalanSearchTerm = '';
 let chalanMonthFilter = 'all';
+let chalanModelFilter = 'all';
+let chalanPartyFilter = 'all';
+window.setChalanModelFilter = (v)=>{ chalanModelFilter = v; renderChalanTable(); };
+window.setChalanPartyFilter = (v)=>{ chalanPartyFilter = v; renderChalanTable(); };
 window.setChalanSearch = (v)=>{
   chalanSearchTerm = v.trim().toLowerCase();
   renderChalanTable();
@@ -9714,6 +9736,27 @@ function renderChalanTable(){
       return `${at.getFullYear()}-${String(at.getMonth()+1).padStart(2,'0')}` === chalanMonthFilter;
     });
   }
+
+  // Model + Party dropdowns — built from the month-scoped set so counts match
+  // what's actually shown. Same consistent .filter-select style as elsewhere.
+  const modelTally = {}, partyTally = {};
+  visible.forEach(c=>{
+    const m = (c.model||'').trim(); if(m) modelTally[m] = (modelTally[m]||0)+1;
+    const p = (c.custName||'').trim(); if(p) partyTally[p] = (partyTally[p]||0)+1;
+  });
+  const modelKeys = Object.keys(modelTally).sort((a,b)=>modelTally[b]-modelTally[a]);
+  const partyKeys = Object.keys(partyTally).sort((a,b)=>a.localeCompare(b));
+  if(!modelKeys.includes(chalanModelFilter) && chalanModelFilter!=='all') chalanModelFilter='all';
+  if(!partyKeys.includes(chalanPartyFilter) && chalanPartyFilter!=='all') chalanPartyFilter='all';
+  const cmWrap = document.getElementById('chalanModelFilterWrap');
+  if(cmWrap) cmWrap.innerHTML = modelKeys.length ? buildFilterSelect('setChalanModelFilter', chalanModelFilter,
+    `All Models (${visible.length})`, modelKeys.map(k=>({value:k, label:`${k} (${modelTally[k]})`}))) : '';
+  const cpWrap = document.getElementById('chalanPartyFilterWrap');
+  if(cpWrap) cpWrap.innerHTML = partyKeys.length ? buildFilterSelect('setChalanPartyFilter', chalanPartyFilter,
+    `All Parties (${visible.length})`, partyKeys.map(k=>({value:k, label:`${k} (${partyTally[k]})`}))) : '';
+
+  if(chalanModelFilter !== 'all') visible = visible.filter(c=>(c.model||'').trim()===chalanModelFilter);
+  if(chalanPartyFilter !== 'all') visible = visible.filter(c=>(c.custName||'').trim()===chalanPartyFilter);
   if(q){
     visible = visible.filter(c=>
       String(c.model||'').toLowerCase().includes(q) ||
@@ -12906,6 +12949,13 @@ let currentEditExchangeId = null;
 let exchangeStatusFilter = 'all';
 let exchangeSendToFilter = 'all';
 let exchangeModelFilter = 'all';
+// Shared builder for the list filter dropdowns (destinations, models, etc.)
+// so every filter looks and behaves the same across the app.
+function buildFilterSelect(setterName, current, allLabel, items){
+  const opts = [`<option value="all"${current==='all'?' selected':''}>${escapeHtml(allLabel)}</option>`]
+    .concat(items.map(it=>`<option value="${escapeHtml(it.value)}"${current===it.value?' selected':''}>${escapeHtml(it.label)}</option>`));
+  return `<select class="filter-select" onchange="${setterName}(this.value)">${opts.join('')}</select>`;
+}
 let exchangeSearchTerm = '';
 
 // Shared by both Mela and Showroom Exchange — reuses the exact same
@@ -13178,28 +13228,22 @@ function renderExchangeTable(){
   if(!sendToKeys.includes(exchangeSendToFilter) && exchangeSendToFilter!=='all') exchangeSendToFilter = 'all';
   const wrap = document.getElementById('exchangeSendToFilterWrap');
   if(wrap){
-    const allBtn = `<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeSendToFilter==='all'?' active':''}" onclick="setExchangeSendToFilter('all')">All Destinations <span class="pill-count">${statusScoped.length}</span></button>`;
-    const pills = sendToKeys.map(k=>`<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeSendToFilter===k?' active':''}" onclick="setExchangeSendToFilter('${k.replace(/'/g,"\\'")}')">${escapeHtml(k)} <span class="pill-count">${sendToCounts[k]}</span></button>`).join('');
-    wrap.innerHTML = allBtn + pills;
+    wrap.className = ''; // drop the pill-scroll styling
+    wrap.innerHTML = buildFilterSelect('setExchangeSendToFilter', exchangeSendToFilter,
+      `All Destinations (${statusScoped.length})`, sendToKeys.map(k=>({value:k, label:`${k} (${sendToCounts[k]})`})));
   }
 
-  // Model pills — same dynamic approach as Send To. Exchange models are
-  // free text (any brand, not the master price list), so a fixed dropdown
-  // doesn't fit here the way it does for Inventory/HH Inventory; pills
-  // built from whatever's actually on file always match reality.
+  // Model dropdown — same idea. Exchange models are free text (any brand),
+  // built from whatever's actually on file.
   const modelCounts = {};
   statusScoped.forEach(s=>{ const k = (s.model||'').trim(); if(k) modelCounts[k] = (modelCounts[k]||0)+1; });
   const modelKeys = Object.keys(modelCounts).sort((a,b)=>modelCounts[b]-modelCounts[a]);
   if(!modelKeys.includes(exchangeModelFilter) && exchangeModelFilter!=='all') exchangeModelFilter = 'all';
   const modelWrap = document.getElementById('exchangeModelFilterWrap');
   if(modelWrap){
-    if(modelKeys.length <= 1){
-      modelWrap.innerHTML = ''; // nothing to filter by with 0-1 distinct models
-    } else {
-      const allModelBtn = `<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeModelFilter==='all'?' active':''}" onclick="setExchangeModelFilter('all')">All Models <span class="pill-count">${statusScoped.length}</span></button>`;
-      const modelPills = modelKeys.map(k=>`<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeModelFilter===k?' active':''}" onclick="setExchangeModelFilter('${k.replace(/'/g,"\\'")}')">${escapeHtml(k)} <span class="pill-count">${modelCounts[k]}</span></button>`).join('');
-      modelWrap.innerHTML = allModelBtn + modelPills;
-    }
+    modelWrap.className = '';
+    modelWrap.innerHTML = modelKeys.length <= 1 ? '' : buildFilterSelect('setExchangeModelFilter', exchangeModelFilter,
+      `All Models (${statusScoped.length})`, modelKeys.map(k=>({value:k, label:`${k} (${modelCounts[k]})`})));
   }
   const pc = { pcExAll:total, pcExInStock:inStock, pcExSold:sold };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
@@ -13988,28 +14032,20 @@ function renderExchangeSrTable(){
   if(!sendToKeys.includes(exchangeSrSendToFilter) && exchangeSrSendToFilter!=='all') exchangeSrSendToFilter = 'all';
   const wrap = document.getElementById('exchangeSrSendToFilterWrap');
   if(wrap){
-    const allBtn = `<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeSrSendToFilter==='all'?' active':''}" onclick="setExchangeSrSendToFilter('all')">All Destinations <span class="pill-count">${statusScoped.length}</span></button>`;
-    const pills = sendToKeys.map(k=>`<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeSrSendToFilter===k?' active':''}" onclick="setExchangeSrSendToFilter('${k.replace(/'/g,"\\'")}')">${escapeHtml(k)} <span class="pill-count">${sendToCounts[k]}</span></button>`).join('');
-    wrap.innerHTML = allBtn + pills;
+    wrap.className = '';
+    wrap.innerHTML = buildFilterSelect('setExchangeSrSendToFilter', exchangeSrSendToFilter,
+      `All Destinations (${statusScoped.length})`, sendToKeys.map(k=>({value:k, label:`${k} (${sendToCounts[k]})`})));
   }
 
-  // Model pills — same dynamic approach as Send To. Exchange models are
-  // free text (any brand, not the master price list), so a fixed dropdown
-  // doesn't fit here the way it does for Inventory/HH Inventory; pills
-  // built from whatever's actually on file always match reality.
   const modelCounts = {};
   statusScoped.forEach(s=>{ const k = (s.model||'').trim(); if(k) modelCounts[k] = (modelCounts[k]||0)+1; });
   const modelKeys = Object.keys(modelCounts).sort((a,b)=>modelCounts[b]-modelCounts[a]);
   if(!modelKeys.includes(exchangeSrModelFilter) && exchangeSrModelFilter!=='all') exchangeSrModelFilter = 'all';
   const modelWrap = document.getElementById('exchangeSrModelFilterWrap');
   if(modelWrap){
-    if(modelKeys.length <= 1){
-      modelWrap.innerHTML = ''; // nothing to filter by with 0-1 distinct models
-    } else {
-      const allModelBtn = `<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeSrModelFilter==='all'?' active':''}" onclick="setExchangeSrModelFilter('all')">All Models <span class="pill-count">${statusScoped.length}</span></button>`;
-      const modelPills = modelKeys.map(k=>`<button class="ex-sendto-tab px-3 py-1 rounded-full text-xs font-bold transition-all${exchangeSrModelFilter===k?' active':''}" onclick="setExchangeSrModelFilter('${k.replace(/'/g,"\\'")}')">${escapeHtml(k)} <span class="pill-count">${modelCounts[k]}</span></button>`).join('');
-      modelWrap.innerHTML = allModelBtn + modelPills;
-    }
+    modelWrap.className = '';
+    modelWrap.innerHTML = modelKeys.length <= 1 ? '' : buildFilterSelect('setExchangeSrModelFilter', exchangeSrModelFilter,
+      `All Models (${statusScoped.length})`, modelKeys.map(k=>({value:k, label:`${k} (${modelCounts[k]})`})));
   }
   const pc = { pcExSrAll:total, pcExSrInStock:inStock, pcExSrSold:sold };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
@@ -20059,6 +20095,10 @@ window.switchSec=(sec)=>{
   if(sec==='hhstock' && currentUserRole !== 'owner'){
     toast("Only a Master ID can open the HH Stock Report.",'err');
     sec = 'stock';
+  }
+  if((sec==='fin' || sec==='acc') && currentUserRole !== 'owner'){
+    toast("Only a Master ID can open "+(sec==='fin'?'HFL Finance':'Accessories')+".",'err');
+    sec = 'price';
   }
   if(sec==='modelAliases' && currentUserRole !== 'owner'){
     toast("Only a Master ID can manage Model Aliases.",'err');
