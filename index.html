@@ -2264,14 +2264,22 @@
   /* Consistent dropdown for all list filters (destinations, models, melas) */
   .filter-select{
     -webkit-appearance:none; appearance:none;
-    background:#F8FAFC; border:2px solid #E2E8F0; border-radius:10px;
-    padding:8px 30px 8px 12px; font-size:13px; font-weight:600; color:#334155;
-    min-width:150px; max-width:230px; cursor:pointer; transition:all .15s ease; outline:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-    background-repeat:no-repeat; background-position:right 11px center;
+    background-color:var(--bg-surface);
+    border:1.5px solid var(--border);
+    border-radius:999px;
+    padding:9px 34px 9px 15px;
+    font-size:12.5px; font-weight:700; color:var(--text-secondary);
+    font-family:'DM Sans',sans-serif; letter-spacing:.01em;
+    min-width:152px; max-width:240px; cursor:pointer; outline:none;
+    transition:border-color .18s ease, box-shadow .18s ease, background-color .18s ease, transform .12s ease;
+    box-shadow:var(--shadow-sm);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239F6A4A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 13px center; background-size:12px;
+    text-overflow:ellipsis;
   }
-  .filter-select:hover{ border-color:#5A4740; }
-  .filter-select:focus{ border-color:#5A4740; box-shadow:0 0 0 3px #F3E9E1; }
+  .filter-select:hover{ border-color:var(--brand-soft-border); background-color:var(--brand-soft-bg); transform:translateY(-1px); }
+  .filter-select:focus{ border-color:var(--brand); box-shadow:0 0 0 3px rgba(159,106,74,.16); }
+  .filter-select option{ color:var(--text-primary); font-weight:600; background:var(--bg-surface); }
   .model-filter-menu{
     position:absolute; z-index:45; top:calc(100% + 6px); left:0; min-width:100%; width:230px;
     max-height:280px; overflow-y:auto; background:#fff; border:1px solid #E2E8F0; border-radius:12px;
@@ -9737,15 +9745,15 @@ function renderChalanTable(){
     });
   }
 
-  // Model + Party dropdowns — built from the month-scoped set so counts match
-  // what's actually shown. Same consistent .filter-select style as elsewhere.
+  // Model + Insurance-party dropdowns — "party" here means the insurance
+  // party (1st / 3rd), not the customer. Built from the month-scoped set.
   const modelTally = {}, partyTally = {};
   visible.forEach(c=>{
     const m = (c.model||'').trim(); if(m) modelTally[m] = (modelTally[m]||0)+1;
-    const p = (c.custName||'').trim(); if(p) partyTally[p] = (partyTally[p]||0)+1;
+    const p = (c.insType||'').trim(); if(p) partyTally[p] = (partyTally[p]||0)+1;
   });
   const modelKeys = Object.keys(modelTally).sort((a,b)=>modelTally[b]-modelTally[a]);
-  const partyKeys = Object.keys(partyTally).sort((a,b)=>a.localeCompare(b));
+  const partyKeys = Object.keys(partyTally).sort((a,b)=>a.localeCompare(b)); // 1st Party before 3rd Party
   if(!modelKeys.includes(chalanModelFilter) && chalanModelFilter!=='all') chalanModelFilter='all';
   if(!partyKeys.includes(chalanPartyFilter) && chalanPartyFilter!=='all') chalanPartyFilter='all';
   const cmWrap = document.getElementById('chalanModelFilterWrap');
@@ -9753,10 +9761,10 @@ function renderChalanTable(){
     `All Models (${visible.length})`, modelKeys.map(k=>({value:k, label:`${k} (${modelTally[k]})`}))) : '';
   const cpWrap = document.getElementById('chalanPartyFilterWrap');
   if(cpWrap) cpWrap.innerHTML = partyKeys.length ? buildFilterSelect('setChalanPartyFilter', chalanPartyFilter,
-    `All Parties (${visible.length})`, partyKeys.map(k=>({value:k, label:`${k} (${partyTally[k]})`}))) : '';
+    `All Insurance (${visible.length})`, partyKeys.map(k=>({value:k, label:`${k} (${partyTally[k]})`}))) : '';
 
   if(chalanModelFilter !== 'all') visible = visible.filter(c=>(c.model||'').trim()===chalanModelFilter);
-  if(chalanPartyFilter !== 'all') visible = visible.filter(c=>(c.custName||'').trim()===chalanPartyFilter);
+  if(chalanPartyFilter !== 'all') visible = visible.filter(c=>(c.insType||'').trim()===chalanPartyFilter);
   if(q){
     visible = visible.filter(c=>
       String(c.model||'').toLowerCase().includes(q) ||
