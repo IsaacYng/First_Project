@@ -3495,11 +3495,18 @@
             </button>
             <div id="hhInvModelFilterMenu" class="model-filter-menu hidden"></div>
           </div>
+          <select id="hhInvMelaFilter" onchange="setHHInvMelaFilter(this.value)"
+            class="flex-shrink-0 bg-slate-50 border-2 border-slate-200 rounded-full px-3 py-1.5 text-xs font-bold text-slate-600 outline-none focus:border-bajaj-blue transition-all cursor-pointer">
+            <option value="all">All Melas</option>
+          </select>
           <div class="relative ml-auto w-full sm:w-64">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="hhInvSearch" autocomplete="off" placeholder="Search chassis, model, event, customer…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
           </div>
+          <button onclick="openMelaManager()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
+            <i class="fas fa-store" style="color:#D98324"></i> Manage Melas
+          </button>
           <button onclick="openHHInvFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Unit
           </button>
@@ -3779,6 +3786,9 @@
             <input type="text" id="exchangeSearch" autocomplete="off" placeholder="Search model, reg no, customer…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
           </div>
+          <button onclick="openMelaManager()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
+            <i class="fas fa-store" style="color:#D98324"></i> Manage Melas
+          </button>
           <button onclick="openExchangeFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Unit
           </button>
@@ -7343,6 +7353,7 @@ onAuthStateChanged(auth, async (user) => {
     // read "No categories yet" no matter what was saved in Firestore.
     loadFinanceCategories();
     loadAccessories();
+    loadMelaAreas();
     loadEvents();
     loadDocuments();
     loadStorageSettings();
@@ -10918,6 +10929,23 @@ let hhInvUnsub = null;
 let currentEditHHInvId = null;
 let hhInvStatusFilter = 'all';
 let hhInvModelFilter = 'all';
+let hhInvMelaFilter = 'all';
+window.setHHInvMelaFilter = (v)=>{ hhInvMelaFilter = v; renderHHInvTable(); };
+// Fill the HH "All Melas" dropdown from managed melas + any event names
+// already typed on units, keeping the current selection.
+function populateHHMelaFilter(){
+  const sel = document.getElementById('hhInvMelaFilter');
+  if(!sel) return;
+  const names = new Set();
+  hhInvData.forEach(s=>{ const v=(s.eventName||'').trim(); if(v) names.add(v); });
+  melaAreas.forEach(m=>{ const v=(m.name||'').trim(); if(v) names.add(v); });
+  const sorted = [...names].sort((a,b)=>a.localeCompare(b));
+  // if the selected mela no longer exists, fall back to All
+  if(hhInvMelaFilter !== 'all' && !sorted.includes(hhInvMelaFilter)) hhInvMelaFilter = 'all';
+  sel.innerHTML = '<option value="all">All Melas</option>' +
+    sorted.map(v=>`<option value="${escapeHtml(v)}"${v===hhInvMelaFilter?' selected':''}>${escapeHtml(v)}</option>`).join('');
+  sel.value = hhInvMelaFilter;
+}
 let hhInvSearchTerm = '';
 
 window.setHHInvModelFilter = (model)=>{
@@ -11093,6 +11121,7 @@ function getFilteredHHInv(){
     base = base.filter(s=>(s.status||'Available')===hhInvStatusFilter);
   }
   if(hhInvModelFilter !== 'all') base = base.filter(s=>s.model===hhInvModelFilter);
+  if(hhInvMelaFilter !== 'all') base = base.filter(s=>(s.eventName||'')===hhInvMelaFilter);
   if(!hhInvSearchTerm) return base;
   const q = hhInvSearchTerm.toLowerCase().trim();
   return base.filter(s=>hhSearchMatches(s,q));
@@ -11103,6 +11132,7 @@ document.getElementById('hhInvSearch').addEventListener('input', e=>{
 });
 
 function renderHHInvTable(){
+  populateHHMelaFilter();
   const tbody = document.getElementById('hhInvTableBody');
   const list = getFilteredHHInv();
   document.getElementById('hhInvCount').textContent = hhInvData.length+' unit'+(hhInvData.length!==1?'s':'');
@@ -11341,12 +11371,87 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 });
 
+// ─────────────────────────────────────────────────────────────────────
+// Mela areas — a managed list of melas/events (like categories), so the
+// same mela is tagged consistently across HH Inventory and Mela Exchange
+// when several melas run at once. Add/remove here; pick it on each unit.
+// ─────────────────────────────────────────────────────────────────────
+let melaAreas = [];
+let melaAreasUnsub = null;
+function loadMelaAreas(){
+  if(melaAreasUnsub) return;
+  melaAreasUnsub = onSnapshot(collection(db,'mela_areas'), snap=>{
+    melaAreas = snap.docs.map(d=>({id:d.id, ...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    renderMelaManager();
+    populateEventNameDatalist();
+    populateSendToDatalist();
+  }, err=>console.error('mela_areas listener failed', err));
+}
+window.openMelaManager = ()=>{
+  let ov = document.getElementById('melaManagerModal');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'melaManagerModal';
+    ov.className = 'import-modal-overlay';
+    ov.innerHTML =
+      '<div class="import-modal-box" style="max-width:460px">'+
+        '<button type="button" class="import-modal-close" onclick="closeMelaManager()"><i class="fas fa-xmark"></i></button>'+
+        '<div class="p-6">'+
+          '<div class="flex items-center gap-2 section-title text-2xl mb-1"><i class="fas fa-store text-amber-500 text-lg"></i> Manage Melas</div>'+
+          '<p class="text-xs text-slate-500 mb-4">Add each mela/event once, then pick it on HH Inventory &amp; Mela Exchange units so every mela\u2019s stock stays separated.</p>'+
+          '<div class="flex gap-2 mb-4">'+
+            '<input id="newMelaInput" type="text" placeholder="e.g. Phidim Mela 2026" class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all" onkeydown="if(event.key===\'Enter\')addMelaArea()"/>'+
+            '<button onclick="addMelaArea()" class="cta-primary !py-2 !px-4 !text-sm flex-shrink-0"><i class="fas fa-plus"></i> Add</button>'+
+          '</div>'+
+          '<div id="melaManagerList" class="flex flex-col gap-2 max-h-72 overflow-y-auto"></div>'+
+        '</div>'+
+      '</div>';
+    ov.addEventListener('click', e=>{ if(e.target===ov) closeMelaManager(); });
+    document.body.appendChild(ov);
+  }
+  renderMelaManager();
+  ov.classList.add('flex');
+};
+window.closeMelaManager = ()=>{ document.getElementById('melaManagerModal')?.classList.remove('flex'); };
+function renderMelaManager(){
+  const list = document.getElementById('melaManagerList');
+  if(!list) return;
+  if(!melaAreas.length){ list.innerHTML = '<div class="text-center text-slate-400 text-xs py-6">No melas yet — add one above.</div>'; return; }
+  list.innerHTML = melaAreas.map(m=>
+    '<div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/60">'+
+      '<span class="text-sm font-semibold text-slate-700"><i class="fas fa-location-dot text-amber-500 mr-2"></i>'+escapeHtml(m.name)+'</span>'+
+      '<button onclick="removeMelaArea(\''+m.id+'\',\''+escapeJsAttr(m.name)+'\')" class="w-8 h-8 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600 transition-all"><i class="fas fa-trash-can text-xs"></i></button>'+
+    '</div>').join('');
+}
+window.addMelaArea = async ()=>{
+  if(blockIfReconditionOnly()) return;
+  const input = document.getElementById('newMelaInput');
+  const name = (input.value||'').trim();
+  if(!name){ toast('Enter a mela name.','warn'); return; }
+  if(melaAreas.some(m=>String(m.name||'').toLowerCase()===name.toLowerCase())){ toast('That mela already exists.','warn'); return; }
+  try{ await addDoc(collection(db,'mela_areas'),{name}); input.value=''; toast('Mela added: '+name); }
+  catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+window.removeMelaArea = async (id, name)=>{
+  if(blockIfReconditionOnly()) return;
+  const proceed = await showConfirm({
+    title:'Remove this mela?',
+    message:`Remove <b>${name}</b> from the list? Units already tagged with it keep their tag — it just won\u2019t show as a suggestion anymore.`,
+    okText:'Remove', okColorClass:'text-red-600 hover:bg-red-50',
+    iconClass:'fa-trash-can', iconColor:'#dc2626', iconBg:'#FDEDED'
+  });
+  if(!proceed) return;
+  try{ await deleteDoc(doc(db,'mela_areas',id)); toast('Mela removed.'); }
+  catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
+
 // Suggestion list for Mela/Event Name — built fresh from whatever's
 // already been typed on other HH Inventory units, so the same event
 // doesn't end up spelled two different ways across records.
 function populateEventNameDatalist(){
   const names = new Set();
   hhInvData.forEach(s=>{ const v=(s.eventName||'').trim(); if(v) names.add(v); });
+  melaAreas.forEach(m=>{ const v=(m.name||'').trim(); if(v) names.add(v); });
   const dl = document.getElementById('hhEventNameOptions');
   if(dl) dl.innerHTML = [...names].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${escapeHtml(v)}"></option>`).join('');
 }
@@ -13327,6 +13432,7 @@ document.getElementById('fixExchangeSnBtn').addEventListener('click', async ()=>
 function populateSendToDatalist(){
   const allSendTo = new Set();
   [...exchangeData, ...exchangeSrData].forEach(s=>{ const v=(s.sendTo||'').trim(); if(v) allSendTo.add(v); });
+  melaAreas.forEach(m=>{ const v=(m.name||'').trim(); if(v) allSendTo.add(v); });
   const optionsHtml = [...allSendTo].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${escapeHtml(v)}"></option>`).join('');
   const dl1 = document.getElementById('exSendToOptions');
   const dl2 = document.getElementById('exSrSendToOptions');
