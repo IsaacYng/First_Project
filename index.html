@@ -10672,14 +10672,10 @@ window.bulkTransferSelectedInv = async ()=>{
       const chunk = targets.slice(i, i+200);
       const batch = writeBatch(db);
       chunk.forEach((s, j)=>{
-        const isSold = s.status==='Sold' || s.hhFlag==='Hide';
-        const payload = {
-          sn: nextSn + i + j, model:s.model||'', chassis:s.chassis||'', engine:s.engine||'', regNo:s.regNo||'', color:s.color||'',
-          eventName:'', owner:'dealer', ownerName:'',
-          status: isSold?'Sold':'Available', customerName: isSold?(s.customerName||''):'', addedAt: new Date()
-        };
-        if(isSold){ payload.soldAt = s.soldAt || new Date(); payload.soldFrom = s.soldFrom || 'Showroom'; }
-        batch.set(doc(collection(db,'hh_inventory')), payload);
+        // Copy the WHOLE unit so status/soldAt/customer/price all survive;
+        // only the S.N changes to fit the target list.
+        const { id, ...rest } = s;
+        batch.set(doc(collection(db,'hh_inventory')), { ...rest, sn: nextSn + i + j });
         batch.delete(doc(db,'inventory', s.id));
       });
       await batch.commit();
@@ -10711,13 +10707,11 @@ window.bulkTransferSelectedHH = async ()=>{
       const chunk = targets.slice(i, i+200);
       const batch = writeBatch(db);
       chunk.forEach((s, j)=>{
-        const isSold = s.status==='Sold';
-        const payload = {
-          sn: nextSn + i + j, model:s.model||'', chassis:s.chassis||'', engine:s.engine||'', regNo:s.regNo||'', color:s.color||'',
-          status: isSold?'Sold':'Available', customerName: isSold?(s.customerName||''):'', addedAt: new Date()
-        };
-        if(isSold){ payload.soldAt = s.soldAt || new Date(); payload.soldFrom = s.soldFrom || 'Mela/Event'; }
-        batch.set(doc(collection(db,'inventory')), payload);
+        // Copy the WHOLE unit (status, soldAt, soldFrom, customer, price,
+        // everything) — only the S.N changes so it slots into the target
+        // list. Cherry-picking fields here is what dropped sold details.
+        const { id, ...rest } = s;
+        batch.set(doc(collection(db,'inventory')), { ...rest, sn: nextSn + i + j });
         batch.delete(doc(db,'hh_inventory', s.id));
       });
       await batch.commit();
@@ -13144,13 +13138,10 @@ async function bulkTransferExchange(fromColl, toColl, dataArr, idSet, toLabel, c
       const chunk = targets.slice(i, i+200);
       const batch = writeBatch(db);
       chunk.forEach((s, j)=>{
-        batch.set(doc(collection(db, toColl)), {
-          sn: nextSn + i + j,
-          model: s.model||'', makeYear: s.makeYear||'', regNo: s.regNo||'',
-          valuation: s.valuation||0, blueBook: s.blueBook||'', key: s.key||'', file: s.file||'',
-          customerName: s.customerName||'', sendTo: s.sendTo||'', remarks: s.remarks||'',
-          status: s.status||'In Stock', addedAt: new Date()
-        });
+        // Copy the whole trade-in record (valuation, doc status, remarks,
+        // sold/status, customer) — only the S.N changes.
+        const { id, ...rest } = s;
+        batch.set(doc(collection(db, toColl)), { ...rest, sn: nextSn + i + j });
         batch.delete(doc(db, fromColl, s.id));
       });
       await batch.commit();
