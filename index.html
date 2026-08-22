@@ -7848,6 +7848,10 @@ window.signOutFromSidebar = ()=>signOut(auth);
         trigger.className = 'cta-secondary !py-2 !px-4 !text-xs flex-shrink-0';
         trigger.innerHTML = '<i class="fas fa-file-excel" style="color:#059669"></i> Import';
         addBtn.parentElement.insertBefore(trigger, addBtn);
+        // Bring the main Export button up next to Import so both Excel
+        // actions sit together in the header (was down in the table toolbar).
+        const exportBtn = section.querySelector('button[onclick*="ToExcel"]');
+        if(exportBtn){ exportBtn.classList.add('flex-shrink-0'); addBtn.parentElement.insertBefore(exportBtn, addBtn); }
       } else {
         trigger.className = 'import-trigger-btn';
         trigger.innerHTML = '<i class="fas fa-file-excel"></i> Import from Excel';
