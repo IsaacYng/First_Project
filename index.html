@@ -2419,6 +2419,15 @@
   .skel-line{ height:12px; border-radius:5px; }
   /* Full-section loading shimmer shown briefly on every nav switch */
   .nav-switch-loader{ position:absolute; inset:0; background:var(--bg-page); z-index:45; display:flex; flex-direction:column; gap:14px; padding:24px 20px; transition:opacity .25s ease; overflow:hidden; }
+  /* Bulk-import moved into a popup (installImportModals) */
+  .import-trigger-btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:12px; border:1.5px solid var(--border-strong); background:var(--bg-surface); color:var(--text-secondary); font-size:13px; font-weight:700; box-shadow:var(--shadow-sm); transition:all .15s; margin-bottom:20px; cursor:pointer; }
+  .import-trigger-btn:hover{ border-color:var(--brand); color:var(--brand); transform:translateY(-1px); }
+  .import-trigger-btn i{ color:#059669; }
+  .import-modal-overlay{ position:fixed; inset:0; background:rgba(11,21,19,.5); z-index:70; display:none; align-items:flex-start; justify-content:center; padding:24px 16px; overflow-y:auto; }
+  .import-modal-overlay.flex{ display:flex; }
+  .import-modal-box{ position:relative; background:var(--bg-surface); border-radius:22px; width:100%; max-width:660px; margin:auto; box-shadow:var(--shadow-lift); }
+  .import-modal-close{ position:absolute; top:14px; right:14px; width:34px; height:34px; border:none; background:var(--bg-surface-2); border-radius:10px; color:var(--text-muted); cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center; }
+  .import-modal-close:hover{ background:var(--danger-soft-bg); color:var(--danger); }
   /* Live activity popups ("pop pop") — a colleague's action slides in */
   .live-pop-wrap{ position:fixed; top:72px; right:14px; z-index:800; display:flex; flex-direction:column; gap:10px; max-width:300px; pointer-events:none; }
   .live-pop{ pointer-events:auto; background:#fff; border:1px solid var(--border); border-left:3px solid var(--brand); border-radius:14px; box-shadow:var(--shadow-md); padding:11px 13px; display:flex; align-items:center; gap:11px; cursor:pointer; animation:livePopIn .32s cubic-bezier(.34,1.56,.64,1); }
@@ -7799,6 +7808,55 @@ window.signOutFromSidebar = ()=>signOut(auth);
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
   else scan();
+})();
+
+/* ─────────────────────────────────────────────────────────────────────
+   Move every "Bulk Import from Excel" card into a popup. Inline, the big
+   import card made each page look cluttered; now each section shows a neat
+   "Import from Excel" button that opens the same card in a modal. Generic —
+   no per-section markup changes, and all input ids/handlers are preserved
+   (the card is moved whole, not rebuilt).
+   ───────────────────────────────────────────────────────────────────── */
+(function installImportModals(){
+  function run(){
+    document.querySelectorAll('.yng-card-shell').forEach(card=>{
+      if(card.dataset.modalized) return;
+      const heading = card.querySelector('.section-title');
+      if(!heading || !/bulk import from excel/i.test(heading.textContent)) return;
+      card.dataset.modalized = '1';
+      const parent = card.parentElement;
+
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.className = 'import-trigger-btn';
+      trigger.innerHTML = '<i class="fas fa-file-excel"></i> Import from Excel';
+
+      const overlay = document.createElement('div');
+      overlay.className = 'import-modal-overlay';
+      const box = document.createElement('div');
+      box.className = 'import-modal-box';
+      const close = document.createElement('button');
+      close.type = 'button';
+      close.className = 'import-modal-close';
+      close.innerHTML = '<i class="fas fa-xmark"></i>';
+      box.appendChild(close);
+
+      parent.insertBefore(trigger, card);
+      // strip the card's own frame/margins — the modal box provides those
+      card.classList.remove('yng-card-shell','mb-5');
+      box.appendChild(card);
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+
+      const open  = ()=>{ overlay.classList.add('flex'); };
+      const shut  = ()=>{ overlay.classList.remove('flex'); };
+      trigger.addEventListener('click', open);
+      close.addEventListener('click', shut);
+      overlay.addEventListener('click', e=>{ if(e.target===overlay) shut(); });
+    });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
 })();
 
 
