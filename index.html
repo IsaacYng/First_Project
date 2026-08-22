@@ -7828,8 +7828,6 @@ window.signOutFromSidebar = ()=>signOut(auth);
 
       const trigger = document.createElement('button');
       trigger.type = 'button';
-      trigger.className = 'import-trigger-btn';
-      trigger.innerHTML = '<i class="fas fa-file-excel"></i> Import from Excel';
 
       const overlay = document.createElement('div');
       overlay.className = 'import-modal-overlay';
@@ -7841,7 +7839,21 @@ window.signOutFromSidebar = ()=>signOut(auth);
       close.innerHTML = '<i class="fas fa-xmark"></i>';
       box.appendChild(close);
 
-      parent.insertBefore(trigger, card);
+      // Prefer to sit next to the section's "Add Unit / Add Model" button in
+      // the header; fall back to where the card used to be.
+      const section = card.closest('.sec-panel');
+      const addBtn = section && Array.from(section.querySelectorAll('button.cta-primary'))
+        .find(b => /add (unit|model)/i.test(b.textContent));
+      if(addBtn && addBtn.parentElement){
+        trigger.className = 'cta-secondary !py-2 !px-4 !text-xs flex-shrink-0';
+        trigger.innerHTML = '<i class="fas fa-file-excel" style="color:#059669"></i> Import';
+        addBtn.parentElement.insertBefore(trigger, addBtn);
+      } else {
+        trigger.className = 'import-trigger-btn';
+        trigger.innerHTML = '<i class="fas fa-file-excel"></i> Import from Excel';
+        parent.insertBefore(trigger, card);
+      }
+
       // strip the card's own frame/margins — the modal box provides those
       card.classList.remove('yng-card-shell','mb-5');
       box.appendChild(card);
