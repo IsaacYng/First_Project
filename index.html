@@ -2299,6 +2299,9 @@
   }
   .cdrop-menu button:hover{ background:var(--brand-soft-bg); color:var(--brand); }
   .cdrop-menu button.active{ background:var(--brand-soft-bg); color:var(--brand); }
+  /* Clear All is a bulk-destructive action — Master IDs only */
+  body:not(.role-owner) button[onclick^="clearAllInventory"],
+  body:not(.role-owner) button[onclick^="clearAllHHInventory"]{ display:none !important; }
   .model-filter-menu{
     position:absolute; z-index:45; top:calc(100% + 6px); right:0; left:auto; min-width:100%; width:230px; max-width:min(230px, calc(100vw - 32px));
     max-height:280px; overflow-y:auto; background:#fff; border:1px solid #E2E8F0; border-radius:12px;
@@ -6500,6 +6503,7 @@ function showDangerousConfirm(opts){
 }
 
 async function clearAllInCollection(colName, dataArr, label){
+  if(currentUserRole !== 'owner'){ toast('Only a Master ID can Clear All.','err'); return; }
   if(!dataArr.length){ toast('Already empty — nothing to clear.'); return; }
   const proceed = await showDangerousConfirm({
     title: `Clear ALL ${label}?`,
@@ -7504,8 +7508,8 @@ function stopActiveStatusCheck(){
    rules must allow signed-in users to read/write the `sessions` collection
    for this to work.
    ───────────────────────────────────────────────────────────────────── */
-const SESSION_HEARTBEAT_MS = 45 * 1000;
-const SESSION_STALE_MS = 150 * 1000;   // a session silent this long is treated as gone
+const SESSION_HEARTBEAT_MS = 60 * 1000;
+const SESSION_STALE_MS = 180 * 1000;   // a session silent this long is treated as gone
 let MY_SESSION_ID = null;
 let sessionHeartbeatTimer = null;
 let sessionListenerUnsub = null;
@@ -8130,6 +8134,7 @@ async function loadProfile(uid) {
     // read-only sections, so those pages genuinely look view-only rather
     // than showing buttons that just error out when tapped.
     document.body.classList.toggle('role-recondition', isRecondition);
+    document.body.classList.toggle('role-owner', currentUserRole === 'owner');
     // Section labels stay visible for every role — they're what makes the
     // menu readable. A label is only hidden when nothing under it survived
     // the role filter, so a heading never sits above an empty gap.
@@ -14601,11 +14606,18 @@ let financeCategories=[]; // {id,name,accessoryNames:[...]} — managed from adm
 let sheetInStockModels = new Set();
 let selectedPrintModels = new Set(); // empty = "no filter yet" (falls back to all)
 let selectedPrintTenures = new Set(); // empty = "no filter yet" (falls back to all tenures of the current DP)
-onSnapshot(collection(db,"inventory"), snap=>{
-  updateSheetStockModels(snap.docs.map(d=>d.data()), 'inventory');
-});
-onSnapshot(collection(db,"hh_inventory"), snap=>{
-  updateSheetStockModels(snap.docs.map(d=>d.data()), 'hh_inventory');
+let _sheetStockSubbed = false;
+onAuthStateChanged(auth, u=>{
+  // inventory/hh_inventory require a login to read, so only subscribe once
+  // the user is signed in — subscribing at page load hit the rules and failed.
+  if(!u || _sheetStockSubbed) return;
+  _sheetStockSubbed = true;
+  onSnapshot(collection(db,"inventory"), snap=>{
+    updateSheetStockModels(snap.docs.map(d=>d.data()), 'inventory');
+  });
+  onSnapshot(collection(db,"hh_inventory"), snap=>{
+    updateSheetStockModels(snap.docs.map(d=>d.data()), 'hh_inventory');
+  });
 });
 let _sheetInvSnapshots = { inventory:[], hh_inventory:[] };
 function updateSheetStockModels(docs, source){
@@ -16276,19 +16288,26 @@ let hhInvList = [];
 function allInventoryRecords(){
   return [...invList, ...hhInvList];
 }
-onSnapshot(collection(db,"hh_inventory"), snap=>{
-  hhInvList = snap.docs.map(d=>({id:d.id,...d.data(),_source:'hh'}));
-  const activeInput=document.getElementById('chassisSearch');
-  if(activeInput && document.activeElement===activeInput && activeInput.value.trim()){
-    renderChassisDropdown(searchChassisSuggestions(activeInput.value.trim()));
-  }
-});
-onSnapshot(collection(db,"inventory"), snap=>{
-  invList = snap.docs.map(d=>({id:d.id,...d.data(),_source:'main'}));
-  const activeInput=document.getElementById('chassisSearch');
-  if(activeInput && document.activeElement===activeInput && activeInput.value.trim()){
-    renderChassisDropdown(searchChassisSuggestions(activeInput.value));
-  }
+let _finChassisSubbed = false;
+onAuthStateChanged(auth, u=>{
+  // Chassis search reads inventory/hh_inventory, which need a login — only
+  // subscribe once signed in (subscribing at load failed the rules).
+  if(!u || _finChassisSubbed) return;
+  _finChassisSubbed = true;
+  onSnapshot(collection(db,"hh_inventory"), snap=>{
+    hhInvList = snap.docs.map(d=>({id:d.id,...d.data(),_source:'hh'}));
+    const activeInput=document.getElementById('chassisSearch');
+    if(activeInput && document.activeElement===activeInput && activeInput.value.trim()){
+      renderChassisDropdown(searchChassisSuggestions(activeInput.value.trim()));
+    }
+  });
+  onSnapshot(collection(db,"inventory"), snap=>{
+    invList = snap.docs.map(d=>({id:d.id,...d.data(),_source:'main'}));
+    const activeInput=document.getElementById('chassisSearch');
+    if(activeInput && document.activeElement===activeInput && activeInput.value.trim()){
+      renderChassisDropdown(searchChassisSuggestions(activeInput.value));
+    }
+  });
 });
 
 /* ═══ FINANCE SCHEMES (admin-controlled: Down Payment % / Interest Rate / Tenure) ═══ */
