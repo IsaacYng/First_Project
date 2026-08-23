@@ -2746,9 +2746,6 @@
         <button id="navStock" onclick="switchSec('stock');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Stock Report">
           <i class="fas fa-file-lines"></i> Stock Report
         </button>
-        <button id="navAreaStock" onclick="switchSec('areaStock');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Area Stock">
-          <i class="fas fa-warehouse"></i> Area Stock
-        </button>
         <button id="navHHStock" onclick="switchSec('hhstock');closeMobileMenu()" class="nav-tab sidebar-link hidden" data-label="HH Stock Report">
           <i class="fas fa-file-lines"></i> HH Stock Report
         </button>
@@ -4560,24 +4557,20 @@
         </div>
       </div>
 
-    </div>
-
-    <!-- ═══ AREA STOCK (own section) ═══ -->
-    <div class="sec-panel" id="secAreaStock">
-      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
-        <div>
-          <div class="section-label">Stock Management ·</div>
-          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Area <span class="text-amber-500">Stock</span></div>
-          <p class="text-xs text-slate-400 mt-1">Which area each unit is in — counted automatically from every unit's own location. Selling from one area only reduces that area. Set a unit's area from Inventory (Add/Edit or select → Move to Area).</p>
-        </div>
-        <button onclick="openAreaManager()" class="cta-primary flex-shrink-0"><i class="fas fa-warehouse"></i> Manage Areas</button>
-      </div>
+      <!-- Area-Wise Stock — read-only, auto per-unit counts -->
       <div class="yng-card-shell overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
+          <div>
+            <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-map-location-dot text-amber-500"></i> Area-Wise Stock</div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Auto-counted from each unit's own area — set a unit's area from Inventory (Add/Edit, or select → Move to Area).</p>
+          </div>
+          <button onclick="openAreaManager()" class="flex items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all"><i class="fas fa-warehouse text-[10px]"></i> Manage Areas</button>
+        </div>
         <div class="overflow-x-auto">
           <table class="w-full border-collapse responsive-table" id="areaStockTable">
             <thead><tr class="bg-slate-50" id="areaStockHead"></tr></thead>
             <tbody id="areaStockBody">
-              <tr><td class="px-4 py-12 text-center text-slate-400"><i class="fas fa-circle-notch animate-spin text-emerald-400 text-xl block mb-2"></i>Loading areas…</td></tr>
+              <tr><td class="px-4 py-12 text-center text-slate-400"><i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading areas…</td></tr>
             </tbody>
           </table>
         </div>
@@ -7336,8 +7329,8 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { financeTool:'navFinanceTool', sheetTool:'navSheetTool', dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', areaStock:'navAreaStock', hhstock:'navHHStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
-  const MNAV_IDS = { financeTool:'mNavFinanceTool', sheetTool:'mNavSheetTool', dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', areaStock:'mNavAreaStock', hhstock:'mNavHHStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
+  const NAV_IDS = { financeTool:'navFinanceTool', sheetTool:'navSheetTool', dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
+  const MNAV_IDS = { financeTool:'mNavFinanceTool', sheetTool:'mNavSheetTool', dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', hhstock:'mNavHHStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
@@ -8068,7 +8061,7 @@ async function loadProfile(uid) {
     // Activity Log shows EVERYONE's actions across the whole system — a
     // Normal ID only gets to see their own via "My Activity" in Profile.
     const ALL_NAV_IDS = ['navFinanceTool','navSheetTool','navDashboard','navPrice','navInv','navHHInv','navAllInv','navExchange','navExchangeSr',
-      'navCustomers','navFin','navAcc','navDocs','navStorage','navEvents','navStock','navAreaStock','navHHStock','navChalans',
+      'navCustomers','navFin','navAcc','navDocs','navStorage','navEvents','navStock','navHHStock','navChalans',
       'navHistory','navTrash','navImportant','navModelAliases'];
     ALL_NAV_IDS.forEach(id=>document.getElementById(id)?.classList.remove('hidden'));
 
@@ -8129,7 +8122,7 @@ async function loadProfile(uid) {
       financeTool:'navFinanceTool', sheetTool:'navSheetTool',
       dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv',
       exchange:'navExchange', exchangeSr:'navExchangeSr', customers:'navCustomers', fin:'navFin', acc:'navAcc',
-      docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', areaStock:'navAreaStock', hhstock:'navHHStock',
+      docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock',
       chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases'
     };
     // Recondition ID gets full control of the two Exchange lists and the
@@ -10506,7 +10499,7 @@ function loadLiveStock(){
     renderInvTable(getFilteredInv());
     updateInvStats();
     renderInvLoadMore();
-    if(document.getElementById('secAreaStock')?.classList.contains('active')) renderAreaStockTable();
+    if(document.getElementById('secStock')?.classList.contains('active')) renderAreaStockTable();
     if(typeof updateStorageOverview === 'function') updateStorageOverview();
     if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
     if(document.getElementById('secCustomers')?.classList.contains('active')) renderCustomersPage();
@@ -20268,8 +20261,8 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 });
 
 /* ─── Nav ─── */
-const SEC_TITLES = { financeTool:'DP Allocations', sheetTool:'EMI Rate Sheet', dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', areaStock:'Area Stock', hhstock:'HH Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
-const SEC_IDS = { financeTool:'secFinanceTool', sheetTool:'secSheetTool', dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', areaStock:'secAreaStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
+const SEC_TITLES = { financeTool:'DP Allocations', sheetTool:'EMI Rate Sheet', dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', hhstock:'HH Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
+const SEC_IDS = { financeTool:'secFinanceTool', sheetTool:'secSheetTool', dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
 // Starts a page's Firestore listener the first time that page is opened,
 // then remembers it's running so re-visiting costs nothing. Keeps sign-in
 // light without changing how any page behaves once you're on it.
@@ -20392,8 +20385,7 @@ window.switchSec=(sec)=>{
   if(sec==='storage') updateStorageOverview();
   if(sec==='events') renderEventsPage();
   ensureSectionData(sec);
-  if(sec==='stock') loadStockReportData(true);
-  if(sec==='areaStock') renderAreaStockTable();
+  if(sec==='stock'){ loadStockReportData(true); renderAreaStockTable(); }
   if(sec==='hhstock') loadHHStockReportData(true);
   if(sec==='chalans') renderChalanTable();
   if(sec==='dashboard') renderDashboard();
