@@ -2286,10 +2286,11 @@
   .cdrop-btn{ text-align:left; }
   .cdrop-cur{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .cdrop-menu{
-    position:absolute; z-index:60; top:calc(100% + 6px); left:0; min-width:100%; width:max-content; max-width:280px;
+    position:absolute; z-index:60; top:calc(100% + 6px); left:0; min-width:100%; width:max-content; max-width:min(280px, calc(100vw - 32px));
     max-height:300px; overflow-y:auto; background:var(--bg-surface); border:1px solid var(--border);
     border-radius:14px; box-shadow:var(--shadow-md); padding:6px;
   }
+  .cdrop-menu.align-right{ left:auto; right:0; }
   .cdrop-menu.hidden{ display:none; }
   .cdrop-menu button{
     display:block; width:100%; text-align:left; padding:9px 12px; border:none; background:transparent;
@@ -2299,7 +2300,7 @@
   .cdrop-menu button:hover{ background:var(--brand-soft-bg); color:var(--brand); }
   .cdrop-menu button.active{ background:var(--brand-soft-bg); color:var(--brand); }
   .model-filter-menu{
-    position:absolute; z-index:45; top:calc(100% + 6px); left:0; min-width:100%; width:230px;
+    position:absolute; z-index:45; top:calc(100% + 6px); right:0; left:auto; min-width:100%; width:230px; max-width:min(230px, calc(100vw - 32px));
     max-height:280px; overflow-y:auto; background:#fff; border:1px solid #E2E8F0; border-radius:12px;
     box-shadow:0 10px 30px rgba(15,23,42,.14); padding:6px;
   }
@@ -2800,7 +2801,7 @@
               <i class="fas fa-bell text-sm"></i>
               <span id="notifDot" class="topbar-dot hidden"></span>
             </button>
-            <div id="notifMenu" class="profile-menu" style="min-width:290px; right:-70px;">
+            <div id="notifMenu" class="profile-menu" style="width:min(290px, calc(100vw - 24px)); right:0;">
               <div class="profile-menu-user" style="display:flex; align-items:center; justify-content:space-between;">
                 <div class="nm">Recent Activity</div>
               </div>
@@ -12987,7 +12988,13 @@ window.toggleCDrop = (e, btn)=>{
   const menu = btn.nextElementSibling;
   const isOpen = menu && !menu.classList.contains('hidden');
   document.querySelectorAll('.cdrop-menu').forEach(m=>m.classList.add('hidden'));
-  if(menu && !isOpen) menu.classList.remove('hidden');
+  if(menu && !isOpen){
+    menu.classList.remove('hidden');
+    // If left-anchored would spill off the right edge, right-align instead.
+    menu.classList.remove('align-right');
+    const r = menu.getBoundingClientRect();
+    if(r.right > window.innerWidth - 8) menu.classList.add('align-right');
+  }
 };
 window.cdropPick = (e, setter, value)=>{
   e.stopPropagation();
