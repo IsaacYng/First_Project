@@ -3205,6 +3205,12 @@
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Area / Location</label>
+            <select id="sArea" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
+              <option value="Workshop">Workshop</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Customer Name</label>
             <input type="text" id="sCustomerName" placeholder="e.g. Santosh Gahatraj"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
@@ -3285,6 +3291,12 @@
               <button onclick="bulkSetStatusInv('Sold')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"><i class="fas fa-handshake mr-1.5"></i> Sold</button>
             </div>
           </div>
+          <div id="bulkAreaInvWrap" class="relative hidden">
+            <button onclick="toggleBulkAreaMenu()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:border-emerald-500 hover:text-emerald-600 transition-all">
+              <i class="fas fa-location-dot text-[11px]"></i> Move to Area <i class="fas fa-chevron-down text-[9px]"></i>
+            </button>
+            <div id="bulkAreaInvMenu" class="hidden absolute left-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-30 min-w-[160px]"></div>
+          </div>
           <button id="cancelSelectBtn" onclick="setInvSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
             <i class="fas fa-xmark text-[11px]"></i> Cancel Select
           </button>
@@ -3308,6 +3320,10 @@
             </button>
             <div id="invModelFilterMenu" class="model-filter-menu hidden"></div>
           </div>
+          <div id="invAreaFilterWrap" class="flex-shrink-0"></div>
+          <button onclick="openAreaManager()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
+            <i class="fas fa-warehouse" style="color:#298F60"></i> Manage Areas
+          </button>
           <div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="invSearch" autocomplete="off" placeholder="Search chassis, engine, model, reg no, customer…"
@@ -9014,7 +9030,7 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
       const prev = invData.find(x=>x.id===currentEditInvId) || {};
       const newStatus = document.getElementById('sStatus').value || 'Available';
       const newCustomer = document.getElementById('sCustomerName').value.trim();
-      const invPayload = {model:modelName,chassis,engine,regNo,color,status:newStatus,customerName:newCustomer};
+      const invPayload = {model:modelName,chassis,engine,regNo,color,status:newStatus,customerName:newCustomer,area:(document.getElementById('sArea').value||'Workshop')};
       // Stamp the sale only on the transition into Sold, so re-saving an
       // already-sold unit never rewrites its original sale date.
       if(newStatus==='Sold' && prev.status!=='Sold'){ invPayload.soldAt = new Date(); invPayload.soldFrom = prev.soldFrom || 'Showroom'; }
@@ -9029,13 +9045,14 @@ document.getElementById('saveStockBtn').addEventListener('click',async()=>{
       const nextSn = await getAccurateNextSn('inventory');
       const addStatus = document.getElementById('sStatus').value || 'Available';
       const addCustomer = document.getElementById('sCustomerName').value.trim();
-      const newDoc = {sn:nextSn,model:modelName,chassis,engine,regNo,color,status:addStatus,customerName:addCustomer,addedAt:new Date()};
+      const newDoc = {sn:nextSn,model:modelName,chassis,engine,regNo,color,status:addStatus,customerName:addCustomer,area:(document.getElementById('sArea').value||'Workshop'),addedAt:new Date()};
       if(addStatus==='Sold'){ newDoc.soldAt = new Date(); newDoc.soldFrom = 'Showroom'; }
       await addDoc(collection(db,"inventory"), newDoc);
       logActivity('Added', 'inventory', { model: modelName, chassis, sn: nextSn });
       ['sRegNo','sChassis','sEngine','sColor','sCustomerName'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('sStatus').value='Available';
       document.getElementById('sStatus')?._csSync?.();
+      const sa=document.getElementById('sArea'); if(sa){ sa.value='Workshop'; }
       document.getElementById('stockModelSelect').value='';
       toast('Unit added — S.N '+nextSn+' assigned automatically, marked Available.');
     }
@@ -9053,6 +9070,7 @@ window._editInventory=(id)=>{
   document.getElementById('sStatus').value=s.status||'Available';
   document.getElementById('sStatus')?._csSync?.();
   document.getElementById('sCustomerName').value=s.customerName||'';
+  populateAreaSelect(s.area || 'Workshop');
   currentEditInvId=id;
   const btn=document.getElementById('saveStockBtn');
   btn.innerHTML='<i class="fas fa-rotate"></i> Update Unit';
@@ -10361,7 +10379,23 @@ window._setHHFlag = async (id, hhFlag) => {
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
+// Fill the Area dropdown from the managed areas (Showroom/Workshop + custom),
+// keeping the chosen value. New units default to Workshop.
+function populateAreaSelect(selected){
+  const sel = document.getElementById('sArea');
+  if(!sel) return;
+  const names = stockAreas.map(a=>a.name).filter(Boolean);
+  DEFAULT_AREAS.forEach(d=>{ if(!names.some(n=>n.toLowerCase()===d.toLowerCase())) names.unshift(d); });
+  // de-dupe, keep order
+  const seen=new Set(); const list=[];
+  names.forEach(n=>{ const k=n.toLowerCase(); if(!seen.has(k)){ seen.add(k); list.push(n); } });
+  const want = selected || sel.value || 'Workshop';
+  sel.innerHTML = list.map(n=>`<option value="${escapeHtml(n)}"${n===want?' selected':''}>${escapeHtml(n)}</option>`).join('');
+  sel.value = list.includes(want) ? want : (list[0]||'Workshop');
+}
+
 window.openInvFormModal = ()=>{
+  if(!currentEditInvId) populateAreaSelect('Workshop'); // fresh add defaults to Workshop
   document.getElementById('invFormModal').classList.add('open');
 };
 window.closeInvFormModal = ()=>{
@@ -10535,6 +10569,78 @@ function renderHHInvLoadMore(){
 
 let invStatusFilter = 'all';
 let invModelFilter = 'all';
+let invAreaFilter = 'all';
+window.setInvAreaFilter = (v)=>{ invAreaFilter = v; renderInvTable(getFilteredInv()); };
+// Build the area filter dropdown from the managed areas, counting only
+// in-stock (not sold) units per area so it mirrors what's on the shelf.
+function renderInvAreaFilter(){
+  const wrap = document.getElementById('invAreaFilterWrap');
+  if(!wrap) return;
+  const names = [];
+  const seen = new Set();
+  DEFAULT_AREAS.forEach(d=>{ const k=d.toLowerCase(); if(!seen.has(k)){seen.add(k); names.push(d);} });
+  stockAreas.forEach(a=>{ const n=(a.name||'').trim(); const k=n.toLowerCase(); if(n && !seen.has(k)){seen.add(k); names.push(n);} });
+  invData.forEach(s=>{ const n=(s.area||'Workshop').trim(); const k=n.toLowerCase(); if(n && !seen.has(k)){seen.add(k); names.push(n);} });
+  const counts = {}; let totalInStock = 0;
+  invData.forEach(s=>{
+    if((s.status||'Available')==='Sold') return; // count what's physically in stock
+    const n = (s.area||'Workshop');
+    counts[n] = (counts[n]||0)+1; totalInStock++;
+  });
+  if(invAreaFilter!=='all' && !names.some(n=>n===invAreaFilter)) invAreaFilter='all';
+  wrap.innerHTML = buildFilterSelect('setInvAreaFilter', invAreaFilter, `All Areas (${totalInStock})`,
+    names.map(n=>({value:n, label:`${n} (${counts[n]||0})`})));
+}
+window.openAreaManager = ()=>{
+  if(currentUserRole==='recondition'){ toast('Recondition IDs can\u2019t manage areas.','err'); return; }
+  let ov = document.getElementById('areaManagerModal');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'areaManagerModal';
+    ov.className = 'import-modal-overlay';
+    ov.innerHTML =
+      '<div class="import-modal-box" style="max-width:460px">'+
+        '<button type="button" class="import-modal-close" onclick="closeAreaManager()"><i class="fas fa-xmark"></i></button>'+
+        '<div class="p-6">'+
+          '<div class="flex items-center gap-2 section-title text-2xl mb-1"><i class="fas fa-warehouse text-emerald-600 text-lg"></i> Manage Areas</div>'+
+          '<p class="text-xs text-slate-500 mb-4">Physical locations for your stock. Showroom &amp; Workshop are always here; add others like TPJ. Each unit sits in one area — selling from one only reduces that area.</p>'+
+          '<div class="flex gap-2 mb-4">'+
+            '<input id="newAreaInputMgr" type="text" placeholder="e.g. TPJ" class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all" onkeydown="if(event.key===\'Enter\')addStockAreaFromManager()"/>'+
+            '<button onclick="addStockAreaFromManager()" class="cta-primary !py-2 !px-4 !text-sm flex-shrink-0"><i class="fas fa-plus"></i> Add</button>'+
+          '</div>'+
+          '<div id="areaManagerList" class="flex flex-col gap-2 max-h-72 overflow-y-auto"></div>'+
+        '</div>'+
+      '</div>';
+    ov.addEventListener('click', e=>{ if(e.target===ov) closeAreaManager(); });
+    document.body.appendChild(ov);
+  }
+  renderAreaManager();
+  ov.classList.add('flex');
+};
+window.closeAreaManager = ()=>{ document.getElementById('areaManagerModal')?.classList.remove('flex'); };
+function renderAreaManager(){
+  const list = document.getElementById('areaManagerList');
+  if(!list) return;
+  const names = [];
+  const seen = new Set();
+  DEFAULT_AREAS.forEach(d=>{ const k=d.toLowerCase(); if(!seen.has(k)){seen.add(k); names.push({name:d, def:true});} });
+  stockAreas.forEach(a=>{ const n=(a.name||'').trim(); const k=n.toLowerCase(); if(n && !seen.has(k)){seen.add(k); names.push({name:n, def:false, id:a.id});} });
+  list.innerHTML = names.map(m=>
+    '<div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/60">'+
+      '<span class="text-sm font-semibold text-slate-700"><i class="fas fa-location-dot text-emerald-600 mr-2"></i>'+escapeHtml(m.name)+(m.def?' <span class="text-[9px] text-slate-400 font-bold uppercase">default</span>':'')+'</span>'+
+      (m.def ? '' : '<button onclick="removeStockArea(\''+m.id+'\',\''+escapeJsAttr(m.name)+'\')" class="w-8 h-8 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600 transition-all"><i class="fas fa-trash-can text-xs"></i></button>')+
+    '</div>').join('');
+}
+window.addStockAreaFromManager = async ()=>{
+  if(currentUserRole==='recondition'){ toast('Recondition IDs can\u2019t manage areas.','err'); return; }
+  const input = document.getElementById('newAreaInputMgr');
+  const name = (input.value||'').trim();
+  if(!name){ toast('Enter an area name.','warn'); return; }
+  if(DEFAULT_AREAS.some(d=>d.toLowerCase()===name.toLowerCase()) || stockAreas.some(a=>String(a.name||'').toLowerCase()===name.toLowerCase())){ toast('That area already exists.','warn'); return; }
+  if(stockAreas.length >= MAX_STOCK_AREAS){ toast(`Areas are capped at ${MAX_STOCK_AREAS}.`,'warn'); return; }
+  try{ await addDoc(collection(db,"stock_areas"),{name}); input.value=''; toast('Area added: '+name); }
+  catch(e){ toast('Error: '+friendlyError(e),'err'); }
+};
 function setInvStatusFilter(status){
   invStatusFilter = status;
   document.querySelectorAll('.inv-status-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===status));
@@ -10657,6 +10763,7 @@ function getFilteredInv(){
     base = base.filter(s => (s.status||'Available') === invStatusFilter);
   }
   if(invModelFilter !== 'all') base = base.filter(s => s.model === invModelFilter);
+  if(invAreaFilter !== 'all') base = base.filter(s => (s.area || 'Workshop') === invAreaFilter);
   if(!invSearchTerm) return base;
   const q = invSearchTerm.toLowerCase().trim();
   return base.filter(s=>{
@@ -10673,6 +10780,7 @@ function renderInvTable(list){
   const tbody=document.getElementById('stockTableBody');
   document.getElementById('invCount').textContent=list.length+' unit'+(list.length!==1?'s':'')+(invSearchTerm?' found':'');
   populateModelFilterDropdown('inv', invData, invModelFilter);
+  renderInvAreaFilter();
   if(!list.length){
     tbody.innerHTML=`<tr><td colspan="9"><div class="py-12 text-center text-slate-400"><i class="fas fa-warehouse text-3xl opacity-25 block mb-2"></i><p class="text-sm">${invSearchTerm?'No units match your search.':'No inventory yet. Add a unit using the form above.'}</p></div></td></tr>`;
     updateDeleteSelectedBtn();
@@ -10706,6 +10814,7 @@ function renderInvTable(list){
         ${highlightMatch(s.model, q)}
         ${isDup ? `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 text-red-600 text-[9px] font-extrabold uppercase tracking-wide align-middle"><i class="fas fa-triangle-exclamation text-[8px]"></i> Duplicate</span>` : ''}
         ${agingBadgeHTML(s)}
+        <span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-600 text-[9px] font-bold uppercase tracking-wide align-middle" title="Area"><i class="fas fa-location-dot text-[8px]"></i> ${escapeHtml(s.area||'Workshop')}</span>
       </td>
       <td class="px-4 py-3" data-th="Chassis No"><code class="${isDup?'bg-red-50 text-red-700 border-red-200':'bg-slate-50 text-slate-600 border-slate-200'} text-xs px-2 py-0.5 rounded-md border font-mono">${highlightMatch(s.chassis, q)}</code></td>
       <td class="px-4 py-3" data-th="Engine No"><code class="${isDup?'bg-red-50 text-red-700 border-red-200':'bg-slate-50 text-slate-600 border-slate-200'} text-xs px-2 py-0.5 rounded-md border font-mono">${highlightMatch(s.engine, q)}</code></td>
@@ -10796,6 +10905,9 @@ function toggleBulkControls(scope, count){
   if(btn){ if(count>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); } else { btn.classList.add('hidden'); btn.classList.remove('flex'); } }
   const cnt = document.getElementById(map.cnt); if(cnt) cnt.textContent = count;
   const wrap = document.getElementById(map.wrap); if(wrap) wrap.classList.toggle('hidden', count===0);
+  if(scope==='inv'){
+    const aw = document.getElementById('bulkAreaInvWrap'); if(aw) aw.classList.toggle('hidden', count===0);
+  }
   const expBtn = document.getElementById(scope==='hh' ? 'bulkExportHHBtn' : 'bulkExportInvBtn');
   if(expBtn){ if(count>0){ expBtn.classList.remove('hidden'); expBtn.classList.add('flex'); } else { expBtn.classList.add('hidden'); expBtn.classList.remove('flex'); } }
   const expCnt = document.getElementById(scope==='hh' ? 'bulkExportHHCount' : 'bulkExportInvCount'); if(expCnt) expCnt.textContent = count;
@@ -10811,6 +10923,7 @@ window.toggleBulkStatusMenu = (scope)=>{
 document.addEventListener('click', (e)=>{
   if(!e.target.closest('#bulkStatusInvWrap')) document.getElementById('bulkStatusInvMenu')?.classList.add('hidden');
   if(!e.target.closest('#bulkStatusHHWrap')) document.getElementById('bulkStatusHHMenu')?.classList.add('hidden');
+  if(!e.target.closest('#bulkAreaInvWrap')) document.getElementById('bulkAreaInvMenu')?.classList.add('hidden');
 });
 
 // Move selected showroom-Inventory units to HH Inventory in one go.
@@ -10918,6 +11031,40 @@ window.bulkSetStatusInv = (status)=>{
   if(blockIfReconditionOnly()) return;
   document.getElementById('bulkStatusInvMenu')?.classList.add('hidden');
   bulkSetStatus('inventory', invData, selectedInvIds, status, ()=>{ selectedInvIds.clear(); setInvSelectMode(false); });
+};
+// Bulk move selected units to an area — fills the menu from managed areas.
+window.toggleBulkAreaMenu = ()=>{
+  const menu = document.getElementById('bulkAreaInvMenu');
+  if(!menu) return;
+  const names = [];
+  const seen = new Set();
+  DEFAULT_AREAS.forEach(d=>{ const k=d.toLowerCase(); if(!seen.has(k)){seen.add(k); names.push(d);} });
+  stockAreas.forEach(a=>{ const n=(a.name||'').trim(); const k=n.toLowerCase(); if(n && !seen.has(k)){seen.add(k); names.push(n);} });
+  menu.innerHTML = names.map(n=>`<button onclick="bulkMoveToArea('${escapeJsAttr(n)}')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-600"><i class="fas fa-location-dot mr-1.5 text-emerald-500"></i> ${escapeHtml(n)}</button>`).join('');
+  menu.classList.toggle('hidden');
+};
+window.bulkMoveToArea = async (area)=>{
+  if(blockIfReconditionOnly()) return;
+  document.getElementById('bulkAreaInvMenu')?.classList.add('hidden');
+  const ids = [...selectedInvIds];
+  if(!ids.length) return;
+  const ok = await showConfirm({
+    title: `Move ${ids.length} unit${ids.length!==1?'s':''} to ${area}?`,
+    message: `These ${ids.length} selected unit(s) will be marked as physically in <b>${area}</b>.`,
+    okText: `Move to ${area}`, okColorClass: 'text-emerald-600 hover:bg-emerald-50',
+    iconClass: 'fa-location-dot', iconColor: '#298F60', iconBg: '#E4F3EC'
+  });
+  if(!ok) return;
+  try{
+    for(let i=0;i<ids.length;i+=400){
+      const batch = writeBatch(db);
+      ids.slice(i,i+400).forEach(id=>batch.update(doc(db,'inventory',id), { area }));
+      await batch.commit();
+    }
+    logActivity('Bulk Area Changed','inventory',{ model:`${ids.length} unit(s)`, customerName: area });
+    toast(`${ids.length} unit(s) moved to ${area}.`);
+    selectedInvIds.clear(); setInvSelectMode(false);
+  }catch(e){ toast('Update failed: '+friendlyError(e),'err'); }
 };
 window.bulkSetStatusHH = (status)=>{
   if(blockIfReconditionOnly()) return;
@@ -11816,14 +11963,15 @@ function buildStockReportPage(){
     // Each colour gets its own row — easier to read at a glance than a combined string.
     return Object.entries(info.colours).sort((a,b)=>b[1]-a[1]).map(([c,available])=>{
       sn++;
-      const key = areaStockKey(m,c);
-      const saved = areaStockMap[key]?.areas || {};
-      // Same capped/scaled breakdown as the on-screen table — a unit that's
-      // Sold / HH Hidden elsewhere must not keep showing as sitting in an
-      // area (e.g. Showroom) in the printed daily report either.
-      const { perArea: cappedByArea } = computeAreaBreakdown(available, saved, workshopArea);
+      // Per-unit area counts: count in-stock units of this model+colour in
+      // each area directly from their own `area` field — this is the fix, so
+      // selling from one area only reduces that area (no manual entry).
       const perArea = stockAreas.map(a=>{
-        const qtyHere = cappedByArea[a.name] ?? 0;
+        const qtyHere = invData.filter(s =>
+          (s.model||'')===m && (s.color||'')===c &&
+          (s.status||'Available')!=='Sold' && s.hhFlag!=='Hide' &&
+          (s.area||'Workshop')===a.name
+        ).length;
         areaTotals[a.name] += qtyHere;
         return qtyHere;
       });
@@ -12252,6 +12400,9 @@ function loadStockAreas(){
     stockAreas = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
     seedDefaultAreas();
     renderAreaStockTable();
+    renderInvAreaFilter();
+    renderAreaManager();
+    if(document.getElementById('invFormModal')?.classList.contains('open') && !currentEditInvId) populateAreaSelect(document.getElementById('sArea')?.value||'Workshop');
     if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err=>console.error('stock_areas listener failed', err));
 
@@ -12397,6 +12548,33 @@ function renderAreaStockTable(){
 
   const workshopArea = findWorkshopArea();
   const rows = [];
+  models.forEach(m=>{
+    Object.entries(byModel[m].colours).sort((a,b)=>b[1]-a[1]).forEach(([c,available])=>{
+      // Read-only, auto: count in-stock units of this model+colour in each
+      // area from their own `area` field. No manual entry — selling from one
+      // area only reduces that area's count.
+      const cells = stockAreas.map(a=>{
+        const qtyHere = invData.filter(s =>
+          (s.model||'')===m && (s.color||'')===c &&
+          (s.status||'Available')!=='Sold' && s.hhFlag!=='Hide' &&
+          (s.area||'Workshop')===a.name
+        ).length;
+        return `<td class="px-3 py-2 text-center text-sm font-semibold ${qtyHere>0?'text-slate-700':'text-slate-300'}" data-th="${escapeHtml(a.name||'')}">${qtyHere}</td>`;
+      }).join('');
+
+      rows.push(`<tr class="border-b border-slate-100">
+        <td class="px-4 py-2.5 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">${escapeHtml(m)}</td>
+        <td class="px-4 py-2.5" data-th="Colour"><span class="flex items-center gap-1.5 text-sm text-slate-600"><span class="colour-dot" style="background:${colourHex(c)}"></span>${escapeHtml(c)}</span></td>
+        ${cells}
+        <td class="px-3 py-2 text-center" data-th="Row Total"><span class="area-total-chip">${available}</span></td>
+      </tr>`);
+    });
+  });
+  body.innerHTML = rows.join('');
+}
+function _oldAreaStockRenderUnused(){
+  const workshopArea = findWorkshopArea();
+  const models = [], byModel = {}, rows = [], pendingAreaFocus = null;
   models.forEach(m=>{
     Object.entries(byModel[m].colours).sort((a,b)=>b[1]-a[1]).forEach(([c,available])=>{
       const key = areaStockKey(m,c);
@@ -19697,6 +19875,7 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
         color: row.color,
         status: 'Available',
         customerName: '',
+        area: 'Workshop',
         addedAt: new Date()
       });
       seenInBatch.push(row);
