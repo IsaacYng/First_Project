@@ -10460,11 +10460,14 @@ document.getElementById('fixHHSnBtn').addEventListener('click', async ()=>{
 function loadLiveStock(){
   if(invUnsub) invUnsub(); // drop the previous listener before opening a wider one
   const tbody = document.getElementById('stockTableBody');
-  const q = query(collection(db,"inventory"), orderBy('sn','asc'), limit(invPageLimit));
+  // Load the FULL inventory (no page limit) — search must cover every unit,
+  // not just a loaded page. Fine for a dealership's scale; if it ever grows
+  // into the thousands, reintroduce paging with a search-all fallback.
+  const q = query(collection(db,"inventory"), orderBy('sn','asc'));
   invUnsub = onSnapshot(q, snap=>{
     invData = snap.docs.map(d=>({id:d.id,...d.data()}));
     markDashReady('inv');
-    invHasMore = snap.docs.length === invPageLimit; // there may be more beyond this page
+    invHasMore = false; // full list loaded — no "Load more" needed
     const liveIds = new Set(invData.map(s=>s.id));
     selectedInvIds.forEach(id=>{ if(!liveIds.has(id)) selectedInvIds.delete(id); });
     renderInvTable(getFilteredInv());
@@ -10688,7 +10691,7 @@ function renderInvTable(list){
   }
   const sorted=[...list].sort((a,b)=>(Number(a.sn)||9999)-(Number(b.sn)||9999));
   const q = invSearchTerm;
-  tbody.innerHTML=sorted.map(s=>{
+  tbody.innerHTML=sorted.map((s,rowIdx)=>{
     const isDup = dupIds.has(s.id);
     const isSel = selectedInvIds.has(s.id);
     return`<tr class="border-b ${isDup?'border-red-100 bg-red-50/40':'border-slate-100'} ${isSel?'row-selected':''}" data-row-id="${s.id}">
@@ -10696,7 +10699,8 @@ function renderInvTable(list){
         <input type="checkbox" class="inv-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${isSel?'checked':''} onchange="toggleSelectInvUnit('${s.id}', this.checked); this.closest('tr').classList.toggle('row-selected', this.checked)">
       </td>
       <td class="px-4 py-3" data-th="S.N">
-        <span class="inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-xs font-mono font-semibold">${s.sn||'—'}</span>
+        <span class="inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-xs font-mono font-semibold">${rowIdx+1}</span>
+        <div class="text-[9px] text-slate-300 font-mono mt-0.5">#${s.sn||'—'}</div>
       </td>
       <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">
         ${highlightMatch(s.model, q)}
@@ -11028,11 +11032,11 @@ function populateHHModelDropdown(){ /* model is free-text here, validated on sav
 function loadHHInventory(){
   if(hhInvUnsub) hhInvUnsub();
   const tbody = document.getElementById('hhInvTableBody');
-  const q = query(collection(db,"hh_inventory"), orderBy('sn','asc'), limit(hhPageLimit));
+  const q = query(collection(db,"hh_inventory"), orderBy('sn','asc'));
   hhInvUnsub = onSnapshot(q, snap=>{
     hhInvData = snap.docs.map(d=>({id:d.id,...d.data()}));
     markDashReady('hh');
-    hhHasMore = snap.docs.length === hhPageLimit;
+    hhHasMore = false;
     const liveIds = new Set(hhInvData.map(s=>s.id));
     selectedHHInvIds.forEach(id=>{ if(!liveIds.has(id)) selectedHHInvIds.delete(id); });
     renderHHInvTable();
@@ -11224,7 +11228,7 @@ function renderHHInvTable(){
     updateDeleteSelectedHHBtn();
     return;
   }
-  tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map(s=>{
+  tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map((s,rowIdx)=>{
     const isSel = selectedHHInvIds.has(s.id);
     const isDup = dupIds.has(s.id);
     return `
@@ -11232,7 +11236,7 @@ function renderHHInvTable(){
       <td class="px-3 py-3 sel-col" data-th="">
         <input type="checkbox" class="hhinv-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${isSel?'checked':''} onchange="toggleSelectHHInvUnit('${s.id}', this.checked); this.closest('tr').classList.toggle('row-selected', this.checked)">
       </td>
-      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${s.sn||'—'}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${rowIdx+1}<div class="text-[9px] text-slate-300 mt-0.5">#${s.sn||'—'}</div></td>
       <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">
         ${escapeHtml(s.model||'—')}
         ${isDup ? `<span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-100 text-red-600 text-[9px] font-extrabold uppercase tracking-wide align-middle"><i class="fas fa-triangle-exclamation text-[8px]"></i> Duplicate</span>` : ''}
@@ -13302,7 +13306,7 @@ function renderExchangeTable(){
     tbody.innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400"><i class="fas fa-right-left text-3xl opacity-25 block mb-2"></i><p class="text-sm">${exchangeSearchTerm?'No units match your search.':'No exchange stock yet. Add a unit above.'}</p></div></td></tr>`;
     return;
   }
-  tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map(s=>{
+  tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map((s,rowIdx)=>{
     const valuation = s.valuation ? 'Rs. '+Number(s.valuation).toLocaleString('en-IN') : '—';
     const isSel = selectedExchangeIds.has(s.id);
     return `
@@ -13310,7 +13314,7 @@ function renderExchangeTable(){
       <td class="px-3 py-3 sel-col" data-th="">
         <input type="checkbox" class="ex-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${isSel?'checked':''} onchange="toggleSelectExchangeUnit('${s.id}', this.checked); this.closest('tr').classList.toggle('row-selected', this.checked)">
       </td>
-      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${s.sn||'—'}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${rowIdx+1}<div class="text-[9px] text-slate-300 mt-0.5">#${s.sn||'—'}</div></td>
       <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">${escapeHtml(s.model||'—')}
         ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
       </td>
@@ -14104,7 +14108,7 @@ function renderExchangeSrTable(){
     tbody.innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400"><i class="fas fa-right-left text-3xl opacity-25 block mb-2"></i><p class="text-sm">${exchangeSrSearchTerm?'No units match your search.':'No exchange stock yet. Add a unit above.'}</p></div></td></tr>`;
     return;
   }
-  tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map(s=>{
+  tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map((s,rowIdx)=>{
     const valuation = s.valuation ? 'Rs. '+Number(s.valuation).toLocaleString('en-IN') : '—';
     const isSel = selectedExchangeSrIds.has(s.id);
     return `
@@ -14112,7 +14116,7 @@ function renderExchangeSrTable(){
       <td class="px-3 py-3 sel-col" data-th="">
         <input type="checkbox" class="ex-sr-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${isSel?'checked':''} onchange="toggleSelectExchangeSrUnit('${s.id}', this.checked); this.closest('tr').classList.toggle('row-selected', this.checked)">
       </td>
-      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${s.sn||'—'}</td>
+      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${rowIdx+1}<div class="text-[9px] text-slate-300 mt-0.5">#${s.sn||'—'}</div></td>
       <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">${escapeHtml(s.model||'—')}
         ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
       </td>
