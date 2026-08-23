@@ -2280,6 +2280,24 @@
   .filter-select:hover{ border-color:var(--brand-soft-border); background-color:var(--brand-soft-bg); transform:translateY(-1px); }
   .filter-select:focus{ border-color:var(--brand); box-shadow:0 0 0 3px rgba(159,106,74,.16); }
   .filter-select option{ color:var(--text-primary); font-weight:600; background:var(--bg-surface); }
+  /* Custom themed dropdown menu (so the OPEN list matches the warm theme,
+     not the browser's dark native picker). */
+  .cdrop{ position:relative; display:inline-block; }
+  .cdrop-btn{ text-align:left; }
+  .cdrop-cur{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cdrop-menu{
+    position:absolute; z-index:60; top:calc(100% + 6px); left:0; min-width:100%; width:max-content; max-width:280px;
+    max-height:300px; overflow-y:auto; background:var(--bg-surface); border:1px solid var(--border);
+    border-radius:14px; box-shadow:var(--shadow-md); padding:6px;
+  }
+  .cdrop-menu.hidden{ display:none; }
+  .cdrop-menu button{
+    display:block; width:100%; text-align:left; padding:9px 12px; border:none; background:transparent;
+    border-radius:9px; font-size:13px; font-weight:600; color:var(--text-secondary); cursor:pointer;
+    transition:background .12s, color .12s; white-space:nowrap;
+  }
+  .cdrop-menu button:hover{ background:var(--brand-soft-bg); color:var(--brand); }
+  .cdrop-menu button.active{ background:var(--brand-soft-bg); color:var(--brand); }
   .model-filter-menu{
     position:absolute; z-index:45; top:calc(100% + 6px); left:0; min-width:100%; width:230px;
     max-height:280px; overflow-y:auto; background:#fff; border:1px solid #E2E8F0; border-radius:12px;
@@ -3514,9 +3532,7 @@
             </button>
             <div id="hhInvModelFilterMenu" class="model-filter-menu hidden"></div>
           </div>
-          <select id="hhInvMelaFilter" onchange="setHHInvMelaFilter(this.value)" class="filter-select flex-shrink-0">
-            <option value="all">All Melas</option>
-          </select>
+          <div id="hhInvMelaFilterWrap" class="flex-shrink-0"></div>
           <div class="relative ml-auto w-full sm:w-64">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="hhInvSearch" autocomplete="off" placeholder="Search chassis, model, event, customer…"
@@ -5450,8 +5466,10 @@
         <div id="chalanMonthFilterWrap" class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
           <!-- Month pills injected dynamically — one per month that actually has Chalans, newest first -->
         </div>
-        <div id="chalanModelFilterWrap" class="flex-shrink-0"></div>
-        <div id="chalanPartyFilterWrap" class="flex-shrink-0"></div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <div id="chalanModelFilterWrap" class="flex-shrink-0"></div>
+          <div id="chalanPartyFilterWrap" class="flex-shrink-0"></div>
+        </div>
         <div class="relative max-w-sm w-full">
           <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
           <input type="text" id="chalanSearchInput" oninput="window.setChalanSearch(this.value)" placeholder="Search model, chassis, customer, chalan no…"
@@ -10985,17 +11003,15 @@ window.setHHInvMelaFilter = (v)=>{ hhInvMelaFilter = v; renderHHInvTable(); };
 // Fill the HH "All Melas" dropdown from managed melas + any event names
 // already typed on units, keeping the current selection.
 function populateHHMelaFilter(){
-  const sel = document.getElementById('hhInvMelaFilter');
-  if(!sel) return;
+  const wrap = document.getElementById('hhInvMelaFilterWrap');
+  if(!wrap) return;
   const names = new Set();
   hhInvData.forEach(s=>{ const v=(s.eventName||'').trim(); if(v) names.add(v); });
   melaAreas.forEach(m=>{ const v=(m.name||'').trim(); if(v) names.add(v); });
   const sorted = [...names].sort((a,b)=>a.localeCompare(b));
-  // if the selected mela no longer exists, fall back to All
   if(hhInvMelaFilter !== 'all' && !sorted.includes(hhInvMelaFilter)) hhInvMelaFilter = 'all';
-  sel.innerHTML = '<option value="all">All Melas</option>' +
-    sorted.map(v=>`<option value="${escapeHtml(v)}"${v===hhInvMelaFilter?' selected':''}>${escapeHtml(v)}</option>`).join('');
-  sel.value = hhInvMelaFilter;
+  wrap.innerHTML = buildFilterSelect('setHHInvMelaFilter', hhInvMelaFilter, 'All Melas',
+    sorted.map(v=>({value:v, label:v})));
 }
 let hhInvSearchTerm = '';
 
@@ -12958,12 +12974,32 @@ let exchangeStatusFilter = 'all';
 let exchangeSendToFilter = 'all';
 let exchangeModelFilter = 'all';
 // Shared builder for the list filter dropdowns (destinations, models, etc.)
-// so every filter looks and behaves the same across the app.
+// Custom (not native <select>) so the OPEN menu matches the warm theme
+// instead of the browser's dark native picker.
 function buildFilterSelect(setterName, current, allLabel, items){
-  const opts = [`<option value="all"${current==='all'?' selected':''}>${escapeHtml(allLabel)}</option>`]
-    .concat(items.map(it=>`<option value="${escapeHtml(it.value)}"${current===it.value?' selected':''}>${escapeHtml(it.label)}</option>`));
-  return `<select class="filter-select" onchange="${setterName}(this.value)">${opts.join('')}</select>`;
+  const opts = [{value:'all', label:allLabel}, ...items];
+  const cur = opts.find(o=>o.value===current) || opts[0];
+  const menu = opts.map(o=>
+    `<button type="button" class="${o.value===current?'active':''}" onclick="cdropPick(event,'${setterName}','${escapeJsAttr(o.value)}')">${escapeHtml(o.label)}</button>`
+  ).join('');
+  return `<div class="cdrop">`+
+    `<button type="button" class="filter-select cdrop-btn" onclick="toggleCDrop(event,this)"><span class="cdrop-cur">${escapeHtml(cur.label)}</span></button>`+
+    `<div class="cdrop-menu hidden">${menu}</div>`+
+  `</div>`;
 }
+window.toggleCDrop = (e, btn)=>{
+  e.stopPropagation();
+  const menu = btn.nextElementSibling;
+  const isOpen = menu && !menu.classList.contains('hidden');
+  document.querySelectorAll('.cdrop-menu').forEach(m=>m.classList.add('hidden'));
+  if(menu && !isOpen) menu.classList.remove('hidden');
+};
+window.cdropPick = (e, setter, value)=>{
+  e.stopPropagation();
+  document.querySelectorAll('.cdrop-menu').forEach(m=>m.classList.add('hidden'));
+  if(typeof window[setter]==='function') window[setter](value);
+};
+document.addEventListener('click', ()=>{ document.querySelectorAll('.cdrop-menu').forEach(m=>m.classList.add('hidden')); });
 let exchangeSearchTerm = '';
 
 // Shared by both Mela and Showroom Exchange — reuses the exact same
