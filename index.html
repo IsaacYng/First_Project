@@ -3532,15 +3532,11 @@
             </button>
             <div id="hhInvModelFilterMenu" class="model-filter-menu hidden"></div>
           </div>
-          <div id="hhInvMelaFilterWrap" class="flex-shrink-0"></div>
           <div class="relative ml-auto w-full sm:w-64">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="hhInvSearch" autocomplete="off" placeholder="Search chassis, model, event, customer…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
           </div>
-          <button onclick="openMelaManager()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
-            <i class="fas fa-store" style="color:#D98324"></i> Manage Melas
-          </button>
           <button onclick="openHHInvFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Unit
           </button>
@@ -11518,7 +11514,6 @@ window.removeMelaArea = async (id, name)=>{
 function populateEventNameDatalist(){
   const names = new Set();
   hhInvData.forEach(s=>{ const v=(s.eventName||'').trim(); if(v) names.add(v); });
-  melaAreas.forEach(m=>{ const v=(m.name||'').trim(); if(v) names.add(v); });
   const dl = document.getElementById('hhEventNameOptions');
   if(dl) dl.innerHTML = [...names].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${escapeHtml(v)}"></option>`).join('');
 }
