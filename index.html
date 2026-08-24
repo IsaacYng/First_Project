@@ -13664,14 +13664,7 @@ window.bulkTransferExSrToMela = ()=>
   bulkTransferExchange('exchange_stock_showroom','exchange_stock', exchangeSrData, selectedExchangeSrIds, 'Mela',
     ()=>{ selectedExchangeSrIds.clear(); setExchangeSrSelectMode(false); });
 
-function exportUnitsToExcel(units, sheetName, filePrefix){
-  if(typeof XLSX === 'undefined'){ toast('Excel library still loading — try again.','err'); return; }
-  if(!units.length){ toast('Nothing selected to export.','err'); return; }
-  const rows = units.map(s=>({
-    'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg No': s.regNo||'',
-    'Valuation': s.valuation||0, 'Blue Book': s.blueBook||'', 'Key': s.key||'', 'File': s.file||'',
-    'Customer': s.customerName||'', 'Contact': s.contact||'', 'Send To': s.sendTo||'', 'Status': s.status||'', 'Remarks': s.remarks||''
-  }));
+function exportExchangeUnitsToExcel(units, sheetName, filePrefix){
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
@@ -13679,9 +13672,9 @@ function exportUnitsToExcel(units, sheetName, filePrefix){
   toast(`${units.length} unit(s) exported.`);
 }
 window.exportSelectedEx = ()=>
-  exportUnitsToExcel([...selectedExchangeIds].map(id=>exchangeData.find(x=>x.id===id)).filter(Boolean), 'Mela Exchange', 'mela_exchange_selected');
+  exportExchangeUnitsToExcel([...selectedExchangeIds].map(id=>exchangeData.find(x=>x.id===id)).filter(Boolean), 'Mela Exchange', 'mela_exchange_selected');
 window.exportSelectedExSr = ()=>
-  exportUnitsToExcel([...selectedExchangeSrIds].map(id=>exchangeSrData.find(x=>x.id===id)).filter(Boolean), 'Showroom Exchange', 'showroom_exchange_selected');
+  exportExchangeUnitsToExcel([...selectedExchangeSrIds].map(id=>exchangeSrData.find(x=>x.id===id)).filter(Boolean), 'Showroom Exchange', 'showroom_exchange_selected');
 
 window.deleteSelectedExchangeUnits = async ()=>{
   if(!selectedExchangeIds.size) return;
