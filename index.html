@@ -3702,6 +3702,11 @@
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Contact No.</label>
+            <input type="text" id="exContact" placeholder="e.g. 98XXXXXXXX" inputmode="tel"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Blue Book</label>
             <select id="exBlueBook" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
               <option value="yes">Yes — received</option>
@@ -3919,6 +3924,11 @@
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Customer Name</label>
             <input type="text" id="exSrCustomerName" placeholder="e.g. Santosh Gahatraj Kami"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Contact No.</label>
+            <input type="text" id="exSrContact" placeholder="e.g. 98XXXXXXXX" inputmode="tel"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div class="flex flex-col gap-1.5">
@@ -4481,7 +4491,7 @@
           <div class="flex flex-col gap-1.5 sm:col-span-2">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Popup Background Image <span class="normal-case font-medium text-slate-300">(optional)</span></label>
             <div id="evBgPreviewWrap" class="hidden relative mb-1.5">
-              <img id="evBgPreview" class="w-full h-32 object-contain bg-white rounded-lg border border-slate-200"/>
+              <img id="evBgPreview" class="w-full h-32 object-contain bg-white rounded-lg border border-slate-200" alt="Event popup background preview"/>
               <button type="button" onclick="removeEventBgImage()" class="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-white/90 hover:bg-white shadow flex items-center justify-center text-red-500"><i class="fas fa-trash-can text-xs"></i></button>
             </div>
             <label class="flex items-center gap-3 border-2 border-dashed border-slate-300 bg-slate-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-slate-50 hover:border-bajaj-blue transition-all">
@@ -8062,7 +8072,7 @@ async function loadProfile(uid) {
     document.getElementById('headerUserName').textContent = name;
     const avatarEl = document.getElementById('navAvatar');
     if(currentUserPhoto){
-      avatarEl.innerHTML = `<img src="${escapeHtml(currentUserPhoto)}" class="w-full h-full object-cover rounded-full">`;
+      avatarEl.innerHTML = `<img src="${escapeHtml(currentUserPhoto)}" class="w-full h-full object-cover rounded-full" alt="Profile photo">`;
       avatarEl.style.background = 'transparent';
     } else {
       avatarEl.textContent = name.charAt(0).toUpperCase();
@@ -8208,7 +8218,7 @@ function renderAvatarColorPicker(){
   const name = document.getElementById('profileNameInput').value || currentUserName;
   const effectivePhoto = pendingProfilePhoto !== null ? pendingProfilePhoto : currentUserPhoto;
   if(effectivePhoto){
-    preview.innerHTML = `<img src="${escapeHtml(effectivePhoto)}" class="w-full h-full object-cover">`;
+    preview.innerHTML = `<img src="${escapeHtml(effectivePhoto)}" class="w-full h-full object-cover" alt="Profile photo preview">`;
     preview.style.background = 'transparent';
     removeBtn.classList.remove('hidden');
   } else {
@@ -8288,7 +8298,7 @@ window.saveProfileInfo = async ()=>{
     document.getElementById('headerUserName').textContent = name;
     const avatarEl = document.getElementById('navAvatar');
     if(currentUserPhoto){
-      avatarEl.innerHTML = `<img src="${escapeHtml(currentUserPhoto)}" class="w-full h-full object-cover rounded-full">`;
+      avatarEl.innerHTML = `<img src="${escapeHtml(currentUserPhoto)}" class="w-full h-full object-cover rounded-full" alt="Profile photo">`;
       avatarEl.style.background = 'transparent';
     } else {
       avatarEl.innerHTML = '';
@@ -8507,7 +8517,7 @@ function renderTeamMembersList(){
     const isActive = m.active !== false;
     const initial = (m.name||'?').charAt(0).toUpperCase();
     const color = m.avatarColor || AVATAR_COLORS[0];
-    const avatarInner = m.photoBase64 ? `<img src="${escapeHtml(m.photoBase64)}" class="w-full h-full object-cover">` : initial;
+    const avatarInner = m.photoBase64 ? `<img src="${escapeHtml(m.photoBase64)}" class="w-full h-full object-cover" alt="${escapeHtml(m.name||'Staff')} avatar">` : initial;
     // Role badges are Master-only information. Showing everyone which
     // account is the Master ID hands out the single most useful clue for
     // guessing a password worth guessing — so to anyone who isn't a Master
@@ -13534,6 +13544,7 @@ function renderExchangeTable(){
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${rowIdx+1}<div class="text-[9px] text-slate-300 mt-0.5">#${s.sn||'—'}</div></td>
       <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">${escapeHtml(s.model||'—')}
         ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
+        ${s.contact ? `<a href="tel:${escapeHtml(s.contact)}" class="text-[11px] text-bajaj-blue font-semibold flex items-center gap-1 hover:underline"><i class="fas fa-phone text-[9px]"></i>${escapeHtml(s.contact)}</a>` : ''}
       </td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Year">${escapeHtml(s.makeYear||'—')}</td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
@@ -13653,13 +13664,13 @@ window.bulkTransferExSrToMela = ()=>
   bulkTransferExchange('exchange_stock_showroom','exchange_stock', exchangeSrData, selectedExchangeSrIds, 'Mela',
     ()=>{ selectedExchangeSrIds.clear(); setExchangeSrSelectMode(false); });
 
-function exportExchangeToExcel(units, sheetName, filePrefix){
+function exportUnitsToExcel(units, sheetName, filePrefix){
   if(typeof XLSX === 'undefined'){ toast('Excel library still loading — try again.','err'); return; }
   if(!units.length){ toast('Nothing selected to export.','err'); return; }
   const rows = units.map(s=>({
     'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg No': s.regNo||'',
     'Valuation': s.valuation||0, 'Blue Book': s.blueBook||'', 'Key': s.key||'', 'File': s.file||'',
-    'Customer': s.customerName||'', 'Send To': s.sendTo||'', 'Status': s.status||'', 'Remarks': s.remarks||''
+    'Customer': s.customerName||'', 'Contact': s.contact||'', 'Send To': s.sendTo||'', 'Status': s.status||'', 'Remarks': s.remarks||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
@@ -13668,9 +13679,9 @@ function exportExchangeToExcel(units, sheetName, filePrefix){
   toast(`${units.length} unit(s) exported.`);
 }
 window.exportSelectedEx = ()=>
-  exportExchangeToExcel([...selectedExchangeIds].map(id=>exchangeData.find(x=>x.id===id)).filter(Boolean), 'Mela Exchange', 'mela_exchange_selected');
+  exportUnitsToExcel([...selectedExchangeIds].map(id=>exchangeData.find(x=>x.id===id)).filter(Boolean), 'Mela Exchange', 'mela_exchange_selected');
 window.exportSelectedExSr = ()=>
-  exportExchangeToExcel([...selectedExchangeSrIds].map(id=>exchangeSrData.find(x=>x.id===id)).filter(Boolean), 'Showroom Exchange', 'showroom_exchange_selected');
+  exportUnitsToExcel([...selectedExchangeSrIds].map(id=>exchangeSrData.find(x=>x.id===id)).filter(Boolean), 'Showroom Exchange', 'showroom_exchange_selected');
 
 window.deleteSelectedExchangeUnits = async ()=>{
   if(!selectedExchangeIds.size) return;
@@ -13761,7 +13772,7 @@ window.closeExchangeFormModal = ()=>{ document.getElementById('exchangeFormModal
 
 window.cancelExchangeEdit = ()=>{
   currentEditExchangeId = null;
-  ['exModel','exMakeYear','exRegNo','exValuation','exCustomerName','exRemarks'].forEach(id=>document.getElementById(id).value='');
+  ['exModel','exMakeYear','exRegNo','exValuation','exCustomerName','exContact','exRemarks'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('exBlueBook').value='yes';
   document.getElementById('exKey').value='yes';
   document.getElementById('exFile').value='yes';
@@ -13786,6 +13797,7 @@ window._editExchange = (id)=>{
   document.getElementById('exRegNo').value = s.regNo||'';
   document.getElementById('exValuation').value = s.valuation??'';
   document.getElementById('exCustomerName').value = s.customerName||'';
+  document.getElementById('exContact').value = s.contact||'';
   document.getElementById('exBlueBook').value = s.blueBook==='no' ? 'no' : 'yes';
   document.getElementById('exKey').value = s.key==='no' ? 'no' : 'yes';
   document.getElementById('exFile').value = s.file==='no' ? 'no' : 'yes';
@@ -13852,6 +13864,8 @@ document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
   if(firstErr){ toast(firstErr.error,'err'); return; }
   if(valuationRaw==='' || isNaN(Number(valuationRaw)) || Number(valuationRaw)<0){ toast('Enter a valid Valuation amount.','err'); return; }
   const customerName = document.getElementById('exCustomerName').value.trim();
+  const contactCheck = Validate.text(document.getElementById('exContact').value, { min:0, max:20, label:'Contact No.' });
+  if(!contactCheck.ok){ toast(contactCheck.error,'err'); return; }
   const blueBook = document.getElementById('exBlueBook').value==='no' ? 'no' : 'yes';
   const key = document.getElementById('exKey').value==='no' ? 'no' : 'yes';
   const file = document.getElementById('exFile').value==='no' ? 'no' : 'yes';
@@ -13861,7 +13875,7 @@ document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
   const sendTo = sendToCheck.value || 'Showroom';
   const payload = {
     model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
-    valuation: Number(valuationRaw), customerName, blueBook, key, file, remarks: remarksCheck.value, sendTo, inspectionStatus
+    valuation: Number(valuationRaw), customerName, contact: contactCheck.value, blueBook, key, file, remarks: remarksCheck.value, sendTo, inspectionStatus
   };
   const saveBtn = document.getElementById('saveExchangeBtn');
   const saveBtnOrigHtml = saveBtn.innerHTML;
@@ -13908,10 +13922,10 @@ window.exportExchangeToExcel = ()=>{
   const rows = sorted.map(s=>({
     'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg. No': s.regNo||'',
     'Valuation': s.valuation||0, 'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
-    'File': s.file==='yes'?'Yes':'No', 'Inspection': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
+    'File': s.file==='yes'?'Yes':'No', 'Inspection': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Contact': s.contact||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:10},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:14},{wch:10},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
   XLSX.writeFile(wb, `exchange_stock_export_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -13960,6 +13974,7 @@ document.getElementById('exExcelFileInput').addEventListener('change', function(
         key:        findCol(['key']),
         file:       findCol(['file']),
         customer:   findCol(['customername','customer']),
+        contact:    findCol(['contact','contactno','phone','mobile']),
         sendTo:     findCol(['sendto','destination']),
         remarks:    findCol(['remarks','notes','note'])
       };
@@ -13983,6 +13998,7 @@ document.getElementById('exExcelFileInput').addEventListener('change', function(
         key:        colIdx.key!==-1       ? parseYesNo(r[colIdx.key])                   : 'yes',
         file:       colIdx.file!==-1      ? parseYesNo(r[colIdx.file])                  : 'yes',
         customerName: colIdx.customer!==-1 ? (r[colIdx.customer]||'').toString().trim() : '',
+        contact:    colIdx.contact!==-1   ? (r[colIdx.contact]||'').toString().trim()   : '',
         sendTo:     colIdx.sendTo!==-1    ? (r[colIdx.sendTo]||'').toString().trim() || 'Showroom' : 'Showroom',
         remarks:    colIdx.remarks!==-1   ? (r[colIdx.remarks]||'').toString().trim()   : ''
       })).filter(r=>r.model || r.regNo);
@@ -13999,12 +14015,12 @@ document.getElementById('exExcelFileInput').addEventListener('change', function(
 
 document.getElementById('exDownloadTemplateBtn').addEventListener('click', ()=>{
   const wsData = [
-    ['Model','MakeYear','RegNo','Valuation','BlueBook','Key','File','Customer','SendTo','Remarks'],
-    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','Yes','Yes','No','Santosh Gahatraj Kami','Showroom','Minor scratch on tank'],
-    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','No','Yes','Yes','','Workshop','']
+    ['Model','MakeYear','RegNo','Valuation','BlueBook','Key','File','Customer','Contact','SendTo','Remarks'],
+    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','Yes','Yes','No','Santosh Gahatraj Kami','98XXXXXXXX','Showroom','Minor scratch on tank'],
+    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','No','Yes','Yes','','','Workshop','']
   ];
   const ws = XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:14},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
   XLSX.writeFile(wb, 'exchange_stock_import_template.xlsx');
@@ -14041,7 +14057,7 @@ document.getElementById('exImportExcelBtn').addEventListener('click', async ()=>
         sn: nextSn,
         model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
         valuation: row.valuation, blueBook: row.blueBook, key: row.key, file: row.file,
-        customerName: row.customerName || '', sendTo: row.sendTo || 'Showroom', remarks: row.remarks || '',
+        customerName: row.customerName || '', contact: row.contact || '', sendTo: row.sendTo || 'Showroom', remarks: row.remarks || '',
         status: 'In Stock', addedAt: new Date()
       });
       results.success.push(row);
@@ -14336,6 +14352,7 @@ function renderExchangeSrTable(){
       <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${rowIdx+1}<div class="text-[9px] text-slate-300 mt-0.5">#${s.sn||'—'}</div></td>
       <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">${escapeHtml(s.model||'—')}
         ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
+        ${s.contact ? `<a href="tel:${escapeHtml(s.contact)}" class="text-[11px] text-bajaj-blue font-semibold flex items-center gap-1 hover:underline"><i class="fas fa-phone text-[9px]"></i>${escapeHtml(s.contact)}</a>` : ''}
       </td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Year">${escapeHtml(s.makeYear||'—')}</td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
@@ -14478,7 +14495,7 @@ window.closeExchangeSrFormModal = ()=>{ document.getElementById('exchangeSrFormM
 
 window.cancelExchangeSrEdit = ()=>{
   currentEditExchangeSrId = null;
-  ['exSrModel','exSrMakeYear','exSrRegNo','exSrValuation','exSrCustomerName','exSrRemarks'].forEach(id=>document.getElementById(id).value='');
+  ['exSrModel','exSrMakeYear','exSrRegNo','exSrValuation','exSrCustomerName','exSrContact','exSrRemarks'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('exSrBlueBook').value='yes';
   document.getElementById('exSrKey').value='yes';
   document.getElementById('exSrFile').value='yes';
@@ -14503,6 +14520,7 @@ window._editExchangeSr = (id)=>{
   document.getElementById('exSrRegNo').value = s.regNo||'';
   document.getElementById('exSrValuation').value = s.valuation??'';
   document.getElementById('exSrCustomerName').value = s.customerName||'';
+  document.getElementById('exSrContact').value = s.contact||'';
   document.getElementById('exSrBlueBook').value = s.blueBook==='no' ? 'no' : 'yes';
   document.getElementById('exSrKey').value = s.key==='no' ? 'no' : 'yes';
   document.getElementById('exSrFile').value = s.file==='no' ? 'no' : 'yes';
@@ -14569,6 +14587,8 @@ document.getElementById('saveExchangeSrBtn').addEventListener('click', async ()=
   if(firstErr){ toast(firstErr.error,'err'); return; }
   if(valuationRaw==='' || isNaN(Number(valuationRaw)) || Number(valuationRaw)<0){ toast('Enter a valid Valuation amount.','err'); return; }
   const customerName = document.getElementById('exSrCustomerName').value.trim();
+  const contactCheck = Validate.text(document.getElementById('exSrContact').value, { min:0, max:20, label:'Contact No.' });
+  if(!contactCheck.ok){ toast(contactCheck.error,'err'); return; }
   const blueBook = document.getElementById('exSrBlueBook').value==='no' ? 'no' : 'yes';
   const key = document.getElementById('exSrKey').value==='no' ? 'no' : 'yes';
   const file = document.getElementById('exSrFile').value==='no' ? 'no' : 'yes';
@@ -14578,7 +14598,7 @@ document.getElementById('saveExchangeSrBtn').addEventListener('click', async ()=
   const sendTo = sendToCheck.value || 'Showroom';
   const payload = {
     model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
-    valuation: Number(valuationRaw), customerName, blueBook, key, file, remarks: remarksCheck.value, sendTo, inspectionStatus
+    valuation: Number(valuationRaw), customerName, contact: contactCheck.value, blueBook, key, file, remarks: remarksCheck.value, sendTo, inspectionStatus
   };
   const saveBtn = document.getElementById('saveExchangeSrBtn');
   const saveBtnOrigHtml = saveBtn.innerHTML;
@@ -14625,10 +14645,10 @@ window.exportExchangeSrToExcel = ()=>{
   const rows = sorted.map(s=>({
     'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg. No': s.regNo||'',
     'Valuation': s.valuation||0, 'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
-    'File': s.file==='yes'?'Yes':'No', 'Inspection': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
+    'File': s.file==='yes'?'Yes':'No', 'Inspection': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Contact': s.contact||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:10},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:14},{wch:10},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
   XLSX.writeFile(wb, `exchange_stock_export_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -14677,6 +14697,7 @@ document.getElementById('exSrExcelFileInput').addEventListener('change', functio
         key:        findCol(['key']),
         file:       findCol(['file']),
         customer:   findCol(['customername','customer']),
+        contact:    findCol(['contact','contactno','phone','mobile']),
         sendTo:     findCol(['sendto','destination']),
         remarks:    findCol(['remarks','notes','note'])
       };
@@ -14700,6 +14721,7 @@ document.getElementById('exSrExcelFileInput').addEventListener('change', functio
         key:        colIdx.key!==-1       ? parseYesNo(r[colIdx.key])                   : 'yes',
         file:       colIdx.file!==-1      ? parseYesNo(r[colIdx.file])                  : 'yes',
         customerName: colIdx.customer!==-1 ? (r[colIdx.customer]||'').toString().trim() : '',
+        contact:    colIdx.contact!==-1   ? (r[colIdx.contact]||'').toString().trim()   : '',
         sendTo:     colIdx.sendTo!==-1    ? (r[colIdx.sendTo]||'').toString().trim() || 'Showroom' : 'Showroom',
         remarks:    colIdx.remarks!==-1   ? (r[colIdx.remarks]||'').toString().trim()   : ''
       })).filter(r=>r.model || r.regNo);
@@ -14716,12 +14738,12 @@ document.getElementById('exSrExcelFileInput').addEventListener('change', functio
 
 document.getElementById('exSrDownloadTemplateBtn').addEventListener('click', ()=>{
   const wsData = [
-    ['Model','MakeYear','RegNo','Valuation','BlueBook','Key','File','Customer','SendTo','Remarks'],
-    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','Yes','Yes','No','Santosh Gahatraj Kami','Showroom','Minor scratch on tank'],
-    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','No','Yes','Yes','','Workshop','']
+    ['Model','MakeYear','RegNo','Valuation','BlueBook','Key','File','Customer','Contact','SendTo','Remarks'],
+    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','Yes','Yes','No','Santosh Gahatraj Kami','98XXXXXXXX','Showroom','Minor scratch on tank'],
+    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','No','Yes','Yes','','','Workshop','']
   ];
   const ws = XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:14},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
   XLSX.writeFile(wb, 'exchange_stock_import_template.xlsx');
@@ -14758,7 +14780,7 @@ document.getElementById('exSrImportExcelBtn').addEventListener('click', async ()
         sn: nextSn,
         model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
         valuation: row.valuation, blueBook: row.blueBook, key: row.key, file: row.file,
-        customerName: row.customerName || '', sendTo: row.sendTo || 'Showroom', remarks: row.remarks || '',
+        customerName: row.customerName || '', contact: row.contact || '', sendTo: row.sendTo || 'Showroom', remarks: row.remarks || '',
         status: 'In Stock', addedAt: new Date()
       });
       results.success.push(row);
@@ -17838,14 +17860,14 @@ window.downloadFullBackup = ()=>{
       'S.N':s.sn||'', 'Model':s.model||'', 'Make Year':s.makeYear||'', 'RegNo':s.regNo||'', 'Valuation':s.valuation||0,
       'Blue Book':s.blueBook==='yes'?'Yes':'No', 'Key':s.key==='yes'?'Yes':'No', 'File':s.file==='yes'?'Yes':'No',
       'Inspection':s.inspectionStatus||'Pending', 'Blue Book File':documents.find(d=>d.id===s.blueBookDocId)?.fileName||'',
-      'Customer':s.customerName||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
+      'Customer':s.customerName||'', 'Contact':s.contact||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
       'Added Date':fmtDate(s.addedAt)
     })));
     addSheet('Exchange Stock (Showroom)', exchangeSrData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Make Year':s.makeYear||'', 'RegNo':s.regNo||'', 'Valuation':s.valuation||0,
       'Blue Book':s.blueBook==='yes'?'Yes':'No', 'Key':s.key==='yes'?'Yes':'No', 'File':s.file==='yes'?'Yes':'No',
       'Inspection':s.inspectionStatus||'Pending', 'Blue Book File':documents.find(d=>d.id===s.blueBookDocId)?.fileName||'',
-      'Customer':s.customerName||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
+      'Customer':s.customerName||'', 'Contact':s.contact||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
       'Added Date':fmtDate(s.addedAt)
     })));
     addSheet('Price List', allMasterBikes.map(b=>({
@@ -17987,13 +18009,13 @@ document.getElementById('restoreBackupBtn')?.addEventListener('click', async ()=
 
     await importSnCollection('Exchange Stock (Mela)', 'exchange_stock', r => ({
       model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
-      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: ['Pass','Fail'].includes(r['Inspection']) ? r['Inspection'] : 'Pending', customerName:String(r['Customer']||''),
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: ['Pass','Fail'].includes(r['Inspection']) ? r['Inspection'] : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''),
       sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
     }), ()=>(exchangeData.length + exchangeSrData.length) < MAX_EXCHANGE_STOCK);
 
     await importSnCollection('Exchange Stock (Showroom)', 'exchange_stock_showroom', r => ({
       model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
-      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: ['Pass','Fail'].includes(r['Inspection']) ? r['Inspection'] : 'Pending', customerName:String(r['Customer']||''),
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: ['Pass','Fail'].includes(r['Inspection']) ? r['Inspection'] : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''),
       sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
     }), ()=>(exchangeData.length + exchangeSrData.length) < MAX_EXCHANGE_STOCK);
 
@@ -18002,7 +18024,7 @@ document.getElementById('restoreBackupBtn')?.addEventListener('click', async ()=
     // Mela (the original meaning) so an old backup still restores cleanly.
     await importSnCollection('Exchange Stock', 'exchange_stock', r => ({
       model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
-      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: ['Pass','Fail'].includes(r['Inspection']) ? r['Inspection'] : 'Pending', customerName:String(r['Customer']||''),
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: ['Pass','Fail'].includes(r['Inspection']) ? r['Inspection'] : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''),
       sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
     }), ()=>(exchangeData.length + exchangeSrData.length) < MAX_EXCHANGE_STOCK);
 
@@ -18358,7 +18380,7 @@ window.openDocPreview = (id)=>{
   document.getElementById('docPreviewDownloadBtn').onclick = ()=>downloadDocument(id);
   const body = document.getElementById('docPreviewBody');
   if(['jpg','jpeg','png'].includes(ext)){
-    body.innerHTML = `<img src="${escapeHtml(docFileSrc(d))}" class="max-w-full max-h-[70vh] object-contain rounded-lg">`;
+    body.innerHTML = `<img src="${escapeHtml(docFileSrc(d))}" class="max-w-full max-h-[70vh] object-contain rounded-lg" alt="${escapeHtml(d.name||'Document preview')}">`;
   } else if(ext==='pdf'){
     body.innerHTML = `<embed src="${escapeHtml(docFileSrc(d))}" type="application/pdf" class="w-full h-[70vh] rounded-lg">`;
   } else if(ext==='mp3'){
