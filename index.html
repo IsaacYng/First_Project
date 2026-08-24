@@ -3728,11 +3728,10 @@
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Inspection</label>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ownership Transfer</label>
             <select id="exInspection" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
               <option value="Pending">Pending</option>
               <option value="Pass">Pass</option>
-              <option value="Fail">Fail</option>
             </select>
           </div>
           <div class="flex flex-col gap-1.5 sm:col-span-3">
@@ -3747,11 +3746,18 @@
             </div>
           </div>
           <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Mela (Where Exchanged)</label>
+            <input type="text" id="exMela" list="exMelaOptions" placeholder="e.g. Aathrai Mela 2083 Shrawan"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+            <datalist id="exMelaOptions"></datalist>
+            <p class="text-[10px] text-slate-400">Which mela event & date this was taken in — separate from Send To.</p>
+          </div>
+          <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Send To</label>
             <input type="text" id="exSendTo" list="exSendToOptions" placeholder="e.g. Showroom, HH Mela, Workshop…"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
             <datalist id="exSendToOptions"></datalist>
-            <p class="text-[10px] text-slate-400">Tap the field to see places already used — or type a new one.</p>
+            <p class="text-[10px] text-slate-400">Where the bike is currently sent/kept — separate from Mela.</p>
           </div>
           <div class="flex flex-col gap-1.5 sm:col-span-3">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Remarks</label>
@@ -3818,6 +3824,9 @@
           </button>
           <button id="bulkExportExBtn" onclick="exportSelectedEx()" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
             <i class="fas fa-file-excel text-[11px]"></i> Export (<span id="bulkExportExCount">0</span>)
+          </button>
+          <button id="startSelectExBtn" onclick="setExchangeSelectMode(true)" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
+            <i class="fas fa-square-check text-[11px]"></i> Select
           </button>
           <button id="cancelSelectExBtn" onclick="setExchangeSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
             <i class="fas fa-xmark text-[11px]"></i> Cancel Select
@@ -3953,11 +3962,10 @@
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Inspection</label>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ownership Transfer</label>
             <select id="exSrInspection" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
               <option value="Pending">Pending</option>
               <option value="Pass">Pass</option>
-              <option value="Fail">Fail</option>
             </select>
           </div>
           <div class="flex flex-col gap-1.5 sm:col-span-3">
@@ -4043,6 +4051,9 @@
           </button>
           <button id="bulkExportExSrBtn" onclick="exportSelectedExSr()" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
             <i class="fas fa-file-excel text-[11px]"></i> Export (<span id="bulkExportExSrCount">0</span>)
+          </button>
+          <button id="startSelectExSrBtn" onclick="setExchangeSrSelectMode(true)" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
+            <i class="fas fa-square-check text-[11px]"></i> Select
           </button>
           <button id="cancelSelectExSrBtn" onclick="setExchangeSrSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
             <i class="fas fa-xmark text-[11px]"></i> Cancel Select
@@ -13550,11 +13561,14 @@ function renderExchangeTable(){
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
       <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Valuation">${valuation}</td>
       <td class="px-4 py-3" data-th="Documents"><div class="flex flex-wrap gap-1">${exDocBadge('Blue Book', s.blueBook==='yes')}${exDocBadge('Key', s.key==='yes')}${exDocBadge('File', s.file==='yes')}
-        ${s.inspectionStatus==='Pass' ? `<span class="badge badge-green"><i class="fas fa-check"></i> Pass</span>` : s.inspectionStatus==='Fail' ? `<span class="badge badge-red"><i class="fas fa-xmark"></i> Fail</span>` : `<span class="badge badge-neutral"><i class="fas fa-hourglass-half"></i> Pending</span>`}
+        ${s.inspectionStatus==='Pass' ? `<span class="badge badge-green"><i class="fas fa-check"></i> Pass</span>` : `<span class="badge badge-neutral"><i class="fas fa-hourglass-half"></i> Pending</span>`}
         ${s.blueBookDocId ? `<button onclick="window.openDocPreview('${s.blueBookDocId}')" class="badge badge-blue" style="cursor:pointer;border:none"><i class="fas fa-file-lines"></i> Blue Book File</button>` : ''}</div>
         ${s.remarks ? `<div class="text-[11px] text-slate-400 mt-1 max-w-[220px] truncate" title="${escapeHtml(s.remarks)}"><i class="fas fa-note-sticky text-slate-300 text-[9px] mr-1"></i>${escapeHtml(s.remarks)}</div>` : ''}
       </td>
-      <td class="px-4 py-3 text-sm text-slate-600" data-th="Send To"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide"><i class="fas fa-location-dot text-[8px]"></i> ${escapeHtml(s.sendTo||'Showroom')}</span></td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Send To">
+        ${s.mela ? `<div class="text-[10px] text-amber-600 font-bold uppercase tracking-wide flex items-center gap-1 mb-1"><i class="fas fa-tent text-[8px]"></i> ${escapeHtml(s.mela)}</div>` : ''}
+        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide"><i class="fas fa-location-dot text-[8px]"></i> ${escapeHtml(s.sendTo||'Showroom')}</span>
+      </td>
       <td class="px-4 py-3" data-th="Status">
         ${s.status==='Sold' ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>` : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> In Stock</span>`}
       </td>
@@ -13583,6 +13597,11 @@ function updateDeleteSelectedExBtn(){
   if(cancelBtn){
     if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
     else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
+  }
+  const startBtn = document.getElementById('startSelectExBtn');
+  if(startBtn){
+    if(inSelectMode){ startBtn.classList.add('hidden'); startBtn.classList.remove('flex'); }
+    else { startBtn.classList.remove('hidden'); startBtn.classList.add('flex'); }
   }
   if(hint){
     if(inSelectMode && selectedExchangeIds.size===0){ hint.classList.remove('hidden'); hint.classList.add('flex'); }
@@ -13665,6 +13684,13 @@ window.bulkTransferExSrToMela = ()=>
     ()=>{ selectedExchangeSrIds.clear(); setExchangeSrSelectMode(false); });
 
 function exportExchangeUnitsToExcel(units, sheetName, filePrefix){
+  if(typeof XLSX === 'undefined'){ toast('Excel library still loading — try again.','err'); return; }
+  if(!units.length){ toast('Nothing selected to export.','err'); return; }
+  const rows = units.map(s=>({
+    'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg No': s.regNo||'',
+    'Valuation': s.valuation||0, 'Blue Book': s.blueBook||'', 'Key': s.key||'', 'File': s.file||'',
+    'Customer': s.customerName||'', 'Contact': s.contact||'', 'Mela': s.mela||'', 'Send To': s.sendTo||'', 'Status': s.status||'', 'Remarks': s.remarks||''
+  }));
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
@@ -13744,15 +13770,14 @@ document.getElementById('fixExchangeSnBtn').addEventListener('click', async ()=>
   }
 });
 
-// Both Send To fields (Mela + Showroom Exchange) share one suggestion
-// list, built fresh from whatever's actually been typed across both
-// collections — so a destination used in one shows up as a suggestion in
-// the other too, instead of staff re-typing (and risking a slightly
-// different spelling for) the same place twice.
+// Send To suggestions come only from destinations actually typed across
+// both collections (Workshop, Showroom, HH Mela, etc.) — Mela event names
+// used to leak in here too, which mixed up two different questions
+// ("where is it now" vs "which mela was it taken in at"). Mela event
+// names now live only in their own Mela datalist below.
 function populateSendToDatalist(){
   const allSendTo = new Set();
   [...exchangeData, ...exchangeSrData].forEach(s=>{ const v=(s.sendTo||'').trim(); if(v) allSendTo.add(v); });
-  melaAreas.forEach(m=>{ const v=(m.name||'').trim(); if(v) allSendTo.add(v); });
   const optionsHtml = [...allSendTo].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${escapeHtml(v)}"></option>`).join('');
   const dl1 = document.getElementById('exSendToOptions');
   const dl2 = document.getElementById('exSrSendToOptions');
@@ -13760,12 +13785,24 @@ function populateSendToDatalist(){
   if(dl2) dl2.innerHTML = optionsHtml;
 }
 
-window.openExchangeFormModal = ()=>{ populateSendToDatalist(); document.getElementById('exchangeFormModal').classList.add('open'); };
+// Mela suggestions: the named events from Mela Areas management, plus
+// anything already typed into a record's own Mela field (covers a mela
+// that was never added to Mela Areas).
+function populateMelaDatalist(){
+  const allMela = new Set();
+  melaAreas.forEach(m=>{ const v=(m.name||'').trim(); if(v) allMela.add(v); });
+  exchangeData.forEach(s=>{ const v=(s.mela||'').trim(); if(v) allMela.add(v); });
+  const optionsHtml = [...allMela].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${escapeHtml(v)}"></option>`).join('');
+  const dl = document.getElementById('exMelaOptions');
+  if(dl) dl.innerHTML = optionsHtml;
+}
+
+window.openExchangeFormModal = ()=>{ populateSendToDatalist(); populateMelaDatalist(); document.getElementById('exchangeFormModal').classList.add('open'); };
 window.closeExchangeFormModal = ()=>{ document.getElementById('exchangeFormModal').classList.remove('open'); };
 
 window.cancelExchangeEdit = ()=>{
   currentEditExchangeId = null;
-  ['exModel','exMakeYear','exRegNo','exValuation','exCustomerName','exContact','exRemarks'].forEach(id=>document.getElementById(id).value='');
+  ['exModel','exMakeYear','exRegNo','exValuation','exCustomerName','exContact','exRemarks','exMela'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('exBlueBook').value='yes';
   document.getElementById('exKey').value='yes';
   document.getElementById('exFile').value='yes';
@@ -13795,8 +13832,9 @@ window._editExchange = (id)=>{
   document.getElementById('exKey').value = s.key==='no' ? 'no' : 'yes';
   document.getElementById('exFile').value = s.file==='no' ? 'no' : 'yes';
   document.getElementById('exRemarks').value = s.remarks||'';
+  document.getElementById('exMela').value = s.mela||'';
   document.getElementById('exSendTo').value = s.sendTo || 'Showroom';
-  document.getElementById('exInspection').value = ['Pass','Fail'].includes(s.inspectionStatus) ? s.inspectionStatus : 'Pending';
+  document.getElementById('exInspection').value = s.inspectionStatus==='Pass' ? 'Pass' : 'Pending';
   exBlueBookFilePending = null;
   document.getElementById('exBlueBookFile').value='';
   const existingLink = document.getElementById('exBlueBookFileExistingLink');
@@ -13862,13 +13900,15 @@ document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
   const blueBook = document.getElementById('exBlueBook').value==='no' ? 'no' : 'yes';
   const key = document.getElementById('exKey').value==='no' ? 'no' : 'yes';
   const file = document.getElementById('exFile').value==='no' ? 'no' : 'yes';
-  const inspectionStatus = ['Pass','Fail'].includes(document.getElementById('exInspection').value) ? document.getElementById('exInspection').value : 'Pending';
+  const inspectionStatus = document.getElementById('exInspection').value==='Pass' ? 'Pass' : 'Pending';
+  const melaCheck = Validate.text(document.getElementById('exMela').value, { min:0, max:80, label:'Mela' });
+  if(!melaCheck.ok){ toast(melaCheck.error,'err'); return; }
   const sendToCheck = Validate.text(document.getElementById('exSendTo').value, { min:0, max:60, label:'Send To' });
   if(!sendToCheck.ok){ toast(sendToCheck.error,'err'); return; }
   const sendTo = sendToCheck.value || 'Showroom';
   const payload = {
     model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
-    valuation: Number(valuationRaw), customerName, contact: contactCheck.value, blueBook, key, file, remarks: remarksCheck.value, sendTo, inspectionStatus
+    valuation: Number(valuationRaw), customerName, contact: contactCheck.value, blueBook, key, file, remarks: remarksCheck.value, mela: melaCheck.value, sendTo, inspectionStatus
   };
   const saveBtn = document.getElementById('saveExchangeBtn');
   const saveBtnOrigHtml = saveBtn.innerHTML;
@@ -13915,10 +13955,10 @@ window.exportExchangeToExcel = ()=>{
   const rows = sorted.map(s=>({
     'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg. No': s.regNo||'',
     'Valuation': s.valuation||0, 'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
-    'File': s.file==='yes'?'Yes':'No', 'Inspection': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Contact': s.contact||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
+    'File': s.file==='yes'?'Yes':'No', 'Ownership Transfer': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Contact': s.contact||'', 'Mela': s.mela||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:14},{wch:10},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:14},{wch:20},{wch:10},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
   XLSX.writeFile(wb, `exchange_stock_export_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -13968,6 +14008,7 @@ document.getElementById('exExcelFileInput').addEventListener('change', function(
         file:       findCol(['file']),
         customer:   findCol(['customername','customer']),
         contact:    findCol(['contact','contactno','phone','mobile']),
+        mela:       findCol(['mela']),
         sendTo:     findCol(['sendto','destination']),
         remarks:    findCol(['remarks','notes','note'])
       };
@@ -13992,6 +14033,7 @@ document.getElementById('exExcelFileInput').addEventListener('change', function(
         file:       colIdx.file!==-1      ? parseYesNo(r[colIdx.file])                  : 'yes',
         customerName: colIdx.customer!==-1 ? (r[colIdx.customer]||'').toString().trim() : '',
         contact:    colIdx.contact!==-1   ? (r[colIdx.contact]||'').toString().trim()   : '',
+        mela:       colIdx.mela!==-1      ? (r[colIdx.mela]||'').toString().trim()      : '',
         sendTo:     colIdx.sendTo!==-1    ? (r[colIdx.sendTo]||'').toString().trim() || 'Showroom' : 'Showroom',
         remarks:    colIdx.remarks!==-1   ? (r[colIdx.remarks]||'').toString().trim()   : ''
       })).filter(r=>r.model || r.regNo);
@@ -14008,12 +14050,12 @@ document.getElementById('exExcelFileInput').addEventListener('change', function(
 
 document.getElementById('exDownloadTemplateBtn').addEventListener('click', ()=>{
   const wsData = [
-    ['Model','MakeYear','RegNo','Valuation','BlueBook','Key','File','Customer','Contact','SendTo','Remarks'],
-    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','Yes','Yes','No','Santosh Gahatraj Kami','98XXXXXXXX','Showroom','Minor scratch on tank'],
-    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','No','Yes','Yes','','','Workshop','']
+    ['Model','MakeYear','RegNo','Valuation','BlueBook','Key','File','Customer','Contact','Mela','SendTo','Remarks'],
+    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','Yes','Yes','No','Santosh Gahatraj Kami','98XXXXXXXX','Aathrai Mela 2083 Shrawan','Showroom','Minor scratch on tank'],
+    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','No','Yes','Yes','','','','Workshop','']
   ];
   const ws = XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:14},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:14},{wch:24},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
   XLSX.writeFile(wb, 'exchange_stock_import_template.xlsx');
@@ -14050,7 +14092,7 @@ document.getElementById('exImportExcelBtn').addEventListener('click', async ()=>
         sn: nextSn,
         model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
         valuation: row.valuation, blueBook: row.blueBook, key: row.key, file: row.file,
-        customerName: row.customerName || '', contact: row.contact || '', sendTo: row.sendTo || 'Showroom', remarks: row.remarks || '',
+        customerName: row.customerName || '', contact: row.contact || '', mela: row.mela || '', sendTo: row.sendTo || 'Showroom', remarks: row.remarks || '',
         status: 'In Stock', addedAt: new Date()
       });
       results.success.push(row);
@@ -14351,7 +14393,7 @@ function renderExchangeSrTable(){
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
       <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Valuation">${valuation}</td>
       <td class="px-4 py-3" data-th="Documents"><div class="flex flex-wrap gap-1">${exSrDocBadge('Blue Book', s.blueBook==='yes')}${exSrDocBadge('Key', s.key==='yes')}${exSrDocBadge('File', s.file==='yes')}
-        ${s.inspectionStatus==='Pass' ? `<span class="badge badge-green"><i class="fas fa-check"></i> Pass</span>` : s.inspectionStatus==='Fail' ? `<span class="badge badge-red"><i class="fas fa-xmark"></i> Fail</span>` : `<span class="badge badge-neutral"><i class="fas fa-hourglass-half"></i> Pending</span>`}
+        ${s.inspectionStatus==='Pass' ? `<span class="badge badge-green"><i class="fas fa-check"></i> Pass</span>` : `<span class="badge badge-neutral"><i class="fas fa-hourglass-half"></i> Pending</span>`}
         ${s.blueBookDocId ? `<button onclick="window.openDocPreview('${s.blueBookDocId}')" class="badge badge-blue" style="cursor:pointer;border:none"><i class="fas fa-file-lines"></i> Blue Book File</button>` : ''}</div>
         ${s.remarks ? `<div class="text-[11px] text-slate-400 mt-1 max-w-[220px] truncate" title="${escapeHtml(s.remarks)}"><i class="fas fa-note-sticky text-slate-300 text-[9px] mr-1"></i>${escapeHtml(s.remarks)}</div>` : ''}
       </td>
@@ -14384,6 +14426,11 @@ function updateDeleteSelectedExSrBtn(){
   if(cancelBtn){
     if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
     else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
+  }
+  const startBtn = document.getElementById('startSelectExSrBtn');
+  if(startBtn){
+    if(inSelectMode){ startBtn.classList.add('hidden'); startBtn.classList.remove('flex'); }
+    else { startBtn.classList.remove('hidden'); startBtn.classList.add('flex'); }
   }
   if(hint){
     if(inSelectMode && selectedExchangeSrIds.size===0){ hint.classList.remove('hidden'); hint.classList.add('flex'); }
@@ -14519,7 +14566,7 @@ window._editExchangeSr = (id)=>{
   document.getElementById('exSrFile').value = s.file==='no' ? 'no' : 'yes';
   document.getElementById('exSrRemarks').value = s.remarks||'';
   document.getElementById('exSrSendTo').value = s.sendTo || 'Showroom';
-  document.getElementById('exSrInspection').value = ['Pass','Fail'].includes(s.inspectionStatus) ? s.inspectionStatus : 'Pending';
+  document.getElementById('exSrInspection').value = s.inspectionStatus==='Pass' ? 'Pass' : 'Pending';
   exSrBlueBookFilePending = null;
   document.getElementById('exSrBlueBookFile').value='';
   const existingLink = document.getElementById('exSrBlueBookFileExistingLink');
@@ -14585,7 +14632,7 @@ document.getElementById('saveExchangeSrBtn').addEventListener('click', async ()=
   const blueBook = document.getElementById('exSrBlueBook').value==='no' ? 'no' : 'yes';
   const key = document.getElementById('exSrKey').value==='no' ? 'no' : 'yes';
   const file = document.getElementById('exSrFile').value==='no' ? 'no' : 'yes';
-  const inspectionStatus = ['Pass','Fail'].includes(document.getElementById('exSrInspection').value) ? document.getElementById('exSrInspection').value : 'Pending';
+  const inspectionStatus = document.getElementById('exSrInspection').value==='Pass' ? 'Pass' : 'Pending';
   const sendToCheck = Validate.text(document.getElementById('exSrSendTo').value, { min:0, max:60, label:'Send To' });
   if(!sendToCheck.ok){ toast(sendToCheck.error,'err'); return; }
   const sendTo = sendToCheck.value || 'Showroom';
@@ -14638,7 +14685,7 @@ window.exportExchangeSrToExcel = ()=>{
   const rows = sorted.map(s=>({
     'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg. No': s.regNo||'',
     'Valuation': s.valuation||0, 'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
-    'File': s.file==='yes'?'Yes':'No', 'Inspection': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Contact': s.contact||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
+    'File': s.file==='yes'?'Yes':'No', 'Ownership Transfer': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Contact': s.contact||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:14},{wch:10},{wch:16},{wch:30}];
@@ -17852,14 +17899,14 @@ window.downloadFullBackup = ()=>{
     addSheet('Exchange Stock (Mela)', exchangeData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Make Year':s.makeYear||'', 'RegNo':s.regNo||'', 'Valuation':s.valuation||0,
       'Blue Book':s.blueBook==='yes'?'Yes':'No', 'Key':s.key==='yes'?'Yes':'No', 'File':s.file==='yes'?'Yes':'No',
-      'Inspection':s.inspectionStatus||'Pending', 'Blue Book File':documents.find(d=>d.id===s.blueBookDocId)?.fileName||'',
-      'Customer':s.customerName||'', 'Contact':s.contact||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
+      'Ownership Transfer':s.inspectionStatus||'Pending', 'Blue Book File':documents.find(d=>d.id===s.blueBookDocId)?.fileName||'',
+      'Customer':s.customerName||'', 'Contact':s.contact||'', 'Mela':s.mela||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
       'Added Date':fmtDate(s.addedAt)
     })));
     addSheet('Exchange Stock (Showroom)', exchangeSrData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Make Year':s.makeYear||'', 'RegNo':s.regNo||'', 'Valuation':s.valuation||0,
       'Blue Book':s.blueBook==='yes'?'Yes':'No', 'Key':s.key==='yes'?'Yes':'No', 'File':s.file==='yes'?'Yes':'No',
-      'Inspection':s.inspectionStatus||'Pending', 'Blue Book File':documents.find(d=>d.id===s.blueBookDocId)?.fileName||'',
+      'Ownership Transfer':s.inspectionStatus||'Pending', 'Blue Book File':documents.find(d=>d.id===s.blueBookDocId)?.fileName||'',
       'Customer':s.customerName||'', 'Contact':s.contact||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
       'Added Date':fmtDate(s.addedAt)
     })));
@@ -18002,13 +18049,13 @@ document.getElementById('restoreBackupBtn')?.addEventListener('click', async ()=
 
     await importSnCollection('Exchange Stock (Mela)', 'exchange_stock', r => ({
       model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
-      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: ['Pass','Fail'].includes(r['Inspection']) ? r['Inspection'] : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''),
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: (r['Ownership Transfer']===undefined ? r['Inspection'] : r['Ownership Transfer'])==='Pass' ? 'Pass' : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''), mela:String(r['Mela']||''),
       sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
     }), ()=>(exchangeData.length + exchangeSrData.length) < MAX_EXCHANGE_STOCK);
 
     await importSnCollection('Exchange Stock (Showroom)', 'exchange_stock_showroom', r => ({
       model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
-      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: ['Pass','Fail'].includes(r['Inspection']) ? r['Inspection'] : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''),
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: (r['Ownership Transfer']===undefined ? r['Inspection'] : r['Ownership Transfer'])==='Pass' ? 'Pass' : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''),
       sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
     }), ()=>(exchangeData.length + exchangeSrData.length) < MAX_EXCHANGE_STOCK);
 
@@ -18017,7 +18064,7 @@ document.getElementById('restoreBackupBtn')?.addEventListener('click', async ()=
     // Mela (the original meaning) so an old backup still restores cleanly.
     await importSnCollection('Exchange Stock', 'exchange_stock', r => ({
       model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
-      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: ['Pass','Fail'].includes(r['Inspection']) ? r['Inspection'] : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''),
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: (r['Ownership Transfer']===undefined ? r['Inspection'] : r['Ownership Transfer'])==='Pass' ? 'Pass' : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''), mela:String(r['Mela']||''),
       sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
     }), ()=>(exchangeData.length + exchangeSrData.length) < MAX_EXCHANGE_STOCK);
 
