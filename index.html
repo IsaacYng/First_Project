@@ -12375,6 +12375,7 @@ window.openHHStockPreview = async function(){
 function areaStockKey(model,color){ return (model+'__'+color).replace(/[\/\.\#\$\[\]]/g,'_'); }
 
 let areaSeedAttempted = false;
+let _areaDupeCleaned = false;
 const DEFAULT_AREAS = ['Showroom','Workshop']; // always present, can't be removed
 async function seedDefaultAreas(){
   if(areaSeedAttempted) return;
@@ -12392,6 +12393,14 @@ function loadStockAreas(){
   onSnapshot(collection(db,"stock_areas"), snap=>{
     stockAreas = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
     seedDefaultAreas();
+    // One-time cleanup: an earlier double-seed left duplicate area docs (e.g.
+    // two "Showroom"/"Workshop"). Delete the extras, keeping the first of each.
+    if(!_areaDupeCleaned && currentUserRole!=='recondition'){
+      _areaDupeCleaned = true;
+      const byName = {}; const dupes = [];
+      stockAreas.forEach(a=>{ const k=String(a.name||'').trim().toLowerCase(); if(!k) return; if(byName[k]) dupes.push(a); else byName[k]=a; });
+      if(dupes.length){ (async()=>{ for(const d of dupes){ try{ await deleteDoc(doc(db,'stock_areas',d.id)); }catch(e){} } })(); }
+    }
     renderAreaStockTable();
     renderInvAreaFilter();
     renderAreaManager();
@@ -12521,10 +12530,16 @@ function renderAreaStockTable(){
   const body = document.getElementById('areaStockBody');
   if(!head || !body) return;
 
+  // De-dupe areas by name (case-insensitive) so a stray duplicate doc can't
+  // show the same column (e.g. Showroom/Workshop) twice.
+  const uniqAreas = [];
+  const _seenArea = new Set();
+  stockAreas.forEach(a=>{ const k=String(a.name||'').trim().toLowerCase(); if(k && !_seenArea.has(k)){ _seenArea.add(k); uniqAreas.push(a); } });
+
   head.innerHTML = `<th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
     <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Colour</th>
-    ${stockAreas.map(a=>`<th class="px-3 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">
-        ${escapeHtml(a.name)}${areaEditMode && !DEFAULT_AREAS.some(d=>d.toLowerCase()===String(a.name||'').toLowerCase()) ? `<button class="area-remove-btn" onclick="removeStockArea('${a.id}','${escapeJsAttr(a.name)}')" title="Remove area"><i class="fas fa-xmark"></i></button>` : ''}
+    ${uniqAreas.map(a=>`<th class="px-3 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">
+        ${escapeHtml(a.name)}
       </th>`).join('')}
     <th class="px-4 py-3 text-center text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Row Total</th>`;
 
@@ -12539,22 +12554,21 @@ function renderAreaStockTable(){
   });
   const models = Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total);
   if(!models.length){
-    body.innerHTML = `<tr><td colspan="${stockAreas.length+3}" class="px-4 py-10 text-center text-slate-400 text-sm">No stock in yet — this fills in automatically once units are added.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="${uniqAreas.length+3}" class="px-4 py-10 text-center text-slate-400 text-sm">No stock in yet — this fills in automatically once units are added.</td></tr>`;
     return;
   }
-  if(!stockAreas.length){
-    body.innerHTML = `<tr><td colspan="3" class="px-4 py-10 text-center text-slate-400 text-sm">No areas added yet. Use "Add Area" above to add areas like Showroom, Workshop, Taplejung.</td></tr>`;
+  if(!uniqAreas.length){
+    body.innerHTML = `<tr><td colspan="3" class="px-4 py-10 text-center text-slate-400 text-sm">No areas added yet. Use "Manage Areas" to add areas like Showroom, Workshop, Taplejung.</td></tr>`;
     return;
   }
 
-  const workshopArea = findWorkshopArea();
   const rows = [];
   models.forEach(m=>{
     Object.entries(byModel[m].colours).sort((a,b)=>b[1]-a[1]).forEach(([c,available])=>{
       // Read-only, auto: count in-stock units of this model+colour in each
       // area from their own `area` field. No manual entry — selling from one
       // area only reduces that area's count.
-      const cells = stockAreas.map(a=>{
+      const cells = uniqAreas.map(a=>{
         const qtyHere = invData.filter(s =>
           (s.model||'')===m && (s.color||'')===c &&
           (s.status||'Available')!=='Sold' && s.hhFlag!=='Hide' &&
