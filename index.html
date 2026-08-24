@@ -7902,23 +7902,43 @@ window.signOutFromSidebar = ()=>signOut(auth);
       const section = card.closest('.sec-panel');
       const addBtn = section && Array.from(section.querySelectorAll('button.cta-primary'))
         .find(b => /add (unit|model)/i.test(b.textContent));
+      const exportBtn = section && section.querySelector('button[onclick*="ToExcel"]');
       if(addBtn && addBtn.parentElement){
-        trigger.className = 'cta-secondary !py-2 !px-4 !text-xs flex-shrink-0';
-        trigger.innerHTML = '<i class="fas fa-file-excel" style="color:#059669"></i> Import';
-        addBtn.parentElement.insertBefore(trigger, addBtn);
-        // Bring the main Export button up next to Import so both Excel
-        // actions sit together in the header (was down in the table toolbar).
-        const exportBtn = section.querySelector('button[onclick*="ToExcel"]');
+        // One compact "⋮" menu holding Import + Export, so the header stays tidy.
+        const menuWrap = document.createElement('div');
+        menuWrap.className = 'relative flex-shrink-0';
+        const menuBtn = document.createElement('button');
+        menuBtn.type = 'button';
+        menuBtn.className = 'cta-secondary !py-2 !px-3 !text-xs';
+        menuBtn.title = 'Import / Export';
+        menuBtn.innerHTML = '<i class="fas fa-ellipsis-vertical"></i>';
+        const menu = document.createElement('div');
+        menu.className = 'hidden absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-40 min-w-[190px]';
+        const impItem = document.createElement('button');
+        impItem.type = 'button';
+        impItem.className = 'w-full text-left px-3 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50';
+        impItem.innerHTML = '<i class="fas fa-file-import mr-2 text-emerald-600"></i> Import from Excel';
+        impItem.addEventListener('click', ()=>{ menu.classList.add('hidden'); overlay.classList.add('flex'); });
+        menu.appendChild(impItem);
         if(exportBtn){
-          // match the Import/Add sizing so the header row is uniform
-          exportBtn.className = 'cta-secondary !py-2 !px-4 !text-xs flex-shrink-0';
-          exportBtn.innerHTML = '<i class="fas fa-file-excel" style="color:#059669"></i> Export';
-          addBtn.parentElement.insertBefore(exportBtn, addBtn);
+          exportBtn.style.display = 'none'; // keep it (for its onclick) but hide
+          const expItem = document.createElement('button');
+          expItem.type = 'button';
+          expItem.className = 'w-full text-left px-3 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50';
+          expItem.innerHTML = '<i class="fas fa-file-export mr-2 text-emerald-600"></i> Export to Excel';
+          expItem.addEventListener('click', ()=>{ menu.classList.add('hidden'); exportBtn.click(); });
+          menu.appendChild(expItem);
         }
+        menuBtn.addEventListener('click', (e)=>{ e.stopPropagation(); menu.classList.toggle('hidden'); });
+        document.addEventListener('click', (e)=>{ if(!menuWrap.contains(e.target)) menu.classList.add('hidden'); });
+        menuWrap.appendChild(menuBtn);
+        menuWrap.appendChild(menu);
+        addBtn.parentElement.insertBefore(menuWrap, addBtn);
       } else {
         trigger.className = 'import-trigger-btn';
         trigger.innerHTML = '<i class="fas fa-file-excel"></i> Import from Excel';
         parent.insertBefore(trigger, card);
+        trigger.addEventListener('click', ()=> overlay.classList.add('flex'));
       }
 
       // strip the card's own frame/margins — the modal box provides those
@@ -7927,9 +7947,7 @@ window.signOutFromSidebar = ()=>signOut(auth);
       overlay.appendChild(box);
       document.body.appendChild(overlay);
 
-      const open  = ()=>{ overlay.classList.add('flex'); };
-      const shut  = ()=>{ overlay.classList.remove('flex'); };
-      trigger.addEventListener('click', open);
+      const shut = ()=>{ overlay.classList.remove('flex'); };
       close.addEventListener('click', shut);
       overlay.addEventListener('click', e=>{ if(e.target===overlay) shut(); });
     });
@@ -10389,6 +10407,7 @@ function populateAreaSelect(selected){
   const want = selected || sel.value || 'Workshop';
   sel.innerHTML = list.map(n=>`<option value="${escapeHtml(n)}"${n===want?' selected':''}>${escapeHtml(n)}</option>`).join('');
   sel.value = list.includes(want) ? want : (list[0]||'Workshop');
+  sel._csSync?.();
 }
 
 window.openInvFormModal = ()=>{
@@ -20710,6 +20729,7 @@ function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('aliasRawInput'), { placeholder:'Select a model name from Inventory…', searchable:true });
   enhanceNativeSelect(document.getElementById('hhOwnerSelect'), { placeholder:'Unit Owner' });
   enhanceNativeSelect(document.getElementById('sStatus'), { placeholder:'Status' });
+  enhanceNativeSelect(document.getElementById('sArea'), { placeholder:'Area / Location' });
   enhanceNativeSelect(document.getElementById('hhStatus'), { placeholder:'Status' });
   enhanceNativeSelect(document.getElementById('exInspection'), { placeholder:'Inspection' });
   enhanceNativeSelect(document.getElementById('exSrInspection'), { placeholder:'Inspection' });
