@@ -7904,14 +7904,14 @@ window.signOutFromSidebar = ()=>signOut(auth);
       const addBtn = section && Array.from(section.querySelectorAll('button.cta-primary'))
         .find(b => /add (unit|model)/i.test(b.textContent));
       const exportBtn = section && section.querySelector('button[onclick*="ToExcel"]');
-      // The Add-Unit modal for this section — we put Import/Export INSIDE it,
-      // so the header stays clean (just the Add button).
+      // The Add-Unit modal's actual white card — put Import/Export INSIDE it
+      // (after Save Unit), so they sit within the card, not on the dim wrapper.
       const addModal = section && section.querySelector('.form-modal-overlay');
-      const addModalInner = addModal && addModal.firstElementChild;
-      if(addModalInner){
+      const modalCard = addModal && addModal.querySelector('.yng-card-shell');
+      if(modalCard){
         if(exportBtn) exportBtn.style.display = 'none'; // keep for its onclick, hide in header
         const row = document.createElement('div');
-        row.className = 'flex items-center gap-2 flex-wrap mb-4';
+        row.className = 'flex items-center gap-2 flex-wrap mt-4 pt-4 border-t border-slate-100';
         const impBtn = document.createElement('button');
         impBtn.type = 'button';
         impBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 border border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all';
@@ -7926,10 +7926,7 @@ window.signOutFromSidebar = ()=>signOut(auth);
           expBtn.addEventListener('click', ()=>{ exportBtn.click(); });
           row.appendChild(expBtn);
         }
-        // Insert right after the modal's first direct child (its title header).
-        // Use a DIRECT child as the reference so insertBefore can never throw
-        // NotFoundError — a nested .section-title's sibling isn't a child here.
-        addModalInner.insertBefore(row, addModalInner.children[1] || null);
+        modalCard.appendChild(row); // inside the white card, after Save Unit
       } else if(addBtn && addBtn.parentElement){
         // fallback: compact Import button in the header
         trigger.className = 'cta-secondary !py-2 !px-4 !text-xs flex-shrink-0';
