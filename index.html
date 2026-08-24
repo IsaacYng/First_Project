@@ -7878,6 +7878,7 @@ window.signOutFromSidebar = ()=>signOut(auth);
 (function installImportModals(){
   function run(){
     document.querySelectorAll('.yng-card-shell').forEach(card=>{
+     try {
       if(card.dataset.modalized) return;
       const heading = card.querySelector('.section-title');
       if(!heading || !/bulk import from excel/i.test(heading.textContent)) return;
@@ -7925,10 +7926,10 @@ window.signOutFromSidebar = ()=>signOut(auth);
           expBtn.addEventListener('click', ()=>{ exportBtn.click(); });
           row.appendChild(expBtn);
         }
-        // place the row just after the modal's title header (first child block)
-        const titleBlock = addModalInner.querySelector('.section-title') || addModalInner.firstElementChild;
-        if(titleBlock && titleBlock.nextSibling) addModalInner.insertBefore(row, titleBlock.nextSibling);
-        else addModalInner.appendChild(row);
+        // Insert right after the modal's first direct child (its title header).
+        // Use a DIRECT child as the reference so insertBefore can never throw
+        // NotFoundError — a nested .section-title's sibling isn't a child here.
+        addModalInner.insertBefore(row, addModalInner.children[1] || null);
       } else if(addBtn && addBtn.parentElement){
         // fallback: compact Import button in the header
         trigger.className = 'cta-secondary !py-2 !px-4 !text-xs flex-shrink-0';
@@ -7951,6 +7952,7 @@ window.signOutFromSidebar = ()=>signOut(auth);
       const shut = ()=>{ overlay.classList.remove('flex'); };
       close.addEventListener('click', shut);
       overlay.addEventListener('click', e=>{ if(e.target===overlay) shut(); });
+     } catch(e){ console.error('import modal enhance failed for a card', e); }
     });
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
