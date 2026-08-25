@@ -2195,6 +2195,32 @@
   #secFinanceTool .intro-speed-lines span{opacity:1 !important;animation:none !important;}
   #secFinanceTool .results-panel::before{opacity:1 !important;animation:none !important;}
 
+  /* ── Recondition ID: view-only sections ──────────────────────────────
+     These pages are visible to a Recondition ID for reference, but every
+     control that would change something is removed rather than left to
+     fail on tap. The JS guards (blockIfReconditionOnly / _deleteEntry)
+     still run underneath — this is the visual half of the same rule, not
+     the security boundary on its own. Recondition Stock and Exchange
+     Stock (Mela + Showroom) are deliberately NOT in this list: those
+     they fully control. */
+  body.role-recondition #secPrice .kebab-btn,
+  body.role-recondition #secPrice .cta-primary,
+  body.role-recondition #secPrice button[onclick*="openCategoryModal"],
+  body.role-recondition #secFin .kebab-btn,
+  body.role-recondition #secFin .cta-primary,
+  body.role-recondition #secEvents .kebab-btn,
+  body.role-recondition #secEvents .cta-primary,
+  body.role-recondition #secStorage .cta-primary,
+  body.role-recondition #secStorage button[onclick*="openSystemLimits"],
+  body.role-recondition #secStorage #fullBackupBtn,
+  body.role-recondition #secStorage #restoreBackupCard,
+  body.role-recondition #secTrash button[onclick*="emptyTrash"],
+  body.role-recondition #secTrash button[onclick*="permanentlyDelete"],
+  body.role-recondition #secDocs .cta-primary,
+  body.role-recondition #secDocs button[onclick*="uploadDocument"],
+  body.role-recondition #priceBulkImportCard{
+    display: none !important;
+  }
   .ex-status-tab:hover{ color:#1F2430; }
   .ex-status-tab.active{ background:#fff; color:#5A4740; box-shadow:0 1px 3px rgba(15,23,42,.1); }
   .ex-status-tab.active .pill-count{ background:#5A4740; color:#fff; }
@@ -8585,23 +8611,24 @@ async function loadProfile(uid) {
 
     // Recondition ID — a narrow role for whoever handles reconditioning
     // on traded-in bikes. They manage their own Recondition Stock in
-    // full and nothing else — not even Dashboard, which surfaces
-    // business-wide numbers that aren't their concern. No access to
-    // Exchange Stock (Mela or Showroom) at all, not even to view — the
-    // two stocks are deliberately unrelated.
+    // full, and — as originally — also have full control of Exchange
+    // Stock (Mela + Showroom), plus the reference pages they need while
+    // reconditioning. Not Dashboard, which surfaces business-wide
+    // numbers that aren't their concern.
     const isRecondition = currentUserRole === 'recondition';
     if(pmRole && isRecondition){
       pmRole.textContent = 'Recondition ID';
       pmRole.className = 'badge badge-neutral';
       pmRole.style.cssText = 'font-size:9px;padding:1px 6px;vertical-align:middle;';
     }
-    // Recondition ID sees only Recondition Stock — every other nav item
-    // is hidden outright rather than shown read-only. Explicit map, not
-    // a derived-from-key guess — several IDs (navHHInv, navAllInv,
-    // navHHStock) don't follow a simple capitalize pattern.
-    // blockIfReconditionOnly() stays in place on every write path too,
-    // as defense-in-depth in case a section is ever reached some other
-    // way.
+    // Recondition ID sees Recondition Stock, Exchange Stock (Mela +
+    // Showroom, full control) and view-only reference pages — every
+    // other nav item is hidden outright rather than shown read-only.
+    // Explicit map, not a derived-from-key guess — several IDs
+    // (navHHInv, navAllInv, navHHStock) don't follow a simple
+    // capitalize pattern. blockIfReconditionOnly() stays in place on
+    // every write path too, as defense-in-depth in case a section is
+    // ever reached some other way.
     const RECON_NAV_MAP = {
       financeTool:'navFinanceTool', sheetTool:'navSheetTool',
       dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv',
@@ -8609,8 +8636,8 @@ async function loadProfile(uid) {
       docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock',
       chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases'
     };
-    const RECON_FULL = ['reconditionStock'];
-    const RECON_READONLY = [];
+    const RECON_FULL = ['reconditionStock','exchange','exchangeSr'];
+    const RECON_READONLY = ['docs','storage','price','events','trash','sheetTool'];
     if(isRecondition){
       Object.entries(RECON_NAV_MAP).forEach(([key,id])=>{
         const keep = RECON_FULL.includes(key) || RECON_READONLY.includes(key);
@@ -13826,7 +13853,9 @@ async function downloadDocsAsZip(docs, zipName, describe){
 // Downloads whatever the Document Vault filter is currently showing, so
 // what you get matches what you can see.
 window.downloadAllDocuments = async ()=>{
-  let list = documents.slice();
+  let list = currentUserRole === 'recondition'
+    ? documents.filter(d=>d.category === 'Blue Book')
+    : documents.slice();
   if(docTypeFilter === 'bluebook') list = list.filter(d=>d.category==='Blue Book');
   else if(docTypeFilter !== 'all') list = list.filter(d=>(DOC_TYPE_GROUPS[docTypeFilter]||[]).includes(String(d.fileExt||'').toLowerCase()));
   await downloadDocsAsZip(list, 'Documents', 'documents in this filter');
@@ -18993,10 +19022,14 @@ async function updateStorageOverview(){
   if(restoreCard) restoreCard.classList.toggle('hidden', currentUserRole !== 'owner');
   // Downloading a backup is safe for any staff to do (it's read-only,
   // doesn't touch live data) — only *restoring* one back into Firestore
-  // needs to be Master-only.
+  // needs to be Master-only. Recondition ID is the one exception: a full
+  // backup contains every collection, not just Recondition/Exchange
+  // Stock, so it's outside what they're meant to have access to.
   const backupBtn = document.getElementById('fullBackupBtn');
   if(backupBtn){
-    backupBtn.classList.remove('hidden'); backupBtn.classList.add('flex');
+    const canDownloadBackup = currentUserRole !== 'recondition';
+    backupBtn.classList.toggle('hidden', !canDownloadBackup);
+    backupBtn.classList.toggle('flex', canDownloadBackup);
   }
   if(totalLabel && ring && ringPct && currentUserRole === 'owner'){
     // Files and records sit in two SEPARATE Google free allowances now that
@@ -19152,6 +19185,7 @@ window.migrateDocsToStorage = async ()=>{
 };
 
 window.downloadFullBackup = ()=>{
+  if(currentUserRole === 'recondition'){ toast('Recondition ID can only download Recondition Stock, Exchange Stock, and Blue Book files individually — not the full backup.','err'); return; }
   const btn = document.getElementById('fullBackupBtn');
   if(btn){ btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Preparing…'; }
   try{
@@ -19415,7 +19449,12 @@ window.setDocTypeFilter = (type)=>{
 function renderDocumentsPage(){
   const wrap = document.getElementById('docsListWrap');
   if(!wrap) return;
-  const docsView = documents;
+  // A Recondition ID's Document Vault is just the Blue Books — the rest of
+  // the vault (bank letters, licences, staff paperwork) isn't theirs to
+  // see. Filtering the source list here means every count, tab and card
+  // below is automatically limited too, rather than needing a check in
+  // each place.
+  const docsView = currentUserRole === 'recondition' ? documents.filter(d=>d.category === 'Blue Book') : documents;
   // Keep each tab's count in sync with the full (unfiltered) list, not just
   // whatever's currently showing — otherwise switching filters would make
   // the numbers drift.
@@ -20032,7 +20071,7 @@ async function trashLinkedBlueBook(docId){
 
 function blockIfReconditionOnly(){
   if(currentUserRole === 'recondition'){
-    toast('Recondition ID can view this, but only Recondition Stock can be edited.','err');
+    toast('Recondition ID can view this, but only Recondition Stock and Exchange Stock can be edited.','err');
     return true;
   }
   return false;
@@ -20040,13 +20079,13 @@ function blockIfReconditionOnly(){
 
 window._deleteEntry=async(col,id)=>{
   if(currentUserRole === 'recondition'){
-    const RECONDITION_ALLOWED_COLLECTIONS = ['recondition_stock'];
+    const RECONDITION_ALLOWED_COLLECTIONS = ['recondition_stock','exchange_stock','exchange_stock_showroom'];
     // Blue Book files belong to the Recondition Stock units they're
     // attached to, so a Recondition ID manages those too — but only Blue
     // Books, never the rest of the Document Vault.
     const isOwnBlueBook = col === 'documents' && documents.find(d=>d.id===id)?.category === 'Blue Book';
     if(!RECONDITION_ALLOWED_COLLECTIONS.includes(col) && !isOwnBlueBook){
-      toast('Recondition ID can only change Recondition Stock and Blue Book files — everything else is view-only.','err');
+      toast('Recondition ID can only change Recondition Stock, Exchange Stock, and Blue Book files — everything else is view-only.','err');
       return;
     }
   }
@@ -20317,8 +20356,8 @@ function renderTrashTable(){
 window.restoreFromTrash = async (trashId)=>{
   const t = trashData.find(x=>x.id===trashId);
   if(!t) return;
-  if(currentUserRole === 'recondition' && t.originalCollection!=='recondition_stock'){
-    toast('Recondition ID can only restore Recondition Stock items.','err');
+  if(currentUserRole === 'recondition' && !['recondition_stock','exchange_stock','exchange_stock_showroom'].includes(t.originalCollection)){
+    toast('Recondition ID can only restore Recondition Stock or Exchange Stock items.','err');
     return;
   }
   const label = TRASH_LABELS[t.originalCollection] || t.originalCollection;
@@ -21420,12 +21459,14 @@ function showNavLoader(){
 }
 
 window.switchSec=(sec)=>{
-  // A Recondition ID exists to manage their own Recondition Stock only —
+  // A Recondition ID exists to manage their own Recondition Stock and
+  // Exchange Stock (Mela + Showroom), plus view a few reference pages —
   // sending them anywhere else in the app exposes business data (pricing,
   // other customers' records, dealership finances) that isn't their job
-  // to see, so every section but Recondition Stock redirects back here
+  // to see, so every section but the allowed ones redirects back here
   // regardless of how the navigation was triggered.
-  if(currentUserRole === 'recondition' && sec !== 'reconditionStock'){
+  const RECON_ALLOWED_SECTIONS = ['reconditionStock','exchange','exchangeSr','docs','storage','price','events','trash','sheetTool'];
+  if(currentUserRole === 'recondition' && !RECON_ALLOWED_SECTIONS.includes(sec)){
     toast("Recondition ID doesn't have access to that section.",'err');
     sec = 'reconditionStock';
   }
@@ -21553,13 +21594,19 @@ window.runGlobalSearch = (q)=>{
   const MAX_PER_GROUP = 5;
   let html = '';
   let total = 0;
-  const invMatches = invData.filter(s => matches(s.model)||matches(s.chassis)||matches(s.engine)||matches(s.regNo)||matches(s.customerName)).slice(0, MAX_PER_GROUP);
+  // Recondition IDs only work with Recondition Stock and Exchange Stock,
+  // so search shows them just those plus the Price List — never
+  // inventory, chalans or contacts, which carry other customers' data
+  // they aren't meant to see.
+  const reconLimited = currentUserRole === 'recondition';
+
+  const invMatches = reconLimited ? [] : invData.filter(s => matches(s.model)||matches(s.chassis)||matches(s.engine)||matches(s.regNo)||matches(s.customerName)).slice(0, MAX_PER_GROUP);
   if(invMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Inventory</div>`;
     html += invMatches.map(s => globalSearchResultRow('fa-warehouse','#059669', escapeHtml(s.model||'—'), `${escapeHtml(s.chassis||'')} · ${escapeHtml(s.status||'')}`, `window.jumpToSearchResult('inventory','${s.id}')`)).join('');
     total += invMatches.length;
   }
-  const hhMatches = hhInvData.filter(s => matches(s.model)||matches(s.chassis)||matches(s.engine)||matches(s.regNo)||matches(s.customerName)).slice(0, MAX_PER_GROUP);
+  const hhMatches = reconLimited ? [] : hhInvData.filter(s => matches(s.model)||matches(s.chassis)||matches(s.engine)||matches(s.regNo)||matches(s.customerName)).slice(0, MAX_PER_GROUP);
   if(hhMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">HH Inventory</div>`;
     html += hhMatches.map(s => globalSearchResultRow('fa-tents','#0EA5E9', escapeHtml(s.model||'—'), `${escapeHtml(s.chassis||'')} · ${escapeHtml(s.status||'')}`, `window.jumpToSearchResult('hh_inventory','${s.id}')`)).join('');
@@ -21571,13 +21618,13 @@ window.runGlobalSearch = (q)=>{
     html += bikeMatches.map(b => globalSearchResultRow('fa-tags','#5A4740', escapeHtml(b.name||'—'), `Rs. ${(b.price||0).toLocaleString('en-IN')}`, `window.jumpToSearchResult('price','${b.id}')`)).join('');
     total += bikeMatches.length;
   }
-  const chalanMatches = chalanData.filter(c => matches(c.model)||matches(c.chassis)||matches(c.custName)||matches(c.chalanNo)).slice(0, MAX_PER_GROUP);
+  const chalanMatches = reconLimited ? [] : chalanData.filter(c => matches(c.model)||matches(c.chassis)||matches(c.custName)||matches(c.chalanNo)).slice(0, MAX_PER_GROUP);
   if(chalanMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Chalan Records</div>`;
     html += chalanMatches.map(c => globalSearchResultRow('fa-file-invoice','#0EA5E9', escapeHtml(c.custName||c.model||'—'), `${escapeHtml(c.model||'')} · ${escapeHtml(c.chalanNo||'')}`, `window.jumpToSearchResult('chalans','${c.id}')`)).join('');
     total += chalanMatches.length;
   }
-  const impMatches = importantData.filter(a => matches(a.value1)||matches(a.value2)||matches(a.note)).slice(0, MAX_PER_GROUP);
+  const impMatches = reconLimited ? [] : importantData.filter(a => matches(a.value1)||matches(a.value2)||matches(a.note)).slice(0, MAX_PER_GROUP);
   if(impMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Important Info</div>`;
     html += impMatches.map(a => globalSearchResultRow(a.type==='link'?'fa-link':'fa-user','#5A4740', escapeHtml(a.value1||'—'), escapeHtml(a.value2||''), `window.jumpToSearchResult('important','${a.id}')`)).join('');
