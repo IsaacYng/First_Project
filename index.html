@@ -3693,8 +3693,18 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Valuation (NPR) <span class="text-red-400">*</span></label>
-            <input type="number" id="exValuation" min="0" placeholder="e.g. 85000"
+            <input type="number" id="exValuation" min="0" placeholder="e.g. 85000" oninput="updateExPayableAmt()"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Less Additional Valuation</label>
+            <input type="number" id="exAdditionalValuation" min="0" placeholder="e.g. 5000" oninput="updateExPayableAmt()"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Payable Amount</label>
+            <div id="exPayableAmtDisplay" class="bg-emerald-50 border-2 border-emerald-200 rounded-lg px-3 py-2 text-sm font-extrabold text-emerald-700">Rs. 0</div>
+            <p class="text-[10px] text-slate-400">Valuation − Additional Valuation. Calculated, not typed — check both numbers above are correct.</p>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Customer Name</label>
@@ -3744,6 +3754,12 @@
               <span id="exBlueBookFileLabel" class="text-xs text-slate-400 truncate flex-1">No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.</span>
               <a id="exBlueBookFileExistingLink" href="#" target="_blank" class="hidden text-xs font-bold text-bajaj-blue hover:underline flex-shrink-0">View current</a>
             </div>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Pass Area</label>
+            <input type="text" id="exPassArea" placeholder="e.g. KTM, ILM, BTM…"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+            <p class="text-[10px] text-slate-400">District the bike's registration/ownership pass is from.</p>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Mela (Where Exchanged)</label>
@@ -3824,9 +3840,6 @@
           </button>
           <button id="bulkExportExBtn" onclick="exportSelectedEx()" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
             <i class="fas fa-file-excel text-[11px]"></i> Export (<span id="bulkExportExCount">0</span>)
-          </button>
-          <button id="startSelectExBtn" onclick="setExchangeSelectMode(true)" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
-            <i class="fas fa-square-check text-[11px]"></i> Select
           </button>
           <button id="cancelSelectExBtn" onclick="setExchangeSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
             <i class="fas fa-xmark text-[11px]"></i> Cancel Select
@@ -3927,8 +3940,18 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Valuation (NPR) <span class="text-red-400">*</span></label>
-            <input type="number" id="exSrValuation" min="0" placeholder="e.g. 85000"
+            <input type="number" id="exSrValuation" min="0" placeholder="e.g. 85000" oninput="updateExSrPayableAmt()"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Less Additional Valuation</label>
+            <input type="number" id="exSrAdditionalValuation" min="0" placeholder="e.g. 5000" oninput="updateExSrPayableAmt()"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Payable Amount</label>
+            <div id="exSrPayableAmtDisplay" class="bg-emerald-50 border-2 border-emerald-200 rounded-lg px-3 py-2 text-sm font-extrabold text-emerald-700">Rs. 0</div>
+            <p class="text-[10px] text-slate-400">Valuation − Additional Valuation. Calculated, not typed — check both numbers above are correct.</p>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Customer Name</label>
@@ -4051,9 +4074,6 @@
           </button>
           <button id="bulkExportExSrBtn" onclick="exportSelectedExSr()" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
             <i class="fas fa-file-excel text-[11px]"></i> Export (<span id="bulkExportExSrCount">0</span>)
-          </button>
-          <button id="startSelectExSrBtn" onclick="setExchangeSrSelectMode(true)" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
-            <i class="fas fa-square-check text-[11px]"></i> Select
           </button>
           <button id="cancelSelectExSrBtn" onclick="setExchangeSrSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
             <i class="fas fa-xmark text-[11px]"></i> Cancel Select
@@ -13486,7 +13506,7 @@ function exSearchMatches(s,q){
 function getFilteredExchange(){
   let base = exchangeData;
   if(exchangeStatusFilter !== 'all') base = base.filter(s=>(s.status||'In Stock')===exchangeStatusFilter);
-  if(exchangeSendToFilter !== 'all') base = base.filter(s=>(s.sendTo||'Showroom')===exchangeSendToFilter);
+  if(exchangeSendToFilter !== 'all') base = base.filter(s=>(s.sendTo||'Bikers Phidim')===exchangeSendToFilter);
   if(exchangeModelFilter !== 'all') base = base.filter(s=>(s.model||'')===exchangeModelFilter);
   if(!exchangeSearchTerm) return base;
   const q = exchangeSearchTerm.toLowerCase().trim();
@@ -13516,7 +13536,7 @@ function renderExchangeTable(){
   // updates how many of each destination are sold.
   const statusScoped = exchangeStatusFilter==='all' ? exchangeData : exchangeData.filter(s=>(s.status||'In Stock')===exchangeStatusFilter);
   const sendToCounts = {};
-  statusScoped.forEach(s=>{ const k = s.sendTo || 'Showroom'; sendToCounts[k] = (sendToCounts[k]||0)+1; });
+  statusScoped.forEach(s=>{ const k = s.sendTo || 'Bikers Phidim'; sendToCounts[k] = (sendToCounts[k]||0)+1; });
   const sendToKeys = Object.keys(sendToCounts).sort((a,b)=> a==='Showroom' ? -1 : b==='Showroom' ? 1 : sendToCounts[b]-sendToCounts[a]);
   if(!sendToKeys.includes(exchangeSendToFilter) && exchangeSendToFilter!=='all') exchangeSendToFilter = 'all';
   const wrap = document.getElementById('exchangeSendToFilterWrap');
@@ -13546,6 +13566,7 @@ function renderExchangeTable(){
   }
   tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map((s,rowIdx)=>{
     const valuation = s.valuation ? 'Rs. '+Number(s.valuation).toLocaleString('en-IN') : '—';
+    const payableDisp = (s.additionalValuation) ? `<div class="text-[10px] text-red-500 font-semibold">- Rs.${Number(s.additionalValuation).toLocaleString('en-IN')}</div><div class="text-[11px] text-emerald-600 font-extrabold">Rs.${Number(s.payableAmount ?? (s.valuation-s.additionalValuation)).toLocaleString('en-IN')} payable</div>` : '';
     const isSel = selectedExchangeIds.has(s.id);
     return `
     <tr class="border-b border-slate-100 ${isSel?'row-selected':''}" data-row-id="${s.id}">
@@ -13559,7 +13580,7 @@ function renderExchangeTable(){
       </td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Year">${escapeHtml(s.makeYear||'—')}</td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
-      <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Valuation">${valuation}</td>
+      <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Valuation">${valuation}${payableDisp}</td>
       <td class="px-4 py-3" data-th="Documents"><div class="flex flex-wrap gap-1">${exDocBadge('Blue Book', s.blueBook==='yes')}${exDocBadge('Key', s.key==='yes')}${exDocBadge('File', s.file==='yes')}
         ${s.inspectionStatus==='Pass' ? `<span class="badge badge-green"><i class="fas fa-check"></i> Pass</span>` : `<span class="badge badge-neutral"><i class="fas fa-hourglass-half"></i> Pending</span>`}
         ${s.blueBookDocId ? `<button onclick="window.openDocPreview('${s.blueBookDocId}')" class="badge badge-blue" style="cursor:pointer;border:none"><i class="fas fa-file-lines"></i> Blue Book File</button>` : ''}</div>
@@ -13567,7 +13588,8 @@ function renderExchangeTable(){
       </td>
       <td class="px-4 py-3 text-sm text-slate-600" data-th="Send To">
         ${s.mela ? `<div class="text-[10px] text-amber-600 font-bold uppercase tracking-wide flex items-center gap-1 mb-1"><i class="fas fa-tent text-[8px]"></i> ${escapeHtml(s.mela)}</div>` : ''}
-        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide"><i class="fas fa-location-dot text-[8px]"></i> ${escapeHtml(s.sendTo||'Showroom')}</span>
+        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide"><i class="fas fa-location-dot text-[8px]"></i> ${escapeHtml(s.sendTo||'Bikers Phidim')}</span>
+        ${s.passArea ? `<div class="text-[10px] text-slate-400 font-semibold mt-1"><i class="fas fa-map-pin text-[8px]"></i> Pass: ${escapeHtml(s.passArea)}</div>` : ''}
       </td>
       <td class="px-4 py-3" data-th="Status">
         ${s.status==='Sold' ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>` : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> In Stock</span>`}
@@ -13597,11 +13619,6 @@ function updateDeleteSelectedExBtn(){
   if(cancelBtn){
     if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
     else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
-  }
-  const startBtn = document.getElementById('startSelectExBtn');
-  if(startBtn){
-    if(inSelectMode){ startBtn.classList.add('hidden'); startBtn.classList.remove('flex'); }
-    else { startBtn.classList.remove('hidden'); startBtn.classList.add('flex'); }
   }
   if(hint){
     if(inSelectMode && selectedExchangeIds.size===0){ hint.classList.remove('hidden'); hint.classList.add('flex'); }
@@ -13688,8 +13705,9 @@ function exportExchangeUnitsToExcel(units, sheetName, filePrefix){
   if(!units.length){ toast('Nothing selected to export.','err'); return; }
   const rows = units.map(s=>({
     'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg No': s.regNo||'',
-    'Valuation': s.valuation||0, 'Blue Book': s.blueBook||'', 'Key': s.key||'', 'File': s.file||'',
-    'Customer': s.customerName||'', 'Contact': s.contact||'', 'Mela': s.mela||'', 'Send To': s.sendTo||'', 'Status': s.status||'', 'Remarks': s.remarks||''
+    'Valuation': s.valuation||0, 'Additional Valuation': s.additionalValuation||0, 'Payable Amount': s.payableAmount ?? ((s.valuation||0)-(s.additionalValuation||0)),
+    'Blue Book': s.blueBook||'', 'Key': s.key||'', 'File': s.file||'',
+    'Customer': s.customerName||'', 'Contact': s.contact||'', 'Pass Area': s.passArea||'', 'Mela': s.mela||'', 'Send To': s.sendTo||'', 'Status': s.status||'', 'Remarks': s.remarks||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
@@ -13800,14 +13818,23 @@ function populateMelaDatalist(){
 window.openExchangeFormModal = ()=>{ populateSendToDatalist(); populateMelaDatalist(); document.getElementById('exchangeFormModal').classList.add('open'); };
 window.closeExchangeFormModal = ()=>{ document.getElementById('exchangeFormModal').classList.remove('open'); };
 
+function updateExPayableAmt(){
+  const val = Number(document.getElementById('exValuation').value) || 0;
+  const add = Number(document.getElementById('exAdditionalValuation').value) || 0;
+  const payable = Math.max(0, val - add);
+  document.getElementById('exPayableAmtDisplay').textContent = 'Rs. ' + payable.toLocaleString('en-IN');
+}
+window.updateExPayableAmt = updateExPayableAmt;
+
 window.cancelExchangeEdit = ()=>{
   currentEditExchangeId = null;
-  ['exModel','exMakeYear','exRegNo','exValuation','exCustomerName','exContact','exRemarks','exMela'].forEach(id=>document.getElementById(id).value='');
+  ['exModel','exMakeYear','exRegNo','exValuation','exAdditionalValuation','exCustomerName','exContact','exRemarks','exMela','exPassArea'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('exBlueBook').value='yes';
   document.getElementById('exKey').value='yes';
   document.getElementById('exFile').value='yes';
-  document.getElementById('exSendTo').value='Showroom';
+  document.getElementById('exSendTo').value='Bikers Phidim';
   document.getElementById('exInspection').value='Pending';
+  updateExPayableAmt();
   exBlueBookFilePending = null;
   document.getElementById('exBlueBookFile').value='';
   document.getElementById('exBlueBookFileLabel').textContent = 'No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.';
@@ -13826,6 +13853,7 @@ window._editExchange = (id)=>{
   document.getElementById('exMakeYear').value = s.makeYear||'';
   document.getElementById('exRegNo').value = s.regNo||'';
   document.getElementById('exValuation').value = s.valuation??'';
+  document.getElementById('exAdditionalValuation').value = s.additionalValuation||'';
   document.getElementById('exCustomerName').value = s.customerName||'';
   document.getElementById('exContact').value = s.contact||'';
   document.getElementById('exBlueBook').value = s.blueBook==='no' ? 'no' : 'yes';
@@ -13833,8 +13861,10 @@ window._editExchange = (id)=>{
   document.getElementById('exFile').value = s.file==='no' ? 'no' : 'yes';
   document.getElementById('exRemarks').value = s.remarks||'';
   document.getElementById('exMela').value = s.mela||'';
-  document.getElementById('exSendTo').value = s.sendTo || 'Showroom';
+  document.getElementById('exPassArea').value = s.passArea||'';
+  document.getElementById('exSendTo').value = s.sendTo || 'Bikers Phidim';
   document.getElementById('exInspection').value = s.inspectionStatus==='Pass' ? 'Pass' : 'Pending';
+  updateExPayableAmt();
   exBlueBookFilePending = null;
   document.getElementById('exBlueBookFile').value='';
   const existingLink = document.getElementById('exBlueBookFileExistingLink');
@@ -13894,6 +13924,12 @@ document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
   const firstErr = [modelCheck, yearCheck, regNoCheck, remarksCheck].find(c=>!c.ok);
   if(firstErr){ toast(firstErr.error,'err'); return; }
   if(valuationRaw==='' || isNaN(Number(valuationRaw)) || Number(valuationRaw)<0){ toast('Enter a valid Valuation amount.','err'); return; }
+  const additionalValuationRaw = document.getElementById('exAdditionalValuation').value;
+  if(additionalValuationRaw!=='' && (isNaN(Number(additionalValuationRaw)) || Number(additionalValuationRaw)<0)){ toast('Enter a valid Additional Valuation amount.','err'); return; }
+  const additionalValuation = Number(additionalValuationRaw)||0;
+  if(additionalValuation > Number(valuationRaw)){ toast('Additional Valuation cannot be more than Valuation — check the numbers.','err'); return; }
+  const passAreaCheck = Validate.text(document.getElementById('exPassArea').value, { min:0, max:20, label:'Pass Area' });
+  if(!passAreaCheck.ok){ toast(passAreaCheck.error,'err'); return; }
   const customerName = document.getElementById('exCustomerName').value.trim();
   const contactCheck = Validate.text(document.getElementById('exContact').value, { min:0, max:20, label:'Contact No.' });
   if(!contactCheck.ok){ toast(contactCheck.error,'err'); return; }
@@ -13905,10 +13941,11 @@ document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
   if(!melaCheck.ok){ toast(melaCheck.error,'err'); return; }
   const sendToCheck = Validate.text(document.getElementById('exSendTo').value, { min:0, max:60, label:'Send To' });
   if(!sendToCheck.ok){ toast(sendToCheck.error,'err'); return; }
-  const sendTo = sendToCheck.value || 'Showroom';
+  const sendTo = sendToCheck.value || 'Bikers Phidim';
   const payload = {
     model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
-    valuation: Number(valuationRaw), customerName, contact: contactCheck.value, blueBook, key, file, remarks: remarksCheck.value, mela: melaCheck.value, sendTo, inspectionStatus
+    valuation: Number(valuationRaw), additionalValuation, payableAmount: Number(valuationRaw)-additionalValuation,
+    customerName, contact: contactCheck.value, blueBook, key, file, remarks: remarksCheck.value, mela: melaCheck.value, passArea: passAreaCheck.value, sendTo, inspectionStatus
   };
   const saveBtn = document.getElementById('saveExchangeBtn');
   const saveBtnOrigHtml = saveBtn.innerHTML;
@@ -13954,11 +13991,12 @@ window.exportExchangeToExcel = ()=>{
   const sorted = [...list].sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0));
   const rows = sorted.map(s=>({
     'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg. No': s.regNo||'',
-    'Valuation': s.valuation||0, 'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
-    'File': s.file==='yes'?'Yes':'No', 'Ownership Transfer': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Contact': s.contact||'', 'Mela': s.mela||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
+    'Valuation': s.valuation||0, 'Additional Valuation': s.additionalValuation||0, 'Payable Amount': s.payableAmount ?? ((s.valuation||0)-(s.additionalValuation||0)),
+    'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
+    'File': s.file==='yes'?'Yes':'No', 'Ownership Transfer': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Contact': s.contact||'', 'Pass Area': s.passArea||'', 'Mela': s.mela||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Bikers Phidim', 'Remarks': s.remarks||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:14},{wch:20},{wch:10},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:14},{wch:14},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:14},{wch:14},{wch:20},{wch:10},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
   XLSX.writeFile(wb, `exchange_stock_export_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -14003,11 +14041,13 @@ document.getElementById('exExcelFileInput').addEventListener('change', function(
         makeYear:   findCol(['makeyear','year']),
         regNo:      findCol(['registrationnumber','regno','regd','registration']),
         valuation:  findCol(['valuation','value','price']),
+        additionalValuation: findCol(['additionalvaluation','lessadditionalvaluation','additional']),
         blueBook:   findCol(['bluebook']),
         key:        findCol(['key']),
         file:       findCol(['file']),
         customer:   findCol(['customername','customer']),
         contact:    findCol(['contact','contactno','phone','mobile']),
+        passArea:   findCol(['passarea']),
         mela:       findCol(['mela']),
         sendTo:     findCol(['sendto','destination']),
         remarks:    findCol(['remarks','notes','note'])
@@ -14028,13 +14068,15 @@ document.getElementById('exExcelFileInput').addEventListener('change', function(
         makeYear:   colIdx.makeYear!==-1  ? (r[colIdx.makeYear]||'').toString().trim()  : '',
         regNo:      colIdx.regNo!==-1     ? (r[colIdx.regNo]||'').toString().trim()     : '',
         valuation:  colIdx.valuation!==-1 ? Number(r[colIdx.valuation])||0              : 0,
+        additionalValuation: colIdx.additionalValuation!==-1 ? Number(r[colIdx.additionalValuation])||0 : 0,
         blueBook:   colIdx.blueBook!==-1  ? parseYesNo(r[colIdx.blueBook])              : 'yes',
         key:        colIdx.key!==-1       ? parseYesNo(r[colIdx.key])                   : 'yes',
         file:       colIdx.file!==-1      ? parseYesNo(r[colIdx.file])                  : 'yes',
         customerName: colIdx.customer!==-1 ? (r[colIdx.customer]||'').toString().trim() : '',
         contact:    colIdx.contact!==-1   ? (r[colIdx.contact]||'').toString().trim()   : '',
+        passArea:   colIdx.passArea!==-1  ? (r[colIdx.passArea]||'').toString().trim()  : '',
         mela:       colIdx.mela!==-1      ? (r[colIdx.mela]||'').toString().trim()      : '',
-        sendTo:     colIdx.sendTo!==-1    ? (r[colIdx.sendTo]||'').toString().trim() || 'Showroom' : 'Showroom',
+        sendTo:     colIdx.sendTo!==-1    ? (r[colIdx.sendTo]||'').toString().trim() || 'Bikers Phidim' : 'Bikers Phidim',
         remarks:    colIdx.remarks!==-1   ? (r[colIdx.remarks]||'').toString().trim()   : ''
       })).filter(r=>r.model || r.regNo);
 
@@ -14050,12 +14092,12 @@ document.getElementById('exExcelFileInput').addEventListener('change', function(
 
 document.getElementById('exDownloadTemplateBtn').addEventListener('click', ()=>{
   const wsData = [
-    ['Model','MakeYear','RegNo','Valuation','BlueBook','Key','File','Customer','Contact','Mela','SendTo','Remarks'],
-    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','Yes','Yes','No','Santosh Gahatraj Kami','98XXXXXXXX','Aathrai Mela 2083 Shrawan','Showroom','Minor scratch on tank'],
-    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','No','Yes','Yes','','','','Workshop','']
+    ['Model','MakeYear','RegNo','Valuation','AdditionalValuation','BlueBook','Key','File','Customer','Contact','PassArea','Mela','SendTo','Remarks'],
+    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','5000','Yes','Yes','No','Santosh Gahatraj Kami','98XXXXXXXX','KTM','Aathrai Mela 2083 Shrawan','Showroom','Minor scratch on tank'],
+    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','0','No','Yes','Yes','','','','','Workshop','']
   ];
   const ws = XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:14},{wch:24},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:16},{wch:10},{wch:8},{wch:8},{wch:22},{wch:14},{wch:10},{wch:24},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
   XLSX.writeFile(wb, 'exchange_stock_import_template.xlsx');
@@ -14087,12 +14129,14 @@ document.getElementById('exImportExcelBtn').addEventListener('click', async ()=>
     const badField = [modelCheck, yearCheck, regNoCheck].find(c=>!c.ok);
     if(badField){ results.failed.push({row, reason: badField.error}); continue; }
     if(isNaN(row.valuation) || row.valuation<0){ results.failed.push({row, reason:'Invalid Valuation amount'}); continue; }
+    if(row.additionalValuation > row.valuation){ results.failed.push({row, reason:'Additional Valuation exceeds Valuation'}); continue; }
     try{
       await addDoc(collection(db,'exchange_stock'), {
         sn: nextSn,
         model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
-        valuation: row.valuation, blueBook: row.blueBook, key: row.key, file: row.file,
-        customerName: row.customerName || '', contact: row.contact || '', mela: row.mela || '', sendTo: row.sendTo || 'Showroom', remarks: row.remarks || '',
+        valuation: row.valuation, additionalValuation: row.additionalValuation||0, payableAmount: row.valuation-(row.additionalValuation||0),
+        blueBook: row.blueBook, key: row.key, file: row.file,
+        customerName: row.customerName || '', contact: row.contact || '', passArea: row.passArea || '', mela: row.mela || '', sendTo: row.sendTo || 'Bikers Phidim', remarks: row.remarks || '',
         status: 'In Stock', addedAt: new Date()
       });
       results.success.push(row);
@@ -14320,7 +14364,7 @@ function exSrSearchMatches(s,q){
 function getFilteredExchangeSr(){
   let base = exchangeSrData;
   if(exchangeSrStatusFilter !== 'all') base = base.filter(s=>(s.status||'In Stock')===exchangeSrStatusFilter);
-  if(exchangeSrSendToFilter !== 'all') base = base.filter(s=>(s.sendTo||'Showroom')===exchangeSrSendToFilter);
+  if(exchangeSrSendToFilter !== 'all') base = base.filter(s=>(s.sendTo||'Bikers Phidim')===exchangeSrSendToFilter);
   if(exchangeSrModelFilter !== 'all') base = base.filter(s=>(s.model||'')===exchangeSrModelFilter);
   if(!exchangeSrSearchTerm) return base;
   const q = exchangeSrSearchTerm.toLowerCase().trim();
@@ -14350,7 +14394,7 @@ function renderExchangeSrTable(){
   // updates how many of each destination are sold.
   const statusScoped = exchangeSrStatusFilter==='all' ? exchangeSrData : exchangeSrData.filter(s=>(s.status||'In Stock')===exchangeSrStatusFilter);
   const sendToCounts = {};
-  statusScoped.forEach(s=>{ const k = s.sendTo || 'Showroom'; sendToCounts[k] = (sendToCounts[k]||0)+1; });
+  statusScoped.forEach(s=>{ const k = s.sendTo || 'Bikers Phidim'; sendToCounts[k] = (sendToCounts[k]||0)+1; });
   const sendToKeys = Object.keys(sendToCounts).sort((a,b)=> a==='Showroom' ? -1 : b==='Showroom' ? 1 : sendToCounts[b]-sendToCounts[a]);
   if(!sendToKeys.includes(exchangeSrSendToFilter) && exchangeSrSendToFilter!=='all') exchangeSrSendToFilter = 'all';
   const wrap = document.getElementById('exchangeSrSendToFilterWrap');
@@ -14378,6 +14422,7 @@ function renderExchangeSrTable(){
   }
   tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map((s,rowIdx)=>{
     const valuation = s.valuation ? 'Rs. '+Number(s.valuation).toLocaleString('en-IN') : '—';
+    const payableDisp = (s.additionalValuation) ? `<div class="text-[10px] text-red-500 font-semibold">- Rs.${Number(s.additionalValuation).toLocaleString('en-IN')}</div><div class="text-[11px] text-emerald-600 font-extrabold">Rs.${Number(s.payableAmount ?? (s.valuation-s.additionalValuation)).toLocaleString('en-IN')} payable</div>` : '';
     const isSel = selectedExchangeSrIds.has(s.id);
     return `
     <tr class="border-b border-slate-100 ${isSel?'row-selected':''}" data-row-id="${s.id}">
@@ -14397,7 +14442,7 @@ function renderExchangeSrTable(){
         ${s.blueBookDocId ? `<button onclick="window.openDocPreview('${s.blueBookDocId}')" class="badge badge-blue" style="cursor:pointer;border:none"><i class="fas fa-file-lines"></i> Blue Book File</button>` : ''}</div>
         ${s.remarks ? `<div class="text-[11px] text-slate-400 mt-1 max-w-[220px] truncate" title="${escapeHtml(s.remarks)}"><i class="fas fa-note-sticky text-slate-300 text-[9px] mr-1"></i>${escapeHtml(s.remarks)}</div>` : ''}
       </td>
-      <td class="px-4 py-3 text-sm text-slate-600" data-th="Send To"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide"><i class="fas fa-location-dot text-[8px]"></i> ${escapeHtml(s.sendTo||'Showroom')}</span></td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Send To"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide"><i class="fas fa-location-dot text-[8px]"></i> ${escapeHtml(s.sendTo||'Bikers Phidim')}</span></td>
       <td class="px-4 py-3" data-th="Status">
         ${s.status==='Sold' ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>` : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> In Stock</span>`}
       </td>
@@ -14426,11 +14471,6 @@ function updateDeleteSelectedExSrBtn(){
   if(cancelBtn){
     if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
     else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
-  }
-  const startBtn = document.getElementById('startSelectExSrBtn');
-  if(startBtn){
-    if(inSelectMode){ startBtn.classList.add('hidden'); startBtn.classList.remove('flex'); }
-    else { startBtn.classList.remove('hidden'); startBtn.classList.add('flex'); }
   }
   if(hint){
     if(inSelectMode && selectedExchangeSrIds.size===0){ hint.classList.remove('hidden'); hint.classList.add('flex'); }
@@ -14533,14 +14573,23 @@ document.getElementById('fixExchangeSrSnBtn').addEventListener('click', async ()
 window.openExchangeSrFormModal = ()=>{ populateSendToDatalist(); document.getElementById('exchangeSrFormModal').classList.add('open'); };
 window.closeExchangeSrFormModal = ()=>{ document.getElementById('exchangeSrFormModal').classList.remove('open'); };
 
+function updateExSrPayableAmt(){
+  const val = Number(document.getElementById('exSrValuation').value) || 0;
+  const add = Number(document.getElementById('exSrAdditionalValuation').value) || 0;
+  const payable = Math.max(0, val - add);
+  document.getElementById('exSrPayableAmtDisplay').textContent = 'Rs. ' + payable.toLocaleString('en-IN');
+}
+window.updateExSrPayableAmt = updateExSrPayableAmt;
+
 window.cancelExchangeSrEdit = ()=>{
   currentEditExchangeSrId = null;
-  ['exSrModel','exSrMakeYear','exSrRegNo','exSrValuation','exSrCustomerName','exSrContact','exSrRemarks'].forEach(id=>document.getElementById(id).value='');
+  ['exSrModel','exSrMakeYear','exSrRegNo','exSrValuation','exSrAdditionalValuation','exSrCustomerName','exSrContact','exSrRemarks'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('exSrBlueBook').value='yes';
   document.getElementById('exSrKey').value='yes';
   document.getElementById('exSrFile').value='yes';
-  document.getElementById('exSrSendTo').value='Showroom';
+  document.getElementById('exSrSendTo').value='Bikers Phidim';
   document.getElementById('exSrInspection').value='Pending';
+  updateExSrPayableAmt();
   exSrBlueBookFilePending = null;
   document.getElementById('exSrBlueBookFile').value='';
   document.getElementById('exSrBlueBookFileLabel').textContent = 'No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.';
@@ -14559,14 +14608,16 @@ window._editExchangeSr = (id)=>{
   document.getElementById('exSrMakeYear').value = s.makeYear||'';
   document.getElementById('exSrRegNo').value = s.regNo||'';
   document.getElementById('exSrValuation').value = s.valuation??'';
+  document.getElementById('exSrAdditionalValuation').value = s.additionalValuation||'';
   document.getElementById('exSrCustomerName').value = s.customerName||'';
   document.getElementById('exSrContact').value = s.contact||'';
   document.getElementById('exSrBlueBook').value = s.blueBook==='no' ? 'no' : 'yes';
   document.getElementById('exSrKey').value = s.key==='no' ? 'no' : 'yes';
   document.getElementById('exSrFile').value = s.file==='no' ? 'no' : 'yes';
   document.getElementById('exSrRemarks').value = s.remarks||'';
-  document.getElementById('exSrSendTo').value = s.sendTo || 'Showroom';
+  document.getElementById('exSrSendTo').value = s.sendTo || 'Bikers Phidim';
   document.getElementById('exSrInspection').value = s.inspectionStatus==='Pass' ? 'Pass' : 'Pending';
+  updateExSrPayableAmt();
   exSrBlueBookFilePending = null;
   document.getElementById('exSrBlueBookFile').value='';
   const existingLink = document.getElementById('exSrBlueBookFileExistingLink');
@@ -14626,6 +14677,10 @@ document.getElementById('saveExchangeSrBtn').addEventListener('click', async ()=
   const firstErr = [modelCheck, yearCheck, regNoCheck, remarksCheck].find(c=>!c.ok);
   if(firstErr){ toast(firstErr.error,'err'); return; }
   if(valuationRaw==='' || isNaN(Number(valuationRaw)) || Number(valuationRaw)<0){ toast('Enter a valid Valuation amount.','err'); return; }
+  const additionalValuationRaw = document.getElementById('exSrAdditionalValuation').value;
+  if(additionalValuationRaw!=='' && (isNaN(Number(additionalValuationRaw)) || Number(additionalValuationRaw)<0)){ toast('Enter a valid Additional Valuation amount.','err'); return; }
+  const additionalValuation = Number(additionalValuationRaw)||0;
+  if(additionalValuation > Number(valuationRaw)){ toast('Additional Valuation cannot be more than Valuation — check the numbers.','err'); return; }
   const customerName = document.getElementById('exSrCustomerName').value.trim();
   const contactCheck = Validate.text(document.getElementById('exSrContact').value, { min:0, max:20, label:'Contact No.' });
   if(!contactCheck.ok){ toast(contactCheck.error,'err'); return; }
@@ -14635,10 +14690,11 @@ document.getElementById('saveExchangeSrBtn').addEventListener('click', async ()=
   const inspectionStatus = document.getElementById('exSrInspection').value==='Pass' ? 'Pass' : 'Pending';
   const sendToCheck = Validate.text(document.getElementById('exSrSendTo').value, { min:0, max:60, label:'Send To' });
   if(!sendToCheck.ok){ toast(sendToCheck.error,'err'); return; }
-  const sendTo = sendToCheck.value || 'Showroom';
+  const sendTo = sendToCheck.value || 'Bikers Phidim';
   const payload = {
     model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
-    valuation: Number(valuationRaw), customerName, contact: contactCheck.value, blueBook, key, file, remarks: remarksCheck.value, sendTo, inspectionStatus
+    valuation: Number(valuationRaw), additionalValuation, payableAmount: Number(valuationRaw)-additionalValuation,
+    customerName, contact: contactCheck.value, blueBook, key, file, remarks: remarksCheck.value, sendTo, inspectionStatus
   };
   const saveBtn = document.getElementById('saveExchangeSrBtn');
   const saveBtnOrigHtml = saveBtn.innerHTML;
@@ -14684,11 +14740,12 @@ window.exportExchangeSrToExcel = ()=>{
   const sorted = [...list].sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0));
   const rows = sorted.map(s=>({
     'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg. No': s.regNo||'',
-    'Valuation': s.valuation||0, 'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
-    'File': s.file==='yes'?'Yes':'No', 'Ownership Transfer': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Contact': s.contact||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Showroom', 'Remarks': s.remarks||''
+    'Valuation': s.valuation||0, 'Additional Valuation': s.additionalValuation||0, 'Payable Amount': s.payableAmount ?? ((s.valuation||0)-(s.additionalValuation||0)),
+    'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
+    'File': s.file==='yes'?'Yes':'No', 'Ownership Transfer': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Contact': s.contact||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Bikers Phidim', 'Remarks': s.remarks||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:14},{wch:10},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:14},{wch:14},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:14},{wch:10},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
   XLSX.writeFile(wb, `exchange_stock_export_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -14733,6 +14790,7 @@ document.getElementById('exSrExcelFileInput').addEventListener('change', functio
         makeYear:   findCol(['makeyear','year']),
         regNo:      findCol(['registrationnumber','regno','regd','registration']),
         valuation:  findCol(['valuation','value','price']),
+        additionalValuation: findCol(['additionalvaluation','lessadditionalvaluation','additional']),
         blueBook:   findCol(['bluebook']),
         key:        findCol(['key']),
         file:       findCol(['file']),
@@ -14757,12 +14815,13 @@ document.getElementById('exSrExcelFileInput').addEventListener('change', functio
         makeYear:   colIdx.makeYear!==-1  ? (r[colIdx.makeYear]||'').toString().trim()  : '',
         regNo:      colIdx.regNo!==-1     ? (r[colIdx.regNo]||'').toString().trim()     : '',
         valuation:  colIdx.valuation!==-1 ? Number(r[colIdx.valuation])||0              : 0,
+        additionalValuation: colIdx.additionalValuation!==-1 ? Number(r[colIdx.additionalValuation])||0 : 0,
         blueBook:   colIdx.blueBook!==-1  ? parseYesNo(r[colIdx.blueBook])              : 'yes',
         key:        colIdx.key!==-1       ? parseYesNo(r[colIdx.key])                   : 'yes',
         file:       colIdx.file!==-1      ? parseYesNo(r[colIdx.file])                  : 'yes',
         customerName: colIdx.customer!==-1 ? (r[colIdx.customer]||'').toString().trim() : '',
         contact:    colIdx.contact!==-1   ? (r[colIdx.contact]||'').toString().trim()   : '',
-        sendTo:     colIdx.sendTo!==-1    ? (r[colIdx.sendTo]||'').toString().trim() || 'Showroom' : 'Showroom',
+        sendTo:     colIdx.sendTo!==-1    ? (r[colIdx.sendTo]||'').toString().trim() || 'Bikers Phidim' : 'Bikers Phidim',
         remarks:    colIdx.remarks!==-1   ? (r[colIdx.remarks]||'').toString().trim()   : ''
       })).filter(r=>r.model || r.regNo);
 
@@ -14778,12 +14837,12 @@ document.getElementById('exSrExcelFileInput').addEventListener('change', functio
 
 document.getElementById('exSrDownloadTemplateBtn').addEventListener('click', ()=>{
   const wsData = [
-    ['Model','MakeYear','RegNo','Valuation','BlueBook','Key','File','Customer','Contact','SendTo','Remarks'],
-    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','Yes','Yes','No','Santosh Gahatraj Kami','98XXXXXXXX','Showroom','Minor scratch on tank'],
-    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','No','Yes','Yes','','','Workshop','']
+    ['Model','MakeYear','RegNo','Valuation','AdditionalValuation','BlueBook','Key','File','Customer','Contact','SendTo','Remarks'],
+    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','5000','Yes','Yes','No','Santosh Gahatraj Kami','98XXXXXXXX','Showroom','Minor scratch on tank'],
+    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','0','No','Yes','Yes','','','Workshop','']
   ];
   const ws = XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:22},{wch:14},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:16},{wch:10},{wch:8},{wch:8},{wch:22},{wch:14},{wch:16},{wch:30}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Exchange Stock');
   XLSX.writeFile(wb, 'exchange_stock_import_template.xlsx');
@@ -14815,12 +14874,14 @@ document.getElementById('exSrImportExcelBtn').addEventListener('click', async ()
     const badField = [modelCheck, yearCheck, regNoCheck].find(c=>!c.ok);
     if(badField){ results.failed.push({row, reason: badField.error}); continue; }
     if(isNaN(row.valuation) || row.valuation<0){ results.failed.push({row, reason:'Invalid Valuation amount'}); continue; }
+    if(row.additionalValuation > row.valuation){ results.failed.push({row, reason:'Additional Valuation exceeds Valuation'}); continue; }
     try{
       await addDoc(collection(db,'exchange_stock_showroom'), {
         sn: nextSn,
         model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
-        valuation: row.valuation, blueBook: row.blueBook, key: row.key, file: row.file,
-        customerName: row.customerName || '', contact: row.contact || '', sendTo: row.sendTo || 'Showroom', remarks: row.remarks || '',
+        valuation: row.valuation, additionalValuation: row.additionalValuation||0, payableAmount: row.valuation-(row.additionalValuation||0),
+        blueBook: row.blueBook, key: row.key, file: row.file,
+        customerName: row.customerName || '', contact: row.contact || '', sendTo: row.sendTo || 'Bikers Phidim', remarks: row.remarks || '',
         status: 'In Stock', addedAt: new Date()
       });
       results.success.push(row);
@@ -17898,13 +17959,15 @@ window.downloadFullBackup = ()=>{
     })));
     addSheet('Exchange Stock (Mela)', exchangeData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Make Year':s.makeYear||'', 'RegNo':s.regNo||'', 'Valuation':s.valuation||0,
+      'Additional Valuation':s.additionalValuation||0, 'Payable Amount':s.payableAmount ?? ((s.valuation||0)-(s.additionalValuation||0)),
       'Blue Book':s.blueBook==='yes'?'Yes':'No', 'Key':s.key==='yes'?'Yes':'No', 'File':s.file==='yes'?'Yes':'No',
       'Ownership Transfer':s.inspectionStatus||'Pending', 'Blue Book File':documents.find(d=>d.id===s.blueBookDocId)?.fileName||'',
-      'Customer':s.customerName||'', 'Contact':s.contact||'', 'Mela':s.mela||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
+      'Customer':s.customerName||'', 'Contact':s.contact||'', 'Pass Area':s.passArea||'', 'Mela':s.mela||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
       'Added Date':fmtDate(s.addedAt)
     })));
     addSheet('Exchange Stock (Showroom)', exchangeSrData.map(s=>({
       'S.N':s.sn||'', 'Model':s.model||'', 'Make Year':s.makeYear||'', 'RegNo':s.regNo||'', 'Valuation':s.valuation||0,
+      'Additional Valuation':s.additionalValuation||0, 'Payable Amount':s.payableAmount ?? ((s.valuation||0)-(s.additionalValuation||0)),
       'Blue Book':s.blueBook==='yes'?'Yes':'No', 'Key':s.key==='yes'?'Yes':'No', 'File':s.file==='yes'?'Yes':'No',
       'Ownership Transfer':s.inspectionStatus||'Pending', 'Blue Book File':documents.find(d=>d.id===s.blueBookDocId)?.fileName||'',
       'Customer':s.customerName||'', 'Contact':s.contact||'', 'Send To':s.sendTo||'', 'Status':s.status||'', 'Remarks':s.remarks||'',
@@ -18048,24 +18111,24 @@ document.getElementById('restoreBackupBtn')?.addEventListener('click', async ()=
     }), ()=>hhInvData.length < MAX_TOTAL_INVENTORY_UNITS);
 
     await importSnCollection('Exchange Stock (Mela)', 'exchange_stock', r => ({
-      model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
-      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: (r['Ownership Transfer']===undefined ? r['Inspection'] : r['Ownership Transfer'])==='Pass' ? 'Pass' : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''), mela:String(r['Mela']||''),
-      sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
+      model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0, additionalValuation:Number(r['Additional Valuation'])||0, payableAmount:(Number(r['Valuation'])||0)-(Number(r['Additional Valuation'])||0),
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: (r['Ownership Transfer']===undefined ? r['Inspection'] : r['Ownership Transfer'])==='Pass' ? 'Pass' : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''), passArea:String(r['Pass Area']||''), mela:String(r['Mela']||''),
+      sendTo:String(r['Send To']||'Bikers Phidim'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
     }), ()=>(exchangeData.length + exchangeSrData.length) < MAX_EXCHANGE_STOCK);
 
     await importSnCollection('Exchange Stock (Showroom)', 'exchange_stock_showroom', r => ({
-      model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
+      model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0, additionalValuation:Number(r['Additional Valuation'])||0, payableAmount:(Number(r['Valuation'])||0)-(Number(r['Additional Valuation'])||0),
       blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: (r['Ownership Transfer']===undefined ? r['Inspection'] : r['Ownership Transfer'])==='Pass' ? 'Pass' : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''),
-      sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
+      sendTo:String(r['Send To']||'Bikers Phidim'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
     }), ()=>(exchangeData.length + exchangeSrData.length) < MAX_EXCHANGE_STOCK);
 
     // Backward compatibility — older backup files exported before the
     // Showroom/Mela split still say plain "Exchange Stock"; treat that as
     // Mela (the original meaning) so an old backup still restores cleanly.
     await importSnCollection('Exchange Stock', 'exchange_stock', r => ({
-      model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0,
-      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: (r['Ownership Transfer']===undefined ? r['Inspection'] : r['Ownership Transfer'])==='Pass' ? 'Pass' : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''), mela:String(r['Mela']||''),
-      sendTo:String(r['Send To']||'Showroom'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
+      model:String(r['Model']||''), makeYear:String(r['Make Year']||''), regNo:String(r['RegNo']||''), valuation:Number(r['Valuation'])||0, additionalValuation:Number(r['Additional Valuation'])||0, payableAmount:(Number(r['Valuation'])||0)-(Number(r['Additional Valuation'])||0),
+      blueBook:yn(r['Blue Book']), key:yn(r['Key']), file:yn(r['File']), inspectionStatus: (r['Ownership Transfer']===undefined ? r['Inspection'] : r['Ownership Transfer'])==='Pass' ? 'Pass' : 'Pending', customerName:String(r['Customer']||''), contact:String(r['Contact']||''), passArea:String(r['Pass Area']||''), mela:String(r['Mela']||''),
+      sendTo:String(r['Send To']||'Bikers Phidim'), status:String(r['Status']||'In Stock'), remarks:String(r['Remarks']||'')
     }), ()=>(exchangeData.length + exchangeSrData.length) < MAX_EXCHANGE_STOCK);
 
     await importPlainCollection('Price List', 'bikes', r => ({
