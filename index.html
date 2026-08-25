@@ -3772,11 +3772,16 @@
       </div><!-- /exchangeFormModal -->
 
       <!-- Excel Bulk Import -->
+      <div id="exImportModal" class="form-modal-overlay" onclick="if(event.target===this) closeExchangeImportModal()">
+      <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
-        <div class="flex items-center gap-2 section-title text-2xl mb-1">
-          <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
+        <div class="flex items-center justify-between mb-1 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
+          </div>
+          <button onclick="closeExchangeImportModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
         </div>
-        <p class="text-xs text-slate-500 mb-4">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, MakeYear, RegNo, Valuation, BlueBook, Key, File, Customer, SendTo, Remarks</b> (only Model, MakeYear, RegNo, Valuation are required — rest are optional, BlueBook/Key/File accept Yes/No, SendTo defaults to Showroom). S.N fills in automatically.</p>
+        <p class="text-xs text-slate-500 mb-4 mt-3">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, MakeYear, RegNo, Valuation, BlueBook, Key, File, Customer, SendTo, Remarks</b> (only Model, MakeYear, RegNo, Valuation are required — rest are optional, BlueBook/Key/File accept Yes/No, SendTo defaults to Showroom). S.N fills in automatically.</p>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all">
             <i class="fas fa-cloud-arrow-up text-emerald-500 text-lg flex-shrink-0"></i>
@@ -3797,6 +3802,8 @@
           <div id="exImportSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
         </div>
       </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /exImportModal -->
 
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
@@ -3835,6 +3842,9 @@
           <div id="exchangeModelFilterWrap" class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
             <!-- Model pills injected dynamically — one per distinct model actually on file (Exchange models are free-text/any-brand, so a fixed dropdown wouldn't fit; pills that only show what's really there do) -->
           </div>
+          <div id="exchangeMelaFilterWrap" class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
+            <!-- Mela pills injected dynamically — which mela event each unit was taken in at -->
+          </div>
           <div class="relative ml-auto w-full sm:w-64">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input type="text" id="exchangeSearch" autocomplete="off" placeholder="Search model, reg no, customer…"
@@ -3842,6 +3852,9 @@
           </div>
           <button onclick="openMelaManager()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-store" style="color:#D98324"></i> Manage Melas
+          </button>
+          <button onclick="openExchangeImportModal()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
+            <i class="fas fa-file-excel" style="color:#059669"></i> Bulk Import
           </button>
           <button onclick="openExchangeFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Unit
@@ -4006,11 +4019,16 @@
       </div><!-- /exchangeSrFormModal -->
 
       <!-- Excel Bulk Import -->
+      <div id="exSrImportModal" class="form-modal-overlay" onclick="if(event.target===this) closeExchangeSrImportModal()">
+      <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
-        <div class="flex items-center gap-2 section-title text-2xl mb-1">
-          <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
+        <div class="flex items-center justify-between mb-1 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
+          </div>
+          <button onclick="closeExchangeSrImportModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
         </div>
-        <p class="text-xs text-slate-500 mb-4">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, MakeYear, RegNo, Valuation, BlueBook, Key, File, Customer, SendTo, Remarks</b> (only Model, MakeYear, RegNo, Valuation are required — rest are optional, BlueBook/Key/File accept Yes/No, SendTo defaults to Showroom). S.N fills in automatically.</p>
+        <p class="text-xs text-slate-500 mb-4 mt-3">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, MakeYear, RegNo, Valuation, BlueBook, Key, File, Customer, SendTo, Remarks</b> (only Model, MakeYear, RegNo, Valuation are required — rest are optional, BlueBook/Key/File accept Yes/No, SendTo defaults to Showroom). S.N fills in automatically.</p>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all">
             <i class="fas fa-cloud-arrow-up text-emerald-500 text-lg flex-shrink-0"></i>
@@ -4031,6 +4049,8 @@
           <div id="exSrImportSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
         </div>
       </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /exSrImportModal -->
 
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
@@ -4074,6 +4094,9 @@
             <input type="text" id="exchangeSrSearch" autocomplete="off" placeholder="Search model, reg no, customer…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
           </div>
+          <button onclick="openExchangeSrImportModal()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
+            <i class="fas fa-file-excel" style="color:#059669"></i> Bulk Import
+          </button>
           <button onclick="openExchangeSrFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Unit
           </button>
@@ -4229,6 +4252,40 @@
       </div><!-- /form-modal-box -->
       </div><!-- /paymentLedgerFormModal -->
 
+      <!-- Excel Bulk Import -->
+      <div id="plImportModal" class="form-modal-overlay" onclick="if(event.target===this) closePaymentLedgerImportModal()">
+      <div class="form-modal-box">
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center justify-between mb-1 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2 section-title text-2xl">
+            <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
+          </div>
+          <button onclick="closePaymentLedgerImportModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+        </div>
+        <p class="text-xs text-slate-500 mb-4 mt-3">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Date, Mela, Cash, FonePay, Cheque, Other, Remarks</b> (Date required in YYYY-MM-DD; at least one of Cash/FonePay/Cheque/Other must be more than 0). Total is calculated automatically — don't include a Total column.</p>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all">
+            <i class="fas fa-cloud-arrow-up text-emerald-500 text-lg flex-shrink-0"></i>
+            <span id="plExcelFileLabel" class="text-sm text-slate-600 font-medium truncate">Click to choose Excel / CSV file…</span>
+            <input type="file" id="plExcelFileInput" accept=".xlsx,.xls,.csv" class="hidden"/>
+          </label>
+          <button id="plDownloadTemplateBtn" class="cta-secondary whitespace-nowrap">
+            <i class="fas fa-download"></i> Sample Template
+          </button>
+          <button id="plImportExcelBtn" disabled class="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 whitespace-nowrap">
+            <i class="fas fa-upload"></i> <span id="plImportExcelBtnText">Import Rows</span>
+          </button>
+        </div>
+        <div id="plImportSummary" class="hidden mt-4 rounded-xl border border-slate-200 overflow-hidden">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-wrap">
+            <span id="plImportSummaryHead" class="text-xs font-bold text-slate-600"></span>
+          </div>
+          <div id="plImportSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
+        </div>
+      </div>
+      </div><!-- /form-modal-box -->
+      </div><!-- /plImportModal -->
+
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
@@ -4245,6 +4302,9 @@
             <input type="text" id="paymentLedgerSearch" autocomplete="off" placeholder="Search mela, remarks…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
           </div>
+          <button onclick="openPaymentLedgerImportModal()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
+            <i class="fas fa-file-excel" style="color:#059669"></i> Bulk Import
+          </button>
           <button onclick="openPaymentLedgerFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Entry
           </button>
@@ -13309,6 +13369,7 @@ let currentEditExchangeId = null;
 let exchangeStatusFilter = 'all';
 let exchangeSendToFilter = 'all';
 let exchangeModelFilter = 'all';
+let exchangeMelaFilter = 'all';
 // Shared builder for the list filter dropdowns (destinations, models, etc.)
 // Custom (not native <select>) so the OPEN menu matches the warm theme
 // instead of the browser's dark native picker.
@@ -13566,6 +13627,11 @@ window.setExchangeModelFilter = (model)=>{
   renderExchangeTable();
 };
 
+window.setExchangeMelaFilter = (mela)=>{
+  exchangeMelaFilter = mela;
+  renderExchangeTable();
+};
+
 function exSearchMatches(s,q){
   return String(s.model||'').toLowerCase().includes(q)
       || String(s.regNo||'').toLowerCase().includes(q)
@@ -13581,6 +13647,7 @@ function getFilteredExchange(){
   if(exchangeStatusFilter !== 'all') base = base.filter(s=>(s.status||'In Stock')===exchangeStatusFilter);
   if(exchangeSendToFilter !== 'all') base = base.filter(s=>(s.sendTo||'Bikers Phidim')===exchangeSendToFilter);
   if(exchangeModelFilter !== 'all') base = base.filter(s=>(s.model||'')===exchangeModelFilter);
+  if(exchangeMelaFilter !== 'all') base = base.filter(s=>(s.mela||'(No Mela)')===exchangeMelaFilter);
   if(!exchangeSearchTerm) return base;
   const q = exchangeSearchTerm.toLowerCase().trim();
   return base.filter(s=>exSearchMatches(s,q));
@@ -13630,6 +13697,19 @@ function renderExchangeTable(){
     modelWrap.className = '';
     modelWrap.innerHTML = modelKeys.length <= 1 ? '' : buildFilterSelect('setExchangeModelFilter', exchangeModelFilter,
       `All Models (${statusScoped.length})`, modelKeys.map(k=>({value:k, label:`${k} (${modelCounts[k]})`})));
+  }
+
+  // Mela dropdown — which mela event each unit was taken in at (separate
+  // question from Send To, which is where it's currently kept).
+  const melaCounts = {};
+  statusScoped.forEach(s=>{ const k = (s.mela||'').trim() || '(No Mela)'; melaCounts[k] = (melaCounts[k]||0)+1; });
+  const melaKeys = Object.keys(melaCounts).sort((a,b)=>melaCounts[b]-melaCounts[a]);
+  if(!melaKeys.includes(exchangeMelaFilter) && exchangeMelaFilter!=='all') exchangeMelaFilter = 'all';
+  const melaWrap = document.getElementById('exchangeMelaFilterWrap');
+  if(melaWrap){
+    melaWrap.className = '';
+    melaWrap.innerHTML = melaKeys.length <= 1 ? '' : buildFilterSelect('setExchangeMelaFilter', exchangeMelaFilter,
+      `All Melas (${statusScoped.length})`, melaKeys.map(k=>({value:k, label:`${k} (${melaCounts[k]})`})));
   }
   const pc = { pcExAll:total, pcExInStock:inStock, pcExSold:sold };
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
@@ -13888,6 +13968,8 @@ function populateMelaDatalist(){
 }
 
 window.openExchangeFormModal = ()=>{ populateSendToDatalist(); populateMelaDatalist(); document.getElementById('exchangeFormModal').classList.add('open'); };
+window.openExchangeImportModal = ()=>{ document.getElementById('exImportModal').classList.add('open'); };
+window.closeExchangeImportModal = ()=>{ document.getElementById('exImportModal').classList.remove('open'); };
 window.closeExchangeFormModal = ()=>{ document.getElementById('exchangeFormModal').classList.remove('open'); };
 
 function updateExPayableAmt(){
@@ -14644,6 +14726,8 @@ document.getElementById('fixExchangeSrSnBtn').addEventListener('click', async ()
 });
 
 window.openExchangeSrFormModal = ()=>{ populateSendToDatalist(); document.getElementById('exchangeSrFormModal').classList.add('open'); };
+window.openExchangeSrImportModal = ()=>{ document.getElementById('exSrImportModal').classList.add('open'); };
+window.closeExchangeSrImportModal = ()=>{ document.getElementById('exSrImportModal').classList.remove('open'); };
 window.closeExchangeSrFormModal = ()=>{ document.getElementById('exchangeSrFormModal').classList.remove('open'); };
 
 function updateExSrPayableAmt(){
@@ -15087,6 +15171,161 @@ window.exportPaymentLedgerToExcel = ()=>{
   XLSX.writeFile(wb, `payment_ledger_export_${new Date().toISOString().slice(0,10)}.xlsx`);
   toast(`Exported ${rows.length} entr${rows.length!==1?'ies':'y'}.`);
 };
+
+/* ─── Payment Ledger Bulk Import (same pattern as Exchange Stock) ─── */
+let plExcelParsedRows = [];
+
+document.getElementById('plExcelFileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const importBtn = document.getElementById('plImportExcelBtn');
+  const label = document.getElementById('plExcelFileLabel');
+  const summary = document.getElementById('plImportSummary');
+  summary.classList.add('hidden');
+  plExcelParsedRows = [];
+  importBtn.disabled = true;
+
+  if(!file){ label.textContent='Click to choose Excel / CSV file…'; return; }
+  label.textContent = file.name;
+
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const aoa = XLSX.utils.sheet_to_json(sheet, {header:1, defval:'', blankrows:false});
+      if(!aoa.length){ toast('File appears empty.','err'); return; }
+
+      const rawHeaders = aoa[0].map(h=>h.toString().trim().toLowerCase().replace(/[^a-z]/g,''));
+      function findCol(keywords){
+        for(let i=0;i<rawHeaders.length;i++){
+          if(keywords.some(kw=>rawHeaders[i].includes(kw))) return i;
+        }
+        return -1;
+      }
+      const colIdx = {
+        date:    findCol(['date']),
+        mela:    findCol(['mela']),
+        cash:    findCol(['cash']),
+        fonePay: findCol(['fonepay','phonepay','fone']),
+        cheque:  findCol(['cheque','check']),
+        other:   findCol(['other']),
+        remarks: findCol(['remarks','notes','note'])
+      };
+
+      if(colIdx.date===-1){
+        toast('Could not find a Date column in the header row.','err');
+        return;
+      }
+
+      function toIsoDate(v){
+        if(v instanceof Date) return v.toISOString().slice(0,10);
+        const s = (v||'').toString().trim();
+        if(!s) return '';
+        // Excel serial date number (rare when reading as string, but guard anyway)
+        if(/^\d+(\.\d+)?$/.test(s) && Number(s) > 20000){
+          const d = XLSX.SSF.parse_date_code(Number(s));
+          if(d) return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+        }
+        // DD/MM/YYYY or DD-MM-YYYY
+        const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if(m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+        // Already YYYY-MM-DD
+        if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        return s;
+      }
+
+      plExcelParsedRows = aoa.slice(1).map(r=>({
+        date:    colIdx.date!==-1    ? toIsoDate(r[colIdx.date])                    : '',
+        mela:    colIdx.mela!==-1    ? (r[colIdx.mela]||'').toString().trim()       : '',
+        cash:    colIdx.cash!==-1    ? Number(r[colIdx.cash])||0                    : 0,
+        fonePay: colIdx.fonePay!==-1 ? Number(r[colIdx.fonePay])||0                 : 0,
+        cheque:  colIdx.cheque!==-1  ? Number(r[colIdx.cheque])||0                  : 0,
+        other:   colIdx.other!==-1   ? Number(r[colIdx.other])||0                   : 0,
+        remarks: colIdx.remarks!==-1 ? (r[colIdx.remarks]||'').toString().trim()    : ''
+      })).filter(r=>r.date);
+
+      if(!plExcelParsedRows.length){ toast('No data rows found in file.','err'); return; }
+      importBtn.disabled = false;
+      toast(plExcelParsedRows.length+' row(s) detected. Review & click Import.');
+    }catch(err){
+      toast('Could not read file: '+err.message,'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('plDownloadTemplateBtn').addEventListener('click', ()=>{
+  const wsData = [
+    ['Date','Mela','Cash','FonePay','Cheque','Other','Remarks'],
+    ['2083-05-14','Aathrai Mela 2083 Shrawan','50000','20000','0','0','Advance for 3 bikes'],
+    ['2083-05-15','Showroom','15000','0','5000','0','']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [{wch:14},{wch:26},{wch:12},{wch:12},{wch:12},{wch:12},{wch:30}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Payment Ledger');
+  XLSX.writeFile(wb, 'payment_ledger_import_template.xlsx');
+});
+
+document.getElementById('plImportExcelBtn').addEventListener('click', async ()=>{
+  if(!plExcelParsedRows.length) return;
+  const btn = document.getElementById('plImportExcelBtn');
+  const btnText = document.getElementById('plImportExcelBtnText');
+  btn.disabled = true;
+  btnText.textContent = 'Importing…';
+
+  const results = { success:[], failed:[] };
+
+  for(const row of plExcelParsedRows){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(row.date)){
+      results.failed.push({row, reason:'Invalid or unrecognized Date'});
+      continue;
+    }
+    const melaCheck = Validate.text(row.mela, { label:'Mela', max:80 });
+    if(!melaCheck.ok){ results.failed.push({row, reason: melaCheck.error}); continue; }
+    if([row.cash,row.fonePay,row.cheque,row.other].some(v=>v<0)){
+      results.failed.push({row, reason:'Amounts cannot be negative'});
+      continue;
+    }
+    const total = row.cash+row.fonePay+row.cheque+row.other;
+    if(total<=0){ results.failed.push({row, reason:'No payment amount (Cash/FonePay/Cheque/Other all zero)'}); continue; }
+    const remarksCheck = Validate.text(row.remarks, { label:'Remarks', max:500 });
+    if(!remarksCheck.ok){ results.failed.push({row, reason: remarksCheck.error}); continue; }
+    try{
+      await addDoc(collection(db,'payment_ledger'), {
+        date: row.date, mela: melaCheck.value, cash: row.cash, fonePay: row.fonePay,
+        cheque: row.cheque, other: row.other, total, remarks: remarksCheck.value, addedAt: new Date()
+      });
+      results.success.push(row);
+    }catch(e){
+      results.failed.push({row, reason:friendlyError(e)});
+    }
+  }
+
+  const summary = document.getElementById('plImportSummary');
+  const head = document.getElementById('plImportSummaryHead');
+  const body = document.getElementById('plImportSummaryBody');
+  head.innerHTML = `<span class="text-emerald-600"><i class="fas fa-circle-check"></i> ${results.success.length} imported</span>` +
+    (results.failed.length ? ` &nbsp;·&nbsp; <span class="text-red-500"><i class="fas fa-circle-xmark"></i> ${results.failed.length} failed</span>` : '');
+  body.innerHTML = results.failed.map(f=>`
+    <div class="px-4 py-2 flex items-center justify-between gap-3">
+      <span class="text-slate-600 truncate">${escapeHtml(f.row.date || '(no date)')} — ${escapeHtml(f.row.mela || '(no mela)')}</span>
+      <span class="text-red-500 font-medium whitespace-nowrap">${f.reason}</span>
+    </div>`).join('') || `<div class="px-4 py-3 text-slate-400">All rows imported successfully.</div>`;
+  summary.classList.remove('hidden');
+
+  toast(`Import done: ${results.success.length} added, ${results.failed.length} failed`, results.failed.length ? 'err' : 'ok');
+
+  btn.disabled = true;
+  btnText.textContent = 'Import Rows';
+  plExcelParsedRows = [];
+  document.getElementById('plExcelFileInput').value = '';
+  document.getElementById('plExcelFileLabel').textContent = 'Click to choose Excel / CSV file…';
+});
+
+window.openPaymentLedgerImportModal = ()=>{ document.getElementById('plImportModal').classList.add('open'); };
+window.closePaymentLedgerImportModal = ()=>{ document.getElementById('plImportModal').classList.remove('open'); };
 
 
 /* ─── Exchange Stock Bulk Import (same pattern as Inventory/HH Inventory) ─── */
