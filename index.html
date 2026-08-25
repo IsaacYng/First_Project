@@ -2200,8 +2200,10 @@
      control that would change something is removed rather than left to
      fail on tap. The JS guards (blockIfReconditionOnly / _deleteEntry)
      still run underneath — this is the visual half of the same rule, not
-     the security boundary on its own. Exchange Stock and Blue Book files
-     are deliberately NOT in this list: those they fully control. */
+     the security boundary on its own. Recondition Stock is deliberately
+     NOT in this list: that they fully control. Mela + Showroom Exchange
+     are view-only for a Recondition ID, so their write controls are
+     hidden here too. */
   body.role-recondition #secPrice .kebab-btn,
   body.role-recondition #secPrice .cta-primary,
   body.role-recondition #secPrice button[onclick*="openCategoryModal"],
@@ -2215,7 +2217,17 @@
   body.role-recondition #secStorage #restoreBackupCard,
   body.role-recondition #secTrash button[onclick*="emptyTrash"],
   body.role-recondition #secTrash button[onclick*="permanentlyDelete"],
-  body.role-recondition #secTrash button[onclick*="restoreFromTrash"],
+  body.role-recondition #secExchange .kebab-btn,
+  body.role-recondition #secExchange .cta-primary,
+  body.role-recondition #secExchange button[onclick*="openExchangeFormModal"],
+  body.role-recondition #secExchange #exImportExcelBtn,
+  body.role-recondition #secExchange #exDownloadTemplateBtn,
+  body.role-recondition #secExchange #fixExchangeSnBtn,
+  body.role-recondition #secExchangeSr .kebab-btn,
+  body.role-recondition #secExchangeSr .cta-primary,
+  body.role-recondition #secExchangeSr button[onclick*="openExchangeSrFormModal"],
+  body.role-recondition #secExchangeSr #exSrImportExcelBtn,
+  body.role-recondition #secExchangeSr #exSrDownloadTemplateBtn,
   body.role-recondition #secDocs .cta-primary,
   body.role-recondition #secDocs button[onclick*="uploadDocument"],
   body.role-recondition #priceBulkImportCard{
@@ -6786,6 +6798,12 @@ window._toggleKebab = (btn, type, id) => {
   } else if(type === 'exchange_stock'){
     const s = exchangeData.find(x=>x.id===id);
     const cur = s?.status || 'In Stock';
+    if(currentUserRole === 'recondition'){
+      openKebabMenuFor(btn, [
+        { label:'View Only — Recondition IDs manage their own Recondition Stock', icon:'fa-eye', onClick:()=>{} }
+      ]);
+      return;
+    }
     const statusAction = cur === 'Sold'
       ? [{ label:'Mark In Stock', icon:'fa-rotate-left', onClick:()=>window._setExchangeStatus(id, 'In Stock') }]
       : [{ label:'Mark Sold', icon:'fa-tag', onClick:()=>window._setExchangeStatus(id, 'Sold') }];
@@ -6798,6 +6816,12 @@ window._toggleKebab = (btn, type, id) => {
   } else if(type === 'exchange_stock_showroom'){
     const s = exchangeSrData.find(x=>x.id===id);
     const cur = s?.status || 'In Stock';
+    if(currentUserRole === 'recondition'){
+      openKebabMenuFor(btn, [
+        { label:'View Only — Recondition IDs manage their own Recondition Stock', icon:'fa-eye', onClick:()=>{} }
+      ]);
+      return;
+    }
     const statusAction = cur === 'Sold'
       ? [{ label:'Mark In Stock', icon:'fa-rotate-left', onClick:()=>window._setExchangeSrStatus(id, 'In Stock') }]
       : [{ label:'Mark Sold', icon:'fa-tag', onClick:()=>window._setExchangeSrStatus(id, 'Sold') }];
@@ -7425,11 +7449,12 @@ onAuthStateChanged(auth, async (user) => {
     document.body.classList.add('app-active');
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     await loadProfile(user.uid);
-    // A Recondition ID's default landing is Exchange Stock, not Dashboard
-    // — the Dashboard surfaces dealership-wide numbers that aren't theirs
-    // to see, and switchSec's own guard would just bounce them back here
-    // anyway the moment anything tried to render on the wrong page.
-    if(currentUserRole === 'recondition') switchSec('exchange');
+    // A Recondition ID's default landing is their own Recondition Stock,
+    // not Dashboard — the Dashboard surfaces dealership-wide numbers that
+    // aren't theirs to see, and switchSec's own guard would just bounce
+    // them back here anyway the moment anything tried to render on the
+    // wrong page.
+    if(currentUserRole === 'recondition') switchSec('reconditionStock');
     loadMasterPriceList();
     loadLiveStock();
     loadHHInventory();
@@ -13693,12 +13718,16 @@ async function bulkTransferExchange(fromColl, toColl, dataArr, idSet, toLabel, c
     clearSel();
   }catch(e){ toast('Transfer failed: '+friendlyError(e),'err'); }
 }
-window.bulkTransferExToShowroom = ()=>
+window.bulkTransferExToShowroom = ()=>{
+  if(blockIfReconditionOnly()) return;
   bulkTransferExchange('exchange_stock','exchange_stock_showroom', exchangeData, selectedExchangeIds, 'Showroom',
     ()=>{ selectedExchangeIds.clear(); setExchangeSelectMode(false); });
-window.bulkTransferExSrToMela = ()=>
+};
+window.bulkTransferExSrToMela = ()=>{
+  if(blockIfReconditionOnly()) return;
   bulkTransferExchange('exchange_stock_showroom','exchange_stock', exchangeSrData, selectedExchangeSrIds, 'Mela',
     ()=>{ selectedExchangeSrIds.clear(); setExchangeSrSelectMode(false); });
+};
 
 function exportExchangeUnitsToExcel(units, sheetName, filePrefix){
   if(typeof XLSX === 'undefined'){ toast('Excel library still loading — try again.','err'); return; }
@@ -13721,6 +13750,7 @@ window.exportSelectedExSr = ()=>
   exportExchangeUnitsToExcel([...selectedExchangeSrIds].map(id=>exchangeSrData.find(x=>x.id===id)).filter(Boolean), 'Showroom Exchange', 'showroom_exchange_selected');
 
 window.deleteSelectedExchangeUnits = async ()=>{
+  if(blockIfReconditionOnly()) return;
   if(!selectedExchangeIds.size) return;
   const ids = [...selectedExchangeIds];
   const proceed = await showDangerousConfirm({
@@ -13752,6 +13782,7 @@ window.deleteSelectedExchangeUnits = async ()=>{
 
 
 document.getElementById('fixExchangeSnBtn').addEventListener('click', async ()=>{
+  if(blockIfReconditionOnly()) return;
   if(currentUserRole !== 'owner'){ toast('Only a Master ID can renumber Exchange Stock.','err'); return; }
   if(!exchangeData.length){ toast('No exchange stock to renumber.','warn'); return; }
   const ok = await showConfirm({
@@ -13815,7 +13846,7 @@ function populateMelaDatalist(){
   if(dl) dl.innerHTML = optionsHtml;
 }
 
-window.openExchangeFormModal = ()=>{ populateSendToDatalist(); populateMelaDatalist(); document.getElementById('exchangeFormModal').classList.add('open'); };
+window.openExchangeFormModal = ()=>{ if(blockIfReconditionOnly()) return; populateSendToDatalist(); populateMelaDatalist(); document.getElementById('exchangeFormModal').classList.add('open'); };
 window.closeExchangeFormModal = ()=>{ document.getElementById('exchangeFormModal').classList.remove('open'); };
 
 function updateExPayableAmt(){
@@ -13848,6 +13879,7 @@ window.cancelExchangeEdit = ()=>{
 };
 
 window._editExchange = (id)=>{
+  if(blockIfReconditionOnly()) return;
   const s = exchangeData.find(x=>x.id===id); if(!s) return;
   document.getElementById('exModel').value = s.model||'';
   document.getElementById('exMakeYear').value = s.makeYear||'';
@@ -13893,6 +13925,7 @@ window._editExchange = (id)=>{
 };
 
 window._setExchangeStatus = async (id, status) => {
+  if(blockIfReconditionOnly()) return;
   const s = exchangeData.find(x=>x.id===id);
   const modelLabel = s ? escapeHtml(s.model||'this unit') : 'this unit';
   const proceed = await showConfirm({
@@ -13911,6 +13944,7 @@ window._setExchangeStatus = async (id, status) => {
 };
 
 document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
+  if(blockIfReconditionOnly()) return;
   if(!currentEditExchangeId && (await getAccurateCombinedExchangeCount(true)) >= MAX_EXCHANGE_STOCK){
     toast(`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached (Mela + Showroom combined).`,'err');
     showLimitExceededModal('Exchange Stock Limit Reached', `Exchange Stock (Mela + Showroom combined) has reached the ${MAX_EXCHANGE_STOCK} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
@@ -14505,6 +14539,7 @@ window.toggleSelectAllExchangeSr = (checked)=>{
 };
 
 window.deleteSelectedExchangeSrUnits = async ()=>{
+  if(blockIfReconditionOnly()) return;
   if(!selectedExchangeSrIds.size) return;
   const ids = [...selectedExchangeSrIds];
   const proceed = await showDangerousConfirm({
@@ -14570,7 +14605,7 @@ document.getElementById('fixExchangeSrSnBtn').addEventListener('click', async ()
   }
 });
 
-window.openExchangeSrFormModal = ()=>{ populateSendToDatalist(); document.getElementById('exchangeSrFormModal').classList.add('open'); };
+window.openExchangeSrFormModal = ()=>{ if(blockIfReconditionOnly()) return; populateSendToDatalist(); document.getElementById('exchangeSrFormModal').classList.add('open'); };
 window.closeExchangeSrFormModal = ()=>{ document.getElementById('exchangeSrFormModal').classList.remove('open'); };
 
 function updateExSrPayableAmt(){
@@ -14603,6 +14638,7 @@ window.cancelExchangeSrEdit = ()=>{
 };
 
 window._editExchangeSr = (id)=>{
+  if(blockIfReconditionOnly()) return;
   const s = exchangeSrData.find(x=>x.id===id); if(!s) return;
   document.getElementById('exSrModel').value = s.model||'';
   document.getElementById('exSrMakeYear').value = s.makeYear||'';
@@ -14646,6 +14682,7 @@ window._editExchangeSr = (id)=>{
 };
 
 window._setExchangeSrStatus = async (id, status) => {
+  if(blockIfReconditionOnly()) return;
   const s = exchangeSrData.find(x=>x.id===id);
   const modelLabel = s ? escapeHtml(s.model||'this unit') : 'this unit';
   const proceed = await showConfirm({
@@ -14664,6 +14701,7 @@ window._setExchangeSrStatus = async (id, status) => {
 };
 
 document.getElementById('saveExchangeSrBtn').addEventListener('click', async ()=>{
+  if(blockIfReconditionOnly()) return;
   if(!currentEditExchangeSrId && (await getAccurateCombinedExchangeCount(true)) >= MAX_EXCHANGE_STOCK){
     toast(`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached (Mela + Showroom combined).`,'err');
     showLimitExceededModal('Exchange Stock Limit Reached', `Exchange Stock (Mela + Showroom combined) has reached the ${MAX_EXCHANGE_STOCK} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
@@ -18829,7 +18867,7 @@ async function trashLinkedBlueBook(docId){
 
 function blockIfReconditionOnly(){
   if(currentUserRole === 'recondition'){
-    toast('Recondition ID can view this, but only Exchange Stock can be edited.','err');
+    toast('Recondition ID can view this, but only Recondition Stock can be edited.','err');
     return true;
   }
   return false;
@@ -18837,13 +18875,13 @@ function blockIfReconditionOnly(){
 
 window._deleteEntry=async(col,id)=>{
   if(currentUserRole === 'recondition'){
-    const RECONDITION_ALLOWED_COLLECTIONS = ['exchange_stock','exchange_stock_showroom'];
-    // Blue Book files belong to the Exchange units they're attached to, so
-    // a Recondition ID manages those too — but only Blue Books, never the
-    // rest of the Document Vault.
+    const RECONDITION_ALLOWED_COLLECTIONS = ['recondition_stock'];
+    // Blue Book files belong to the Recondition Stock units they're
+    // attached to, so a Recondition ID manages those too — but only Blue
+    // Books, never the rest of the Document Vault.
     const isOwnBlueBook = col === 'documents' && documents.find(d=>d.id===id)?.category === 'Blue Book';
     if(!RECONDITION_ALLOWED_COLLECTIONS.includes(col) && !isOwnBlueBook){
-      toast('Recondition ID can only change Exchange Stock and Blue Book files — everything else is view-only.','err');
+      toast('Recondition ID can only change Recondition Stock and Blue Book files — everything else is view-only.','err');
       return;
     }
   }
@@ -19114,8 +19152,8 @@ function renderTrashTable(){
 window.restoreFromTrash = async (trashId)=>{
   const t = trashData.find(x=>x.id===trashId);
   if(!t) return;
-  if(currentUserRole === 'recondition' && t.originalCollection!=='exchange_stock' && t.originalCollection!=='exchange_stock_showroom'){
-    toast('Recondition ID can only restore Exchange Stock items.','err');
+  if(currentUserRole === 'recondition' && t.originalCollection!=='recondition_stock'){
+    toast('Recondition ID can only restore Recondition Stock items.','err');
     return;
   }
   const label = TRASH_LABELS[t.originalCollection] || t.originalCollection;
@@ -20218,13 +20256,13 @@ function showNavLoader(){
 }
 
 window.switchSec=(sec)=>{
-  // A Recondition ID exists to work with old-bike trade-ins and their
-  // Blue Books specifically — sending them anywhere else in the app
-  // exposes business data (pricing, other customers' records, dealership
-  // finances) that isn't their job to see, so every section but the two
-  // Exchange ones redirects back here regardless of how the navigation
-  // was triggered.
-  const RECON_ALLOWED_SECTIONS = ['exchange','exchangeSr','docs','storage','price','events','trash','sheetTool'];
+  // A Recondition ID exists to manage their own Recondition Stock, and to
+  // view (not edit) Exchange Stock and Blue Books — sending them anywhere
+  // else in the app exposes business data (pricing, other customers'
+  // records, dealership finances) that isn't their job to see, so every
+  // section but the allowed ones redirects back here regardless of how
+  // the navigation was triggered.
+  const RECON_ALLOWED_SECTIONS = ['reconditionStock','exchange','exchangeSr','docs','storage','price','events','trash','sheetTool'];
   if(currentUserRole === 'recondition' && !RECON_ALLOWED_SECTIONS.includes(sec)){
     toast("Recondition ID doesn't have access to that section.",'err');
     sec = 'exchange';
