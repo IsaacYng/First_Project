@@ -198,7 +198,7 @@
        reveals it) should sit as a flex row like every other cell, not the
        desktop table-cell display used above 640px. !important guarantees
        this wins over the ID-scoped desktop rule at this breakpoint. */
-    #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col, #exchangeTable.select-mode .sel-col, #exchangeSrTable.select-mode .sel-col { display: flex !important; justify-content: flex-end !important; }
+    #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col, #exchangeTable.select-mode .sel-col, #exchangeSrTable.select-mode .sel-col, #reconStockTable.select-mode .sel-col { display: flex !important; justify-content: flex-end !important; }
   }
 
   /* ═══════════ INDEX.HTML DESIGN SYSTEM — CTAs, badges, cards ═══════════ */
@@ -371,16 +371,16 @@
   /* Select/checkbox column stays hidden until "Select" is tapped from a
      row's action menu (or the bulk bar is otherwise engaged) — keeps the
      table clean day-to-day instead of always showing tick-boxes. */
-  #stockTable .sel-col, #hhInvTable .sel-col, #chalanTable .sel-col, #exchangeTable .sel-col, #exchangeSrTable .sel-col{ display:none; }
-  #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col, #exchangeTable.select-mode .sel-col, #exchangeSrTable.select-mode .sel-col{ display:table-cell; }
+  #stockTable .sel-col, #hhInvTable .sel-col, #chalanTable .sel-col, #exchangeTable .sel-col, #exchangeSrTable .sel-col, #reconStockTable .sel-col{ display:none; }
+  #stockTable.select-mode .sel-col, #hhInvTable.select-mode .sel-col, #chalanTable.select-mode .sel-col, #exchangeTable.select-mode .sel-col, #exchangeSrTable.select-mode .sel-col, #reconStockTable.select-mode .sel-col{ display:table-cell; }
   /* Selected-row glow — Bajaj blue tint so a ticked unit is obvious at a
      glance, not just a tiny checkmark easy to lose track of. */
-  #stockTable.select-mode tbody tr.row-selected, #hhInvTable.select-mode tbody tr.row-selected, #chalanTable.select-mode tbody tr.row-selected, #exchangeTable.select-mode tbody tr.row-selected, #exchangeSrTable.select-mode tbody tr.row-selected {
+  #stockTable.select-mode tbody tr.row-selected, #hhInvTable.select-mode tbody tr.row-selected, #chalanTable.select-mode tbody tr.row-selected, #exchangeTable.select-mode tbody tr.row-selected, #exchangeSrTable.select-mode tbody tr.row-selected, #reconStockTable.select-mode tbody tr.row-selected {
     background: #F3E9E1 !important;
     box-shadow: inset 3px 0 0 #5A4740;
     transition: background .15s ease;
   }
-  #stockTable.select-mode tbody tr, #hhInvTable.select-mode tbody tr, #chalanTable.select-mode tbody tr, #exchangeTable.select-mode tbody tr, #exchangeSrTable.select-mode tbody tr { transition: background .15s ease; }
+  #stockTable.select-mode tbody tr, #hhInvTable.select-mode tbody tr, #chalanTable.select-mode tbody tr, #exchangeTable.select-mode tbody tr, #exchangeSrTable.select-mode tbody tr, #reconStockTable.select-mode tbody tr { transition: background .15s ease; }
   .kebab-menu{
     position:fixed; z-index:550; min-width:150px; background:#fff; border-radius:12px;
     border:1px solid #E2E8F0; box-shadow:0 10px 30px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.06);
@@ -2195,44 +2195,6 @@
   #secFinanceTool .intro-speed-lines span{opacity:1 !important;animation:none !important;}
   #secFinanceTool .results-panel::before{opacity:1 !important;animation:none !important;}
 
-  /* ── Recondition ID: view-only sections ──────────────────────────────
-     These pages are visible to a Recondition ID for reference, but every
-     control that would change something is removed rather than left to
-     fail on tap. The JS guards (blockIfReconditionOnly / _deleteEntry)
-     still run underneath — this is the visual half of the same rule, not
-     the security boundary on its own. Recondition Stock is deliberately
-     NOT in this list: that they fully control. Mela + Showroom Exchange
-     are view-only for a Recondition ID, so their write controls are
-     hidden here too. */
-  body.role-recondition #secPrice .kebab-btn,
-  body.role-recondition #secPrice .cta-primary,
-  body.role-recondition #secPrice button[onclick*="openCategoryModal"],
-  body.role-recondition #secFin .kebab-btn,
-  body.role-recondition #secFin .cta-primary,
-  body.role-recondition #secEvents .kebab-btn,
-  body.role-recondition #secEvents .cta-primary,
-  body.role-recondition #secStorage .cta-primary,
-  body.role-recondition #secStorage button[onclick*="openSystemLimits"],
-  body.role-recondition #secStorage #fullBackupBtn,
-  body.role-recondition #secStorage #restoreBackupCard,
-  body.role-recondition #secTrash button[onclick*="emptyTrash"],
-  body.role-recondition #secTrash button[onclick*="permanentlyDelete"],
-  body.role-recondition #secExchange .kebab-btn,
-  body.role-recondition #secExchange .cta-primary,
-  body.role-recondition #secExchange button[onclick*="openExchangeFormModal"],
-  body.role-recondition #secExchange #exImportExcelBtn,
-  body.role-recondition #secExchange #exDownloadTemplateBtn,
-  body.role-recondition #secExchange #fixExchangeSnBtn,
-  body.role-recondition #secExchangeSr .kebab-btn,
-  body.role-recondition #secExchangeSr .cta-primary,
-  body.role-recondition #secExchangeSr button[onclick*="openExchangeSrFormModal"],
-  body.role-recondition #secExchangeSr #exSrImportExcelBtn,
-  body.role-recondition #secExchangeSr #exSrDownloadTemplateBtn,
-  body.role-recondition #secDocs .cta-primary,
-  body.role-recondition #secDocs button[onclick*="uploadDocument"],
-  body.role-recondition #priceBulkImportCard{
-    display: none !important;
-  }
   .ex-status-tab:hover{ color:#1F2430; }
   .ex-status-tab.active{ background:#fff; color:#5A4740; box-shadow:0 1px 3px rgba(15,23,42,.1); }
   .ex-status-tab.active .pill-count{ background:#5A4740; color:#fff; }
@@ -2741,8 +2703,8 @@
         <button id="navExchangeSr" onclick="switchSec('exchangeSr');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Showroom Exchange">
           <i class="fas fa-shop"></i> Showroom Exchange
         </button>
-        <button id="navReconStock" onclick="switchSec('reconditionStock');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Recondition Stock">
-          <i class="fas fa-screwdriver-wrench"></i> Recondition Stock
+        <button id="navPaymentLedger" onclick="switchSec('paymentLedger');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Payment Ledger">
+          <i class="fas fa-money-bill-wave"></i> Payment Ledger
         </button>
         <button id="navCustomers" onclick="switchSec('customers');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Customers">
           <i class="fas fa-address-card"></i> Customers
@@ -4143,193 +4105,173 @@
         </div>
       </div>
     </div>
-    <div class="sec-panel" id="secReconditionStock">
+
+    <!-- ═══ PAYMENT LEDGER — mela/date-wise cash received, separate from unit-level exchange records ═══ -->
+    <div class="sec-panel" id="secPaymentLedger">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
         <div>
-          <div class="section-label">Stock Management ·</div>
-          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Recondition <span class="text-amber-500">Stock</span></div>
+          <div class="section-label">Finance ·</div>
+          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Payment <span class="text-amber-500">Ledger</span></div>
         </div>
-        <div class="flex items-center gap-2 flex-wrap flex-shrink-0">
-          <span id="reconStockTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500">0 units total</span>
+        <span id="paymentLedgerTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500">0 entries</span>
+      </div>
+      <p class="text-xs text-slate-400 -mt-4 mb-5"><i class="fas fa-circle-info mr-1"></i>Cash actually received, date-wise and mela-wise — one entry can cover several bikes sold that day at that mela. Separate from Exchange Stock's own Valuation/Payable numbers, so this reconciles against those rather than duplicating them.</p>
+
+      <!-- Mini Dashboard -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+        <div class="yng-card-shell p-4">
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Valuation</div>
+          <div id="plTotalValuation" class="text-xl font-extrabold text-slate-800">Rs. 0</div>
+          <div class="text-[10px] text-slate-400 mt-0.5">Mela Exchange, all units</div>
+        </div>
+        <div class="yng-card-shell p-4">
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Payable</div>
+          <div id="plTotalPayable" class="text-xl font-extrabold text-slate-800">Rs. 0</div>
+          <div class="text-[10px] text-slate-400 mt-0.5">After Additional Valuation</div>
+        </div>
+        <div class="yng-card-shell p-4">
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Collected</div>
+          <div id="plTotalCollected" class="text-xl font-extrabold text-emerald-600">Rs. 0</div>
+          <div class="text-[10px] text-slate-400 mt-0.5">From this ledger</div>
+        </div>
+        <div class="yng-card-shell p-4">
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Payable − Collected</div>
+          <div id="plOutstanding" class="text-xl font-extrabold text-amber-600">Rs. 0</div>
+          <div class="text-[10px] text-slate-400 mt-0.5">Still to reconcile</div>
         </div>
       </div>
-      <p class="text-xs text-slate-400 -mt-4 mb-5"><i class="fas fa-circle-info mr-1"></i>Bikes a Recondition ID buys directly (not a mela or showroom trade-in) — its own separate stock, managed only by Recondition IDs and Master.</p>
 
-      <!-- Add Unit (modal) -->
-      <div id="reconStockFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelReconStockEdit()">
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center gap-2 section-title text-xl mb-1">
+          <i class="fas fa-tent text-amber-500 text-lg"></i> By Mela
+        </div>
+        <p class="text-xs text-slate-500 mb-3">Every Mela that has either an Exchange unit or a ledger entry — a big gap between Payable and Collected for one mela is worth checking before it's forgotten.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-sm" id="plByMelaTable">
+            <thead>
+              <tr class="bg-slate-50">
+                <th class="px-3 py-2 text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Mela</th>
+                <th class="px-3 py-2 text-right text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Valuation</th>
+                <th class="px-3 py-2 text-right text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Payable</th>
+                <th class="px-3 py-2 text-right text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Collected</th>
+                <th class="px-3 py-2 text-right text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Difference</th>
+              </tr>
+            </thead>
+            <tbody id="plByMelaBody">
+              <tr><td colspan="5" class="px-3 py-6 text-center text-slate-400 text-xs">No data yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add Entry (modal) -->
+      <div id="paymentLedgerFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelPaymentLedgerEdit()">
       <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
         <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100">
           <div class="flex items-center gap-2 section-title text-2xl">
             <i class="fas fa-plus-circle text-amber-500 text-lg"></i>
-            <span id="reconStockFormTitle">Add Recondition Stock Unit</span>
+            <span id="paymentLedgerFormTitle">Add Payment Entry</span>
           </div>
-          <button onclick="cancelReconStockEdit()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+          <button onclick="cancelPaymentLedgerEdit()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-1.5">
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Model Name <span class="text-red-400">*</span></label>
-            <input type="text" id="reconModel" autocomplete="off" placeholder="e.g. Honda Shine 125 (any brand)"
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Date <span class="text-red-400">*</span></label>
+            <input type="date" id="plDate" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full"/>
+          </div>
+          <div class="flex flex-col gap-1.5 sm:col-span-2">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Mela</label>
+            <input type="text" id="plMela" list="plMelaOptions" placeholder="e.g. Aathrai Mela 2083 Shrawan, or Showroom"
+              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
+            <datalist id="plMelaOptions"></datalist>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Cash</label>
+            <input type="number" id="plCash" min="0" placeholder="0" oninput="updatePlTotal()"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Make Year <span class="text-red-400">*</span></label>
-            <input type="text" id="reconMakeYear" placeholder="e.g. 2019 / 2076"
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Fone Pay</label>
+            <input type="number" id="plFonePay" min="0" placeholder="0" oninput="updatePlTotal()"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Registration No <span class="text-red-400">*</span></label>
-            <input type="text" id="reconRegNo" placeholder="Koshi Pra-02-061Pa0675"
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Cheque</label>
+            <input type="number" id="plCheque" min="0" placeholder="0" oninput="updatePlTotal()"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Purchase Price (NPR) <span class="text-red-400">*</span></label>
-            <input type="number" id="reconValuation" min="0" placeholder="e.g. 85000" oninput="updateReconPayableAmt()"
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Other</label>
+            <input type="number" id="plOther" min="0" placeholder="0" oninput="updatePlTotal()"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Less Additional Valuation</label>
-            <input type="number" id="reconAdditionalValuation" min="0" placeholder="e.g. 5000" oninput="updateReconPayableAmt()"
-              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Payable Amount</label>
-            <div id="reconPayableAmtDisplay" class="bg-emerald-50 border-2 border-emerald-200 rounded-lg px-3 py-2 text-sm font-extrabold text-emerald-700">Rs. 0</div>
-            <p class="text-[10px] text-slate-400">Purchase Price − Additional Valuation. Calculated, not typed.</p>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Seller Name</label>
-            <input type="text" id="reconCustomerName" placeholder="e.g. Santosh Gahatraj Kami"
-              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Contact No.</label>
-            <input type="text" id="reconContact" placeholder="e.g. 98XXXXXXXX" inputmode="tel"
-              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Blue Book</label>
-            <select id="reconBlueBook" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
-              <option value="yes">Yes — received</option>
-              <option value="no">No — missing</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Key</label>
-            <select id="reconKey" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
-              <option value="yes">Yes — received</option>
-              <option value="no">No — missing</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">File</label>
-            <select id="reconFile" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
-              <option value="yes">Yes — received</option>
-              <option value="no">No — missing</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ownership Transfer</label>
-            <select id="reconInspection" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 transition-all w-full">
-              <option value="Pending">Pending</option>
-              <option value="Pass">Pass</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5 sm:col-span-3">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Blue Book File (PDF or Image)</label>
-            <div class="flex items-center gap-3 border-2 border-dashed border-slate-200 rounded-lg px-3 py-2.5">
-              <label class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 cursor-pointer hover:bg-slate-100 transition-all flex-shrink-0">
-                <i class="fas fa-file-arrow-up text-slate-400"></i> Choose File
-                <input type="file" id="reconBlueBookFile" accept=".pdf,image/*" class="hidden"/>
-              </label>
-              <span id="reconBlueBookFileLabel" class="text-xs text-slate-400 truncate flex-1">No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Seller Name.</span>
-              <a id="reconBlueBookFileExistingLink" href="#" target="_blank" class="hidden text-xs font-bold text-bajaj-blue hover:underline flex-shrink-0">View current</a>
-            </div>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Send To</label>
-            <input type="text" id="reconSendTo" list="reconSendToOptions" placeholder="e.g. Showroom, Workshop…"
-              class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
-            <datalist id="reconSendToOptions"></datalist>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total</label>
+            <div id="plTotalDisplay" class="bg-emerald-50 border-2 border-emerald-200 rounded-lg px-3 py-2 text-sm font-extrabold text-emerald-700">Rs. 0</div>
+            <p class="text-[10px] text-slate-400">Cash + Fone Pay + Cheque + Other. Calculated, not typed.</p>
           </div>
           <div class="flex flex-col gap-1.5 sm:col-span-3">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Remarks</label>
-            <textarea id="reconRemarks" rows="2" placeholder="e.g. Minor scratch on tank…"
+            <textarea id="plRemarks" rows="2" placeholder="e.g. Advance for 3 bikes, balance next week…"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full resize-none"></textarea>
           </div>
         </div>
-        <p class="text-[11px] text-slate-400 -mt-2 mb-4">New units are added as <b>In Stock</b> by default. Mark <b>Sold</b> from the row menu once it's resold — sold units auto-clear from here 6 months after the sale date.</p>
-        <div class="flex gap-2 flex-wrap">
-          <button id="saveReconStockBtn" class="cta-primary">
-            <i class="fas fa-floppy-disk"></i> Save Unit
+        <div class="flex gap-2 flex-wrap mt-2">
+          <button id="savePaymentLedgerBtn" class="cta-primary">
+            <i class="fas fa-floppy-disk"></i> Save Entry
           </button>
-          <button id="cancelReconStockBtn" onclick="cancelReconStockEdit()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
+          <button id="cancelPaymentLedgerBtn" onclick="cancelPaymentLedgerEdit()" class="hidden items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:border-red-300 hover:text-red-500 transition-all">
             <i class="fas fa-xmark"></i> Cancel Edit
           </button>
         </div>
       </div>
       </div><!-- /form-modal-box -->
-      </div><!-- /reconStockFormModal -->
+      </div><!-- /paymentLedgerFormModal -->
 
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
-          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-screwdriver-wrench text-amber-500"></i> Recondition Stock Register</div>
-          <span id="reconStockCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
-          <button onclick="exportReconStockToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-money-bill-wave text-amber-500"></i> Entries</div>
+          <span id="paymentLedgerCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 entries</span>
+          <button onclick="exportPaymentLedgerToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
             <i class="fas fa-file-excel text-[11px]"></i> Export
           </button>
-          <button id="deleteSelectedReconBtn" onclick="deleteSelectedReconStockUnits()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all">
-            <i class="fas fa-trash-can text-[11px]"></i> Delete Selected (<span id="deleteSelectedReconCount">0</span>)
-          </button>
-          <button id="cancelSelectReconBtn" onclick="setReconStockSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
-            <i class="fas fa-xmark text-[11px]"></i> Cancel Select
-          </button>
-          <span id="selectModeHintRecon" class="hidden items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-bajaj-blue">
-            <i class="fas fa-hand-pointer text-[10px]"></i> Select mode — tap rows to add
-          </span>
-          <div class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
-            <button class="recon-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active" data-status="all" onclick="setReconStockStatusFilter('all')">All <span class="pill-count" id="pcReconAll">0</span></button>
-            <button class="recon-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="In Stock" onclick="setReconStockStatusFilter('In Stock')">In Stock <span class="pill-count" id="pcReconInStock">0</span></button>
-            <button class="recon-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all" data-status="Sold" onclick="setReconStockStatusFilter('Sold')">Sold <span class="pill-count" id="pcReconSold">0</span></button>
+          <div id="paymentLedgerMelaFilterWrap" class="filter-scroll bg-slate-50 border border-slate-200 rounded-full p-1 max-w-full">
+            <!-- Mela filter pills injected dynamically -->
           </div>
           <div class="relative ml-auto w-full sm:w-64">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-            <input type="text" id="reconStockSearch" autocomplete="off" placeholder="Search model, reg no, seller…"
+            <input type="text" id="paymentLedgerSearch" autocomplete="off" placeholder="Search mela, remarks…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
           </div>
-          <button onclick="openReconStockFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
-            <i class="fas fa-plus"></i> Add Unit
+          <button onclick="openPaymentLedgerFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+            <i class="fas fa-plus"></i> Add Entry
           </button>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse responsive-table" id="reconStockTable">
+          <table class="w-full border-collapse responsive-table" id="paymentLedgerTable">
             <thead>
               <tr class="bg-slate-50">
-                <th class="px-3 py-3 text-left border-b border-slate-200 w-8 sel-col">
-                  <input type="checkbox" id="reconSelectAll" onchange="toggleSelectAllReconStock(this.checked)" class="w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer">
-                </th>
-                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">S.N</th>
-                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Model</th>
-                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Year</th>
-                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Reg. No</th>
-                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Purchase Price</th>
-                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Documents</th>
-                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Send To</th>
-                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Status</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Date</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Mela</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Cash</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Fone Pay</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Cheque</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Other</th>
+                <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Total</th>
                 <th class="px-4 py-3 text-left text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">Actions</th>
               </tr>
             </thead>
-            <tbody id="reconStockTableBody">
-              <tr><td colspan="10" class="px-4 py-12 text-center text-slate-400">
-                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading recondition stock…
+            <tbody id="paymentLedgerTableBody">
+              <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">
+                <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading payment ledger…
               </td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
-
 
     <!-- ═══ CUSTOMERS (computed from Inventory/HH/Chalan/Exchange — no separate collection) ═══ -->
     <div class="sec-panel" id="secCustomers">
@@ -6407,7 +6349,6 @@
           <input type="password" id="newStaffPass" placeholder="Temporary password (min 6 characters)" autocomplete="new-password" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all"/>
           <select id="newStaffRole" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-bajaj-blue transition-all">
             <option value="staff">Normal ID — full access except Master-only tools</option>
-            <option value="recondition">Recondition ID — Exchange Stock &amp; Blue Book only</option>
           </select>
           <div class="flex items-center gap-2">
             <label class="text-xs font-semibold text-slate-500 flex-shrink-0"><i class="fas fa-mobile-screen text-slate-400 mr-1"></i> Devices at once</label>
@@ -6988,12 +6929,6 @@ window._toggleKebab = (btn, type, id) => {
   } else if(type === 'exchange_stock'){
     const s = exchangeData.find(x=>x.id===id);
     const cur = s?.status || 'In Stock';
-    if(currentUserRole === 'recondition'){
-      openKebabMenuFor(btn, [
-        { label:'View Only — Recondition IDs manage their own Recondition Stock', icon:'fa-eye', onClick:()=>{} }
-      ]);
-      return;
-    }
     const statusAction = cur === 'Sold'
       ? [{ label:'Mark In Stock', icon:'fa-rotate-left', onClick:()=>window._setExchangeStatus(id, 'In Stock') }]
       : [{ label:'Mark Sold', icon:'fa-tag', onClick:()=>window._setExchangeStatus(id, 'Sold') }];
@@ -7006,12 +6941,6 @@ window._toggleKebab = (btn, type, id) => {
   } else if(type === 'exchange_stock_showroom'){
     const s = exchangeSrData.find(x=>x.id===id);
     const cur = s?.status || 'In Stock';
-    if(currentUserRole === 'recondition'){
-      openKebabMenuFor(btn, [
-        { label:'View Only — Recondition IDs manage their own Recondition Stock', icon:'fa-eye', onClick:()=>{} }
-      ]);
-      return;
-    }
     const statusAction = cur === 'Sold'
       ? [{ label:'Mark In Stock', icon:'fa-rotate-left', onClick:()=>window._setExchangeSrStatus(id, 'In Stock') }]
       : [{ label:'Mark Sold', icon:'fa-tag', onClick:()=>window._setExchangeSrStatus(id, 'Sold') }];
@@ -7021,17 +6950,10 @@ window._toggleKebab = (btn, type, id) => {
       { label:'Edit', icon:'fa-pen', onClick:()=>window._editExchangeSr(id) },
       { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('exchange_stock_showroom', id) }
     ]);
-  } else if(type === 'recondition_stock'){
-    const s = reconStockData.find(x=>x.id===id);
-    const cur = s?.status || 'In Stock';
-    const statusAction = cur === 'Sold'
-      ? [{ label:'Mark In Stock', icon:'fa-rotate-left', onClick:()=>window._setReconStockStatus(id, 'In Stock') }]
-      : [{ label:'Mark Sold', icon:'fa-tag', onClick:()=>window._setReconStockStatus(id, 'Sold') }];
+  } else if(type === 'payment_ledger'){
     openKebabMenuFor(btn, [
-      { label:'Select', icon:'fa-square-check', onClick:()=>window._selectRow('recondition_stock', id) },
-      ...statusAction,
-      { label:'Edit', icon:'fa-pen', onClick:()=>window._editReconStock(id) },
-      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('recondition_stock', id) }
+      { label:'Edit', icon:'fa-pen', onClick:()=>window._editPaymentLedger(id) },
+      { label:'Delete', icon:'fa-trash-can', danger:true, onClick:()=>window._deleteEntry('payment_ledger', id) }
     ]);
   } else if(type === 'finance_schemes'){
     openKebabMenuFor(btn, [
@@ -7096,12 +7018,6 @@ window._selectRow = (type, id)=>{
     window.toggleSelectExchangeSrUnit(id, true);
     renderExchangeSrTable();
     const cb = document.querySelector(`.ex-sr-row-checkbox[data-id="${id}"]`);
-    if(cb){ cb.scrollIntoView({behavior:'smooth', block:'center'}); }
-  } else if(type==='recondition_stock'){
-    window.setReconStockSelectMode(true);
-    window.toggleSelectReconStockUnit(id, true);
-    renderReconStockTable();
-    const cb = document.querySelector(`.recon-row-checkbox[data-id="${id}"]`);
     if(cb){ cb.scrollIntoView({behavior:'smooth', block:'center'}); }
   }
 };
@@ -7355,7 +7271,7 @@ function renderAllInventoryTable(){
   if(dupChip){
     if(totalDups>0){
       dupChip.classList.remove('hidden'); dupChip.classList.add('flex'); dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${totalDups} duplicate${totalDups!==1?'s':''} found`;
-      if(resolveBtn && currentUserRole!=='recondition'){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
+      if(resolveBtn){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
     } else {
       dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
       if(resolveBtn){ resolveBtn.classList.add('hidden'); resolveBtn.classList.remove('flex'); }
@@ -7456,7 +7372,6 @@ function computeAllDuplicateGroups(){
 }
 
 window.openDuplicateResolver = ()=>{
-  if(currentUserRole === 'recondition'){ toast('Recondition IDs can\u2019t resolve duplicates.','err'); return; }
   const groups = computeAllDuplicateGroups();
   if(!groups.length){ toast('No duplicates found.'); return; }
   renderDuplicateResolver(groups);
@@ -7602,7 +7517,7 @@ function setActiveTab(sec) {
     t.classList.remove('bg-blue-50','border-blue-200','text-blue-700');
     t.classList.add('text-slate-600','border-transparent');
   });
-  const NAV_IDS = { financeTool:'navFinanceTool', sheetTool:'navSheetTool', dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', exchangeSr:'navExchangeSr', reconditionStock:'navReconStock', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
+  const NAV_IDS = { financeTool:'navFinanceTool', sheetTool:'navSheetTool', dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', exchangeSr:'navExchangeSr', paymentLedger:'navPaymentLedger', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
   const MNAV_IDS = { financeTool:'mNavFinanceTool', sheetTool:'mNavSheetTool', dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', hhstock:'mNavHHStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
@@ -7627,14 +7542,14 @@ setActiveTab('dashboard');
 // before their own (possibly narrower) listeners load, and no reads still
 // billing against a session that's over.
 function teardownAllListenersAndData(){
-  [invUnsub, hhInvUnsub, exchangeUnsub, exchangeSrUnsub, reconStockUnsub, chalanUnsub, modelAliasesUnsub,
+  [invUnsub, hhInvUnsub, exchangeUnsub, exchangeSrUnsub, paymentLedgerUnsub, chalanUnsub, modelAliasesUnsub,
    trashUnsub, activityLogUnsub, importantUnsub, bikesUnsub, finCatsUnsub, finSchemesUnsub,
    accessoriesUnsub, documentsUnsub].forEach(u=>{ try{ if(typeof u === 'function') u(); }catch(e){ console.error('listener teardown failed', e); } });
-  invUnsub = hhInvUnsub = exchangeUnsub = exchangeSrUnsub = reconStockUnsub = chalanUnsub = modelAliasesUnsub =
+  invUnsub = hhInvUnsub = exchangeUnsub = exchangeSrUnsub = paymentLedgerUnsub = chalanUnsub = modelAliasesUnsub =
     trashUnsub = activityLogUnsub = importantUnsub = bikesUnsub = finCatsUnsub = finSchemesUnsub =
     accessoriesUnsub = documentsUnsub = null;
 
-  invData = []; hhInvData = []; exchangeData = []; exchangeSrData = []; reconStockData = [];
+  invData = []; hhInvData = []; exchangeData = []; exchangeSrData = []; paymentLedgerData = [];
   allMasterBikes = []; accessories = []; financeSchemes = []; financeCategories = [];
   documents = []; events = []; chalanData = []; trashData = []; importantData = [];
   modelAliasesData = []; stockAreas = []; teamMembers = [];
@@ -7657,18 +7572,12 @@ onAuthStateChanged(auth, async (user) => {
     document.body.classList.add('app-active');
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
     await loadProfile(user.uid);
-    // A Recondition ID's default landing is their own Recondition Stock,
-    // not Dashboard — the Dashboard surfaces dealership-wide numbers that
-    // aren't theirs to see, and switchSec's own guard would just bounce
-    // them back here anyway the moment anything tried to render on the
-    // wrong page.
-    if(currentUserRole === 'recondition') switchSec('reconditionStock');
     loadMasterPriceList();
     loadLiveStock();
     loadHHInventory();
     loadExchangeStock();
     loadExchangeSrStock();
-    loadReconStock();
+    loadPaymentLedger();
     loadFinanceSchemes();
     // Was missing entirely — the function existed but nothing ever called
     // it, so `financeCategories` stayed empty and Model Categories always
@@ -7696,10 +7605,10 @@ onAuthStateChanged(auth, async (user) => {
     // Tear down every live Firestore listener and wipe the in-memory
     // caches on sign-out. Without this, the previous user's listeners
     // keep streaming and their data stays in memory — so the next person
-    // to sign in on the same device (a Recondition ID, say) could briefly
-    // see records their role isn't allowed to see, before their own
-    // narrower listeners replace them. It also stops Firestore reads
-    // billing against a session nobody is using anymore.
+    // to sign in on the same device could briefly see records their role
+    // isn't allowed to see, before their own narrower listeners replace
+    // them. It also stops Firestore reads billing against a session
+    // nobody is using anymore.
     teardownAllListenersAndData();
     document.getElementById('login-section').style.display = 'flex';
     document.getElementById('admin-section').style.display = 'none';
@@ -8358,7 +8267,7 @@ async function loadProfile(uid) {
     if(teamBtn) teamBtn.classList.remove('hidden'); // everyone can view the team; only Master ID can manage it
     // Activity Log shows EVERYONE's actions across the whole system — a
     // Normal ID only gets to see their own via "My Activity" in Profile.
-    const ALL_NAV_IDS = ['navFinanceTool','navSheetTool','navDashboard','navPrice','navInv','navHHInv','navAllInv','navExchange','navExchangeSr','navReconStock',
+    const ALL_NAV_IDS = ['navFinanceTool','navSheetTool','navDashboard','navPrice','navInv','navHHInv','navAllInv','navExchange','navExchangeSr','navPaymentLedger',
       'navCustomers','navFin','navAcc','navDocs','navStorage','navEvents','navStock','navHHStock','navChalans',
       'navHistory','navTrash','navImportant','navModelAliases'];
     ALL_NAV_IDS.forEach(id=>document.getElementById(id)?.classList.remove('hidden'));
@@ -8398,50 +8307,6 @@ async function loadProfile(uid) {
     const toolsLabel = document.getElementById('navToolsLabel');
     if(toolsLabel) toolsLabel.classList.remove('hidden');
 
-    // Recondition ID — a narrow role for whoever handles reconditioning
-    // on traded-in bikes. They manage their own Recondition Stock in
-    // full, can view (not edit) Exchange Stock (Mela + Showroom) for
-    // reference, and nothing else — not even Dashboard, which surfaces
-    // business-wide numbers that aren't their concern.
-    const isRecondition = currentUserRole === 'recondition';
-    if(pmRole && isRecondition){
-      pmRole.textContent = 'Recondition ID';
-      pmRole.className = 'badge badge-neutral';
-      pmRole.style.cssText = 'font-size:9px;padding:1px 6px;vertical-align:middle;';
-    }
-    // Recondition ID sees Recondition Stock, Exchange Stock (Mela +
-    // Showroom, view-only) and nothing else — every other nav item is
-    // hidden outright rather than shown read-only. Explicit map, not a
-    // derived-from-key guess — several IDs (navHHInv, navAllInv,
-    // navHHStock) don't follow a simple capitalize pattern.
-    // blockIfReconditionOnly() stays in place on every write path too,
-    // as defense-in-depth in case a section is ever reached some other
-    // way.
-    const RECON_NAV_MAP = {
-      financeTool:'navFinanceTool', sheetTool:'navSheetTool',
-      dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv',
-      exchange:'navExchange', exchangeSr:'navExchangeSr', reconditionStock:'navReconStock', customers:'navCustomers', fin:'navFin', acc:'navAcc',
-      docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock',
-      chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases'
-    };
-    // Recondition ID gets full control only of their own Recondition
-    // Stock and the Blue Book files attached to it, plus VIEW-ONLY access
-    // to Exchange Stock and the other reference pages they need while
-    // reconditioning (what a model costs, finance options, upcoming
-    // melas, storage headroom, and Trash to check something they
-    // removed). Everything else stays hidden.
-    const RECON_FULL = ['reconditionStock'];
-    const RECON_READONLY = ['exchange','exchangeSr','docs','storage','price','events','trash','sheetTool'];
-    if(isRecondition){
-      Object.entries(RECON_NAV_MAP).forEach(([key,id])=>{
-        const keep = RECON_FULL.includes(key) || RECON_READONLY.includes(key);
-        if(!keep) document.getElementById(id)?.classList.add('hidden');
-      });
-    }
-    // Drives the CSS below that strips Add/Edit/Delete controls out of the
-    // read-only sections, so those pages genuinely look view-only rather
-    // than showing buttons that just error out when tapped.
-    document.body.classList.toggle('role-recondition', isRecondition);
     document.body.classList.toggle('role-owner', currentUserRole === 'owner');
     // Section labels stay visible for every role — they're what makes the
     // menu readable. A label is only hidden when nothing under it survived
@@ -8791,8 +8656,7 @@ function renderTeamMembersList(){
     // themselves, every teammate simply looks like a teammate.
     const canSeeRoles = currentUserRole === 'owner';
     const roleBadge = !canSeeRoles ? ''
-      : m.role==='owner' ? '<span class="badge badge-blue ml-1">Master ID</span>'
-      : m.role==='recondition' ? '<span class="badge badge-neutral ml-1">Recondition ID</span>' : '';
+      : m.role==='owner' ? '<span class="badge badge-blue ml-1">Master ID</span>' : '';
     // Same reasoning for the email address — it's half of a login. Your own
     // address still shows (you already know it); everyone else's is hidden
     // unless you're a Master ID who needs it to send a password reset.
@@ -8828,7 +8692,7 @@ window.addTeamMember = async ()=>{
   const name = document.getElementById('newStaffName').value.trim();
   const email = document.getElementById('newStaffEmail').value.trim();
   const pass = document.getElementById('newStaffPass').value;
-  const role = document.getElementById('newStaffRole').value === 'recondition' ? 'recondition' : 'staff';
+  const role = 'staff';
   let maxSessions = parseInt(document.getElementById('newStaffMaxSessions')?.value, 10);
   if(!(maxSessions >= 1)) maxSessions = 3;
   if(maxSessions > 20) maxSessions = 20;
@@ -9067,7 +8931,6 @@ async function shiftMasterSnUp(fromSn, excludeId=null){
 }
 
 document.getElementById('saveModelBtn').addEventListener('click',async()=>{
-  if(blockIfReconditionOnly()) return;
   const category=document.getElementById('mCategory').value;
   const checks = [
     Validate.positiveNumber(document.getElementById('mSn').value, { label:'S.N' }),
@@ -9266,7 +9129,6 @@ async function getAccurateCombinedExchangeCount(forceRefresh){
 }
 
 document.getElementById('saveStockBtn').addEventListener('click',async()=>{
-  if(blockIfReconditionOnly()) return;
   if(!currentEditInvId && (await getAccurateTotalInventoryCount(true)) >= MAX_TOTAL_INVENTORY_UNITS){
     toast(`Storage full — ${MAX_TOTAL_INVENTORY_UNITS} unit limit reached.`,'err');
     showLimitExceededModal('Inventory Limit Reached', `Inventory + HH Inventory combined has reached the ${MAX_TOTAL_INVENTORY_UNITS} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
@@ -9981,7 +9843,6 @@ window.confirmModelAlias = async (alias, canonical)=>{
 };
 
 window.addModelAlias = async ()=>{
-  if(blockIfReconditionOnly()) return;
   const alias = document.getElementById('aliasRawInput').value.trim();
   const canonical = document.getElementById('aliasCanonicalSelect').value;
   if(!alias || !canonical){ toast('Fill in both fields.','err'); return; }
@@ -10152,7 +10013,6 @@ window._deleteChalan = async (id)=>{
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 window.deleteSelectedChalans = async ()=>{
-  if(blockIfReconditionOnly()) return;
   if(!selectedChalanIds.size) return;
   const ok = await showDangerousConfirm({
     title: `Delete ${selectedChalanIds.size} Chalan record${selectedChalanIds.size!==1?'s':''}?`,
@@ -10523,7 +10383,6 @@ async function getAccurateNextSn(colName){
 }
 
 window.transferToHH = async (id) => {
-  if(blockIfReconditionOnly()) return;
   const s = invData.find(x=>x.id===id);
   if(!s){ toast('Unit not found.','err'); return; }
   const isSold = s.status==='Sold' || s.hhFlag==='Hide';
@@ -10560,7 +10419,6 @@ window.transferToHH = async (id) => {
 };
 
 window.transferToInventory = async (id) => {
-  if(blockIfReconditionOnly()) return;
   const s = hhInvData.find(x=>x.id===id);
   if(!s){ toast('Unit not found.','err'); return; }
   const isSold = s.status==='Sold';
@@ -10592,7 +10450,6 @@ window.transferToInventory = async (id) => {
 };
 
 window._setUnitStatus = async (id, status) => {
-  if(blockIfReconditionOnly()) return;
   const s = invData.find(x=>x.id===id);
   const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const needsCustomer = (status==='Booked' || status==='Sold');
@@ -10632,7 +10489,6 @@ window._setUnitStatus = async (id, status) => {
 };
 
 window._setHHFlag = async (id, hhFlag) => {
-  if(blockIfReconditionOnly()) return;
   const s = invData.find(x=>x.id===id);
   const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const existingName = escapeHtml(s?.customerName||'');
@@ -10886,7 +10742,6 @@ function renderInvAreaFilter(){
     names.map(n=>({value:n, label:`${n} (${counts[n]||0})`})));
 }
 window.openAreaManager = ()=>{
-  if(currentUserRole==='recondition'){ toast('Recondition IDs can\u2019t manage areas.','err'); return; }
   let ov = document.getElementById('areaManagerModal');
   if(!ov){
     ov = document.createElement('div');
@@ -10926,7 +10781,6 @@ function renderAreaManager(){
     '</div>').join('');
 }
 window.addStockAreaFromManager = async ()=>{
-  if(currentUserRole==='recondition'){ toast('Recondition IDs can\u2019t manage areas.','err'); return; }
   const input = document.getElementById('newAreaInputMgr');
   const name = (input.value||'').trim();
   if(!name){ toast('Enter an area name.','warn'); return; }
@@ -11086,7 +10940,7 @@ function renderInvTable(list){
   if(dupIds.size>0){
     dupChip.classList.remove('hidden'); dupChip.classList.add('flex');
     dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${dupIds.size} duplicate${dupIds.size!==1?'s':''} found`;
-    if(resolveBtn && currentUserRole!=='recondition'){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
+    if(resolveBtn){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
   } else {
     dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
     if(resolveBtn){ resolveBtn.classList.add('hidden'); resolveBtn.classList.remove('flex'); }
@@ -11222,7 +11076,6 @@ document.addEventListener('click', (e)=>{
 
 // Move selected showroom-Inventory units to HH Inventory in one go.
 window.bulkTransferSelectedInv = async ()=>{
-  if(blockIfReconditionOnly()) return;
   if(!selectedInvIds.size) return;
   const ids = [...selectedInvIds];
   const ok = await showConfirm({
@@ -11257,7 +11110,6 @@ window.bulkTransferSelectedInv = async ()=>{
 
 // Move selected HH-Inventory units back to showroom Inventory in one go.
 window.bulkTransferSelectedHH = async ()=>{
-  if(blockIfReconditionOnly()) return;
   if(!selectedHHInvIds.size) return;
   const ids = [...selectedHHInvIds];
   const ok = await showConfirm({
@@ -11322,7 +11174,6 @@ async function bulkSetStatus(collName, dataArr, idSet, status, clearSel){
   }catch(e){ toast('Update failed: '+friendlyError(e),'err'); }
 }
 window.bulkSetStatusInv = (status)=>{
-  if(blockIfReconditionOnly()) return;
   document.getElementById('bulkStatusInvMenu')?.classList.add('hidden');
   bulkSetStatus('inventory', invData, selectedInvIds, status, ()=>{ selectedInvIds.clear(); setInvSelectMode(false); });
 };
@@ -11338,7 +11189,6 @@ window.toggleBulkAreaMenu = ()=>{
   menu.classList.toggle('hidden');
 };
 window.bulkMoveToArea = async (area)=>{
-  if(blockIfReconditionOnly()) return;
   document.getElementById('bulkAreaInvMenu')?.classList.add('hidden');
   const ids = [...selectedInvIds];
   if(!ids.length) return;
@@ -11361,7 +11211,6 @@ window.bulkMoveToArea = async (area)=>{
   }catch(e){ toast('Update failed: '+friendlyError(e),'err'); }
 };
 window.bulkSetStatusHH = (status)=>{
-  if(blockIfReconditionOnly()) return;
   document.getElementById('bulkStatusHHMenu')?.classList.add('hidden');
   bulkSetStatus('hh_inventory', hhInvData, selectedHHInvIds, status, ()=>{ selectedHHInvIds.clear(); setHHInvSelectMode(false); });
 };
@@ -11391,7 +11240,6 @@ window.exportSelectedHH = ()=>{
 };
 
 window.deleteSelectedInvUnits = async ()=>{
-  if(blockIfReconditionOnly()) return;
   if(!selectedInvIds.size) return;
   const ids = [...selectedInvIds];
   const proceed = await showDangerousConfirm({
@@ -11566,7 +11414,6 @@ async function checkForHiddenUnits(colName, loadedCount, hasMore, tableId){
 // invisible behind the orderBy. Additive only — records that already have
 // an S.N are left exactly as they are.
 window.repairMissingSn = async (colName)=>{
-  if(blockIfReconditionOnly()) return;
   try{
     toast('Checking for hidden units…');
     const snap = await getDocs(collection(db, colName));
@@ -11658,7 +11505,7 @@ function renderHHInvTable(){
     if(dupIds.size>0){
       dupChip.classList.remove('hidden'); dupChip.classList.add('flex');
       dupChip.innerHTML = `<i class="fas fa-triangle-exclamation text-[10px]"></i> ${dupIds.size} duplicate${dupIds.size!==1?'s':''} found`;
-      if(resolveBtn && currentUserRole!=='recondition'){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
+      if(resolveBtn){ resolveBtn.classList.remove('hidden'); resolveBtn.classList.add('flex'); }
     } else {
       dupChip.classList.add('hidden'); dupChip.classList.remove('flex');
       if(resolveBtn){ resolveBtn.classList.add('hidden'); resolveBtn.classList.remove('flex'); }
@@ -11765,7 +11612,6 @@ window.toggleSelectAllHHInv = (checked)=>{
 };
 
 window.deleteSelectedHHInvUnits = async ()=>{
-  if(blockIfReconditionOnly()) return;
   if(!selectedHHInvIds.size) return;
   const ids = [...selectedHHInvIds];
   const proceed = await showDangerousConfirm({
@@ -11798,7 +11644,6 @@ document.getElementById('hhOwnerSelect')?.addEventListener('change', function(){
 });
 
 document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
-  if(blockIfReconditionOnly()) return;
   if(!currentEditHHInvId && (await getAccurateTotalInventoryCount(true)) >= MAX_TOTAL_INVENTORY_UNITS){
     toast(`Storage full — ${MAX_TOTAL_INVENTORY_UNITS} unit limit reached.`,'err');
     showLimitExceededModal('Inventory Limit Reached', `Inventory + HH Inventory combined has reached the ${MAX_TOTAL_INVENTORY_UNITS} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
@@ -11938,7 +11783,6 @@ function renderMelaManager(){
     '</div>').join('');
 }
 window.addMelaArea = async ()=>{
-  if(blockIfReconditionOnly()) return;
   const input = document.getElementById('newMelaInput');
   const name = (input.value||'').trim();
   if(!name){ toast('Enter a mela name.','warn'); return; }
@@ -11947,7 +11791,6 @@ window.addMelaArea = async ()=>{
   catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 window.removeMelaArea = async (id, name)=>{
-  if(blockIfReconditionOnly()) return;
   const proceed = await showConfirm({
     title:'Remove this mela?',
     message:`Remove <b>${name}</b> from the list? Units already tagged with it keep their tag — it just won\u2019t show as a suggestion anymore.`,
@@ -12017,7 +11860,6 @@ window.cancelHHInvEdit = ()=>{
 };
 
 window._setHHInvStatus = async (id, status) => {
-  if(blockIfReconditionOnly()) return;
   const s = hhInvData.find(x=>x.id===id);
   const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const needsCustomer = (status==='Booked' || status==='Sold');
@@ -12083,7 +11925,6 @@ window._setHHInvStatus = async (id, status) => {
 // collections instead of a separate "Hold" concept that needed its own
 // explanation.
 window._setHHInvFlag = async (id, hhFlag) => {
-  if(blockIfReconditionOnly()) return;
   const s = hhInvData.find(x=>x.id===id);
   const modelLabel = s ? `${escapeHtml(s.model)} — ${escapeHtml(s.color||'')}`.trim() : 'this unit';
   const existingName = escapeHtml(s?.customerName||'');
@@ -12680,7 +12521,6 @@ let _areaDupeCleaned = false;
 const DEFAULT_AREAS = ['Showroom','Workshop']; // always present, can't be removed
 async function seedDefaultAreas(){
   if(areaSeedAttempted) return;
-  if(currentUserRole === 'recondition') return; // recondition can't write areas
   areaSeedAttempted = true;
   try{
     const have = new Set(stockAreas.map(a=>String(a.name||'').toLowerCase()));
@@ -12696,7 +12536,7 @@ function loadStockAreas(){
     seedDefaultAreas();
     // One-time cleanup: an earlier double-seed left duplicate area docs (e.g.
     // two "Showroom"/"Workshop"). Delete the extras, keeping the first of each.
-    if(!_areaDupeCleaned && currentUserRole!=='recondition'){
+    if(!_areaDupeCleaned){
       _areaDupeCleaned = true;
       const byName = {}; const dupes = [];
       stockAreas.forEach(a=>{ const k=String(a.name||'').trim().toLowerCase(); if(!k) return; if(byName[k]) dupes.push(a); else byName[k]=a; });
@@ -12717,7 +12557,6 @@ function loadStockAreas(){
 }
 
 window.addStockArea = async ()=>{
-  if(blockIfReconditionOnly()) return;
   const input = document.getElementById('newAreaInput');
   const name = (input.value||'').trim();
   if(!name){ toast('Please enter an area name.','warn'); return; }
@@ -13296,7 +13135,6 @@ window.startCategoryRename = async (id)=>{
 };
 
 window.addFinanceCategory = async ()=>{
-  if(blockIfReconditionOnly()) return;
   const nameInput = document.getElementById('newFinCatName');
   const name = nameInput.value.trim();
   if(!name){ toast('Category name required (e.g. 3 Wheeler)','err'); return; }
@@ -13383,7 +13221,6 @@ function renderFinTable(){
 }
 
 document.getElementById('saveFinBtn').addEventListener('click', async()=>{
-  if(blockIfReconditionOnly()) return;
   const category = document.getElementById('fCategory').value;
   if(!category){ toast('Add a category above first (Bike/Scooter/...).','err'); return; }
 
@@ -13672,9 +13509,7 @@ async function downloadDocsAsZip(docs, zipName, describe){
 // Downloads whatever the Document Vault filter is currently showing, so
 // what you get matches what you can see.
 window.downloadAllDocuments = async ()=>{
-  let list = currentUserRole === 'recondition'
-    ? documents.filter(d=>d.category === 'Blue Book')
-    : documents.slice();
+  let list = documents.slice();
   if(docTypeFilter === 'bluebook') list = list.filter(d=>d.category==='Blue Book');
   else if(docTypeFilter !== 'all') list = list.filter(d=>(DOC_TYPE_GROUPS[docTypeFilter]||[]).includes(String(d.fileExt||'').toLowerCase()));
   await downloadDocsAsZip(list, 'Documents', 'documents in this filter');
@@ -13735,6 +13570,8 @@ function exSearchMatches(s,q){
   return String(s.model||'').toLowerCase().includes(q)
       || String(s.regNo||'').toLowerCase().includes(q)
       || String(s.customerName||'').toLowerCase().includes(q)
+      || String(s.contact||'').toLowerCase().includes(q)
+      || String(s.mela||'').toLowerCase().includes(q)
       || String(s.remarks||'').toLowerCase().includes(q)
       || String(s.sendTo||'').toLowerCase().includes(q)
       || (s.makeYear||'').toString().toLowerCase().includes(q);
@@ -13899,7 +13736,6 @@ function toggleExtraExBtns(scope, count){
   });
 }
 async function bulkTransferExchange(fromColl, toColl, dataArr, idSet, toLabel, clearSel){
-  if(blockIfReconditionOnly && false) return; // recondition CAN manage exchange, so no block here
   const ids = [...idSet];
   if(!ids.length) return;
   const ok = await showConfirm({
@@ -13929,16 +13765,12 @@ async function bulkTransferExchange(fromColl, toColl, dataArr, idSet, toLabel, c
     clearSel();
   }catch(e){ toast('Transfer failed: '+friendlyError(e),'err'); }
 }
-window.bulkTransferExToShowroom = ()=>{
-  if(blockIfReconditionOnly()) return;
+window.bulkTransferExToShowroom = ()=>
   bulkTransferExchange('exchange_stock','exchange_stock_showroom', exchangeData, selectedExchangeIds, 'Showroom',
     ()=>{ selectedExchangeIds.clear(); setExchangeSelectMode(false); });
-};
-window.bulkTransferExSrToMela = ()=>{
-  if(blockIfReconditionOnly()) return;
+window.bulkTransferExSrToMela = ()=>
   bulkTransferExchange('exchange_stock_showroom','exchange_stock', exchangeSrData, selectedExchangeSrIds, 'Mela',
     ()=>{ selectedExchangeSrIds.clear(); setExchangeSrSelectMode(false); });
-};
 
 function exportExchangeUnitsToExcel(units, sheetName, filePrefix){
   if(typeof XLSX === 'undefined'){ toast('Excel library still loading — try again.','err'); return; }
@@ -13961,7 +13793,6 @@ window.exportSelectedExSr = ()=>
   exportExchangeUnitsToExcel([...selectedExchangeSrIds].map(id=>exchangeSrData.find(x=>x.id===id)).filter(Boolean), 'Showroom Exchange', 'showroom_exchange_selected');
 
 window.deleteSelectedExchangeUnits = async ()=>{
-  if(blockIfReconditionOnly()) return;
   if(!selectedExchangeIds.size) return;
   const ids = [...selectedExchangeIds];
   const proceed = await showDangerousConfirm({
@@ -13993,7 +13824,6 @@ window.deleteSelectedExchangeUnits = async ()=>{
 
 
 document.getElementById('fixExchangeSnBtn').addEventListener('click', async ()=>{
-  if(blockIfReconditionOnly()) return;
   if(currentUserRole !== 'owner'){ toast('Only a Master ID can renumber Exchange Stock.','err'); return; }
   if(!exchangeData.length){ toast('No exchange stock to renumber.','warn'); return; }
   const ok = await showConfirm({
@@ -14031,10 +13861,10 @@ document.getElementById('fixExchangeSnBtn').addEventListener('click', async ()=>
 });
 
 // Send To suggestions come only from destinations actually typed across
-// both collections (Workshop, Showroom, HH Mela, etc.) — Mela event names
-// used to leak in here too, which mixed up two different questions
-// ("where is it now" vs "which mela was it taken in at"). Mela event
-// names now live only in their own Mela datalist below.
+// Mela + Showroom Exchange (Workshop, Showroom, HH Mela, etc.) — Mela
+// event names used to leak in here too, which mixed up two different
+// questions ("where is it now" vs "which mela was it taken in at"). Mela
+// event names now live only in their own Mela datalist below.
 function populateSendToDatalist(){
   const allSendTo = new Set();
   [...exchangeData, ...exchangeSrData].forEach(s=>{ const v=(s.sendTo||'').trim(); if(v) allSendTo.add(v); });
@@ -14057,7 +13887,7 @@ function populateMelaDatalist(){
   if(dl) dl.innerHTML = optionsHtml;
 }
 
-window.openExchangeFormModal = ()=>{ if(blockIfReconditionOnly()) return; populateSendToDatalist(); populateMelaDatalist(); document.getElementById('exchangeFormModal').classList.add('open'); };
+window.openExchangeFormModal = ()=>{ populateSendToDatalist(); populateMelaDatalist(); document.getElementById('exchangeFormModal').classList.add('open'); };
 window.closeExchangeFormModal = ()=>{ document.getElementById('exchangeFormModal').classList.remove('open'); };
 
 function updateExPayableAmt(){
@@ -14090,7 +13920,6 @@ window.cancelExchangeEdit = ()=>{
 };
 
 window._editExchange = (id)=>{
-  if(blockIfReconditionOnly()) return;
   const s = exchangeData.find(x=>x.id===id); if(!s) return;
   document.getElementById('exModel').value = s.model||'';
   document.getElementById('exMakeYear').value = s.makeYear||'';
@@ -14136,7 +13965,6 @@ window._editExchange = (id)=>{
 };
 
 window._setExchangeStatus = async (id, status) => {
-  if(blockIfReconditionOnly()) return;
   const s = exchangeData.find(x=>x.id===id);
   const modelLabel = s ? escapeHtml(s.model||'this unit') : 'this unit';
   const proceed = await showConfirm({
@@ -14155,7 +13983,6 @@ window._setExchangeStatus = async (id, status) => {
 };
 
 document.getElementById('saveExchangeBtn').addEventListener('click', async ()=>{
-  if(blockIfReconditionOnly()) return;
   if(!currentEditExchangeId && (await getAccurateCombinedExchangeCount(true)) >= MAX_EXCHANGE_STOCK){
     toast(`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached (Mela + Showroom combined).`,'err');
     showLimitExceededModal('Exchange Stock Limit Reached', `Exchange Stock (Mela + Showroom combined) has reached the ${MAX_EXCHANGE_STOCK} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
@@ -14602,6 +14429,7 @@ function exSrSearchMatches(s,q){
   return String(s.model||'').toLowerCase().includes(q)
       || String(s.regNo||'').toLowerCase().includes(q)
       || String(s.customerName||'').toLowerCase().includes(q)
+      || String(s.contact||'').toLowerCase().includes(q)
       || String(s.remarks||'').toLowerCase().includes(q)
       || String(s.sendTo||'').toLowerCase().includes(q)
       || (s.makeYear||'').toString().toLowerCase().includes(q);
@@ -14750,7 +14578,6 @@ window.toggleSelectAllExchangeSr = (checked)=>{
 };
 
 window.deleteSelectedExchangeSrUnits = async ()=>{
-  if(blockIfReconditionOnly()) return;
   if(!selectedExchangeSrIds.size) return;
   const ids = [...selectedExchangeSrIds];
   const proceed = await showDangerousConfirm({
@@ -14816,7 +14643,7 @@ document.getElementById('fixExchangeSrSnBtn').addEventListener('click', async ()
   }
 });
 
-window.openExchangeSrFormModal = ()=>{ if(blockIfReconditionOnly()) return; populateSendToDatalist(); document.getElementById('exchangeSrFormModal').classList.add('open'); };
+window.openExchangeSrFormModal = ()=>{ populateSendToDatalist(); document.getElementById('exchangeSrFormModal').classList.add('open'); };
 window.closeExchangeSrFormModal = ()=>{ document.getElementById('exchangeSrFormModal').classList.remove('open'); };
 
 function updateExSrPayableAmt(){
@@ -14849,7 +14676,6 @@ window.cancelExchangeSrEdit = ()=>{
 };
 
 window._editExchangeSr = (id)=>{
-  if(blockIfReconditionOnly()) return;
   const s = exchangeSrData.find(x=>x.id===id); if(!s) return;
   document.getElementById('exSrModel').value = s.model||'';
   document.getElementById('exSrMakeYear').value = s.makeYear||'';
@@ -14893,7 +14719,6 @@ window._editExchangeSr = (id)=>{
 };
 
 window._setExchangeSrStatus = async (id, status) => {
-  if(blockIfReconditionOnly()) return;
   const s = exchangeSrData.find(x=>x.id===id);
   const modelLabel = s ? escapeHtml(s.model||'this unit') : 'this unit';
   const proceed = await showConfirm({
@@ -14912,7 +14737,6 @@ window._setExchangeSrStatus = async (id, status) => {
 };
 
 document.getElementById('saveExchangeSrBtn').addEventListener('click', async ()=>{
-  if(blockIfReconditionOnly()) return;
   if(!currentEditExchangeSrId && (await getAccurateCombinedExchangeCount(true)) >= MAX_EXCHANGE_STOCK){
     toast(`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached (Mela + Showroom combined).`,'err');
     showLimitExceededModal('Exchange Stock Limit Reached', `Exchange Stock (Mela + Showroom combined) has reached the ${MAX_EXCHANGE_STOCK} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
@@ -15003,359 +14827,244 @@ window.exportExchangeSrToExcel = ()=>{
 
 window.loadExchangeSrStock = loadExchangeSrStock;
 
-/* ═══════════════════════════════════════════════════════════════════════
-   RECONDITION STOCK — bikes a Recondition ID buys directly, not a mela or
-   showroom trade-in. Fully separate collection/limit from Exchange Stock;
-   Recondition IDs have full control here (Exchange Stock is view-only for
-   them), Master has full control everywhere as always.
-   ═══════════════════════════════════════════════════════════════════════ */
-let reconStockData = [];
-let reconStockUnsub = null;
-let currentEditReconId = null;
-let reconStatusFilter = 'all';
-let reconSearchTerm = '';
-let reconBlueBookFilePending = null;
-document.getElementById('reconBlueBookFile')?.addEventListener('change', function(e){
-  reconBlueBookFilePending = e.target.files[0] || null;
-  const label = document.getElementById('reconBlueBookFileLabel');
-  if(label) label.textContent = reconBlueBookFilePending ? reconBlueBookFilePending.name : 'No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.';
-});
 
-function loadReconStock(){
-  if(reconStockUnsub) reconStockUnsub();
-  const tbody = document.getElementById('reconStockTableBody');
-  reconStockUnsub = onSnapshot(query(collection(db,'recondition_stock'), orderBy('sn','asc')), snap=>{
-    reconStockData = snap.docs.map(d=>({id:d.id,...d.data()}));
-    const liveIds = new Set(reconStockData.map(s=>s.id));
-    selectedReconIds.forEach(id=>{ if(!liveIds.has(id)) selectedReconIds.delete(id); });
-    renderReconStockTable();
-    if(typeof updateStorageOverview === 'function') updateStorageOverview();
+/* ═══════════════════════════════════════════════════════════════════════
+   PAYMENT LEDGER — cash actually received, date/mela-wise. Deliberately
+   NOT tied 1:1 to Exchange Stock units (one entry can cover several bikes
+   sold the same day at the same mela) — it reconciles against Exchange's
+   Valuation/Payable totals rather than duplicating per-unit numbers.
+   ═══════════════════════════════════════════════════════════════════════ */
+let paymentLedgerData = [];
+let paymentLedgerUnsub = null;
+let currentEditPlId = null;
+let plMelaFilter = 'all';
+let plSearchTerm = '';
+
+function loadPaymentLedger(){
+  if(paymentLedgerUnsub) paymentLedgerUnsub();
+  const tbody = document.getElementById('paymentLedgerTableBody');
+  paymentLedgerUnsub = onSnapshot(query(collection(db,'payment_ledger'), orderBy('date','desc')), snap=>{
+    paymentLedgerData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderPaymentLedgerTable();
+    renderPaymentLedgerDashboard();
   }, err=>{
-    console.error('recondition_stock listener failed', err);
-    if(tbody) tbody.innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400">
+    console.error('payment_ledger listener failed', err);
+    if(tbody) tbody.innerHTML = `<tr><td colspan="8"><div class="py-12 text-center text-slate-400">
       <i class="fas fa-triangle-exclamation text-3xl text-red-300 block mb-2"></i>
-      <p class="text-sm mb-3">Couldn't load recondition stock — check your connection.</p>
-      <button onclick="loadReconStock()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
+      <p class="text-sm mb-3">Couldn't load payment ledger — check your connection.</p>
+      <button onclick="loadPaymentLedger()" class="cta-secondary !py-2 !px-4 !text-xs">Retry</button>
     </div></td></tr>`;
-    toast('Recondition stock sync failed: '+friendlyError(err),'err');
+    toast('Payment ledger sync failed: '+friendlyError(err),'err');
   });
 }
+window.loadPaymentLedger = loadPaymentLedger;
 
-window.setReconStockStatusFilter = (status)=>{
-  reconStatusFilter = status;
-  document.querySelectorAll('#secReconditionStock .recon-status-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===status));
-  renderReconStockTable();
+function populatePlMelaDatalist(){
+  const allMela = new Set();
+  melaAreas.forEach(m=>{ const v=(m.name||'').trim(); if(v) allMela.add(v); });
+  exchangeData.forEach(s=>{ const v=(s.mela||'').trim(); if(v) allMela.add(v); });
+  paymentLedgerData.forEach(p=>{ const v=(p.mela||'').trim(); if(v) allMela.add(v); });
+  allMela.add('Showroom');
+  const optionsHtml = [...allMela].sort((a,b)=>a.localeCompare(b)).map(v=>`<option value="${escapeHtml(v)}"></option>`).join('');
+  const dl = document.getElementById('plMelaOptions');
+  if(dl) dl.innerHTML = optionsHtml;
+}
+
+window.setPlMelaFilter = (mela)=>{
+  plMelaFilter = mela;
+  renderPaymentLedgerTable();
 };
 
-function reconSearchMatches(s,q){
-  return String(s.model||'').toLowerCase().includes(q)
-      || String(s.regNo||'').toLowerCase().includes(q)
-      || String(s.customerName||'').toLowerCase().includes(q)
-      || String(s.remarks||'').toLowerCase().includes(q)
-      || String(s.sendTo||'').toLowerCase().includes(q)
-      || (s.makeYear||'').toString().toLowerCase().includes(q);
+function plSearchMatches(p,q){
+  return String(p.mela||'').toLowerCase().includes(q)
+      || String(p.remarks||'').toLowerCase().includes(q)
+      || String(p.date||'').toLowerCase().includes(q);
 }
-function getFilteredReconStock(){
-  let base = reconStockData;
-  if(reconStatusFilter !== 'all') base = base.filter(s=>(s.status||'In Stock')===reconStatusFilter);
-  if(!reconSearchTerm) return base;
-  const q = reconSearchTerm.toLowerCase().trim();
-  return base.filter(s=>reconSearchMatches(s,q));
+function getFilteredPaymentLedger(){
+  let base = paymentLedgerData;
+  if(plMelaFilter !== 'all') base = base.filter(p=>(p.mela||'—')===plMelaFilter);
+  if(!plSearchTerm) return base;
+  const q = plSearchTerm.toLowerCase().trim();
+  return base.filter(p=>plSearchMatches(p,q));
 }
-document.getElementById('reconStockSearch')?.addEventListener('input', function(){
-  reconSearchTerm = this.value;
-  renderReconStockTable();
+document.getElementById('paymentLedgerSearch')?.addEventListener('input', function(){
+  plSearchTerm = this.value;
+  renderPaymentLedgerTable();
 });
 
-function reconDocBadge(label, ok){
-  return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wide ${ok?'bg-emerald-50 text-emerald-600':'bg-red-50 text-red-500'}"><i class="fas ${ok?'fa-check':'fa-xmark'} text-[8px]"></i> ${label}</span>`;
-}
+function fmtRs(n){ return 'Rs. '+Number(n||0).toLocaleString('en-IN'); }
 
-function renderReconStockTable(){
-  const tbody = document.getElementById('reconStockTableBody');
+function renderPaymentLedgerTable(){
+  const tbody = document.getElementById('paymentLedgerTableBody');
   if(!tbody) return;
-  const list = getFilteredReconStock();
-  const total = reconStockData.length;
-  const inStock = reconStockData.filter(s=>(s.status||'In Stock')==='In Stock').length;
-  const sold = total - inStock;
-  document.getElementById('reconStockTotalChip').textContent = total+' unit'+(total!==1?'s':'')+' total  ·  '+inStock+' in stock  ·  '+sold+' sold';
-  document.getElementById('reconStockCount').textContent = list.length+' unit'+(list.length!==1?'s':'');
+  const list = getFilteredPaymentLedger();
+  document.getElementById('paymentLedgerTotalChip').textContent = paymentLedgerData.length+' entr'+(paymentLedgerData.length!==1?'ies':'y');
+  document.getElementById('paymentLedgerCount').textContent = list.length+' entr'+(list.length!==1?'ies':'y');
 
-  const pc = { pcReconAll:total, pcReconInStock:inStock, pcReconSold:sold };
-  Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
+  const melaCounts = {};
+  paymentLedgerData.forEach(p=>{ const k = p.mela || '—'; melaCounts[k] = (melaCounts[k]||0)+1; });
+  const melaKeys = Object.keys(melaCounts).sort((a,b)=>melaCounts[b]-melaCounts[a]);
+  if(!melaKeys.includes(plMelaFilter) && plMelaFilter!=='all') plMelaFilter = 'all';
+  const wrap = document.getElementById('paymentLedgerMelaFilterWrap');
+  if(wrap){
+    wrap.innerHTML = melaKeys.length <= 1 ? '' : buildFilterSelect('setPlMelaFilter', plMelaFilter,
+      `All Melas (${paymentLedgerData.length})`, melaKeys.map(k=>({value:k, label:`${k} (${melaCounts[k]})`})));
+  }
+
   if(!list.length){
-    tbody.innerHTML = `<tr><td colspan="10"><div class="py-12 text-center text-slate-400"><i class="fas fa-right-left text-3xl opacity-25 block mb-2"></i><p class="text-sm">${reconSearchTerm?'No units match your search.':'No recondition stock yet. Add a unit above.'}</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="py-12 text-center text-slate-400"><i class="fas fa-money-bill-wave text-3xl opacity-25 block mb-2"></i><p class="text-sm">${plSearchTerm?'No entries match your search.':'No payment entries yet. Add one above.'}</p></div></td></tr>`;
     return;
   }
-  tbody.innerHTML = list.slice().sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0)).map((s,rowIdx)=>{
-    const valuation = s.valuation ? 'Rs. '+Number(s.valuation).toLocaleString('en-IN') : '—';
-    const payableDisp = (s.additionalValuation) ? `<div class="text-[10px] text-red-500 font-semibold">- Rs.${Number(s.additionalValuation).toLocaleString('en-IN')}</div><div class="text-[11px] text-emerald-600 font-extrabold">Rs.${Number(s.payableAmount ?? (s.valuation-s.additionalValuation)).toLocaleString('en-IN')} payable</div>` : '';
-    const isSel = selectedReconIds.has(s.id);
+  tbody.innerHTML = list.map(p=>{
+    const total = p.total ?? ((p.cash||0)+(p.fonePay||0)+(p.cheque||0)+(p.other||0));
     return `
-    <tr class="border-b border-slate-100 ${isSel?'row-selected':''}" data-row-id="${s.id}">
-      <td class="px-3 py-3 sel-col" data-th="">
-        <input type="checkbox" class="recon-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${isSel?'checked':''} onchange="toggleSelectReconStockUnit('${s.id}', this.checked); this.closest('tr').classList.toggle('row-selected', this.checked)">
+    <tr class="border-b border-slate-100">
+      <td class="px-4 py-3 text-sm text-slate-600 whitespace-nowrap" data-th="Date">${p.date ? new Date(p.date+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'}</td>
+      <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Mela">${escapeHtml(p.mela||'—')}
+        ${p.remarks ? `<div class="text-[11px] text-slate-400 mt-0.5 max-w-[200px] truncate" title="${escapeHtml(p.remarks)}">${escapeHtml(p.remarks)}</div>` : ''}
       </td>
-      <td class="px-4 py-3 font-mono text-sm text-slate-500" data-th="S.N">${rowIdx+1}<div class="text-[9px] text-slate-300 mt-0.5">#${s.sn||'—'}</div></td>
-      <td class="px-4 py-3 font-semibold text-sm text-slate-800" data-th="Model">${escapeHtml(s.model||'—')}
-        ${s.customerName ? `<div class="text-[11px] text-slate-500 font-semibold flex items-center gap-1"><i class="fas fa-user text-slate-300 text-[9px]"></i>${escapeHtml(s.customerName)}</div>` : ''}
-        ${s.contact ? `<a href="tel:${escapeHtml(s.contact)}" class="text-[11px] text-bajaj-blue font-semibold flex items-center gap-1 hover:underline"><i class="fas fa-phone text-[9px]"></i>${escapeHtml(s.contact)}</a>` : ''}
-      </td>
-      <td class="px-4 py-3 text-sm text-slate-600" data-th="Year">${escapeHtml(s.makeYear||'—')}</td>
-      <td class="px-4 py-3 text-sm text-slate-600" data-th="Reg. No">${escapeHtml(s.regNo||'—')}</td>
-      <td class="px-4 py-3 text-sm font-semibold text-slate-700" data-th="Valuation">${valuation}</td>
-      <td class="px-4 py-3" data-th="Documents"><div class="flex flex-wrap gap-1">${reconDocBadge('Blue Book', s.blueBook==='yes')}${reconDocBadge('Key', s.key==='yes')}${reconDocBadge('File', s.file==='yes')}
-        ${s.inspectionStatus==='Pass' ? `<span class="badge badge-green"><i class="fas fa-check"></i> Pass</span>` : `<span class="badge badge-neutral"><i class="fas fa-hourglass-half"></i> Pending</span>`}
-        ${s.blueBookDocId ? `<button onclick="window.openDocPreview('${s.blueBookDocId}')" class="badge badge-blue" style="cursor:pointer;border:none"><i class="fas fa-file-lines"></i> Blue Book File</button>` : ''}</div>
-        ${s.remarks ? `<div class="text-[11px] text-slate-400 mt-1 max-w-[220px] truncate" title="${escapeHtml(s.remarks)}"><i class="fas fa-note-sticky text-slate-300 text-[9px] mr-1"></i>${escapeHtml(s.remarks)}</div>` : ''}
-      </td>
-      <td class="px-4 py-3 text-sm text-slate-600" data-th="Send To"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wide"><i class="fas fa-location-dot text-[8px]"></i> ${escapeHtml(s.sendTo||'Bikers Phidim')}</span></td>
-      <td class="px-4 py-3" data-th="Status">
-        ${s.status==='Sold' ? `<span class="badge badge-red"><i class="fas fa-circle-check"></i> Sold</span>` : `<span class="badge badge-green"><i class="fas fa-circle-check"></i> In Stock</span>`}
-      </td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Cash">${p.cash ? fmtRs(p.cash) : '—'}</td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Fone Pay">${p.fonePay ? fmtRs(p.fonePay) : '—'}</td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Cheque">${p.cheque ? fmtRs(p.cheque) : '—'}</td>
+      <td class="px-4 py-3 text-sm text-slate-600" data-th="Other">${p.other ? fmtRs(p.other) : '—'}</td>
+      <td class="px-4 py-3 text-sm font-extrabold text-emerald-600" data-th="Total">${fmtRs(total)}</td>
       <td class="px-4 py-3" data-th="Actions">
-        <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'recondition_stock','${s.id}')"><i class="fas fa-ellipsis-vertical"></i></button>
+        <button type="button" class="kebab-btn" onclick="window._toggleKebab(this,'payment_ledger','${p.id}')"><i class="fas fa-ellipsis-vertical"></i></button>
       </td>
     </tr>`;
   }).join('');
-  updateDeleteSelectedReconBtn();
 }
 
-/* ─── Multi-select + bulk delete (Exchange Stock) ─── */
-let selectedReconIds = new Set();
+// Mini dashboard — reconciles this ledger's Collected totals against
+// Mela Exchange's own Valuation/Payable totals, grouped by Mela name (the
+// two only line up if the same Mela name is used in both places).
+function renderPaymentLedgerDashboard(){
+  const totalValEl = document.getElementById('plTotalValuation');
+  if(!totalValEl) return;
+  const melaUnits = exchangeData; // Mela Exchange only — Showroom has no "mela"
+  const totalValuation = melaUnits.reduce((sum,s)=>sum+(Number(s.valuation)||0), 0);
+  const totalPayable = melaUnits.reduce((sum,s)=>sum+(Number(s.payableAmount) ?? ((Number(s.valuation)||0)-(Number(s.additionalValuation)||0))), 0);
+  const totalCollected = paymentLedgerData.reduce((sum,p)=>sum+(Number(p.total) ?? ((p.cash||0)+(p.fonePay||0)+(p.cheque||0)+(p.other||0))), 0);
+  const outstanding = totalPayable - totalCollected;
 
-function updateDeleteSelectedReconBtn(){
-  const btn = document.getElementById('deleteSelectedReconBtn');
-  const countEl = document.getElementById('deleteSelectedReconCount');
-  const cancelBtn = document.getElementById('cancelSelectReconBtn');
-  const hint = document.getElementById('selectModeHintRecon');
-  if(!btn || !countEl) return;
-  const inSelectMode = document.getElementById('reconStockTable')?.classList.contains('select-mode');
-  countEl.textContent = selectedReconIds.size;
-  if(selectedReconIds.size>0){ btn.classList.remove('hidden'); btn.classList.add('flex'); }
-  else { btn.classList.add('hidden'); btn.classList.remove('flex'); }
-  if(cancelBtn){
-    if(inSelectMode){ cancelBtn.classList.remove('hidden'); cancelBtn.classList.add('flex'); }
-    else { cancelBtn.classList.add('hidden'); cancelBtn.classList.remove('flex'); }
-  }
-  if(hint){
-    if(inSelectMode && selectedReconIds.size===0){ hint.classList.remove('hidden'); hint.classList.add('flex'); }
-    else { hint.classList.add('hidden'); hint.classList.remove('flex'); }
-  }
-  const selectAll = document.getElementById('reconSelectAll');
-  if(selectAll){
-    const visibleIds = getFilteredReconStock().map(s=>s.id);
-    const allChecked = visibleIds.length>0 && visibleIds.every(id=>selectedReconIds.has(id));
-    selectAll.checked = allChecked;
-    selectAll.indeterminate = !allChecked && visibleIds.some(id=>selectedReconIds.has(id));
-  }
-}
+  document.getElementById('plTotalValuation').textContent = fmtRs(totalValuation);
+  document.getElementById('plTotalPayable').textContent = fmtRs(totalPayable);
+  document.getElementById('plTotalCollected').textContent = fmtRs(totalCollected);
+  const outEl = document.getElementById('plOutstanding');
+  outEl.textContent = fmtRs(Math.abs(outstanding)) + (outstanding>0 ? ' due' : outstanding<0 ? ' over' : '');
+  outEl.className = 'text-xl font-extrabold ' + (outstanding>0 ? 'text-amber-600' : outstanding<0 ? 'text-red-600' : 'text-emerald-600');
 
-window.setReconStockSelectMode = (on)=>{
-  const table = document.getElementById('reconStockTable');
-  if(table) table.classList.toggle('select-mode', on);
-  if(!on) selectedReconIds.clear();
-  updateDeleteSelectedReconBtn();
-};
-
-window.toggleSelectReconStockUnit = (id, checked)=>{
-  if(checked) selectedReconIds.add(id); else selectedReconIds.delete(id);
-  updateDeleteSelectedReconBtn();
-};
-
-window.toggleSelectAllReconStock = (checked)=>{
-  const visibleIds = getFilteredReconStock().map(s=>s.id);
-  if(checked) visibleIds.forEach(id=>selectedReconIds.add(id));
-  else visibleIds.forEach(id=>selectedReconIds.delete(id));
-  renderReconStockTable();
-};
-
-window.deleteSelectedReconStockUnits = async ()=>{
-  if(!selectedReconIds.size) return;
-  const ids = [...selectedReconIds];
-  const proceed = await showDangerousConfirm({
-    title: `Delete ${ids.length} selected unit${ids.length!==1?'s':''}?`,
-    message: `This will <b>permanently delete ${ids.length} selected unit${ids.length!==1?'s':''}</b> from Recondition Stock. This cannot be undone.<br><br>The button unlocks in 5 seconds — please make sure this is really what you want.`,
-    okText: 'Delete Selected'
-  });
-  if(!proceed) return;
-  try{
-    const targets = ids.map(id=>reconStockData.find(x=>x.id===id)).filter(Boolean);
-    for(const t of targets) await moveToTrash('recondition_stock', t.id, t);
-    for(const t of targets){ if(t.blueBookDocId) await trashLinkedBlueBook(t.blueBookDocId); }
-    const chunks = [];
-    for(let i=0;i<ids.length;i+=400) chunks.push(ids.slice(i,i+400));
-    for(const chunk of chunks){
-      const batch = writeBatch(db);
-      chunk.forEach(id=>batch.delete(doc(db,'recondition_stock',id)));
-      await batch.commit();
-    }
-    logActivity('Bulk Deleted', 'recondition_stock', { model: `${targets.length} unit(s)`, sn: '' });
-    toast(`${ids.length} unit(s) moved to Trash.`);
-    selectedReconIds.clear();
-    document.getElementById('reconStockTable')?.classList.remove('select-mode');
-    updateDeleteSelectedReconBtn();
-  }catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
-};
-
-
-window.openReconStockFormModal = ()=>{ populateSendToDatalist(); document.getElementById('reconStockFormModal').classList.add('open'); };
-window.closeReconStockFormModal = ()=>{ document.getElementById('reconStockFormModal').classList.remove('open'); };
-
-function updateReconPayableAmt(){
-  const val = Number(document.getElementById('reconValuation').value) || 0;
-  const add = Number(document.getElementById('reconAdditionalValuation').value) || 0;
-  const payable = Math.max(0, val - add);
-  document.getElementById('reconPayableAmtDisplay').textContent = 'Rs. ' + payable.toLocaleString('en-IN');
-}
-window.updateReconPayableAmt = updateReconPayableAmt;
-
-window.cancelReconStockEdit = ()=>{
-  currentEditReconId = null;
-  ['reconModel','reconMakeYear','reconRegNo','reconValuation','reconAdditionalValuation','reconCustomerName','reconContact','reconRemarks'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('reconBlueBook').value='yes';
-  document.getElementById('reconKey').value='yes';
-  document.getElementById('reconFile').value='yes';
-  document.getElementById('reconSendTo').value='Bikers Phidim';
-  document.getElementById('reconInspection').value='Pending';
-  updateReconPayableAmt();
-  reconBlueBookFilePending = null;
-  document.getElementById('reconBlueBookFile').value='';
-  document.getElementById('reconBlueBookFileLabel').textContent = 'No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.';
-  document.getElementById('reconBlueBookFileExistingLink').classList.add('hidden');
-  const btn = document.getElementById('saveReconStockBtn');
-  btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Unit';
-  document.getElementById('reconStockFormTitle').textContent = 'Add Recondition Stock Unit';
-  const cancel = document.getElementById('cancelReconStockBtn');
-  cancel.classList.add('hidden'); cancel.classList.remove('flex');
-  closeReconStockFormModal();
-};
-
-window._editReconStock = (id)=>{
-  const s = reconStockData.find(x=>x.id===id); if(!s) return;
-  document.getElementById('reconModel').value = s.model||'';
-  document.getElementById('reconMakeYear').value = s.makeYear||'';
-  document.getElementById('reconRegNo').value = s.regNo||'';
-  document.getElementById('reconValuation').value = s.valuation??'';
-  document.getElementById('reconAdditionalValuation').value = s.additionalValuation||'';
-  document.getElementById('reconCustomerName').value = s.customerName||'';
-  document.getElementById('reconContact').value = s.contact||'';
-  document.getElementById('reconBlueBook').value = s.blueBook==='no' ? 'no' : 'yes';
-  document.getElementById('reconKey').value = s.key==='no' ? 'no' : 'yes';
-  document.getElementById('reconFile').value = s.file==='no' ? 'no' : 'yes';
-  document.getElementById('reconRemarks').value = s.remarks||'';
-  document.getElementById('reconSendTo').value = s.sendTo || 'Bikers Phidim';
-  document.getElementById('reconInspection').value = s.inspectionStatus==='Pass' ? 'Pass' : 'Pending';
-  updateReconPayableAmt();
-  reconBlueBookFilePending = null;
-  document.getElementById('reconBlueBookFile').value='';
-  const existingLink = document.getElementById('reconBlueBookFileExistingLink');
-  const fileLabel = document.getElementById('reconBlueBookFileLabel');
-  if(s.blueBookDocId){
-    const d = documents.find(x=>x.id===s.blueBookDocId);
-    if(d){
-      const ic = DOC_FILE_ICONS[String(d.fileExt||'').toLowerCase()] || {icon:'fa-file', color:'#64748B'};
-      fileLabel.innerHTML = `<i class="fas ${ic.icon} mr-1.5" style="color:${ic.color}"></i>Current file: ${escapeHtml(d.fileName||d.name||'')}`;
-    } else {
-      fileLabel.textContent = 'Current file on record.';
-    }
-    existingLink.classList.remove('hidden');
-    existingLink.onclick = (e)=>{ e.preventDefault(); window.openDocPreview(s.blueBookDocId); };
-  } else {
-    fileLabel.textContent = 'No file chosen — will be saved to Document Vault, auto-renamed to Reg No + Customer Name.';
-    existingLink.classList.add('hidden');
-  }
-  currentEditReconId = id;
-  const btn = document.getElementById('saveReconStockBtn');
-  btn.innerHTML = '<i class="fas fa-rotate"></i> Update Unit';
-  document.getElementById('reconStockFormTitle').textContent = 'Edit Recondition Unit';
-  const cancel = document.getElementById('cancelReconStockBtn');
-  cancel.classList.remove('hidden'); cancel.classList.add('flex');
-  openReconStockFormModal();
-};
-
-window._setReconStockStatus = async (id, status) => {
-  const s = reconStockData.find(x=>x.id===id);
-  const modelLabel = s ? escapeHtml(s.model||'this unit') : 'this unit';
-  const proceed = await showConfirm({
-    title: 'Mark as '+status+'?',
-    message: `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`,
-    okText:'Confirm',
-    okColorClass:'text-bajaj-blue hover:bg-blue-50',
-    iconClass:'fa-rotate', iconColor:'#5A4740', iconBg:'#F3E9E1'
-  });
-  if(!proceed) return;
-  try{
-    await updateDoc(doc(db,'recondition_stock',id),{status});
-    logActivity(status==='Sold' ? 'Marked Sold' : 'Marked In Stock', 'recondition_stock', s);
-    toast('Unit marked as '+status+'.');
-  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
-};
-
-document.getElementById('saveReconStockBtn').addEventListener('click', async ()=>{
-  if(!currentEditReconId && reconStockData.length >= MAX_EXCHANGE_STOCK){
-    toast(`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached (Recondition Stock).`,'err');
-    showLimitExceededModal('Recondition Stock Limit Reached', `Recondition Stock has reached the ${MAX_EXCHANGE_STOCK} unit limit. Delete or clear out some units (Trash included) first, or reach out below to have the limit raised.`);
-    return;
-  }
-  const modelCheck = Validate.text(document.getElementById('reconModel').value, { label:'Model Name', max:80 });
-  const yearCheck = Validate.text(document.getElementById('reconMakeYear').value, { label:'Make Year', max:10 });
-  const regNoCheck = Validate.text(document.getElementById('reconRegNo').value, { label:'Registration No', max:40 });
-  const valuationRaw = document.getElementById('reconValuation').value;
-  const remarksCheck = Validate.text(document.getElementById('reconRemarks').value, { min:0, max:500, label:'Remarks' });
-  const firstErr = [modelCheck, yearCheck, regNoCheck, remarksCheck].find(c=>!c.ok);
-  if(firstErr){ toast(firstErr.error,'err'); return; }
-  if(valuationRaw==='' || isNaN(Number(valuationRaw)) || Number(valuationRaw)<0){ toast('Enter a valid Valuation amount.','err'); return; }
-  const additionalValuationRaw = document.getElementById('reconAdditionalValuation').value;
-  if(additionalValuationRaw!=='' && (isNaN(Number(additionalValuationRaw)) || Number(additionalValuationRaw)<0)){ toast('Enter a valid Additional Valuation amount.','err'); return; }
-  const additionalValuation = Number(additionalValuationRaw)||0;
-  if(additionalValuation > Number(valuationRaw)){ toast('Additional Valuation cannot be more than Valuation — check the numbers.','err'); return; }
-  const customerName = document.getElementById('reconCustomerName').value.trim();
-  const contactCheck = Validate.text(document.getElementById('reconContact').value, { min:0, max:20, label:'Contact No.' });
-  if(!contactCheck.ok){ toast(contactCheck.error,'err'); return; }
-  const blueBook = document.getElementById('reconBlueBook').value==='no' ? 'no' : 'yes';
-  const key = document.getElementById('reconKey').value==='no' ? 'no' : 'yes';
-  const file = document.getElementById('reconFile').value==='no' ? 'no' : 'yes';
-  const inspectionStatus = document.getElementById('reconInspection').value==='Pass' ? 'Pass' : 'Pending';
-  const sendToCheck = Validate.text(document.getElementById('reconSendTo').value, { min:0, max:60, label:'Send To' });
-  if(!sendToCheck.ok){ toast(sendToCheck.error,'err'); return; }
-  const sendTo = sendToCheck.value || 'Bikers Phidim';
-  const payload = {
-    model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
-    valuation: Number(valuationRaw), additionalValuation, payableAmount: Number(valuationRaw)-additionalValuation,
-    customerName, contact: contactCheck.value, blueBook, key, file, remarks: remarksCheck.value, sendTo, inspectionStatus
+  // Per-Mela breakdown — union of Mela names appearing in either Exchange
+  // units or ledger entries, so a mela with payments but (not yet) any
+  // exchange unit logged still shows up, and vice versa.
+  const byMela = {};
+  const touch = (name)=>{
+    const k = (name||'').trim() || '(No Mela)';
+    if(!byMela[k]) byMela[k] = { valuation:0, payable:0, collected:0 };
+    return byMela[k];
   };
-  const saveBtn = document.getElementById('saveReconStockBtn');
+  melaUnits.forEach(s=>{
+    const rec = touch(s.mela);
+    rec.valuation += Number(s.valuation)||0;
+    rec.payable += Number(s.payableAmount) ?? ((Number(s.valuation)||0)-(Number(s.additionalValuation)||0));
+  });
+  paymentLedgerData.forEach(p=>{
+    const rec = touch(p.mela);
+    rec.collected += Number(p.total) ?? ((p.cash||0)+(p.fonePay||0)+(p.cheque||0)+(p.other||0));
+  });
+  const body = document.getElementById('plByMelaBody');
+  const keys = Object.keys(byMela).sort((a,b)=>byMela[b].valuation-byMela[a].valuation);
+  if(!keys.length){
+    body.innerHTML = `<tr><td colspan="5" class="px-3 py-6 text-center text-slate-400 text-xs">No data yet.</td></tr>`;
+  } else {
+    body.innerHTML = keys.map(k=>{
+      const r = byMela[k];
+      const diff = r.payable - r.collected;
+      const diffCls = diff>0 ? 'text-amber-600' : diff<0 ? 'text-red-600' : 'text-emerald-600';
+      return `<tr class="border-b border-slate-100">
+        <td class="px-3 py-2 font-semibold text-slate-700">${escapeHtml(k)}</td>
+        <td class="px-3 py-2 text-right text-slate-600">${fmtRs(r.valuation)}</td>
+        <td class="px-3 py-2 text-right text-slate-600">${fmtRs(r.payable)}</td>
+        <td class="px-3 py-2 text-right text-slate-600">${fmtRs(r.collected)}</td>
+        <td class="px-3 py-2 text-right font-bold ${diffCls}">${fmtRs(Math.abs(diff))}${diff!==0?(diff>0?' due':' over'):''}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+window.openPaymentLedgerFormModal = ()=>{ populatePlMelaDatalist(); document.getElementById('paymentLedgerFormModal').classList.add('open'); };
+window.closePaymentLedgerFormModal = ()=>{ document.getElementById('paymentLedgerFormModal').classList.remove('open'); };
+
+function updatePlTotal(){
+  const cash = Number(document.getElementById('plCash').value)||0;
+  const fonePay = Number(document.getElementById('plFonePay').value)||0;
+  const cheque = Number(document.getElementById('plCheque').value)||0;
+  const other = Number(document.getElementById('plOther').value)||0;
+  document.getElementById('plTotalDisplay').textContent = fmtRs(cash+fonePay+cheque+other);
+}
+window.updatePlTotal = updatePlTotal;
+
+window.cancelPaymentLedgerEdit = ()=>{
+  currentEditPlId = null;
+  ['plDate','plMela','plCash','plFonePay','plCheque','plOther','plRemarks'].forEach(id=>document.getElementById(id).value='');
+  updatePlTotal();
+  const btn = document.getElementById('savePaymentLedgerBtn');
+  btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Save Entry';
+  document.getElementById('paymentLedgerFormTitle').textContent = 'Add Payment Entry';
+  const cancel = document.getElementById('cancelPaymentLedgerBtn');
+  cancel.classList.add('hidden'); cancel.classList.remove('flex');
+  closePaymentLedgerFormModal();
+};
+
+window._editPaymentLedger = (id)=>{
+  const p = paymentLedgerData.find(x=>x.id===id); if(!p) return;
+  document.getElementById('plDate').value = p.date||'';
+  document.getElementById('plMela').value = p.mela||'';
+  document.getElementById('plCash').value = p.cash||'';
+  document.getElementById('plFonePay').value = p.fonePay||'';
+  document.getElementById('plCheque').value = p.cheque||'';
+  document.getElementById('plOther').value = p.other||'';
+  document.getElementById('plRemarks').value = p.remarks||'';
+  updatePlTotal();
+  currentEditPlId = id;
+  const btn = document.getElementById('savePaymentLedgerBtn');
+  btn.innerHTML = '<i class="fas fa-rotate"></i> Update Entry';
+  document.getElementById('paymentLedgerFormTitle').textContent = 'Edit Payment Entry';
+  const cancel = document.getElementById('cancelPaymentLedgerBtn');
+  cancel.classList.remove('hidden'); cancel.classList.add('flex');
+  openPaymentLedgerFormModal();
+};
+
+document.getElementById('savePaymentLedgerBtn').addEventListener('click', async ()=>{
+  const dateVal = document.getElementById('plDate').value;
+  if(!dateVal){ toast('Pick a date.','err'); return; }
+  const melaCheck = Validate.text(document.getElementById('plMela').value, { min:0, max:80, label:'Mela' });
+  if(!melaCheck.ok){ toast(melaCheck.error,'err'); return; }
+  const cash = Number(document.getElementById('plCash').value)||0;
+  const fonePay = Number(document.getElementById('plFonePay').value)||0;
+  const cheque = Number(document.getElementById('plCheque').value)||0;
+  const other = Number(document.getElementById('plOther').value)||0;
+  if([cash,fonePay,cheque,other].some(v=>v<0)){ toast('Amounts cannot be negative.','err'); return; }
+  const total = cash+fonePay+cheque+other;
+  if(total<=0){ toast('Enter at least one payment amount.','err'); return; }
+  const remarksCheck = Validate.text(document.getElementById('plRemarks').value, { min:0, max:500, label:'Remarks' });
+  if(!remarksCheck.ok){ toast(remarksCheck.error,'err'); return; }
+  const payload = { date:dateVal, mela:melaCheck.value, cash, fonePay, cheque, other, total, remarks:remarksCheck.value };
+  const saveBtn = document.getElementById('savePaymentLedgerBtn');
   const saveBtnOrigHtml = saveBtn.innerHTML;
+  saveBtn.disabled = true;
   try{
-    if(reconBlueBookFilePending){
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Uploading Blue Book…';
-      try{
-        payload.blueBookDocId = await uploadBlueBookFile(reconBlueBookFilePending, regNoCheck.value, customerName, 'recondition_stock');
-      }catch(uploadErr){
-        toast('Blue Book upload failed: '+uploadErr.message,'err');
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = saveBtnOrigHtml;
-        return;
-      }
-    }
-    if(currentEditReconId){
-      await updateDoc(doc(db,'recondition_stock',currentEditReconId), payload);
-      logActivity('Updated', 'recondition_stock', payload);
-      toast('Recondition unit updated!');
-      window.cancelReconStockEdit();
+    if(currentEditPlId){
+      await updateDoc(doc(db,'payment_ledger',currentEditPlId), payload);
+      logActivity('Updated', 'payment_ledger', { model:payload.mela||'Payment Entry' });
+      toast('Payment entry updated!');
     } else {
-      const nextSn = await getAccurateNextSn('recondition_stock');
-      await addDoc(collection(db,'recondition_stock'), {...payload, sn:nextSn, status:'In Stock', addedAt:new Date()});
-      logActivity('Added', 'recondition_stock', {...payload, sn:nextSn});
-      window.cancelReconStockEdit();
-      toast('Recondition unit added — S.N '+nextSn+' assigned, marked In Stock.');
+      await addDoc(collection(db,'payment_ledger'), {...payload, addedAt:new Date()});
+      logActivity('Added', 'payment_ledger', { model:payload.mela||'Payment Entry' });
+      toast('Payment entry added!');
     }
-    // Belt-and-suspenders: force the modal shut after a successful save
-    // regardless of anything above, so a partial DOM-reset hiccup can
-    // never leave the popup stuck open when the save actually went through.
-    document.getElementById('reconStockFormModal')?.classList.remove('open');
+    window.cancelPaymentLedgerEdit();
+    document.getElementById('paymentLedgerFormModal')?.classList.remove('open');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
   finally{
     saveBtn.disabled = false;
@@ -15363,25 +15072,21 @@ document.getElementById('saveReconStockBtn').addEventListener('click', async ()=
   }
 });
 
-window.exportReconStockToExcel = ()=>{
-  const list = getFilteredReconStock();
+window.exportPaymentLedgerToExcel = ()=>{
+  const list = getFilteredPaymentLedger();
   if(!list.length){ toast('Nothing to export in the current view.','warn'); return; }
-  const sorted = [...list].sort((a,b)=>(Number(a.sn)||0)-(Number(b.sn)||0));
-  const rows = sorted.map(s=>({
-    'S.N': s.sn||'', 'Model': s.model||'', 'Make Year': s.makeYear||'', 'Reg. No': s.regNo||'',
-    'Valuation': s.valuation||0, 'Additional Valuation': s.additionalValuation||0, 'Payable Amount': s.payableAmount ?? ((s.valuation||0)-(s.additionalValuation||0)),
-    'Blue Book': s.blueBook==='yes'?'Yes':'No', 'Key': s.key==='yes'?'Yes':'No',
-    'File': s.file==='yes'?'Yes':'No', 'Ownership Transfer': s.inspectionStatus||'Pending', 'Customer': s.customerName||'', 'Contact': s.contact||'', 'Status': s.status||'In Stock', 'Send To': s.sendTo||'Bikers Phidim', 'Remarks': s.remarks||''
+  const rows = list.map(p=>({
+    'Date': p.date||'', 'Mela': p.mela||'', 'Cash': p.cash||0, 'Fone Pay': p.fonePay||0,
+    'Cheque': p.cheque||0, 'Other': p.other||0, 'Total': p.total ?? ((p.cash||0)+(p.fonePay||0)+(p.cheque||0)+(p.other||0)),
+    'Remarks': p.remarks||''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:6},{wch:24},{wch:10},{wch:18},{wch:12},{wch:14},{wch:14},{wch:10},{wch:8},{wch:8},{wch:10},{wch:22},{wch:14},{wch:10},{wch:16},{wch:30}];
+  ws['!cols'] = [{wch:12},{wch:24},{wch:12},{wch:12},{wch:12},{wch:12},{wch:14},{wch:30}];
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Recondition Stock');
-  XLSX.writeFile(wb, `recondition_stock_export_${new Date().toISOString().slice(0,10)}.xlsx`);
-  toast(`Exported ${rows.length} unit(s).`);
+  XLSX.utils.book_append_sheet(wb, ws, 'Payment Ledger');
+  XLSX.writeFile(wb, `payment_ledger_export_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast(`Exported ${rows.length} entr${rows.length!==1?'ies':'y'}.`);
 };
-
-window.loadReconStock = loadReconStock;
 
 
 /* ─── Exchange Stock Bulk Import (same pattern as Inventory/HH Inventory) ─── */
@@ -17935,7 +17640,6 @@ window.handleEventBgImageSelect = (event)=>{
 };
 
 window.saveEvent = async ()=>{
-  if(blockIfReconditionOnly()) return;
   const title = document.getElementById('evTitle').value.trim();
   const startDate = document.getElementById('evStartDate').value;
   const endDate = document.getElementById('evEndDate').value;
@@ -18293,9 +17997,9 @@ async function updateStorageOverview(){
   }
 
   // "At a Glance" — visible to every role, unlike the Master-only donut
-  // below it, so the right column is never an empty gap for Staff/
-  // Recondition IDs. Same numbers as the Document Vault quota card up
-  // top, just given room to breathe with a ring + status line.
+  // below it, so the right column is never an empty gap for Staff. Same
+  // numbers as the Document Vault quota card up top, just given room to
+  // breathe with a ring + status line.
   {
     const near2 = usedPctOfCap >= 90 ? 'full' : usedPctOfCap >= 70 ? 'filling' : 'ok';
     const cfg2 = {
@@ -18400,14 +18104,10 @@ async function updateStorageOverview(){
   if(restoreCard) restoreCard.classList.toggle('hidden', currentUserRole !== 'owner');
   // Downloading a backup is safe for any staff to do (it's read-only,
   // doesn't touch live data) — only *restoring* one back into Firestore
-  // needs to be Master-only. Recondition ID is the one exception: a full
-  // backup contains every collection, not just Exchange Stock, so it's
-  // outside what they're meant to have access to.
+  // needs to be Master-only.
   const backupBtn = document.getElementById('fullBackupBtn');
   if(backupBtn){
-    const canDownloadBackup = currentUserRole !== 'recondition';
-    backupBtn.classList.toggle('hidden', !canDownloadBackup);
-    backupBtn.classList.toggle('flex', canDownloadBackup);
+    backupBtn.classList.remove('hidden'); backupBtn.classList.add('flex');
   }
   if(totalLabel && ring && ringPct && currentUserRole === 'owner'){
     // Files and records sit in two SEPARATE Google free allowances now that
@@ -18563,7 +18263,6 @@ window.migrateDocsToStorage = async ()=>{
 };
 
 window.downloadFullBackup = ()=>{
-  if(currentUserRole === 'recondition'){ toast('Recondition ID can only download Exchange Stock / Blue Book files.','err'); return; }
   const btn = document.getElementById('fullBackupBtn');
   if(btn){ btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Preparing…'; }
   try{
@@ -18827,12 +18526,7 @@ window.setDocTypeFilter = (type)=>{
 function renderDocumentsPage(){
   const wrap = document.getElementById('docsListWrap');
   if(!wrap) return;
-  // A Recondition ID's Document Vault is just the Blue Books — the rest of
-  // the vault (bank letters, licences, staff paperwork) isn't theirs to
-  // see. Filtering the source list here means every count, tab and card
-  // below is automatically limited too, rather than needing a check in
-  // each place.
-  const docsView = currentUserRole === 'recondition' ? documents.filter(d=>d.category === 'Blue Book') : documents;
+  const docsView = documents;
   // Keep each tab's count in sync with the full (unfiltered) list, not just
   // whatever's currently showing — otherwise switching filters would make
   // the numbers drift.
@@ -18948,7 +18642,6 @@ window.handleDocFileSelect = (event)=>{
 };
 
 window.uploadDocument = async ()=>{
-  if(currentUserRole === 'recondition'){ toast('Recondition ID can only upload Blue Book files, from inside an Exchange Stock unit.','err'); return; }
  try{
   const nameEl = document.getElementById('docName');
   const descriptionEl = document.getElementById('docDescription');
@@ -19086,10 +18779,6 @@ window.downloadDocument = (id)=>{
   const d = documents.find(x=>x.id===id);
   const src = docFileSrc(d);
   if(!src) return;
-  if(currentUserRole === 'recondition' && d.category !== 'Blue Book'){
-    toast('Recondition ID can only download Blue Book files.','err');
-    return;
-  }
   let filename = (d.fileName || d.name || 'document').trim();
   const ext = String(d.fileExt||'').toLowerCase();
   if(ext && !filename.toLowerCase().endsWith('.'+ext)) filename += '.'+ext;
@@ -19356,7 +19045,6 @@ function renderAccTable(){
 }
 
 document.getElementById('saveAccBtn').addEventListener('click', async()=>{
-  if(blockIfReconditionOnly()) return;
   const nameCheck = Validate.text(document.getElementById('aName').value, { label:'Accessory name', max:60 });
   const priceCheck = Validate.positiveNumber(document.getElementById('aPrice').value, { label:'Price' });
 
@@ -19438,10 +19126,6 @@ window._saveSn=async(col,id,val)=>{
   }catch(e){ toast('Failed: '+friendlyError(e),'err'); }
 };
 
-// Recondition ID can see everything (so they have context on what a
-// trade-in bike is worth, what's already sold, etc.) but can only ever
-// change Exchange Stock records — every other mutating action in the app
-// runs through this same check.
 // When an Exchange unit is deleted, its Blue Book file in Document Vault
 // has nothing pointing at it anymore — so it follows the unit into Trash
 // (same 7-day window) instead of quietly occupying storage forever.
@@ -19457,27 +19141,8 @@ async function trashLinkedBlueBook(docId){
   }
 }
 
-function blockIfReconditionOnly(){
-  if(currentUserRole === 'recondition'){
-    toast('Recondition ID can view this, but only Recondition Stock can be edited.','err');
-    return true;
-  }
-  return false;
-}
-
 window._deleteEntry=async(col,id)=>{
-  if(currentUserRole === 'recondition'){
-    const RECONDITION_ALLOWED_COLLECTIONS = ['recondition_stock'];
-    // Blue Book files belong to the Recondition Stock units they're
-    // attached to, so a Recondition ID manages those too — but only Blue
-    // Books, never the rest of the Document Vault.
-    const isOwnBlueBook = col === 'documents' && documents.find(d=>d.id===id)?.category === 'Blue Book';
-    if(!RECONDITION_ALLOWED_COLLECTIONS.includes(col) && !isOwnBlueBook){
-      toast('Recondition ID can only change Recondition Stock and Blue Book files — everything else is view-only.','err');
-      return;
-    }
-  }
-  if(col==='documents' && currentUserRole !== 'owner' && currentUserRole !== 'recondition'){
+  if(col==='documents' && currentUserRole !== 'owner'){
     // A Normal ID can only delete a document they uploaded themselves —
     // anyone else's upload still needs a Master ID.
     const d = documents.find(x=>x.id===id);
@@ -19600,7 +19265,7 @@ window._deleteEntry=async(col,id)=>{
       }
       toast('Showroom exchange unit moved to Trash — S.N renumbered automatically.');
     } else {
-      const srcArr = col==='finance_schemes' ? financeSchemes : (col==='accessories' ? accessories : (col==='events' ? events : (col==='documents' ? documents : [])));
+      const srcArr = col==='finance_schemes' ? financeSchemes : (col==='accessories' ? accessories : (col==='events' ? events : (col==='documents' ? documents : (col==='payment_ledger' ? paymentLedgerData : []))));
       const target = srcArr.find(x=>x.id===id);
       if(target) await moveToTrash(col, id, target);
       await deleteDoc(doc(db,col,id));
@@ -19698,7 +19363,7 @@ function daysLeft(deletedAt){
   return Math.max(0, diffDays);
 }
 
-const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', exchange_stock:'Mela Exchange', exchange_stock_showroom:'Showroom Exchange', recondition_stock:'Recondition Stock', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event', documents:'Document', important_info:'Important Info', chalans:'Chalan Records', model_aliases:'Model Aliases' };
+const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', exchange_stock:'Mela Exchange', exchange_stock_showroom:'Showroom Exchange', payment_ledger:'Payment Ledger', bikes:'Price List', finance_schemes:'Finance Scheme', accessories:'Accessory', profiles:'Team', events:'Event', documents:'Document', important_info:'Important Info', chalans:'Chalan Records', model_aliases:'Model Aliases' };
 
 function renderTrashTable(){
   const tbody = document.getElementById('trashTableBody');
@@ -19744,10 +19409,6 @@ function renderTrashTable(){
 window.restoreFromTrash = async (trashId)=>{
   const t = trashData.find(x=>x.id===trashId);
   if(!t) return;
-  if(currentUserRole === 'recondition' && t.originalCollection!=='recondition_stock'){
-    toast('Recondition ID can only restore Recondition Stock items.','err');
-    return;
-  }
   const label = TRASH_LABELS[t.originalCollection] || t.originalCollection;
   const ok = await showConfirm({
     title: 'Restore this item?',
@@ -19915,7 +19576,6 @@ window.cancelImportantEdit = ()=>{
 };
 
 document.getElementById('saveImportantBtn').addEventListener('click', async ()=>{
-  if(blockIfReconditionOnly()) return;
   const v1 = document.getElementById('impVal1').value.trim();
   const v2 = document.getElementById('impVal2').value.trim();
   if(!v1 || !v2){ toast('Please fill both required fields.','err'); return; }
@@ -20784,7 +20444,7 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
 
 /* ─── Nav ─── */
 const SEC_TITLES = { financeTool:'DP Allocations', sheetTool:'EMI Rate Sheet', dashboard:'Dashboard', price:'Master Price List', inv:'Live Inventory', hhinv:'HH Inventory (Outdoor/Mela)', allinv:'All Inventory (Combined)', exchange:'Mela Exchange (Old Bikes)', exchangeSr:'Showroom Exchange (Old Bikes)', customers:'Customers', fin:'HFL Finance Options', acc:'Accessories Inventory', docs:'Document Vault', storage:'Storage', events:'Events & Offers', stock:'Stock Report', hhstock:'HH Stock Report', chalans:'Chalan Records', history:'Activity Log', trash:'Trash', important:'Important Info', modelAliases:'Model Aliases' };
-const SEC_IDS = { financeTool:'secFinanceTool', sheetTool:'secSheetTool', dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', reconditionStock:'secReconditionStock', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
+const SEC_IDS = { financeTool:'secFinanceTool', sheetTool:'secSheetTool', dashboard:'secDashboard', price:'secPrice', inv:'secInv', hhinv:'secHHInv', allinv:'secAllInv', exchange:'secExchange', exchangeSr:'secExchangeSr', paymentLedger:'secPaymentLedger', customers:'secCustomers', fin:'secFin', acc:'secAcc', docs:'secDocs', storage:'secStorage', events:'secEvents', stock:'secStock', hhstock:'secHHStock', chalans:'secChalans', history:'secHistory', trash:'secTrash', important:'secImportant', modelAliases:'secModelAliases' };
 // Starts a page's Firestore listener the first time that page is opened,
 // then remembers it's running so re-visiting costs nothing. Keeps sign-in
 // light without changing how any page behaves once you're on it.
@@ -20848,17 +20508,6 @@ function showNavLoader(){
 }
 
 window.switchSec=(sec)=>{
-  // A Recondition ID exists to manage their own Recondition Stock, and to
-  // view (not edit) Exchange Stock and Blue Books — sending them anywhere
-  // else in the app exposes business data (pricing, other customers'
-  // records, dealership finances) that isn't their job to see, so every
-  // section but the allowed ones redirects back here regardless of how
-  // the navigation was triggered.
-  const RECON_ALLOWED_SECTIONS = ['reconditionStock','exchange','exchangeSr','docs','storage','price','events','trash','sheetTool'];
-  if(currentUserRole === 'recondition' && !RECON_ALLOWED_SECTIONS.includes(sec)){
-    toast("Recondition ID doesn't have access to that section.",'err');
-    sec = 'exchange';
-  }
   if(sec==='history' && currentUserRole !== 'owner'){
     toast("Only a Master ID can view the full Activity Log — your own recent activity is in My Profile.",'err');
     sec = 'price';
@@ -20983,18 +20632,13 @@ window.runGlobalSearch = (q)=>{
   const MAX_PER_GROUP = 5;
   let html = '';
   let total = 0;
-  // Recondition IDs only work with old-bike trade-ins, so search shows them
-  // just Exchange Stock and the Price List — never inventory, chalans or
-  // contacts, which carry other customers' data they aren't meant to see.
-  const reconLimited = currentUserRole === 'recondition';
-
-  const invMatches = reconLimited ? [] : invData.filter(s => matches(s.model)||matches(s.chassis)||matches(s.engine)||matches(s.regNo)||matches(s.customerName)).slice(0, MAX_PER_GROUP);
+  const invMatches = invData.filter(s => matches(s.model)||matches(s.chassis)||matches(s.engine)||matches(s.regNo)||matches(s.customerName)).slice(0, MAX_PER_GROUP);
   if(invMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Inventory</div>`;
     html += invMatches.map(s => globalSearchResultRow('fa-warehouse','#059669', escapeHtml(s.model||'—'), `${escapeHtml(s.chassis||'')} · ${escapeHtml(s.status||'')}`, `window.jumpToSearchResult('inventory','${s.id}')`)).join('');
     total += invMatches.length;
   }
-  const hhMatches = reconLimited ? [] : hhInvData.filter(s => matches(s.model)||matches(s.chassis)||matches(s.engine)||matches(s.regNo)||matches(s.customerName)).slice(0, MAX_PER_GROUP);
+  const hhMatches = hhInvData.filter(s => matches(s.model)||matches(s.chassis)||matches(s.engine)||matches(s.regNo)||matches(s.customerName)).slice(0, MAX_PER_GROUP);
   if(hhMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">HH Inventory</div>`;
     html += hhMatches.map(s => globalSearchResultRow('fa-tents','#0EA5E9', escapeHtml(s.model||'—'), `${escapeHtml(s.chassis||'')} · ${escapeHtml(s.status||'')}`, `window.jumpToSearchResult('hh_inventory','${s.id}')`)).join('');
@@ -21006,13 +20650,13 @@ window.runGlobalSearch = (q)=>{
     html += bikeMatches.map(b => globalSearchResultRow('fa-tags','#5A4740', escapeHtml(b.name||'—'), `Rs. ${(b.price||0).toLocaleString('en-IN')}`, `window.jumpToSearchResult('price','${b.id}')`)).join('');
     total += bikeMatches.length;
   }
-  const chalanMatches = reconLimited ? [] : chalanData.filter(c => matches(c.model)||matches(c.chassis)||matches(c.custName)||matches(c.chalanNo)).slice(0, MAX_PER_GROUP);
+  const chalanMatches = chalanData.filter(c => matches(c.model)||matches(c.chassis)||matches(c.custName)||matches(c.chalanNo)).slice(0, MAX_PER_GROUP);
   if(chalanMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Chalan Records</div>`;
     html += chalanMatches.map(c => globalSearchResultRow('fa-file-invoice','#0EA5E9', escapeHtml(c.custName||c.model||'—'), `${escapeHtml(c.model||'')} · ${escapeHtml(c.chalanNo||'')}`, `window.jumpToSearchResult('chalans','${c.id}')`)).join('');
     total += chalanMatches.length;
   }
-  const impMatches = reconLimited ? [] : importantData.filter(a => matches(a.value1)||matches(a.value2)||matches(a.note)).slice(0, MAX_PER_GROUP);
+  const impMatches = importantData.filter(a => matches(a.value1)||matches(a.value2)||matches(a.note)).slice(0, MAX_PER_GROUP);
   if(impMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Important Info</div>`;
     html += impMatches.map(a => globalSearchResultRow(a.type==='link'?'fa-link':'fa-user','#5A4740', escapeHtml(a.value1||'—'), escapeHtml(a.value2||''), `window.jumpToSearchResult('important','${a.id}')`)).join('');
