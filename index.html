@@ -12326,6 +12326,7 @@ let stockReportAllUnits = [];
 // filename match whichever report was actually opened.
 let currentReportKind = 'inventory';
 
+window.loadStockReportData = loadStockReportData;
 async function loadStockReportData(forceRefresh){
   if(stockReportGrouped && !forceRefresh) { renderStockDashboard(); return; }
   const listEl = document.getElementById('stockModelList');
@@ -12600,6 +12601,7 @@ let hhStockReportTotalUnits = 0;
 let hhStockReportSoldUnits = 0;
 let hhStockReportAllUnits = [];
 
+window.loadHHStockReportData = loadHHStockReportData;
 async function loadHHStockReportData(forceRefresh){
   if(hhStockReportGrouped && !forceRefresh) { renderHHStockDashboard(); return; }
   const listEl = document.getElementById('hhStockModelList');
@@ -15822,8 +15824,6 @@ function populateReconSendToDatalist(){
 }
 
 window.openReconStockFormModal = ()=>{ populateReconSendToDatalist(); document.getElementById('reconStockFormModal').classList.add('open'); };
-window.openExchangeSrImportModal = ()=>{ document.getElementById('exSrImportModal').classList.add('open'); };
-window.closeExchangeSrImportModal = ()=>{ document.getElementById('exSrImportModal').classList.remove('open'); };
 window.closeReconStockFormModal = ()=>{ document.getElementById('reconStockFormModal').classList.remove('open'); };
 
 function updateReconPayableAmt(){
