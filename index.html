@@ -8366,6 +8366,12 @@ window.signOutFromSidebar = ()=>signOut(auth);
     document.querySelectorAll('.yng-card-shell').forEach(card=>{
      try {
       if(card.dataset.modalized) return;
+      // Skip cards that are already inside a manually-built modal
+      // (Mela Exchange, Showroom Exchange, Payment Ledger each have their
+      // own proper "Bulk Import" popup wired to a toolbar button). Without
+      // this, the generic mover would steal the card out of that modal and
+      // re-wrap it, leaving the toolbar button opening an empty overlay.
+      if(card.closest('.form-modal-overlay')) return;
       const heading = card.querySelector('.section-title');
       if(!heading || !/bulk import from excel/i.test(heading.textContent)) return;
       card.dataset.modalized = '1';
@@ -8402,7 +8408,7 @@ window.signOutFromSidebar = ()=>signOut(auth);
         impBtn.type = 'button';
         impBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 border border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all';
         impBtn.innerHTML = '<i class="fas fa-file-import text-[11px]"></i> Import from Excel';
-        impBtn.addEventListener('click', ()=>{ overlay.classList.add('flex'); });
+        impBtn.addEventListener('click', ()=>{ if(addModal) addModal.classList.remove('open'); overlay.classList.add('flex'); });
         row.appendChild(impBtn);
         if(exportBtn){
           const expBtn = document.createElement('button');
@@ -15569,7 +15575,7 @@ document.getElementById('plImportExcelBtn').addEventListener('click', async ()=>
       results.failed.push({row, reason:'Invalid or unrecognized Date'});
       continue;
     }
-    const melaCheck = Validate.text(row.mela, { label:'Mela', max:80 });
+    const melaCheck = Validate.text(row.mela, { min:0, label:'Mela', max:80 });
     if(!melaCheck.ok){ results.failed.push({row, reason: melaCheck.error}); continue; }
     if([row.cash,row.fonePay,row.cheque,row.other].some(v=>v<0)){
       results.failed.push({row, reason:'Amounts cannot be negative'});
