@@ -1139,12 +1139,12 @@
 #secSheetTool .pv-titlebar{flex:0 0 auto;text-align:center;color:#000;font-size:12pt;font-weight:700;margin-bottom:4mm}
 #secSheetTool .pv-tablewrap{flex:0 0 auto}
 #secSheetTool .pv-datebar{flex:0 0 auto;text-align:center;color:#000;font-size:9pt;margin-top:4mm}
-#secSheetTool .pv-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:9.2pt;color:#000;border:1px solid #000}
-#secSheetTool .pv-table th{background:#4C7A2A;color:#fff;padding:7px 4px;text-align:right;font-size:8.4pt;letter-spacing:.01em;word-wrap:break-word;border:0.75px solid #000}
+#secSheetTool .pv-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:11pt;color:#000;border:1px solid #000}
+#secSheetTool .pv-table th{background:#4C7A2A;color:#fff !important;font-weight:700 !important;padding:8px 4px;text-align:right;font-size:10pt;letter-spacing:.01em;word-wrap:break-word;border:0.75px solid #000}
 #secSheetTool .pv-table th:nth-child(1), #secSheetTool .pv-table td:nth-child(1){text-align:center;width:4%}
 #secSheetTool .pv-table th:nth-child(2), #secSheetTool .pv-table td:nth-child(2){text-align:left;width:17%}
 #secSheetTool .pv-table th:nth-child(n+3), #secSheetTool .pv-table td:nth-child(n+3){width:8.6%}
-#secSheetTool .pv-table td{padding:4px;border:0.5px solid #000;text-align:right;word-wrap:break-word;overflow-wrap:break-word}
+#secSheetTool .pv-table td{padding:5px 4px;border:0.5px solid #000;text-align:right;font-weight:600;word-wrap:break-word;overflow-wrap:break-word}
 #secSheetTool .pv-table tr:nth-child(even){background:#D9D9D9}
 #secSheetTool .pv-table td.total-cell{font-weight:bold}
 @media print{#secSheetTool #sheetLoader{display:none !important}
@@ -2359,9 +2359,9 @@
   .pv-titlebar .sub{ font-size:9pt; font-weight:600; color:#333; margin-top:1mm; }
   .pv-tablewrap{ flex:1 1 auto; overflow:hidden; }
   .pv-datebar{ flex:0 0 auto; text-align:right; color:#000; font-size:8.5pt; margin-top:4mm; }
-  .pv-table{ width:100%; table-layout:fixed; border-collapse:collapse; font-size:8.2pt; color:#000; border:1px solid #000; }
-  .pv-table th{ background:#5A4740; color:#fff; padding:6px 4px; text-align:center; font-size:7.4pt; letter-spacing:.01em; border:0.75px solid #000; }
-  .pv-table td{ padding:4px 5px; border:0.5px solid #000; text-align:center; word-wrap:break-word; }
+  .pv-table{ width:100%; table-layout:fixed; border-collapse:collapse; font-size:10.5pt; color:#000; border:1px solid #000; }
+  .pv-table th{ background:#4C7A2A; color:#fff !important; font-weight:700 !important; padding:7px 4px; text-align:center; font-size:9.5pt; letter-spacing:.01em; border:0.75px solid #000; }
+  .pv-table td{ padding:5px; border:0.5px solid #000; text-align:center; font-weight:600; word-wrap:break-word; }
   .pv-table td.left{ text-align:left; }
   .pv-table tr:nth-child(even){ background:#EEF2F7; }
   .pv-table tr.grand-total{ background:#F6EBE0 !important; font-weight:bold; }
@@ -3801,14 +3801,9 @@
       </div><!-- /exchangeFormModal -->
 
       <!-- Excel Bulk Import -->
-      <div id="exImportModal" class="form-modal-overlay" onclick="if(event.target===this) closeExchangeImportModal()">
-      <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
-        <div class="flex items-center justify-between mb-1 pb-4 border-b border-slate-100">
-          <div class="flex items-center gap-2 section-title text-2xl">
-            <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
-          </div>
-          <button onclick="closeExchangeImportModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+        <div class="flex items-center gap-2 section-title text-2xl mb-1">
+          <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
         </div>
         <p class="text-xs text-slate-500 mb-4 mt-3">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, MakeYear, RegNo, Valuation, BlueBook, Key, File, Customer, SendTo, Remarks</b> (only Model, MakeYear, RegNo, Valuation are required — rest are optional, BlueBook/Key/File accept Yes/No, SendTo defaults to Showroom). S.N fills in automatically.</p>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -3831,8 +3826,6 @@
           <div id="exImportSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
         </div>
       </div>
-      </div><!-- /form-modal-box -->
-      </div><!-- /exImportModal -->
 
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
@@ -3881,9 +3874,6 @@
           </div>
           <button onclick="openMelaManager()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-store" style="color:#D98324"></i> Manage Melas
-          </button>
-          <button onclick="openExchangeImportModal()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
-            <i class="fas fa-file-excel" style="color:#059669"></i> Bulk Import
           </button>
           <button onclick="openExchangeFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Unit
@@ -4048,14 +4038,9 @@
       </div><!-- /exchangeSrFormModal -->
 
       <!-- Excel Bulk Import -->
-      <div id="exSrImportModal" class="form-modal-overlay" onclick="if(event.target===this) closeExchangeSrImportModal()">
-      <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
-        <div class="flex items-center justify-between mb-1 pb-4 border-b border-slate-100">
-          <div class="flex items-center gap-2 section-title text-2xl">
-            <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
-          </div>
-          <button onclick="closeExchangeSrImportModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+        <div class="flex items-center gap-2 section-title text-2xl mb-1">
+          <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
         </div>
         <p class="text-xs text-slate-500 mb-4 mt-3">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, MakeYear, RegNo, Valuation, BlueBook, Key, File, Customer, SendTo, Remarks</b> (only Model, MakeYear, RegNo, Valuation are required — rest are optional, BlueBook/Key/File accept Yes/No, SendTo defaults to Showroom). S.N fills in automatically.</p>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -4078,8 +4063,6 @@
           <div id="exSrImportSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
         </div>
       </div>
-      </div><!-- /form-modal-box -->
-      </div><!-- /exSrImportModal -->
 
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
@@ -4123,9 +4106,6 @@
             <input type="text" id="exchangeSrSearch" autocomplete="off" placeholder="Search model, reg no, customer…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
           </div>
-          <button onclick="openExchangeSrImportModal()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
-            <i class="fas fa-file-excel" style="color:#059669"></i> Bulk Import
-          </button>
           <button onclick="openExchangeSrFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Unit
           </button>
@@ -4282,14 +4262,9 @@
       </div><!-- /paymentLedgerFormModal -->
 
       <!-- Excel Bulk Import -->
-      <div id="plImportModal" class="form-modal-overlay" onclick="if(event.target===this) closePaymentLedgerImportModal()">
-      <div class="form-modal-box">
       <div class="yng-card-shell p-5 mb-5">
-        <div class="flex items-center justify-between mb-1 pb-4 border-b border-slate-100">
-          <div class="flex items-center gap-2 section-title text-2xl">
-            <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
-          </div>
-          <button onclick="closePaymentLedgerImportModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all flex-shrink-0"><i class="fas fa-xmark"></i></button>
+        <div class="flex items-center gap-2 section-title text-2xl mb-1">
+          <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
         </div>
         <p class="text-xs text-slate-500 mb-4 mt-3">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Date, Mela, Cash, FonePay, Cheque, Other, Remarks</b> (Date required in YYYY-MM-DD; at least one of Cash/FonePay/Cheque/Other must be more than 0). Total is calculated automatically — don't include a Total column.</p>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -4312,8 +4287,6 @@
           <div id="plImportSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
         </div>
       </div>
-      </div><!-- /form-modal-box -->
-      </div><!-- /plImportModal -->
 
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
@@ -4331,9 +4304,6 @@
             <input type="text" id="paymentLedgerSearch" autocomplete="off" placeholder="Search mela, remarks…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
           </div>
-          <button onclick="openPaymentLedgerImportModal()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
-            <i class="fas fa-file-excel" style="color:#059669"></i> Bulk Import
-          </button>
           <button onclick="openPaymentLedgerFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Entry
           </button>
@@ -8366,12 +8336,6 @@ window.signOutFromSidebar = ()=>signOut(auth);
     document.querySelectorAll('.yng-card-shell').forEach(card=>{
      try {
       if(card.dataset.modalized) return;
-      // Skip cards that are already inside a manually-built modal
-      // (Mela Exchange, Showroom Exchange, Payment Ledger each have their
-      // own proper "Bulk Import" popup wired to a toolbar button). Without
-      // this, the generic mover would steal the card out of that modal and
-      // re-wrap it, leaving the toolbar button opening an empty overlay.
-      if(card.closest('.form-modal-overlay')) return;
       const heading = card.querySelector('.section-title');
       if(!heading || !/bulk import from excel/i.test(heading.textContent)) return;
       card.dataset.modalized = '1';
@@ -14261,8 +14225,6 @@ function populateMelaDatalist(){
 }
 
 window.openExchangeFormModal = ()=>{ populateSendToDatalist(); populateMelaDatalist(); document.getElementById('exchangeFormModal').classList.add('open'); };
-window.openExchangeImportModal = ()=>{ document.getElementById('exImportModal').classList.add('open'); };
-window.closeExchangeImportModal = ()=>{ document.getElementById('exImportModal').classList.remove('open'); };
 window.closeExchangeFormModal = ()=>{ document.getElementById('exchangeFormModal').classList.remove('open'); };
 
 function updateExPayableAmt(){
@@ -15019,8 +14981,6 @@ document.getElementById('fixExchangeSrSnBtn').addEventListener('click', async ()
 });
 
 window.openExchangeSrFormModal = ()=>{ populateSendToDatalist(); document.getElementById('exchangeSrFormModal').classList.add('open'); };
-window.openExchangeSrImportModal = ()=>{ document.getElementById('exSrImportModal').classList.add('open'); };
-window.closeExchangeSrImportModal = ()=>{ document.getElementById('exSrImportModal').classList.remove('open'); };
 window.closeExchangeSrFormModal = ()=>{ document.getElementById('exchangeSrFormModal').classList.remove('open'); };
 
 function updateExSrPayableAmt(){
@@ -15583,7 +15543,7 @@ document.getElementById('plImportExcelBtn').addEventListener('click', async ()=>
     }
     const total = row.cash+row.fonePay+row.cheque+row.other;
     if(total<=0){ results.failed.push({row, reason:'No payment amount (Cash/FonePay/Cheque/Other all zero)'}); continue; }
-    const remarksCheck = Validate.text(row.remarks, { label:'Remarks', max:500 });
+    const remarksCheck = Validate.text(row.remarks, { min:0, label:'Remarks', max:500 });
     if(!remarksCheck.ok){ results.failed.push({row, reason: remarksCheck.error}); continue; }
     try{
       await addDoc(collection(db,'payment_ledger'), {
@@ -15617,8 +15577,6 @@ document.getElementById('plImportExcelBtn').addEventListener('click', async ()=>
   document.getElementById('plExcelFileLabel').textContent = 'Click to choose Excel / CSV file…';
 });
 
-window.openPaymentLedgerImportModal = ()=>{ document.getElementById('plImportModal').classList.add('open'); };
-window.closePaymentLedgerImportModal = ()=>{ document.getElementById('plImportModal').classList.remove('open'); };
 
 
 /* ═══════════════════════════════════════════════════════════════════════
