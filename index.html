@@ -7,7 +7,7 @@
 <title>Bajaj Bikes — Admin Panel</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="icon" type="image/png" href="favicon.png">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=Dancing+Script:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -167,7 +167,7 @@
 
   /* Page header eyebrow — matches index.html .section-label */
   .section-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #5A4740; }
-  .section-title { font-family: 'Bebas Neue', cursive; line-height: 1; letter-spacing: 0.01em; color: #0F172A; }
+  .section-title { font-family: 'Dancing Script', cursive; font-weight: 700; line-height: 1.1; letter-spacing: 0.01em; color: #0F172A; }
   .eyebrow-line::before { content:''; display:inline-block; width:14px; height:2px; background:#5A4740; margin-right:6px; vertical-align:middle; }
 
   @media (max-width: 640px) {
@@ -1256,7 +1256,7 @@
 #secSheetTool .event-popup-dot.active{ background:#5A4740; width:20px; border-radius:4px; }
 #secSheetTool .no-scrollbar{ scrollbar-width:none; -ms-overflow-style:none; }
 #secSheetTool .no-scrollbar::-webkit-scrollbar{ display:none; }
-#secSheetTool .section-title{ font-family: 'Bebas Neue', cursive; line-height: 1; letter-spacing: 0.01em; color: #0F172A; }
+#secSheetTool .section-title{ font-family: 'Dancing Script', cursive; font-weight: 700; line-height: 1.1; letter-spacing: 0.01em; color: #0F172A; }
 @keyframes slideIn { from{opacity:0;transform:translateY(16px) scale(.96);} to{opacity:1;transform:translateY(0) scale(1);} }
 
   /* ═══ DP ALLOCATIONS — scoped to #secFinanceTool so this section's
@@ -2710,6 +2710,9 @@
         <button id="navSheetTool" onclick="switchSec('sheetTool');closeMobileMenu()" class="nav-tab sidebar-link" data-label="EMI Rate Sheet">
           <i class="fas fa-table"></i> EMI Rate Sheet
         </button>
+        <button id="navFin" onclick="switchSec('fin');closeMobileMenu()" class="nav-tab sidebar-link" data-label="HFL Finance">
+          <i class="fas fa-percent"></i> HFL Finance
+        </button>
         <div class="sidebar-section-label">Dealership</div>
         <button id="navPrice" onclick="switchSec('price');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Price List">
           <i class="fas fa-tags"></i> Price List
@@ -2723,6 +2726,13 @@
         <button id="navAllInv" onclick="switchSec('allinv');closeMobileMenu()" class="nav-tab sidebar-link" data-label="All Inventory">
           <i class="fas fa-layer-group"></i> All Inventory
         </button>
+        <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Accessories">
+          <i class="fas fa-helmet-safety"></i> Accessories
+        </button>
+        <button id="navCustomers" onclick="switchSec('customers');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Customers">
+          <i class="fas fa-address-card"></i> Customers
+        </button>
+        <div class="sidebar-section-label">Exchange</div>
         <button id="navExchange" onclick="switchSec('exchange');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Mela Exchange">
           <i class="fas fa-right-left"></i> Mela Exchange
         </button>
@@ -2734,15 +2744,6 @@
         </button>
         <button id="navReconStock" onclick="switchSec('reconditionStock');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Recondition Stock">
           <i class="fas fa-screwdriver-wrench"></i> Recondition Stock
-        </button>
-        <button id="navCustomers" onclick="switchSec('customers');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Customers">
-          <i class="fas fa-address-card"></i> Customers
-        </button>
-        <button id="navFin" onclick="switchSec('fin');closeMobileMenu()" class="nav-tab sidebar-link" data-label="HFL Finance">
-          <i class="fas fa-percent"></i> HFL Finance
-        </button>
-        <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Accessories">
-          <i class="fas fa-helmet-safety"></i> Accessories
         </button>
         <div class="sidebar-section-label">Marketing</div>
         <button id="navEvents" onclick="switchSec('events');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Events & Offers">
