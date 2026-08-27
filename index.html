@@ -2729,9 +2729,6 @@
         <button id="navAcc" onclick="switchSec('acc');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Accessories">
           <i class="fas fa-helmet-safety"></i> Accessories
         </button>
-        <button id="navCustomers" onclick="switchSec('customers');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Customers">
-          <i class="fas fa-address-card"></i> Customers
-        </button>
         <div class="sidebar-section-label">Exchange</div>
         <button id="navExchange" onclick="switchSec('exchange');closeMobileMenu()" class="nav-tab sidebar-link" data-label="Mela Exchange">
           <i class="fas fa-right-left"></i> Mela Exchange
@@ -4461,6 +4458,33 @@
       </div>
       </div><!-- /form-modal-box -->
       </div><!-- /reconStockFormModal -->
+
+      <!-- Excel Bulk Import -->
+      <div class="yng-card-shell p-5 mb-5">
+        <div class="flex items-center gap-2 section-title text-2xl mb-1">
+          <i class="fas fa-file-excel text-emerald-500 text-lg"></i> Bulk Import from Excel
+        </div>
+        <p class="text-xs text-slate-500 mb-4 mt-3">Upload an <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.xlsx</code> or <code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-mono">.csv</code> file with header row: <b class="text-slate-700">Model, MakeYear, RegNo, Valuation, AdditionalValuation, BlueBook, Key, File, Customer, Contact, SendTo, Remarks</b> (only Model, MakeYear, RegNo, Valuation are required — rest optional; BlueBook/Key/File accept Yes/No). S.N fills in automatically.</p>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <label class="flex-1 flex items-center gap-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl px-4 py-3 cursor-pointer hover:bg-emerald-50 hover:border-emerald-400 transition-all">
+            <i class="fas fa-cloud-arrow-up text-emerald-500 text-lg flex-shrink-0"></i>
+            <span id="reconExcelFileLabel" class="text-sm text-slate-600 font-medium truncate">Click to choose Excel / CSV file…</span>
+            <input type="file" id="reconExcelFileInput" accept=".xlsx,.xls,.csv" class="hidden"/>
+          </label>
+          <button id="reconDownloadTemplateBtn" class="cta-secondary whitespace-nowrap">
+            <i class="fas fa-download"></i> Sample Template
+          </button>
+          <button id="reconImportExcelBtn" disabled class="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-bold shadow-btn hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 whitespace-nowrap">
+            <i class="fas fa-upload"></i> <span id="reconImportExcelBtnText">Import Rows</span>
+          </button>
+        </div>
+        <div id="reconImportSummary" class="hidden mt-4 rounded-xl border border-slate-200 overflow-hidden">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-wrap">
+            <span id="reconImportSummaryHead" class="text-xs font-bold text-slate-600"></span>
+          </div>
+          <div id="reconImportSummaryBody" class="max-h-52 overflow-y-auto text-xs divide-y divide-slate-100"></div>
+        </div>
+      </div>
 
       <!-- Table -->
       <div class="yng-card-shell overflow-hidden">
@@ -6648,7 +6672,8 @@ import {
   setPersistence, browserLocalPersistence, browserSessionPersistence
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import {
-  getFirestore, collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc, where,
+  getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  collection, onSnapshot, deleteDoc, doc, addDoc, getDoc, getDocs, updateDoc, setDoc, where,
   serverTimestamp, query, orderBy, limit, runTransaction, writeBatch, getCountFromServer
 } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 import {
@@ -6724,7 +6749,22 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+// Offline support — Firestore keeps a local copy of everything already
+// loaded in the browser's IndexedDB. So at a mela with no signal the app
+// still opens and shows the latest data it saw, and any Add/Edit done
+// offline is queued and syncs automatically the moment the connection is
+// back. persistentMultipleTabManager lets it work across multiple open
+// tabs. Falls back to plain in-memory (online-only) if the browser blocks
+// persistent storage (e.g. private mode), so the app never fails to load.
+let db;
+try {
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+  });
+} catch (e) {
+  console.warn('Offline cache unavailable, using online-only Firestore:', e);
+  db = getFirestore(app);
+}
 // Firebase Storage holds the actual file bytes. Keeping them here instead
 // of inline in Firestore is what stops every page load from downloading
 // the entire Document Vault before the app can render.
@@ -6737,6 +6777,31 @@ const storage = getStorage(app);
 // whole time. Signed out immediately after each use.
 const secondaryApp = initializeApp(firebaseConfig, "StaffCreation");
 const secondaryAuth = getAuth(secondaryApp);
+
+// Offline status banner — a small fixed pill that appears only when the
+// device loses connection, so the user knows the app is running on cached
+// data and that anything they add will sync once they're back online.
+(function setupOfflineBanner(){
+  function ensureBanner(){
+    let b = document.getElementById('offlineBanner');
+    if(!b){
+      b = document.createElement('div');
+      b.id = 'offlineBanner';
+      b.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:9999;background:#7A5C1E;color:#fff;font-size:13px;font-weight:700;padding:8px 16px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.25);display:none;align-items:center;gap:8px;max-width:92vw;';
+      b.innerHTML = '<i class="fas fa-wifi" style="opacity:.7"></i> Offline — showing saved data. Changes will sync when back online.';
+      (document.body||document.documentElement).appendChild(b);
+    }
+    return b;
+  }
+  function update(){
+    const b = ensureBanner();
+    b.style.display = navigator.onLine ? 'none' : 'flex';
+  }
+  window.addEventListener('online', update);
+  window.addEventListener('offline', update);
+  if(document.readyState !== 'loading') update();
+  else document.addEventListener('DOMContentLoaded', update);
+})();
 
 let currentEditId = null;
 // Which accessories (from the model's category) are toggled ON for the bike
@@ -14524,7 +14589,9 @@ document.getElementById('exImportExcelBtn').addEventListener('click', async ()=>
   const results = { success:[], failed:[] };
   let runningTotal = await getAccurateCombinedExchangeCount(true); // real Firestore count (Mela + Showroom combined), not just what's paginated locally
 
+  const __impTotal_exExcelParsedRows = exExcelParsedRows.length; let __impDone_exExcelParsedRows = 0;
   for(const row of exExcelParsedRows){
+    __impDone_exExcelParsedRows++; if(typeof btnText!=='undefined' && btnText) btnText.textContent = 'Importing '+__impDone_exExcelParsedRows+'/'+__impTotal_exExcelParsedRows+'…';
     if(runningTotal >= MAX_EXCHANGE_STOCK){
       results.failed.push({row, reason:`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached (Mela + Showroom combined)`});
       continue;
@@ -15531,7 +15598,9 @@ document.getElementById('plImportExcelBtn').addEventListener('click', async ()=>
 
   const results = { success:[], failed:[] };
 
+  const __impTotal_plExcelParsedRows = plExcelParsedRows.length; let __impDone_plExcelParsedRows = 0;
   for(const row of plExcelParsedRows){
+    __impDone_plExcelParsedRows++; if(typeof btnText!=='undefined' && btnText) btnText.textContent = 'Importing '+__impDone_plExcelParsedRows+'/'+__impTotal_plExcelParsedRows+'…';
     if(!/^\d{4}-\d{2}-\d{2}$/.test(row.date)){
       results.failed.push({row, reason:'Invalid or unrecognized Date'});
       continue;
@@ -16077,7 +16146,9 @@ document.getElementById('exSrImportExcelBtn').addEventListener('click', async ()
   const results = { success:[], failed:[] };
   let runningTotal = await getAccurateCombinedExchangeCount(true); // real Firestore count (Mela + Showroom combined), not just what's paginated locally
 
+  const __impTotal_exSrExcelParsedRows = exSrExcelParsedRows.length; let __impDone_exSrExcelParsedRows = 0;
   for(const row of exSrExcelParsedRows){
+    __impDone_exSrExcelParsedRows++; if(typeof btnText!=='undefined' && btnText) btnText.textContent = 'Importing '+__impDone_exSrExcelParsedRows+'/'+__impTotal_exSrExcelParsedRows+'…';
     if(runningTotal >= MAX_EXCHANGE_STOCK){
       results.failed.push({row, reason:`Storage full — ${MAX_EXCHANGE_STOCK} unit limit reached (Mela + Showroom combined)`});
       continue;
@@ -16129,6 +16200,167 @@ document.getElementById('exSrImportExcelBtn').addEventListener('click', async ()
   exSrExcelParsedRows = [];
   document.getElementById('exSrExcelFileInput').value = '';
   document.getElementById('exSrExcelFileLabel').textContent = 'Click to choose Excel / CSV file…';
+});
+
+/* ─── Recondition Stock Bulk Import (mirrors Showroom Exchange) ─── */
+let reconExcelParsedRows = [];
+
+document.getElementById('reconExcelFileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  const importBtn = document.getElementById('reconImportExcelBtn');
+  const label = document.getElementById('reconExcelFileLabel');
+  const summary = document.getElementById('reconImportSummary');
+  summary.classList.add('hidden');
+  reconExcelParsedRows = [];
+  importBtn.disabled = true;
+
+  if(!file){ label.textContent='Click to choose Excel / CSV file…'; return; }
+  label.textContent = file.name;
+
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const aoa = XLSX.utils.sheet_to_json(sheet, {header:1, defval:'', blankrows:false});
+      if(!aoa.length){ toast('File appears empty.','err'); return; }
+
+      const rawHeaders = aoa[0].map(h=>h.toString().trim().toLowerCase().replace(/[^a-z]/g,''));
+      function findCol(keywords){
+        for(let i=0;i<rawHeaders.length;i++){
+          if(keywords.some(kw=>rawHeaders[i].includes(kw))) return i;
+        }
+        return -1;
+      }
+      const colIdx = {
+        model:      findCol(['modelname','model']),
+        makeYear:   findCol(['makeyear','year']),
+        regNo:      findCol(['registrationnumber','regno','regd','registration']),
+        valuation:  findCol(['purchaseprice','valuation','value','price']),
+        additionalValuation: findCol(['additionalvaluation','lessadditionalvaluation','additional']),
+        blueBook:   findCol(['bluebook']),
+        key:        findCol(['key']),
+        file:       findCol(['file']),
+        customer:   findCol(['sellername','customername','seller','customer']),
+        contact:    findCol(['contact','contactno','phone','mobile']),
+        sendTo:     findCol(['sendto','destination']),
+        remarks:    findCol(['remarks','notes','note'])
+      };
+
+      if(colIdx.model===-1 || colIdx.regNo===-1){
+        toast('Could not find Model / RegNo columns in the header row.','err');
+        return;
+      }
+
+      function parseYesNo(v){
+        const s = (v||'').toString().trim().toLowerCase();
+        return (s==='no' || s==='n' || s==='0' || s==='false') ? 'no' : 'yes';
+      }
+
+      reconExcelParsedRows = aoa.slice(1).map(r=>({
+        model:      colIdx.model!==-1     ? (r[colIdx.model]||'').toString().trim()     : '',
+        makeYear:   colIdx.makeYear!==-1  ? (r[colIdx.makeYear]||'').toString().trim()  : '',
+        regNo:      colIdx.regNo!==-1     ? (r[colIdx.regNo]||'').toString().trim()     : '',
+        valuation:  colIdx.valuation!==-1 ? Number(r[colIdx.valuation])||0              : 0,
+        additionalValuation: colIdx.additionalValuation!==-1 ? Number(r[colIdx.additionalValuation])||0 : 0,
+        blueBook:   colIdx.blueBook!==-1  ? parseYesNo(r[colIdx.blueBook])              : 'yes',
+        key:        colIdx.key!==-1       ? parseYesNo(r[colIdx.key])                   : 'yes',
+        file:       colIdx.file!==-1      ? parseYesNo(r[colIdx.file])                  : 'yes',
+        customerName: colIdx.customer!==-1 ? (r[colIdx.customer]||'').toString().trim() : '',
+        contact:    colIdx.contact!==-1   ? (r[colIdx.contact]||'').toString().trim()   : '',
+        sendTo:     colIdx.sendTo!==-1    ? (r[colIdx.sendTo]||'').toString().trim() || 'Bikers Phidim' : 'Bikers Phidim',
+        remarks:    colIdx.remarks!==-1   ? (r[colIdx.remarks]||'').toString().trim()   : ''
+      })).filter(r=>r.model || r.regNo);
+
+      if(!reconExcelParsedRows.length){ toast('No data rows found in file.','err'); return; }
+      importBtn.disabled = false;
+      toast(reconExcelParsedRows.length+' row(s) detected. Review & click Import.');
+    }catch(err){
+      toast('Could not read file: '+err.message,'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('reconDownloadTemplateBtn').addEventListener('click', ()=>{
+  const wsData = [
+    ['Model','MakeYear','RegNo','Valuation','AdditionalValuation','BlueBook','Key','File','Customer','Contact','SendTo','Remarks'],
+    ['Honda Shine 125','2019','Koshi Pra-02-061Pa0675','85000','5000','Yes','Yes','No','Santosh Gahatraj Kami','98XXXXXXXX','Workshop','Minor scratch on tank'],
+    ['TVS Apache 160','2018','Koshi Pra-02-061Pa0680','72000','0','No','Yes','Yes','','','Showroom','']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [{wch:22},{wch:10},{wch:18},{wch:12},{wch:16},{wch:10},{wch:8},{wch:8},{wch:22},{wch:14},{wch:16},{wch:30}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Recondition Stock');
+  XLSX.writeFile(wb, 'recondition_stock_import_template.xlsx');
+});
+
+document.getElementById('reconImportExcelBtn').addEventListener('click', async ()=>{
+  if(!reconExcelParsedRows.length) return;
+  const btn = document.getElementById('reconImportExcelBtn');
+  const btnText = document.getElementById('reconImportExcelBtnText');
+  btn.disabled = true;
+  btnText.textContent = 'Importing…';
+
+  let nextSn = await getAccurateNextSn('recondition_stock');
+  const results = { success:[], failed:[] };
+  let runningTotal = reconStockData.length;
+
+  const __impTotal = reconExcelParsedRows.length; let __impDone = 0;
+  for(const row of reconExcelParsedRows){
+    __impDone++; if(btnText) btnText.textContent = 'Importing '+__impDone+'/'+__impTotal+'…';
+    if(runningTotal >= MAX_RECONDITION_STOCK){
+      results.failed.push({row, reason:`Storage full — ${MAX_RECONDITION_STOCK} unit limit reached (Recondition Stock)`});
+      continue;
+    }
+    if(!row.model || !row.makeYear || !row.regNo || !row.valuation){
+      results.failed.push({row, reason:'Missing required field (Model/MakeYear/RegNo/Valuation)'});
+      continue;
+    }
+    const modelCheck = Validate.text(row.model, { label:'Model', max:80 });
+    const yearCheck = Validate.text(row.makeYear, { label:'Make Year', max:10 });
+    const regNoCheck = Validate.text(row.regNo, { label:'Reg No', max:40 });
+    const badField = [modelCheck, yearCheck, regNoCheck].find(c=>!c.ok);
+    if(badField){ results.failed.push({row, reason: badField.error}); continue; }
+    if(isNaN(row.valuation) || row.valuation<0){ results.failed.push({row, reason:'Invalid Valuation amount'}); continue; }
+    if(row.additionalValuation > row.valuation){ results.failed.push({row, reason:'Additional Valuation exceeds Valuation'}); continue; }
+    try{
+      await addDoc(collection(db,'recondition_stock'), {
+        sn: nextSn,
+        model: modelCheck.value, makeYear: yearCheck.value, regNo: regNoCheck.value,
+        valuation: row.valuation, additionalValuation: row.additionalValuation||0, payableAmount: row.valuation-(row.additionalValuation||0),
+        blueBook: row.blueBook, key: row.key, file: row.file, inspection: 'Pending',
+        customerName: row.customerName || '', contact: row.contact || '', sendTo: row.sendTo || 'Bikers Phidim', remarks: row.remarks || '',
+        status: 'In Stock', addedAt: new Date()
+      });
+      results.success.push(row);
+      nextSn++;
+      runningTotal++;
+    }catch(e){
+      results.failed.push({row, reason:friendlyError(e)});
+    }
+  }
+
+  const summary = document.getElementById('reconImportSummary');
+  const head = document.getElementById('reconImportSummaryHead');
+  const body = document.getElementById('reconImportSummaryBody');
+  head.innerHTML = `<span class="text-emerald-600"><i class="fas fa-circle-check"></i> ${results.success.length} imported</span>` +
+    (results.failed.length ? ` &nbsp;·&nbsp; <span class="text-red-500"><i class="fas fa-circle-xmark"></i> ${results.failed.length} failed</span>` : '');
+  body.innerHTML = results.failed.map(f=>`
+    <div class="px-4 py-2 flex items-center justify-between gap-3">
+      <span class="text-slate-600 truncate">${escapeHtml(f.row.model || '(no model)')} — ${escapeHtml(f.row.regNo || '(no reg no)')}</span>
+      <span class="text-red-500 font-medium whitespace-nowrap">${f.reason}</span>
+    </div>`).join('') || `<div class="px-4 py-3 text-slate-400">All rows imported successfully.</div>`;
+  summary.classList.remove('hidden');
+
+  toast(`Import done: ${results.success.length} added, ${results.failed.length} failed`, results.failed.length ? 'err' : 'ok');
+
+  btn.disabled = true;
+  btnText.textContent = 'Import Rows';
+  reconExcelParsedRows = [];
+  document.getElementById('reconExcelFileInput').value = '';
+  document.getElementById('reconExcelFileLabel').textContent = 'Click to choose Excel / CSV file…';
 });
 
 
@@ -20933,7 +21165,9 @@ document.getElementById('importExcelBtn').addEventListener('click', async ()=>{
   const seenInBatch = []; // track chassis/engine already added within this same import run
   let runningTotal = await getAccurateTotalInventoryCount(true); // real Firestore count, not just what's paginated locally
 
+  const __impTotal_excelParsedRows = excelParsedRows.length; let __impDone_excelParsedRows = 0;
   for(const row of excelParsedRows){
+    __impDone_excelParsedRows++; if(typeof btnText!=='undefined' && btnText) btnText.textContent = 'Importing '+__impDone_excelParsedRows+'/'+__impTotal_excelParsedRows+'…';
     if(runningTotal >= MAX_TOTAL_INVENTORY_UNITS){
       results.failed.push({row, reason:`Storage full — ${MAX_TOTAL_INVENTORY_UNITS} unit combined limit reached`});
       continue;
@@ -21117,7 +21351,9 @@ document.getElementById('hhImportExcelBtn').addEventListener('click', async ()=>
   const seenInBatch = [];
   let runningTotal = await getAccurateTotalInventoryCount(true);
 
+  const __impTotal_hhExcelParsedRows = hhExcelParsedRows.length; let __impDone_hhExcelParsedRows = 0;
   for(const row of hhExcelParsedRows){
+    __impDone_hhExcelParsedRows++; if(typeof btnText!=='undefined' && btnText) btnText.textContent = 'Importing '+__impDone_hhExcelParsedRows+'/'+__impTotal_hhExcelParsedRows+'…';
     if(runningTotal >= MAX_TOTAL_INVENTORY_UNITS){
       results.failed.push({row, reason:`Storage full — ${MAX_TOTAL_INVENTORY_UNITS} unit combined limit reached`});
       continue;
@@ -21282,7 +21518,9 @@ document.getElementById('priceImportExcelBtn').addEventListener('click', async (
   const results = { success:[], failed:[] };
   const seenInBatch = []; // track model names already added within this same import run
 
+  const __impTotal_priceExcelParsedRows = priceExcelParsedRows.length; let __impDone_priceExcelParsedRows = 0;
   for(const row of priceExcelParsedRows){
+    __impDone_priceExcelParsedRows++; if(typeof btnText!=='undefined' && btnText) btnText.textContent = 'Importing '+__impDone_priceExcelParsedRows+'/'+__impTotal_priceExcelParsedRows+'…';
     if(runningModelCount >= MAX_BIKES){
       results.failed.push({row, reason:`Model limit reached — capped at ${MAX_BIKES} models`});
       continue;
