@@ -18514,11 +18514,14 @@ window.calculateFinance=function(){
   animateValue('mrp',mrp,'default');
   animateValue('afterDiscount',afterDiscount,'default');
   animateValue('displayIns',activeInsurance,'default');
-  // On-screen service charge display + label with current %
-  { const scRow=document.getElementById('scDisplayRow'); const scOn=(parseFloat(serviceCharge)||0)>0;
-    if(scRow) scRow.style.display = scOn ? '' : 'none';
-    if(scOn){ animateValue('displayServiceCharge',serviceCharge,'default');
-      const lbl=document.querySelector('#scDisplayRow label em'); if(lbl) lbl.textContent='('+(Math.round((parseFloat(serviceChargeCfg.percent)||0)*100)/100)+'% of loan)'; } }
+  // On-screen service charge display — visible whenever the charge is on
+  // (default 1%), like Insurance/Namsari; the amount updates with the loan.
+  { const scRow=document.getElementById('scDisplayRow');
+    const scShow = (typeof serviceChargeOn==='function') ? serviceChargeOn() : ((parseFloat(serviceCharge)||0)>0);
+    if(scRow) scRow.style.display = scShow ? '' : 'none';
+    if(scShow){ animateValue('displayServiceCharge', serviceCharge||0, 'default');
+      const pct = (typeof serviceChargeCfg!=='undefined') ? (Math.round((parseFloat(serviceChargeCfg.percent)||0)*100)/100) : 1;
+      const lbl=document.querySelector('#scDisplayRow label em'); if(lbl) lbl.textContent='('+pct+'% of loan)'; } }
   animateValue('displayRate',rate,'pct');
   animateValue('displayDpAmt',dpAmountOnly,'default');
   animateValue('displayLoanAmt',loanAmount,'default');
