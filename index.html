@@ -16757,7 +16757,7 @@ function computeRow(bike,dpPct,tenure,namsari,accTotal,mode){
         : loanAmt/tenure)
     : 0;
   const financeInsurance=parseFloat(bike.financeInsurance)||0;
-  const serviceCharge=computeServiceCharge(loanAmt);
+  const serviceCharge=(typeof computeServiceCharge==='function')?computeServiceCharge(loanAmt):0;
   const rawTotal=mode==='indoor'
     ? dpAmt+namsari+bike.insurance+emi+accTotal+serviceCharge
     : dpAmt+namsari+financeInsurance+emi+serviceCharge;
@@ -18449,7 +18449,7 @@ window.calculateFinance=function(){
   // Service charge — same rule as the EMI rate sheet (percent of loan; 1% by
   // default, master-configurable in HFL Finance). 0 when off, so totals are
   // unchanged and the printed line is hidden.
-  const serviceCharge=computeServiceCharge(loanAmount);
+  const serviceCharge=(typeof computeServiceCharge==='function')?computeServiceCharge(loanAmount):0;
 
   // Interest rate comes from the admin-managed finance_schemes collection.
   // Exact downPay% match wins; otherwise fall back to the closest scheme at
