@@ -4587,6 +4587,30 @@
         </button>
       </div>
 
+      <!-- Service Charge (percent of loan) -->
+      <div class="yng-card-shell p-5 mb-5" id="serviceChargeCard">
+        <div class="flex items-center gap-2 section-title text-2xl mb-1">
+          <i class="fas fa-hand-holding-dollar text-emerald-500 text-lg"></i> Service Charge
+          <span id="scStatusChip" class="badge" style="background:#4C7A2A;color:#fff;margin-left:4px">1% of Loan</span>
+        </div>
+        <p class="text-xs text-slate-500 mb-4 mt-2">A percent of each bike's <b>Loan Amount</b>, added to the Total on the EMI sheet (column shown before Namsari). Same for every bike. Set to <b>Off</b> or <b>0%</b> to hide it. Synced to all devices; only the Master can change it.</p>
+        <div class="flex flex-wrap items-end gap-3">
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Status</label>
+            <select id="scOnSelect" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 w-32">
+              <option value="on">On</option>
+              <option value="off">Off (hidden)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Percent of Loan (%)</label>
+            <input type="number" id="scPercentInput" step="0.01" min="0" max="100" value="1" class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-right w-32 text-slate-800">
+          </div>
+          <button class="cta-primary !py-2 !px-4 !text-xs" onclick="saveServiceCharge()"><i class="fas fa-floppy-disk"></i> Save</button>
+        </div>
+        <p id="scOwnerNote" style="display:none" class="text-[11px] text-amber-700 italic mt-3"><i class="fas fa-lock"></i> Only the Master account can change this.</p>
+      </div>
+
       <!-- Form (modal) -->
       <div id="finFormModal" class="form-modal-overlay" onclick="if(event.target===this) cancelFinEdit()">
       <div class="form-modal-box">
@@ -6787,8 +6811,8 @@ const secondaryAuth = getAuth(secondaryApp);
     if(!b){
       b = document.createElement('div');
       b.id = 'offlineBanner';
-      b.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:9999;background:#7A5C1E;color:#fff;font-size:13px;font-weight:700;padding:8px 16px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.25);display:none;align-items:center;gap:8px;max-width:92vw;';
-      b.innerHTML = '<i class="fas fa-wifi" style="opacity:.7"></i> Offline — showing saved data. Changes will sync when back online.';
+      b.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:9999;background:rgba(122,92,30,.95);color:#fff;font-size:11px;font-weight:600;padding:5px 11px;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.2);display:none;align-items:center;gap:6px;white-space:nowrap;backdrop-filter:blur(4px);';
+      b.innerHTML = '<i class="fas fa-cloud-slash" style="opacity:.75;font-size:10px"></i> Offline · will sync';
       (document.body||document.documentElement).appendChild(b);
     }
     return b;
@@ -7927,6 +7951,7 @@ onAuthStateChanged(auth, async (user) => {
     loadDocuments();
     loadStorageSettings();
     loadSystemLimits();
+    loadFinanceSettings();
     // Trash, Important Info and Storage Areas each feed exactly one page.
     // Subscribing to them at sign-in meant every staff member downloaded
     // three collections they might never look at. They now load the first
@@ -13292,6 +13317,9 @@ function loadFinanceCategories(){
     // badges until something else (e.g. editing a bike) happened to re-render it.
     if(typeof renderMasterTable === 'function' && allMasterBikes.length) renderMasterTable();
     if(typeof updateStorageOverview === 'function') updateStorageOverview();
+    // A category's service charge feeds the EMI sheet Total — re-render it
+    // so the Service Charge column/totals update the moment it changes.
+    if(typeof recalcAll === 'function') recalcAll();
   }, err=>console.error('finance_categories listener failed', err));
 }
 
@@ -16690,6 +16718,26 @@ function accessoriesTotal(bike){
    mode='outdoor' -> insurance-like cost = this bike's own financeInsurance ONLY
                      (displayed as the "Insurance" column; raw Insurance is not shown
                      or added here — avoids double counting) */
+// ── Service Charge (percentage of loan amount) ───────────────────────
+// Bajaj rule: a flat percent of the loan amount, the same for every bike.
+// Master can change the percent or switch it off from HFL Finance; synced
+// to all devices via settings/finance. When the percent is 0 the column
+// hides and totals are unchanged.
+let serviceChargeCfg = { percent: 1, on: true };  // default: 1% of loan, ON
+function computeServiceCharge(loanAmt){
+  if(!serviceChargeCfg || !serviceChargeCfg.on) return 0;
+  const p = parseFloat(serviceChargeCfg.percent)||0;
+  if(p<=0) return 0;
+  return (parseFloat(loanAmt)||0) * (p/100);
+}
+function serviceChargeOn(){
+  return serviceChargeCfg && serviceChargeCfg.on && (parseFloat(serviceChargeCfg.percent)||0)>0;
+}
+function serviceChargeLabel(){
+  const p = parseFloat(serviceChargeCfg.percent)||0;
+  return `Service Charge (${(Math.round(p*100)/100)}%)`;
+}
+
 function computeRow(bike,dpPct,tenure,namsari,accTotal,mode){
   const dpAmt=bike.price*(dpPct/100);
   const loanAmt=bike.price-dpAmt;
@@ -16706,14 +16754,15 @@ function computeRow(bike,dpPct,tenure,namsari,accTotal,mode){
         : loanAmt/tenure)
     : 0;
   const financeInsurance=parseFloat(bike.financeInsurance)||0;
+  const serviceCharge=computeServiceCharge(loanAmt);
   const rawTotal=mode==='indoor'
-    ? dpAmt+namsari+bike.insurance+emi+accTotal
-    : dpAmt+namsari+financeInsurance+emi;
+    ? dpAmt+namsari+bike.insurance+emi+accTotal+serviceCharge
+    : dpAmt+namsari+financeInsurance+emi+serviceCharge;
   const lastThree=rawTotal%1000;
   const autoRounding=lastThree>0 ? (1000-lastThree) : 0;
   const advanceEmi=emi+autoRounding;
   const total=rawTotal+autoRounding;
-  return {dpAmt,loanAmt,insurance:bike.insurance,financeInsurance,emi,advanceEmi,total,rate,tenureOk};
+  return {dpAmt,loanAmt,insurance:bike.insurance,financeInsurance,emi,advanceEmi,total,rate,tenureOk,serviceCharge};
 }
 const fmt=n=>Math.round(n).toLocaleString('en-IN');
 const fmtDec=n=>Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -16721,6 +16770,7 @@ const fmtDec=n=>Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximu
 /* ══════════ Table headers per mode ══════════ */
 function renderSheetHead(s){
   const head=document.getElementById('sheetHead');
+  const scTh = serviceChargeOn() ? `<th>${serviceChargeLabel()}</th>` : '';
   if(s.mode==='indoor'){
     head.innerHTML=`<tr>
       <th>S.N</th><th>Model</th><th>Price</th>
@@ -16728,7 +16778,7 @@ function renderSheetHead(s){
       <th>Loan Amount</th><th>Insurance</th>
       <th>Monthly EMI <span class="badge">${s.rate.toFixed(2)}%</span></th>
       <th>Advance EMI <span class="badge">${s.tenure} mo</span></th>
-      <th>Accessories</th><th>Namsari</th><th>Total Downpayment</th>
+      <th>Accessories</th>${scTh}<th>Namsari</th><th>Total Downpayment</th>
     </tr>`;
   }else{
     head.innerHTML=`<tr>
@@ -16737,7 +16787,7 @@ function renderSheetHead(s){
       <th>Loan Amount</th><th>Insurance</th>
       <th>Monthly EMI <span class="badge">${s.rate.toFixed(2)}%</span></th>
       <th>Advance EMI <span class="badge">${s.tenure} mo</span></th>
-      <th>Namsari</th><th>Total Downpayment</th>
+      ${scTh}<th>Namsari</th><th>Total Downpayment</th>
     </tr>`;
   }
 }
@@ -16752,6 +16802,33 @@ function currentSettings(){
   const mode=sheetMode;
   return {dp,tenure,namsari,acc,rate,mode};
 }
+// ── Service Charge settings UI (HFL Finance) ─────────────────────────
+function syncServiceChargeUI(){
+  const onSel=document.getElementById('scOnSelect'); if(!onSel) return;
+  onSel.value = serviceChargeCfg.on ? 'on' : 'off';
+  document.getElementById('scPercentInput').value = serviceChargeCfg.percent;
+  const chip=document.getElementById('scStatusChip');
+  if(serviceChargeOn()){ chip.textContent=(Math.round(serviceChargeCfg.percent*100)/100)+'% of Loan'; chip.style.background='#4C7A2A'; }
+  else { chip.textContent='Off'; chip.style.background='#94a3b8'; }
+  const isOwner = currentUserRole==='owner';
+  ['scOnSelect','scPercentInput'].forEach(id=>{ const el=document.getElementById(id); if(el) el.disabled=!isOwner; });
+  const note=document.getElementById('scOwnerNote'); if(note) note.style.display=isOwner?'none':'block';
+  const btn=document.querySelector('#serviceChargeCard .cta-primary'); if(btn) btn.style.display=isOwner?'':'none';
+}
+window.saveServiceCharge = async function(){
+  if(currentUserRole!=='owner'){ toast('Only the Master account can change the service charge.','err'); return; }
+  const on = document.getElementById('scOnSelect').value==='on';
+  const percent = parseFloat(document.getElementById('scPercentInput').value)||0;
+  if(on && percent<=0){ toast('Enter a percent greater than 0 (or set it Off).','err'); return; }
+  if(percent>100){ toast('Percent looks too high (over 100%). Please check.','err'); return; }
+  try{
+    await setDoc(doc(db,'settings','finance'), { scPercent:percent, scOn:on }, { merge:true });
+    serviceChargeCfg = { percent, on };
+    syncServiceChargeUI(); recalcAll();
+    toast('Service charge saved — applied to all sheets.','ok');
+  }catch(e){ toast('Could not save: '+friendlyError(e),'err'); }
+};
+
 function recalcAll(){
   const s=currentSettings();
   const schemesReady=financeSchemes.length>0 && s.dp>0;
@@ -16770,7 +16847,7 @@ function recalcAll(){
 
   if(!schemesReady){
     document.getElementById('sheetHead').innerHTML='';
-    body.innerHTML=`<tr><td colspan="11" style="text-align:center;padding:24px;color:var(--ink4)">
+    body.innerHTML=`<tr><td colspan="${serviceChargeOn()?12:11}" style="text-align:center;padding:24px;color:var(--ink4)">
       <i class="fa-solid fa-circle-notch fa-spin"></i> Waiting for finance schemes from Admin Panel…
     </td></tr>`;
     return;
@@ -16788,6 +16865,7 @@ function recalcAll(){
     if(!r.tenureOk) return;
     shown++;
     const tr=document.createElement('tr');
+    const scTd = serviceChargeOn() ? `<td>${fmt(r.serviceCharge)}</td>` : '';
     if(s.mode==='indoor'){
       tr.innerHTML=`
         <td>${shown}</td>
@@ -16798,7 +16876,7 @@ function recalcAll(){
         <td>${fmt(r.insurance)}</td>
         <td>${fmtDec(r.emi)}</td>
         <td>${fmtDec(r.advanceEmi)}</td>
-        <td>${fmt(bikeAcc)}</td>
+        <td>${fmt(bikeAcc)}</td>${scTd}
         <td>${fmt(s.namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td>`;
     }else{
@@ -16810,7 +16888,7 @@ function recalcAll(){
         <td>${fmt(r.loanAmt)}</td>
         <td>${fmt(r.financeInsurance)}</td>
         <td>${fmtDec(r.emi)}</td>
-        <td>${fmtDec(r.advanceEmi)}</td>
+        <td>${fmtDec(r.advanceEmi)}</td>${scTd}
         <td>${fmt(s.namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td>`;
     }
@@ -16819,7 +16897,7 @@ function recalcAll(){
   document.getElementById('sumCount').textContent=shown;
   if(!shown){
     document.getElementById('sheetHead').innerHTML='';
-    body.innerHTML=`<tr><td colspan="11" style="text-align:center;padding:24px;color:var(--ink4)">
+    body.innerHTML=`<tr><td colspan="${serviceChargeOn()?12:11}" style="text-align:center;padding:24px;color:var(--ink4)">
       No models offer ${s.tenure} months at ${s.dp}% Down Payment — pick a different tenure.
     </td></tr>`;
   }
@@ -16925,9 +17003,10 @@ window.exportSheetToExcel = ()=>{
   const wb = XLSX.utils.book_new();
   tenures.forEach(t=>{
     const rate=rateForDp(s.dp);
+    const scLbl = serviceChargeOn() ? serviceChargeLabel() : null;
     const header = s.mode==='indoor'
-      ? ['S.N','Model','Price','DP Amount','Loan Amount','Insurance','Monthly EMI','Advance EMI','Accessories','Namsari','Total Downpayment']
-      : ['S.N','Model','Price','DP Amount','Loan Amount','Insurance','Monthly EMI','Advance EMI','Namsari','Total Downpayment'];
+      ? ['S.N','Model','Price','DP Amount','Loan Amount','Insurance','Monthly EMI','Advance EMI','Accessories',...(scLbl?[scLbl]:[]),'Namsari','Total Downpayment']
+      : ['S.N','Model','Price','DP Amount','Loan Amount','Insurance','Monthly EMI','Advance EMI',...(scLbl?[scLbl]:[]),'Namsari','Total Downpayment'];
     const rows=[header];
     let n=0;
     modelsToInclude.forEach(bike=>{
@@ -16936,8 +17015,8 @@ window.exportSheetToExcel = ()=>{
       if(!r.tenureOk) return;
       n++;
       rows.push(s.mode==='indoor'
-        ? [n,bike.name,bike.price,r.dpAmt,r.loanAmt,r.insurance,r.emi,r.advanceEmi,bikeAcc,s.namsari,r.total]
-        : [n,bike.name,bike.price,r.dpAmt,r.loanAmt,r.financeInsurance,r.emi,r.advanceEmi,s.namsari,r.total]);
+        ? [n,bike.name,bike.price,r.dpAmt,r.loanAmt,r.insurance,r.emi,r.advanceEmi,bikeAcc,...(scLbl?[r.serviceCharge]:[]),s.namsari,r.total]
+        : [n,bike.name,bike.price,r.dpAmt,r.loanAmt,r.financeInsurance,r.emi,r.advanceEmi,...(scLbl?[r.serviceCharge]:[]),s.namsari,r.total]);
     });
     if(rows.length<2) return; // nothing valid at this tenure (e.g. capped category) — skip the sheet entirely
     const ws = XLSX.utils.aoa_to_sheet(rows);
@@ -16966,29 +17045,31 @@ function buildTenurePage(dp,tenure,namsari,acc,mode,modelsOverride){
     const r=computeRow(bike,dp,tenure,namsari,bikeAcc,mode);
     if(!r.tenureOk) return;
     n++;
+    const scTd = serviceChargeOn() ? `<td>${fmt(r.serviceCharge)}</td>` : '';
     if(mode==='indoor'){
       rows+=`<tr>
         <td>${n}</td><td>${escAttrSheet(bike.name)}</td><td>${fmt(bike.price)}</td>
         <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td><td>${fmt(r.insurance)}</td>
         <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>
-        <td>${fmt(bikeAcc)}</td><td>${fmt(namsari)}</td>
+        <td>${fmt(bikeAcc)}</td>${scTd}<td>${fmt(namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td></tr>`;
     }else{
       rows+=`<tr>
         <td>${n}</td><td>${escAttrSheet(bike.name)}</td><td>${fmt(bike.price)}</td>
         <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td>
         <td>${fmt(r.financeInsurance)}</td>
-        <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>
+        <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>${scTd}
         <td>${fmt(namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td></tr>`;
     }
   });
   const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const scTh = serviceChargeOn() ? `<th>${serviceChargeLabel()}</th>` : '';
   const headCells=mode==='indoor'
     ? `<th>S.N</th><th>Model</th><th>Price</th><th>DP Amt</th><th>Loan Amt</th><th>Insurance</th>
-       <th>Monthly EMI</th><th>Advance EMI</th><th>Accessories</th><th>Namsari</th><th>Total</th>`
+       <th>Monthly EMI</th><th>Advance EMI</th><th>Accessories</th>${scTh}<th>Namsari</th><th>Total</th>`
     : `<th>S.N</th><th>Model</th><th>Price</th><th>DP Amt</th><th>Loan Amt</th><th>Insurance</th>
-       <th>Monthly EMI</th><th>Advance EMI</th><th>Namsari</th><th>Total</th>`;
+       <th>Monthly EMI</th><th>Advance EMI</th>${scTh}<th>Namsari</th><th>Total</th>`;
   const modeLabel=mode==='indoor'?'Indoor':'Outdoor';
   return `
     <div class="pv-titlebar">Samriddhi And Brothers — Bajaj Finance Sheet (${modeLabel}) &nbsp;|&nbsp; DP ${dp}% &nbsp;|&nbsp; Interest ${rate}% &nbsp;|&nbsp; Tenure ${tenure} Months</div>
@@ -18955,8 +19036,7 @@ function loadDocuments(){
   }, err=>console.error('documents listener failed', err));
 }
 
-function loadStorageSettings(){
-  onSnapshot(doc(db,'settings','storage'), snap=>{
+function loadStorageSettings(){  onSnapshot(doc(db,'settings','storage'), snap=>{
     if(snap.exists()){
       const d = snap.data();
       if(d.capBytes) STORAGE_CAP_BYTES = d.capBytes;
@@ -18968,6 +19048,23 @@ function loadStorageSettings(){
   }, err=>console.error('storage settings listener failed', err));
 }
 
+function loadFinanceSettings(){
+  // Service charge (percent of loan). Defaults to 1% ON even before any doc
+  // exists, per the current Bajaj rule. Master can change % or switch off.
+  onSnapshot(doc(db,'settings','finance'), snap=>{
+    if(snap.exists()){
+      const d = snap.data();
+      serviceChargeCfg = {
+        percent: (d.scPercent!==undefined && d.scPercent!==null) ? (parseFloat(d.scPercent)||0) : 1,
+        on: d.scOn!==undefined ? !!d.scOn : true
+      };
+    } else {
+      serviceChargeCfg = { percent: 1, on: true };
+    }
+    if(typeof syncServiceChargeUI==='function') syncServiceChargeUI();
+    if(typeof recalcAll==='function') recalcAll();
+  }, err=>console.error('finance settings listener failed', err));
+}
 function loadSystemLimits(){
   onSnapshot(doc(db,'settings','limits'), snap=>{
     if(snap.exists()){
