@@ -5233,6 +5233,7 @@
           <div class="calc-card">
             <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>Additional Charges</div>
             <div class="charge-row"><label><i class="fa-solid fa-shield-halved"></i> Insurance</label><span class="val skel" id="displayIns">Rs. 0</span></div>
+            <div class="charge-row" id="scDisplayRow" style="display:none"><label><i class="fa-solid fa-hand-holding-dollar"></i> Service Charge <em style="font-size:10px;color:var(--ink4)">(1% of loan)</em></label><span class="val" id="displayServiceCharge">Rs. 0</span></div>
             <div class="charge-row"><label><i class="fa-solid fa-stamp"></i> Registration / Namsari</label><input type="number" id="fin_namsariInput" value="3000"></div>
           </div>
           <div class="calc-card">
@@ -5435,6 +5436,7 @@
             <li><span class="lbl"><span>•</span><span>Interest Rate (%)</span></span><span>:</span><span id="a4Rate">--</span></li>
             <li><span class="lbl"><span>•</span><span>Tenure (Months)</span></span><span>:</span><span id="a4Tenure">--</span></li>
             <li style="display:block;margin-bottom:3px">• &nbsp;Registration Charge / Yatayat Expenses: &nbsp;<span id="a4Namsari">3,000.00</span>&nbsp;<em style="font-size:11pt">(suggested by HH)</em></li>
+            <li id="a4ServiceChargeRow" style="display:none;margin-bottom:3px">• &nbsp;Service Charge : &nbsp;<span id="a4ServiceCharge">0.00</span>&nbsp;<em style="font-size:11pt">(max 1% of loan amount)</em></li>
             <li style="display:block;margin-bottom:3px">• &nbsp;Insurance Premium : &nbsp;<span id="a4Ins">0.00</span></li>
             <li style="display:block;margin-bottom:3px">• &nbsp;Advance EMI (If Any) : &nbsp;<span id="a4AdvEmiAmt">0.00</span></li>
             <li style="display:block;margin-bottom:3px">• &nbsp;Total Down-payment Amount paid by Customer : &nbsp;<strong id="a4TotalDP">0.00</strong></li>
@@ -5442,7 +5444,7 @@
 
           <p style="font-size:13pt;font-weight:bold;margin-top:4mm">Declaration</p>
           <hr style="border:none;border-top:1px solid #000;margin:3px 0 3mm 0">
-          <p style="font-size:12.5pt;margin-bottom:2mm;line-height:1.55">We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.</p>
+          <p style="font-size:12.5pt;margin-bottom:2mm;line-height:1.55">We hereby confirm that the information provided above is accurate and correct. We acknowledge and agree to the specified amounts and the detailed breakdown of the down payment.<span id="a4ScDeclare"> Furthermore, we confirm that the only <span id="a4ScDeclarePct">1</span>% service charge has been incurred and paid by the customer.</span></p>
           <p style="font-size:12.5pt">Signatures &amp; Authorization</p>
 
           <div class="sig-row" style="margin-top:28mm">
@@ -5560,13 +5562,14 @@
       <li><span class="lbl"><span>•</span><span>Interest Rate (%)</span></span><span>:</span><span id="p1Rate">--</span></li>
       <li><span class="lbl"><span>•</span><span>Tenure (Months)</span></span><span>:</span><span id="p1Tenure">--</span></li>
       <li style="display:block;margin-bottom:3px">• &nbsp;Registration Charge / Yatayat Expenses: &nbsp;<span id="p1Namsari">3,000.00</span>&nbsp;<em style="font-size:11pt">(suggested by HH)</em></li>
+      <li id="p1ServiceChargeRow" style="display:none;margin-bottom:3px">• &nbsp;Service Charge : &nbsp;<span id="p1ServiceCharge">0.00</span>&nbsp;<em style="font-size:11pt">(max 1% of loan amount)</em></li>
       <li style="display:block;margin-bottom:3px">• &nbsp;Insurance Premium : &nbsp;<span id="p1Ins">0.00</span></li>
       <li style="display:block;margin-bottom:3px">• &nbsp;Advance EMI (If Any) : &nbsp;<span id="p1AdvEmi">0.00</span></li>
       <li style="display:block;margin-bottom:3px">• &nbsp;Total Down-payment Amount paid by Customer : &nbsp;<strong id="p1TotalDP">0.00</strong></li>
     </ul>
     <p style="font-size:13pt;font-weight:bold;margin-top:4mm">Declaration</p>
     <hr style="border:none;border-top:1px solid #000;margin:3px 0 3mm 0">
-    <p style="font-size:11.5pt;margin-bottom:2mm;line-height:1.55">We confirm that the information provided above is accurate, and we acknowledge and agree to the specified amounts and breakdown of the down payment.</p>
+    <p style="font-size:11.5pt;margin-bottom:2mm;line-height:1.55">We hereby confirm that the information provided above is accurate and correct. We acknowledge and agree to the specified amounts and the detailed breakdown of the down payment.<span id="p1ScDeclare"> Furthermore, we confirm that the only <span id="p1ScDeclarePct">1</span>% service charge has been incurred and paid by the customer.</span></p>
     <p style="font-size:11.5pt">Signatures &amp; Authorization</p>
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:6px;white-space:nowrap;margin-top:24mm">
       <div style="flex:1;text-align:center;border-top:1px solid #000;padding-top:2px;font-size:10.5pt">Customer's Signature</div>
@@ -18443,6 +18446,10 @@ window.calculateFinance=function(){
   const afterDiscount=mrp-discount;
   const dpAmountOnly=afterDiscount*(dpPercentVal/100);
   const loanAmount=afterDiscount-dpAmountOnly;
+  // Service charge — same rule as the EMI rate sheet (percent of loan; 1% by
+  // default, master-configurable in HFL Finance). 0 when off, so totals are
+  // unchanged and the printed line is hidden.
+  const serviceCharge=computeServiceCharge(loanAmount);
 
   // Interest rate comes from the admin-managed finance_schemes collection.
   // Exact downPay% match wins; otherwise fall back to the closest scheme at
@@ -18469,7 +18476,7 @@ window.calculateFinance=function(){
     ? (loanAmount*monthlyRate*Math.pow(1+monthlyRate,tenure))/(Math.pow(1+monthlyRate,tenure)-1)
     : 0;
 
-  const rawTotalDownpayment=dpAmountOnly+namsari+activeInsurance+emi+accCost+customerExtraAdv;
+  const rawTotalDownpayment=dpAmountOnly+namsari+activeInsurance+emi+accCost+customerExtraAdv+serviceCharge;
   const lastThreeDigits=rawTotalDownpayment%1000;
   const autoRounding=lastThreeDigits>0?(1000-lastThreeDigits):0;
   const finalTotalDP=rawTotalDownpayment+autoRounding;
@@ -18477,7 +18484,7 @@ window.calculateFinance=function(){
   const totalAdvEmi=emi+autoRounding+customerExtraAdv;
   const dueEmi=(emi*tenure)-totalAdvEmi;
   const totalInterest=(emi*tenure)-loanAmount;
-  const finalTotalDP_A4=dpAmountOnly+namsari+financeInsurance+totalAdvEmi;
+  const finalTotalDP_A4=dpAmountOnly+namsari+financeInsurance+totalAdvEmi+serviceCharge;
 
   const animateValue=(id,targetNum,format='default')=>{
     const el=document.getElementById(id);
@@ -18507,6 +18514,11 @@ window.calculateFinance=function(){
   animateValue('mrp',mrp,'default');
   animateValue('afterDiscount',afterDiscount,'default');
   animateValue('displayIns',activeInsurance,'default');
+  // On-screen service charge display + label with current %
+  { const scRow=document.getElementById('scDisplayRow'); const scOn=(parseFloat(serviceCharge)||0)>0;
+    if(scRow) scRow.style.display = scOn ? '' : 'none';
+    if(scOn){ animateValue('displayServiceCharge',serviceCharge,'default');
+      const lbl=document.querySelector('#scDisplayRow label em'); if(lbl) lbl.textContent='('+(Math.round((parseFloat(serviceChargeCfg.percent)||0)*100)/100)+'% of loan)'; } }
   animateValue('displayRate',rate,'pct');
   animateValue('displayDpAmt',dpAmountOnly,'default');
   animateValue('displayLoanAmt',loanAmount,'default');
@@ -18545,7 +18557,7 @@ window.calculateFinance=function(){
     animateBar(loanBar,currentLoanWidth,targetLoanWidth);
   }
 
-  window._lastCalc={bike,mrp,discount,afterDiscount,cashInsurance,financeInsurance,activeInsurance,insuranceType,rate,dpAmountOnly,loanAmount,emi,autoRounding,totalAdvEmi,tenure,namsari,finalTotalDP,finalTotalDP_A4};
+  window._lastCalc={bike,mrp,discount,afterDiscount,cashInsurance,financeInsurance,activeInsurance,insuranceType,rate,dpAmountOnly,loanAmount,emi,autoRounding,totalAdvEmi,tenure,namsari,serviceCharge,finalTotalDP,finalTotalDP_A4};
  }catch(err){
   console.error('calculateFinance() crashed:', err);
   const warnEl = document.getElementById('bikeLoadWarning');
@@ -18574,6 +18586,18 @@ window.syncAllToA4=function(){
   set('a4MRP',fmtDec(c.afterDiscount)); set('a4DP',fmtDec(c.dpAmountOnly)); set('a4Loan',fmtDec(c.loanAmount));
   set('a4Rate',c.rate.toFixed(2)); set('a4Tenure',c.tenure); set('a4Ins',fmtDec(c.financeInsurance));
   set('a4AdvEmiAmt',fmtDec(c.totalAdvEmi)); set('a4TotalDP',fmtDec(c.finalTotalDP_A4)); set('a4Namsari',fmtDec(c.namsari));
+  // Service charge line — shown only when a charge applies (off/0 => hidden)
+  const scShow = (parseFloat(c.serviceCharge)||0) > 0;
+  const scPct = Math.round((parseFloat(serviceChargeCfg.percent)||0)*100)/100;
+  set('a4ServiceCharge', fmtDec(c.serviceCharge||0));
+  const a4scRow=document.getElementById('a4ServiceChargeRow'); if(a4scRow) a4scRow.style.display = scShow ? 'block' : 'none';
+  set('p1ServiceCharge', fmtDec(c.serviceCharge||0));
+  const p1scRow=document.getElementById('p1ServiceChargeRow'); if(p1scRow) p1scRow.style.display = scShow ? 'block' : 'none';
+  // Declaration sentence about the service charge — only when it applies
+  ['a4','p1'].forEach(pfx=>{
+    const decl=document.getElementById(pfx+'ScDeclare'); if(decl) decl.style.display = scShow ? 'inline' : 'none';
+    const pct=document.getElementById(pfx+'ScDeclarePct'); if(pct) pct.textContent = scPct;
+  });
 
   set('a4Date2',dateStr); set('a4CustName2',custName); set('a4Model2',c.bike.name);
   set('a4MRP2',fmt(c.mrp)); set('a4PriceWords',numberToWords(Math.round(c.mrp))+" rupees only.");
@@ -18636,6 +18660,8 @@ window.printBothPages=function(){
   syncAllToA4();
   ['Date','Dealer','CustName','CustPhone','Model','MRP','DP','Loan','Rate','Tenure','Namsari','Ins'].forEach(k=>syncField('a4'+k,'p1'+k));
   syncField('a4AdvEmiAmt','p1AdvEmi'); syncField('a4TotalDP','p1TotalDP');
+  syncField('a4ServiceCharge','p1ServiceCharge');
+  { const src=document.getElementById('a4ServiceChargeRow'), dst=document.getElementById('p1ServiceChargeRow'); if(src&&dst) dst.style.display=src.style.display; }
   ['Date2','CustName2','Model2','MRP2','PriceWords','Color2','Reg2','Engine2','Chassis2','MakeYear','DiscountAmt','DiscountWords','NetPrice','NetPriceWords'].forEach(k=>{
     const dst='p2'+k.replace('2','');
     syncField('a4'+k,dst);
