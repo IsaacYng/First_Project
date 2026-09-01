@@ -12965,22 +12965,6 @@ function loadStockAreas(){
   }, err=>console.error('area_stock listener failed', err));
 }
 
-window.addStockArea = async ()=>{
-  const input = document.getElementById('newAreaInput');
-  const name = (input.value||'').trim();
-  if(!name){ toast('Please enter an area name.','warn'); return; }
-  if(stockAreas.some(a=>String(a.name||'').toLowerCase()===name.toLowerCase())){ toast('This area already exists.','warn'); return; }
-  if(stockAreas.length >= MAX_STOCK_AREAS){
-    showLimitExceededModal('Storage Area Limit Reached', `Storage Areas are capped at ${MAX_STOCK_AREAS}. Remove one first, or reach out below to have the limit raised.`);
-    return;
-  }
-  try{
-    await addDoc(collection(db,"stock_areas"),{name});
-    input.value='';
-    toast('Area added: '+name);
-  }catch(e){ toast('Error: '+friendlyError(e),'err'); }
-};
-
 window.removeStockArea = async (id, name)=>{
   if(DEFAULT_AREAS.some(d=>d.toLowerCase()===String(name||'').toLowerCase())){
     toast(`${name} is a default area — it can't be removed.`,'warn');
