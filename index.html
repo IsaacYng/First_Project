@@ -16710,13 +16710,17 @@ function accessoriesTotal(bike){
 // Master can change the percent or switch it off from HFL Finance; synced
 // to all devices via settings/finance. When the percent is 0 the column
 // hides and totals are unchanged.
-// Deliberately a plain global (no let/const): Sheet Tool and Finance Tool
-// live in two separate sibling IIFEs, and Finance Tool's syncAllToA4()
-// reads this directly (serviceChargeCfg.percent) with no function-call
-// indirection — a block-scoped `let` here made it invisible outside this
-// IIFE, throwing "serviceChargeCfg is not defined" the moment Preview Form
-// was clicked and silently aborting before the popup ever opened.
-serviceChargeCfg = { percent: 1, on: true };  // default: 1% of loan, ON
+// Deliberately window.X (not let/const): Sheet Tool and Finance Tool live in
+// two separate sibling IIFEs, and Finance Tool's syncAllToA4() reads this
+// directly (serviceChargeCfg.percent) with no function-call indirection —
+// a block-scoped `let` here made it invisible outside this IIFE. This whole
+// app runs inside <script type="module">, which is always strict mode, so a
+// bare assignment (no window.) throws "serviceChargeCfg is not defined"
+// instead of silently creating a global — and since that throw happened at
+// top-level module execution (not inside a function), it aborted the rest
+// of the module outright, which is why every nav button stopped responding
+// (window.switchSec, defined further down, never even got assigned).
+window.serviceChargeCfg = { percent: 1, on: true };  // default: 1% of loan, ON
 function computeServiceCharge(loanAmt){
   if(!serviceChargeCfg || !serviceChargeCfg.on) return 0;
   const p = parseFloat(serviceChargeCfg.percent)||0;
@@ -16819,7 +16823,7 @@ window.saveServiceCharge = async function(){
   if(percent>100){ toast('Percent looks too high (over 100%). Please check.','err'); return; }
   try{
     await setDoc(doc(db,'settings','finance'), { scPercent:percent, scOn:on }, { merge:true });
-    serviceChargeCfg = { percent, on };
+    window.serviceChargeCfg = { percent, on };
     syncServiceChargeUI(); recalcAll();
     toast('Service charge saved — applied to all sheets.','ok');
   }catch(e){ toast('Could not save: '+friendlyError(e),'err'); }
@@ -19076,12 +19080,12 @@ function loadFinanceSettings(){
   onSnapshot(doc(db,'settings','finance'), snap=>{
     if(snap.exists()){
       const d = snap.data();
-      serviceChargeCfg = {
+      window.serviceChargeCfg = {
         percent: (d.scPercent!==undefined && d.scPercent!==null) ? (parseFloat(d.scPercent)||0) : 1,
         on: d.scOn!==undefined ? !!d.scOn : true
       };
     } else {
-      serviceChargeCfg = { percent: 1, on: true };
+      window.serviceChargeCfg = { percent: 1, on: true };
     }
     if(typeof syncServiceChargeUI==='function') syncServiceChargeUI();
     if(typeof recalcAll==='function') recalcAll();
