@@ -16875,7 +16875,7 @@ function recalcAll(){
         <td>${fmt(r.loanAmt)}</td>
         <td>${fmt(r.insurance)}</td>
         <td>${fmtDec(r.emi)}</td>
-        <td>${fmtDec(r.advanceEmi)}</td>
+        <td>${fmt(r.advanceEmi)}</td>
         <td>${fmt(bikeAcc)}</td>${scTd}
         <td>${fmt(s.namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td>`;
@@ -16888,7 +16888,7 @@ function recalcAll(){
         <td>${fmt(r.loanAmt)}</td>
         <td>${fmt(r.financeInsurance)}</td>
         <td>${fmtDec(r.emi)}</td>
-        <td>${fmtDec(r.advanceEmi)}</td>${scTd}
+        <td>${fmt(r.advanceEmi)}</td>${scTd}
         <td>${fmt(s.namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td>`;
     }
@@ -17050,7 +17050,7 @@ function buildTenurePage(dp,tenure,namsari,acc,mode,modelsOverride){
       rows+=`<tr>
         <td>${n}</td><td>${escAttrSheet(bike.name)}</td><td>${fmt(bike.price)}</td>
         <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td><td>${fmt(r.insurance)}</td>
-        <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>
+        <td>${fmtDec(r.emi)}</td><td>${fmt(r.advanceEmi)}</td>
         <td>${fmt(bikeAcc)}</td>${scTd}<td>${fmt(namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td></tr>`;
     }else{
@@ -17058,7 +17058,7 @@ function buildTenurePage(dp,tenure,namsari,acc,mode,modelsOverride){
         <td>${n}</td><td>${escAttrSheet(bike.name)}</td><td>${fmt(bike.price)}</td>
         <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td>
         <td>${fmt(r.financeInsurance)}</td>
-        <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>${scTd}
+        <td>${fmtDec(r.emi)}</td><td>${fmt(r.advanceEmi)}</td>${scTd}
         <td>${fmt(namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td></tr>`;
     }
@@ -17326,6 +17326,16 @@ onSnapshot(collection(db,"accessories"), snap=>{
   window.closePreview       = typeof closePreview       === 'function' ? closePreview       : window.closePreview;
   window.printAllTenures    = typeof printAllTenures    === 'function' ? printAllTenures    : window.printAllTenures;
   window.addCustomAccessory = typeof addCustomAccessory === 'function' ? addCustomAccessory : window.addCustomAccessory;
+  // Same cross-IIFE visibility issue as above, for the newer Service Charge
+  // feature: Finance Tool's calculateFinance() only ever calls these via
+  // `typeof computeServiceCharge==='function'` guards, which silently
+  // resolved to false (not a thrown error) since these were never exposed —
+  // so serviceCharge was always computed as 0 on the DP Allocation side,
+  // even though the EMI Rate Sheet (which calls them from inside this same
+  // IIFE) worked correctly the whole time.
+  window.computeServiceCharge = typeof computeServiceCharge === 'function' ? computeServiceCharge : window.computeServiceCharge;
+  window.serviceChargeOn      = typeof serviceChargeOn      === 'function' ? serviceChargeOn      : window.serviceChargeOn;
+  window.serviceChargeLabel   = typeof serviceChargeLabel   === 'function' ? serviceChargeLabel   : window.serviceChargeLabel;
 })();
 
 /* ═══════════════════════════════════════════════════════════════════════
