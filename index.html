@@ -16710,12 +16710,21 @@ function accessoriesTotal(bike){
 // Master can change the percent or switch it off from HFL Finance; synced
 // to all devices via settings/finance. When the percent is 0 the column
 // hides and totals are unchanged.
-let serviceChargeCfg = { percent: 1, on: true };  // default: 1% of loan, ON
+// Deliberately a plain global (no let/const): Sheet Tool and Finance Tool
+// live in two separate sibling IIFEs, and Finance Tool's syncAllToA4()
+// reads this directly (serviceChargeCfg.percent) with no function-call
+// indirection — a block-scoped `let` here made it invisible outside this
+// IIFE, throwing "serviceChargeCfg is not defined" the moment Preview Form
+// was clicked and silently aborting before the popup ever opened.
+serviceChargeCfg = { percent: 1, on: true };  // default: 1% of loan, ON
 function computeServiceCharge(loanAmt){
   if(!serviceChargeCfg || !serviceChargeCfg.on) return 0;
   const p = parseFloat(serviceChargeCfg.percent)||0;
   if(p<=0) return 0;
-  return (parseFloat(loanAmt)||0) * (p/100);
+  // Rounded to whole rupees: an un-rounded % of loan amount (e.g. ...50 * 1%)
+  // leaves a stray .50 that fed straight into Advance EMI downstream,
+  // stopping it from landing on a clean whole rupee like Total does.
+  return Math.round((parseFloat(loanAmt)||0) * (p/100));
 }
 function serviceChargeOn(){
   return serviceChargeCfg && serviceChargeCfg.on && (parseFloat(serviceChargeCfg.percent)||0)>0;
