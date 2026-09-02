@@ -17336,6 +17336,17 @@ onSnapshot(collection(db,"accessories"), snap=>{
   window.computeServiceCharge = typeof computeServiceCharge === 'function' ? computeServiceCharge : window.computeServiceCharge;
   window.serviceChargeOn      = typeof serviceChargeOn      === 'function' ? serviceChargeOn      : window.serviceChargeOn;
   window.serviceChargeLabel   = typeof serviceChargeLabel   === 'function' ? serviceChargeLabel   : window.serviceChargeLabel;
+  // Found during final pre-publish audit — same root cause, different call
+  // sites. Each of these is called elsewhere purely through a
+  // `typeof X==='function'` guard (recalcAll from a top-level Firestore
+  // listener; renderAccessoryFields and buildCustomSelect from Finance
+  // Tool's sibling IIFE; syncServiceChargeUI from the same top-level
+  // listener as recalcAll) — all four guards were silently resolving to
+  // false and skipping the call, with no visible error anywhere.
+  window.recalcAll             = typeof recalcAll             === 'function' ? recalcAll             : window.recalcAll;
+  window.renderAccessoryFields = typeof renderAccessoryFields === 'function' ? renderAccessoryFields : window.renderAccessoryFields;
+  window.syncServiceChargeUI   = typeof syncServiceChargeUI   === 'function' ? syncServiceChargeUI   : window.syncServiceChargeUI;
+  window.buildCustomSelect     = typeof buildCustomSelect     === 'function' ? buildCustomSelect     : window.buildCustomSelect;
 })();
 
 /* ═══════════════════════════════════════════════════════════════════════
