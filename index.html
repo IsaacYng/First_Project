@@ -7935,7 +7935,15 @@ onAuthStateChanged(auth, async (user) => {
     // aren't theirs to see, and switchSec's own guard would just bounce
     // them back here anyway the moment anything tried to render on the
     // wrong page.
-    if(currentUserRole === 'recondition') switchSec('reconditionStock');
+    if(currentUserRole === 'recondition') {
+      switchSec('reconditionStock');
+    } else {
+      let savedSection = null;
+      try{ savedSection = localStorage.getItem('yng_lastSection'); }catch(e){}
+      if(savedSection && savedSection !== 'dashboard' && typeof SEC_IDS !== 'undefined' && SEC_IDS[savedSection] && document.getElementById(SEC_IDS[savedSection])){
+        switchSec(savedSection);
+      }
+    }
     loadMasterPriceList();
     loadLiveStock();
     loadHHInventory();
@@ -21833,6 +21841,11 @@ window.switchSec=(sec)=>{
     toast("Only a Master ID can manage Model Aliases.",'err');
     sec = 'price';
   }
+  // Remembered across reloads (see onAuthStateChanged) so refreshing the
+  // page lands back on whatever page was actually open, instead of always
+  // resetting to Dashboard. Saved after all the role-redirects above run,
+  // so it's always the section the user actually ended up seeing.
+  try{ localStorage.setItem('yng_lastSection', sec); }catch(e){}
   // Belt-and-suspenders: force display via inline style directly, on TOP of
   // the class toggle — inline styles always win regardless of any CSS
   // specificity/cascade conflict that might exist in a given environment,
