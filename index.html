@@ -21996,6 +21996,16 @@ window.runGlobalSearch = (q)=>{
     html += exMatches.map(s => globalSearchResultRow('fa-right-left','#EA580C', escapeHtml(s.model||'—'), `${escapeHtml(s.regNo||'')} · ${escapeHtml(s.status||'In Stock')}`, `window.jumpToSearchResult('exchange_stock','${s.id}')`)).join('');
     total += exMatches.length;
   }
+  // Customers isn't its own Firestore collection — it's the same aggregated
+  // index (by name, built from sold Inventory/HH Inventory + Chalans +
+  // Exchanges) that the Customers page itself uses, so a match here is
+  // guaranteed to open to something real.
+  const custMatches = reconLimited ? [] : (typeof buildCustomerIndex==='function' ? buildCustomerIndex() : []).filter(c => matches(c.name)||matches(c.contact)).slice(0, MAX_PER_GROUP);
+  if(custMatches.length){
+    html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Customers</div>`;
+    html += custMatches.map(c => globalSearchResultRow('fa-address-card','#964734', escapeHtml(c.name||'—'), `${c.purchases.length} bought · ${c.chalans.length} chalan · ${c.exchanges.length} exchange`, `window.jumpToSearchResult('customer','${escapeJsAttr(c.name)}')`)).join('');
+    total += custMatches.length;
+  }
 
   resultsEl.innerHTML = total ? html : `<div class="py-10 text-center text-slate-400 text-sm"><i class="fas fa-magnifying-glass text-2xl opacity-30 block mb-2"></i>No matches for "${escapeHtml(q)}".</div>`;
 };
@@ -22008,6 +22018,7 @@ window.jumpToSearchResult = (type, id)=>{
   else if(type==='chalans'){ window.switchSec('chalans'); setTimeout(()=>window._selectRow('chalans', id), 150); }
   else if(type==='important'){ window.switchSec('important'); }
   else if(type==='price'){ window.switchSec('price'); }
+  else if(type==='customer'){ window.switchSec('customers'); setTimeout(()=>window.openCustomerDetail(id), 150); }
 };
 
 // "/" opens search from anywhere (as long as focus isn't already inside a
