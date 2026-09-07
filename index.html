@@ -1781,6 +1781,11 @@
 #secFinanceTool .emi-box-val.updated{
   animation:fin_emiPulse .5s cubic-bezier(.34,1.56,.64,1);
 }
+@keyframes searchJumpFlash{
+  0%{ background-color:rgba(15,164,175,.35); }
+  100%{ background-color:transparent; }
+}
+.search-jump-flash{ animation: searchJumpFlash 1.8s ease-out; }
 @keyframes fin_emiPulse{
   0%{transform:scale(.85) rotateZ(-2deg);opacity:.8}
   50%{transform:scale(1.15) rotateZ(1deg)}
@@ -7377,6 +7382,31 @@ window._selectRow = (type, id)=>{
     renderReconStockTable();
     const cb = document.querySelector(`.recon-row-checkbox[data-id="${id}"]`);
     if(cb){ cb.scrollIntoView({behavior:'smooth', block:'center'}); }
+  }
+};
+
+// Separate from _selectRow on purpose: _selectRow is the row context menu's
+// deliberate "Select" action (ticks the checkbox, turns on bulk-select mode)
+// — a real feature someone chose on purpose. A search jump is just "here's
+// the record you searched for", so it only scrolls to the row and briefly
+// flashes it, without ever engaging select mode or pre-checking a box.
+window._jumpToRow = (type, id)=>{
+  const SELECTORS = {
+    inventory: '.inv-row-checkbox',
+    hh_inventory: '.hhinv-row-checkbox',
+    chalans: '.chalan-row-checkbox',
+    exchange_stock: '.ex-row-checkbox',
+    exchange_stock_showroom: '.ex-sr-row-checkbox',
+    recondition_stock: '.recon-row-checkbox'
+  };
+  const sel = SELECTORS[type];
+  if(!sel) return;
+  const cb = document.querySelector(`${sel}[data-id="${id}"]`);
+  const row = cb ? (cb.closest('tr') || cb.closest('.card-shell') || cb.parentElement) : null;
+  if(row){
+    row.scrollIntoView({behavior:'smooth', block:'center'});
+    row.classList.add('search-jump-flash');
+    setTimeout(()=>row.classList.remove('search-jump-flash'), 1800);
   }
 };
 
@@ -14696,10 +14726,10 @@ function buildCustomerIndex(){
   };
   const bump = (rec, date)=>{ if(date && (!rec.lastActivity || date > rec.lastActivity)) rec.lastActivity = date; };
 
-  [...invData, ...hhInvData].filter(u=>u.status==='Sold' && u.customerName).forEach(u=>{
+  [...invData.map(u=>({...u,_src:'inventory'})), ...hhInvData.map(u=>({...u,_src:'hh_inventory'}))].filter(u=>u.status==='Sold' && u.customerName).forEach(u=>{
     const rec = touch(u.customerName); if(!rec) return;
     const date = toDateSafe(u.soldAt);
-    rec.purchases.push({ model:u.model, chassis:u.chassis, regNo:u.regNo, date, soldFrom:u.soldFrom });
+    rec.purchases.push({ model:u.model, chassis:u.chassis, regNo:u.regNo, date, soldFrom:u.soldFrom, id:u.id, source:u._src });
     bump(rec, date);
   });
   chalanData.forEach(c=>{
@@ -22003,7 +22033,18 @@ window.runGlobalSearch = (q)=>{
   const custMatches = reconLimited ? [] : (typeof buildCustomerIndex==='function' ? buildCustomerIndex() : []).filter(c => matches(c.name)||matches(c.contact)).slice(0, MAX_PER_GROUP);
   if(custMatches.length){
     html += `<div class="px-4 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Customers</div>`;
-    html += custMatches.map(c => globalSearchResultRow('fa-address-card','#964734', escapeHtml(c.name||'—'), `${c.purchases.length} bought · ${c.chalans.length} chalan · ${c.exchanges.length} exchange`, `window.jumpToSearchResult('customer','${escapeJsAttr(c.name)}')`)).join('');
+    html += custMatches.map(c => {
+      // "Which vehicle did this customer take" — jump straight to that unit's
+      // actual Inventory/HH Inventory record (most recent purchase) rather
+      // than a name-keyed summary. Only falls back to the customer detail
+      // popup when there's no completed purchase to jump to (chalan/exchange
+      // activity only, no sale on file yet).
+      const bestPurchase = c.purchases.length ? c.purchases.slice().sort((a,b)=>(b.date?.getTime()||0)-(a.date?.getTime()||0))[0] : null;
+      const jump = (bestPurchase && bestPurchase.id && bestPurchase.source)
+        ? `window.jumpToSearchResult('${bestPurchase.source}','${bestPurchase.id}')`
+        : `window.jumpToSearchResult('customer','${escapeJsAttr(c.name)}')`;
+      return globalSearchResultRow('fa-address-card','#964734', escapeHtml(c.name||'—'), `${c.purchases.length} bought · ${c.chalans.length} chalan · ${c.exchanges.length} exchange`, jump);
+    }).join('');
     total += custMatches.length;
   }
 
@@ -22012,10 +22053,10 @@ window.runGlobalSearch = (q)=>{
 
 window.jumpToSearchResult = (type, id)=>{
   window.closeGlobalSearch();
-  if(type==='inventory'){ window.switchSec('inv'); setTimeout(()=>window._selectRow('inventory', id), 150); }
-  else if(type==='hh_inventory'){ window.switchSec('hhinv'); setTimeout(()=>window._selectRow('hh_inventory', id), 150); }
-  else if(type==='exchange_stock'){ window.switchSec('exchange'); setTimeout(()=>window._selectRow('exchange_stock', id), 150); }
-  else if(type==='chalans'){ window.switchSec('chalans'); setTimeout(()=>window._selectRow('chalans', id), 150); }
+  if(type==='inventory'){ window.switchSec('inv'); setTimeout(()=>window._jumpToRow('inventory', id), 150); }
+  else if(type==='hh_inventory'){ window.switchSec('hhinv'); setTimeout(()=>window._jumpToRow('hh_inventory', id), 150); }
+  else if(type==='exchange_stock'){ window.switchSec('exchange'); setTimeout(()=>window._jumpToRow('exchange_stock', id), 150); }
+  else if(type==='chalans'){ window.switchSec('chalans'); setTimeout(()=>window._jumpToRow('chalans', id), 150); }
   else if(type==='important'){ window.switchSec('important'); }
   else if(type==='price'){ window.switchSec('price'); }
   else if(type==='customer'){ window.switchSec('customers'); setTimeout(()=>window.openCustomerDetail(id), 150); }
