@@ -30,22 +30,22 @@
             amberDark: '#723627',
           },
           blue: {
-            50:  '#F6EFEA',
-            100: '#CFEBED',
-            200: '#DFC3AE',
-            300: '#CBA184',
-            400: '#B07C56',
-            500: '#964734',
-            600: '#7E5238',
-            700: '#0FA4AF',
-            800: '#024950',
-            900: '#2A211D',
+            50:  '#EFF8F9',
+            100: '#DFF3F4',
+            200: '#C7E9EC',
+            300: '#8ED4DA',
+            400: '#4FB8C1',
+            500: '#0FA4AF',
+            600: '#0C8790',
+            700: '#024950',
+            800: '#01363B',
+            900: '#003135',
           },
           /* NOTE: a `brand` and `gold` palette used to be defined here,
              duplicating `blue`/`bajaj` and `amber` respectively with zero
              actual class usage in this file — removed to cut config bloat.
              `blue.*` is kept (still used for nav/active-state classes) and
-             intentionally shares its 600 value with `bajaj.blue`; treat
+             intentionally shares its 500 value with `bajaj.blue`; treat
              `bajaj.*` as the canonical brand token going forward and avoid
              introducing further one-off palettes. */
           danger: '#C0392B',
@@ -53,22 +53,22 @@
           /* Chai accent — overrides Tailwind's default amber so every
              amber-* utility across the app shifts to the warm accent. */
           amber: {
-            50:  '#F8EFE8',
-            100: '#F0DECF',
-            200: '#E3C4A9',
-            300: '#5FBFC7',
-            400: '#BE8760',
+            50:  '#FBEEE9',
+            100: '#F3E3DE',
+            200: '#E5C3B7',
+            300: '#D19E8C',
+            400: '#B57058',
             500: '#964734',
-            600: '#8A5A3E',
+            600: '#7E3B2B',
             700: '#723627',
-            800: '#0FA4AF',
-            900: '#024950',
+            800: '#5A2B1F',
+            900: '#3D1D15',
           },
         },
         boxShadow: {
           card: '0 2px 12px rgba(0,49,53,0.07)',
-          'card-hover': '0 20px 48px rgba(90,71,64,0.14)',
-          btn: '0 4px 18px rgba(90,71,64,0.28)',
+          'card-hover': '0 20px 48px rgba(0,49,53,0.14)',
+          btn: '0 4px 18px rgba(0,49,53,0.28)',
         },
         animation: {
           fadeUp: 'fadeUp 0.3s ease both',
@@ -111,7 +111,7 @@
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg-surface-2); }
-  ::-webkit-scrollbar-thumb { background: rgba(90,71,64,0.3); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,49,53,0.3); border-radius: 99px; }
 
 
   /* Section transitions */
@@ -126,7 +126,7 @@
     color: #723627; font-weight: 700; outline: none;
     transition: border-color 0.2s;
   }
-  .sn-input:focus { border-color: #964734; box-shadow:0 0 0 3px rgba(159,106,74,.12); }
+  .sn-input:focus { border-color: #964734; box-shadow:0 0 0 3px rgba(150,71,52,.12); }
 
   /* Spinner */
   .spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite; display:none; }
@@ -160,7 +160,7 @@
   .colour-dot { display:inline-block; width:9px; height:9px; border-radius:50%; border:1px solid rgba(0,0,0,.12); flex-shrink:0; }
 
   /* Input focus ring */
-  input:focus, select:focus { outline: none; border-color: #0FA4AF !important; box-shadow: 0 0 0 3px rgba(90,71,64,0.12) !important; }
+  input:focus, select:focus { outline: none; border-color: #0FA4AF !important; box-shadow: 0 0 0 3px rgba(0,49,53,0.12) !important; }
 
   /* Gradient top bar */
   .top-bar-grad { background: linear-gradient(90deg, #0FA4AF, #964734, #298F60); }
@@ -207,7 +207,7 @@
     font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.875rem;
     letter-spacing: 0.02em; padding: 12px 22px; border-radius: 10px;
     display: inline-flex; align-items: center; justify-content:center; gap: 8px;
-    transition: all 0.22s ease; box-shadow: 0 4px 18px rgba(90,71,64,0.3);
+    transition: all 0.22s ease; box-shadow: 0 4px 18px rgba(0,49,53,0.3);
     text-decoration: none; border: 2px solid #0FA4AF; cursor:pointer;
     position: relative; overflow: hidden;
   }
@@ -217,7 +217,7 @@
     transform: translateX(-160%); transition: transform 0.55s ease;
   }
   .cta-primary:hover::before { transform: translateX(160%); }
-  .cta-primary:hover:not(:disabled) { background: #024950; border-color: #024950; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(90,71,64,0.38); }
+  .cta-primary:hover:not(:disabled) { background: #024950; border-color: #024950; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(0,49,53,0.38); }
   .cta-primary:disabled{ opacity:.55; cursor:not-allowed; transform:none !important; }
   .cta-secondary {
     background: transparent; color: #0FA4AF;
@@ -226,11 +226,11 @@
     display: inline-flex; align-items: center; justify-content:center; gap: 8px;
     border: 2px solid #0FA4AF; transition: all 0.22s ease; text-decoration: none; cursor:pointer;
   }
-  .cta-secondary:hover { background: #0FA4AF; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(90,71,64,0.22); }
+  .cta-secondary:hover { background: #0FA4AF; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(0,49,53,0.22); }
   .cta-amber {
     background:#964734; color:#fff; font-weight:700; font-size:.875rem;
     padding:12px 22px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; gap:8px;
-    box-shadow:0 6px 20px rgba(159,106,74,.28); transition:all .2s ease; border:none; cursor:pointer;
+    box-shadow:0 6px 20px rgba(150,71,52,.28); transition:all .2s ease; border:none; cursor:pointer;
   }
   .cta-amber:hover:not(:disabled){ background:#723627; transform:translateY(-2px); }
   .cta-amber:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
@@ -240,7 +240,7 @@
     background: #0FA4AF; color: #fff;
     font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.7rem;
     letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 6px 14px; border-radius: 999px; box-shadow: 0 4px 14px rgba(90,71,64,0.28);
+    padding: 6px 14px; border-radius: 999px; box-shadow: 0 4px 14px rgba(0,49,53,0.28);
     position: relative; overflow: hidden;
   }
   .price-badge::before {
@@ -251,18 +251,18 @@
   @keyframes badgeShine { 0%,55%{transform:translateX(-140%)} 80%{transform:translateX(140%)} 100%{transform:translateX(140%)} }
 
   .stat-chip {
-    background: #fff; border: 1px solid rgba(90,71,64,0.12); border-radius: 12px;
+    background: #fff; border: 1px solid rgba(0,49,53,0.12); border-radius: 12px;
     padding: 14px 20px; display: flex; flex-direction: column; align-items: center;
     gap: 2px; box-shadow: 0 2px 12px rgba(0,0,0,0.05);
     transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
   }
-  .stat-chip:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(90,71,64,0.16); border-color: rgba(90,71,64,0.3); }
+  .stat-chip:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,49,53,0.16); border-color: rgba(0,49,53,0.3); }
 
   .yng-card-shell{
     background:#fff; border-radius:18px; border:1px solid #E8E6E1; overflow:hidden;
     box-shadow:0 2px 12px rgba(0,0,0,.04); transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
   }
-  .yng-card-shell:hover{ transform:translateY(-4px); box-shadow:0 16px 40px rgba(90,71,64,.12); border-color:rgba(90,71,64,.24); }
+  .yng-card-shell:hover{ transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,49,53,.12); border-color:rgba(0,49,53,.24); }
 
   /* ═══ LOGIN — Diprella-style split card ═══ */
   :root{
@@ -329,7 +329,7 @@
   .remember-label{ font-size:12px; font-weight:600; color:#556067; }
   .lfield-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#723627;margin-bottom:6px;display:block}
   .lfield{width:100%;height:50px;border:1.5px solid transparent;border-radius:12px;background:#F6EFEA;padding:0 14px 0 44px;font-size:14px;color:#0D0D0D;outline:none;transition:border-color .2s,box-shadow .2s,background .2s;font-family:'DM Sans',sans-serif}
-  .lfield:focus{border-color:var(--lblue);box-shadow:0 0 0 3px rgba(90,71,64,.12);background:#fff}
+  .lfield:focus{border-color:var(--lblue);box-shadow:0 0 0 3px rgba(0,49,53,.12);background:#fff}
   .lfield-wrap{position:relative}
   .lfield-wrap i{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#964734;font-size:14px}
   .lfield-wrap .pass-toggle-btn{
@@ -339,13 +339,13 @@
   }
   .lfield-wrap .pass-toggle-btn:hover{ color:#0FA4AF; background:#EFF8F9; }
   .lfield-wrap input[type="password"], .lfield-wrap input[type="text"].lfield{ padding-right:42px; }
-  .login-cta{width:100%;padding:15px 20px;background:var(--lblue);color:#fff;border:none;border-radius:999px;font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase;box-shadow:0 10px 24px rgba(90,71,64,.30);transition:background .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+  .login-cta{width:100%;padding:15px 20px;background:var(--lblue);color:#fff;border:none;border-radius:999px;font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase;box-shadow:0 10px 24px rgba(0,49,53,.30);transition:background .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
   .login-cta:hover{background:var(--lblueDark);transform:translateY(-1px)}
   .login-cta:disabled{opacity:.6;cursor:not-allowed;transform:none}
   .login-support-btn{display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:999px;font-size:13px;font-weight:700;transition:all .18s;text-decoration:none}
 
   /* ═══ Sidebar nav-tab state (structural rules live in the shell block below) ═══ */
-  #navAvatar{box-shadow:0 0 0 2px #fff, 0 0 0 3.5px rgba(90,71,64,.25)}
+  #navAvatar{box-shadow:0 0 0 2px #fff, 0 0 0 3.5px rgba(0,49,53,.25)}
   .fit-toggle-card{display:flex;align-items:center;gap:10px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:9px 12px;cursor:pointer;transition:all .15s ease;user-select:none}
   .fit-toggle-card:hover{border-color:#cbd5e1}
   .fit-toggle-icon{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#e2e8f0;color:#94a3b8;font-size:13px;transition:all .15s ease}
@@ -738,7 +738,7 @@
     transition:border-color .15s ease, box-shadow .15s ease; text-align:left;
   }
   .cs-trigger:hover{ border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft-bg); }
-  .cs-trigger.open, .cs-trigger:focus-visible{ border-color:#0FA4AF; box-shadow:0 0 0 3px rgba(90,71,64,.12); outline:none; }
+  .cs-trigger.open, .cs-trigger:focus-visible{ border-color:#0FA4AF; box-shadow:0 0 0 3px rgba(0,49,53,.12); outline:none; }
   .cs-trigger .cs-label{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .cs-trigger .cs-label.placeholder{ color:#94A3B8; font-weight:500; }
   .cs-trigger .cs-chev{ color:#94A3B8; font-size:11px; transition:transform .15s ease; flex-shrink:0; }
@@ -775,7 +775,7 @@
   .colour-chip{ display:inline-flex; align-items:center; gap:5px; background:#F1F2F5; border:1px solid #E7E9EE; border-radius:7px; padding:2px 8px; font-size:11px; font-weight:700; color:#4B5262; }
   .colour-chip .dot{ width:7px; height:7px; border-radius:50%; background:#0FA4AF; flex-shrink:0; }
   .area-qty-input{ width:64px; text-align:center; border:1.5px solid #E2E8F0; border-radius:7px; padding:5px 4px; font-size:13px; font-weight:700; color:#1F2430; background:#F8FAFC; transition:border-color .15s; }
-  .area-qty-input:focus{ outline:none; border-color:#0FA4AF; box-shadow:0 0 0 3px rgba(90,71,64,.1); }
+  .area-qty-input:focus{ outline:none; border-color:#0FA4AF; box-shadow:0 0 0 3px rgba(0,49,53,.1); }
   .area-remove-btn{ width:20px; height:20px; border-radius:6px; border:none; background:rgba(220,38,38,.08); color:#DC2626; cursor:pointer; font-size:9px; display:inline-flex; align-items:center; justify-content:center; margin-left:6px; transition:background .15s; }
   .area-remove-btn:hover{ background:rgba(220,38,38,.18); }
   .area-total-chip{ display:inline-flex; align-items:center; justify-content:center; min-width:34px; padding:3px 8px; border-radius:7px; background:#DFF3F4; color:#0FA4AF; font-weight:800; font-size:12.5px; }
@@ -1030,7 +1030,7 @@
 @keyframes slideInRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
 #secSheetTool .calc-card{animation-delay:inherit}
 @media(prefers-reduced-motion:reduce){#secSheetTool .calc-card, #secSheetTool .sheet-wrap, #secSheetTool header, #secSheetTool .fin-hero, #secSheetTool main, #secSheetTool footer{animation:none!important;opacity:1;transform:none!important}}
-#secSheetTool .nav-blur{background:rgba(255,255,255,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(90,71,64,0.08);box-shadow:0 2px 24px rgba(0,0,0,0.06)}
+#secSheetTool .nav-blur{background:rgba(255,255,255,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,49,53,0.08);box-shadow:0 2px 24px rgba(0,0,0,0.06)}
 #secSheetTool .nav-link{position:relative;font-size:0.875rem;font-weight:500;color:#374151;display:flex;align-items:center;gap:5px;transition:color 0.2s;padding:4px 2px}
 #secSheetTool .nav-link::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:#0FA4AF;border-radius:2px;transition:width 0.25s ease}
 #secSheetTool .nav-link:hover{color:#0FA4AF}
@@ -1039,13 +1039,13 @@
 #secSheetTool .nav-link.active::after{width:100%}
 #secSheetTool #mobile-menu{max-height:0;overflow:hidden;transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.28s ease;opacity:0}
 #secSheetTool #mobile-menu.open{max-height:640px;opacity:1}
-#secSheetTool .cta-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;border-radius:10px;padding:10px 20px;border:none;cursor:pointer;transition:background .2s,transform .15s;box-shadow:0 4px 14px rgba(90,71,64,.22)}
+#secSheetTool .cta-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;border-radius:10px;padding:10px 20px;border:none;cursor:pointer;transition:background .2s,transform .15s;box-shadow:0 4px 14px rgba(0,49,53,.22)}
 #secSheetTool .cta-primary:hover{background:var(--blueDark)}
 #secSheetTool .custom-select{position:relative}
 #secSheetTool .sr-only-select{position:absolute;opacity:0;pointer-events:none;height:46px;width:100%;left:0;top:0}
 #secSheetTool .custom-select-trigger{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);padding:0 16px;font-size:14px;color:var(--ink);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif;text-align:left}
 #secSheetTool .custom-select-trigger:hover{border-color:#C9D6E3}
-#secSheetTool .custom-select-trigger.open{border-color:var(--blue);box-shadow:0 0 0 3px rgba(90,71,64,.1)}
+#secSheetTool .custom-select-trigger.open{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,49,53,.1)}
 #secSheetTool .cst-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 #secSheetTool .cst-chevron{color:var(--ink3);font-size:12px;transition:transform .22s ease;margin-left:8px;flex-shrink:0}
 #secSheetTool .custom-select-trigger.open .cst-chevron{transform:rotate(180deg);color:var(--blue)}
@@ -1060,13 +1060,13 @@
 #secSheetTool .cst-option.selected .cst-dot::after{opacity:1;transform:scale(1)}
 #secSheetTool .field-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;display:block}
 #secSheetTool input.styled{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);padding:0 14px;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
-#secSheetTool input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(90,71,64,.1)}
+#secSheetTool input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,49,53,.1)}
 #secSheetTool .fin-hero{background:linear-gradient(135deg,#F3F5F9 0%,#EBF4FF 55%,#DCEEFB 100%);position:relative;overflow:hidden}
-#secSheetTool .fin-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:420px;height:420px;background:radial-gradient(circle,rgba(90,71,64,.1) 0%,transparent 70%);border-radius:50%}
-#secSheetTool .fin-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(159,106,74,.08) 0%,transparent 70%);border-radius:50%}
+#secSheetTool .fin-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:420px;height:420px;background:radial-gradient(circle,rgba(0,49,53,.1) 0%,transparent 70%);border-radius:50%}
+#secSheetTool .fin-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(150,71,52,.08) 0%,transparent 70%);border-radius:50%}
 #secSheetTool .headline{font-family:'Bebas Neue',cursive;line-height:.95;letter-spacing:.01em}
-#secSheetTool .price-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(90,71,64,.28)}
-#secSheetTool .stat-chip{background:var(--bg-surface);border:1px solid rgba(90,71,64,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+#secSheetTool .price-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,49,53,.28)}
+#secSheetTool .stat-chip{background:var(--bg-surface);border:1px solid rgba(0,49,53,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
 #secSheetTool .calc-card{background:var(--bg-surface);border:1px solid var(--line);border-radius:18px;padding:1.4rem;box-shadow:0 2px 14px rgba(0,0,0,.04)}
 #secSheetTool .calc-card:has(.custom-select-panel.open){position:relative;z-index:60}
 #secSheetTool .calc-card.dropdown-open{position:relative;z-index:60}
@@ -1085,13 +1085,13 @@
 #secSheetTool .acc-row-custom input.amt{width:90px;border:none;background:transparent;font-size:13px;font-weight:700;color:var(--ink);outline:none;text-align:right}
 #secSheetTool .acc-remove{width:26px;height:26px;border-radius:8px;border:none;background:rgba(220,38,38,.08);color:var(--red);cursor:pointer;flex-shrink:0;font-size:12px;transition:background .15s}
 #secSheetTool .acc-remove:hover{background:rgba(220,38,38,.16)}
-#secSheetTool .acc-add-btn{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--blue);background:var(--blueLt);border:1px dashed rgba(90,71,64,.35);border-radius:10px;padding:8px 14px;cursor:pointer;transition:background .15s}
+#secSheetTool .acc-add-btn{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--blue);background:var(--blueLt);border:1px dashed rgba(0,49,53,.35);border-radius:10px;padding:8px 14px;cursor:pointer;transition:background .15s}
 #secSheetTool .acc-add-btn:hover{background:#DCEEFB}
 #secSheetTool .acc-total-chip{margin-left:auto;background:var(--blueLt);color:var(--blue);font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:.02em;padding:4px 14px;border-radius:999px}
 #secSheetTool .mode-toggle{display:inline-flex;background:var(--bgSoft);border:1.5px solid var(--line);border-radius:999px;padding:4px;gap:2px}
 #secSheetTool .mode-btn{border:none;background:transparent;color:var(--ink3);font-size:12.5px;font-weight:700;letter-spacing:.02em;padding:8px 18px;border-radius:999px;cursor:pointer;transition:background .2s,color .2s;display:flex;align-items:center;gap:7px}
 #secSheetTool .mode-btn i{font-size:11px}
-#secSheetTool .mode-btn.active{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(90,71,64,.28)}
+#secSheetTool .mode-btn.active{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(0,49,53,.28)}
 #secSheetTool .mode-btn:not(.active):hover{color:var(--blue)}
 #secSheetTool .summary-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem;margin-bottom:1.1rem}
 #secSheetTool .sum-pill{background:var(--bg-surface);border:1px solid var(--line);border-radius:12px;padding:9px 16px;display:flex;flex-direction:column;gap:2px;box-shadow:0 2px 10px rgba(0,0,0,.04);min-width:0}
@@ -1100,7 +1100,7 @@
 #secSheetTool .sheet-wrap{background:var(--bg-surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 2px 14px rgba(0,0,0,.04);overflow:hidden}
 #secSheetTool .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative}
 #secSheetTool .table-scroll::-webkit-scrollbar{height:8px}
-#secSheetTool .table-scroll::-webkit-scrollbar-thumb{background:rgba(90,71,64,.3);border-radius:99px}
+#secSheetTool .table-scroll::-webkit-scrollbar-thumb{background:rgba(0,49,53,.3);border-radius:99px}
 #secSheetTool .sheet-table{border-collapse:collapse;width:100%;min-width:1180px;font-size:12.5px}
 #secSheetTool .sheet-table thead th{background:var(--blueDark);color:#fff;font-weight:700;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:12px 10px;text-align:center;white-space:nowrap;position:sticky;top:0;z-index:2;min-width:52px}
 #secSheetTool .sheet-table thead th:first-child, #secSheetTool .sheet-table tbody td:first-child{text-align:center}
@@ -1162,7 +1162,7 @@
 #secSheetTool .sum-pill{padding:7px 12px}}
 @media (min-width:1024px){#secSheetTool main > div{padding-left:32px;padding-right:32px}
 #secSheetTool .calc-card{padding:1.7rem 1.9rem;border-radius:20px;transition:box-shadow .25s,border-color .25s}
-#secSheetTool .calc-card:hover{box-shadow:0 8px 28px rgba(90,71,64,.08);border-color:rgba(90,71,64,.16)}
+#secSheetTool .calc-card:hover{box-shadow:0 8px 28px rgba(0,49,53,.08);border-color:rgba(0,49,53,.16)}
 #secSheetTool .calc-card-title{font-size:1.02rem;margin-bottom:1.5rem}
 #secSheetTool .controls-grid{gap:1.4rem}
 #secSheetTool .custom-select-trigger, #secSheetTool input.styled{height:48px}
@@ -1429,7 +1429,7 @@
   background: rgba(255,255,255,0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(90,71,64,0.08);
+  border-bottom: 1px solid rgba(0,49,53,0.08);
   box-shadow: 0 2px 24px rgba(0,0,0,0.06);
 }
 #secFinanceTool .nav-link{
@@ -1452,11 +1452,11 @@
   background:var(--blue);color:#fff;font-weight:600;border-radius:10px;
   padding:10px 20px;border:none;cursor:pointer;
   transition:all .25s cubic-bezier(.4,.0,.2,1);
-  box-shadow:0 4px 14px rgba(90,71,64,.22);
+  box-shadow:0 4px 14px rgba(0,49,53,.22);
 }
 #secFinanceTool .cta-primary:hover{
   background:var(--blueDark);transform:translateY(-2px);
-  box-shadow:0 8px 20px rgba(90,71,64,.35);
+  box-shadow:0 8px 20px rgba(0,49,53,.35);
 }
 #secFinanceTool .cta-primary:active{transform:translateY(0)}
 #secFinanceTool .custom-select{position:relative}
@@ -1470,10 +1470,10 @@
 }
 #secFinanceTool .custom-select-trigger:hover{
   border-color:#C9D6E3;transform:translateY(-1px);
-  background:linear-gradient(135deg,var(--bgSoft) 0%,rgba(90,71,64,.02) 100%);
+  background:linear-gradient(135deg,var(--bgSoft) 0%,rgba(0,49,53,.02) 100%);
 }
 #secFinanceTool .custom-select-trigger.open{
-  border-color:var(--blue);box-shadow:0 0 0 3px rgba(90,71,64,.1);
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,49,53,.1);
 }
 #secFinanceTool .cst-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 #secFinanceTool .cst-chevron{color:var(--ink3);font-size:12px;transition:transform .22s ease;margin-left:8px;flex-shrink:0}
@@ -1507,17 +1507,17 @@
 #secFinanceTool .cst-option.selected .cst-dot{border-color:var(--blue)}
 #secFinanceTool .cst-option.selected .cst-dot::after{opacity:1;transform:scale(1)}
 #secFinanceTool .fin-hero{background:linear-gradient(135deg,#F3F5F9 0%,#EBF4FF 55%,#DCEEFB 100%);position:relative;overflow:hidden}
-#secFinanceTool .fin-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:420px;height:420px;background:radial-gradient(circle,rgba(90,71,64,.1) 0%,transparent 70%);border-radius:50%}
-#secFinanceTool .fin-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(159,106,74,.08) 0%,transparent 70%);border-radius:50%}
+#secFinanceTool .fin-hero::before{content:'';position:absolute;top:-100px;right:-100px;width:420px;height:420px;background:radial-gradient(circle,rgba(0,49,53,.1) 0%,transparent 70%);border-radius:50%}
+#secFinanceTool .fin-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:320px;height:320px;background:radial-gradient(circle,rgba(150,71,52,.08) 0%,transparent 70%);border-radius:50%}
 #secFinanceTool .headline{font-family:'Bebas Neue',cursive;line-height:.95;letter-spacing:.01em}
-#secFinanceTool .price-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(90,71,64,.28)}
-#secFinanceTool .stat-chip{background:var(--bg-surface);border:1px solid rgba(90,71,64,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+#secFinanceTool .price-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;font-weight:600;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,49,53,.28)}
+#secFinanceTool .stat-chip{background:var(--bg-surface);border:1px solid rgba(0,49,53,.12);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,.05)}
 #secFinanceTool .total-dp-banner{
   background:linear-gradient(120deg,var(--blue) 0%,var(--blueDark) 65%,#00284D 100%);
   border-radius:16px;padding:1rem 1.5rem;display:flex;align-items:center;
   justify-content:space-between;gap:1rem;flex-wrap:wrap;position:sticky;
   top:64px;z-index:40;overflow:hidden;
-  box-shadow:0 10px 30px rgba(90,71,64,.28),0 1px 0 rgba(255,255,255,.08) inset;
+  box-shadow:0 10px 30px rgba(0,49,53,.28),0 1px 0 rgba(255,255,255,.08) inset;
   border:1px solid rgba(255,255,255,.1);
   transition:all .3s ease;
 }
@@ -1526,10 +1526,10 @@
   background:linear-gradient(90deg,var(--amber),#5FBFC7,var(--amber));
   opacity:.9;
 }
-#secFinanceTool .total-dp-banner:hover{box-shadow:0 14px 36px rgba(90,71,64,.32),0 1px 0 rgba(255,255,255,.08) inset}
+#secFinanceTool .total-dp-banner:hover{box-shadow:0 14px 36px rgba(0,49,53,.32),0 1px 0 rgba(255,255,255,.08) inset}
 #secFinanceTool .total-dp-banner::before{
   content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;
-  background:radial-gradient(circle,rgba(159,106,74,.2) 0%,transparent 70%);border-radius:50%;
+  background:radial-gradient(circle,rgba(150,71,52,.2) 0%,transparent 70%);border-radius:50%;
 }
 #secFinanceTool .tdp-left{display:flex;flex-direction:column;gap:3px;position:relative;z-index:1}
 #secFinanceTool .tdp-label{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#BFDBFE;display:flex;align-items:center;gap:6px}
@@ -1560,7 +1560,7 @@
 #secFinanceTool .calc-card:has(.custom-select-panel.open){z-index:60}
 #secFinanceTool .calc-card.dropdown-open{z-index:60}
 #secFinanceTool .calc-card:hover{
-  border-color:rgba(90,71,64,.15);box-shadow:0 8px 28px rgba(90,71,64,.12);
+  border-color:rgba(0,49,53,.15);box-shadow:0 8px 28px rgba(0,49,53,.12);
   transform:translateY(-2px);
 }
 #secFinanceTool .calc-card-title{
@@ -1584,12 +1584,12 @@
   background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;
 }
 #secFinanceTool select.styled:focus, #secFinanceTool input.styled:focus{
-  border-color:var(--blue);box-shadow:0 0 0 4px rgba(90,71,64,.15);
-  animation:fin_inputFocus .3s ease forwards;background:linear-gradient(135deg,var(--bgSoft) 0%,rgba(90,71,64,.06) 100%);
+  border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,49,53,.15);
+  animation:fin_inputFocus .3s ease forwards;background:linear-gradient(135deg,var(--bgSoft) 0%,rgba(0,49,53,.06) 100%);
 }
 @keyframes fin_inputFocus{
-  0%{box-shadow:0 0 0 0 rgba(90,71,64,.1)}
-  100%{box-shadow:0 0 0 4px rgba(90,71,64,.15)}
+  0%{box-shadow:0 0 0 0 rgba(0,49,53,.1)}
+  100%{box-shadow:0 0 0 4px rgba(0,49,53,.15)}
 }
 #secFinanceTool .metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:1.25rem}
 #secFinanceTool .metric-box{
@@ -1598,8 +1598,8 @@
   transition:all .18s cubic-bezier(.4,.0,.2,1);
 }
 #secFinanceTool .metric-box.has-input:focus-within{
-  border-color:var(--blue);box-shadow:0 0 0 3px rgba(90,71,64,.08);
-  transform:translateY(-2px);background:linear-gradient(135deg,#F8FAFC 0%,rgba(90,71,64,.04) 100%);
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,49,53,.08);
+  transform:translateY(-2px);background:linear-gradient(135deg,#F8FAFC 0%,rgba(0,49,53,.04) 100%);
 }
 #secFinanceTool .metric-lbl{font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3)}
 #secFinanceTool .metric-val{
@@ -1631,7 +1631,7 @@
 #secFinanceTool .config-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding-top:1.25rem;border-top:1px solid var(--line);margin-top:1.25rem}
 #secFinanceTool .two-up{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
 #secFinanceTool .charge-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);transition:all .2s ease}
-#secFinanceTool .charge-row:hover{background:rgba(90,71,64,.02);padding:11px 8px;border-radius:6px;margin:0 -8px;padding:11px 8px}
+#secFinanceTool .charge-row:hover{background:rgba(0,49,53,.02);padding:11px 8px;border-radius:6px;margin:0 -8px;padding:11px 8px}
 #secFinanceTool .charge-row:last-child{border-bottom:none;padding-bottom:0}
 #secFinanceTool .charge-row label{font-size:13.5px;color:var(--ink2);font-weight:500;display:flex;align-items:center;gap:8px}
 #secFinanceTool .charge-row label i{color:var(--blue);font-size:13px;transition:transform .2s ease}
@@ -1654,7 +1654,7 @@
 #secFinanceTool .itoggle-btn:hover{transform:translateY(-1px)}
 #secFinanceTool .itoggle-btn.active{
   background:var(--blueLt);border-color:var(--blue);color:var(--blue);
-  transform:scale(1.02);box-shadow:0 4px 12px rgba(90,71,64,.15);
+  transform:scale(1.02);box-shadow:0 4px 12px rgba(0,49,53,.15);
 }
 #secFinanceTool .acc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 #secFinanceTool .acc-field{display:flex;flex-direction:column;gap:6px}
@@ -1668,14 +1668,14 @@
   outline:none;font-size:15px;font-weight:700;color:var(--ink);padding:5px 2px;
   transition:all .18s cubic-bezier(.4,.0,.2,1);font-family:'DM Sans',sans-serif;
 }
-#secFinanceTool .acc-field input:focus{border-color:var(--blue);background:rgba(90,71,64,.02)}
+#secFinanceTool .acc-field input:focus{border-color:var(--blue);background:rgba(0,49,53,.02)}
 #secFinanceTool .chassis-tools-row{display:flex;gap:12px;margin-top:14px;align-items:flex-end;flex-wrap:wrap}
 #secFinanceTool .chassis-tools-row .ct-search{flex:1 1 220px;min-width:200px}
 #secFinanceTool .chassis-tools-row .ct-find{flex:0 0 auto}
 #secFinanceTool .chassis-tools-row .ct-year{flex:0 0 120px;min-width:110px}
 #secFinanceTool .model-mismatch-warning{
   display:none;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;
-  background:rgba(159,106,74,.1);border:1.5px solid rgba(159,106,74,.35);border-radius:10px;
+  background:rgba(150,71,52,.1);border:1.5px solid rgba(150,71,52,.35);border-radius:10px;
   font-size:12px;line-height:1.5;color:#92400E;animation:fin_slideDown .2s ease-out;
 }
 #secFinanceTool .model-mismatch-warning i{color:var(--amber);margin-top:2px;flex-shrink:0}
@@ -1767,10 +1767,10 @@
   padding:.8rem;margin:.75rem 0;text-align:center;position:relative;overflow:hidden;
   transition:all .3s cubic-bezier(.34,1.56,.64,1);cursor:default;
 }
-#secFinanceTool .emi-box:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(90,71,64,.3)}
+#secFinanceTool .emi-box:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,49,53,.3)}
 #secFinanceTool .emi-box::before{
   content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;
-  background:radial-gradient(circle,rgba(159,106,74,.22) 0%,transparent 70%);border-radius:50%;
+  background:radial-gradient(circle,rgba(150,71,52,.22) 0%,transparent 70%);border-radius:50%;
 }
 #secFinanceTool .emi-box-lbl{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-bottom:4px;position:relative;z-index:1}
 #secFinanceTool .emi-box-val{
@@ -1801,8 +1801,8 @@
 #secFinanceTool .emi-box:hover .emi-box-val{font-size:clamp(1.4rem,3.8vw,1.75rem)}
 #secFinanceTool .emi-box-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;position:relative;z-index:1}
 #secFinanceTool .grand-total-box{
-  background:linear-gradient(120deg,rgba(159,106,74,.16),rgba(159,106,74,.05));
-  border:1px solid rgba(159,106,74,.35);border-radius:14px;
+  background:linear-gradient(120deg,rgba(150,71,52,.16),rgba(150,71,52,.05));
+  border:1px solid rgba(150,71,52,.35);border-radius:14px;
   padding:1rem 1.1rem;margin-bottom:1.2rem;text-align:center;position:relative;overflow:hidden;
   transition:all .3s cubic-bezier(.34,1.56,.64,1);
 }
@@ -1848,10 +1848,10 @@
   border-radius:10px;padding:7px 4px;font-size:11px;font-weight:600;color:var(--ink3);
   transition:all .2s cubic-bezier(.4,.0,.2,1);cursor:pointer;user-select:none;
 }
-#secFinanceTool .rate-chip:hover{transform:translateY(-3px);box-shadow:0 4px 14px rgba(90,71,64,.2)}
+#secFinanceTool .rate-chip:hover{transform:translateY(-3px);box-shadow:0 4px 14px rgba(0,49,53,.2)}
 #secFinanceTool .rate-chip.active{
   background:var(--blueLt);border-color:var(--blue);color:var(--blue);
-  transform:scale(1.02);box-shadow:0 6px 18px rgba(90,71,64,.25);
+  transform:scale(1.02);box-shadow:0 6px 18px rgba(0,49,53,.25);
 }
 #secFinanceTool .rate-chip .pct{font-family:'Bebas Neue',cursive;font-size:1.1rem;display:block}
 #secFinanceTool .btn-preview{
@@ -2128,7 +2128,7 @@
 #secFinanceTool .dobp-wheels{position:relative;display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:4px;padding:8px 12px}
 #secFinanceTool .dobp-highlight{
     position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%);height:44px;
-    background:var(--blueLt);border:1.5px solid rgba(90,71,64,.28);border-radius:11px;pointer-events:none;
+    background:var(--blueLt);border:1.5px solid rgba(0,49,53,.28);border-radius:11px;pointer-events:none;
   }
 #secFinanceTool .dobp-col{
     height:220px;overflow-y:auto;scroll-snap-type:y mandatory;
@@ -2254,7 +2254,7 @@
     background:rgba(15,23,42,.08); color:inherit; font-size:9.5px; font-weight:800;
     margin-left:5px; line-height:1;
   }
-  .doc-type-tab.active .filter-count-badge{ background:rgba(90,71,64,.12); }
+  .doc-type-tab.active .filter-count-badge{ background:rgba(0,49,53,.12); }
   /* Custom model-filter dropdown — native <select> option lists can't be
      restyled consistently across browsers (Android shows a plain blue-
      highlight system list), so this is a fully custom button+menu instead,
@@ -2283,7 +2283,7 @@
     text-overflow:ellipsis;
   }
   .filter-select:hover{ border-color:var(--brand-soft-border); background-color:var(--brand-soft-bg); transform:translateY(-1px); }
-  .filter-select:focus{ border-color:var(--brand); box-shadow:0 0 0 3px rgba(159,106,74,.16); }
+  .filter-select:focus{ border-color:var(--brand); box-shadow:0 0 0 3px rgba(150,71,52,.16); }
   .filter-select option{ color:var(--text-primary); font-weight:600; background:var(--bg-surface); }
   /* Custom themed dropdown menu (so the OPEN list matches the warm theme,
      not the browser's dark native picker). */
@@ -2939,6 +2939,10 @@
 
         <!-- Right column -->
         <div class="flex flex-col gap-5">
+          <div class="sm-card p-5">
+            <div class="section-title text-xl mb-3">Business Summary</div>
+            <div id="dashBusinessSummary" class="flex flex-col gap-4"></div>
+          </div>
           <div class="sm-card p-5">
             <div class="section-title text-xl mb-3">Top Models</div>
             <div id="dashTopModels"></div>
@@ -8000,9 +8004,11 @@ onAuthStateChanged(auth, async (user) => {
     loadActivityLog();
     loadChalans();
     autoArchiveOldSoldUnits();
+    autoDeleteExpiredMelaStock();
     loadModelAliases();
     setBtnState(false);
     startActiveStatusCheck();
+    startDailySweeps();
     startSessionGuard(user);
     startLivePopups();
   } else {
@@ -8019,6 +8025,7 @@ onAuthStateChanged(auth, async (user) => {
     document.body.classList.remove('app-active');
     setBtnState(false);
     stopActiveStatusCheck();
+    stopDailySweeps();
     stopSessionGuard();
     stopLivePopups();
     // If we were booted for a device-limit / possible-leak reason, show it
@@ -8070,6 +8077,24 @@ function stopIdleLogoutTimer(){
    This re-checks every few minutes and signs out the moment it's disabled. */
 const ACTIVE_STATUS_CHECK_MS = 3 * 60 * 1000;
 let activeStatusCheckTimer = null;
+// autoArchiveOldSoldUnits/autoDeleteExpiredMelaStock previously only ran
+// once at login — fine for a quick daily check-in, but this panel is meant
+// to stay open on a shop computer for days at a stretch, so a mela that
+// crosses its 7-day-expiry mark mid-session would sit un-swept until
+// someone happens to log out and back in. A slow 6-hour recheck is plenty
+// for something that only changes on day-granularity anyway.
+const DAILY_SWEEP_INTERVAL_MS = 6 * 60 * 60 * 1000;
+let dailySweepTimer = null;
+function startDailySweeps(){
+  stopDailySweeps();
+  dailySweepTimer = setInterval(()=>{
+    autoArchiveOldSoldUnits();
+    autoDeleteExpiredMelaStock();
+  }, DAILY_SWEEP_INTERVAL_MS);
+}
+function stopDailySweeps(){
+  if(dailySweepTimer){ clearInterval(dailySweepTimer); dailySweepTimer = null; }
+}
 function startActiveStatusCheck(){
   stopActiveStatusCheck();
   activeStatusCheckTimer = setInterval(async ()=>{
@@ -10863,6 +10888,27 @@ window.transferToHH = async (id) => {
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
+// Same core steps as the manual transferToInventory() button above — proper
+// server-side S.N, Sold status/customer/soldAt/soldFrom carried over — just
+// without the confirm dialog, since this runs automatically right after
+// _setHHInvStatus marks a unit Sold rather than from a person clicking a
+// "Transfer" button on purpose.
+async function autoTransferSoldHHToInventory(id, s){
+  try{
+    const nextSn = await getAccurateNextSn('inventory');
+    const payload = {
+      sn: nextSn, model: s.model||'', chassis: s.chassis||'', engine: s.engine||'', regNo: s.regNo||'', color: s.color||'',
+      status: 'Sold', customerName: s.customerName||'', addedAt: new Date(),
+      soldAt: s.soldAt || new Date(), soldFrom: s.soldFrom || 'Mela/Event'
+    };
+    await addDoc(collection(db,'inventory'), payload);
+    await deleteDoc(doc(db,'hh_inventory', id));
+    logActivity('Auto-Transferred to Inventory', 'hh_inventory', { model: s.model, chassis: s.chassis, customerName: s.customerName });
+    invPageLimit = Math.max(invPageLimit, nextSn + 5);
+    loadLiveStock();
+  }catch(e){ console.error('autoTransferSoldHHToInventory failed', e); }
+}
+
 window.transferToInventory = async (id) => {
   const s = hhInvData.find(x=>x.id===id);
   if(!s){ toast('Unit not found.','err'); return; }
@@ -12164,7 +12210,9 @@ document.getElementById('saveHHInvBtn').addEventListener('click', async()=>{
       if(hhAddStatus==='Sold'){ hhNewDoc.soldAt = new Date(); hhNewDoc.soldFrom = hhAddSoldFrom || 'Mela/Event'; }
       await addDoc(collection(db,"hh_inventory"), hhNewDoc);
       logActivity('Added', 'hh_inventory', { model: modelName, chassis, sn: nextSn });
-      ['hhChassis','hhEngine','hhRegNo','hhColor','hhEventName','hhOwnerName','hhCustomerName','hhSoldFrom'].forEach(id=>document.getElementById(id).value='');
+      ['hhChassis','hhEngine','hhRegNo','hhColor','hhOwnerName','hhCustomerName','hhSoldFrom'].forEach(id=>document.getElementById(id).value='');
+      const evField = document.getElementById('hhEventName');
+      if(evField) evField.value = getActiveMelaEventName();
       document.getElementById('hhStatus').value='Available';
       document.getElementById('hhStatus')?._csSync?.();
       document.getElementById('hhModelInput').value='';
@@ -12355,8 +12403,13 @@ window._setHHInvStatus = async (id, status) => {
     if(status==='Sold'){ payload.soldAt = new Date(); payload.soldFrom = soldFrom; }
     await updateDoc(doc(db,"hh_inventory",id),payload);
     logActivity(status==='Sold' ? 'Marked Sold' : 'Status: '+status, 'hh_inventory', {...s, customerName});
-    toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
-    if(status==='Sold') maybePromptChalan(id, 'hh_inventory');
+    if(status==='Sold'){
+      await maybePromptChalan(id, 'hh_inventory');
+      toast(`Unit marked as Sold${customerName?' — '+customerName:''} — moving to Inventory…`);
+      await autoTransferSoldHHToInventory(id, {...s, ...payload});
+    } else {
+      toast('Unit marked as '+status+(customerName?' — '+customerName:'')+'.');
+    }
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
 };
 
@@ -18417,7 +18470,7 @@ function renderChassisDropdown(list){
   dd.innerHTML=list.map(s=>{
     const flagged=s.hhFlag==='Hide'||s.status==='Sold';
     const pill=s.hhFlag==='Hide'?'<span class="csd-status-pill">HH Hide</span>':(s.status==='Sold'?'<span class="csd-status-pill">Sold</span>':'');
-    const sourceTag=s._source==='hh'?'<span class="csd-status-pill" style="background:rgba(90,71,64,.1);color:#0FA4AF;border-color:rgba(90,71,64,.3)">HH Mela</span>':'';
+    const sourceTag=s._source==='hh'?'<span class="csd-status-pill" style="background:rgba(0,49,53,.1);color:#0FA4AF;border-color:rgba(0,49,53,.3)">HH Mela</span>':'';
     return `
     <button type="button" class="csd-item${flagged?' csd-flagged':''}" data-id="${s.id}">
       <span class="csd-main">
@@ -18802,6 +18855,17 @@ function eventStatus(ev){
   if(today < start) return 'upcoming';
   if(today > end) return 'ended';
   return 'running';
+}
+// Whichever event's date range covers today, if any — used to default HH
+// Inventory's Mela/Event field during a live mela instead of clearing it
+// (and making staff retype the same mela name) after every single unit
+// added. If two events somehow overlap, the one that started most recently
+// wins — the more specific/current one of the two.
+function getActiveMelaEventName(){
+  const running = events.filter(ev => eventStatus(ev)==='running');
+  if(!running.length) return '';
+  running.sort((a,b)=> new Date(b.startDate) - new Date(a.startDate));
+  return (running[0].title||'').trim();
 }
 function daysUntil(dateStr){
   const today = new Date(); today.setHours(0,0,0,0);
@@ -20650,9 +20714,9 @@ async function purgeExpiredTrash(){
   }
 }
 
-const SOLD_UNIT_ARCHIVE_DAYS = 182; // ~6 months
+const SOLD_UNIT_ARCHIVE_DAYS = 365; // ~12 months
 
-// Sold units older than 6 months move to Trash automatically — same 7-day
+// Sold units older than 12 months move to Trash automatically — same 7-day
 // recovery window as any manual delete (purgeExpiredTrash above handles
 // the "not restored in time -> gone for good" half of this on its own,
 // nothing extra needed here). Keeps Live Inventory from slowly filling up
@@ -20679,8 +20743,51 @@ async function autoArchiveOldSoldUnits(){
     // to trigger the sweep, so it's never missed just because Isaac wasn't
     // the one signed in at the time.
     logActivity('Auto-Archived', 'inventory', { model: `${stale.length} sold unit(s) — ${names}` });
-    toast(`${stale.length} Sold unit${stale.length!==1?'s':''} (6+ months old) moved to Trash: ${names}`, 'warn');
+    toast(`${stale.length} Sold unit${stale.length!==1?'s':''} (12+ months old) moved to Trash: ${names}`, 'warn');
   }catch(e){ console.error('autoArchiveOldSoldUnits failed', e); }
+}
+
+const HH_MELA_EXPIRE_DAYS = 7;
+
+// 7 days after a mela/event's endDate, any HH Inventory unit still sitting
+// as Available and tagged to that mela moves to Trash on its own — stock
+// that didn't sell at an event isn't meant to linger under that event's
+// name indefinitely once it's long over. Sold units are untouched here
+// (autoTransferSoldHHToInventory already moves those out the moment
+// they're marked Sold) and Booked/HHSales/HHHide are left alone too —
+// only stock still genuinely sitting Available. Uses fresh reads rather
+// than the local events/hhInvData arrays, since those come from listeners
+// that may not have delivered their first snapshot yet at login time.
+async function autoDeleteExpiredMelaStock(){
+  try{
+    const [eventsSnap, hhSnap] = await Promise.all([
+      getDocs(collection(db,'events')),
+      getDocs(query(collection(db,'hh_inventory'), where('status','==','Available')))
+    ]);
+    const now = Date.now();
+    const expiredNames = new Set(
+      eventsSnap.docs.map(d=>d.data())
+        .filter(ev=>{
+          if(!ev.endDate) return false;
+          const end = new Date(ev.endDate); end.setHours(23,59,59,999);
+          return (now - end.getTime()) > HH_MELA_EXPIRE_DAYS*24*60*60*1000;
+        })
+        .map(ev=>(ev.title||'').trim().toLowerCase())
+        .filter(Boolean)
+    );
+    if(!expiredNames.size) return;
+    const stale = hhSnap.docs
+      .map(d=>({id:d.id, ...d.data()}))
+      .filter(u=> expiredNames.has((u.eventName||'').trim().toLowerCase()));
+    if(!stale.length) return;
+    for(const u of stale){
+      await moveToTrash('hh_inventory', u.id, u);
+      await deleteDoc(doc(db,'hh_inventory', u.id));
+    }
+    const names = stale.slice(0,5).map(u=>u.model||'Unit').join(', ') + (stale.length>5 ? ` +${stale.length-5} more` : '');
+    logActivity('Auto-Archived', 'hh_inventory', { model: `${stale.length} unsold mela unit(s) — ${names}` });
+    toast(`${stale.length} unsold unit${stale.length!==1?'s':''} from an ended mela moved to Trash: ${names}`, 'warn');
+  }catch(e){ console.error('autoDeleteExpiredMelaStock failed', e); }
 }
 
 function daysLeft(deletedAt){
@@ -21899,7 +22006,14 @@ window.switchSec=(sec)=>{
   const heading = document.getElementById('topbarHeading');
   if(heading) heading.textContent = SEC_TITLES[sec] || '';
   if(sec==='inv') populateModelDropdown();
-  if(sec==='hhinv') populateHHModelDropdown();
+  if(sec==='hhinv'){
+    populateHHModelDropdown();
+    const evField = document.getElementById('hhEventName');
+    if(evField && !evField.value.trim()){
+      const active = getActiveMelaEventName();
+      if(active) evField.value = active;
+    }
+  }
   if(sec==='allinv') renderAllInventoryTable();
   if(sec==='exchange') renderExchangeTable();
   if(sec==='exchangeSr') renderExchangeSrTable();
