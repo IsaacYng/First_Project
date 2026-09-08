@@ -9811,12 +9811,36 @@ function renderSalesTrendChart(){
 // once. Until all have, the dashboard shows a loading skeleton instead of
 // flashing "0" for stats that simply haven't loaded yet.
 const DASH_READY = { bikes:false, inv:false, hh:false, chalans:false, ex:false, exSr:false };
+let dashForceReadyTimer = null;
 function markDashReady(k){
-  if(DASH_READY[k]) return;
   DASH_READY[k] = true;
+  // Always re-render (not just on the first time this flag flips) — a
+  // collection's very first Firestore snapshot can be an empty cache-miss
+  // before the real data arrives moments later over the network. With a
+  // one-time latch here, that first empty snapshot alone was enough to mark
+  // everything "ready" and render real 0s that then never refreshed once
+  // the actual data came in, since this function would just return early
+  // on every later update. Re-rendering every time costs nothing — this
+  // page is cheap to redraw — and it's what actually keeps the numbers
+  // honest as data keeps arriving.
   if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
 }
 function dashAllReady(){ return DASH_READY.bikes && DASH_READY.inv && DASH_READY.hh && DASH_READY.chalans && DASH_READY.ex && DASH_READY.exSr; }
+// Safety net: if some collection's listener never fires for any reason
+// (a dropped connection, a permissions hiccup, anything), the dashboard
+// used to be stuck showing the loading skeleton forever with no way out
+// short of a hard refresh. After 8 seconds, force it to render with
+// whatever has actually arrived — an honest 0 for a slow collection beats
+// an indefinite skeleton.
+function startDashForceReadyTimer(){
+  if(dashForceReadyTimer) return;
+  dashForceReadyTimer = setTimeout(()=>{
+    dashForceReadyTimer = null;
+    if(dashAllReady()) return;
+    Object.keys(DASH_READY).forEach(k=>{ DASH_READY[k] = true; });
+    if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
+  }, 8000);
+}
 function renderDashboardSkeleton(){
   ['dashModelsCount','dashAvailableCount','dashSoldMonthCount','dashChalanMonthCount','dashExchangeCount'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.innerHTML='<span class="skel skel-num"></span>';
@@ -9835,7 +9859,7 @@ function renderDashboardSkeleton(){
 
 function renderDashboard(){
   // Still loading — show the skeleton, don't compute stats from empty arrays.
-  if(!dashAllReady()){ renderDashboardSkeleton(); return; }
+  if(!dashAllReady()){ renderDashboardSkeleton(); startDashForceReadyTimer(); return; }
   const modelsEl = document.getElementById('dashModelsCount');
   if(modelsEl) modelsEl.textContent = allMasterBikes.length;
 
