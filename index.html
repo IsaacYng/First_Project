@@ -9275,6 +9275,7 @@ function loadMasterPriceList() {
   bikesUnsub = onSnapshot(collection(db,"bikes"), snap => {
     allMasterBikes = snap.docs.map(d=>({id:d.id,...d.data()}));
     markDashReady('bikes');
+    markPageReady('pg_bikes');
     renderMasterTable(); updatePriceStats(); populateModelDropdown();
     // Category rows show "N models using this category" — keep that fresh too.
     if(typeof renderFinCategoryChips === 'function') renderFinCategoryChips();
@@ -9294,6 +9295,7 @@ function loadMasterPriceList() {
 
 function renderMasterTable() {
   const tbody = document.getElementById('masterTableBody');
+  if(!isPageReady('pg_bikes')){ renderTableSkeleton('masterTableBody', 10, 6); ensurePageReadyTimeout('pg_bikes', renderMasterTable); return; }
   document.getElementById('priceCount').textContent = allMasterBikes.length+' model'+(allMasterBikes.length!==1?'s':'');
   if (!allMasterBikes.length) {
     tbody.innerHTML=`<tr><td colspan="10"><div class="py-12 text-center text-slate-400"><i class="fas fa-motorcycle text-3xl opacity-25 block mb-2"></i><p class="text-sm">No models yet. Add your first bike above.</p></div></td></tr>`;
@@ -9716,6 +9718,7 @@ function loadChalans(){
   chalanUnsub = onSnapshot(query(collection(db,"chalans"), orderBy('createdAt','desc')), snap=>{
     chalanData = snap.docs.map(d=>({id:d.id,...d.data()}));
     markDashReady('chalans');
+    markPageReady('pg_chalans');
     purgeExpiredChalans();
     renderChalanTable();
     updateStorageOverview();
@@ -9810,6 +9813,58 @@ function renderSalesTrendChart(){
 // Tracks whether each collection the dashboard needs has arrived at least
 // once. Until all have, the dashboard shows a loading skeleton instead of
 // flashing "0" for stats that simply haven't loaded yet.
+// ---- Generic loading-readiness + skeleton system -------------------------
+// The same bug shape kept showing up across the app: every Firestore-backed
+// list starts from an empty local array, and switchSec renders its page
+// immediately on navigation — before that collection's very first snapshot
+// has actually arrived. Without this, opening a page (especially on a slow
+// connection) shows a false "nothing here yet" for a moment even when the
+// collection is full. Dashboard and Documents each got a bespoke fix for
+// this earlier; every other page can now share this instead of repeating
+// the same three pieces (ready-flag, skeleton, safety-timeout) from scratch.
+const _pageReady = {};
+const _pageReadyTimers = {};
+function markPageReady(key, rerender){
+  _pageReady[key] = true;
+  if(_pageReadyTimers[key]){ clearTimeout(_pageReadyTimers[key]); delete _pageReadyTimers[key]; }
+  if(typeof rerender === 'function') rerender();
+}
+function isPageReady(key){ return !!_pageReady[key]; }
+// Safety net: if a listener never fires (dropped connection, permissions
+// hiccup), force the page past its skeleton after 8s rather than leaving
+// it stuck forever with no way out short of a hard refresh.
+function ensurePageReadyTimeout(key, forceRerender){
+  if(_pageReadyTimers[key]) return;
+  _pageReadyTimers[key] = setTimeout(()=>{
+    delete _pageReadyTimers[key];
+    if(_pageReady[key]) return;
+    _pageReady[key] = true;
+    if(typeof forceRerender === 'function') forceRerender();
+  }, 8000);
+}
+// Renders placeholder rows into a <tbody> — sized to roughly match the
+// real table (same column count) so the swap-in doesn't jump around.
+function renderTableSkeleton(tbodyId, cols, rows){
+  const el = document.getElementById(tbodyId);
+  if(!el) return;
+  const widths = [92,65,80,55,70,60,85,50,75,62];
+  el.innerHTML = Array(rows||5).fill(0).map(()=>
+    '<tr>'+Array(cols).fill(0).map((_,i)=>'<td class="px-4 py-3"><div class="skel skel-line" style="width:'+(widths[i%widths.length])+'%"></div></td>').join('')+'</tr>'
+  ).join('');
+}
+// Renders placeholder cards into a grid/flex container (non-table pages
+// like Model Aliases, Events, Accessories).
+function renderCardSkeleton(containerId, count){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = Array(count||4).fill(
+    '<div style="border:1px solid var(--border-soft);border-radius:14px;padding:16px;">'+
+      '<div class="skel skel-line" style="width:70%;margin-bottom:8px"></div>'+
+      '<div class="skel skel-line" style="width:45%"></div>'+
+    '</div>'
+  ).join('');
+}
+
 const DASH_READY = { bikes:false, inv:false, hh:false, chalans:false, ex:false, exSr:false };
 let dashForceReadyTimer = null;
 function markDashReady(k){
@@ -10081,6 +10136,7 @@ function loadModelAliases(){
   if(modelAliasesUnsub) modelAliasesUnsub();
   modelAliasesUnsub = onSnapshot(collection(db,"model_aliases"), snap=>{
     modelAliasesData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markPageReady('pg_aliases', ()=>{ if(document.getElementById('secModelAliases')?.classList.contains('active')) renderModelAliasesPage(); });
     computeModelMismatches();
     if(document.getElementById('secStorage')?.classList.contains('active')) updateStorageOverview();
   }, err=>console.error('model_aliases listener failed', err));
@@ -10155,6 +10211,7 @@ window.setAliasSearch = (v)=>{
 };
 
 function renderModelAliasesPage(){
+  if(!isPageReady('pg_aliases')){ renderCardSkeleton('aliasesListWrap', 4); ensurePageReadyTimeout('pg_aliases', renderModelAliasesPage); return; }
   const suggestedCount = modelMismatches.filter(m=>m.suggestion).length;
   const reviewCount = modelMismatches.length - suggestedCount;
 
@@ -10391,6 +10448,7 @@ window.setChalanMonthFilter = (key)=>{
 function renderChalanTable(){
   const tbody = document.getElementById('chalanTableBody');
   if(!tbody) return;
+  if(!isPageReady('pg_chalans')){ renderTableSkeleton('chalanTableBody', 7, 6); ensurePageReadyTimeout('pg_chalans', renderChalanTable); return; }
 
   // Month pills — one per month that actually has a Chalan on file, built
   // fresh from the data so it never shows an empty "August 2025" pill for
@@ -11165,6 +11223,7 @@ function loadLiveStock(){
   invUnsub = onSnapshot(q, snap=>{
     invData = snap.docs.map(d=>({id:d.id,...d.data()}));
     markDashReady('inv');
+    markPageReady('pg_inv');
     invHasMore = false; // full list loaded — no "Load more" needed
     const liveIds = new Set(invData.map(s=>s.id));
     selectedInvIds.forEach(id=>{ if(!liveIds.has(id)) selectedInvIds.delete(id); });
@@ -11441,6 +11500,7 @@ function getFilteredInv(){
 
 function renderInvTable(list){
   const tbody=document.getElementById('stockTableBody');
+  if(!isPageReady('pg_inv')){ renderTableSkeleton('stockTableBody', 9, 6); ensurePageReadyTimeout('pg_inv', ()=>renderInvTable(getFilteredInv())); return; }
   document.getElementById('invCount').textContent=list.length+' unit'+(list.length!==1?'s':'')+(invSearchTerm?' found':'');
   populateModelFilterDropdown('inv', invData, invModelFilter);
   renderInvAreaFilter();
@@ -11840,6 +11900,7 @@ function loadHHInventory(){
   hhInvUnsub = onSnapshot(q, snap=>{
     hhInvData = snap.docs.map(d=>({id:d.id,...d.data()}));
     markDashReady('hh');
+    markPageReady('pg_hh');
     hhHasMore = false;
     const liveIds = new Set(hhInvData.map(s=>s.id));
     selectedHHInvIds.forEach(id=>{ if(!liveIds.has(id)) selectedHHInvIds.delete(id); });
@@ -12008,6 +12069,7 @@ document.getElementById('hhInvSearch').addEventListener('input', e=>{
 });
 
 function renderHHInvTable(){
+  if(!isPageReady('pg_hh')){ renderTableSkeleton('hhInvTableBody', 10, 6); ensurePageReadyTimeout('pg_hh', renderHHInvTable); return; }
   populateHHMelaFilter();
   const tbody = document.getElementById('hhInvTableBody');
   const list = getFilteredHHInv();
@@ -13690,6 +13752,7 @@ function loadFinanceSchemes(){
   if(finSchemesUnsub) finSchemesUnsub();
   finSchemesUnsub = onSnapshot(collection(db,"finance_schemes"), snap => {
     financeSchemes = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markPageReady('pg_schemes');
     renderFinTable();
     if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err => {
@@ -13705,6 +13768,7 @@ function loadFinanceSchemes(){
 
 function renderFinTable(){
   const tbody = document.getElementById('finTableBody');
+  if(!isPageReady('pg_schemes')){ renderTableSkeleton('finTableBody', 5, 5); ensurePageReadyTimeout('pg_schemes', renderFinTable); return; }
   document.getElementById('finCount').textContent = financeSchemes.length+' scheme'+(financeSchemes.length!==1?'s':'');
   if(!financeSchemes.length){
     tbody.innerHTML=`<tr><td colspan="5"><div class="py-12 text-center text-slate-400"><i class="fas fa-percent text-3xl opacity-25 block mb-2"></i><p class="text-sm">No schemes yet. Add one above.</p></div></td></tr>`;
@@ -14047,6 +14111,7 @@ function loadExchangeStock(){
   exchangeUnsub = onSnapshot(query(collection(db,'exchange_stock'), orderBy('sn','asc')), snap=>{
     exchangeData = snap.docs.map(d=>({id:d.id,...d.data()}));
     markDashReady('ex');
+    markPageReady('pg_ex');
     const liveIds = new Set(exchangeData.map(s=>s.id));
     selectedExchangeIds.forEach(id=>{ if(!liveIds.has(id)) selectedExchangeIds.delete(id); });
     renderExchangeTable();
@@ -14117,6 +14182,7 @@ function exDocBadge(label, ok){
 function renderExchangeTable(){
   const tbody = document.getElementById('exchangeTableBody');
   if(!tbody) return;
+  if(!isPageReady('pg_ex')){ renderTableSkeleton('exchangeTableBody', 10, 6); ensurePageReadyTimeout('pg_ex', renderExchangeTable); return; }
   const list = getFilteredExchange();
   const total = exchangeData.length;
   const inStock = exchangeData.filter(s=>(s.status||'In Stock')==='In Stock').length;
@@ -14927,6 +14993,7 @@ function loadExchangeSrStock(){
   exchangeSrUnsub = onSnapshot(query(collection(db,'exchange_stock_showroom'), orderBy('sn','asc')), snap=>{
     exchangeSrData = snap.docs.map(d=>({id:d.id,...d.data()}));
     markDashReady('exSr');
+    markPageReady('pg_exSr');
     const liveIds = new Set(exchangeSrData.map(s=>s.id));
     selectedExchangeSrIds.forEach(id=>{ if(!liveIds.has(id)) selectedExchangeSrIds.delete(id); });
     renderExchangeSrTable();
@@ -14990,6 +15057,7 @@ function exSrDocBadge(label, ok){
 function renderExchangeSrTable(){
   const tbody = document.getElementById('exchangeSrTableBody');
   if(!tbody) return;
+  if(!isPageReady('pg_exSr')){ renderTableSkeleton('exchangeSrTableBody', 10, 6); ensurePageReadyTimeout('pg_exSr', renderExchangeSrTable); return; }
   const list = getFilteredExchangeSr();
   const total = exchangeSrData.length;
   const inStock = exchangeSrData.filter(s=>(s.status||'In Stock')==='In Stock').length;
@@ -15380,6 +15448,7 @@ function loadPaymentLedger(){
   const tbody = document.getElementById('paymentLedgerTableBody');
   paymentLedgerUnsub = onSnapshot(query(collection(db,'payment_ledger'), orderBy('date','desc')), snap=>{
     paymentLedgerData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markPageReady('pg_ledger');
     renderPaymentLedgerTable();
     renderPaymentLedgerDashboard();
   }, err=>{
@@ -15432,6 +15501,7 @@ function fmtRs(n){ return 'Rs. '+Number(n||0).toLocaleString('en-IN'); }
 function renderPaymentLedgerTable(){
   const tbody = document.getElementById('paymentLedgerTableBody');
   if(!tbody) return;
+  if(!isPageReady('pg_ledger')){ renderTableSkeleton('paymentLedgerTableBody', 8, 6); ensurePageReadyTimeout('pg_ledger', renderPaymentLedgerTable); return; }
   const list = getFilteredPaymentLedger();
   document.getElementById('paymentLedgerTotalChip').textContent = paymentLedgerData.length+' entr'+(paymentLedgerData.length!==1?'ies':'y');
   document.getElementById('paymentLedgerCount').textContent = list.length+' entr'+(list.length!==1?'ies':'y');
@@ -15802,6 +15872,7 @@ function loadReconStock(){
   const tbody = document.getElementById('reconStockTableBody');
   reconStockUnsub = onSnapshot(query(collection(db,'recondition_stock'), orderBy('sn','asc')), snap=>{
     reconStockData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markPageReady('pg_recon');
     const liveIds = new Set(reconStockData.map(s=>s.id));
     selectedReconIds.forEach(id=>{ if(!liveIds.has(id)) selectedReconIds.delete(id); });
     renderReconStockTable();
@@ -15851,6 +15922,7 @@ function reconDocBadge(label, ok){
 function renderReconStockTable(){
   const tbody = document.getElementById('reconStockTableBody');
   if(!tbody) return;
+  if(!isPageReady('pg_recon')){ renderTableSkeleton('reconStockTableBody', 10, 6); ensurePageReadyTimeout('pg_recon', renderReconStockTable); return; }
   const list = getFilteredReconStock();
   const total = reconStockData.length;
   const inStock = reconStockData.filter(s=>(s.status||'In Stock')==='In Stock').length;
@@ -18826,6 +18898,7 @@ function loadAccessories(){
   if(accessoriesUnsub) accessoriesUnsub();
   accessoriesUnsub = onSnapshot(collection(db,"accessories"), snap => {
     accessories = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markPageReady('pg_acc');
     renderAccTable();
     // Category cards show which accessories are selected, filtered against
     // this same list — if categories happened to load and render BEFORE
@@ -18859,6 +18932,7 @@ let eventPopupCountdownTimers = [];
 function loadEvents(){
   onSnapshot(collection(db,"events"), snap => {
     events = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markPageReady('pg_events');
     renderEventsPage();
     if(typeof updateStorageOverview === 'function') updateStorageOverview();
     if(!eventPopupShownThisLoad){
@@ -18900,6 +18974,7 @@ function daysUntil(dateStr){
 function renderEventsPage(){
   const wrap = document.getElementById('eventsListWrap');
   if(!wrap) return;
+  if(!isPageReady('pg_events')){ renderCardSkeleton('eventsListWrap', 3); ensurePageReadyTimeout('pg_events', renderEventsPage); return; }
   if(!events.length){
     wrap.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400"><i class="fas fa-bullhorn text-3xl opacity-25 block mb-2"></i><p class="text-sm">No events yet — add one to show a popup when people open the app.</p></div>`;
     return;
@@ -19165,6 +19240,36 @@ window.closeEventPopup = ()=>{
    inside the section, to keep the structure as simple as possible.
    ═══════════════════════════════════════════════════════════════════════ */
 let documents = [];
+let documentsReady = false;
+let docsForceReadyTimer = null;
+// Same false-empty-flash problem as the Dashboard: `documents` starts as []
+// before the very first Firestore snapshot arrives, and switchSec renders
+// the page immediately on navigation — without this flag that showed "No
+// documents uploaded yet." for a moment even when the vault is full, every
+// single time someone opens the page before the listener catches up.
+function renderDocumentsSkeleton(){
+  const wrap = document.getElementById('docsListWrap');
+  if(!wrap) return;
+  wrap.innerHTML = Array(4).fill(
+    '<div class="doc-card-skel" style="border:1px solid var(--border-soft);border-radius:14px;padding:16px;">'+
+      '<div class="flex items-center justify-between mb-3">'+
+        '<span class="skel" style="width:40px;height:40px;border-radius:10px"></span>'+
+        '<span class="skel" style="width:28px;height:28px;border-radius:8px"></span>'+
+      '</div>'+
+      '<div class="skel skel-line" style="width:80%;margin-bottom:8px"></div>'+
+      '<div class="skel skel-line" style="width:50%"></div>'+
+    '</div>'
+  ).join('');
+}
+function startDocsForceReadyTimer(){
+  if(docsForceReadyTimer) return;
+  docsForceReadyTimer = setTimeout(()=>{
+    docsForceReadyTimer = null;
+    if(documentsReady) return;
+    documentsReady = true;
+    if(document.getElementById('secDocs')?.classList.contains('active')) renderDocumentsPage();
+  }, 8000);
+}
 let docTypeFilter = 'all';
 let docSearchTerm = '';
 window.setDocSearch = (v)=>{
@@ -19203,6 +19308,7 @@ function loadDocuments(){
   if(documentsUnsub) documentsUnsub();
   documentsUnsub = onSnapshot(collection(db,"documents"), snap=>{
     documents = snap.docs.map(d=>({id:d.id,...d.data()}));
+    documentsReady = true;
     renderDocumentsPage();
     updateStorageOverview();
     maybePromptStorageMigration();
@@ -19916,6 +20022,7 @@ window.setDocTypeFilter = (type)=>{
 function renderDocumentsPage(){
   const wrap = document.getElementById('docsListWrap');
   if(!wrap) return;
+  if(!documentsReady){ renderDocumentsSkeleton(); startDocsForceReadyTimer(); return; }
   // A Recondition ID's Document Vault is just the Blue Books — the rest of
   // the vault (bank letters, licences, staff paperwork) isn't theirs to
   // see. Filtering the source list here means every count, tab and card
@@ -20417,6 +20524,7 @@ window.attemptFakeSubscribe = async ()=>{
 
 function renderAccTable(){
   const tbody = document.getElementById('accTableBody');
+  if(!isPageReady('pg_acc')){ renderTableSkeleton('accTableBody', 3, 5); ensurePageReadyTimeout('pg_acc', renderAccTable); return; }
   document.getElementById('accCount').textContent = accessories.length+' item'+(accessories.length!==1?'s':'');
   if(!accessories.length){
     tbody.innerHTML=`<tr><td colspan="3"><div class="py-12 text-center text-slate-400"><i class="fas fa-helmet-safety text-3xl opacity-25 block mb-2"></i><p class="text-sm">No accessories yet. Add one above.</p></div></td></tr>`;
@@ -20713,6 +20821,7 @@ function loadTrash(){
   if(trashUnsub) trashUnsub();
   trashUnsub = onSnapshot(collection(db,"trash"), snap=>{
     trashData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markPageReady('pg_trash');
     purgeExpiredTrash();
     renderTrashTable();
     const navCount = document.getElementById('trashNavCount');
@@ -20825,6 +20934,7 @@ const TRASH_LABELS = { inventory:'Inventory', hh_inventory:'HH Inventory', excha
 function renderTrashTable(){
   const tbody = document.getElementById('trashTableBody');
   if(!tbody) return;
+  if(!isPageReady('pg_trash')){ renderTableSkeleton('trashTableBody', 6, 5); ensurePageReadyTimeout('pg_trash', renderTrashTable); return; }
   document.getElementById('trashCount').textContent = trashData.length+' item'+(trashData.length!==1?'s':'');
   const isMaster = currentUserRole === 'owner';
   const emptyBtn = document.getElementById('emptyTrashBtn');
@@ -20984,6 +21094,7 @@ function loadImportantInfo(){
   const q = query(collection(db,"important_info"), orderBy('value1'));
   importantUnsub = onSnapshot(q, snap=>{
     importantData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markPageReady('pg_important');
     renderImportantList();
     if(typeof updateStorageOverview === 'function') updateStorageOverview();
   }, err=>console.error('important_info listener failed', err));
@@ -21067,6 +21178,7 @@ document.getElementById('saveImportantBtn').addEventListener('click', async ()=>
 function renderImportantList(){
   const wrap = document.getElementById('importantList');
   if(!wrap) return;
+  if(!isPageReady('pg_important')){ renderCardSkeleton('importantList', 4); ensurePageReadyTimeout('pg_important', renderImportantList); return; }
   // Credential type is retired — filter out any pre-existing entries so
   // they never render, even though the form can't create new ones anymore.
   const byType = importantData.filter(a=>a.type!=='credential');
@@ -21146,6 +21258,7 @@ function loadActivityLog(){
   activityLogUnsub = onSnapshot(q, snap=>{
     const previousIds = new Set(activityLogData.map(a=>a.id));
     activityLogData = snap.docs.map(d=>({id:d.id,...d.data()}));
+    markPageReady('pg_activity');
     purgeExpiredActivityLog();
     renderActivityLog();
     if(document.getElementById('secDashboard')?.classList.contains('active')) renderDashboard();
@@ -21244,6 +21357,7 @@ const ACTION_STYLE = {
 function renderActivityLog(){
   const tbody = document.getElementById('historyTableBody');
   if(!tbody) return;
+  if(!isPageReady('pg_activity')){ renderTableSkeleton('historyTableBody', 5, 6); ensurePageReadyTimeout('pg_activity', renderActivityLog); return; }
   const q = historySearchTerm.toLowerCase().trim();
   const list = q ? activityLogData.filter(a=>
     String(a.action||'').toLowerCase().includes(q) ||
