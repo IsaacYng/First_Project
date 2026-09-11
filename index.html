@@ -11956,12 +11956,23 @@ async function refreshPagedTotalChip(collectionName, chipElId, loadedCount){
 // register and the report end up disagreeing. This compares the true
 // server count against what actually loaded and surfaces the gap instead
 // of letting it stay silent.
+const _hiddenCheckSeq = {};
 async function checkForHiddenUnits(colName, loadedCount, hasMore, tableId){
   const bannerId = tableId + '-hiddenWarning';
   const removeBanner = ()=>{ document.getElementById(bannerId)?.remove(); };
   if(hasMore){ removeBanner(); return; } // still paginating — can't conclude anything yet
+  // This runs on every render, and renders can fire back-to-back as data
+  // keeps arriving (live listeners, background sweeps, another staff
+  // member's edit). Each call is an async server round-trip, so an older
+  // call that happens to resolve *after* a newer one could overwrite a
+  // correct, up-to-date banner (or its removal) with stale results — which
+  // is exactly how "X units hidden" could still be showing by the time
+  // someone clicks Repair, moments after the real gap already closed on
+  // its own. Only the most recently *started* call is allowed to act.
+  const mySeq = (_hiddenCheckSeq[colName] = (_hiddenCheckSeq[colName]||0) + 1);
   try{
     const snap = await getCountFromServer(collection(db, colName));
+    if(_hiddenCheckSeq[colName] !== mySeq) return; // a newer check superseded this one
     const total = snap.data().count;
     const hidden = total - loadedCount;
     if(hidden <= 0){ removeBanner(); return; }
