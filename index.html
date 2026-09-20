@@ -10719,21 +10719,21 @@ function buildChalanDocumentHtml(content, position){
   @media print{ body{ padding:0; } }
   .chalan-copy{ padding-bottom:6mm; margin-bottom:6mm; border-bottom:1px dashed #999; }
   .chalan-copy:last-child{ border-bottom:none; margin-bottom:0; }
-  .chalan-head{ text-align:center; margin-bottom:4mm; }
-  .chalan-company{ font-size:23px; font-weight:700; }
-  .chalan-loc{ font-size:13px; margin-top:2px; }
-  .chalan-title{ font-size:16px; font-weight:700; margin-top:4px; text-decoration:underline; }
-  .chalan-meta-table{ width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4mm; font-size:14.5px; }
-  .chalan-meta-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
-  .chalan-bike-table{ width:100%; border-collapse:collapse; border:1px solid #000; font-size:14.5px; }
-  .chalan-bike-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
+  .chalan-head{ text-align:center; margin-bottom:3mm; }
+  .chalan-company{ font-size:20px; font-weight:700; }
+  .chalan-loc{ font-size:12px; margin-top:2px; }
+  .chalan-title{ font-size:14px; font-weight:700; margin-top:3px; text-decoration:underline; }
+  .chalan-meta-table{ width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:3mm; font-size:13px; }
+  .chalan-meta-table td{ border:1px solid #000; padding:3px 8px; color:#000; }
+  .chalan-bike-table{ width:100%; border-collapse:collapse; border:1px solid #000; font-size:13px; }
+  .chalan-bike-table td{ border:1px solid #000; padding:3px 8px; color:#000; }
   .cb-sn{ width:7%; text-align:center; }
   .cb-label{ width:24%; white-space:nowrap; }
   .cb-colon{ width:3%; text-align:center; }
   .cb-value{ width:46%; }
   .cb-amt{ width:20%; text-align:right; padding-right:10px; }
-  .cb-total-lbl{ font-weight:700; font-size:15.5px; }
-  .cb-total-val{ font-weight:700; font-size:15.5px; }
+  .cb-total-lbl{ font-weight:700; font-size:14px; }
+  .cb-total-val{ font-weight:700; font-size:14px; }
   /* Top/Bottom print position — an A4 sheet is ~297mm tall and one Chalan
      copy only needs about half of that, so printing the same physical
      sheet twice (once for the top half, once for the bottom half after
@@ -16785,7 +16785,7 @@ function buildCustomSelect(selectId){
     const item=document.createElement('div');
     item.className='cst-option'+(opt.selected?' selected':'');
     item.setAttribute('role','option'); item.dataset.index=i;
-    item.innerHTML=`<span class="cst-dot"></span><span>${opt.text}</span>`;
+    item.innerHTML=`<span class="cst-dot"></span><span>${escapeHtml(opt.text)}</span>`;
     item.addEventListener('click',()=>{
       real.selectedIndex=i;
       real.dispatchEvent(new Event('input',{bubbles:true}));
@@ -17581,7 +17581,7 @@ function buildCustomSelect(selectId){
     item.className='cst-option'+(opt.selected?' selected':'');
     item.setAttribute('role','option');
     item.dataset.index=i;
-    item.innerHTML=`<span class="cst-dot"></span><span>${opt.text}</span>`;
+    item.innerHTML=`<span class="cst-dot"></span><span>${escapeHtml(opt.text)}</span>`;
     item.addEventListener('click',()=>{
       real.selectedIndex=i;
       real.dispatchEvent(new Event('input',{bubbles:true}));
@@ -18452,7 +18452,7 @@ window.showModelMismatchWarning=function(selectedModelText,chassisModelText,targ
   // The message must sit inside ONE span: bare text nodes and <strong> tags
   // placed directly in a flex container each become separate flex items, which
   // is what stacked the words into narrow columns.
-  el.innerHTML=`<i class="fa-solid fa-triangle-exclamation"></i><span>Chassis mismatch: this chassis is a <strong>${chassisModelText}</strong>, but <strong>${selectedModelText||'the selected model'}</strong> was selected. The model has been switched — please confirm before continuing.</span>`;
+  el.innerHTML=`<i class="fa-solid fa-triangle-exclamation"></i><span>Chassis mismatch: this chassis is a <strong>${escapeHtml(chassisModelText)}</strong>, but <strong>${escapeHtml(selectedModelText||'the selected model')}</strong> was selected. The model has been switched — please confirm before continuing.</span>`;
   el.style.display='flex';
 }
 
