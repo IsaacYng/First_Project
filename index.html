@@ -5200,7 +5200,13 @@
 
           <div class="config-row">
             <div>
-              <label class="field-label">Downpayment %</label>
+              <div class="flex items-center justify-between">
+                <label class="field-label">Downpayment %</label>
+                <label class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 cursor-pointer select-none">
+                  <input type="checkbox" id="fin_dpManualToggle" onchange="window.toggleFinDpManual(this.checked)" style="width:13px;height:13px">
+                  Manual amount
+                </label>
+              </div>
               <div class="custom-select" id="fin_dpPercentWrap">
                 <select id="fin_dpPercent" class="styled sr-only-select" tabindex="-1" aria-hidden="true">
                   <option value="30">30%</option><option value="40">40%</option>
@@ -5212,6 +5218,7 @@
                 </button>
                 <div class="custom-select-panel" id="fin_dpPercentPanel" role="listbox"></div>
               </div>
+              <input type="number" id="fin_dpManualAmount" placeholder="Exact downpayment amount" class="styled" style="display:none;margin-top:6px;width:100%" oninput="calculateFinance()">
             </div>
             <div>
               <label class="field-label">Loan Tenure</label>
@@ -16923,10 +16930,15 @@ function computeServiceCharge(loanAmt){
   if(!serviceChargeCfg || !serviceChargeCfg.on) return 0;
   const p = parseFloat(serviceChargeCfg.percent)||0;
   if(p<=0) return 0;
-  // Rounded to whole rupees: an un-rounded % of loan amount (e.g. ...50 * 1%)
-  // leaves a stray .50 that fed straight into Advance EMI downstream,
-  // stopping it from landing on a clean whole rupee like Total does.
-  return Math.round((parseFloat(loanAmt)||0) * (p/100));
+  // Deliberately NOT rounded: Hulas Finserv's own loan-review process
+  // recalculates this independently and expects it to match their exact
+  // 1%-of-loan figure to the paisa. Rounding this to a clean rupee (as an
+  // earlier version of this function did, purely for a tidier on-screen
+  // Advance EMI) created a real mismatch against Hulas's own math and got
+  // a live application rejected with "advance emi doesnot match with
+  // allocation paper." Matching their number exactly matters more here
+  // than a round Advance EMI does.
+  return (parseFloat(loanAmt)||0) * (p/100);
 }
 function serviceChargeOn(){
   return serviceChargeCfg && serviceChargeCfg.on && (parseFloat(serviceChargeCfg.percent)||0)>0;
@@ -17073,7 +17085,7 @@ function recalcAll(){
         <td>${fmt(r.loanAmt)}</td>
         <td>${fmt(r.insurance)}</td>
         <td>${fmtDec(r.emi)}</td>
-        <td>${fmt(r.advanceEmi)}</td>
+        <td>${fmtDec(r.advanceEmi)}</td>
         <td>${fmt(bikeAcc)}</td>${scTd}
         <td>${fmt(s.namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td>`;
@@ -17086,7 +17098,7 @@ function recalcAll(){
         <td>${fmt(r.loanAmt)}</td>
         <td>${fmt(r.financeInsurance)}</td>
         <td>${fmtDec(r.emi)}</td>
-        <td>${fmt(r.advanceEmi)}</td>${scTd}
+        <td>${fmtDec(r.advanceEmi)}</td>${scTd}
         <td>${fmt(s.namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td>`;
     }
@@ -17248,7 +17260,7 @@ function buildTenurePage(dp,tenure,namsari,acc,mode,modelsOverride){
       rows+=`<tr>
         <td>${n}</td><td>${escAttrSheet(bike.name)}</td><td>${fmt(bike.price)}</td>
         <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td><td>${fmt(r.insurance)}</td>
-        <td>${fmtDec(r.emi)}</td><td>${fmt(r.advanceEmi)}</td>
+        <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>
         <td>${fmt(bikeAcc)}</td>${scTd}<td>${fmt(namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td></tr>`;
     }else{
@@ -17256,7 +17268,7 @@ function buildTenurePage(dp,tenure,namsari,acc,mode,modelsOverride){
         <td>${n}</td><td>${escAttrSheet(bike.name)}</td><td>${fmt(bike.price)}</td>
         <td>${fmt(r.dpAmt)}</td><td>${fmt(r.loanAmt)}</td>
         <td>${fmt(r.financeInsurance)}</td>
-        <td>${fmtDec(r.emi)}</td><td>${fmt(r.advanceEmi)}</td>${scTd}
+        <td>${fmtDec(r.emi)}</td><td>${fmtDec(r.advanceEmi)}</td>${scTd}
         <td>${fmt(namsari)}</td>
         <td class="total-cell">${fmt(r.total)}</td></tr>`;
     }
@@ -18624,6 +18636,22 @@ document.addEventListener('keydown',e=>{
   }
 });
 
+// Manual downpayment toggle — swaps the DP% dropdown (custom-select engine,
+// left completely alone here) for a plain rupee-amount input when the
+// customer's actual downpayment doesn't land on a standard 30/40/50/60%
+// tier. calculateFinance() derives an effective DP% from the typed amount
+// so the existing scheme-rate lookup still works unchanged.
+window.toggleFinDpManual = function(isManual){
+  const dropdownWrap = document.getElementById('fin_dpPercentWrap');
+  const manualInput = document.getElementById('fin_dpManualAmount');
+  if(dropdownWrap) dropdownWrap.style.display = isManual ? 'none' : '';
+  if(manualInput){
+    manualInput.style.display = isManual ? 'block' : 'none';
+    if(isManual) manualInput.focus();
+  }
+  calculateFinance();
+};
+
 window.calculateFinance=function(){
  try{
   let selectedId=document.getElementById('modelSelect')?.value;
@@ -18656,11 +18684,18 @@ window.calculateFinance=function(){
   const accCost=Array.from(document.querySelectorAll('#fin_accDynamicGrid input[data-acc-name]')).reduce((sum,el)=>{
     return sum+(parseFloat(el.value)||0);
   },0)+getVal('othersInput');
-  const dpPercentVal=getVal('fin_dpPercent',50);
+  const dpManualMode = document.getElementById('fin_dpManualToggle')?.checked;
+  const dpManualAmt = getVal('fin_dpManualAmount', 0);
+  let dpPercentVal=getVal('fin_dpPercent',50);
   const tenure=getVal('fin_tenure',60);
 
   const afterDiscount=mrp-discount;
-  const dpAmountOnly=afterDiscount*(dpPercentVal/100);
+  const dpAmountOnly = dpManualMode ? dpManualAmt : afterDiscount*(dpPercentVal/100);
+  // Manual mode still needs *a* DP% for the scheme-rate lookup below, which
+  // matches by percentage tier — this derives the equivalent percentage so
+  // a manual amount still lands on the correct rate bracket instead of
+  // silently falling back to whatever the (now-irrelevant) dropdown says.
+  if(dpManualMode && afterDiscount>0) dpPercentVal = (dpAmountOnly/afterDiscount)*100;
   const loanAmount=afterDiscount-dpAmountOnly;
   // Service charge — same rule as the EMI rate sheet (percent of loan; 1% by
   // default, master-configurable in HFL Finance). 0 when off, so totals are
@@ -18776,7 +18811,9 @@ window.calculateFinance=function(){
     animateBar(loanBar,currentLoanWidth,targetLoanWidth);
   }
 
-  window._lastCalc={bike,mrp,discount,afterDiscount,cashInsurance,financeInsurance,activeInsurance,insuranceType,rate,dpAmountOnly,loanAmount,emi,autoRounding,totalAdvEmi,tenure,namsari,serviceCharge,finalTotalDP,finalTotalDP_A4};
+  const preciseAdvEmi = emi+customerExtraAdv;
+  const preciseTotalDP = dpAmountOnly+namsari+financeInsurance+preciseAdvEmi+serviceCharge;
+  window._lastCalc={bike,mrp,discount,afterDiscount,cashInsurance,financeInsurance,activeInsurance,insuranceType,rate,dpAmountOnly,loanAmount,emi,autoRounding,totalAdvEmi,tenure,namsari,serviceCharge,finalTotalDP,finalTotalDP_A4,preciseAdvEmi,preciseTotalDP};
  }catch(err){
   console.error('calculateFinance() crashed:', err);
   const warnEl = document.getElementById('bikeLoadWarning');
@@ -18804,7 +18841,7 @@ window.syncAllToA4=function(){
   set('a4Dealer','Samriddhi And Brothers Auto Pvt. Ltd.'); set('a4Model',c.bike.name);
   set('a4MRP',fmtDec(c.afterDiscount)); set('a4DP',fmtDec(c.dpAmountOnly)); set('a4Loan',fmtDec(c.loanAmount));
   set('a4Rate',c.rate.toFixed(2)); set('a4Tenure',c.tenure); set('a4Ins',fmtDec(c.financeInsurance));
-  set('a4AdvEmiAmt',fmtDec(c.totalAdvEmi)); set('a4TotalDP',fmtDec(c.finalTotalDP_A4)); set('a4Namsari',fmtDec(c.namsari));
+  set('a4AdvEmiAmt',fmtDec(c.preciseAdvEmi)); set('a4TotalDP',fmtDec(c.preciseTotalDP)); set('a4Namsari',fmtDec(c.namsari));
   // Service charge line — shown only when a charge applies (off/0 => hidden)
   const scShow = (parseFloat(c.serviceCharge)||0) > 0;
   const scPct = Math.round((parseFloat(serviceChargeCfg.percent)||0)*100)/100;
