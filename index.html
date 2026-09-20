@@ -5218,7 +5218,7 @@
                 </button>
                 <div class="custom-select-panel" id="fin_dpPercentPanel" role="listbox"></div>
               </div>
-              <input type="number" id="fin_dpManualAmount" placeholder="Exact downpayment amount" class="styled" style="display:none;margin-top:6px;width:100%" oninput="calculateFinance()">
+              <input type="number" id="fin_dpManualAmount" placeholder="Exact DP % (e.g. 65)" class="styled" style="display:none;margin-top:6px;width:100%" oninput="calculateFinance()">
             </div>
             <div>
               <label class="field-label">Loan Tenure</label>
@@ -18685,17 +18685,12 @@ window.calculateFinance=function(){
     return sum+(parseFloat(el.value)||0);
   },0)+getVal('othersInput');
   const dpManualMode = document.getElementById('fin_dpManualToggle')?.checked;
-  const dpManualAmt = getVal('fin_dpManualAmount', 0);
-  let dpPercentVal=getVal('fin_dpPercent',50);
+  const dpManualPct = getVal('fin_dpManualAmount', 0);
+  let dpPercentVal = dpManualMode ? dpManualPct : getVal('fin_dpPercent',50);
   const tenure=getVal('fin_tenure',60);
 
   const afterDiscount=mrp-discount;
-  const dpAmountOnly = dpManualMode ? dpManualAmt : afterDiscount*(dpPercentVal/100);
-  // Manual mode still needs *a* DP% for the scheme-rate lookup below, which
-  // matches by percentage tier — this derives the equivalent percentage so
-  // a manual amount still lands on the correct rate bracket instead of
-  // silently falling back to whatever the (now-irrelevant) dropdown says.
-  if(dpManualMode && afterDiscount>0) dpPercentVal = (dpAmountOnly/afterDiscount)*100;
+  const dpAmountOnly = afterDiscount*(dpPercentVal/100);
   const loanAmount=afterDiscount-dpAmountOnly;
   // Service charge — same rule as the EMI rate sheet (percent of loan; 1% by
   // default, master-configurable in HFL Finance). 0 when off, so totals are
@@ -18770,7 +18765,7 @@ window.calculateFinance=function(){
   { const scRow=document.getElementById('scDisplayRow');
     const scShow = (typeof serviceChargeOn==='function') ? serviceChargeOn() : ((parseFloat(serviceCharge)||0)>0);
     if(scRow) scRow.style.display = scShow ? '' : 'none';
-    if(scShow){ animateValue('displayServiceCharge', serviceCharge||0, 'default');
+    if(scShow){ animateValue('displayServiceCharge', serviceCharge||0, 'dec');
       const pct = (typeof serviceChargeCfg!=='undefined') ? (Math.round((parseFloat(serviceChargeCfg.percent)||0)*100)/100) : 1;
       const lbl=document.querySelector('#scDisplayRow label em'); if(lbl) lbl.textContent='('+pct+'% of loan)'; } }
   animateValue('displayRate',rate,'pct');
