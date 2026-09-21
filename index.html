@@ -18836,7 +18836,7 @@ window.syncAllToA4=function(){
   set('a4Dealer','Samriddhi And Brothers Auto Pvt. Ltd.'); set('a4Model',c.bike.name);
   set('a4MRP',fmtDec(c.afterDiscount)); set('a4DP',fmtDec(c.dpAmountOnly)); set('a4Loan',fmtDec(c.loanAmount));
   set('a4Rate',c.rate.toFixed(2)); set('a4Tenure',c.tenure); set('a4Ins',fmtDec(c.financeInsurance));
-  set('a4AdvEmiAmt',fmtDec(c.preciseAdvEmi)); set('a4TotalDP',fmtDec(c.preciseTotalDP)); set('a4Namsari',fmtDec(c.namsari));
+  set('a4AdvEmiAmt',fmtDec(c.totalAdvEmi)); set('a4TotalDP',fmtDec(c.finalTotalDP_A4)); set('a4Namsari',fmtDec(c.namsari));
   // Service charge line — shown only when a charge applies (off/0 => hidden)
   const scShow = (parseFloat(c.serviceCharge)||0) > 0;
   const scPct = Math.round((parseFloat(serviceChargeCfg.percent)||0)*100)/100;
