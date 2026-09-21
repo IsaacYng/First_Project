@@ -1058,6 +1058,15 @@
 #secSheetTool .cst-option.selected{color:var(--ink);font-weight:700;background:var(--blueLt)}
 #secSheetTool .cst-option.selected .cst-dot{border-color:var(--blue)}
 #secSheetTool .cst-option.selected .cst-dot::after{opacity:1;transform:scale(1)}
+.mini-toggle-row{ display:flex; align-items:center; gap:7px; cursor:pointer; user-select:none; }
+.mini-toggle-row .mini-toggle-label{ font-size:11px; font-weight:700; color:var(--text-secondary); letter-spacing:.02em; }
+.mini-toggle{ position:relative; display:inline-block; width:34px; height:19px; flex-shrink:0; }
+.mini-toggle input{ position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer; }
+.mini-toggle .mt-track{ position:absolute; inset:0; background:var(--border-strong); border-radius:999px; transition:background-color .18s ease; }
+.mini-toggle .mt-knob{ position:absolute; top:2px; left:2px; width:15px; height:15px; background:#fff; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:transform .18s ease; }
+.mini-toggle input:checked ~ .mt-track{ background:var(--brand); }
+.mini-toggle input:checked ~ .mt-knob{ transform:translateX(15px); }
+.mini-toggle input:focus-visible ~ .mt-track{ outline:2px solid var(--brand); outline-offset:2px; }
 #secSheetTool .field-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;display:block}
 #secSheetTool input.styled{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;background:var(--bgSoft);padding:0 14px;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'DM Sans',sans-serif}
 #secSheetTool input.styled:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,49,53,.1)}
@@ -5201,13 +5210,16 @@
           <div class="config-row">
             <div>
               <div class="flex items-center justify-between">
-                <label class="field-label">Downpayment %</label>
-                <label class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 cursor-pointer select-none">
-                  <input type="checkbox" id="fin_dpManualToggle" onchange="window.toggleFinDpManual(this.checked)" style="width:13px;height:13px">
-                  Manual amount
+                <label class="field-label" style="margin-bottom:0">Downpayment %</label>
+                <label class="mini-toggle-row">
+                  <span class="mini-toggle-label">Manual %</span>
+                  <span class="mini-toggle">
+                    <input type="checkbox" id="fin_dpManualToggle" onchange="window.toggleFinDpManual(this.checked)">
+                    <span class="mt-track"></span><span class="mt-knob"></span>
+                  </span>
                 </label>
               </div>
-              <div class="custom-select" id="fin_dpPercentWrap">
+              <div class="custom-select" id="fin_dpPercentWrap" style="margin-top:6px">
                 <select id="fin_dpPercent" class="styled sr-only-select" tabindex="-1" aria-hidden="true">
                   <option value="30">30%</option><option value="40">40%</option>
                   <option value="50" selected>50%</option><option value="60">60%</option>
@@ -5221,8 +5233,17 @@
               <input type="number" id="fin_dpManualAmount" placeholder="Exact DP % (e.g. 65)" class="styled" style="display:none;margin-top:6px;width:100%" oninput="calculateFinance()">
             </div>
             <div>
-              <label class="field-label">Loan Tenure</label>
-              <div class="custom-select" id="fin_tenureWrap">
+              <div class="flex items-center justify-between">
+                <label class="field-label" style="margin-bottom:0">Loan Tenure</label>
+                <label class="mini-toggle-row">
+                  <span class="mini-toggle-label">Manual</span>
+                  <span class="mini-toggle">
+                    <input type="checkbox" id="fin_tenureManualToggle" onchange="window.toggleFinTenureManual(this.checked)">
+                    <span class="mt-track"></span><span class="mt-knob"></span>
+                  </span>
+                </label>
+              </div>
+              <div class="custom-select" id="fin_tenureWrap" style="margin-top:6px">
                 <select id="fin_tenure" class="styled sr-only-select" tabindex="-1" aria-hidden="true">
                   <option value="12">12 Months</option><option value="18">18 Months</option>
                   <option value="24">24 Months</option><option value="36">36 Months</option>
@@ -5234,6 +5255,7 @@
                 </button>
                 <div class="custom-select-panel" id="fin_tenurePanel" role="listbox"></div>
               </div>
+              <input type="number" id="fin_tenureManualAmount" placeholder="Exact tenure in months (e.g. 45)" class="styled" style="display:none;margin-top:6px;width:100%" oninput="calculateFinance()">
             </div>
           </div>
 
@@ -18641,6 +18663,20 @@ document.addEventListener('keydown',e=>{
 // customer's actual downpayment doesn't land on a standard 30/40/50/60%
 // tier. calculateFinance() derives an effective DP% from the typed amount
 // so the existing scheme-rate lookup still works unchanged.
+// Manual tenure toggle — same pattern as manual DP%: swaps the tenure
+// dropdown (12/18/24/36/48/60 months) for a plain months input when the
+// deal needs a tenure that isn't one of the standard options.
+window.toggleFinTenureManual = function(isManual){
+  const dropdownWrap = document.getElementById('fin_tenureWrap');
+  const manualInput = document.getElementById('fin_tenureManualAmount');
+  if(dropdownWrap) dropdownWrap.style.display = isManual ? 'none' : '';
+  if(manualInput){
+    manualInput.style.display = isManual ? 'block' : 'none';
+    if(isManual) manualInput.focus();
+  }
+  calculateFinance();
+};
+
 window.toggleFinDpManual = function(isManual){
   const dropdownWrap = document.getElementById('fin_dpPercentWrap');
   const manualInput = document.getElementById('fin_dpManualAmount');
@@ -18687,7 +18723,8 @@ window.calculateFinance=function(){
   const dpManualMode = document.getElementById('fin_dpManualToggle')?.checked;
   const dpManualPct = getVal('fin_dpManualAmount', 0);
   let dpPercentVal = dpManualMode ? dpManualPct : getVal('fin_dpPercent',50);
-  const tenure=getVal('fin_tenure',60);
+  const tenureManualMode = document.getElementById('fin_tenureManualToggle')?.checked;
+  const tenure = tenureManualMode ? getVal('fin_tenureManualAmount', 60) : getVal('fin_tenure',60);
 
   const afterDiscount=mrp-discount;
   const dpAmountOnly = afterDiscount*(dpPercentVal/100);
