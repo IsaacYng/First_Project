@@ -1058,6 +1058,11 @@
 #secSheetTool .cst-option.selected{color:var(--ink);font-weight:700;background:var(--blueLt)}
 #secSheetTool .cst-option.selected .cst-dot{border-color:var(--blue)}
 #secSheetTool .cst-option.selected .cst-dot::after{opacity:1;transform:scale(1)}
+.dp-mode-segment{ display:inline-flex; background:var(--bg-surface-2); border:1px solid var(--border-soft); border-radius:8px; padding:2px; gap:2px; }
+.dp-mode-btn{ font-size:10px; font-weight:800; letter-spacing:.03em; padding:4px 10px; border-radius:6px; color:var(--text-muted); background:transparent; border:none; cursor:pointer; transition:background-color .15s ease, color .15s ease; }
+.dp-mode-btn.active{ background:var(--brand); color:#fff; }
+.dp-equiv-pct{ font-size:11px; font-weight:600; color:var(--text-muted); margin-top:5px; }
+.dp-equiv-pct b{ color:var(--brand-dark); }
 .mini-toggle-row{ display:flex; align-items:center; gap:7px; cursor:pointer; user-select:none; }
 .mini-toggle-row .mini-toggle-label{ font-size:11px; font-weight:700; color:var(--text-secondary); letter-spacing:.02em; }
 .mini-toggle{ position:relative; display:inline-block; width:34px; height:19px; flex-shrink:0; }
@@ -5210,14 +5215,12 @@
           <div class="config-row">
             <div>
               <div class="flex items-center justify-between">
-                <label class="field-label" style="margin-bottom:0">Downpayment %</label>
-                <label class="mini-toggle-row">
-                  <span class="mini-toggle-label">Manual %</span>
-                  <span class="mini-toggle">
-                    <input type="checkbox" id="fin_dpManualToggle" onchange="window.toggleFinDpManual(this.checked)">
-                    <span class="mt-track"></span><span class="mt-knob"></span>
-                  </span>
-                </label>
+                <label class="field-label" style="margin-bottom:0">Downpayment</label>
+                <div class="dp-mode-segment" id="fin_dpModeSegment">
+                  <button type="button" data-mode="preset" class="dp-mode-btn active" onclick="window.setFinDpMode('preset')">Preset</button>
+                  <button type="button" data-mode="percent" class="dp-mode-btn" onclick="window.setFinDpMode('percent')">%</button>
+                  <button type="button" data-mode="amount" class="dp-mode-btn" onclick="window.setFinDpMode('amount')">Rs</button>
+                </div>
               </div>
               <div class="custom-select" id="fin_dpPercentWrap" style="margin-top:6px">
                 <select id="fin_dpPercent" class="styled sr-only-select" tabindex="-1" aria-hidden="true">
@@ -5231,6 +5234,8 @@
                 <div class="custom-select-panel" id="fin_dpPercentPanel" role="listbox"></div>
               </div>
               <input type="number" id="fin_dpManualAmount" placeholder="Exact DP % (e.g. 65)" class="styled" style="display:none;margin-top:6px;width:100%" oninput="calculateFinance()">
+              <input type="number" id="fin_dpManualRupee" placeholder="Exact DP amount in Rs (e.g. 150000)" class="styled" style="display:none;margin-top:6px;width:100%" oninput="calculateFinance()">
+              <div class="dp-equiv-pct" id="fin_dpEquivPct" style="display:none"></div>
             </div>
             <div>
               <div class="flex items-center justify-between">
@@ -18677,14 +18682,25 @@ window.toggleFinTenureManual = function(isManual){
   calculateFinance();
 };
 
-window.toggleFinDpManual = function(isManual){
+// 3-way Downpayment mode: Preset (30/40/50/60% dropdown), % (custom
+// percentage), or Rs (exact rupee amount — for when a customer just says
+// "I'll pay this much" rather than thinking in percentages). calculateFinance()
+// derives whichever of amount/percentage it doesn't have directly from the
+// other, so the rate-tier lookup (which matches on DP%) keeps working the
+// same regardless of which mode is active.
+window.setFinDpMode = function(mode){
+  document.querySelectorAll('#fin_dpModeSegment .dp-mode-btn').forEach(b=>b.classList.toggle('active', b.dataset.mode===mode));
   const dropdownWrap = document.getElementById('fin_dpPercentWrap');
-  const manualInput = document.getElementById('fin_dpManualAmount');
-  if(dropdownWrap) dropdownWrap.style.display = isManual ? 'none' : '';
-  if(manualInput){
-    manualInput.style.display = isManual ? 'block' : 'none';
-    if(isManual) manualInput.focus();
-  }
+  const pctInput = document.getElementById('fin_dpManualAmount');
+  const rupeeInput = document.getElementById('fin_dpManualRupee');
+  const equivEl = document.getElementById('fin_dpEquivPct');
+  if(dropdownWrap) dropdownWrap.style.display = mode==='preset' ? '' : 'none';
+  if(pctInput) pctInput.style.display = mode==='percent' ? 'block' : 'none';
+  if(rupeeInput) rupeeInput.style.display = mode==='amount' ? 'block' : 'none';
+  if(equivEl) equivEl.style.display = mode==='amount' ? 'block' : 'none';
+  window._finDpMode = mode;
+  if(mode==='amount' && rupeeInput) rupeeInput.focus();
+  else if(mode==='percent' && pctInput) pctInput.focus();
   calculateFinance();
 };
 
@@ -18720,14 +18736,24 @@ window.calculateFinance=function(){
   const accCost=Array.from(document.querySelectorAll('#fin_accDynamicGrid input[data-acc-name]')).reduce((sum,el)=>{
     return sum+(parseFloat(el.value)||0);
   },0)+getVal('othersInput');
-  const dpManualMode = document.getElementById('fin_dpManualToggle')?.checked;
-  const dpManualPct = getVal('fin_dpManualAmount', 0);
-  let dpPercentVal = dpManualMode ? dpManualPct : getVal('fin_dpPercent',50);
+  const dpMode = window._finDpMode || 'preset';
   const tenureManualMode = document.getElementById('fin_tenureManualToggle')?.checked;
   const tenure = tenureManualMode ? getVal('fin_tenureManualAmount', 60) : getVal('fin_tenure',60);
 
   const afterDiscount=mrp-discount;
-  const dpAmountOnly = afterDiscount*(dpPercentVal/100);
+  let dpPercentVal, dpAmountOnly;
+  if(dpMode==='amount'){
+    dpAmountOnly = getVal('fin_dpManualRupee', 0);
+    dpPercentVal = afterDiscount>0 ? (dpAmountOnly/afterDiscount)*100 : 0;
+    const equivEl = document.getElementById('fin_dpEquivPct');
+    if(equivEl) equivEl.innerHTML = `= <b>${dpPercentVal.toFixed(2)}%</b> of after-discount price`;
+  } else if(dpMode==='percent'){
+    dpPercentVal = getVal('fin_dpManualAmount', 0);
+    dpAmountOnly = afterDiscount*(dpPercentVal/100);
+  } else {
+    dpPercentVal = getVal('fin_dpPercent', 50);
+    dpAmountOnly = afterDiscount*(dpPercentVal/100);
+  }
   const loanAmount=afterDiscount-dpAmountOnly;
   // Service charge — same rule as the EMI rate sheet (percent of loan; 1% by
   // default, master-configurable in HFL Finance). 0 when off, so totals are
