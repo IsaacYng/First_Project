@@ -5295,6 +5295,13 @@
           <div class="calc-card-title"><span class="icon"><i class="fa-solid fa-user-tag"></i></span>Customer &amp; Vehicle Details <span style="font-weight:400;font-size:11px;color:var(--ink4);margin-left:auto">for the printed form</span></div>
           <div class="customer-grid" style="margin-bottom:14px">
             <div>
+              <label class="field-label">Dealer Name <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-faint)">(leave blank for Samriddhi And Brothers)</span></label>
+              <input type="text" id="fin_dealerNameInput" class="styled" placeholder="Samriddhi And Brothers Auto Pvt. Ltd." oninput="calculateFinance()">
+            </div>
+          </div>
+
+          <div class="customer-grid" style="margin-bottom:14px">
+            <div>
               <label class="field-label">Customer Full Name <span style="color:var(--red)">*</span></label>
               <input type="text" id="custNameInput" class="styled" placeholder="e.g. Ram Bahadur Rai">
               <div class="field-error-msg" id="custNameError"><i class="fa-solid fa-circle-exclamation"></i> Customer name is required</div>
@@ -18896,7 +18903,8 @@ window.syncAllToA4=function(){
   const custPhone=document.getElementById('custPhoneInput')?.value||"--";
 
   set('a4Date',dateStr); set('a4CustName',custName); set('a4CustPhone',custPhone);
-  set('a4Dealer','Samriddhi And Brothers Auto Pvt. Ltd.'); set('a4Model',c.bike.name);
+  const dealerName = document.getElementById('fin_dealerNameInput')?.value.trim() || 'Samriddhi And Brothers Auto Pvt. Ltd.';
+  set('a4Dealer',dealerName); set('a4Model',c.bike.name);
   set('a4MRP',fmtDec(c.afterDiscount)); set('a4DP',fmtDec(c.dpAmountOnly)); set('a4Loan',fmtDec(c.loanAmount));
   set('a4Rate',c.rate.toFixed(2)); set('a4Tenure',c.tenure); set('a4Ins',fmtDec(c.financeInsurance));
   set('a4AdvEmiAmt',fmtDec(c.totalAdvEmi)); set('a4TotalDP',fmtDec(c.finalTotalDP_A4)); set('a4Namsari',fmtDec(c.namsari));
