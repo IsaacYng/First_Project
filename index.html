@@ -2962,12 +2962,6 @@
             <div id="dashTopModels"></div>
             <button onclick="window.switchSec('price')" class="w-full mt-3 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:border-bajaj-blue hover:text-bajaj-blue transition-all">Full Price List</button>
           </div>
-          <div class="sm-card overflow-hidden">
-            <div class="px-5 py-4 border-b border-slate-100">
-              <div class="section-title text-xl">Recent Activity</div>
-            </div>
-            <div id="dashRecentActivity"></div>
-          </div>
         </div>
       </div>
     </div>
@@ -5298,6 +5292,16 @@
               <label class="field-label">Dealer Name <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-faint)">(leave blank for Samriddhi And Brothers)</span></label>
               <input type="text" id="fin_dealerNameInput" class="styled" placeholder="Samriddhi And Brothers Auto Pvt. Ltd." oninput="calculateFinance()">
             </div>
+            <div>
+              <label class="field-label">Date of Birth <span style="color:var(--red)">*</span></label>
+              <!-- Single trigger for both calendars — opens the slot-wheel picker -->
+              <button type="button" class="custom-select-trigger" id="dobTrigger">
+                <span class="cst-text" id="dobTriggerText">Select date of birth</span>
+                <i class="fa-solid fa-calendar-days cst-chevron"></i>
+              </button>
+              <div class="field-error-msg" id="dobError"><i class="fa-solid fa-circle-exclamation"></i> Date of birth is required</div>
+              <div id="dobAgeNote" style="display:none;margin-top:8px;font-size:12px;font-weight:600"></div>
+            </div>
           </div>
 
           <div class="customer-grid" style="margin-bottom:14px">
@@ -5313,17 +5317,6 @@
             </div>
           </div>
 
-          <div style="margin-bottom:14px">
-            <label class="field-label">Date of Birth <span style="color:var(--red)">*</span></label>
-            <!-- Single trigger for both calendars — opens the slot-wheel picker -->
-            <button type="button" class="custom-select-trigger" id="dobTrigger">
-              <span class="cst-text" id="dobTriggerText">Select date of birth</span>
-              <i class="fa-solid fa-calendar-days cst-chevron"></i>
-            </button>
-
-            <div class="field-error-msg" id="dobError"><i class="fa-solid fa-circle-exclamation"></i> Date of birth is required</div>
-            <div id="dobAgeNote" style="display:none;margin-top:8px;font-size:12px;font-weight:600"></div>
-          </div>
           <div class="customer-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:.75rem">
             <div class="acc-field">
               <label>Chassis No. <span style="color:var(--red)">*</span></label>
