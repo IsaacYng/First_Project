@@ -12749,7 +12749,25 @@ function renderStockDashboard(){
 }
 
 function getModelCategory(model){
-  const b = allMasterBikes.find(x=>x.name===model);
+  // Was a brittle exact string match (allMasterBikes.find(x=>x.name===model)),
+  // so any inventory unit whose typed model name didn't match the Price
+  // List's canonical name to the letter — different spacing, an alias not
+  // yet applied, a stray space — silently fell back to the 'Bike' default
+  // with no visible error. That's exactly how Chetak (a Scooter) units
+  // ended up counted under "Bike", with the Scooter tile showing 0 despite
+  // Chetak clearly appearing in the Stock By Model list right below it.
+  // Same three-tier resolution the rest of the app already uses for this
+  // exact problem: exact match, then alias-resolved, then normalized fuzzy.
+  if(!model) return 'Bike';
+  let b = allMasterBikes.find(x=>x.name===model);
+  if(!b){
+    const resolved = resolveModelName(model);
+    if(resolved!==model) b = allMasterBikes.find(x=>x.name===resolved);
+  }
+  if(!b){
+    const norm = normModelName(model);
+    b = allMasterBikes.find(x=>normModelName(x.name)===norm);
+  }
   return b ? (b.category||'Bike') : 'Bike';
 }
 
