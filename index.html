@@ -2369,6 +2369,8 @@
   .spv-swipe-hint{ display:none; align-items:center; justify-content:center; gap:7px; color:#94A3B8; font-size:11.5px; font-weight:700; margin-bottom:10px; }
   @media (max-width:960px){ .spv-swipe-hint{ display:flex; } }
   .spv-btn{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; padding:9px 16px; border-radius:9px; border:none; cursor:pointer; transition:opacity .15s; }
+  .spv-tab{ font-size:12px; font-weight:700; color:rgba(255,255,255,.55); background:transparent; border:none; padding:7px 13px; border-radius:8px; cursor:pointer; transition:background-color .15s,color .15s; }
+  .spv-tab.active{ background:#0FA4AF; color:#fff; }
   .spv-btn:hover{ opacity:.85; }
   .spv-btn.print{ background:#964734; color:#0F172A; }
   .spv-btn.close{ background:rgba(255,255,255,.08); color:#fff; }
@@ -6138,8 +6140,14 @@
         <div class="text-white font-bold text-sm" id="spvTitle">Daily Stock Report Preview</div>
         <div class="text-white/50 text-xs" id="spvSubtitle">—</div>
       </div>
+      <button id="spvExcelBtn" class="spv-btn" style="background:#1D6F42" onclick="exportStockReportExcel()"><i class="fas fa-file-excel"></i> Excel</button>
       <button id="spvDownloadBtn" class="spv-btn print" onclick="downloadStockReportJPG()"><i class="fas fa-download"></i> Download JPG</button>
       <button class="spv-btn close" onclick="closeStockPreview()"><i class="fas fa-xmark"></i> Close</button>
+    </div>
+    <div class="spv-tabs" id="spvTabs" style="display:flex;gap:6px;padding:8px 16px;background:#0B1F22;border-bottom:1px solid rgba(255,255,255,.08)">
+      <button class="spv-tab active" data-tab="colour" onclick="switchStockReportTab('colour')">By Colour</button>
+      <button class="spv-tab" data-tab="area" onclick="switchStockReportTab('area')">By Area + Colour</button>
+      <button class="spv-tab" data-tab="areaSummary" onclick="switchStockReportTab('areaSummary')">Area Summary</button>
     </div>
     <div class="spv-body">
       <div class="spv-swipe-hint"><i class="fas fa-arrows-left-right"></i> Swipe left/right to see the full report</div>
@@ -7992,6 +8000,21 @@ function teardownAllListenersAndData(){
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
+    // "Every day" login: force a fresh sign-in once a new calendar day has
+    // begun, regardless of "Keep Signed In" persistence — a session left
+    // open overnight, or for days on an always-on shop computer, shouldn't
+    // just carry over silently forever. This is on top of (not instead of)
+    // the existing local/session persistence choice at login.
+    const todayStr = new Date().toDateString();
+    let lastLoginDay = null;
+    try{ lastLoginDay = localStorage.getItem('yng_lastLoginDay'); }catch(e){}
+    if(lastLoginDay && lastLoginDay !== todayStr){
+      try{ localStorage.removeItem('yng_lastLoginDay'); }catch(e){}
+      await signOut(auth);
+      return; // onAuthStateChanged fires again with user=null, showing the login screen
+    }
+    try{ localStorage.setItem('yng_lastLoginDay', todayStr); }catch(e){}
+
     currentUserEmail = user.email || '';
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('admin-section').style.display = 'flex';
@@ -12760,7 +12783,7 @@ function buildStockReportPage(){
   // Area-wise grid — same Model / Colour / [Area columns] / Total shape as the
   // live editable table in-app, so the report matches what staff already see.
   const areaGridSection = stockAreas.length ? `
-    <div class="jrp-area-title">Area-Wise Distribution</div>
+    <div class="jrp-area-title">Area-Wise Distribution (By Colour)</div>
     <div class="jrp-cat-summary">${areaChips}</div>
     <table class="jrp-table jrp-area-grid">
       <thead><tr>
@@ -12783,6 +12806,17 @@ function buildStockReportPage(){
         </tr>
       </tbody>
     </table>` : '';
+
+  // Simple area-only summary — just each area's running total, no model or
+  // colour breakdown, for a quick glance without wading through every row.
+  const areaSummarySection = stockAreas.length ? `
+    <table class="jrp-table" style="max-width:420px">
+      <thead><tr><th style="text-align:left">Area</th><th style="width:30%;text-align:center">Total Units</th></tr></thead>
+      <tbody>
+        ${stockAreas.map((a,i)=>{ const p=AREA_PALETTE[i%AREA_PALETTE.length]; return `<tr><td class="left" style="font-weight:700"><span class="colour-chip"><span class="dot" style="background:${p.fg}"></span>${escapeHtml(a.name)}</span></td><td style="text-align:center;font-weight:800">${areaTotals[a.name]||0}</td></tr>`; }).join('')}
+        <tr class="grand-total"><td>GRAND TOTAL</td><td style="text-align:center">${stockReportTotalUnits}</td></tr>
+      </tbody>
+    </table>` : '<div class="py-12 text-center text-slate-400">No stock areas set up yet.</div>';
 
   // Extra sections: full detail (model, colour, chassis, reg no) for every
   // unit that's Booked, Sold, or carries an HH flag — so the report is a
@@ -12813,7 +12847,7 @@ function buildStockReportPage(){
     buildDetailSection('HH Hide (Sold, Held Back From HH Report)', hhHideList, '#F1F2F5', '#4B5262'),
   ].join('');
 
-  return `
+  const head = `
     <div class="jrp-head">
       <div class="brand">SAMRIDDHI AND BROTHERS</div>
       <div class="sub">Bajaj Authorized Dealer · Phidim, Nepal — Daily Stock Report</div>
@@ -12822,18 +12856,45 @@ function buildStockReportPage(){
       <div class="jrp-cat-chip">Bike: ${bikeTotal}</div>
       <div class="jrp-cat-chip">Scooter: ${scooterTotal}</div>
       <div class="jrp-cat-chip" style="background:#F3E3DE;color:#0FA4AF">Total Available: ${stockReportTotalUnits}</div>
+    </div>`;
+  const footer = `<div class="jrp-footer">Generated: ${today}</div>`;
+
+  // Three independently downloadable tabs. Only one is visible (display)
+  // at a time — switchStockReportTab() toggles which, and
+  // downloadStockReportJPG() only captures the currently-visible one, so
+  // each can be shared or saved on its own instead of one giant combined image.
+  return `
+    <div id="spvTab_colour" class="spv-tab-panel">
+      ${head}
+      <table class="jrp-table">
+        <thead><tr><th style="width:6%">S.N</th><th>Model</th><th style="width:14%">Category</th><th style="width:20%">Colour</th><th style="width:10%;text-align:center">Qty</th></tr></thead>
+        <tbody>
+          ${rows}
+          <tr class="grand-total"><td colspan="4">GRAND TOTAL (IN STOCK)</td><td style="text-align:center">${stockReportTotalUnits}</td></tr>
+        </tbody>
+      </table>
+      ${detailSections}
+      ${footer}
     </div>
-    <table class="jrp-table">
-      <thead><tr><th style="width:6%">S.N</th><th>Model</th><th style="width:14%">Category</th><th style="width:20%">Colour</th><th style="width:10%;text-align:center">Qty</th></tr></thead>
-      <tbody>
-        ${rows}
-        <tr class="grand-total"><td colspan="4">GRAND TOTAL (IN STOCK)</td><td style="text-align:center">${stockReportTotalUnits}</td></tr>
-      </tbody>
-    </table>
-    ${areaGridSection}
-    ${detailSections}
-    <div class="jrp-footer">Generated: ${today}</div>`;
+    <div id="spvTab_area" class="spv-tab-panel" style="display:none">
+      ${head}
+      ${areaGridSection}
+      ${footer}
+    </div>
+    <div id="spvTab_areaSummary" class="spv-tab-panel" style="display:none">
+      ${head}
+      ${areaSummarySection}
+      ${footer}
+    </div>`;
 }
+
+// Switches which of the 3 report tabs is visible, and updates the tab
+// button highlighting. downloadStockReportJPG() always targets whichever
+// panel is currently visible.
+window.switchStockReportTab = function(tab){
+  document.querySelectorAll('#spvTabs .spv-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.spv-tab-panel').forEach(p=>{ p.style.display = (p.id === 'spvTab_'+tab) ? '' : 'none'; });
+};
 
 window.openStockPreview = async function(){
   currentReportKind = 'inventory';
@@ -12842,6 +12903,9 @@ window.openStockPreview = async function(){
   document.getElementById('spvTitle').textContent = 'Daily Stock Report Preview';
   document.getElementById('spvSubtitle').textContent = stockReportTotalUnits+' available units across '+Object.keys(stockReportGrouped).length+' models';
   document.getElementById('spvPage').innerHTML = `<div class="jpg-report-paper">${buildStockReportPage()}</div>`;
+  const tabsBar = document.getElementById('spvTabs'); if(tabsBar) tabsBar.style.display = '';
+  const excelBtn = document.getElementById('spvExcelBtn'); if(excelBtn) excelBtn.style.display = '';
+  window.switchStockReportTab('colour');
   document.getElementById('stockPreviewOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 };
@@ -12849,6 +12913,72 @@ window.closeStockPreview = function(){
   document.getElementById('stockPreviewOverlay').classList.remove('open');
   document.body.style.overflow = '';
 };
+window.exportStockReportExcel = function(){
+  if(typeof XLSX==='undefined'){ toast('Excel library not loaded — try refreshing the page.','err'); return; }
+  const wb = XLSX.utils.book_new();
+  const today = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+  if(currentReportKind==='hh'){
+    // HH's report isn't split into tabs (yet) — export what's on it as one sheet.
+    const byModel = hhStockReportGrouped || {};
+    const aoa = [['Model','Colour','Chassis','Qty']];
+    Object.keys(byModel).forEach(m=>{
+      const info = byModel[m];
+      Object.entries(info.colours||{}).forEach(([c,qty])=>{
+        const chassisList = (info.chassisByColour && info.chassisByColour[c]) || [];
+        aoa.push([m, c, chassisList.join(', '), qty]);
+      });
+    });
+    aoa.push(['','','Total',hhStockReportTotalUnits]);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), 'HH Stock');
+    XLSX.writeFile(wb, `HH-Stock-Report-${today}.xlsx`);
+    return;
+  }
+
+  // --- Sheet 1: By Colour ---
+  const byModel = stockReportGrouped || {};
+  const colourAoa = [['S.N','Model','Category','Colour','Chassis','Qty']];
+  let sn = 0;
+  Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total).forEach(m=>{
+    const info = byModel[m];
+    const cat = getModelCategory(m);
+    Object.entries(info.colours).sort((a,b)=>b[1]-a[1]).forEach(([c,qty])=>{
+      sn++;
+      const chassisList = (info.chassisByColour && info.chassisByColour[c]) || [];
+      colourAoa.push([sn, m, cat, c, chassisList.join(', '), qty]);
+    });
+  });
+  colourAoa.push(['','','','','Total',stockReportTotalUnits]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(colourAoa), 'By Colour');
+
+  // --- Sheet 2: By Area + Colour, and Sheet 3: Area Summary (shared computation) ---
+  const areaTotals = {};
+  stockAreas.forEach(a=>{ areaTotals[a.name]=0; });
+  const areaAoa = [['Model','Colour', ...stockAreas.map(a=>a.name), 'Total']];
+  Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total).forEach(m=>{
+    const info = byModel[m];
+    Object.entries(info.colours).sort((a,b)=>b[1]-a[1]).forEach(([c,available])=>{
+      const perArea = stockAreas.map(a=>{
+        const qtyHere = invData.filter(s =>
+          (s.model||'')===m && (s.color||'')===c &&
+          (s.status||'Available')!=='Sold' && s.hhFlag!=='Hide' &&
+          (s.area||'Workshop')===a.name
+        ).length;
+        areaTotals[a.name] += qtyHere;
+        return qtyHere;
+      });
+      areaAoa.push([m, c, ...perArea, available]);
+    });
+  });
+  areaAoa.push(['AREA TOTALS','', ...stockAreas.map(a=>areaTotals[a.name]||0), stockReportTotalUnits]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(areaAoa), 'By Area + Colour');
+
+  const summaryAoa = [['Area','Total Units'], ...stockAreas.map(a=>[a.name, areaTotals[a.name]||0]), ['GRAND TOTAL', stockReportTotalUnits]];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryAoa), 'Area Summary');
+
+  XLSX.writeFile(wb, `Stock-Report-${today}.xlsx`);
+};
+
 window.downloadStockReportJPG = async function(){
   const target = document.querySelector('#spvPage .jpg-report-paper');
   if(!target){ toast('Report not ready yet.','err'); return; }
@@ -13213,6 +13343,7 @@ window.openHHStockPreview = async function(){
   document.getElementById('spvTitle').textContent = 'HH Stock Report Preview';
   document.getElementById('spvSubtitle').textContent = hhStockReportTotalUnits+' available units across '+Object.keys(hhStockReportGrouped).length+' models';
   document.getElementById('spvPage').innerHTML = `<div class="jpg-report-paper">${buildHHStockReportPage()}</div>`;
+  const tabsBar = document.getElementById('spvTabs'); if(tabsBar) tabsBar.style.display = 'none';
   document.getElementById('stockPreviewOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 };
