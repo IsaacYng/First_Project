@@ -2418,7 +2418,7 @@
   .jrp-cat-summary{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
   .jrp-cat-chip{ background:#DFF3F4; color:#0FA4AF; padding:8px 16px; border-radius:9px; font-weight:800; font-size:13.5px; }
   .jrp-table{ width:100%; border-collapse:collapse; margin-top:20px; font-size:13px; }
-  .jrp-table th{ background:#0FA4AF; color:#fff; padding:10px 9px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .jrp-table th{ background:#0B7C86; color:#fff !important; padding:11px 9px; text-align:left; font-size:12px; font-weight:800 !important; text-transform:uppercase; letter-spacing:.05em; }
   .jrp-table td{ padding:9px; border-bottom:1px solid #E2E8F0; }
   .jrp-table tr:nth-child(even) td{ background:#F8FAFC; }
   .jrp-table tr.grand-total td{ background:#F3E3DE; font-weight:800; border-top:2px solid #964734; }
@@ -11068,7 +11068,7 @@ window._setUnitStatus = async (id, status) => {
   const message = needsCustomer
     ? `<b>${modelLabel}</b> will be marked <b>${status}</b>.<br><br>
        <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
-       <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
+       <input id="confirmCustomerNameInput_invStatus" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
          style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">`
     : `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`;
   const proceed = await showConfirm({
@@ -11081,7 +11081,7 @@ window._setUnitStatus = async (id, status) => {
   if(!proceed) return;
   // Read the embedded input's value right after the modal resolves — the
   // DOM node is still there (only hidden), and nothing else touches it yet.
-  const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : '';
+  const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput_invStatus')?.value.trim() || '') : '';
   try{
     const payload = {status, customerName};
     // Timestamp used to auto-archive Sold units to Trash after 6 months —
@@ -11101,7 +11101,7 @@ window._setHHFlag = async (id, hhFlag) => {
   const existingName = escapeHtml(s?.customerName||'');
   const customerField = `<br><br>
     <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
-    <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
+    <input id="confirmCustomerNameInput_invHHFlag" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
       style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">`;
   let title, message;
   if(hhFlag==='Sales'){
@@ -11121,7 +11121,7 @@ window._setHHFlag = async (id, hhFlag) => {
     iconClass:'fa-bullseye', iconColor:'#0FA4AF', iconBg:'#DFF3F4'
   });
   if(!proceed) return;
-  const customerName = hhFlag==='Hide' ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : undefined;
+  const customerName = hhFlag==='Hide' ? (document.getElementById('confirmCustomerNameInput_invHHFlag')?.value.trim() || '') : undefined;
   try{
     const payload = { hhFlag: hhFlag || null };
     if(customerName !== undefined) payload.customerName = customerName;
@@ -12508,7 +12508,7 @@ window._setHHInvStatus = async (id, status) => {
   const message = needsCustomer
     ? `<b>${modelLabel}</b> will be marked <b>${status}</b>.<br><br>
        <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
-       <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
+       <input id="confirmCustomerNameInput_hhStatus" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
          style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">${soldFromField}`
     : `<b>${modelLabel}</b> will be marked <b>${status}</b>. Confirm?`;
   // The confirm modal's HTML (including the select above) is inserted
@@ -12523,7 +12523,7 @@ window._setHHInvStatus = async (id, status) => {
     iconClass:'fa-rotate', iconColor:'#0FA4AF', iconBg:'#DFF3F4'
   });
   if(!proceed) return;
-  const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : '';
+  const customerName = needsCustomer ? (document.getElementById('confirmCustomerNameInput_hhStatus')?.value.trim() || '') : '';
   let soldFrom;
   if(status==='Sold'){
     const picked = document.getElementById('confirmSoldFromInput')?.value || 'Mela/Event';
@@ -12559,7 +12559,7 @@ window._setHHInvFlag = async (id, hhFlag) => {
   const existingName = escapeHtml(s?.customerName||'');
   const customerField = `<br><br>
     <label style="font-size:10.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px;">Customer Name (optional)</label>
-    <input id="confirmCustomerNameInput" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
+    <input id="confirmCustomerNameInput_hhFlag" type="text" value="${existingName}" placeholder="e.g. Santosh Gahatraj Kami"
       style="width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:8px;font-size:13.5px;font-weight:600;color:#1F2430;box-sizing:border-box;outline:none;">`;
   let title, message;
   if(hhFlag==='Sales'){
@@ -12579,7 +12579,7 @@ window._setHHInvFlag = async (id, hhFlag) => {
     iconClass:'fa-bullseye', iconColor:'#0FA4AF', iconBg:'#DFF3F4'
   });
   if(!proceed) return;
-  const customerName = hhFlag==='Hide' ? (document.getElementById('confirmCustomerNameInput')?.value.trim() || '') : undefined;
+  const customerName = hhFlag==='Hide' ? (document.getElementById('confirmCustomerNameInput_hhFlag')?.value.trim() || '') : undefined;
   try{
     const payload = { hhFlag: hhFlag || null };
     if(customerName !== undefined) payload.customerName = customerName;
@@ -12745,7 +12745,7 @@ function buildStockReportPage(){
       const chassisLine = chassisTails.length
         ? `<div style="font-size:11px;color:#475569;font-weight:700;margin-top:3px;letter-spacing:.02em">Chassis: ${chassisTails.join(', ')}</div>`
         : '';
-      return `<tr><td>${sn}</td><td>${m}${chassisLine}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${available}</td></tr>`;
+      return `<tr><td>${sn}</td><td>${m} <span style="font-weight:700;color:#0FA4AF">— ${c}</span>${chassisLine}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${available}</td></tr>`;
     }).join('');
   }).join('');
 
@@ -12852,17 +12852,94 @@ window.closeStockPreview = function(){
 window.downloadStockReportJPG = async function(){
   const target = document.querySelector('#spvPage .jpg-report-paper');
   if(!target){ toast('Report not ready yet.','err'); return; }
+  if(typeof html2canvas !== 'function'){ toast('Image library is still loading — try again in a moment.','warn'); return; }
   const btn = document.getElementById('spvDownloadBtn');
   const origHtml = btn.innerHTML;
   btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Generating…';
   btn.disabled = true;
+
+  // Let the browser actually paint the "Generating…" state before the heavy
+  // work starts — html2canvas blocks the main thread, and without this the
+  // page looked completely frozen (no spinner, no response) on phones.
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  await new Promise(r=>setTimeout(r, 40));
+
+  // html2canvas clones the ENTIRE document by default — for this app that
+  // means every hidden section and every inventory/chalan table row too,
+  // which is what froze the tab on mobile. Skip everything that isn't the
+  // report itself, one of its ancestors (needed for layout/styles), or
+  // <head> (stylesheets).
+  const keep = new Set();
+  for(let n=target; n; n=n.parentElement) keep.add(n);
+  const ignoreEverythingElse = (el)=>{
+    if(target.contains(el) || keep.has(el)) return false;
+    if(el.tagName==='HEAD' || (el.closest && el.closest('head'))) return false;
+    return true;
+  };
+
+  // Cap the canvas by device: a phone can't comfortably hold a 2x render of a
+  // tall report, so scale down until it fits a sane pixel budget (never below
+  // 1x, never above the old 2x). Mobile's budget was cut further (6M -> 3.5M)
+  // — html2canvas blocks the main thread for the entire render, so a smaller
+  // canvas is directly less time spent looking frozen on a weaker phone.
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.matchMedia('(max-width: 900px)').matches;
+  const w = target.scrollWidth || target.offsetWidth || 900, h = target.scrollHeight || 1200;
+  const maxPixels = isMobile ? 3500000 : 16000000;
+  const pickScale = ()=> Math.max(1, Math.min(2, Math.sqrt(maxPixels/(w*h))));
+
+  const render = (scale)=> html2canvas(target, {
+    scale, backgroundColor:'#ffffff', useCORS:true, logging:false,
+    imageTimeout:0, removeContainer:true, scrollX:0, scrollY:0,
+    ignoreElements: ignoreEverythingElse
+  });
+
+  // A genuinely stuck render (very old/weak device, huge report) used to
+  // leave the tab looking permanently frozen with no way out but force-
+  // closing the app. This races the render against a timeout so there's
+  // always a recoverable error instead of an indefinite hang.
+  const withTimeout = (promise, ms, label)=> Promise.race([
+    promise,
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' timed out')), ms))
+  ]);
+
+  // toBlob encodes off the critical path and avoids building a multi-MB
+  // base64 string in memory the way toDataURL did.
+  const canvasToBlob = (canvas)=> new Promise((resolve,reject)=>{
+    if(canvas.toBlob){
+      canvas.toBlob(b=> b ? resolve(b) : reject(new Error('Could not encode the image')), 'image/jpeg', 0.92);
+    }else{
+      try{
+        const bin = atob(canvas.toDataURL('image/jpeg',0.92).split(',')[1]);
+        const arr = new Uint8Array(bin.length);
+        for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+        resolve(new Blob([arr],{type:'image/jpeg'}));
+      }catch(e){ reject(e); }
+    }
+  });
+
   try{
-    const canvas = await html2canvas(target, { scale:2, backgroundColor:'#ffffff', useCORS:true });
+    let canvas;
+    try{
+      canvas = await withTimeout(render(pickScale()), 20000, 'Report render');
+    }catch(firstErr){
+      // Out of memory / canvas too large / timed out on the first try — one
+      // more attempt at plain 1x before giving up.
+      console.warn('JPG export failed at first scale, retrying at 1x', firstErr);
+      canvas = await withTimeout(render(1), 20000, 'Report render');
+    }
+    const blob = await canvasToBlob(canvas);
+    // Release the big bitmap right away — phones hold onto it otherwise.
+    canvas.width = 0; canvas.height = 0;
+
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     const namePrefix = currentReportKind==='hh' ? 'HH-Stock-Report-' : 'Stock-Report-';
     link.download = namePrefix+new Date().toISOString().slice(0,10)+'.jpg';
-    link.href = canvas.toDataURL('image/jpeg', 0.95);
+    link.href = url;
+    document.body.appendChild(link);
     link.click();
+    link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 30000);
     toast((currentReportKind==='hh' ? 'HH stock' : 'Stock')+' report downloaded as JPG!');
   }catch(e){
     console.error('JPG export failed', e);
@@ -13052,7 +13129,7 @@ function buildHHStockReportPage(){
       const chassisLine = chassisTails.length
         ? `<div style="font-size:11px;color:#475569;font-weight:700;margin-top:3px;letter-spacing:.02em">Chassis: ${chassisTails.join(', ')}</div>`
         : '';
-      return `<tr><td>${sn}</td><td>${m}${chassisLine}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${available}</td></tr>`;
+      return `<tr><td>${sn}</td><td>${m} <span style="font-weight:700;color:#0FA4AF">— ${c}</span>${chassisLine}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${available}</td></tr>`;
     }).join('');
   }).join('');
 
