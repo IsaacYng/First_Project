@@ -235,6 +235,33 @@
   .cta-amber:hover:not(:disabled){ background:#723627; transform:translateY(-2px); }
   .cta-amber:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
 
+  /* ═══════════ PILL BUTTON — icon in a circular badge, pill-shaped body.
+     A new component alongside cta-primary/cta-secondary/cta-amber (which
+     stay untouched everywhere they're already used) — applied to the most
+     prominent action buttons first, with more to follow in later passes.
+     Works with the existing "<i> then text" markup already used throughout
+     the app: the icon is visually moved to the trailing edge via flexbox
+     `order`, so no button's HTML needs restructuring to pick this up. ═══════════ */
+  .pill-btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:.875rem; letter-spacing:.01em;
+    padding:5px 5px 5px 20px; border-radius:999px; border:none; cursor:pointer;
+    box-shadow:0 4px 16px rgba(0,49,53,.22); transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .pill-btn:hover:not(:disabled){ transform:translateY(-2px); box-shadow:0 8px 22px rgba(0,49,53,.3); }
+  .pill-btn:disabled{ opacity:.55; cursor:not-allowed; transform:none !important; }
+  .pill-btn > i:first-child{
+    order:2; width:34px; height:34px; border-radius:50%; flex-shrink:0;
+    display:inline-flex; align-items:center; justify-content:center; font-size:13px;
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.15);
+  }
+  .pill-btn-primary{ background:var(--brand); color:#fff; }
+  .pill-btn-primary > i:first-child{ background:var(--brand-dark); color:#fff; }
+  .pill-btn-amber{ background:var(--amber); color:#fff; }
+  .pill-btn-amber > i:first-child{ background:var(--amber-dark); color:#fff; }
+  .pill-btn-danger{ background:var(--danger); color:#fff; }
+  .pill-btn-danger > i:first-child{ background:var(--danger-text); color:#fff; }
+
   .price-badge {
     display: inline-flex; align-items: center; gap: 8px;
     background: #0FA4AF; color: #fff;
@@ -2998,7 +3025,7 @@
           <button onclick="openCategoryModal()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-layer-group"></i> Manage Categories
           </button>
-          <button onclick="openMasterFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <button onclick="openMasterFormModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Model
           </button>
         </div>
@@ -3373,7 +3400,7 @@
             <button id="invSearchClear" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 text-xs"><i class="fas fa-circle-xmark"></i></button>
             <div id="invSearchDropdown" class="hidden absolute z-40 top-[calc(100%+6px)] left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto"></div>
           </div>
-          <button onclick="openInvFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <button onclick="openInvFormModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Unit
           </button>
         </div>
@@ -3599,7 +3626,7 @@
             <input type="text" id="hhInvSearch" autocomplete="off" placeholder="Search chassis, model, event, customer…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
           </div>
-          <button onclick="openHHInvFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <button onclick="openHHInvFormModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Unit
           </button>
         </div>
@@ -3911,7 +3938,7 @@
           <button onclick="openMelaManager()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
             <i class="fas fa-store" style="color:#D98324"></i> Manage Melas
           </button>
-          <button onclick="openExchangeFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <button onclick="openExchangeFormModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Unit
           </button>
         </div>
@@ -4142,7 +4169,7 @@
             <input type="text" id="exchangeSrSearch" autocomplete="off" placeholder="Search model, reg no, customer…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
           </div>
-          <button onclick="openExchangeSrFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <button onclick="openExchangeSrFormModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Unit
           </button>
         </div>
@@ -4340,7 +4367,7 @@
             <input type="text" id="paymentLedgerSearch" autocomplete="off" placeholder="Search mela, remarks…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
           </div>
-          <button onclick="openPaymentLedgerFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <button onclick="openPaymentLedgerFormModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Entry
           </button>
         </div>
@@ -4551,7 +4578,7 @@
             <input type="text" id="reconStockSearch" autocomplete="off" placeholder="Search model, reg no, seller…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
           </div>
-          <button onclick="openReconStockFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+          <button onclick="openReconStockFormModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
             <i class="fas fa-plus"></i> Add Unit
           </button>
         </div>
@@ -4620,7 +4647,7 @@
           <div class="section-label">Finance Schemes ·</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">HFL <span class="text-amber-500">Finance Options</span></div>
         </div>
-        <button onclick="openFinFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+        <button onclick="openFinFormModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
           <i class="fas fa-plus"></i> Add Scheme
         </button>
       </div>
@@ -4730,7 +4757,7 @@
           <div class="section-label">Accessories ·</div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Accessories <span class="text-amber-500">Inventory</span></div>
         </div>
-        <button onclick="openAccFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+        <button onclick="openAccFormModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
           <i class="fas fa-plus"></i> Add Accessory
         </button>
       </div>
@@ -4806,7 +4833,7 @@
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Document <span class="text-amber-500">Vault</span></div>
           <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Shared across the whole team — KYC forms, allocation forms, Namsari letters — scanned and stored safely. Photos are compressed automatically; PDF/Word/Excel need to already be under ~900 KB.</p>
         </div>
-        <button onclick="openDocUploadModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+        <button onclick="openDocUploadModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
           <i class="fas fa-upload"></i> Upload Document
         </button>
       </div>
@@ -4960,7 +4987,7 @@
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Events <span class="text-amber-500">& Offers</span></div>
           <p class="text-sm text-slate-500 mt-1.5 max-w-lg">Melas, Dashain/summer offers, exchange campaigns — whatever's currently running shows as a popup to anyone opening the app.</p>
         </div>
-        <button onclick="openEventFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+        <button onclick="openEventFormModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
           <i class="fas fa-plus"></i> Add Event
         </button>
       </div>
@@ -5908,7 +5935,7 @@
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Model <span class="text-amber-500">Aliases</span></div>
           <p class="text-sm text-slate-500 mt-1.5 max-w-lg">When the same bike gets typed differently across records — like "150 SD" and "150 DTS-i" — link them here so price/insurance lookups (Chalan, etc.) still find the right model.</p>
         </div>
-        <button onclick="window.openAliasFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+        <button onclick="window.openAliasFormModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
           <i class="fas fa-plus"></i> Add Alias
         </button>
       </div>
@@ -6059,7 +6086,7 @@
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Important <span class="text-amber-500">Info</span></div>
           <p class="text-sm text-slate-500 mt-1.5 max-w-lg" id="importantDesc">Contacts and links for outside services — everyone can add, edit, or remove any entry.</p>
         </div>
-        <button id="addImportantBtn" onclick="openImportantFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
+        <button id="addImportantBtn" onclick="openImportantFormModal()" class="pill-btn pill-btn-primary !text-xs flex-shrink-0">
           <i class="fas fa-plus"></i> Add Entry
         </button>
       </div>
