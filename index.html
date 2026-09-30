@@ -2419,6 +2419,25 @@
   .jrp-head .sub{ font-size:12.5px; color:#64748B; margin-top:3px; font-weight:600; }
   .jrp-cat-summary{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
   .jrp-cat-chip{ background:#DFF3F4; color:#0FA4AF; padding:8px 16px; border-radius:9px; font-weight:800; font-size:13.5px; }
+  .jrp-card-grid{ display:grid; grid-template-columns:1fr; gap:10px; margin:16px 0; }
+  @media(min-width:640px){ .jrp-card-grid{ grid-template-columns:1fr 1fr; } }
+  @media(min-width:960px){ .jrp-card-grid{ grid-template-columns:1fr 1fr 1fr; } }
+  .jrp-card{ border:1px solid #E2E8F0; border-radius:14px; padding:14px 16px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.05); transition:box-shadow .15s; }
+  .jrp-card-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:9px; }
+  .jrp-card-model{ font-weight:800; font-size:14px; color:#0F172A; line-height:1.3; }
+  .jrp-card-cat{ font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:#0FA4AF; background:#DFF3F4; padding:3px 9px; border-radius:999px; white-space:nowrap; flex-shrink:0; }
+  .jrp-card-mid{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .jrp-card-colour{ display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; color:#475569; }
+  .jrp-colour-dot{ width:14px; height:14px; border-radius:50%; border:1.5px solid rgba(0,0,0,.12); flex-shrink:0; }
+  .jrp-card-qty{ font-size:22px; font-weight:900; color:#0FA4AF; line-height:1; }
+  .jrp-card-qty-lbl{ font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#94A3B8; text-align:right; margin-top:2px; }
+  .jrp-card-chassis{ font-size:10px; color:#94A3B8; font-family:'JetBrains Mono',monospace; margin-top:9px; padding-top:9px; border-top:1px dashed #E2E8F0; word-break:break-all; line-height:1.5; }
+  .jrp-card-areas{ margin-top:9px; padding-top:9px; border-top:1px dashed #E2E8F0; display:flex; flex-wrap:wrap; gap:6px; }
+  .jrp-area-pill{ font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:999px; background:#F1F5F9; color:#64748B; }
+  .jrp-area-pill.has-stock{ background:#DFF3F4; color:#0FA4AF; }
+  .jrp-stat-card{ border-radius:16px; padding:20px 18px; color:#fff; box-shadow:0 4px 14px rgba(0,0,0,.1); }
+  .jrp-stat-num{ font-size:32px; font-weight:900; line-height:1; margin-top:6px; }
+  .jrp-stat-lbl{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; opacity:.85; }
   .jrp-table{ width:100%; border-collapse:collapse; margin-top:20px; font-size:13px; }
   .jrp-table th{ background:#0B7C86; color:#fff !important; padding:11px 9px; text-align:left; font-size:12px; font-weight:800 !important; text-transform:uppercase; letter-spacing:.05em; }
   .jrp-table td{ padding:9px; border-bottom:1px solid #E2E8F0; }
@@ -12736,21 +12755,24 @@ function getModelCategory(model){
 
 function buildStockReportPage(){
   const byModel = stockReportGrouped || {};
-  const models = Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total);
+  const models = Object.keys(byModel).sort((a,b)=>a.localeCompare(b)); // A-Z by model name
   const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
   const workshopArea = findWorkshopArea();
-  let sn = 0, bikeTotal = 0, scooterTotal = 0;
+  let bikeTotal = 0, scooterTotal = 0;
   const areaTotals = {};    // areaName -> running total (workshop = computed leftover)
-  const areaGridRows = [];  // one row per model+colour, same shape as the on-screen editable grid
+  const areaCardEntries = [];  // one entry per model+colour, same shape as the on-screen editable grid
   stockAreas.forEach(a=>{ areaTotals[a.name]=0; });
 
-  const rows = models.map(m=>{
+  // --- By Colour: one card per Model+Colour combo ---
+  const colourCards = models.map(m=>{
     const info = byModel[m];
     const cat = getModelCategory(m);
     if(cat==='Scooter') scooterTotal += info.total; else bikeTotal += info.total;
-    // Each colour gets its own row — easier to read at a glance than a combined string.
-    return Object.entries(info.colours).sort((a,b)=>b[1]-a[1]).map(([c,available])=>{
-      sn++;
+    // Each colour gets its own card — a model with two colours in stock
+    // shows as two clearly separate cards rather than one row that looks
+    // like a confusing duplicate when a table's other columns are scrolled
+    // out of view on a narrow phone screen.
+    return Object.entries(info.colours).sort((a,b)=>a[0].localeCompare(b[0])).map(([c,available])=>{
       // Per-unit area counts: count in-stock units of this model+colour in
       // each area directly from their own `area` field — this is the fix, so
       // selling from one area only reduces that area (no manual entry).
@@ -12763,12 +12785,19 @@ function buildStockReportPage(){
         areaTotals[a.name] += qtyHere;
         return qtyHere;
       });
-      areaGridRows.push({ model:m, color:c, perArea, total:available });
+      areaCardEntries.push({ model:m, color:c, cat, perArea, total:available });
       const chassisTails = (info.chassisByColour && info.chassisByColour[c]) || [];
       const chassisLine = chassisTails.length
-        ? `<div style="font-size:11px;color:#475569;font-weight:700;margin-top:3px;letter-spacing:.02em">Chassis: ${chassisTails.join(', ')}</div>`
+        ? `<div class="jrp-card-chassis">Chassis: ${chassisTails.join(', ')}</div>`
         : '';
-      return `<tr><td>${sn}</td><td>${m} <span style="font-weight:700;color:#0FA4AF">— ${c}</span>${chassisLine}</td><td>${cat}</td><td>${c}</td><td style="font-weight:800;text-align:center">${available}</td></tr>`;
+      return `<div class="jrp-card">
+        <div class="jrp-card-top"><div class="jrp-card-model">${escapeHtml(m)}</div><div class="jrp-card-cat">${cat}</div></div>
+        <div class="jrp-card-mid">
+          <div class="jrp-card-colour"><span class="jrp-colour-dot" style="background:${colourHex(c)}"></span>${escapeHtml(c)}</div>
+          <div style="text-align:right"><div class="jrp-card-qty">${available}</div><div class="jrp-card-qty-lbl">In Stock</div></div>
+        </div>
+        ${chassisLine}
+      </div>`;
     }).join('');
   }).join('');
 
@@ -12780,43 +12809,50 @@ function buildStockReportPage(){
     ? stockAreas.map((a,i)=>{ const p=AREA_PALETTE[i%AREA_PALETTE.length]; return `<div class="jrp-cat-chip" style="background:${p.bg};color:${p.fg}">${escapeHtml(a.name)}: ${areaTotals[a.name]||0}</div>`; }).join('')
     : '';
 
-  // Area-wise grid — same Model / Colour / [Area columns] / Total shape as the
-  // live editable table in-app, so the report matches what staff already see.
+  // --- By Area + Colour: one card per Model+Colour, with a pill per area
+  // showing that area's count — the areas with actual stock stand out in
+  // teal, empty ones stay muted grey, so it reads at a glance without
+  // needing a wide multi-column table.
+  areaCardEntries.sort((a,b)=> a.model.localeCompare(b.model) || a.color.localeCompare(b.color));
   const areaGridSection = stockAreas.length ? `
     <div class="jrp-area-title">Area-Wise Distribution (By Colour)</div>
     <div class="jrp-cat-summary">${areaChips}</div>
-    <table class="jrp-table jrp-area-grid">
-      <thead><tr>
-        <th style="text-align:left">Model</th>
-        <th style="width:18%;text-align:left">Colour</th>
-        ${stockAreas.map(a=>`<th style="width:${Math.floor(40/stockAreas.length)}%">${escapeHtml(a.name)}</th>`).join('')}
-        <th style="width:10%">Total</th>
-      </tr></thead>
-      <tbody>
-        ${areaGridRows.map(r=>`<tr>
-          <td class="left">${escapeHtml(r.model)}</td>
-          <td class="left">${escapeHtml(r.color)}</td>
-          ${r.perArea.map(v=>`<td style="font-weight:${v>0?'800':'400'};color:${v>0?'#000':'#B8BEC9'}">${v}</td>`).join('')}
-          <td style="font-weight:800;background:#F1F5F9">${r.total}</td>
-        </tr>`).join('')}
-        <tr class="grand-total">
-          <td colspan="2">AREA TOTALS</td>
-          ${stockAreas.map(a=>`<td>${areaTotals[a.name]||0}</td>`).join('')}
-          <td>${stockReportTotalUnits}</td>
-        </tr>
-      </tbody>
+    <div class="jrp-card-grid">
+      ${areaCardEntries.map(r=>`<div class="jrp-card">
+        <div class="jrp-card-top"><div class="jrp-card-model">${escapeHtml(r.model)}</div><div class="jrp-card-cat">${r.cat}</div></div>
+        <div class="jrp-card-mid">
+          <div class="jrp-card-colour"><span class="jrp-colour-dot" style="background:${colourHex(r.color)}"></span>${escapeHtml(r.color)}</div>
+          <div style="text-align:right"><div class="jrp-card-qty">${r.total}</div><div class="jrp-card-qty-lbl">Total</div></div>
+        </div>
+        <div class="jrp-card-areas">
+          ${stockAreas.map((a,i)=>`<span class="jrp-area-pill${r.perArea[i]>0?' has-stock':''}">${escapeHtml(a.name)}: ${r.perArea[i]}</span>`).join('')}
+        </div>
+      </div>`).join('')}
+    </div>
+    <table class="jrp-table" style="margin-top:16px">
+      <tbody><tr class="grand-total">
+        <td>AREA TOTALS</td>
+        ${stockAreas.map(a=>`<td>${escapeHtml(a.name)}: ${areaTotals[a.name]||0}</td>`).join('')}
+        <td>Grand Total: ${stockReportTotalUnits}</td>
+      </tr></tbody>
     </table>` : '';
 
-  // Simple area-only summary — just each area's running total, no model or
-  // colour breakdown, for a quick glance without wading through every row.
+  // --- Area Summary: premium gradient stat cards, one per area ---
   const areaSummarySection = stockAreas.length ? `
-    <table class="jrp-table" style="max-width:420px">
-      <thead><tr><th style="text-align:left">Area</th><th style="width:30%;text-align:center">Total Units</th></tr></thead>
-      <tbody>
-        ${stockAreas.map((a,i)=>{ const p=AREA_PALETTE[i%AREA_PALETTE.length]; return `<tr><td class="left" style="font-weight:700"><span class="colour-chip"><span class="dot" style="background:${p.fg}"></span>${escapeHtml(a.name)}</span></td><td style="text-align:center;font-weight:800">${areaTotals[a.name]||0}</td></tr>`; }).join('')}
-        <tr class="grand-total"><td>GRAND TOTAL</td><td style="text-align:center">${stockReportTotalUnits}</td></tr>
-      </tbody>
-    </table>` : '<div class="py-12 text-center text-slate-400">No stock areas set up yet.</div>';
+    <div class="jrp-card-grid">
+      ${stockAreas.map((a,i)=>{
+        const p=AREA_PALETTE[i%AREA_PALETTE.length];
+        const grad = `linear-gradient(135deg, ${p.fg}, ${p.fg}CC)`;
+        return `<div class="jrp-stat-card" style="background:${grad}">
+          <div class="jrp-stat-lbl">${escapeHtml(a.name)}</div>
+          <div class="jrp-stat-num">${areaTotals[a.name]||0}</div>
+        </div>`;
+      }).join('')}
+      <div class="jrp-stat-card" style="background:linear-gradient(135deg,#0F172A,#0F172ACC)">
+        <div class="jrp-stat-lbl">Grand Total</div>
+        <div class="jrp-stat-num">${stockReportTotalUnits}</div>
+      </div>
+    </div>` : '<div class="py-12 text-center text-slate-400">No stock areas set up yet.</div>';
 
   // Extra sections: full detail (model, colour, chassis, reg no) for every
   // unit that's Booked, Sold, or carries an HH flag — so the report is a
@@ -12866,13 +12902,7 @@ function buildStockReportPage(){
   return `
     <div id="spvTab_colour" class="spv-tab-panel">
       ${head}
-      <table class="jrp-table">
-        <thead><tr><th style="width:6%">S.N</th><th>Model</th><th style="width:14%">Category</th><th style="width:20%">Colour</th><th style="width:10%;text-align:center">Qty</th></tr></thead>
-        <tbody>
-          ${rows}
-          <tr class="grand-total"><td colspan="4">GRAND TOTAL (IN STOCK)</td><td style="text-align:center">${stockReportTotalUnits}</td></tr>
-        </tbody>
-      </table>
+      <div class="jrp-card-grid">${colourCards}</div>
       ${detailSections}
       ${footer}
     </div>
@@ -12939,7 +12969,7 @@ window.exportStockReportExcel = function(){
   const byModel = stockReportGrouped || {};
   const colourAoa = [['S.N','Model','Category','Colour','Chassis','Qty']];
   let sn = 0;
-  Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total).forEach(m=>{
+  Object.keys(byModel).sort((a,b)=>a.localeCompare(b)).forEach(m=>{
     const info = byModel[m];
     const cat = getModelCategory(m);
     Object.entries(info.colours).sort((a,b)=>b[1]-a[1]).forEach(([c,qty])=>{
@@ -12955,7 +12985,7 @@ window.exportStockReportExcel = function(){
   const areaTotals = {};
   stockAreas.forEach(a=>{ areaTotals[a.name]=0; });
   const areaAoa = [['Model','Colour', ...stockAreas.map(a=>a.name), 'Total']];
-  Object.keys(byModel).sort((a,b)=>byModel[b].total-byModel[a].total).forEach(m=>{
+  Object.keys(byModel).sort((a,b)=>a.localeCompare(b)).forEach(m=>{
     const info = byModel[m];
     Object.entries(info.colours).sort((a,b)=>b[1]-a[1]).forEach(([c,available])=>{
       const perArea = stockAreas.map(a=>{
