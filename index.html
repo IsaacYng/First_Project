@@ -9932,7 +9932,7 @@ function renderSalesTrendChart(){
     el.innerHTML = `<div class="py-8 text-center text-slate-400 text-sm"><i class="fas fa-chart-column text-2xl opacity-25 block mb-2"></i>No sales recorded in the last 6 months yet.</div>`;
     return;
   }
-  el.innerHTML = `<div class="flex items-end justify-between gap-2 sm:gap-3 border-b border-slate-100" style="height:130px">` +
+  el.innerHTML = `<div class="flex items-end justify-between gap-2 sm:gap-3 border-b border-slate-100" style="height:108px">` +
     months.map(m=>{
       // Fixed pixel budget for the bar itself (not a % of the flex item's
       // own height) — the flex item also holds the count number and month
@@ -9943,7 +9943,10 @@ function renderSalesTrendChart(){
       // were being clamped against the same available space instead of
       // scaling proportionally against each other. A plain pixel height
       // computed directly from count/max removes that ambiguity entirely.
-      const BAR_AREA_PX = 82;
+      // The budget is sized to the container height itself (108px minus
+      // room for the number/label text) so the tallest bar actually reaches
+      // up near the top instead of leaving empty space above it.
+      const BAR_AREA_PX = 68;
       const isZero = !m.count;
       const barPx = isZero ? 7 : Math.max(Math.round((m.count/max)*BAR_AREA_PX), 10);
       const isCurrentMonth = m.year===now.getFullYear() && m.month===now.getMonth();
@@ -10053,7 +10056,7 @@ function renderDashboardSkeleton(){
   const cust=document.getElementById('dashRecentCustomers'); if(cust) cust.innerHTML=Array(5).fill('<span class="skel" style="width:52px;height:52px;border-radius:50%"></span>').join('');
   const tt=document.getElementById('dashTrendTotal'); if(tt) tt.innerHTML='<span class="skel" style="width:130px;height:30px"></span>';
   const chart=document.getElementById('dashSalesTrendChart');
-  if(chart) chart.innerHTML='<div class="flex items-end justify-between gap-3" style="height:130px">'+[40,25,60,35,80,55].map(h=>`<div class="flex-1 flex items-end h-full"><span class="skel" style="width:100%;height:${h}%;border-radius:8px 8px 0 0"></span></div>`).join('')+'</div>';
+  if(chart) chart.innerHTML='<div class="flex items-end justify-between gap-3" style="height:108px">'+[40,25,60,35,80,55].map(h=>`<div class="flex-1 flex items-end h-full"><span class="skel" style="width:100%;height:${h}%;border-radius:8px 8px 0 0"></span></div>`).join('')+'</div>';
   const tm=document.getElementById('dashTopModels'); if(tm) tm.innerHTML=Array(3).fill('<div class="flex items-center gap-3 py-2"><span class="skel" style="width:44px;height:44px;border-radius:12px"></span><div class="flex-1"><div class="skel skel-line" style="width:70%;margin-bottom:6px"></div><div class="skel skel-line" style="width:40%"></div></div></div>').join('');
   const bs=document.getElementById('dashBusinessSummary'); if(bs) bs.innerHTML=Array(3).fill('<div class="skel skel-line" style="width:100%;height:16px;margin:6px 0"></div>').join('');
   const ra=document.getElementById('dashRecentActivity'); if(ra) ra.innerHTML='<div class="p-5">'+Array(4).fill('<div class="skel skel-line" style="width:100%;height:14px;margin:12px 0"></div>').join('')+'</div>';
