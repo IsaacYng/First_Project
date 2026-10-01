@@ -3079,7 +3079,7 @@
           </div>
           <div class="flex flex-col gap-1.5 col-span-2 sm:col-span-2">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Model Name <span class="text-red-400">*</span></label>
-            <input type="text" id="mName" placeholder="e.g. Pulsar NS200"
+            <input type="text" id="mName" placeholder="e.g. Pulsar NS200" oninput="window.autoDetectModelCategory(this.value)"
               class="bg-slate-50 border-2 border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all w-full"/>
           </div>
           <div class="flex flex-col gap-1.5">
@@ -9532,7 +9532,26 @@ function clearMasterForm(){
   // whatever category happens to exist first only if Bike isn't set up.
   if(financeCategories.some(c=>c.name==='Bike')) catSel.value = 'Bike';
   else if(financeCategories.length) catSel.value = financeCategories[0].name;
+  if(typeof syncCustomSelectUI==='function') syncCustomSelectUI('mCategory');
+  mCategoryUserTouched = false;
 }
+
+// The Category field always defaulted to "Bike" with no name-based hint, so
+// forgetting to manually switch it for a Chetak (Bajaj's electric scooter
+// line) silently miscategorized it — no error, just a wrong count showing
+// up later on the Scooter stat tile. This only ever switches TO Scooter,
+// and only while the person hasn't touched the Category field themselves
+// yet this time around, so it can never override a deliberate choice.
+let mCategoryUserTouched = false;
+window.autoDetectModelCategory = function(name){
+  if(mCategoryUserTouched) return;
+  const catSel = document.getElementById('mCategory');
+  if(!catSel || !financeCategories.some(c=>c.name==='Scooter')) return;
+  if(/\bchetak\b/i.test(name||'') && catSel.value!=='Scooter'){
+    catSel.value = 'Scooter';
+    if(typeof syncCustomSelectUI==='function') syncCustomSelectUI('mCategory');
+  }
+};
 
 /* ─── Inventory ─── */
 // Combined cap across Inventory + HH Inventory — keeps the two Firestore
@@ -22836,6 +22855,7 @@ function enhanceNativeSelect(select, opts={}){
 
 function initCustomSelects(){
   enhanceNativeSelect(document.getElementById('mCategory'), { placeholder:'Category' });
+  document.getElementById('mCategory').addEventListener('input', ()=>{ mCategoryUserTouched = true; });
   enhanceNativeSelect(document.getElementById('chalanInsType'), { placeholder:'Insurance Type' });
   enhanceNativeSelect(document.getElementById('aliasCanonicalSelect'), { placeholder:'Select a model…', searchable:true });
   enhanceNativeSelect(document.getElementById('aliasRawInput'), { placeholder:'Select a model name from Inventory…', searchable:true });
