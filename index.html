@@ -9932,17 +9932,26 @@ function renderSalesTrendChart(){
     el.innerHTML = `<div class="py-8 text-center text-slate-400 text-sm"><i class="fas fa-chart-column text-2xl opacity-25 block mb-2"></i>No sales recorded in the last 6 months yet.</div>`;
     return;
   }
-  el.innerHTML = `<div class="flex items-end justify-between gap-2 sm:gap-4 border-b border-slate-100" style="height:130px">` +
+  el.innerHTML = `<div class="flex items-end justify-between gap-2 sm:gap-3 border-b border-slate-100" style="height:130px">` +
     months.map(m=>{
-      const pct = Math.round((m.count/max)*100);
-      const isCurrentMonth = m.year===now.getFullYear() && m.month===now.getMonth();
+      // Fixed pixel budget for the bar itself (not a % of the flex item's
+      // own height) — the flex item also holds the count number and month
+      // label above/below the bar, and percentage heights on a child next
+      // to other non-percentage siblings don't resolve the same way across
+      // browsers. That's exactly why two very different values (48 vs 65)
+      // were rendering as visually identical bar heights: both percentages
+      // were being clamped against the same available space instead of
+      // scaling proportionally against each other. A plain pixel height
+      // computed directly from count/max removes that ambiguity entirely.
+      const BAR_AREA_PX = 82;
       const isZero = !m.count;
+      const barPx = isZero ? 7 : Math.max(Math.round((m.count/max)*BAR_AREA_PX), 10);
+      const isCurrentMonth = m.year===now.getFullYear() && m.month===now.getMonth();
       const barClass = isZero ? 'bg-slate-100' : (isCurrentMonth ? 'bg-bajaj-blue' : 'bg-blue-200');
-      const barStyle = isZero ? 'height:7px' : `height:${Math.max(pct,10)}%`;
       return `
       <div class="flex-1 flex flex-col items-center justify-end h-full gap-1.5">
         <span class="text-xs font-black ${isZero?'text-slate-300':'text-slate-700'}">${m.count}</span>
-        <div class="w-full rounded-t-md ${barClass} transition-all" style="${barStyle}"></div>
+        <div class="w-full rounded-t-md ${barClass} transition-all" style="height:${barPx}px"></div>
         <span class="text-[10px] font-bold ${isCurrentMonth?'text-bajaj-blue':'text-slate-400'} uppercase">${m.label}</span>
       </div>`;
     }).join('') + `</div>`;
