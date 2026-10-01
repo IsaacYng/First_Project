@@ -6759,6 +6759,21 @@
   </div>
 </div>
 
+<!-- BULK OPERATION PROGRESS — shows live "X of Y (Z%)" progress for bulk
+     delete/add operations across every section. Added because a bulk delete
+     with zero feedback made people assume it hadn't started and click the
+     button again mid-operation — which ran the same delete a second time and
+     left Trash with duplicate entries for the same units. -->
+<div id="bulkProgressBanner" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-[600] bg-[#0B1F22] text-white rounded-2xl px-5 py-3.5 shadow-2xl min-w-[280px] max-w-sm">
+  <div class="flex items-center justify-between gap-3 mb-2">
+    <span id="bulkProgressLabel" class="text-[12.5px] font-bold">Working…</span>
+    <span id="bulkProgressPct" class="text-[12.5px] font-bold text-[#5FBFC7]">0%</span>
+  </div>
+  <div class="h-[6px] bg-white/15 rounded-full overflow-hidden">
+    <div id="bulkProgressBar" class="h-full bg-[#0FA4AF] transition-all duration-150" style="width:0%"></div>
+  </div>
+</div>
+
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
@@ -7896,6 +7911,34 @@ window.confirmDeleteDuplicates = async ()=>{
 
 /* ─── Helpers ─── */
 let toastTimer = null;
+// ---- Bulk operation progress + lock -----------------------------------
+// The lock is what actually fixes the duplicate-Trash bug: a bulk delete
+// used to have no way to tell if it was already running, so clicking the
+// button again mid-operation (easy to do with zero visual feedback) ran
+// the same delete a second time, moving the same units to Trash twice.
+// The progress banner is what makes it obvious something IS happening, so
+// there's no reason to feel like re-clicking is needed in the first place.
+const _bulkOpsRunning = new Set();
+function isBulkOpRunning(key){ return _bulkOpsRunning.has(key); }
+function startBulkOp(key){ _bulkOpsRunning.add(key); }
+function endBulkOp(key){ _bulkOpsRunning.delete(key); }
+function showBulkProgress(label, current, total){
+  const banner = document.getElementById('bulkProgressBanner');
+  if(!banner) return;
+  const pct = total>0 ? Math.round((current/total)*100) : 0;
+  banner.classList.remove('hidden');
+  const lbl = document.getElementById('bulkProgressLabel');
+  const pctEl = document.getElementById('bulkProgressPct');
+  const bar = document.getElementById('bulkProgressBar');
+  if(lbl) lbl.textContent = `${label} ${current} of ${total}…`;
+  if(pctEl) pctEl.textContent = pct+'%';
+  if(bar) bar.style.width = pct+'%';
+}
+function hideBulkProgress(){
+  const banner = document.getElementById('bulkProgressBanner');
+  if(banner) banner.classList.add('hidden');
+}
+
 function toast(msg, type='ok') {
   const t = document.getElementById('toast');
   const ic = document.getElementById('toastIcon');
@@ -10661,18 +10704,25 @@ window._deleteChalan = async (id)=>{
 };
 window.deleteSelectedChalans = async ()=>{
   if(!selectedChalanIds.size) return;
+  if(isBulkOpRunning('chalan-delete')){ toast('Already deleting — please wait for it to finish.','warn'); return; }
   const ok = await showDangerousConfirm({
     title: `Delete ${selectedChalanIds.size} Chalan record${selectedChalanIds.size!==1?'s':''}?`,
     message: "This will permanently remove the selected Chalan records. This can't be undone.",
     okText: 'Delete All', countdownSec: 3
   });
   if(!ok) return;
+  startBulkOp('chalan-delete');
   try{
-    for(const id of selectedChalanIds){ await deleteDoc(doc(db,'chalans',id)); }
-    logActivity('Bulk Deleted', 'chalans', { model: `${selectedChalanIds.size} chalan record(s)` });
+    const ids = [...selectedChalanIds];
+    for(let i=0;i<ids.length;i++){
+      showBulkProgress('Deleting', i+1, ids.length);
+      await deleteDoc(doc(db,'chalans',ids[i]));
+    }
+    logActivity('Bulk Deleted', 'chalans', { model: `${ids.length} chalan record(s)` });
     selectedChalanIds.clear();
     toast('Selected Chalan records deleted.');
   }catch(e){ toast('Error: '+friendlyError(e),'err'); }
+  finally{ endBulkOp('chalan-delete'); hideBulkProgress(); }
 };
 
 let currentChalanSourceCol = 'inventory';
@@ -11911,6 +11961,7 @@ window.exportSelectedHH = ()=>{
 
 window.deleteSelectedInvUnits = async ()=>{
   if(!selectedInvIds.size) return;
+  if(isBulkOpRunning('inv-delete')){ toast('Already deleting — please wait for it to finish.','warn'); return; }
   const ids = [...selectedInvIds];
   const proceed = await showDangerousConfirm({
     title: `Delete ${ids.length} selected unit${ids.length!==1?'s':''}?`,
@@ -11918,9 +11969,13 @@ window.deleteSelectedInvUnits = async ()=>{
     okText: 'Delete Selected'
   });
   if(!proceed) return;
+  startBulkOp('inv-delete');
   try{
     const targets = ids.map(id=>invData.find(x=>x.id===id)).filter(Boolean);
-    for(const t of targets) await moveToTrash('inventory', t.id, t);
+    for(let i=0;i<targets.length;i++){
+      showBulkProgress('Deleting', i+1, targets.length);
+      await moveToTrash('inventory', targets[i].id, targets[i]);
+    }
     const chunks = [];
     for(let i=0;i<ids.length;i+=400) chunks.push(ids.slice(i,i+400));
     for(const chunk of chunks){
@@ -11934,6 +11989,7 @@ window.deleteSelectedInvUnits = async ()=>{
     document.getElementById('stockTable')?.classList.remove('select-mode');
     updateDeleteSelectedBtn();
   }catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
+  finally{ endBulkOp('inv-delete'); hideBulkProgress(); }
 };
 
 function updateInvStats(){
@@ -12296,6 +12352,7 @@ window.toggleSelectAllHHInv = (checked)=>{
 
 window.deleteSelectedHHInvUnits = async ()=>{
   if(!selectedHHInvIds.size) return;
+  if(isBulkOpRunning('hh-delete')){ toast('Already deleting — please wait for it to finish.','warn'); return; }
   const ids = [...selectedHHInvIds];
   const proceed = await showDangerousConfirm({
     title: `Delete ${ids.length} selected HH unit${ids.length!==1?'s':''}?`,
@@ -12303,9 +12360,13 @@ window.deleteSelectedHHInvUnits = async ()=>{
     okText: 'Delete Selected'
   });
   if(!proceed) return;
+  startBulkOp('hh-delete');
   try{
     const targets = ids.map(id=>hhInvData.find(x=>x.id===id)).filter(Boolean);
-    for(const t of targets) await moveToTrash('hh_inventory', t.id, t);
+    for(let i=0;i<targets.length;i++){
+      showBulkProgress('Deleting', i+1, targets.length);
+      await moveToTrash('hh_inventory', targets[i].id, targets[i]);
+    }
     const chunks = [];
     for(let i=0;i<ids.length;i+=400) chunks.push(ids.slice(i,i+400));
     for(const chunk of chunks){
@@ -12319,6 +12380,7 @@ window.deleteSelectedHHInvUnits = async ()=>{
     document.getElementById('hhInvTable')?.classList.remove('select-mode');
     updateDeleteSelectedHHBtn();
   }catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
+  finally{ endBulkOp('hh-delete'); hideBulkProgress(); }
 };
 
 document.getElementById('hhOwnerSelect')?.addEventListener('change', function(){
@@ -14702,6 +14764,7 @@ window.exportSelectedExSr = ()=>
 
 window.deleteSelectedExchangeUnits = async ()=>{
   if(!selectedExchangeIds.size) return;
+  if(isBulkOpRunning('ex-delete')){ toast('Already deleting — please wait for it to finish.','warn'); return; }
   const ids = [...selectedExchangeIds];
   const proceed = await showDangerousConfirm({
     title: `Delete ${ids.length} selected unit${ids.length!==1?'s':''}?`,
@@ -14709,9 +14772,13 @@ window.deleteSelectedExchangeUnits = async ()=>{
     okText: 'Delete Selected'
   });
   if(!proceed) return;
+  startBulkOp('ex-delete');
   try{
     const targets = ids.map(id=>exchangeData.find(x=>x.id===id)).filter(Boolean);
-    for(const t of targets) await moveToTrash('exchange_stock', t.id, t);
+    for(let i=0;i<targets.length;i++){
+      showBulkProgress('Deleting', i+1, targets.length);
+      await moveToTrash('exchange_stock', targets[i].id, targets[i]);
+    }
     // Linked Blue Book files follow their units into Trash too — same as
     // the single-unit delete path.
     for(const t of targets){ if(t.blueBookDocId) await trashLinkedBlueBook(t.blueBookDocId); }
@@ -14728,6 +14795,7 @@ window.deleteSelectedExchangeUnits = async ()=>{
     document.getElementById('exchangeTable')?.classList.remove('select-mode');
     updateDeleteSelectedExBtn();
   }catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
+  finally{ endBulkOp('ex-delete'); hideBulkProgress(); }
 };
 
 
@@ -15491,6 +15559,7 @@ window.toggleSelectAllExchangeSr = (checked)=>{
 
 window.deleteSelectedExchangeSrUnits = async ()=>{
   if(!selectedExchangeSrIds.size) return;
+  if(isBulkOpRunning('exsr-delete')){ toast('Already deleting — please wait for it to finish.','warn'); return; }
   const ids = [...selectedExchangeSrIds];
   const proceed = await showDangerousConfirm({
     title: `Delete ${ids.length} selected unit${ids.length!==1?'s':''}?`,
@@ -15498,9 +15567,13 @@ window.deleteSelectedExchangeSrUnits = async ()=>{
     okText: 'Delete Selected'
   });
   if(!proceed) return;
+  startBulkOp('exsr-delete');
   try{
     const targets = ids.map(id=>exchangeSrData.find(x=>x.id===id)).filter(Boolean);
-    for(const t of targets) await moveToTrash('exchange_stock_showroom', t.id, t);
+    for(let i=0;i<targets.length;i++){
+      showBulkProgress('Deleting', i+1, targets.length);
+      await moveToTrash('exchange_stock_showroom', targets[i].id, targets[i]);
+    }
     for(const t of targets){ if(t.blueBookDocId) await trashLinkedBlueBook(t.blueBookDocId); }
     const chunks = [];
     for(let i=0;i<ids.length;i+=400) chunks.push(ids.slice(i,i+400));
@@ -15515,6 +15588,7 @@ window.deleteSelectedExchangeSrUnits = async ()=>{
     document.getElementById('exchangeSrTable')?.classList.remove('select-mode');
     updateDeleteSelectedExSrBtn();
   }catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
+  finally{ endBulkOp('exsr-delete'); hideBulkProgress(); }
 };
 
 
@@ -16330,6 +16404,7 @@ window.toggleSelectAllReconStock = (checked)=>{
 
 window.deleteSelectedReconStockUnits = async ()=>{
   if(!selectedReconIds.size) return;
+  if(isBulkOpRunning('recon-delete')){ toast('Already deleting — please wait for it to finish.','warn'); return; }
   const ids = [...selectedReconIds];
   const proceed = await showDangerousConfirm({
     title: `Delete ${ids.length} selected unit${ids.length!==1?'s':''}?`,
@@ -16337,9 +16412,13 @@ window.deleteSelectedReconStockUnits = async ()=>{
     okText: 'Delete Selected'
   });
   if(!proceed) return;
+  startBulkOp('recon-delete');
   try{
     const targets = ids.map(id=>reconStockData.find(x=>x.id===id)).filter(Boolean);
-    for(const t of targets) await moveToTrash('recondition_stock', t.id, t);
+    for(let i=0;i<targets.length;i++){
+      showBulkProgress('Deleting', i+1, targets.length);
+      await moveToTrash('recondition_stock', targets[i].id, targets[i]);
+    }
     for(const t of targets){ if(t.blueBookDocId) await trashLinkedBlueBook(t.blueBookDocId); }
     const chunks = [];
     for(let i=0;i<ids.length;i+=400) chunks.push(ids.slice(i,i+400));
@@ -16354,6 +16433,7 @@ window.deleteSelectedReconStockUnits = async ()=>{
     document.getElementById('reconStockTable')?.classList.remove('select-mode');
     updateDeleteSelectedReconBtn();
   }catch(e){ toast('Delete failed: '+friendlyError(e),'err'); }
+  finally{ endBulkOp('recon-delete'); hideBulkProgress(); }
 };
 
 
