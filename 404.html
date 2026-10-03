@@ -5,29 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="robots" content="noindex"/>
 <title>Redirecting…</title>
-<!-- Any unknown / old link on this site lands here (GitHub Pages serves
-     404.html for every not-found path) and is sent straight to the app.
-     This file never needs editing again — it just forwards to "/", which
-     always serves the latest index.html. -->
+<!-- GitHub Pages shows this file for any path that doesn't exist.
+     It sends the visitor straight to the home page.
+     If the path is a poem name (e.g. /kafin), that poem opens on the home page. -->
 <script>
-  // Keep the reset handler working even if it's ever reached via 404:
-  // forward /reset (with or without query) to reset.html.
-  (function(){
-    var p = location.pathname || '';
-    if (/\/reset\/?$/.test(p)) { location.replace('/reset.html' + location.search); return; }
-    location.replace('/' + location.search);
-  })();
+(function(){
+  var poems=['the-gossip-rope','kinariyeko-phul','kafin','nachaheko-sangeet','ashru-bipanako','sukshma-spandan','euta-enako-duita-pratibimba'];
+  var slug=(location.pathname||'').replace(/^\/+|\/+$/g,'').replace(/^poems?\//,'').toLowerCase();
+  location.replace(poems.indexOf(slug)>-1 ? '/?poem='+slug : '/');
+})();
 </script>
 <meta http-equiv="refresh" content="0; url=/"/>
 <style>
-  body{font-family:'DM Sans',system-ui,sans-serif;background:#F1E9E6;color:#5A4740;
+  body{font-family:'Bricolage Grotesque',system-ui,-apple-system,'Segoe UI',sans-serif;background:#E4EAE9;color:#1C2A33;
        display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;text-align:center}
-  a{color:#5A4740;font-weight:700}
+  a{color:#B8233A;font-weight:700}
 </style>
 </head>
 <body>
   <div>
-    <p>Taking you to the panel…</p>
+    <p>Taking you home…</p>
     <p><a href="/">Continue</a></p>
   </div>
 </body>
