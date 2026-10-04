@@ -707,6 +707,7 @@
       box-shadow:0 -4px 20px rgba(0,49,53,.08);
     }
     .main-scroll{ padding-bottom:64px; }
+    .main-scroll > footer{ display:none; }
   }
 
   /* ── Topbar ── */
@@ -3007,7 +3008,7 @@
     <div class="main-col">
       <!-- TOPBAR -->
       <header class="topbar">
-        <button id="hamburgerOpen" onclick="toggleMobileMenu()" class="topbar-menu-btn">
+        <button id="hamburgerOpen" onclick="handleTopHamburger()" class="topbar-menu-btn">
           <i class="fas fa-bars text-sm"></i>
         </button>
 
@@ -22990,6 +22991,15 @@ document.addEventListener('keydown', (e)=>{
 function toggleMobileMenu(){
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+// The top hamburger used to always open the old plain sidebar overlay —
+// on mobile that meant two different "see everything" experiences (this
+// one, and the bottom bar's nicer More sheet). Routes to the same sheet
+// on mobile for one consistent way to navigate; desktop keeps the
+// original sidebar toggle since there's no bottom bar there.
+function handleTopHamburger(){
+  if(window.matchMedia('(max-width:768px)').matches){ openSectionsSheet(); }
+  else { toggleMobileMenu(); }
 }
 function closeMobileMenu(){
   document.getElementById('sidebar').classList.remove('open');
