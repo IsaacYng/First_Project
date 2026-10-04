@@ -19335,10 +19335,18 @@ window.calculateFinance=function(){
     ? (loanAmount*monthlyRate*Math.pow(1+monthlyRate,tenure))/(Math.pow(1+monthlyRate,tenure)-1)
     : 0;
 
-  const rawTotalDownpayment=dpAmountOnly+namsari+activeInsurance+emi+accCost+customerExtraAdv+serviceCharge;
-  const lastThreeDigits=rawTotalDownpayment%1000;
+  // Auto-rounding is computed on the auto-calculated amount only — NOT
+  // including the manual extra advance. If a manually-typed amount (say
+  // 1500, added to an already-clean 207,000 total) were included before
+  // rounding, the rounding step would push the result up to the next clean
+  // 1000 (209,000) instead of landing exactly on what was actually typed
+  // (208,500). The manual amount is added straight onto the already-rounded
+  // total afterward, so typing any number always lands exactly on
+  // (clean auto total + that number), precisely as entered.
+  const rawTotalDownpaymentAuto=dpAmountOnly+namsari+activeInsurance+emi+accCost+serviceCharge;
+  const lastThreeDigits=rawTotalDownpaymentAuto%1000;
   const autoRounding=lastThreeDigits>0?(1000-lastThreeDigits):0;
-  const finalTotalDP=rawTotalDownpayment+autoRounding;
+  const finalTotalDP=rawTotalDownpaymentAuto+autoRounding+customerExtraAdv;
 
   const totalAdvEmi=emi+autoRounding+customerExtraAdv;
   const dueEmi=(emi*tenure)-totalAdvEmi;
