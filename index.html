@@ -679,6 +679,15 @@
     @keyframes qsheetPop{ from{ transform:scale(.94) translateY(8px); opacity:0; } to{ transform:scale(1) translateY(0); opacity:1; } }
   }
 
+  /* ── Role-based visibility for mobile nav/sheets — reuses the existing
+     role-recondition body class loadProfile() already toggles for the
+     sidebar, so a Recondition ID sees the same restricted set everywhere
+     instead of the new mobile UI accidentally exposing sections it was
+     never meant to reach. ── */
+  .recon-only{ display:none !important; }
+  body.role-recondition .recon-hide{ display:none !important; }
+  body.role-recondition .recon-only{ display:flex !important; }
+
   /* ── Mobile bottom tab bar ── */
   .mobile-tab-bar{ display:none; }
   .mobile-tab{
@@ -2803,17 +2812,23 @@
          for on every section switch, so the active highlight here stays in
          sync automatically with zero JS changes needed. -->
     <nav id="mobileTabBar" class="mobile-tab-bar">
-      <button id="mNavDashboard" class="mobile-tab" onclick="switchSec('dashboard')">
+      <button id="mNavDashboard" class="mobile-tab recon-hide" onclick="switchSec('dashboard')">
         <i class="fas fa-gauge-high"></i><span>Home</span>
       </button>
-      <button id="mNavInv" class="mobile-tab" onclick="switchSec('inv')">
+      <button id="mNavInv" class="mobile-tab recon-hide" onclick="switchSec('inv')">
         <i class="fas fa-warehouse"></i><span>Inventory</span>
+      </button>
+      <button id="mNavReconStock" class="mobile-tab recon-only" onclick="switchSec('reconditionStock')">
+        <i class="fas fa-screwdriver-wrench"></i><span>Recon. Stock</span>
       </button>
       <button class="mobile-tab-fab" onclick="openCreateSheet()" aria-label="Create">
         <i class="fas fa-plus"></i>
       </button>
-      <button id="mNavFinanceTool" class="mobile-tab" onclick="switchSec('financeTool')">
+      <button id="mNavFinanceTool" class="mobile-tab recon-hide" onclick="switchSec('financeTool')">
         <i class="fas fa-calculator"></i><span>DP Alloc.</span>
+      </button>
+      <button id="mNavExchangeSr" class="mobile-tab recon-only" onclick="switchSec('exchangeSr')">
+        <i class="fas fa-shop"></i><span>Showroom Exc.</span>
       </button>
       <button class="mobile-tab" onclick="openSectionsSheet()">
         <i class="fas fa-ellipsis"></i><span>More</span>
@@ -2825,11 +2840,11 @@
       <div class="qsheet">
         <div class="qsheet-handle"></div>
         <div class="qsheet-title">Create</div>
-        <button class="qsheet-item" onclick="closeCreateSheet();switchSec('inv');openInvFormModal();">
+        <button class="qsheet-item recon-hide" onclick="closeCreateSheet();switchSec('inv');openInvFormModal();">
           <span class="qicon" style="background:#0FA4AF"><i class="fas fa-warehouse"></i></span>
           <span class="qtxt"><b>Add Unit</b><span>Inventory</span></span>
         </button>
-        <button class="qsheet-item" onclick="closeCreateSheet();switchSec('hhinv');openHHInvFormModal();">
+        <button class="qsheet-item recon-hide" onclick="closeCreateSheet();switchSec('hhinv');openHHInvFormModal();">
           <span class="qicon" style="background:#964734"><i class="fas fa-tents"></i></span>
           <span class="qtxt"><b>Add HH Unit</b><span>Mela / outdoor stock</span></span>
         </button>
@@ -2837,11 +2852,11 @@
           <span class="qicon" style="background:#298F60"><i class="fas fa-right-left"></i></span>
           <span class="qtxt"><b>Add Exchange Unit</b><span>Mela Exchange</span></span>
         </button>
-        <button class="qsheet-item" onclick="closeCreateSheet();switchSec('price');window.openMasterFormModal();">
+        <button class="qsheet-item recon-hide" onclick="closeCreateSheet();switchSec('price');window.openMasterFormModal();">
           <span class="qicon" style="background:#B5862E"><i class="fas fa-tags"></i></span>
           <span class="qtxt"><b>Add Model</b><span>Price List</span></span>
         </button>
-        <button class="qsheet-item" onclick="closeCreateSheet();switchSec('acc');window.openAccFormModal();">
+        <button class="qsheet-item recon-hide" onclick="closeCreateSheet();switchSec('acc');window.openAccFormModal();">
           <span class="qicon" style="background:#003135"><i class="fas fa-helmet-safety"></i></span>
           <span class="qtxt"><b>Add Accessory</b><span>Accessories catalog</span></span>
         </button>
@@ -2854,7 +2869,7 @@
         <div class="qsheet-handle"></div>
         <div class="qsheet-title">All sections</div>
         <div class="qsheet-grid">
-          <button class="qgitem" onclick="closeSectionsSheet();switchSec('dashboard')"><span class="qgicon"><i class="fas fa-gauge-high"></i></span><span>Dashboard</span></button>
+          <button class="qgitem recon-hide" onclick="closeSectionsSheet();switchSec('dashboard')"><span class="qgicon"><i class="fas fa-gauge-high"></i></span><span>Dashboard</span></button>
         </div>
         <div class="qsheet-group-label">Documents</div>
         <div class="qsheet-grid">
@@ -2863,23 +2878,23 @@
         </div>
         <div class="qsheet-group-label">Finance Tool</div>
         <div class="qsheet-grid">
-          <button class="qgitem" onclick="closeSectionsSheet();switchSec('financeTool')"><span class="qgicon"><i class="fas fa-calculator"></i></span><span>DP Allocations</span></button>
+          <button class="qgitem recon-hide" onclick="closeSectionsSheet();switchSec('financeTool')"><span class="qgicon"><i class="fas fa-calculator"></i></span><span>DP Allocations</span></button>
           <button class="qgitem" onclick="closeSectionsSheet();switchSec('sheetTool')"><span class="qgicon"><i class="fas fa-table"></i></span><span>EMI Rate Sheet</span></button>
-          <button class="qgitem" onclick="closeSectionsSheet();switchSec('fin')"><span class="qgicon"><i class="fas fa-percent"></i></span><span>HFL Finance</span></button>
+          <button class="qgitem recon-hide" onclick="closeSectionsSheet();switchSec('fin')"><span class="qgicon"><i class="fas fa-percent"></i></span><span>HFL Finance</span></button>
         </div>
         <div class="qsheet-group-label">Dealership</div>
         <div class="qsheet-grid">
           <button class="qgitem" onclick="closeSectionsSheet();switchSec('price')"><span class="qgicon"><i class="fas fa-tags"></i></span><span>Price List</span></button>
-          <button class="qgitem" onclick="closeSectionsSheet();switchSec('inv')"><span class="qgicon"><i class="fas fa-warehouse"></i></span><span>Inventory</span></button>
-          <button class="qgitem" onclick="closeSectionsSheet();switchSec('hhinv')"><span class="qgicon"><i class="fas fa-tents"></i></span><span>HH Inventory</span></button>
-          <button class="qgitem" onclick="closeSectionsSheet();switchSec('allinv')"><span class="qgicon"><i class="fas fa-layer-group"></i></span><span>All Inventory</span></button>
-          <button class="qgitem" onclick="closeSectionsSheet();switchSec('acc')"><span class="qgicon"><i class="fas fa-helmet-safety"></i></span><span>Accessories</span></button>
+          <button class="qgitem recon-hide" onclick="closeSectionsSheet();switchSec('inv')"><span class="qgicon"><i class="fas fa-warehouse"></i></span><span>Inventory</span></button>
+          <button class="qgitem recon-hide" onclick="closeSectionsSheet();switchSec('hhinv')"><span class="qgicon"><i class="fas fa-tents"></i></span><span>HH Inventory</span></button>
+          <button class="qgitem recon-hide" onclick="closeSectionsSheet();switchSec('allinv')"><span class="qgicon"><i class="fas fa-layer-group"></i></span><span>All Inventory</span></button>
+          <button class="qgitem recon-hide" onclick="closeSectionsSheet();switchSec('acc')"><span class="qgicon"><i class="fas fa-helmet-safety"></i></span><span>Accessories</span></button>
         </div>
         <div class="qsheet-group-label">Exchange</div>
         <div class="qsheet-grid">
           <button class="qgitem" onclick="closeSectionsSheet();switchSec('exchange')"><span class="qgicon"><i class="fas fa-right-left"></i></span><span>Mela Exchange</span></button>
           <button class="qgitem" onclick="closeSectionsSheet();switchSec('exchangeSr')"><span class="qgicon"><i class="fas fa-shop"></i></span><span>Showroom Exchange</span></button>
-          <button class="qgitem" onclick="closeSectionsSheet();switchSec('paymentLedger')"><span class="qgicon"><i class="fas fa-money-bill-wave"></i></span><span>Payment Ledger</span></button>
+          <button class="qgitem recon-hide" onclick="closeSectionsSheet();switchSec('paymentLedger')"><span class="qgicon"><i class="fas fa-money-bill-wave"></i></span><span>Payment Ledger</span></button>
           <button class="qgitem" onclick="closeSectionsSheet();switchSec('reconditionStock')"><span class="qgicon"><i class="fas fa-screwdriver-wrench"></i></span><span>Recondition Stock</span></button>
         </div>
         <div class="qsheet-group-label">Marketing</div>
@@ -2888,8 +2903,8 @@
         </div>
         <div class="qsheet-group-label">Reports</div>
         <div class="qsheet-grid">
-          <button class="qgitem" onclick="closeSectionsSheet();switchSec('stock')"><span class="qgicon"><i class="fas fa-file-lines"></i></span><span>Stock Report</span></button>
-          <button class="qgitem" onclick="closeSectionsSheet();switchSec('chalans')"><span class="qgicon"><i class="fas fa-file-invoice"></i></span><span>Chalan Records</span></button>
+          <button class="qgitem recon-hide" onclick="closeSectionsSheet();switchSec('stock')"><span class="qgicon"><i class="fas fa-file-lines"></i></span><span>Stock Report</span></button>
+          <button class="qgitem recon-hide" onclick="closeSectionsSheet();switchSec('chalans')"><span class="qgicon"><i class="fas fa-file-invoice"></i></span><span>Chalan Records</span></button>
           <button class="qgitem" onclick="closeSectionsSheet();switchSec('trash')"><span class="qgicon"><i class="fas fa-trash-can"></i></span><span>Trash</span></button>
         </div>
         <button class="qsheet-item" onclick="closeSectionsSheet();toggleMobileMenu()" style="margin-top:6px;border-top:1px solid var(--border-soft);padding-top:14px">
@@ -8203,7 +8218,7 @@ function setActiveTab(sec) {
     t.classList.add('text-slate-600','border-transparent');
   });
   const NAV_IDS = { financeTool:'navFinanceTool', sheetTool:'navSheetTool', dashboard:'navDashboard', price:'navPrice', inv:'navInv', hhinv:'navHHInv', allinv:'navAllInv', exchange:'navExchange', exchangeSr:'navExchangeSr', reconditionStock:'navReconStock', paymentLedger:'navPaymentLedger', customers:'navCustomers', fin:'navFin', acc:'navAcc', docs:'navDocs', storage:'navStorage', events:'navEvents', stock:'navStock', hhstock:'navHHStock', chalans:'navChalans', history:'navHistory', trash:'navTrash', important:'navImportant', modelAliases:'navModelAliases' };
-  const MNAV_IDS = { financeTool:'mNavFinanceTool', sheetTool:'mNavSheetTool', dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', hhstock:'mNavHHStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
+  const MNAV_IDS = { financeTool:'mNavFinanceTool', sheetTool:'mNavSheetTool', dashboard:'mNavDashboard', price:'mNavPrice', inv:'mNavInv', hhinv:'mNavHHInv', allinv:'mNavAllInv', exchange:'mNavExchange', exchangeSr:'mNavExchangeSr', reconditionStock:'mNavReconStock', customers:'mNavCustomers', fin:'mNavFin', acc:'mNavAcc', docs:'mNavDocs', storage:'mNavStorage', events:'mNavEvents', stock:'mNavStock', hhstock:'mNavHHStock', chalans:'mNavChalans', history:'mNavHistory', trash:'mNavTrash', important:'mNavImportant', modelAliases:'mNavModelAliases' };
   const tid = NAV_IDS[sec] || 'navStock';
   const mtid = MNAV_IDS[sec] || 'mNavStock';
   const tab = document.getElementById(tid);
