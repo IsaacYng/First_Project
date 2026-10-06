@@ -2503,7 +2503,6 @@
   .cb-amt{ width:20%; text-align:right; padding-right:10px; }
   .cb-total-lbl{ font-weight:700; font-size:15.5px; }
   .cb-total-val{ font-weight:700; font-size:15.5px; }
-  .chalan-position-spacer{ height:140mm; }
   /* ── Simple, clean JPG-exportable report card (not tied to print page size) ── */
   .jpg-report-paper{ font-family:'DM Sans',sans-serif; background:#fff; width:900px; padding:34px 38px; margin:0 auto; box-sizing:border-box; color:#0F172A; flex-shrink:0; }
   .jrp-head{ text-align:center; border-bottom:3px solid #0FA4AF; padding-bottom:14px; }
@@ -6549,12 +6548,12 @@
     </div>
     <div class="p-4 border-t border-slate-100 flex-shrink-0 flex flex-col gap-3">
       <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Print on this paper's:</span>
+        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Copies on this sheet:</span>
         <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
-          <button id="chalanPosTopBtn" onclick="window.setChalanPrintPosition('top')" class="chalan-pos-tab px-3 py-1 rounded-full text-xs font-bold transition-all active">Top Half</button>
-          <button id="chalanPosBottomBtn" onclick="window.setChalanPrintPosition('bottom')" class="chalan-pos-tab px-3 py-1 rounded-full text-xs font-bold transition-all">Bottom Half</button>
+          <button id="chalanCopy1Btn" onclick="window.setChalanCopyCount(1)" class="chalan-pos-tab px-3 py-1 rounded-full text-xs font-bold transition-all">1 Copy</button>
+          <button id="chalanCopy2Btn" onclick="window.setChalanCopyCount(2)" class="chalan-pos-tab px-3 py-1 rounded-full text-xs font-bold transition-all active">2 Copies</button>
         </div>
-        <span class="text-[11px] text-slate-400">Print Top, then feed the same sheet back in and print Bottom — one page, two Chalans.</span>
+        <span class="text-[11px] text-slate-400">Both copies print together on one sheet — no need to feed the paper back in.</span>
       </div>
       <div class="flex gap-2">
         <button onclick="window.closeChalanPreview()" class="flex-1 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-slate-300 transition-all">Close</button>
@@ -11057,7 +11056,7 @@ window.previewChalan = ()=>{
   const pModal = document.getElementById('chalanPreviewModal');
   pModal.classList.remove('hidden');
   pModal.classList.add('flex');
-  window.setChalanPrintPosition('top');
+  window.setChalanCopyCount(2);
 };
 
 // Shared by both a fresh Preview and a Re-print of an already-saved
@@ -11067,7 +11066,7 @@ window.previewChalan = ()=>{
 // built — used identically by the live iframe Preview and the real print
 // window, so there's exactly one design to keep in sync instead of two
 // copies quietly drifting apart from each other.
-function buildChalanDocumentHtml(content, position){
+function buildChalanDocumentHtml(content){
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -11084,6 +11083,11 @@ function buildChalanDocumentHtml(content, position){
      handles the real margin when actually printing, so doubling it here
      too would push everything in by 16mm on paper. */
   @media print{ body{ padding:0; } }
+  /* Multiple .chalan-copy blocks (when 2 copies are requested) stack here
+     in natural document order, separated by this dashed divider — both
+     come out of a single print pass now, instead of the old approach of
+     printing one copy plus ~140mm of reserved blank paper, then manually
+     re-feeding the same physical sheet to print the second into that gap. */
   .chalan-copy{ padding-bottom:6mm; margin-bottom:6mm; border-bottom:1px dashed #999; }
   .chalan-copy:last-child{ border-bottom:none; margin-bottom:0; }
   .chalan-head{ text-align:center; margin-bottom:3mm; }
@@ -11101,17 +11105,9 @@ function buildChalanDocumentHtml(content, position){
   .cb-amt{ width:20%; text-align:right; padding-right:10px; }
   .cb-total-lbl{ font-weight:700; font-size:14px; }
   .cb-total-val{ font-weight:700; font-size:14px; }
-  /* Top/Bottom print position — an A4 sheet is ~297mm tall and one Chalan
-     copy only needs about half of that, so printing the same physical
-     sheet twice (once for the top half, once for the bottom half after
-     it's fed back in) gets two Chalans out of one piece of paper instead
-     of wasting a full sheet per Chalan. This spacer just pushes the
-     content down when "Bottom" is selected; "Top" prints exactly where
-     it always has. */
-  .chalan-position-spacer{ height:140mm; }
 </style>
 </head>
-<body>${position==='bottom' ? '<div class="chalan-position-spacer"></div>' : ''}${content}</body>
+<body>${content}</body>
 </html>`;
 }
 
@@ -11119,7 +11115,9 @@ function buildChalanDocumentHtml(content, position){
 // this is the exact same document buildChalanDocumentHtml() would hand
 // to the print window, so the iframe is a true, native-scrollable,
 // native-zoomable preview rather than an approximation of one.
+let lastChalanFields = null;
 function renderChalanIntoWrappers(f){
+  lastChalanFields = f;
   const fields = {
     model: f.model, chassis: f.chassis, engine: f.engine, regNo: f.regNo,
     mfdDate: f.makeYear,
@@ -11136,11 +11134,18 @@ function renderChalanIntoWrappers(f){
   const tpl = document.getElementById('chalanCopyTemplate');
   const wrap = document.getElementById('chalanPrintWrapper');
   wrap.innerHTML = '';
-  const copy = tpl.content.cloneNode(true);
-  copy.querySelectorAll('[data-f]').forEach(el=>{
-    el.textContent = fields[el.dataset.f] ?? '';
-  });
-  wrap.appendChild(copy);
+  // Renders chalanCopyCount copies stacked in natural document flow — the
+  // existing dashed-line divider between .chalan-copy blocks separates them
+  // cleanly. This replaced printing one copy plus ~140mm of reserved blank
+  // paper, then physically re-feeding the same sheet to print the second
+  // copy into that gap — both copies now come out of a single print pass.
+  for(let i=0;i<chalanCopyCount;i++){
+    const copy = tpl.content.cloneNode(true);
+    copy.querySelectorAll('[data-f]').forEach(el=>{
+      el.textContent = fields[el.dataset.f] ?? '';
+    });
+    wrap.appendChild(copy);
+  }
   document.getElementById('chalanPreviewBody').innerHTML = wrap.innerHTML;
 }
 
@@ -11159,7 +11164,7 @@ window.reprintChalan = (id)=>{
   const pModal = document.getElementById('chalanPreviewModal');
   pModal.classList.remove('hidden');
   pModal.classList.add('flex');
-  window.setChalanPrintPosition('top');
+  window.setChalanCopyCount(1);
 };
 
 window.closeChalanPreview = ()=>{
@@ -11175,30 +11180,15 @@ window.closeChalanPreview = ()=>{
 // stylesheet sidesteps that completely: there's nothing else on the page
 // for anything to go wrong with.
 let isPrintingChalan = false;
-let chalanPrintPosition = 'top';
-window.setChalanPrintPosition = (pos)=>{
-  chalanPrintPosition = pos;
-  document.getElementById('chalanPosTopBtn')?.classList.toggle('active', pos==='top');
-  document.getElementById('chalanPosBottomBtn')?.classList.toggle('active', pos==='bottom');
-  // Mirror the choice in the on-screen Preview itself — seeing the blank
-  // gap before the Chalan (or not) is what actually prevents printing to
-  // the wrong half by mistake; the toggle buttons alone aren't enough.
-  const previewBody = document.getElementById('chalanPreviewBody');
-  if(previewBody){
-    let spacer = previewBody.querySelector('.chalan-position-spacer');
-    if(pos==='bottom'){
-      if(!spacer){
-        spacer = document.createElement('div');
-        spacer.className = 'chalan-position-spacer';
-        previewBody.insertBefore(spacer, previewBody.firstChild);
-      }
-    } else if(spacer){
-      spacer.remove();
-    }
-  }
-  // Jump the scroll back to the top whenever the choice changes, so
-  // switching to Bottom doesn't leave the view sitting wherever it
-  // happened to be scrolled to before.
+let chalanCopyCount = 2;
+window.setChalanCopyCount = (n)=>{
+  chalanCopyCount = n;
+  document.getElementById('chalanCopy1Btn')?.classList.toggle('active', n===1);
+  document.getElementById('chalanCopy2Btn')?.classList.toggle('active', n===2);
+  // Re-render the preview with the new copy count — needs the same fields
+  // that were last used, so a reprint or a toggle flip both regenerate
+  // from the same data without the caller needing to pass it again.
+  if(lastChalanFields) renderChalanIntoWrappers(lastChalanFields);
   const viewport = document.getElementById('chalanPreviewViewport');
   if(viewport) viewport.scrollTop = 0;
 };
@@ -11232,7 +11222,7 @@ window.printChalanNow = async ()=>{
 
   if(win.closed){ toast('Print window was closed before it could load — please try again.','err'); isPrintingChalan = false; return; }
   win.document.open();
-  win.document.write(buildChalanDocumentHtml(content, chalanPrintPosition));
+  win.document.write(buildChalanDocumentHtml(content));
   win.document.close();
   let printed = false;
   const doPrint = () => {
