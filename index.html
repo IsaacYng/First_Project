@@ -2486,8 +2486,22 @@
      exactly inside printChalanNow's popup-window stylesheet so preview
      and print never quietly drift apart from each other. ── */
   #chalanPrintWrapper{ display:none; }
-  .chalan-copy{ font-family:'Times New Roman',Georgia,serif; color:#000; padding-bottom:6mm; margin-bottom:6mm; border-bottom:1px dashed #999; }
-  .chalan-copy:last-child{ border-bottom:none; margin-bottom:0; }
+  /* Each copy is a fixed 140.5mm box — exactly half of the 281mm printable
+     area left after the @page's 8mm top+bottom margins (297mm - 16mm = 281mm,
+     halved = 140.5mm). That's what actually fixes the "cut it in half and
+     the two pieces come out different sizes" problem: a straight cut at the
+     paper's true physical center (148.5mm from the edge) now always lands
+     exactly on the line between copy 1 and copy 2, regardless of how much
+     content either one has. The content is vertically centered inside that
+     fixed box so it sits balanced in its half rather than pinned to the top
+     with a loose gap below it. */
+  .chalan-copy{
+    font-family:'Times New Roman',Georgia,serif; color:#000;
+    height:140.5mm; box-sizing:border-box;
+    display:flex; flex-direction:column; justify-content:center;
+    border-bottom:1px dashed #999;
+  }
+  .chalan-copy:last-child{ border-bottom:none; }
   .chalan-head{ text-align:center; margin-bottom:4mm; }
   .chalan-company{ font-size:23px; font-weight:700; }
   .chalan-loc{ font-size:13px; margin-top:2px; }
@@ -11083,28 +11097,38 @@ function buildChalanDocumentHtml(content){
      handles the real margin when actually printing, so doubling it here
      too would push everything in by 16mm on paper. */
   @media print{ body{ padding:0; } }
-  /* Multiple .chalan-copy blocks (when 2 copies are requested) stack here
-     in natural document order, separated by this dashed divider — both
-     come out of a single print pass now, instead of the old approach of
-     printing one copy plus ~140mm of reserved blank paper, then manually
-     re-feeding the same physical sheet to print the second into that gap. */
-  .chalan-copy{ padding-bottom:6mm; margin-bottom:6mm; border-bottom:1px dashed #999; }
-  .chalan-copy:last-child{ border-bottom:none; margin-bottom:0; }
-  .chalan-head{ text-align:center; margin-bottom:3mm; }
-  .chalan-company{ font-size:20px; font-weight:700; }
-  .chalan-loc{ font-size:12px; margin-top:2px; }
-  .chalan-title{ font-size:14px; font-weight:700; margin-top:3px; text-decoration:underline; }
-  .chalan-meta-table{ width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:3mm; font-size:13px; }
-  .chalan-meta-table td{ border:1px solid #000; padding:3px 8px; color:#000; }
-  .chalan-bike-table{ width:100%; border-collapse:collapse; border:1px solid #000; font-size:13px; }
-  .chalan-bike-table td{ border:1px solid #000; padding:3px 8px; color:#000; }
+  /* Each copy is a fixed 140.5mm box — exactly half of the 281mm printable
+     area left after the @page's 8mm top+bottom margins (297mm - 16mm = 281mm,
+     halved = 140.5mm). A straight cut at the paper's true physical center
+     (148.5mm from the edge) now always lands exactly on the line between
+     copy 1 and copy 2, giving two equal halves regardless of how much
+     content either copy actually has — content is vertically centered
+     inside that fixed box rather than pinned to the top with a loose gap
+     below it. This stays byte-for-byte identical to the on-screen preview's
+     version of this CSS on purpose, so the two can't quietly drift apart
+     again the way they had before (preview had kept the original larger
+     font sizes while this print version had been shrunk down separately). */
+  .chalan-copy{
+    height:140.5mm; box-sizing:border-box;
+    display:flex; flex-direction:column; justify-content:center;
+    border-bottom:1px dashed #999;
+  }
+  .chalan-copy:last-child{ border-bottom:none; }
+  .chalan-head{ text-align:center; margin-bottom:4mm; }
+  .chalan-company{ font-size:23px; font-weight:700; }
+  .chalan-loc{ font-size:13px; margin-top:2px; }
+  .chalan-title{ font-size:16px; font-weight:700; margin-top:4px; text-decoration:underline; }
+  .chalan-meta-table{ width:100%; border-collapse:collapse; border:1px solid #000; margin-bottom:4mm; font-size:14.5px; }
+  .chalan-meta-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
+  .chalan-bike-table{ width:100%; border-collapse:collapse; border:1px solid #000; font-size:14.5px; }
+  .chalan-bike-table td{ border:1px solid #000; padding:5px 8px; color:#000; }
   .cb-sn{ width:7%; text-align:center; }
   .cb-label{ width:24%; white-space:nowrap; }
   .cb-colon{ width:3%; text-align:center; }
   .cb-value{ width:46%; }
   .cb-amt{ width:20%; text-align:right; padding-right:10px; }
-  .cb-total-lbl{ font-weight:700; font-size:14px; }
-  .cb-total-val{ font-weight:700; font-size:14px; }
+  .cb-total-lbl{ font-weight:700; font-size:15.5px; }
+  .cb-total-val{ font-weight:700; font-size:15.5px; }
 </style>
 </head>
 <body>${content}</body>
