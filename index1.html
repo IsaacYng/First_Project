@@ -2992,6 +2992,63 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
 #secInv .yng-card-shell{ border-radius:20px !important; }
 </style>
 
+
+<style id="v5-fix-clipping">
+/* ══ V5 — Photo ma dekhiyeko 3 ota problem ko fix ══ */
+/* 1) Stock card le dropdown katdaina — overflow visible, table le afai scroll garcha */
+.inv-stock-card{ overflow:visible !important; border-radius:24px !important; }
+.inv-stock-card > .overflow-x-auto, .inv-stock-card .overflow-x-auto{ overflow-x:auto !important; border-radius:0 0 24px 24px; }
+/* 2) Model dropdown — desktop: button sanga align, mobile: bottom-sheet (katai katidaina) */
+#invModelFilterWrap{ position:relative; }
+.model-filter-menu{ left:0 !important; right:auto !important; width:280px !important; max-width:min(280px, calc(100vw - 32px)) !important; }
+.model-filter-menu .model-filter-option{ white-space:normal !important; overflow:visible !important; text-overflow:clip !important; line-height:1.35; }
+@media (max-width:768px){
+  .model-filter-menu{
+    position:fixed !important; left:12px !important; right:12px !important;
+    top:auto !important; bottom:86px !important; width:auto !important; max-width:none !important;
+    max-height:48vh !important; border-radius:20px !important; padding:8px !important;
+    box-shadow:0 24px 60px rgba(0,0,0,.22) !important; z-index:90 !important;
+  }
+  .model-filter-menu .model-filter-option{ padding:12px 12px !important; font-size:14px !important; }
+}
+/* 3) Area select (native) — mobile ma grid bhitra atyena, full width */
+#invAreaFilterWrap{ min-width:0 !important; width:100%; }
+#invAreaFilterWrap select{ min-width:0 !important; width:100% !important; max-width:none !important; }
+#invModelFilterWrap{ min-width:0 !important; width:100%; }
+#invModelFilterWrap .model-filter-btn{ min-width:0 !important; width:100% !important; max-width:none !important; }
+/* 4) Status tabs — mobile ma 3x2 grid, katai katidaina, scroll garnu pardaina */
+@media (max-width:640px){
+  .inv-toolbar-tabs{ display:grid !important; grid-template-columns:1fr 1fr 1fr !important; overflow:visible !important; gap:6px !important; }
+  .inv-toolbar-tabs .inv-status-tab{ justify-content:center !important; padding:9px 6px !important; font-size:12px !important; }
+  .inv-toolbar-tabs .inv-status-tab .pill-count{ padding:1px 6px !important; }
+}
+/* 5) Title + Add/Export — mobile ma 2 row: title mathi, Add+Export tala side-by-side (Export kahilyai haraudaina) */
+@media (max-width:640px){
+  .inv-toolbar-top{ flex-direction:column !important; align-items:stretch !important; gap:12px !important; }
+  .inv-toolbar-primary{ display:grid !important; grid-template-columns:1fr 1fr !important; width:100% !important; gap:8px !important; }
+  .inv-toolbar-primary .inv-btn{ width:100% !important; padding:12px 10px !important; }
+}
+/* 6) Filters — mobile ma Manage Areas full-width, eklai adha ma basdaina */
+@media (max-width:640px){
+  .inv-toolbar-filters{ display:grid !important; grid-template-columns:1fr 1fr !important; }
+  .inv-toolbar-filters .inv-manage-areas{ grid-column:1 / -1 !important; justify-content:center !important; }
+  .inv-search-slot{ grid-column:1 / -1 !important; }
+  .inv-search-slot #invSearch{ font-size:13px !important; }
+}
+/* 7) Tools row — mobile ma wrap, katai katidaina */
+.inv-toolbar-tools{ flex-wrap:wrap !important; }
+.inv-toolbar-tools .inv-tool-btn{ flex-shrink:0; }
+/* 8) Tala ko dock le table nachopne — content lai thulo bottom padding */
+@media (max-width:768px){
+  .main-scroll{ padding-bottom:150px !important; }
+  .main-scroll > div{ padding-bottom:150px !important; }
+  #secInv{ padding-bottom:20px !important; }
+  .inv-stock-card{ margin-bottom:20px !important; }
+}
+/* 9) Search dropdown (invSearchDropdown) pani card le katne chaina */
+#invSearchDropdown{ z-index:60 !important; }
+</style>
+
 </head>
 <body class="bg-[#F4F5F7] text-slate-700 min-h-screen">
 
@@ -3724,7 +3781,7 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
       </div>
 
       <!-- Inv Table -->
-      <div class="yng-card-shell overflow-hidden">
+      <div class="yng-card-shell inv-stock-card">
         <div class="inv-toolbar">
           <!-- Row 1 — Title + Primary actions (Add Unit always visible, top-right) -->
           <div class="inv-toolbar-top">
@@ -3766,7 +3823,7 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
             <button onclick="openAreaManager()" class="inv-btn inv-btn-ghost inv-manage-areas"><i class="fas fa-warehouse" style="color:#298F60"></i><span>Manage Areas</span></button>
             <div class="inv-search-slot"><div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
             <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-            <input type="text" id="invSearch" autocomplete="off" placeholder="Search chassis, engine, model, reg no, customer…"
+            <input type="text" id="invSearch" autocomplete="off" placeholder="Search chassis, engine, model…"
               class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-8 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
             <button id="invSearchClear" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 text-xs"><i class="fas fa-circle-xmark"></i></button>
             <div id="invSearchDropdown" class="hidden absolute z-40 top-[calc(100%+6px)] left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto"></div>
