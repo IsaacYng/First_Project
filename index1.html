@@ -2779,6 +2779,34 @@ input:focus, select:focus, textarea:focus{ border-color:#FF4D00 !important; box-
 /* Toast + modals keep new radius */
 #toast{ border-radius:16px !important; }
 #sectionsSheetOverlay{ display:none !important; } /* All sections sheet removed — app opens direct to Dashboard */
+/* ── Dashboard V2 — img jastai layout ── */
+.v2-dash-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
+.v2-dash-greet{ font-family:'Sora',sans-serif; font-size:32px; font-weight:800; letter-spacing:-.02em; color:#111827; line-height:1.1; }
+.v2-dash-date{ font-size:13px; font-weight:600; color:#6B7280; margin-top:4px; }
+.v2-dash-date:empty{ display:none; }
+.v2-dash-sub{ font-size:14px; color:#374151; margin-top:4px; }
+.v2-dash-add{ background:#FF4D00; color:#fff; border:none; border-radius:999px; padding:12px 20px; font-weight:700; font-size:14px; cursor:pointer; box-shadow:0 8px 20px rgba(255,77,0,.3); white-space:nowrap; display:flex; align-items:center; gap:6px; }
+.v2-dash-add:hover{ background:#E84400; }
+.v2-dash-cards{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+@media (max-width:900px){ .v2-dash-cards{ grid-template-columns:1fr 1fr; } }
+@media (max-width:520px){ .v2-dash-cards{ grid-template-columns:1fr; } .v2-dash-greet{ font-size:26px; } }
+.v2-dash-card{ background:#fff; border:1px solid #E9EBEF; border-radius:20px; padding:20px; box-shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.04); }
+.v2-dash-card-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+.v2-dash-label{ font-size:13px; font-weight:600; color:#111827; }
+.v2-dash-icon{ width:36px; height:36px; border-radius:10px; background:#FFF1EB; color:#FF4D00; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.v2-dash-value{ font-family:'Sora',sans-serif; font-size:32px; font-weight:800; color:#111827; line-height:1.1; margin-top:14px; letter-spacing:-.02em; }
+.v2-dash-trend{ font-size:12px; color:#6B7280; margin-top:8px; font-weight:600; }
+.v2-dash-trend-txt{ color:#6B7280; }
+.v2-dash-grid2{ display:grid; grid-template-columns:1.6fr 1fr; gap:16px; margin-bottom:16px; }
+.v2-dash-grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+@media (max-width:900px){ .v2-dash-grid2, .v2-dash-grid3{ grid-template-columns:1fr; } }
+.v2-dash-card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:12px; }
+.v2-dash-h2{ font-family:'Sora',sans-serif; font-size:18px; font-weight:700; color:#111827; letter-spacing:-.01em; }
+.v2-dash-small{ font-size:12px; color:#9CA3AF; font-weight:600; margin-top:2px; }
+.v2-dash-link{ background:none; border:none; color:#FF4D00; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.v2-dash-chart-card{ overflow:hidden; }
+#dashSalesTrendChart{ min-height:140px; }
+
 </style>
 
 </head>
@@ -3118,17 +3146,9 @@ input:focus, select:focus, textarea:focus{ border-color:#FF4D00 !important; box-
 
     <!-- ═══ DASHBOARD ═══ -->
     <div class="sec-panel active" id="secDashboard">
-      <!-- Greeting — renderGreeting() only ever touches text inside these
-           three ids, never this wrapper. -->
-      <div id="greetingBanner" class="mb-5">
-        <div id="greetingIcon" class="hidden"><i class="fas fa-sun"></i></div>
-        <div id="greetingText" class="section-title text-3xl leading-none">Good Morning, Admin!</div>
-        <div id="greetingDate" class="text-sm text-slate-400 font-semibold mt-1"></div>
-      </div>
-
       <!-- Needs Attention — quiet until there's actually something to act on -->
       <div id="dashAttentionWrap" class="hidden mb-5">
-        <div id="dashMismatchAlertCard" class="hidden sm-card p-4 flex items-center gap-3 cursor-pointer" style="border-left:3px solid #964734" onclick="window.switchSec('modelAliases')">
+        <div id="dashMismatchAlertCard" class="hidden sm-card p-4 flex items-center gap-3 cursor-pointer" style="border-left:3px solid #FF4D00" onclick="window.switchSec('modelAliases')">
           <div class="w-9 h-9 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0"><i class="fas fa-code-compare text-amber-600 text-sm"></i></div>
           <div class="flex-1">
             <div class="text-sm font-bold text-slate-800">Model Mismatches need review</div>
@@ -3138,87 +3158,73 @@ input:focus, select:focus, textarea:focus{ border-color:#FF4D00 !important; box-
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <!-- Left column -->
-        <div class="lg:col-span-2 flex flex-col gap-5">
-
-          <!-- Overview -->
-          <div class="sm-card p-6">
-            <div class="flex items-center justify-between mb-5">
-              <div class="section-title text-2xl">Overview</div>
-              <span class="text-xs font-bold text-slate-400 bg-slate-50 border border-slate-100 rounded-full px-3 py-1.5">This month</span>
-            </div>
-            <div class="grid grid-cols-2 gap-6">
-              <div>
-                <div class="flex items-center gap-1.5 text-slate-400 text-xs font-bold uppercase tracking-wide mb-2"><i class="fas fa-motorcycle"></i> Units Sold</div>
-                <div class="flex items-end gap-2 flex-wrap">
-                  <div class="sm-stat-value" id="dashSoldMonthCount">0</div>
-                  <span id="dashSoldTrend"></span>
-                </div>
-              </div>
-              <div>
-                <div class="flex items-center gap-1.5 text-slate-400 text-xs font-bold uppercase tracking-wide mb-2"><i class="fas fa-sack-dollar"></i> Revenue</div>
-                <div class="flex items-end gap-2 flex-wrap">
-                  <div class="sm-stat-value" style="font-size:2rem" id="dashRevenueMonth">Rs. 0</div>
-                  <span id="dashRevenueTrend"></span>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-6 pt-5 border-t border-slate-100">
-              <div class="text-base font-extrabold text-slate-800" id="dashSoldHeadline">0 units sold this month!</div>
-              <p class="text-xs text-slate-400 mt-0.5">Your most recent customers, from Chalan records.</p>
-              <div class="flex items-start gap-4 mt-4 flex-wrap" id="dashRecentCustomers"></div>
-            </div>
-          </div>
-
-          <!-- Compact secondary stats -->
-          <div class="sm-card p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div class="cursor-pointer" onclick="window.switchSec('price')">
-              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Models</div>
-              <div class="text-xl font-black text-slate-800 mt-0.5" id="dashModelsCount">0</div>
-            </div>
-            <div class="cursor-pointer" onclick="window.switchSec('inv')">
-              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Available Units</div>
-              <div class="text-xl font-black text-slate-800 mt-0.5" id="dashAvailableCount">0</div>
-            </div>
-            <div class="cursor-pointer" onclick="window.switchSec('chalans')">
-              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Chalans This Month</div>
-              <div class="text-xl font-black text-slate-800 mt-0.5" id="dashChalanMonthCount">0</div>
-            </div>
-            <div class="cursor-pointer" onclick="window.switchSec('exchange')">
-              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Exchange In Stock</div>
-              <div class="text-xl font-black text-slate-800 mt-0.5" id="dashExchangeCount">0</div>
-            </div>
-          </div>
-
-          <!-- Sales Trend -->
-          <div class="sm-card p-6">
-            <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
-              <div class="section-title text-2xl">Sales Trend</div>
-              <span id="dashTopModelChip" class="text-[11px] font-bold text-slate-500 bg-slate-50 border border-slate-100 rounded-full px-3 py-1.5"></span>
-            </div>
-            <div class="text-xs text-slate-400 font-semibold mb-3">Last 6 months</div>
-            <div class="sm-chart-total mb-2" id="dashTrendTotal">0 units sold</div>
-            <div id="dashSalesTrendChart"></div>
-          </div>
+      <!-- Header — img jastai: Greeting + Add button -->
+      <div id="greetingBanner" class="v2-dash-head">
+        <div class="min-w-0">
+          <div id="greetingIcon" class="hidden"><i class="fas fa-sun"></i></div>
+          <div class="v2-dash-greet"><span id="greetingText" class="section-title">Good Morning, Admin!</span> <span aria-hidden="true">👋</span></div>
+          <div id="greetingDate" class="v2-dash-date"></div>
+          <div class="v2-dash-sub">Here&rsquo;s what&rsquo;s happening at Samriddhi &amp; Brothers today</div>
         </div>
+        <button onclick="openCreateSheet()" class="v2-dash-add"><span aria-hidden="true">+</span> Add New Order</button>
+      </div>
 
-        <!-- Right column -->
-        <div class="flex flex-col gap-5">
-          <div class="sm-card p-5">
-            <div class="section-title text-xl mb-3">Business Summary</div>
-            <div id="dashBusinessSummary" class="flex flex-col gap-4"></div>
+      <!-- 4 stat cards — img jastai row -->
+      <div class="v2-dash-cards">
+        <div class="v2-dash-card">
+          <div class="v2-dash-card-top"><span class="v2-dash-label">Units Sold</span><span class="v2-dash-icon"><i class="fas fa-motorcycle"></i></span></div>
+          <div class="v2-dash-value" id="dashSoldMonthCount">0</div>
+          <div class="v2-dash-trend"><span id="dashSoldTrend"></span><span class="v2-dash-trend-txt"> this month</span></div>
+        </div>
+        <div class="v2-dash-card">
+          <div class="v2-dash-card-top"><span class="v2-dash-label">Revenue</span><span class="v2-dash-icon"><i class="fas fa-sack-dollar"></i></span></div>
+          <div class="v2-dash-value" id="dashRevenueMonth">Rs. 0</div>
+          <div class="v2-dash-trend"><span id="dashRevenueTrend"></span><span class="v2-dash-trend-txt"> this month</span></div>
+        </div>
+        <div class="v2-dash-card">
+          <div class="v2-dash-card-top"><span class="v2-dash-label">Inventory in Stock</span><span class="v2-dash-icon"><i class="fas fa-warehouse"></i></span></div>
+          <div class="v2-dash-value" id="dashAvailableCount">0</div>
+          <div class="v2-dash-trend"><span class="v2-dash-trend-txt"><b id="dashModelsCount">0</b> models in Price List</span></div>
+        </div>
+        <div class="v2-dash-card">
+          <div class="v2-dash-card-top"><span class="v2-dash-label">Chalans This Month</span><span class="v2-dash-icon"><i class="fas fa-file-invoice"></i></span></div>
+          <div class="v2-dash-value" id="dashChalanMonthCount">0</div>
+          <div class="v2-dash-trend"><span class="v2-dash-trend-txt">Exchange in stock: <b id="dashExchangeCount">0</b></span></div>
+        </div>
+      </div>
+
+      <!-- Sales over time + Recent Activity — img jastai -->
+      <div class="v2-dash-grid2">
+        <div class="v2-dash-card v2-dash-chart-card">
+          <div class="v2-dash-card-head">
+            <div><div class="v2-dash-h2">Sales over time</div><div class="v2-dash-small">Last 6 months</div></div>
+            <span id="dashTopModelChip" class="text-[11px] font-bold text-slate-500 bg-slate-50 border border-slate-100 rounded-full px-3 py-1.5"></span>
           </div>
-          <div class="sm-card p-5">
-            <div class="section-title text-xl mb-3">Top Models</div>
-            <div id="dashTopModels"></div>
-            <button onclick="window.switchSec('price')" class="w-full mt-3 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:border-bajaj-blue hover:text-bajaj-blue transition-all">Full Price List</button>
-          </div>
-          <div class="sm-card p-5">
-            <div class="section-title text-xl mb-3">Recent Activity</div>
-            <div id="dashRecentActivity" class="flex flex-col gap-3"></div>
-          </div>
+          <div class="sm-chart-total mb-2" id="dashTrendTotal">0 units sold</div>
+          <div id="dashSalesTrendChart"></div>
+        </div>
+        <div class="v2-dash-card">
+          <div class="v2-dash-card-head"><div class="v2-dash-h2">Recent Activity</div><button onclick="window.switchSec('chalans')" class="v2-dash-link">View all &rarr;</button></div>
+          <div id="dashRecentActivity" class="flex flex-col gap-3"></div>
+        </div>
+      </div>
+
+      <!-- Overview + Business Summary + Top Models -->
+      <div class="v2-dash-grid3">
+        <div class="v2-dash-card">
+          <div class="v2-dash-h2">Overview</div>
+          <div class="text-base font-extrabold text-slate-800 mt-2" id="dashSoldHeadline">0 units sold this month!</div>
+          <p class="text-xs text-slate-400 mt-0.5">Your most recent customers, from Chalan records.</p>
+          <div class="flex items-start gap-4 mt-4 flex-wrap" id="dashRecentCustomers"></div>
+        </div>
+        <div class="v2-dash-card">
+          <div class="v2-dash-h2">Business Summary</div>
+          <div id="dashBusinessSummary" class="flex flex-col gap-4 mt-3"></div>
+        </div>
+        <div class="v2-dash-card">
+          <div class="v2-dash-h2">Top Models</div>
+          <div id="dashTopModels" class="mt-3"></div>
+          <button onclick="window.switchSec('price')" class="w-full mt-3 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:border-bajaj-blue hover:text-bajaj-blue transition-all">Full Price List</button>
         </div>
       </div>
     </div>
