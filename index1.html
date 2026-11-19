@@ -1,27 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style>
+<head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no"/>
@@ -2807,6 +2786,132 @@ input:focus, select:focus, textarea:focus{ border-color:#FF4D00 !important; box-
 .v2-dash-chart-card{ overflow:hidden; }
 #dashSalesTrendChart{ min-height:140px; }
 
+</style>
+
+
+<style id="v3-new-uiux">
+/* ═══════════════════════════════════════════════════════════════
+   V3 — FULL NEW UI/UX. Purano dense/grey look hatayo.
+   New language: Warm paper bg, white cards 24px, black primary,
+   orange accent only for highlights, big type, airy spacing,
+   floating mobile dock, pill tabs, soft tables.
+   Sits AFTER all old CSS + V2, so it wins everywhere.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --bg-page:#F6F6F4; --bg-surface:#fff; --bg-surface-2:#F1F1EE; --bg-surface-3:#E9E9E6;
+  --border:#ECECEA; --border-soft:#F0F0EE; --border-strong:#DDDAD6;
+  --text-primary:#191919; --text-secondary:#3D3D3D; --text-tertiary:#6B6B66; --text-muted:#8A8A85; --text-faint:#B8B8B2;
+  --brand:#FF4D00; --brand-dark:#C23300; --brand-soft-bg:#FFF1EB;
+  --ink-black:#111111;
+}
+html,body{ background:#F6F6F4 !important; color:#191919 !important; font-family:'Plus Jakarta Sans',system-ui,sans-serif !important; }
+body{ line-height:1.5; }
+*::-webkit-scrollbar{ width:8px; height:8px; }
+*::-webkit-scrollbar-thumb{ background:#DDDAD6; border-radius:99px; }
+/* — Layout: airy — */
+.main-scroll{ padding:0 !important; }
+.main-scroll > div{ padding:28px !important; max-width:1280px !important; }
+@media (max-width:768px){ .main-scroll > div{ padding:18px 16px 110px !important; } }
+.sec-panel{ animation:v3Fade .35s ease both; }
+@keyframes v3Fade{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+.section-title{ font-family:'Sora',sans-serif !important; font-size:28px !important; line-height:1.15 !important; letter-spacing:-.03em !important; color:#191919 !important; font-weight:700 !important; }
+.section-label, .eyebrow{ font-size:11px !important; letter-spacing:.14em !important; color:#FF4D00 !important; }
+/* — Sidebar: white, airy, black active — */
+.sidebar{ background:#fff !important; border-right:1px solid #ECECEA !important; width:280px !important; }
+.sidebar-brand{ border-bottom:1px solid #F0F0EE !important; padding:22px 20px !important; }
+.sidebar-brand *{ color:#191919 !important; }
+.sidebar-nav{ padding:18px 14px !important; gap:4px !important; }
+.sidebar-section-label{ color:#8A8A85 !important; font-size:10px !important; letter-spacing:.16em !important; padding:16px 12px 8px !important; }
+.sidebar-link{ color:#3D3D3D !important; border-radius:14px !important; padding:12px 14px !important; font-size:14px !important; font-weight:600 !important; }
+.sidebar-link i{ color:#8A8A85 !important; font-size:15px !important; }
+.sidebar-link:hover{ background:#F6F6F4 !important; color:#111 !important; }
+.sidebar-link.bg-blue-50{ background:#111 !important; color:#fff !important; box-shadow:0 10px 24px rgba(0,0,0,.18) !important; }
+.sidebar-link.bg-blue-50 i{ color:#fff !important; }
+.sidebar-foot{ border-top:1px solid #F0F0EE !important; padding:16px !important; }
+.sidebar-logout-btn{ color:#6B6B66 !important; border-radius:14px !important; }
+/* — Topbar: clean, tall, pill search — */
+.topbar{ background:rgba(246,246,244,.85) !important; backdrop-filter:blur(14px); border-bottom:1px solid #ECECEA !important; height:76px !important; padding:0 28px !important; }
+@media (max-width:768px){ .topbar{ padding:0 16px !important; height:64px !important; } }
+.topbar-title .heading{ font-family:'Sora',sans-serif !important; font-size:20px !important; font-weight:700 !important; letter-spacing:-.02em !important; }
+.topbar-menu-btn{ width:42px !important; height:42px !important; border-radius:14px !important; background:#fff !important; border:1px solid #ECECEA !important; color:#191919 !important; }
+.topbar-search{ background:#fff !important; border:1px solid #ECECEA !important; border-radius:999px !important; padding:10px 16px !important; width:280px !important; font-size:14px !important; box-shadow:0 1px 2px rgba(0,0,0,.03) !important; }
+.topbar-icon-btn{ width:42px !important; height:42px !important; border-radius:14px !important; background:#fff !important; border:1px solid #ECECEA !important; }
+/* — Cards: 24px, soft, airy — */
+.sm-card, .yng-card-shell, .cloud-card, .calc-card, .v2-dash-card{ background:#fff !important; border:1px solid #ECECEA !important; border-radius:24px !important; box-shadow:0 1px 2px rgba(0,0,0,.03), 0 12px 32px rgba(0,0,0,.04) !important; padding:24px !important; }
+.sm-card:hover, .yng-card-shell:hover{ box-shadow:0 4px 8px rgba(0,0,0,.04), 0 16px 40px rgba(0,0,0,.06) !important; }
+.sm-stat-value{ font-family:'Sora',sans-serif !important; letter-spacing:-.02em !important; }
+/* — Buttons: black primary, white secondary, orange accent — */
+.cta-primary, .login-cta, .v2-dash-add{ background:#111 !important; color:#fff !important; border-radius:999px !important; padding:12px 22px !important; font-weight:700 !important; font-size:14px !important; box-shadow:0 8px 20px rgba(0,0,0,.18) !important; border:none !important; }
+.cta-primary:hover, .login-cta:hover{ background:#000 !important; transform:translateY(-1px); }
+.cta-secondary{ background:#fff !important; border:1px solid #ECECEA !important; color:#191919 !important; border-radius:999px !important; padding:12px 22px !important; font-weight:700 !important; }
+button[class*="bg-bajaj-blue"]{ background:#111 !important; color:#fff !important; border-radius:999px !important; }
+/* Generic small buttons inside tables/cards — pill, not square */
+.yng-card-shell button, .sm-card button{ border-radius:12px !important; }
+/* — Inputs: big, soft — */
+input, select, textarea, .lfield{ border-radius:14px !important; border:1px solid #E5E5E2 !important; background:#FBFBFA !important; padding:12px 14px !important; font-size:14px !important; color:#191919 !important; }
+input:focus, select:focus, textarea:focus{ border-color:#111 !important; box-shadow:0 0 0 3px rgba(0,0,0,.08) !important; background:#fff !important; }
+label{ font-weight:600 !important; color:#3D3D3D !important; }
+/* — Tables: clean, no grey header block — */
+table{ border-collapse:separate !important; border-spacing:0 !important; width:100% !important; }
+table thead th, .responsive-table thead th{ background:#fff !important; color:#8A8A85 !important; font-size:11px !important; letter-spacing:.1em !important; text-transform:uppercase !important; padding:12px 16px !important; border-bottom:1px solid #ECECEA !important; font-weight:700 !important; }
+table tbody td{ padding:16px !important; border-bottom:1px solid #F0F0EE !important; font-size:14px !important; color:#191919 !important; vertical-align:middle !important; }
+table tbody tr{ transition:background .15s; }
+table tbody tr:hover{ background:#FFF7F2 !important; }
+table tbody tr:last-child td{ border-bottom:none !important; }
+/* — Badges / chips / pills — */
+.badge, .chip, .rate-chip{ border-radius:999px !important; padding:6px 12px !important; font-size:12px !important; font-weight:700 !important; border:1px solid #ECECEA !important; background:#F6F6F4 !important; color:#3D3D3D !important; }
+.rate-chip.active, .rate-chip.selected{ background:#FFF1EB !important; border-color:#FF4D00 !important; color:#C23300 !important; }
+/* — Tabs: pill segmented — */
+.nav-tab, .tab-btn{ border-radius:999px !important; padding:10px 18px !important; font-weight:700 !important; font-size:13px !important; color:#6B6B66 !important; border:1px solid transparent !important; background:transparent !important; }
+.nav-tab.bg-blue-50, .tab-btn.active{ background:#111 !important; color:#fff !important; border-color:#111 !important; }
+/* — Modals: 24px, centred, big title — */
+div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
+.qsheet{ border-radius:28px 28px 0 0 !important; padding:14px 20px 28px !important; }
+@media (min-width:769px){ .qsheet{ border-radius:24px !important; } }
+.qsheet-item{ padding:14px 10px !important; border-radius:16px !important; }
+.qsheet-item .qicon{ width:48px !important; height:48px !important; border-radius:14px !important; }
+.qsheet-grid .qgitem{ border-radius:18px !important; padding:16px 8px !important; background:#F6F6F4 !important; border:1px solid #ECECEA !important; }
+/* — Mobile: floating dock, not full bar — */
+@media (max-width:768px){
+  .mobile-tab-bar{ left:14px !important; right:14px !important; bottom:14px !important; height:66px !important; border-radius:999px !important; background:rgba(255,255,255,.96) !important; backdrop-filter:blur(14px); border:1px solid #ECECEA !important; box-shadow:0 16px 40px rgba(0,0,0,.14) !important; padding:6px 8px !important; }
+  .mobile-tab{ border-radius:999px !important; font-size:11px !important; }
+  .mobile-tab.bg-blue-50{ background:#111 !important; color:#fff !important; }
+  .mobile-tab-fab{ background:#FF4D00 !important; border:3px solid #fff !important; box-shadow:0 10px 24px rgba(255,77,0,.4) !important; width:56px !important; height:56px !important; margin-top:-34px !important; }
+}
+/* — Tailwind old grey overrides — */
+.bg-slate-50{ background-color:#F6F6F4 !important; }
+.bg-slate-100{ background-color:#F1F1EE !important; }
+.border-slate-100{ border-color:#F0F0EE !important; }
+.border-slate-200{ border-color:#ECECEA !important; }
+.text-slate-400{ color:#8A8A85 !important; }
+.text-slate-500{ color:#6B6B66 !important; }
+.text-slate-600{ color:#3D3D3D !important; }
+.text-slate-800{ color:#191919 !important; }
+.rounded-lg{ border-radius:16px !important; }
+.rounded-xl{ border-radius:20px !important; }
+.rounded-md{ border-radius:12px !important; }
+/* — Login V3: white card, black left, orange accent — */
+.login-stage{ background:#F6F6F4 !important; }
+.login-card{ border-radius:28px !important; box-shadow:0 24px 60px rgba(0,0,0,.10) !important; border:1px solid #ECECEA !important; overflow:hidden !important; }
+.login-left{ background:#111 !important; }
+.login-cta{ background:#FF4D00 !important; }
+/* — Sheet / Finance tools match V3 — */
+#secSheetTool .calc-card, #secFinanceTool .calc-card{ border-radius:24px !important; }
+.preview-shell{ border-radius:24px !important; border:1px solid #ECECEA !important; }
+.preview-toolbar{ background:#111 !important; border-radius:24px 24px 0 0 !important; }
+.pbtn.print{ background:#FF4D00 !important; border-radius:999px !important; }
+/* — Dashboard V3 tweaks — */
+.v2-dash-card{ border-radius:24px !important; }
+.v2-dash-add{ background:#FF4D00 !important; box-shadow:0 8px 20px rgba(255,77,0,.3) !important; }
+.v2-dash-icon{ background:#FFF1EB !important; color:#FF4D00 !important; border-radius:12px !important; }
+/* — Loader V3 — */
+#adminLoader{ background:#F6F6F4 !important; }
+.v2-loader-mark{ background:#111 !important; box-shadow:0 16px 40px rgba(0,0,0,.2) !important; }
+.v2-loader-name{ color:#111 !important; }
+.v2-loader-sub{ color:#8A8A85 !important; }
+.v2-loader-bar{ background:#E9E9E6 !important; }
+.v2-loader-fill{ background:#FF4D00 !important; }
+.v2-loader-pct{ color:#6B6B66 !important; }
 </style>
 
 </head>
@@ -23305,5 +23410,5 @@ window.addEventListener('DOMContentLoaded', () => {
   }, totalMs);
 });
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</body>
 </html>
