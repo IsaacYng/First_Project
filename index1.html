@@ -3050,7 +3050,7 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
 </style>
 
 
-<style id="v7-leak-fixed">
+<style id="v8-audit-fixed">
 .v6-badge{ display:inline-block; vertical-align:middle; margin-left:8px; background:#FF4D00; color:#fff; font-size:10px; font-weight:800; letter-spacing:.06em; padding:3px 8px; border-radius:999px; }
 .inv-toolbar button{ pointer-events:auto !important; }
 #secInv{ padding-top:8px !important; }
@@ -3066,6 +3066,12 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
   .inv-toolbar-filters .inv-manage-areas i{ color:#FF4D00 !important; }
 }
 .model-filter-menu.hidden{ display:none !important; }
+</style>
+
+
+<style id="v8-audit-fixed-css">
+.inv-count-check{ font-size:11px; color:#64748B; padding:2px 4px 8px; line-height:1.4; }
+.inv-count-check{ font-family:'JetBrains Mono',monospace; }
 </style>
 
 </head>
@@ -3807,7 +3813,7 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
             <div class="inv-toolbar-title">
               <span class="inv-toolbar-icon"><i class="fas fa-warehouse"></i></span>
               <div class="min-w-0">
-                <div class="inv-toolbar-h">Stock Register <span class="v6-badge">V7 • Leak Fixed</span></div>
+                <div class="inv-toolbar-h">Stock Register <span class="v6-badge">V8 • Audit Fixed</span></div>
                 <div class="inv-toolbar-sub"><span id="invCount" class="inv-count-pill">0 units</span> <span class="hidden sm:inline">· Showroom stock</span></div>
               </div>
               <span id="invDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-full px-2.5 py-1 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
@@ -3829,6 +3835,7 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
           </div>
 
           <!-- Row 3 — Filters + Search: 1 clean row on desktop, stacked neatly on mobile -->
+          <div id="invCountCheck" class="inv-count-check">All = Available + Booked + Sold &nbsp;·&nbsp; HH Sales / HH Hide overlap — extra hoina, subset ho</div>
           <div class="inv-toolbar-filters">
             <div class="relative flex-shrink-0" id="invModelFilterWrap">
             <button data-noguard type="button" onclick="toggleModelFilterMenu('inv')" class="model-filter-btn">
@@ -3915,6 +3922,7 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
         <div class="flex items-center gap-2 flex-wrap flex-shrink-0">
           <span id="hhInvTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500">0 units total</span>
         </div>
+          <div id="hhCountCheck" class="inv-count-check">All = Available + Booked + Sold &nbsp;·&nbsp; HH Sales / HH Hide overlap — extra hoina</div>
       </div>
       <p class="text-xs text-slate-400 -mt-4 mb-5"><i class="fas fa-circle-info mr-1"></i>Units taken out to outdoor melas/events — a separate list, tracked separately. Doesn't affect Live Inventory; this is a separate stock.</p>
 
@@ -12245,8 +12253,8 @@ function renderInvTable(list){
         <input type="checkbox" class="inv-row-checkbox w-4 h-4 rounded border-slate-300 accent-bajaj-blue cursor-pointer" data-id="${s.id}" ${isSel?'checked':''} onchange="toggleSelectInvUnit('${s.id}', this.checked); this.closest('tr').classList.toggle('row-selected', this.checked)">
       </td>
       <td class="px-4 py-3" data-th="S.N">
-        <span class="inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-xs font-mono font-semibold">${rowIdx+1}</span>
-        <div class="text-[9px] text-slate-300 font-mono mt-0.5">#${s.sn||'—'}</div>
+        <span class="inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-xs font-mono font-semibold">${s.sn||'—'}</span>
+        <div class="text-[9px] text-slate-300 font-mono mt-0.5">#${rowIdx+1}</div>
       </td>
       <td class="px-4 py-3 font-bold text-slate-800 text-sm whitespace-nowrap" data-th="Model">
         ${highlightMatch(s.model, q)}
@@ -12576,6 +12584,8 @@ function updateInvStats(){
   if(invHasMore) refreshPagedTotalChip('inventory', 'invTotalChip', invData.length);
   checkForHiddenUnits('inventory', invData.length, invHasMore, 'stockTable');
   const pc = { pcAll:invData.length, pcAvailable:available, pcBooked:booked, pcSold:sold, pcHHSales:hhSalesCount, pcHHHide:hhHideCount };
+  const cc = document.getElementById('invCountCheck');
+  if(cc) cc.textContent = invData.length + ' All = ' + available + ' Available + ' + booked + ' Booked + ' + sold + ' Sold  ·  HH Sales ' + hhSalesCount + ' / HH Hide ' + hhHideCount + ' overlap — extra hoina';
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
 }
 
@@ -12759,6 +12769,8 @@ function updateHHInvStats(){
   if(hhHasMore) refreshPagedTotalChip('hh_inventory', 'hhInvTotalChip', hhInvData.length);
   checkForHiddenUnits('hh_inventory', hhInvData.length, hhHasMore, 'hhInvTable');
   const pc = { pcHHAll:hhInvData.length, pcHHAvailable:available, pcHHBooked:booked, pcHHSold:sold, pcHHInvSales:hhSalesCount, pcHHInvHide:hhHideCount };
+  const hcc = document.getElementById('hhCountCheck');
+  if(hcc) hcc.textContent = hhInvData.length + ' All = ' + available + ' Available + ' + booked + ' Booked + ' + sold + ' Sold  ·  HH Sales ' + hhSalesCount + ' / HH Hide ' + hhHideCount + ' overlap — extra hoina';
   Object.entries(pc).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
 }
 
@@ -23565,13 +23577,21 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<script id="v7-leak-fixed-js">
+<script id="v8-audit-fixed-js">
 document.addEventListener('DOMContentLoaded', ()=>{
   document.querySelectorAll('#secInv .inv-toolbar button').forEach(b=>{
     b.setAttribute('data-noguard','');
     delete b.dataset.lastClickTs;
   });
-  console.log('Bajaj Admin V7 - Leak Fixed');
+  console.log('Bajaj Admin V8 - Audit Fixed');
+});
+</script>
+
+
+<script id="v8-audit-fixed-js2">
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('button[onclick*="StatusFilter"], button[onclick*="setInv"], button[onclick*="setHH"]').forEach(b=>{ b.setAttribute('data-noguard',''); delete b.dataset.lastClickTs; });
+  console.log('Bajaj Admin V8 - Audit Fixed: counts reconciled, S.N stable, tabs unguarded');
 });
 </script>
 
