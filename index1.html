@@ -3050,33 +3050,21 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
 </style>
 
 
-<style id="v6-buttons-fixed">
-/* ══ V6 — Button nai chalena + design preview jastai ══ */
-/* Click-guard le Stock button block gardaina — data-noguard le skip garcha, CSS le pani ensure */
-.inv-toolbar button{ pointer-events:auto !important; }
+<style id="v7-leak-fixed">
 .v6-badge{ display:inline-block; vertical-align:middle; margin-left:8px; background:#FF4D00; color:#fff; font-size:10px; font-weight:800; letter-spacing:.06em; padding:3px 8px; border-radius:999px; }
-/* Top clipping fix — Live Inventory header topbar muni lukdaina */
+.inv-toolbar button{ pointer-events:auto !important; }
 #secInv{ padding-top:8px !important; }
 .inv-page-head{ padding-top:6px !important; }
-/* Tabs: preview jastai 2-line — naam mathi, count tala, centered */
 .inv-toolbar-tabs .inv-status-tab{ flex-direction:column !important; gap:1px !important; line-height:1.2 !important; }
 .inv-toolbar-tabs .inv-status-tab .tab-name{ font-size:13px; font-weight:800; line-height:1.2; }
 .inv-toolbar-tabs .inv-status-tab .pill-count{ font-size:11px !important; font-weight:700 !important; background:transparent !important; border:none !important; padding:0 !important; opacity:.75; }
 .inv-toolbar-tabs .inv-status-tab.active .pill-count{ opacity:.9; }
 @media (max-width:640px){
-  .inv-toolbar-tabs .inv-status-tab .tab-name{ font-size:13px !important; }
-}
-/* Manage Areas: preview jastai black button on mobile */
-@media (max-width:640px){
+  .inv-toolbar-primary{ display:grid !important; grid-template-columns:1fr 1fr !important; width:100% !important; gap:8px !important; }
+  .inv-toolbar-primary .inv-btn{ width:100% !important; justify-content:center !important; }
   .inv-toolbar-filters .inv-manage-areas{ background:#111 !important; color:#fff !important; border-color:#111 !important; }
   .inv-toolbar-filters .inv-manage-areas i{ color:#FF4D00 !important; }
 }
-/* Add + Export: mobile ma pakka side-by-side, katai haraudaina */
-@media (max-width:640px){
-  .inv-toolbar-primary{ display:grid !important; grid-template-columns:1fr 1fr !important; width:100% !important; gap:8px !important; }
-  .inv-toolbar-primary .inv-btn{ width:100% !important; justify-content:center !important; }
-}
-/* Bottom-sheet dropdown le button chhopdaina — khulda matra dekhincha, banda huda display:none */
 .model-filter-menu.hidden{ display:none !important; }
 </style>
 
@@ -3819,7 +3807,7 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
             <div class="inv-toolbar-title">
               <span class="inv-toolbar-icon"><i class="fas fa-warehouse"></i></span>
               <div class="min-w-0">
-                <div class="inv-toolbar-h">Stock Register <span class="v6-badge">V6 • Buttons Fixed</span></div>
+                <div class="inv-toolbar-h">Stock Register <span class="v6-badge">V7 • Leak Fixed</span></div>
                 <div class="inv-toolbar-sub"><span id="invCount" class="inv-count-pill">0 units</span> <span class="hidden sm:inline">· Showroom stock</span></div>
               </div>
               <span id="invDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-full px-2.5 py-1 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
@@ -11461,20 +11449,7 @@ function buildChalanDocumentHtml(content){
   .cb-total-val{ font-weight:700; font-size:15.5px; }
 </style>
 </head>
-<body>${content}
-<script id="v6-buttons-fixed-js">
-// V6: Stock Register ko button lai click-guard ko stale timestamp le block nagaros
-document.addEventListener('DOMContentLoaded', ()=>{
-  document.querySelectorAll('#secInv .inv-toolbar button').forEach(b=>{
-    b.setAttribute('data-noguard','');
-    delete b.dataset.lastClickTs;
-  });
-  // Version proof — console + Stock header badge le nayan file load bhayo bhanne dekhaucha
-  console.log('%c Bajaj Admin V6 — Buttons Fixed ', 'background:#FF4D00;color:#fff;padding:2px 8px;border-radius:999px');
-});
-</script>
-
-</body>
+<body>${content}</body>
 </html>`;
 }
 
@@ -23589,5 +23564,16 @@ window.addEventListener('DOMContentLoaded', () => {
   }, totalMs);
 });
 </script>
+
+<script id="v7-leak-fixed-js">
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('#secInv .inv-toolbar button').forEach(b=>{
+    b.setAttribute('data-noguard','');
+    delete b.dataset.lastClickTs;
+  });
+  console.log('Bajaj Admin V7 - Leak Fixed');
+});
+</script>
+
 </body>
 </html>
