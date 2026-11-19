@@ -7,7 +7,7 @@
 <title>Bajaj Bikes — Admin Panel</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="icon" type="image/png" href="favicon.png">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=Dancing+Script:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -17,29 +17,29 @@
     theme: {
       extend: {
         fontFamily: {
-          display: ['Bebas Neue', 'cursive'],
-          body: ['DM Sans', 'sans-serif'],
+          display: ['Sora', 'sans-serif'],
+          body: ['Plus Jakarta Sans', 'sans-serif'],
           mono: ['JetBrains Mono', 'monospace'],
         },
         colors: {
           bajaj: {
-            blue: '#0FA4AF',
-            blueDark: '#024950',
-            blueLight: '#EFF8F9',
-            amber: '#964734',
-            amberDark: '#723627',
+            blue: '#FF4D00',
+            blueDark: '#C23300',
+            blueLight: '#FFF1EB',
+            amber: '#FF8A00',
+            amberDark: '#E85D00',
           },
           blue: {
-            50:  '#EFF8F9',
-            100: '#DFF3F4',
-            200: '#C7E9EC',
-            300: '#8ED4DA',
-            400: '#4FB8C1',
-            500: '#0FA4AF',
-            600: '#0C8790',
-            700: '#024950',
-            800: '#01363B',
-            900: '#003135',
+            50:  '#FFF1EB',
+            100: '#FFE2D6',
+            200: '#FFC9B3',
+            300: '#FFA382',
+            400: '#FF7440',
+            500: '#FF4D00',
+            600: '#E84400',
+            700: '#C23300',
+            800: '#8A2400',
+            900: '#571700',
           },
           /* NOTE: a `brand` and `gold` palette used to be defined here,
              duplicating `blue`/`bajaj` and `amber` respectively with zero
@@ -48,8 +48,8 @@
              intentionally shares its 500 value with `bajaj.blue`; treat
              `bajaj.*` as the canonical brand token going forward and avoid
              introducing further one-off palettes. */
-          danger: '#C0392B',
-          success: '#298F60',
+          danger: '#DC2626',
+          success: '#059669',
           /* Chai accent — overrides Tailwind's default amber so every
              amber-* utility across the app shifts to the warm accent. */
           amber: {
@@ -90,16 +90,17 @@
      consistent — refining one value here updates every card/button/input
      built on top of it. */
   :root{
-    --bg-page:#EFF8F9; --bg-surface:#fff; --bg-surface-2:#E7F4F6; --bg-surface-3:#AFDDE5;
-    --border:#C7E4E9; --border-soft:#DCEEF1; --border-strong:#9BCBD3;
-    --text-primary:#003135; --text-secondary:#17474B; --text-tertiary:#2E5F63; --text-muted:#6B8F93; --text-faint:#A0BFC3;
-    --brand:#0FA4AF; --brand-dark:#024950; --brand-soft-bg:#DFF3F4; --brand-soft-bg-2:#CFEBED; --brand-soft-border:#A8DCE0;
-    --amber:#964734; --amber-dark:#723627; --amber-soft-bg:#F3E3DE; --amber-soft-border:#E5C3B7;
-    --danger:#C0392B; --danger-text:#A83226; --danger-soft-bg:#FBEBE9; --danger-soft-border:#F1CFC9;
-    --success:#298F60; --success-text:#22754F; --success-soft-bg:#E6F2EC; --success-soft-border:#C5E3D2;
-    --shadow-sm:0 1px 3px rgba(0,49,53,.08);
-    --shadow-md:0 14px 34px rgba(0,49,53,.14), 0 2px 8px rgba(0,49,53,.06);
-    --shadow-lift:0 26px 66px rgba(0,49,53,.20);
+    --bg-page:#F4F5F7; --bg-surface:#fff; --bg-surface-2:#F1F2F4; --bg-surface-3:#E5E7EB;
+    --border:#E5E7EB; --border-soft:#EEF0F2; --border-strong:#D1D5DB;
+    --text-primary:#111827; --text-secondary:#374151; --text-tertiary:#6B7280; --text-muted:#9CA3AF; --text-faint:#C0C4CC;
+    --brand:#FF4D00; --brand-dark:#C23300; --brand-soft-bg:#FFF1EB; --brand-soft-bg-2:#FFE2D6; --brand-soft-border:#FFC9B3;
+    --amber:#FF8A00; --amber-dark:#E85D00; --amber-soft-bg:#FFF7ED; --amber-soft-border:#FED7AA;
+    --danger:#DC2626; --danger-text:#B91C1C; --danger-soft-bg:#FEF2F2; --danger-soft-border:#FECACA;
+    --success:#059669; --success-text:#047857; --success-soft-bg:#ECFDF5; --success-soft-border:#A7F3D0;
+    --shadow-sm:0 1px 2px rgba(16,24,40,.05);
+    --shadow-md:0 8px 24px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.05);
+    --shadow-lift:0 24px 60px rgba(16,24,40,.16);
+    --sidebar-bg:#0B0F19; --sidebar-text:#CBD5E1;
     color-scheme: light;
   }
 
@@ -2666,65 +2667,109 @@
      needs portrait, so this one shared rule gets its content swapped in by
      JS right before each section's print button calls window.print(). -->
 <style id="dynamicPageSize"></style>
+
+<style id="v2-redesign">
+/* ═══════════════════════════════════════════════════════════════════
+   V2 — FULL REDESIGN. Old teal/cyan/Bebas design removed.
+   New: Midnight sidebar + Vivid Orange accent + Neutral paper.
+   Fonts: Sora (headings) + Plus Jakarta Sans (UI).
+   This layer sits AFTER all old CSS and wins on every surface.
+   ═══════════════════════════════════════════════════════════════════ */
+:root{
+  --brand:#FF4D00; --brand-dark:#C23300; --brand-soft-bg:#FFF1EB;
+  --bg-page:#F4F5F7; --bg-surface:#fff; --text-primary:#111827;
+  --blue:#FF4D00; --blueDark:#C23300; --blueLt:#FFF1EB;
+  --amber:#FF8A00; --amberDark:#E85D00; --green:#059669; --red:#DC2626;
+  --line:#E5E7EB; --bgSoft:#F4F5F7; --ink:#111827; --ink2:#374151; --ink3:#6B7280; --ink4:#9CA3AF;
+}
+html,body{ background:#F4F5F7 !important; color:#111827 !important; font-family:'Plus Jakarta Sans',system-ui,sans-serif !important; }
+body{ -webkit-font-smoothing:antialiased; }
+.font-display, .section-title, .section-label, .eyebrow, .login-left-title, .login-right-title, .qsheet-title, .calc-card-title, .pv-titlebar, .ptitle{ font-family:'Sora','Plus Jakarta Sans',sans-serif !important; letter-spacing:-.02em !important; }
+.section-title{ color:#111827 !important; font-weight:700 !important; }
+.section-label, .eyebrow{ color:#FF4D00 !important; font-weight:700 !important; letter-spacing:.12em !important; }
+/* Sidebar — midnight */
+.sidebar{ background:#0B0F19 !important; border-right:none !important; width:272px !important; }
+.sidebar-brand{ border-bottom:1px solid rgba(255,255,255,.08) !important; padding:20px 18px !important; }
+.sidebar-brand *{ color:#fff !important; }
+.sidebar-nav{ padding:16px 12px !important; }
+.sidebar-section-label{ color:#64748B !important; font-size:10px !important; letter-spacing:.14em !important; }
+.sidebar-link{ color:#CBD5E1 !important; border-radius:12px !important; padding:11px 12px !important; font-weight:600 !important; }
+.sidebar-link i{ color:#94A3B8 !important; }
+.sidebar-link:hover{ background:rgba(255,255,255,.08) !important; color:#fff !important; }
+.sidebar-link:hover i{ color:#fff !important; }
+.sidebar-link.bg-blue-50{ background:#FF4D00 !important; color:#fff !important; font-weight:700 !important; box-shadow:0 8px 20px rgba(255,77,0,.35) !important; border-color:transparent !important; }
+.sidebar-link.bg-blue-50 i{ color:#fff !important; }
+.sidebar-link.bg-blue-50::before{ display:none !important; }
+.sidebar-foot{ border-top:1px solid rgba(255,255,255,.08) !important; }
+.sidebar-logout-btn{ color:#CBD5E1 !important; }
+.sidebar-logout-btn:hover{ background:rgba(220,38,38,.15) !important; color:#FCA5A5 !important; }
+/* Topbar */
+.topbar{ background:rgba(255,255,255,.88) !important; backdrop-filter:blur(12px); border-bottom:1px solid #E5E7EB !important; height:68px !important; }
+.topbar-menu-btn{ background:#F4F5F7 !important; border:1px solid #E5E7EB !important; border-radius:10px !important; color:#374151 !important; }
+.topbar-search{ background:#F4F5F7 !important; border:1px solid #E5E7EB !important; border-radius:999px !important; }
+.topbar-title .heading{ color:#111827 !important; font-family:'Sora',sans-serif !important; }
+/* Cards */
+.sm-card, .yng-card-shell, .cloud-card, .calc-card, .login-card{ background:#fff !important; border:1px solid #E9EBEF !important; border-radius:20px !important; box-shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.04) !important; }
+.sm-stat-value{ font-family:'Sora',sans-serif !important; color:#111827 !important; }
+/* Buttons */
+.cta-primary, .login-cta{ background:#FF4D00 !important; color:#fff !important; border:none !important; border-radius:999px !important; box-shadow:0 8px 20px rgba(255,77,0,.28) !important; font-weight:700 !important; }
+.cta-primary:hover, .login-cta:hover{ background:#E84400 !important; transform:translateY(-1px); }
+.cta-secondary{ background:#fff !important; border:1px solid #E5E7EB !important; color:#111827 !important; border-radius:999px !important; font-weight:700 !important; }
+/* Tables */
+table thead th, .responsive-table thead th{ background:#F9FAFB !important; color:#6B7280 !important; font-size:11px !important; letter-spacing:.08em !important; text-transform:uppercase; }
+table tbody tr:hover{ background:#FFF7F2 !important; }
+/* Inputs */
+input, select, textarea, .lfield{ border-radius:12px !important; border-color:#E5E7EB !important; font-family:'Plus Jakarta Sans',sans-serif !important; }
+input:focus, select:focus, textarea:focus{ border-color:#FF4D00 !important; box-shadow:0 0 0 3px rgba(255,77,0,.12) !important; outline:none !important; }
+/* Login */
+.login-stage{ background:#0B0F19 !important; }
+.login-left{ background:linear-gradient(160deg,#FF4D00 0%,#FF8A00 100%) !important; }
+.login-card{ border-radius:24px !important; overflow:hidden !important; box-shadow:0 24px 60px rgba(0,0,0,.4) !important; }
+/* Loader V2 */
+#adminLoader{ background:#0B0F19 !important; }
+#adminLoader::before, #adminLoader::after, #adminLoader .intro-grid{ display:none !important; }
+.v2-loader-wrap{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:10px; }
+.v2-loader-mark{ width:64px; height:64px; border-radius:18px; background:#FF4D00; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Sora',sans-serif; font-size:30px; font-weight:800; box-shadow:0 16px 40px rgba(255,77,0,.45); }
+.v2-loader-name{ font-family:'Sora',sans-serif; font-size:22px; font-weight:800; letter-spacing:.18em; color:#fff; margin-top:8px; }
+.v2-loader-sub{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#94A3B8; font-weight:600; }
+.v2-loader-bar{ width:200px; height:6px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden; margin-top:14px; }
+.v2-loader-fill{ height:100%; width:100%; border-radius:99px; background:#FF4D00; animation:v2Fill 2.3s ease forwards; }
+@keyframes v2Fill{ from{ width:0; } to{ width:100%; } }
+.v2-loader-pct{ font-family:'JetBrains Mono',monospace; font-size:12px; color:#CBD5E1; margin-top:2px; }
+/* Mobile */
+.mobile-tab-bar{ background:#fff !important; border-top:1px solid #E5E7EB !important; box-shadow:0 -4px 20px rgba(16,24,40,.06) !important; }
+.mobile-tab.bg-blue-50{ color:#FF4D00 !important; }
+.mobile-tab-fab{ background:#FF4D00 !important; border-color:#fff !important; box-shadow:0 8px 20px rgba(255,77,0,.4) !important; }
+.qsheet-item .qicon, .qsheet-grid .qgitem .qgicon{ background:#FFF1EB !important; color:#FF4D00 !important; box-shadow:none !important; }
+/* Sheet + Finance tools — same new language */
+#secSheetTool .calc-card, #secFinanceTool .calc-card{ background:#fff !important; border:1px solid #E9EBEF !important; border-radius:20px !important; }
+#secSheetTool .calc-card-title, #secFinanceTool .calc-card-title{ font-family:'Sora',sans-serif !important; color:#111827 !important; }
+.rate-chip{ border-radius:12px !important; border:1px solid #E5E7EB !important; }
+.rate-chip.active, .rate-chip.selected{ background:#FFF1EB !important; border-color:#FF4D00 !important; color:#C23300 !important; }
+.preview-shell{ border-radius:20px !important; }
+.preview-toolbar{ background:#0B0F19 !important; }
+.pbtn.print{ background:#FF4D00 !important; }
+/* Kill old Bebas / Dancing leftovers */
+[style*="Bebas"], [style*="Dancing"]{ font-family:'Sora',sans-serif !important; }
+/* Pills / chips that used old teal */
+.bg-blue-50{ background-color:#FFF1EB !important; }
+.text-blue-700{ color:#C23300 !important; }
+.border-blue-200{ border-color:#FFC9B3 !important; }
+/* Toast + modals keep new radius */
+#toast{ border-radius:16px !important; }
+</style>
+
 </head>
-<body class="bg-slate-50 text-slate-700 min-h-screen">
+<body class="bg-[#F4F5F7] text-slate-700 min-h-screen">
 
 <!-- ══════════ INTRO LOADER ══════════ -->
 <div id="adminLoader">
-  <div class="intro-grid"></div>
-  <div class="intro-content">
-
-    <!-- Icon mark -->
-    <div class="intro-logo-mark">
-      <i class="fas fa-motorcycle" style="font-size:22px;"></i>
-    </div>
-
-    <!-- Road animation: bike riding across screen -->
-    <div class="intro-road">
-      <div class="intro-road-line"></div>
-      <div class="intro-speed-lines"><span></span><span></span><span></span></div>
-      <div class="intro-bike-shadow"></div>
-      <div class="intro-bike-wrap">
-        <svg width="74" height="46" viewBox="0 0 74 46" fill="none">
-          <!-- Wheels -->
-          <g class="bike-part bp-wheels">
-            <circle cx="16" cy="32" r="9" stroke="#fff" stroke-width="2.4" fill="none"/>
-            <circle cx="16" cy="32" r="2.2" fill="#fff"/>
-            <circle cx="58" cy="32" r="9" stroke="#fff" stroke-width="2.4" fill="none"/>
-            <circle cx="58" cy="32" r="2.2" fill="#fff"/>
-          </g>
-          <!-- Frame/Body -->
-          <g class="bike-part bp-frame">
-            <path d="M16 29 Q28 18 37 17 L42 10 L54 8 L57 14" stroke="#964734" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            <path d="M37 17 L34 28 L16 29" stroke="#964734" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            <path d="M34 28 Q45 31 58 29" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/>
-          </g>
-          <!-- Panel/Dashboard -->
-          <g class="bike-part bp-panel">
-            <rect x="40" y="12" width="14" height="8" rx="2.5" fill="#964734" opacity="0.9"/>
-            <line x1="44" y1="14" x2="44" y2="18" stroke="#fff" stroke-width="1.2" opacity="0.5"/>
-            <line x1="49" y1="14" x2="49" y2="18" stroke="#fff" stroke-width="1.2" opacity="0.5"/>
-          </g>
-          <!-- Light -->
-          <g class="bike-part bp-light">
-            <circle class="intro-headlight" cx="62" cy="13" r="3.2" fill="#FFF3C4"/>
-            <path class="intro-headlight" d="M64 13 L71 13" stroke="#FFF3C4" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-          </g>
-        </svg>
-      </div>
-    </div>
-
-    <!-- Brand text -->
-    <div class="intro-brand">
-      <div class="intro-name">SAMRIDDHI <span>ADMIN</span></div>
-      <div class="intro-tag">Dealer Management System</div>
-    </div>
-
-    <!-- Progress bar -->
-    <div class="intro-progress">
-      <div class="intro-bar"><div class="intro-bar-fill"></div></div>
-      <span class="intro-percent" id="intro-percent">0%</span>
-    </div>
+  <div class="v2-loader-wrap">
+    <div class="v2-loader-mark">S</div>
+    <div class="v2-loader-name">SAMRIDDHI</div>
+    <div class="v2-loader-sub">Dealer OS &nbsp;·&nbsp; Bajaj Authorised</div>
+    <div class="v2-loader-bar"><div class="v2-loader-fill"></div></div>
+    <span class="v2-loader-pct" id="intro-percent">0%</span>
   </div>
 </div>
 
