@@ -2914,6 +2914,84 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
 .v2-loader-pct{ color:#6B6B66 !important; }
 </style>
 
+
+<style id="v4-organized-buttons">
+/* ══ V4 — Stock Register buttons organized + design polish ══ */
+/* Page head: no more huge 56px title + overflowing pill */
+.inv-page-head{ margin-bottom:18px; }
+.inv-page-title{ font-family:'Sora',sans-serif; font-size:30px; font-weight:700; letter-spacing:-.02em; color:#191919; line-height:1.15; margin-top:4px; }
+@media (max-width:640px){ .inv-page-title{ font-size:26px; } }
+.inv-total-line{ margin-top:6px; font-size:12.5px; font-weight:600; color:#6B6B66; font-family:'JetBrains Mono',monospace; }
+/* Toolbar card */
+.inv-toolbar{ padding:18px 20px 14px; border-bottom:1px solid #ECECEA; display:flex; flex-direction:column; gap:14px; }
+@media (max-width:640px){ .inv-toolbar{ padding:16px 14px 12px; gap:12px; } }
+/* Row 1 */
+.inv-toolbar-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.inv-toolbar-title{ display:flex; align-items:center; gap:12px; min-width:0; }
+.inv-toolbar-icon{ width:44px; height:44px; border-radius:14px; background:#FFF1EB; color:#FF4D00; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.inv-toolbar-h{ font-family:'Sora',sans-serif; font-size:19px; font-weight:700; letter-spacing:-.01em; color:#191919; line-height:1.2; }
+.inv-toolbar-sub{ font-size:12px; color:#8A8A85; font-weight:600; margin-top:2px; }
+.inv-count-pill{ display:inline-block; background:#F6F6F4; border:1px solid #ECECEA; border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; color:#3D3D3D; }
+/* Primary actions — always together, top-right */
+.inv-toolbar-primary{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.inv-btn{ display:inline-flex; align-items:center; justify-content:center; gap:7px; border-radius:999px; padding:11px 18px; font-size:13.5px; font-weight:700; cursor:pointer; border:1px solid transparent; white-space:nowrap; transition:transform .12s, box-shadow .15s, background .15s; }
+.inv-btn:active{ transform:scale(.97); }
+.inv-btn-primary{ background:#111; color:#fff; box-shadow:0 8px 20px rgba(0,0,0,.18); }
+.inv-btn-primary:hover{ background:#000; }
+.inv-btn-secondary{ background:#fff; border-color:#ECECEA; color:#191919; }
+.inv-btn-secondary:hover{ border-color:#DDDAD6; background:#FBFBFA; }
+.inv-btn-ghost{ background:#F6F6F4; border-color:#ECECEA; color:#3D3D3D; }
+.inv-btn-ghost:hover{ background:#EFEFEC; }
+@media (max-width:480px){ .inv-btn{ padding:10px 14px; font-size:13px; } }
+/* Row 2 — Status tabs: single scrollable pill bar */
+.inv-toolbar-tabs{ display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; -webkit-overflow-scrolling:touch; }
+.inv-toolbar-tabs::-webkit-scrollbar{ display:none; }
+.inv-toolbar-tabs .inv-status-tab{ flex-shrink:0; display:inline-flex; align-items:center; gap:6px; padding:9px 14px; border-radius:999px; font-size:13px; font-weight:700; color:#6B6B66; background:#F6F6F4; border:1px solid transparent; cursor:pointer; }
+.inv-toolbar-tabs .inv-status-tab.active{ background:#111; color:#fff; }
+.inv-toolbar-tabs .inv-status-tab .pill-count{ background:rgba(255,255,255,.22); color:inherit; border-radius:999px; padding:1px 7px; font-size:11px; font-weight:800; }
+.inv-toolbar-tabs .inv-status-tab:not(.active) .pill-count{ background:#fff; color:#3D3D3D; border:1px solid #ECECEA; }
+/* Row 3 — Filters + Search */
+.inv-toolbar-filters{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.inv-toolbar-filters .model-filter-btn{ border-radius:999px !important; padding:10px 14px !important; background:#fff !important; border:1px solid #ECECEA !important; font-size:13px !important; font-weight:700 !important; }
+.inv-toolbar-filters #invAreaFilterWrap select, .inv-toolbar-filters #invAreaFilterWrap button{ border-radius:999px !important; padding:10px 14px !important; background:#fff !important; border:1px solid #ECECEA !important; font-size:13px !important; font-weight:700 !important; }
+.inv-manage-areas{ padding:10px 14px !important; }
+.inv-search-slot{ flex:1 1 220px; min-width:180px; }
+.inv-search-slot #invSearchWrap{ width:100% !important; margin-left:0 !important; position:relative; }
+.inv-search-slot #invSearch{ border-radius:999px !important; padding:11px 36px 11px 38px !important; background:#F6F6F4 !important; border:1px solid #ECECEA !important; width:100% !important; }
+.inv-search-slot #invSearch:focus{ background:#fff !important; border-color:#111 !important; }
+@media (max-width:640px){ .inv-toolbar-filters{ display:grid; grid-template-columns:1fr 1fr; } .inv-search-slot{ grid-column:1 / -1; } .inv-manage-areas{ justify-content:center; } }
+/* Row 4 — Tools: quiet, small, separated */
+.inv-toolbar-tools{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding-top:12px; border-top:1px dashed #ECECEA; }
+.inv-tools-label{ font-size:10px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#B8B8B2; margin-right:2px; }
+.inv-tool-btn{ display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:999px; background:#fff; border:1px solid #ECECEA; color:#3D3D3D; font-size:12px; font-weight:700; cursor:pointer; }
+.inv-tool-btn:hover{ border-color:#DDDAD6; background:#FBFBFA; }
+.inv-tool-danger{ color:#C23B2A; }
+.inv-tool-danger:hover{ background:#FFF1EB; border-color:#FFC9B3; }
+.inv-toolbar-tools #bulkStatusInvWrap button, .inv-toolbar-tools #bulkAreaInvWrap button{ border-radius:999px !important; padding:8px 12px !important; font-size:12px !important; border:1px solid #ECECEA !important; }
+/* Table polish */
+#stockTable thead th{ background:#FBFBFA !important; }
+#stockTable tbody td{ padding:14px 16px !important; }
+#stockTable tbody tr:hover{ background:#FFF7F2 !important; }
+/* Topbar on mobile: show title, keep icons compact */
+@media (max-width:640px){
+  .topbar{ padding:0 14px !important; gap:10px !important; }
+  .topbar-title .eyebrow{ display:none; }
+  .topbar-title .heading{ font-size:14px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px; }
+  .topbar-icon-btn{ width:38px !important; height:38px !important; }
+}
+/* Mobile dock: FAB no longer overlaps Inventory pill — active tab is orange text, not black pill */
+@media (max-width:768px){
+  .mobile-tab-bar{ height:64px !important; padding:6px 14px !important; }
+  .mobile-tab{ gap:3px !important; }
+  .mobile-tab.bg-blue-50{ background:transparent !important; color:#FF4D00 !important; }
+  .mobile-tab.bg-blue-50 i{ color:#FF4D00 !important; }
+  .mobile-tab-fab{ width:54px !important; height:54px !important; margin-top:0 !important; position:relative !important; top:-22px !important; border:4px solid #F6F6F4 !important; background:#FF4D00 !important; box-shadow:0 12px 24px rgba(255,77,0,.38) !important; }
+  .main-scroll > div{ padding-bottom:110px !important; }
+}
+/* Bulk Import card: quieter, less tall */
+#secInv .yng-card-shell{ border-radius:20px !important; }
+</style>
+
 </head>
 <body class="bg-[#F4F5F7] text-slate-700 min-h-screen">
 
@@ -3191,7 +3269,7 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
           <i class="fas fa-bars text-sm"></i>
         </button>
 
-        <div class="topbar-title hidden sm:block">
+        <div class="topbar-title">
           <div class="eyebrow">Samriddhi Admin</div>
           <div class="heading" id="topbarHeading">Master Price List</div>
         </div>
@@ -3542,12 +3620,12 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
 
     <!-- ═══ INVENTORY ═══ -->
     <div class="sec-panel" id="secInv">
-      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+      <div class="inv-page-head">
         <div>
           <div class="section-label">Stock Management ·</div>
-          <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">Live <span class="text-amber-500">Inventory</span></div>
+          <div class="inv-page-title">Live <span class="text-amber-500">Inventory</span></div>
+          <div id="invTotalChip" class="inv-total-line">0 units total</div>
         </div>
-        <span id="invTotalChip" class="bg-slate-100 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-500 flex-shrink-0">0 units total</span>
       </div>
 
       <!-- Inv Form (modal) -->
@@ -3647,30 +3725,64 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
 
       <!-- Inv Table -->
       <div class="yng-card-shell overflow-hidden">
-        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 flex-wrap">
-          <div class="flex items-center gap-2 section-title text-2xl"><i class="fas fa-warehouse text-amber-500"></i> Stock Register</div>
-          <span id="invCount" class="bg-slate-100 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-mono text-slate-500">0 units</span>
-          <span id="invDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-md px-2 py-0.5 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
-          <button id="resolveDupBtnInv" onclick="openDuplicateResolver()" class="hidden items-center gap-1.5 px-2.5 py-1 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all"><i class="fas fa-code-compare text-[10px]"></i> Resolve Duplicates</button>
-          <button id="fixSnBtn" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-bajaj-blue text-bajaj-blue text-xs font-bold rounded-lg hover:bg-bajaj-blue hover:text-white transition-all">
-            <i class="fas fa-arrow-down-1-9 text-[11px]"></i> Fix Numbering
-          </button>
-          <button onclick="exportInventoryToExcel()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
-            <i class="fas fa-file-excel text-[11px]"></i> Export
-          </button>
-          <button onclick="clearAllInventory()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-red-200 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all">
-            <i class="fas fa-trash-can text-[11px]"></i> Clear All
-          </button>
-          <button id="deleteSelectedBtn" onclick="deleteSelectedInvUnits()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all">
-            <i class="fas fa-trash-can text-[11px]"></i> Delete Selected (<span id="deleteSelectedCount">0</span>)
-          </button>
-          <button id="bulkTransferInvBtn" onclick="bulkTransferSelectedInv()" class="hidden items-center gap-1.5 px-3 py-1.5 bg-bajaj-blue text-white text-xs font-bold rounded-lg hover:bg-bajaj-blueDark transition-all">
-            <i class="fas fa-right-left text-[11px]"></i> Move to HH (<span id="bulkTransferInvCount">0</span>)
-          </button>
-          <button id="bulkExportInvBtn" onclick="exportSelectedInv()" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-emerald-200 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
-            <i class="fas fa-file-excel text-[11px]"></i> Export (<span id="bulkExportInvCount">0</span>)
-          </button>
-          <div id="bulkStatusInvWrap" class="relative hidden">
+        <div class="inv-toolbar">
+          <!-- Row 1 — Title + Primary actions (Add Unit always visible, top-right) -->
+          <div class="inv-toolbar-top">
+            <div class="inv-toolbar-title">
+              <span class="inv-toolbar-icon"><i class="fas fa-warehouse"></i></span>
+              <div class="min-w-0">
+                <div class="inv-toolbar-h">Stock Register</div>
+                <div class="inv-toolbar-sub"><span id="invCount" class="inv-count-pill">0 units</span> <span class="hidden sm:inline">· Showroom stock</span></div>
+              </div>
+              <span id="invDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-full px-2.5 py-1 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
+            </div>
+            <div class="inv-toolbar-primary">
+              <button onclick="exportInventoryToExcel()" class="inv-btn inv-btn-secondary"><i class="fas fa-file-excel"></i><span>Export</span></button>
+              <button onclick="openInvFormModal()" class="inv-btn inv-btn-primary"><i class="fas fa-plus"></i><span>Add Unit</span></button>
+            </div>
+          </div>
+
+          <!-- Row 2 — Status tabs: one scrollable pill bar -->
+          <div class="inv-toolbar-tabs" role="tablist">
+            <button class="inv-status-tab active" data-status="all" onclick="setInvStatusFilter('all')">All <span class="pill-count" id="pcAll">0</span></button>
+            <button class="inv-status-tab" data-status="Available" onclick="setInvStatusFilter('Available')">Available <span class="pill-count" id="pcAvailable">0</span></button>
+            <button class="inv-status-tab" data-status="Booked" onclick="setInvStatusFilter('Booked')">Booked <span class="pill-count" id="pcBooked">0</span></button>
+            <button class="inv-status-tab" data-status="Sold" onclick="setInvStatusFilter('Sold')">Sold <span class="pill-count" id="pcSold">0</span></button>
+            <button class="inv-status-tab" data-status="HHSales" onclick="setInvStatusFilter('HHSales')">HH Sales <span class="pill-count" id="pcHHSales">0</span></button>
+            <button class="inv-status-tab" data-status="HHHide" onclick="setInvStatusFilter('HHHide')">HH Hide <span class="pill-count" id="pcHHHide">0</span></button>
+          </div>
+
+          <!-- Row 3 — Filters + Search: 1 clean row on desktop, stacked neatly on mobile -->
+          <div class="inv-toolbar-filters">
+            <div class="relative flex-shrink-0" id="invModelFilterWrap">
+            <button type="button" onclick="toggleModelFilterMenu('inv')" class="model-filter-btn">
+              <i class="fas fa-motorcycle text-slate-400 text-xs flex-shrink-0"></i>
+              <span id="invModelFilterLabel" class="truncate">All Models</span>
+              <i class="fas fa-chevron-down text-slate-400 text-[10px] flex-shrink-0 ml-auto"></i>
+            </button>
+            <div id="invModelFilterMenu" class="model-filter-menu hidden"></div>
+          </div>
+            <div id="invAreaFilterWrap" class="flex-shrink-0"></div>
+            <button onclick="openAreaManager()" class="inv-btn inv-btn-ghost inv-manage-areas"><i class="fas fa-warehouse" style="color:#298F60"></i><span>Manage Areas</span></button>
+            <div class="inv-search-slot"><div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
+            <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="invSearch" autocomplete="off" placeholder="Search chassis, engine, model, reg no, customer…"
+              class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-8 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
+            <button id="invSearchClear" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 text-xs"><i class="fas fa-circle-xmark"></i></button>
+            <div id="invSearchDropdown" class="hidden absolute z-40 top-[calc(100%+6px)] left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto"></div>
+          </div></div>
+          </div>
+
+          <!-- Row 4 — Tools: quiet secondary row, not mixed with main actions -->
+          <div class="inv-toolbar-tools">
+            <span class="inv-tools-label">Tools</span>
+            <button id="fixSnBtn" class="inv-tool-btn"><i class="fas fa-arrow-down-1-9"></i> Fix Numbering</button>
+            <button id="resolveDupBtnInv" onclick="openDuplicateResolver()" class="inv-tool-btn inv-tool-danger hidden items-center gap-1.5"><i class="fas fa-code-compare"></i> Resolve Duplicates</button>
+            <button onclick="clearAllInventory()" class="inv-tool-btn inv-tool-danger"><i class="fas fa-trash-can"></i> Clear All</button>
+            <button id="deleteSelectedBtn" onclick="deleteSelectedInvUnits()" class="inv-tool-btn inv-tool-danger hidden items-center gap-1.5"><i class="fas fa-trash-can"></i> Delete Selected (<span id="deleteSelectedCount">0</span>)</button>
+            <button id="bulkTransferInvBtn" onclick="bulkTransferSelectedInv()" class="inv-tool-btn hidden items-center gap-1.5"><i class="fas fa-right-left"></i> Move to HH (<span id="bulkTransferInvCount">0</span>)</button>
+            <button id="bulkExportInvBtn" onclick="exportSelectedInv()" class="inv-tool-btn hidden items-center gap-1.5"><i class="fas fa-file-excel"></i> Export (<span id="bulkExportInvCount">0</span>)</button>
+            <div id="bulkStatusInvWrap" class="relative hidden">
             <button onclick="toggleBulkStatusMenu('inv')" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:border-bajaj-blue hover:text-bajaj-blue transition-all">
               <i class="fas fa-tag text-[11px]"></i> Set Status <i class="fas fa-chevron-down text-[9px]"></i>
             </button>
@@ -3680,49 +3792,15 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
               <button onclick="bulkSetStatusInv('Sold')" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"><i class="fas fa-handshake mr-1.5"></i> Sold</button>
             </div>
           </div>
-          <div id="bulkAreaInvWrap" class="relative hidden">
+            <div id="bulkAreaInvWrap" class="relative hidden">
             <button onclick="toggleBulkAreaMenu()" class="flex items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:border-emerald-500 hover:text-emerald-600 transition-all">
               <i class="fas fa-location-dot text-[11px]"></i> Move to Area <i class="fas fa-chevron-down text-[9px]"></i>
             </button>
             <div id="bulkAreaInvMenu" class="hidden absolute left-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-30 min-w-[160px]"></div>
           </div>
-          <button id="cancelSelectBtn" onclick="setInvSelectMode(false)" class="hidden items-center gap-1.5 px-3 py-1.5 border-2 border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all">
-            <i class="fas fa-xmark text-[11px]"></i> Cancel Select
-          </button>
-          <span id="selectModeHint" class="hidden items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-bajaj-blue">
-            <i class="fas fa-hand-pointer text-[10px]"></i> Select mode — tap rows to add
-          </span>
-          <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1 overflow-x-auto max-w-full inv-filter-scroll ml-auto flex-shrink-0">
-            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all active flex-shrink-0" data-status="all" onclick="setInvStatusFilter('all')">All <span class="pill-count" id="pcAll">0</span></button>
-            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Available" onclick="setInvStatusFilter('Available')">Available <span class="pill-count" id="pcAvailable">0</span></button>
-            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Booked" onclick="setInvStatusFilter('Booked')">Booked <span class="pill-count" id="pcBooked">0</span></button>
-            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="Sold" onclick="setInvStatusFilter('Sold')">Sold <span class="pill-count" id="pcSold">0</span></button>
-            <span class="w-px h-4 bg-slate-200 mx-0.5 flex-shrink-0"></span>
-            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="HHSales" onclick="setInvStatusFilter('HHSales')">HH Sales <span class="pill-count" id="pcHHSales">0</span></button>
-            <button class="inv-status-tab px-3 py-1 rounded-full text-xs font-bold transition-all flex-shrink-0" data-status="HHHide" onclick="setInvStatusFilter('HHHide')">HH Hide <span class="pill-count" id="pcHHHide">0</span></button>
+            <button id="cancelSelectBtn" onclick="setInvSelectMode(false)" class="inv-tool-btn hidden items-center gap-1.5"><i class="fas fa-xmark"></i> Cancel Select</button>
+            <span id="selectModeHint" class="hidden items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-bajaj-blue"><i class="fas fa-hand-pointer text-[10px]"></i> Select mode — tap rows to add</span>
           </div>
-          <div class="relative flex-shrink-0" id="invModelFilterWrap">
-            <button type="button" onclick="toggleModelFilterMenu('inv')" class="model-filter-btn">
-              <i class="fas fa-motorcycle text-slate-400 text-xs flex-shrink-0"></i>
-              <span id="invModelFilterLabel" class="truncate">All Models</span>
-              <i class="fas fa-chevron-down text-slate-400 text-[10px] flex-shrink-0 ml-auto"></i>
-            </button>
-            <div id="invModelFilterMenu" class="model-filter-menu hidden"></div>
-          </div>
-          <div id="invAreaFilterWrap" class="flex-shrink-0"></div>
-          <button onclick="openAreaManager()" class="cta-secondary !py-2 !px-4 !text-xs flex-shrink-0">
-            <i class="fas fa-warehouse" style="color:#298F60"></i> Manage Areas
-          </button>
-          <div class="relative ml-auto w-full sm:w-72" id="invSearchWrap">
-            <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-            <input type="text" id="invSearch" autocomplete="off" placeholder="Search chassis, engine, model, reg no, customer…"
-              class="w-full bg-slate-50 border-2 border-slate-200 rounded-lg pl-9 pr-8 py-2 text-sm text-slate-800 placeholder:text-slate-400 transition-all"/>
-            <button id="invSearchClear" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 text-xs"><i class="fas fa-circle-xmark"></i></button>
-            <div id="invSearchDropdown" class="hidden absolute z-40 top-[calc(100%+6px)] left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto"></div>
-          </div>
-          <button onclick="openInvFormModal()" class="cta-primary !py-2 !px-4 !text-xs flex-shrink-0">
-            <i class="fas fa-plus"></i> Add Unit
-          </button>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full border-collapse responsive-table" id="stockTable">
