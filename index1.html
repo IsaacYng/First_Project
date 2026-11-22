@@ -1238,20 +1238,21 @@
 #secSheetTool .pbtn.print:hover{background:#5FBFC7}
 #secSheetTool .pbtn.close{background:rgba(255,255,255,.08);color:#fff}
 #secSheetTool .pbtn.close:hover{background:rgba(255,255,255,.16)}
-#secSheetTool .preview-body{padding:20px;overflow-x:auto}
+#secSheetTool .preview-body{padding:14px;overflow:hidden}
 #secSheetTool .pv-page{display:none}
-#secSheetTool .pv-page.active{display:block;animation:pageIn .28s ease both}
+#secSheetTool .pv-page.active{display:flex;justify-content:center;animation:pageIn .28s ease both}
 @keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-#secSheetTool .a4l-paper{font-family:'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;background:#fff !important;width:297mm;min-height:210mm;height:210mm;padding:9mm 10mm;box-sizing:border-box;margin:0 auto;box-shadow:0 6px 40px rgba(0,0,0,.22);border:1px solid #ddd;display:flex;flex-direction:column;justify-content:center}
-#secSheetTool .pv-titlebar{flex:0 0 auto;text-align:center;color:#000;font-size:12pt;font-weight:700;margin-bottom:4mm}
+#secSheetTool .a4l-paper{font-family:'Book Antiqua','Palatino Linotype','Palatino',Georgia,serif !important;background:#fff !important;width:297mm;min-height:210mm;height:210mm;padding:8mm 8mm;box-sizing:border-box;margin:0 auto;box-shadow:0 6px 40px rgba(0,0,0,.22);border:1px solid #ddd;display:flex;flex-direction:column;justify-content:center;flex-shrink:0;transform-origin:top center}
+#secSheetTool .pv-titlebar{flex:0 0 auto;text-align:center;color:#000;font-size:11pt;font-weight:700;margin-bottom:3mm;line-height:1.25}
 #secSheetTool .pv-tablewrap{flex:0 0 auto}
 #secSheetTool .pv-datebar{flex:0 0 auto;text-align:center;color:#000;font-size:9pt;margin-top:4mm}
-#secSheetTool .pv-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:9.2pt;color:#000;border:1px solid #000}
-#secSheetTool .pv-table th{background:#4C7A2A;color:#fff !important;font-weight:700 !important;padding:8px 4px;text-align:right;font-size:9pt;letter-spacing:0;white-space:normal;word-wrap:break-word;overflow-wrap:break-word;line-height:1.15;border:0.75px solid #000}
-#secSheetTool .pv-table th:nth-child(1), #secSheetTool .pv-table td:nth-child(1){text-align:center;width:4%}
-#secSheetTool .pv-table th:nth-child(2), #secSheetTool .pv-table td:nth-child(2){text-align:left;width:17%}
-#secSheetTool .pv-table th:nth-child(n+3), #secSheetTool .pv-table td:nth-child(n+3){width:8.6%}
-#secSheetTool .pv-table td{padding:4px;border:0.5px solid #000;text-align:right;word-wrap:break-word;overflow-wrap:break-word}
+#secSheetTool .pv-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:8.8pt;color:#000;border:1px solid #000;font-variant-numeric:tabular-nums}
+#secSheetTool .pv-table th{background:#4C7A2A;color:#fff !important;font-weight:700 !important;padding:7px 3px;text-align:right;font-size:8.5pt;letter-spacing:0;white-space:nowrap;line-height:1.15;border:0.75px solid #000}
+#secSheetTool .pv-table th:nth-child(1), #secSheetTool .pv-table td:nth-child(1){text-align:center;width:3.5%}
+#secSheetTool .pv-table th:nth-child(2), #secSheetTool .pv-table td:nth-child(2){text-align:left;width:19%}
+#secSheetTool .pv-table th:nth-child(n+3), #secSheetTool .pv-table td:nth-child(n+3){white-space:nowrap}
+#secSheetTool .pv-table td{padding:3px 2px;border:0.5px solid #000;text-align:right;white-space:nowrap;line-height:1.25}
+#secSheetTool .pv-table td:nth-child(2){white-space:normal;word-break:break-word;overflow-wrap:break-word;text-align:left}
 #secSheetTool .pv-table tr:nth-child(even){background:#D9D9D9}
 #secSheetTool .pv-table td.total-cell{font-weight:bold}
 @media print{#secSheetTool #sheetLoader{display:none !important}
@@ -3050,7 +3051,7 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
 </style>
 
 
-<style id="v11-normal-sheet">
+<style id="v12-a4-fit">
 .v6-badge{ display:inline-block; vertical-align:middle; margin-left:8px; background:#FF4D00; color:#fff; font-size:10px; font-weight:800; letter-spacing:.06em; padding:3px 8px; border-radius:999px; }
 .inv-toolbar button{ pointer-events:auto !important; }
 #secInv{ padding-top:8px !important; }
@@ -3891,7 +3892,7 @@ input:focus, select:focus, textarea:focus{ outline:2px solid rgba(15,164,175,.45
             <div class="inv-toolbar-title">
               <span class="inv-toolbar-icon"><i class="fas fa-warehouse"></i></span>
               <div class="min-w-0">
-                <div class="inv-toolbar-h">Stock Register <span class="v6-badge">V11 • Normal Sheet</span></div>
+                <div class="inv-toolbar-h">Stock Register <span class="v6-badge">V12 • A4 Fit</span></div>
                 <div class="inv-toolbar-sub"><span id="invCount" class="inv-count-pill">0 units</span> <span class="hidden sm:inline">· Showroom stock</span></div>
               </div>
               <span id="invDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-full px-2.5 py-1 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
@@ -18335,6 +18336,8 @@ function openPreview(){
   document.getElementById('previewOverlay').classList.add('open');
   document.body.style.overflow='hidden';
   fitPreviewPages();
+  requestAnimationFrame(fitPreviewPages); // V12: re-fit after layout settles
+  setTimeout(fitPreviewPages, 380); // V12: re-fit after open animation ends
 }
 /* Scales the A4-landscape preview page down to fit the screen so it is fully
    visible and centered — never overflows sideways on a phone. Print output is
@@ -18342,14 +18345,24 @@ function openPreview(){
 function fitPreviewPages(){
   const body=document.getElementById('pvBody');
   if(!body) return;
+  // V12: measure the SHELL (the real constraint). pvBody.clientWidth reads
+  // stale/0 while the open animation is still running — that left the paper
+  // unscaled and crossing the modal. Preview papers only — print-wrapper
+  // pages must never get zoomed.
+  const shell=document.querySelector('#secSheetTool .preview-shell');
+  const shellW=shell ? shell.clientWidth : body.clientWidth;
+  const cs=getComputedStyle(body);
+  const padX=(parseFloat(cs.paddingLeft)||0)+(parseFloat(cs.paddingRight)||0);
+  const available=Math.max(120, shellW - padX - 4);
   const naturalWidthPx=1122; // 297mm at 96dpi
-  const available=body.clientWidth-4;
-  const scale=Math.min(1,available/naturalWidthPx);
-  document.querySelectorAll('.a4l-paper').forEach(el=>{
+  const scale=Math.max(0.15, Math.min(1, available/naturalWidthPx));
+  document.querySelectorAll('#secSheetTool .pv-page .a4l-paper').forEach(el=>{
     el.style.zoom=scale;
+    el.style.transform='none';
   });
 }
 window.addEventListener('resize',()=>{ if(document.getElementById('previewOverlay').classList.contains('open')) fitPreviewPages(); });
+window.addEventListener('orientationchange',()=>{ setTimeout(()=>{ if(document.getElementById('previewOverlay').classList.contains('open')) fitPreviewPages(); }, 300); });
 function switchPvTab(t){
   document.querySelectorAll('.ptab').forEach(b=>b.classList.toggle('active',Number(b.dataset.tenure)===t));
   document.querySelectorAll('.pv-page').forEach(p=>p.classList.toggle('active',p.id==='pvPage'+t));
@@ -23640,7 +23653,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     b.setAttribute('data-noguard','');
     delete b.dataset.lastClickTs;
   });
-  console.log('Bajaj Admin V11 - Normal Sheet');
+  console.log('Bajaj Admin V12 - A4 Fit');
 });
 </script>
 
@@ -23675,9 +23688,22 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 <script id="v11-normal-sheet-js">
 document.addEventListener('DOMContentLoaded', ()=>{
-  console.log('Bajaj Admin V11 - Normal Sheet: preview picker removed, all models + all tenures');
+  console.log('Bajaj Admin V12 - A4 Fit: preview picker removed, all models + all tenures');
 });
 </script>
+
+
+<style id="v12-a4-fit-css">
+/* V12 — A4 Fit. Toolbar tabs scroll instead of wrapping; print always full-size. */
+@media (max-width:768px){
+  #secSheetTool .preview-toolbar{padding:10px 12px;gap:8px}
+  #secSheetTool .ptabs{flex-wrap:nowrap;overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+  #secSheetTool .ptab{flex-shrink:0;padding:6px 11px}
+}
+@media print{
+  #secSheetTool .a4l-paper{zoom:1 !important;transform:none !important}
+}
+</style>
 
 </body>
 </html>
