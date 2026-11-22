@@ -3773,7 +3773,7 @@ input:focus, select:focus, textarea:focus{ outline:2px solid rgba(15,164,175,.45
               </tr>
             </thead>
             <tbody id="masterTableBody">
-              <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">
+              <tr><td colspan="10" class="px-4 py-12 text-center text-slate-400">
                 <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Connecting to database…
               </td></tr>
             </tbody>
@@ -4276,7 +4276,7 @@ input:focus, select:focus, textarea:focus{ outline:2px solid rgba(15,164,175,.45
               </tr>
             </thead>
             <tbody id="allInvTableBody">
-              <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">
+              <tr><td colspan="10" class="px-4 py-12 text-center text-slate-400">
                 <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading combined inventory…
               </td></tr>
             </tbody>
@@ -4951,7 +4951,7 @@ input:focus, select:focus, textarea:focus{ outline:2px solid rgba(15,164,175,.45
               </tr>
             </thead>
             <tbody id="paymentLedgerTableBody">
-              <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">
+              <tr><td colspan="10" class="px-4 py-12 text-center text-slate-400">
                 <i class="fas fa-circle-notch animate-spin text-amber-400 text-xl block mb-2"></i>Loading payment ledger…
               </td></tr>
             </tbody>
@@ -23689,5 +23689,348 @@ html, body{ background:#F4F5F7 !important; }
 })();
 </script>
 
+
+<style id="v15-screenshot-fixes-css">
+
+/* ══════════════════════════════════════════════════════════════════════
+   V15 — Screenshot fixes (22 Nov): 5 screenshots, 1 root cause family
+   Screenshots: (1) Document Vault skeleton overlap/clipped button
+                (2) Price Catalogue table cut off on right, Actions clipped
+                (3) Chalan Records header + filters overlapping, table cut
+                (4) Sheet Preview A4 paper cut off left/right, no scroll
+                (5) HH Inventory header overlap + chassis/engine breaking mid-word
+   Root causes fixed below:
+   - html/body + .main-scroll overflow-x:hidden clipped every wide table
+     instead of letting its own wrapper scroll.
+   - .section-title clamp(2.4rem,5vw,3.5rem) = 38-56px titles + header
+     flex-rows with no wrap forced title / chip / button to overlap.
+   - Tables used white-space:nowrap + min-width but their wrapper was
+     inside .yng-card-shell{overflow:hidden}, and filter bars hid their
+     scrollbar + faded the last pill with mask-image.
+   - Preview: .preview-body{overflow:hidden} + 297mm paper + flex
+     justify-content:center = left edge cut off, no way to scroll to it.
+   - Chassis/Engine used overflow-wrap:anywhere -> broke mid-word.
+   This block is append-only overrides — no existing markup/JS touched.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ---------- 0. STOP THE OUTER CLIPPING, KEEP INNER SCROLL ---------- */
+html{ overflow-x:clip !important; }
+body{ overflow-x:clip !important; }
+.app-shell, .main-col, .main-scroll > div, .sec-panel{ min-width:0 !important; }
+.main-scroll{ overflow-x:clip !important; overflow-y:auto !important; }
+.main-scroll > div{ width:100% !important; max-width:1280px !important; }
+.sec-panel{ overflow:visible !important; }
+.sec-panel > *{ min-width:0; }
+/* Flex children must be allowed to shrink, otherwise a long chassis /
+   filter row forces the whole page wider than the viewport. */
+.sec-panel .flex > *, .sec-panel [class*="flex"] > *{ min-width:0; }
+button, .cta-primary, .cta-secondary{ flex-shrink:0; }
+
+/* ---------- 1. PAGE HEADERS — no more 56px titles overlapping chips ---------- */
+/* Tailwind arbitrary class text-[clamp(2.4rem,5vw,3.5rem)] beats a plain
+   .section-title rule, so target it directly. */
+.section-title, .inv-page-title,
+.section-title[class*="text-[clamp"], .inv-page-title[class*="text-[clamp"]{
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif !important;
+  font-size:24px !important; line-height:1.2 !important;
+  letter-spacing:-0.01em !important; font-weight:800 !important;
+  color:#111827 !important; white-space:normal !important;
+  overflow-wrap:break-word !important; max-width:100% !important;
+}
+@media (max-width:768px){
+  .section-title, .inv-page-title,
+  .section-title[class*="text-[clamp"], .inv-page-title[class*="text-[clamp"]{
+    font-size:20px !important;
+  }
+}
+/* Every page head: allow wrap, align to top, never overlap. */
+.sec-panel > div:first-child,
+.sec-panel > .inv-page-head{
+  flex-wrap:wrap !important; align-items:flex-start !important;
+  row-gap:10px !important;
+}
+.sec-panel > div:first-child > div:first-child{ min-width:0; flex:1 1 280px; }
+/* The "All = Available + Booked..." line was INSIDE the HH header flex-row,
+   so it sat on top of the chip. Force it onto its own full-width line. */
+#hhCountCheck, .inv-count-check{
+  flex:1 1 100% !important; order:20 !important; width:100% !important;
+  padding:2px 0 0 !important; white-space:normal !important;
+  line-height:1.5 !important; font-size:11px !important;
+}
+#secHHInv > div:first-child{ padding-bottom:2px !important; }
+#secHHInv > p{ margin-top:0 !important; }
+/* Header chips / buttons never get squashed to "..." */
+#hhInvTotalChip, #invTotalChip, #priceCount, #hhInvCount{ white-space:nowrap !important; flex-shrink:0 !important; }
+
+/* ---------- 2. TABLES — scroll inside the card, never cut by the page ---------- */
+/* Card keeps its radius, but must not clip its own scroll wrapper. */
+.yng-card-shell{ overflow:hidden !important; }
+.yng-card-shell:has(table):hover{ transform:none !important; }
+/* Every table wrapper becomes a real horizontal scroller with a VISIBLE bar. */
+.yng-card-shell .overflow-x-auto,
+.sec-panel .overflow-x-auto,
+.table-scroll, .table-wrap{
+  overflow-x:auto !important; overflow-y:visible !important;
+  max-width:100% !important; -webkit-overflow-scrolling:touch !important;
+  scrollbar-width:thin !important; scrollbar-color:rgba(15,23,42,.35) transparent !important;
+}
+.yng-card-shell .overflow-x-auto::-webkit-scrollbar,
+.sec-panel .overflow-x-auto::-webkit-scrollbar{ height:8px !important; display:block !important; }
+.yng-card-shell .overflow-x-auto::-webkit-scrollbar-thumb,
+.sec-panel .overflow-x-auto::-webkit-scrollbar-thumb{ background:rgba(15,23,42,.3) !important; border-radius:99px !important; }
+.yng-card-shell .overflow-x-auto::-webkit-scrollbar-track,
+.sec-panel .overflow-x-auto::-webkit-scrollbar-track{ background:#F1F2F4 !important; }
+/* Desktop: tables keep their natural width and scroll — no squashing. */
+#secPrice table{ min-width:940px !important; }
+#secChalans table{ min-width:840px !important; }
+#secHHInv table{ min-width:1000px !important; }
+#secInv table{ min-width:980px !important; }
+#secAllInv table{ min-width:980px !important; }
+.sec-panel table{ border-collapse:collapse !important; }
+/* Numbers + codes: never break mid-word, tabular figures line up. */
+.sec-panel table th, .sec-panel table td{
+  white-space:nowrap !important; overflow-wrap:normal !important;
+  word-break:keep-all !important; font-variant-numeric:tabular-nums !important;
+}
+/* ...except the two columns that SHOULD wrap: Model + Customer. */
+.sec-panel table td[data-col="model"], .sec-panel table td[data-col="customer"]{
+  white-space:normal !important; overflow-wrap:break-word !important;
+  word-break:break-word !important; min-width:140px !important; max-width:240px !important;
+}
+/* Chassis / Engine / Reg: mono-ish, keep-all, no mid-word split. */
+.sec-panel table td[data-col="chassis"], .sec-panel table td[data-col="engine"],
+.sec-panel table td[data-col="reg"]{
+  white-space:nowrap !important; word-break:keep-all !important;
+  overflow-wrap:normal !important; letter-spacing:.01em !important;
+}
+/* Price columns right-aligned so Rs. figures scan vertically. */
+.sec-panel table td[data-col="price"], .sec-panel table td[data-col="money"]{
+  text-align:right !important;
+}
+/* Sticky Actions: the kebab / Edit button is never the thing that gets cut. */
+.sec-panel table th:last-child, .sec-panel table td:last-child{
+  position:sticky !important; right:0 !important; z-index:2 !important;
+  background:#fff !important; box-shadow:-8px 0 12px -8px rgba(15,23,42,.18) !important;
+}
+.sec-panel table thead th:last-child{ background:#F9FAFB !important; z-index:3 !important; }
+/* Mobile card-view (existing .responsive-table): only when data-th exists,
+   and chassis breaks ONLY there (break-all is correct in a narrow card). */
+@media (max-width:768px){
+  .sec-panel table.responsive-table{ min-width:0 !important; }
+  .sec-panel table.responsive-table th:last-child,
+  .sec-panel table.responsive-table td:last-child{
+    position:static !important; box-shadow:none !important;
+  }
+  .sec-panel table.responsive-table tbody td[data-col="chassis"],
+  .sec-panel table.responsive-table tbody td[data-col="engine"],
+  .sec-panel table.responsive-table tbody td[data-col="reg"]{
+    word-break:break-all !important; overflow-wrap:anywhere !important;
+  }
+}
+/* Small "scroll for more columns" hint, injected by JS only when needed. */
+.v15-scroll-hint{
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  font-size:11px; font-weight:600; color:#6B7280; background:#F8FAFC;
+  border-top:1px solid #EEF0F2; padding:8px 12px; white-space:nowrap;
+}
+.v15-scroll-hint i{ color:#FF4D00; font-size:10px; }
+
+/* ---------- 3. FILTER BARS — show the scrollbar, kill the fade mask ---------- */
+.filter-scroll, .inv-filter-scroll{
+  overflow-x:auto !important; flex-wrap:nowrap !important;
+  scrollbar-width:thin !important; scrollbar-color:rgba(15,23,42,.35) transparent !important;
+  mask-image:none !important; -webkit-mask-image:none !important;
+  padding-bottom:4px !important; max-width:100% !important;
+}
+.filter-scroll::-webkit-scrollbar, .inv-filter-scroll::-webkit-scrollbar{
+  height:6px !important; display:block !important;
+}
+.filter-scroll::-webkit-scrollbar-thumb, .inv-filter-scroll::-webkit-scrollbar-thumb{
+  background:rgba(15,23,42,.3) !important; border-radius:99px !important;
+}
+.filter-scroll > *, .inv-filter-scroll > *{ flex-shrink:0 !important; white-space:nowrap !important; }
+/* Chalan toolbar: filters on row 1, search full-width on row 2 under 1024px. */
+@media (max-width:1024px){
+  #secChalans > div:nth-of-type(2){ flex-wrap:wrap !important; }
+  #secChalans #chalanMonthFilterWrap{ flex:1 1 100% !important; max-width:100% !important; }
+  #secChalans #chalanSearchInput{ width:100% !important; }
+  #secChalans .relative.max-w-sm{ max-width:100% !important; flex:1 1 100% !important; }
+  #secHHInv .filter-scroll{ max-width:100% !important; }
+}
+
+/* ---------- 4. DOCUMENT VAULT — skeleton = small cards, not full-width slabs ---------- */
+#docsListWrap{
+  display:grid !important; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)) !important;
+  gap:16px !important; width:100% !important; align-items:start !important;
+}
+.doc-card-skel{
+  min-height:118px !important; height:auto !important; background:#fff !important;
+  box-sizing:border-box !important; overflow:hidden !important;
+}
+.doc-card-skel .skel{
+  display:block !important; min-width:0 !important; flex-shrink:0 !important;
+}
+.doc-card-skel .skel-line{ height:12px !important; width:100% !important; }
+.doc-card-skel .skel-line:first-of-type{ width:80% !important; }
+.doc-card-skel .skel-line:last-of-type{ width:50% !important; }
+/* Vault header button never clipped by the title row. */
+#secDocs > div:first-child > button{ flex-shrink:0 !important; white-space:nowrap !important; }
+
+/* ---------- 5. SHEET PREVIEW — A4 must scroll, never get centre-clipped ---------- */
+#secSheetTool #previewOverlay{
+  padding:16px !important; overflow:auto !important;
+  align-items:flex-start !important; justify-content:center !important;
+}
+#secSheetTool .preview-shell{
+  max-width:min(1120px, calc(100vw - 32px)) !important;
+  width:100% !important; overflow:hidden !important;
+}
+#secSheetTool .preview-toolbar{
+  flex-wrap:wrap !important; gap:10px !important; align-items:center !important;
+}
+#secSheetTool .preview-toolbar .ptitle{
+  flex:1 1 220px !important; min-width:0 !important;
+  white-space:normal !important; line-height:1.35 !important;
+}
+#secSheetTool .ptabs{
+  flex-wrap:nowrap !important; overflow-x:auto !important; max-width:100% !important;
+  scrollbar-width:thin !important; -webkit-overflow-scrolling:touch !important;
+}
+#secSheetTool .ptab{ flex-shrink:0 !important; white-space:nowrap !important; }
+#secSheetTool .pactions{ flex-shrink:0 !important; margin-left:auto !important; }
+#secSheetTool .preview-body{
+  overflow-x:auto !important; overflow-y:visible !important;
+  padding:16px !important; -webkit-overflow-scrolling:touch !important;
+  scrollbar-width:thin !important;
+}
+#secSheetTool .preview-body::-webkit-scrollbar{ height:8px !important; display:block !important; }
+#secSheetTool .pv-page{ display:none !important; }
+#secSheetTool .pv-page.active{
+  /* safe center: centres when it fits, left-aligns (scrollable) when it doesn't.
+     Plain justify-content:center cuts the LEFT edge off with no way to reach it. */
+  display:flex !important; justify-content:safe center !important;
+  overflow-x:visible !important;
+}
+#secSheetTool .pv-page .a4l-paper{
+  /* JS sets transform:scale() + wrapper height; CSS keeps the true size. */
+  flex-shrink:0 !important; margin:0 auto !important;
+  transform-origin:top left !important; max-width:none !important;
+}
+#secSheetTool .pv-tablewrap{ overflow-x:visible !important; }
+@media (max-width:640px){
+  #secSheetTool #previewOverlay{ padding:8px !important; }
+  #secSheetTool .preview-body{ padding:10px 8px !important; }
+  #secSheetTool .preview-toolbar .ptitle{ flex-basis:100% !important; }
+  #secSheetTool .pactions{ margin-left:0 !important; }
+}
+
+/* ---------- 6. SMALL POLISH ---------- */
+/* Table cards should not jump on hover — it read as overlap in screenshots. */
+.yng-card-shell:has(table){ transition:box-shadow .2s ease, border-color .2s ease !important; }
+img{ max-width:100%; }
+
+</style>
+<script id="v15-screenshot-fixes-js">
+
+/* V15 — Screenshot fixes JS: table data-cols, scroll hints, A4 preview scale.
+   Append-only: runs after every existing script, never rewrites their HTML. */
+(function(){
+  function onReady(fn){ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
+  onReady(function(){
+
+    /* --- A. Tag table cells by column so CSS can wrap Model/Customer
+           but keep Chassis/Engine/Reg on one line. --- */
+    function tagTables(){
+      document.querySelectorAll('.sec-panel table').forEach(function(table){
+        var heads = Array.prototype.slice.call(table.querySelectorAll('thead th'));
+        if(!heads.length) return;
+        var cols = heads.map(function(th){
+          var t = (th.textContent||'').toLowerCase();
+          if(/model/.test(t)) return 'model';
+          if(/customer|cust\.?|buyer/.test(t)) return 'customer';
+          if(/chassis/.test(t)) return 'chassis';
+          if(/engine/.test(t)) return 'engine';
+          if(/reg/.test(t)) return 'reg';
+          if(/price|insurance|finance|party|total|amount|rs\.?/.test(t)) return 'price';
+          return '';
+        });
+        // Mobile card view needs data-th labels.
+        table.querySelectorAll('tbody tr').forEach(function(tr){
+          Array.prototype.forEach.call(tr.children, function(td, i){
+            if(cols[i]) td.setAttribute('data-col', cols[i]);
+            if(heads[i] && !td.getAttribute('data-th')) td.setAttribute('data-th', heads[i].textContent.trim());
+          });
+        });
+      });
+    }
+    tagTables();
+    // Tables render async from Firestore — re-tag when rows arrive.
+    var mo = new MutationObserver(function(muts){
+      var hit = muts.some(function(m){ return m.addedNodes && m.addedNodes.length; });
+      if(hit) tagTables();
+    });
+    document.querySelectorAll('.sec-panel').forEach(function(p){ mo.observe(p, {childList:true, subtree:true}); });
+
+    /* --- B. "Scroll for more columns" hint, only when the table overflows. --- */
+    function addHints(){
+      document.querySelectorAll('.sec-panel .overflow-x-auto').forEach(function(wrap){
+        if(wrap.querySelector('.v15-scroll-hint')) return;
+        if(!wrap.querySelector('table')) return;
+        var hint = document.createElement('div');
+        hint.className = 'v15-scroll-hint';
+        hint.innerHTML = '<i class="fas fa-arrows-left-right"></i> Scroll sideways to see all columns';
+        hint.style.display = 'none';
+        wrap.parentNode.insertBefore(hint, wrap.nextSibling);
+        var update = function(){
+          hint.style.display = (wrap.scrollWidth > wrap.clientWidth + 4) ? 'flex' : 'none';
+        };
+        wrap.addEventListener('scroll', function(){ hint.style.display = 'none'; }, {once:true});
+        update(); window.addEventListener('resize', update);
+        setTimeout(update, 600);
+      });
+    }
+    addHints(); setTimeout(addHints, 1500);
+
+    /* --- C. HH header: if the count-check is still inside the flex header,
+           move it out so it can never sit on top of the chip again. --- */
+    var hhCheck = document.getElementById('hhCountCheck');
+    if(hhCheck && hhCheck.parentElement && hhCheck.parentElement.classList.contains('flex')){
+      var head = hhCheck.parentElement;
+      head.parentNode.insertBefore(hhCheck, head.nextSibling);
+    }
+
+    /* --- D. Sheet Preview A4 scaling: scale the 297mm paper to fit the
+           modal, instead of letting it overflow and get centre-clipped. --- */
+    var overlay = document.getElementById('previewOverlay');
+    var bodyEl = document.querySelector('#secSheetTool .preview-body');
+    function fitPreview(){
+      if(!overlay || !overlay.classList.contains('open')) return;
+      if(!bodyEl) return;
+      var papers = document.querySelectorAll('#secSheetTool .pv-page.active .a4l-paper');
+      if(!papers.length) return;
+      var avail = bodyEl.clientWidth - 4; // keep 2px breathing room each side
+      // 297mm at 96dpi = 1122.5px
+      var scale = Math.max(0.2, Math.min(1, avail / 1122.5));
+      papers.forEach(function(paper){
+        paper.style.zoom = '';
+        paper.style.transform = 'scale(' + scale + ')';
+        // Reserve the scaled height so the page below doesn't overlap.
+        var page = paper.closest('.pv-page');
+        if(page){ page.style.minHeight = (794 * scale) + 'px'; }
+      });
+    }
+    if(overlay){
+      new MutationObserver(fitPreview).observe(overlay, {attributes:true, attributeFilter:['class']});
+      document.querySelectorAll('#secSheetTool .ptab').forEach(function(t){
+        t.addEventListener('click', function(){ setTimeout(fitPreview, 60); });
+      });
+    }
+    window.addEventListener('resize', fitPreview);
+    setTimeout(fitPreview, 800);
+    console.log('Bajaj Admin V15 — screenshot UI/UX fixes applied');
+  });
+})();
+
+</script>
 </body>
 </html>
