@@ -3054,7 +3054,7 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
 </style>
 
 
-<style id="v13-clean">
+<style id="v14-uiux">
 .v6-badge{ display:inline-block; vertical-align:middle; margin-left:8px; background:#FF4D00; color:#fff; font-size:10px; font-weight:800; letter-spacing:.06em; padding:3px 8px; border-radius:999px; }
 .inv-toolbar button{ pointer-events:auto !important; }
 #secInv{ padding-top:8px !important; }
@@ -3122,7 +3122,7 @@ input[type="text"], input[type="search"]{ min-width:0; max-width:100%; box-sizin
 /* V10 - ONE FONT EVERYWHERE + UI/UX consistency (V9 fixes kept) */
 /* Before: 7 fonts fighting - DM Sans body, Sora headings, Dancing Script section-titles (cursive!), Bebas login, JetBrains chassis, Times/Book Antiqua chalan. Now: Plus Jakarta Sans for everything. */
 :root{ --font-sans:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif; }
-html, body, *, *::before, *::after{ font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif !important; font-variant-numeric:tabular-nums; }
+html, body, *{ font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif !important; font-variant-numeric:tabular-nums; } /* V14: *::before/*::after REMOVED — it overrode Font Awesome glyph font, icons showed as boxes */
 /* Icons are NOT text - Font Awesome must keep its own font, else <i> shows as boxes. */
 .fa, .fas, .far, .fal, .fat, .fad, .fab, .fa-solid, .fa-regular, .fa-brands, i.fa, i.fas, i.far, i.fab, i.fa-solid, i.fa-regular, i.fa-brands{ font-family:"Font Awesome 6 Free","Font Awesome 6 Brands" !important; }
 .fab, i.fab, i.fa-brands{ font-family:"Font Awesome 6 Brands" !important; }
@@ -3895,7 +3895,7 @@ input:focus, select:focus, textarea:focus{ outline:2px solid rgba(15,164,175,.45
             <div class="inv-toolbar-title">
               <span class="inv-toolbar-icon"><i class="fas fa-warehouse"></i></span>
               <div class="min-w-0">
-                <div class="inv-toolbar-h">Stock Register <span class="v6-badge">V13 • Clean</span></div>
+                <div class="inv-toolbar-h">Stock Register <span class="v6-badge">V14 • UI/UX</span></div>
                 <div class="inv-toolbar-sub"><span id="invCount" class="inv-count-pill">0 units</span> <span class="hidden sm:inline">· Showroom stock</span></div>
               </div>
               <span id="invDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-full px-2.5 py-1 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
@@ -6294,7 +6294,7 @@ input:focus, select:focus, textarea:focus{ outline:2px solid rgba(15,164,175,.45
     <div class="sec-panel" id="secSheetTool">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
         <div>
-          <div class="section-label">Finance Tool · <span class="v6-badge" id="sheetToolVersionBadge">V13 • Clean</span></div>
+          <div class="section-label">Finance Tool · <span class="v6-badge" id="sheetToolVersionBadge">V14 • UI/UX</span></div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">EMI Rate <span class="text-amber-500">Sheet</span></div>
         </div>
       </div>
@@ -6407,7 +6407,7 @@ input:focus, select:focus, textarea:focus{ outline:2px solid rgba(15,164,175,.45
 <div id="previewOverlay" onclick="if(event.target===this) closePreview()">
   <div class="preview-shell">
     <div class="preview-toolbar">
-      <div class="ptitle"><i class="fa-solid fa-file-lines"></i> Sheet Preview — <span id="pvSubtitle">Downpayment</span> <span id="pvVersionPill" style="font-size:10px;font-weight:800;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:2px 8px;letter-spacing:.05em">V13</span></div>
+      <div class="ptitle"><i class="fa-solid fa-file-lines"></i> Sheet Preview — <span id="pvSubtitle">Downpayment</span> <span id="pvVersionPill" style="font-size:10px;font-weight:800;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:2px 8px;letter-spacing:.05em">V14</span></div>
       <div class="ptabs" id="pvTabs"></div>
       <div class="pactions">
         <button class="pbtn print" onclick="printAllTenures()"><i class="fa-solid fa-print"></i> Print All Tenures</button>
@@ -23581,7 +23581,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     b.setAttribute('data-noguard','');
     delete b.dataset.lastClickTs;
   });
-  console.log('Bajaj Admin V13 - Clean');
+  console.log('Bajaj Admin V14 - UI/UX');
 });
 </script>
 
@@ -23616,12 +23616,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 <script id="v11-normal-sheet-js">
 document.addEventListener('DOMContentLoaded', ()=>{
-  console.log('Bajaj Admin V13 - Clean: preview picker removed, all models + all tenures');
+  console.log('Bajaj Admin V14 - UI/UX: preview picker removed, all models + all tenures');
 });
 </script>
 
 
-<style id="v13-clean-css">
+<style id="v14-uiux-css">
 /* V12 — A4 Fit. Toolbar tabs scroll instead of wrapping; print always full-size. */
 @media (max-width:768px){
   #secSheetTool .preview-toolbar{padding:10px 12px;gap:8px}
@@ -23634,7 +23634,42 @@ document.addEventListener('DOMContentLoaded', ()=>{
 </style>
 
 
-<script id="v13-clean-selftest">
+
+<style id="v14-uiux-css">
+/* ══════════ V14 — UI/UX consistency: icons, titles, cards, gaps, background ══════════ */
+/* A. ICONS — FA glyphs render in ::before. V10's *::before !important killed them (boxes). Restore FA font on icon pseudo-elements. This + the V10 rule fix = double protection. */
+i[class*="fa-"]::before, i[class*="fa-"]::after,
+span[class*="fa-"]::before, span[class*="fa-"]::after,
+.fa::before, .fas::before, .far::before, .fal::before, .fat::before, .fad::before,
+.fa-solid::before, .fa-regular::before, .fa-light::before, .fa-thin::before, .fa-duotone::before{ font-family:"Font Awesome 6 Free" !important; }
+.fab::before, .fa-brands::before, i[class*="fa-brands"]::before{ font-family:"Font Awesome 6 Brands" !important; }
+/* B. TITLES — ONE style everywhere. Was Dancing Script / Bebas / Sora 28px / Sora 30px / clamp 3.5rem fighting. Now Plus Jakarta Sans, 24px desktop / 20px phone. */
+.section-title, .inv-page-title{ font-family:'Plus Jakarta Sans',system-ui,sans-serif !important; font-size:24px !important; line-height:1.2 !important; letter-spacing:-0.01em !important; font-weight:800 !important; color:#111827 !important; }
+.v2-dash-greet, .v2-dash-value{ font-family:'Plus Jakarta Sans',system-ui,sans-serif !important; font-size:28px !important; line-height:1.15 !important; font-weight:800 !important; letter-spacing:-0.01em !important; }
+#secDashboard .sm-stat-value, .sm-stat-value{ font-family:'Plus Jakarta Sans',system-ui,sans-serif !important; font-size:32px !important; font-weight:800 !important; letter-spacing:-0.02em !important; }
+.login-left-title, .login-right-title{ font-family:'Plus Jakarta Sans',system-ui,sans-serif !important; font-size:26px !important; line-height:1.1 !important; font-weight:800 !important; }
+.jrp-head .brand{ font-family:'Plus Jakarta Sans',system-ui,sans-serif !important; font-size:20px !important; font-weight:800 !important; }
+@media (max-width:768px){
+  .section-title, .inv-page-title{ font-size:20px !important; }
+  .v2-dash-greet, .v2-dash-value{ font-size:22px !important; }
+  #secDashboard .sm-stat-value, .sm-stat-value{ font-size:26px !important; }
+  .login-left-title, .login-right-title{ font-size:22px !important; }
+}
+/* C. CARDS — ONE radius (16px), ONE padding. Was radius 18/20/22/24, padding 1.4rem/1.7rem fighting. */
+.calc-card, .yng-card-shell, .card, .results-panel, .sheet-wrap{ border-radius:16px !important; }
+.calc-card{ padding:16px !important; }
+.results-panel{ padding:16px !important; }
+@media (min-width:1024px){ .calc-card{ padding:20px !important; } }
+/* D. GAPS — ONE scale for toolbars/controls. Was 2px..16px random. */
+.inv-toolbar{ gap:10px !important; padding:14px 16px 12px !important; }
+.preview-toolbar{ gap:8px !important; }
+.mode-toggle{ gap:6px !important; }
+.summary-strip{ gap:10px !important; }
+/* E. BACKGROUND — ONE page background. Was #F4F5F7 vs #F6F6F4 fighting. */
+html, body{ background:#F4F5F7 !important; }
+</style>
+
+<script id="v14-uiux-selftest">
 (function(){
   var checks = {
     openPreview: typeof window.openPreview === 'function',
@@ -23643,13 +23678,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
     exportSheetToExcel: typeof window.exportSheetToExcel === 'function',
     pickerGone: !document.getElementById('modelPrintCheckList') && !document.getElementById('tenurePrintCheckList'),
     previewBody: !!document.getElementById('pvBody'),
-    previewTabs: !!document.getElementById('pvTabs')
+    previewTabs: !!document.getElementById('pvTabs'),
+    iconsOK: (function(){ var el=document.querySelector('i.fa-solid, i.fas'); if(!el) return true; try{ return getComputedStyle(el, '::before').fontFamily.indexOf('Font Awesome')>=0; }catch(e){ return true; } })()
   };
   var ok = Object.keys(checks).every(function(k){ return checks[k]; });
-  window.__V13_OK = ok; window.__V13_CHECKS = checks;
+  window.__V14_OK = ok; window.__V14_CHECKS = checks;
   var badge = document.getElementById('sheetToolVersionBadge');
-  if(badge){ badge.textContent = ok ? 'V13 • OK' : 'V13 • ERROR — Reload garnuhos'; }
-  console.log('Bajaj Admin V13 self-test:', ok ? 'OK' : 'FAIL', checks);
+  if(badge){ badge.textContent = ok ? 'V14 • OK' : 'V14 • ERROR — Reload garnuhos'; }
+  console.log('Bajaj Admin V14 self-test:', ok ? 'OK' : 'FAIL', checks);
 })();
 </script>
 
