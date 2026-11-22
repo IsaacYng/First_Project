@@ -4,6 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
 <title>Bajaj Bikes — Admin Panel</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="icon" type="image/png" href="favicon.png">
@@ -3051,7 +3054,7 @@ div[class*="modal"] > div, .modal-content{ border-radius:24px !important; }
 </style>
 
 
-<style id="v12-a4-fit">
+<style id="v13-clean">
 .v6-badge{ display:inline-block; vertical-align:middle; margin-left:8px; background:#FF4D00; color:#fff; font-size:10px; font-weight:800; letter-spacing:.06em; padding:3px 8px; border-radius:999px; }
 .inv-toolbar button{ pointer-events:auto !important; }
 #secInv{ padding-top:8px !important; }
@@ -3892,7 +3895,7 @@ input:focus, select:focus, textarea:focus{ outline:2px solid rgba(15,164,175,.45
             <div class="inv-toolbar-title">
               <span class="inv-toolbar-icon"><i class="fas fa-warehouse"></i></span>
               <div class="min-w-0">
-                <div class="inv-toolbar-h">Stock Register <span class="v6-badge">V12 • A4 Fit</span></div>
+                <div class="inv-toolbar-h">Stock Register <span class="v6-badge">V13 • Clean</span></div>
                 <div class="inv-toolbar-sub"><span id="invCount" class="inv-count-pill">0 units</span> <span class="hidden sm:inline">· Showroom stock</span></div>
               </div>
               <span id="invDupChip" class="hidden items-center gap-1 bg-red-50 border border-red-200 rounded-full px-2.5 py-1 text-xs font-bold text-red-600"><i class="fas fa-triangle-exclamation text-[10px]"></i> 0 duplicates</span>
@@ -6291,7 +6294,7 @@ input:focus, select:focus, textarea:focus{ outline:2px solid rgba(15,164,175,.45
     <div class="sec-panel" id="secSheetTool">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
         <div>
-          <div class="section-label">Finance Tool ·</div>
+          <div class="section-label">Finance Tool · <span class="v6-badge" id="sheetToolVersionBadge">V13 • Clean</span></div>
           <div class="section-title text-[clamp(2.4rem,5vw,3.5rem)] mt-1">EMI Rate <span class="text-amber-500">Sheet</span></div>
         </div>
       </div>
@@ -6404,7 +6407,7 @@ input:focus, select:focus, textarea:focus{ outline:2px solid rgba(15,164,175,.45
 <div id="previewOverlay" onclick="if(event.target===this) closePreview()">
   <div class="preview-shell">
     <div class="preview-toolbar">
-      <div class="ptitle"><i class="fa-solid fa-file-lines"></i> Sheet Preview — <span id="pvSubtitle">Downpayment</span></div>
+      <div class="ptitle"><i class="fa-solid fa-file-lines"></i> Sheet Preview — <span id="pvSubtitle">Downpayment</span> <span id="pvVersionPill" style="font-size:10px;font-weight:800;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:2px 8px;letter-spacing:.05em">V13</span></div>
       <div class="ptabs" id="pvTabs"></div>
       <div class="pactions">
         <button class="pbtn print" onclick="printAllTenures()"><i class="fa-solid fa-print"></i> Print All Tenures</button>
@@ -18127,90 +18130,15 @@ function recalcAll(){
 }
 
 /* ══════════ Print-preview modal: one A4-landscape page per tenure (of the current DP's scheme) ══════════ */
-/* ══════════ Multi-model print/export selector ══════════ */
-function renderModelPrintSelector(){
-  return; // V11: picker removed — normal preview, no checkboxes / no stock
-  const wrap = document.getElementById('modelPrintCheckList');
-  const countChip = document.getElementById('modelPrintCountChip');
-  if(!wrap) return;
-  if(!BIKES.length){
-    wrap.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--ink4);font-size:12px;padding:12px">No models yet.</p>`;
-    if(countChip) countChip.textContent = '0 selected';
-    return;
-  }
-  // First time this renders (nothing chosen yet), default to whatever's
-  // actually in stock — that's the common case (don't print models you
-  // have zero of) — everything is still one click away via Select All.
-  if(selectedPrintModels.size===0 && !window._modelPrintSelectionTouched){
-    BIKES.forEach(b=>{ if(sheetInStockModels.has(b.name)) selectedPrintModels.add(b.name); });
-    if(!selectedPrintModels.size) BIKES.forEach(b=>selectedPrintModels.add(b.name)); // nothing in stock yet — fall back to all, rather than an empty list
-  }
-  wrap.innerHTML = BIKES.map(b=>{
-    const inStock = sheetInStockModels.has(b.name);
-    const checked = selectedPrintModels.has(b.name);
-    return `<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink2);padding:5px 7px;border-radius:8px;cursor:pointer;background:${checked?'var(--blueLt)':'transparent'}" onmouseover="this.style.background='var(--bgSoft)'" onmouseout="this.style.background='${checked?'var(--blueLt)':'transparent'}'">
-      <input type="checkbox" data-model="${escAttrSheet(b.name)}" ${checked?'checked':''} onchange="toggleModelPrintSelection('${escAttrSheet(b.name).replace(/'/g,"\\'")}',this.checked)" style="accent-color:var(--blue)">
-      <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escAttrSheet(b.name)}</span>
-      ${inStock ? '' : `<span style="font-size:9.5px;font-weight:700;color:var(--ink4);background:var(--bgSoft);border:1px solid var(--line);border-radius:5px;padding:1px 5px;flex-shrink:0">no stock</span>`}
-    </label>`;
-  }).join('');
-  if(countChip) countChip.textContent = selectedPrintModels.size + ' selected';
-}
-window.toggleModelPrintSelection = (name, checked)=>{
-  window._modelPrintSelectionTouched = true;
-  if(checked) selectedPrintModels.add(name); else selectedPrintModels.delete(name);
-  renderModelPrintSelector();
-};
-window.setModelPrintSelection = (mode)=>{
-  window._modelPrintSelectionTouched = true;
-  if(mode==='all') selectedPrintModels = new Set(BIKES.map(b=>b.name));
-  else if(mode==='stock') selectedPrintModels = new Set(BIKES.filter(b=>sheetInStockModels.has(b.name)).map(b=>b.name));
-  else selectedPrintModels = new Set();
-  renderModelPrintSelector();
-};
-
-/* ══════════ Tenure selection (same pattern as models) ══════════
-   Tenures depend on which DP% is currently picked — re-rendered whenever
-   the DP dropdown changes, since a different DP can offer a different set
-   of tenures (e.g. Scooter capped at 36mo). */
-function renderTenurePrintSelector(){
-  return; // V11: picker removed — normal preview, no tenure checkboxes
-  const wrap = document.getElementById('tenurePrintCheckList');
-  const chip = document.getElementById('tenurePrintCountChip');
-  if(!wrap) return;
-  const s = currentSettings();
-  const tenures = (financeSchemes.length && s.dp) ? currentSchemeTenures(s.dp) : [];
-  if(!tenures.length){
-    wrap.innerHTML = `<p style="color:var(--ink4);font-size:12px">Pick a Downpayment % above first.</p>`;
-    if(chip) chip.textContent = '0 selected';
-    return;
-  }
-  // Default to everything selected the first time (or whenever the DP
-  // changes and brings in tenures we haven't seen selections for yet).
-  if(!window._tenurePrintSelectionTouched || ![...selectedPrintTenures].some(t=>tenures.includes(t))){
-    selectedPrintTenures = new Set(tenures);
-  }
-  wrap.innerHTML = tenures.map(t=>{
-    const checked = selectedPrintTenures.has(t);
-    return `<label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink2);padding:6px 10px;border-radius:999px;cursor:pointer;border:1.5px solid ${checked?'var(--blue)':'var(--line)'};background:${checked?'var(--blueLt)':'var(--bg-surface)'}">
-      <input type="checkbox" data-tenure="${t}" ${checked?'checked':''} onchange="toggleTenurePrintSelection(${t},this.checked)" style="accent-color:var(--blue)">
-      ${t} mo
-    </label>`;
-  }).join('');
-  if(chip) chip.textContent = selectedPrintTenures.size + ' selected';
-}
-window.toggleTenurePrintSelection = (t, checked)=>{
-  window._tenurePrintSelectionTouched = true;
-  if(checked) selectedPrintTenures.add(t); else selectedPrintTenures.delete(t);
-  renderTenurePrintSelector();
-};
-window.setTenurePrintSelection = (mode)=>{
-  window._tenurePrintSelectionTouched = true;
-  const s = currentSettings();
-  const tenures = (financeSchemes.length && s.dp) ? currentSchemeTenures(s.dp) : [];
-  selectedPrintTenures = mode==='all' ? new Set(tenures) : new Set();
-  renderTenurePrintSelector();
-};
+/* ══════════ Print picker — REMOVED in V11, dead code deleted in V13 ══════════
+   Preview/Print/Export always use ALL models + ALL tenures now.
+   Stubs kept so any old call is a harmless no-op. */
+function renderModelPrintSelector(){}
+function renderTenurePrintSelector(){}
+window.toggleModelPrintSelection = ()=>{};
+window.setModelPrintSelection = ()=>{};
+window.toggleTenurePrintSelection = ()=>{};
+window.setTenurePrintSelection = ()=>{};
 
 /* ══════════ Excel export — same rows the sheet/print already compute,
    one workbook sheet per tenure in the current DP's scheme, respecting
@@ -23653,7 +23581,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     b.setAttribute('data-noguard','');
     delete b.dataset.lastClickTs;
   });
-  console.log('Bajaj Admin V12 - A4 Fit');
+  console.log('Bajaj Admin V13 - Clean');
 });
 </script>
 
@@ -23688,12 +23616,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 <script id="v11-normal-sheet-js">
 document.addEventListener('DOMContentLoaded', ()=>{
-  console.log('Bajaj Admin V12 - A4 Fit: preview picker removed, all models + all tenures');
+  console.log('Bajaj Admin V13 - Clean: preview picker removed, all models + all tenures');
 });
 </script>
 
 
-<style id="v12-a4-fit-css">
+<style id="v13-clean-css">
 /* V12 — A4 Fit. Toolbar tabs scroll instead of wrapping; print always full-size. */
 @media (max-width:768px){
   #secSheetTool .preview-toolbar{padding:10px 12px;gap:8px}
@@ -23704,6 +23632,26 @@ document.addEventListener('DOMContentLoaded', ()=>{
   #secSheetTool .a4l-paper{zoom:1 !important;transform:none !important}
 }
 </style>
+
+
+<script id="v13-clean-selftest">
+(function(){
+  var checks = {
+    openPreview: typeof window.openPreview === 'function',
+    printAllTenures: typeof window.printAllTenures === 'function',
+    closePreview: typeof window.closePreview === 'function',
+    exportSheetToExcel: typeof window.exportSheetToExcel === 'function',
+    pickerGone: !document.getElementById('modelPrintCheckList') && !document.getElementById('tenurePrintCheckList'),
+    previewBody: !!document.getElementById('pvBody'),
+    previewTabs: !!document.getElementById('pvTabs')
+  };
+  var ok = Object.keys(checks).every(function(k){ return checks[k]; });
+  window.__V13_OK = ok; window.__V13_CHECKS = checks;
+  var badge = document.getElementById('sheetToolVersionBadge');
+  if(badge){ badge.textContent = ok ? 'V13 • OK' : 'V13 • ERROR — Reload garnuhos'; }
+  console.log('Bajaj Admin V13 self-test:', ok ? 'OK' : 'FAIL', checks);
+})();
+</script>
 
 </body>
 </html>
